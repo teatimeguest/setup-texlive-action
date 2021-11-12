@@ -1,0 +1,43 @@
+name: Setup TeX Live action
+description: A GitHub Action to set up TeX Live.
+author: '@teatimeguest'
+
+inputs:
+  cache:
+    description: >-
+      Enable to cache `TEXDIR`.
+    default: true
+    required: false
+  packages:
+    description: >-
+      Whitespace-separated list of TeX packages to install.
+      Shemes and collections can also be specified.
+    required: false
+  prefix:
+    description: >-
+      TeX Live installation prefix.
+      The default is `C:\TEMP\setup-texlive` on Windows,
+      `/tmp/setup-texlive` on Linux and macOS.
+    required: false
+  version:
+    description: >-
+      Version of TeX Live to install.
+      Supported values are `2019`, `2020`, `2021`, and `latest`.
+      If set to `latest`, the latest version will be installed.
+    default: latest
+    required: false
+
+outputs:
+  cache-hit:
+    description: >-
+      A boolean value to indicate if a cache was hit.
+
+runs:
+  using: node12
+  main: dist/index.js
+  post: dist/index.js
+  post-if: success()
+
+branding:
+  color: green
+  icon: type
