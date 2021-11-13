@@ -5,13 +5,13 @@ author: '@teatimeguest'
 inputs:
   cache:
     description: >-
-      Enable to cache `TEXDIR`.
+      Enable caching for `TEXDIR`.
     default: true
     required: false
   packages:
     description: >-
       Whitespace-separated list of TeX packages to install.
-      Shemes and collections can also be specified.
+      Schemes and collections can also be specified.
     required: false
   prefix:
     description: >-

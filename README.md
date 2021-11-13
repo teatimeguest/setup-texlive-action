@@ -29,7 +29,7 @@ can be specified by the `packages` input:
   uses: teatimeguest/setup-texlive-action@v1
   with:
     packages: >-
-      sheme-basic
+      scheme-basic
       cleveref
       hyperref
 ```
@@ -65,8 +65,8 @@ All inputs are optional.
 
 |Name|Type|Description|
 |---|---|---|
-|`cache`|Bool|Enable to cache `TEXDIR`. The default is `true`.|
-|`packages`|String|Whitespace-separated list of TeX packages to install. Shemes and collections can also be specified.|
+|`cache`|Bool|Enable caching for `TEXDIR`. The default is `true`.|
+|`packages`|String|Whitespace-separated list of TeX packages to install. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. The default is `C:\TEMP\setup-texlive` on Windows, `/tmp/setup-texlive` on Linux and macOS.|
 |`version`|String|Version of TeX Live to install. Supported values are `2019`, `2020`, `2021`, and `latest`.|
 
