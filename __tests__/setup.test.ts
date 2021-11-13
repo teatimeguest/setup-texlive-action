@@ -30,6 +30,8 @@ jest.spyOn(tl, 'install');
 jest.spyOn(tl.Manager.prototype, 'install');
 jest.spyOn(tl.Manager.prototype, 'pathAdd');
 
+const env = { ...process.env };
+
 const notIf = (condition: boolean) => {
   return <T>(x: jest.JestMatchers<T>) => (condition ? x : x.not);
 };
@@ -49,7 +51,10 @@ let context: {
 
 beforeEach(() => {
   console.log('::stop-commands::stoptoken');
+
+  process.env = { ...env };
   process.env['GITHUB_PATH'] = '';
+  process.env['ACTIONS_CACHE_URL'] = '<some url>';
 
   context = {
     inputs: {
@@ -221,6 +226,15 @@ describe('setup()', () => {
       expect(core.saveState).toBeCalledWith('post', true);
       expect(core.setOutput).toBeCalledWith('cache-hit', inputs.cache);
     });
+  });
+
+  test('caching is disabled neither `ACTIONS_CACHE_URL` nor `ACTIONS_RUNTIME_URL` is set', async () => {
+    process.env['ACTIONS_CACHE_URL'] = undefined;
+    process.env['ACTIONS_RUNTIME_URL'] = undefined;
+
+    await setup.run();
+    expect(cache.restoreCache).not.toBeCalled();
+    expect(core.saveState).not.toBeCalledWith('key', expect.anything());
   });
 
   test.each(['2018', '2022', 'version'])(

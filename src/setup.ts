@@ -24,7 +24,21 @@ interface Inputs {
 }
 
 function getInputs(): Inputs {
-  const cache = core.getBooleanInput('cache');
+  let cache = core.getBooleanInput('cache');
+
+  if (
+    cache &&
+    /**
+     * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/src/internal/cacheHttpClient.ts}
+     */
+    !process.env['ACTIONS_CACHE_URL'] &&
+    !process.env['ACTIONS_RUNTIME_URL']
+  ) {
+    cache = false;
+    core.info(
+      'Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_CACHE_URL` is defined',
+    );
+  }
 
   const packages = core
     .getInput('packages')
