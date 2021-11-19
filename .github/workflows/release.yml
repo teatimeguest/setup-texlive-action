@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  schedule:
+    - cron: '0 23 * * 5' # At 23:00 on Friday
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Prepare
+        id: prepare
+        run: |
+          latest="$(git describe --tags --abbrev=0 --match='v*.*.*')"
+          if ! git diff --quiet "${latest}" dist/index.js; then
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            next="$(npm version patch -m 'chore(release): prepare for v%s [skip ci]')"
+            git tag -f "$(sed -E 's/^(v[0-9]+)\..*/\1/' <<< "${next}")"
+            git push origin
+            git push --tags -f origin
+            echo "::set-output name=tag::${next}"
+          fi
+
+      - name: Release
+        if: startsWith(steps.prepare.outputs.tag, 'v')
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          name: ${{ steps.prepare.outputs.tag }}
+          tag_name: ${{ steps.prepare.outputs.tag }}

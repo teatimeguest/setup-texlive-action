@@ -5,9 +5,8 @@
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "build": "tsc && ncc build",
-    "editorconfig-checker": "ec",
     "format": "prettier --write src/*.ts __tests__/*.ts",
-    "format-check": "prettier --check __tests__/*.ts src/*.ts",
+    "format-check": "prettier --check __tests__/*.ts src/*.ts && ec",
     "lint": "eslint --ext .ts __tests__ src",
     "test": "jest --coverage"
   },

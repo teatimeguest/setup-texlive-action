@@ -1,0 +1,45 @@
+name: Dependabot
+
+on:
+  workflow_run:
+    workflows:
+      - Pull request
+    types:
+      - completed
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.sender.login == 'dependabot[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.workflow_run.pull_requests[0].head.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Update dist
+        run: |
+          if ! git diff --quiet -- dist/index.js; then
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add dist/index.js
+            git commit -m 'chore(dist): auto-update [skip ci]'
+            git push origin
+          fi
+
+      - name: Merge
+        env:
+          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+        run: gh pr merge -md
