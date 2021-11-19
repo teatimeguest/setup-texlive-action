@@ -13,13 +13,32 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test
+
+      - name: Configure git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Update dist
+        run: |
+          if ! git diff --quiet -- dist/index.js; then
+            git add dist/index.js
+            git commit -m 'chore(dist): auto-update [skip ci]'
+          fi
+
       - name: Prepare
         id: prepare
         run: |
           latest="$(git describe --tags --abbrev=0 --match='v*.*.*')"
           if ! git diff --quiet "${latest}" dist/index.js; then
-            git config user.name github-actions
-            git config user.email github-actions@github.com
             next="$(npm version patch -m 'chore(release): prepare for v%s [skip ci]')"
             git tag -f "$(sed -E 's/^(v[0-9]+)\..*/\1/' <<< "${next}")"
             git push origin
