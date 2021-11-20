@@ -2,10 +2,8 @@ name: Dependabot
 
 on:
   workflow_run:
-    workflows:
-      - Pull request
-    types:
-      - completed
+    workflows: Pull request
+    types: completed
 
 jobs:
   dependabot:
@@ -15,13 +13,8 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       github.event.sender.login == 'dependabot[bot]'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.workflow_run.pull_requests[0].head.ref }}
-          fetch-depth: 0
-
       - name: Try to merge
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr merge -md || true
+        run: gh pr merge ${{ github.event.workflow_run.pull_requests[0].html_url }} -sd
