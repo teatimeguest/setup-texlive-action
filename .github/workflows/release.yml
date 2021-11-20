@@ -40,7 +40,7 @@ jobs:
           latest="$(git describe --tags --abbrev=0 --match='v*.*.*')"
           if ! git diff --quiet "${latest}" dist/index.js; then
             next="$(npm version patch -m 'chore(release): prepare for v%s [skip ci]')"
-            git tag -f "$(sed -E 's/^(v[0-9]+)\..*/\1/' <<< "${next}")"
+            git tag -f "${next%%.*}"
             git push origin
             git push --tags -f origin
             echo "::set-output name=tag::${next}"
