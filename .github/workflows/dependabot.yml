@@ -17,4 +17,4 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr merge ${{ github.event.workflow_run.pull_requests[0].html_url }} -sd
+        run: gh pr merge ${{ github.event.workflow_run.pull_requests[0].url }} -sd
