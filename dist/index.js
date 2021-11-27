@@ -59838,19 +59838,14 @@ function getInputs() {
         process.env['TEXLIVE_INSTALL_PREFIX'],
         path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive'),
     ].find(Boolean);
-    const getVersion = (version) => {
-        if (version === 'latest') {
-            return tl.LATEST_VERSION;
-        }
-        else if (tl.isVersion(version)) {
-            return version;
-        }
-        else {
-            throw new Error("`version` must be specified by year or 'latest'");
-        }
-    };
-    const version = getVersion(core.getInput('version'));
-    return { cache, packages, prefix, version };
+    let version = core.getInput('version');
+    if (version === 'latest') {
+        version = tl.LATEST_VERSION;
+    }
+    else if (!tl.isVersion(version)) {
+        throw new Error("`version` must be specified by year or 'latest'");
+    }
+    return { cache, packages, prefix, version: version };
 }
 function getCacheKeys(version, packages) {
     const digest = (s) => {
@@ -59943,39 +59938,46 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _InstallTL_instances, _InstallTL_download, _InstallTL_profile;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Manager = exports.install = exports.LATEST_VERSION = exports.isVersion = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
+const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const glob = __importStar(__nccwpck_require__(8090));
 const tool = __importStar(__nccwpck_require__(7784));
 // prettier-ignore
 const VERSIONS = [
-    '2019',
-    '2020',
-    '2021',
+    '1996', '1997', '1998', '1999',
+    '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
+    '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
+    '2020', '2021',
 ];
 function isVersion(version) {
     return VERSIONS.includes(version);
 }
 exports.isVersion = isVersion;
-exports.LATEST_VERSION = '2021';
-async function install(version, prefix, platform) {
-    const installer = path.join(await download(version, platform), `install-tl${platform === 'win32' ? '-windows' : ''}`);
-    const profile = await createProfile(version, prefix);
-    const env = { ...process.env, TEXLIVE_INSTALL_ENV_NOCHECK: '1' };
-    const options = ['-no-gui', '-profile', profile];
-    if (version !== exports.LATEST_VERSION) {
-        options.push('-repository', repository(version).toString());
+exports.LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
+async function install(version, prefix, platform = os.platform()) {
+    /**
+     * - There is no `install-tl` for versions prior to 2005, and
+     *   versions 2005--2007 do not seem to be archived.
+     *
+     * - Versions 2008--2012 can be installed on `macos-latest`, but
+     *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
+     */
+    if (Number(version) < (platform === 'darwin' ? 2013 : 2008)) {
+        throw new Error(`Installation of TeX Live ${version} on ${platform} is not supported`);
     }
-    await core.group('Installing TeX Live', async () => {
-        await exec.exec(installer, options, { env });
-        const tlmgr = new Manager(version, prefix);
-        await tlmgr.pathAdd();
-    });
+    return new InstallTL(version, prefix, platform).run();
 }
 exports.install = install;
 class Manager {
@@ -59991,45 +59993,75 @@ class Manager {
         return { texdir, local, sysconfig, sysvar };
     }
     async install(packages) {
-        if (packages.length === 0) {
-            return;
+        if (packages.length !== 0) {
+            await exec.exec('tlmgr', ['install', ...packages]);
         }
-        await exec.exec('tlmgr', ['install', ...packages]);
     }
     /**
      * @todo `install-tl -print-platform` and `tlmgr print-platform` may be useful
      */
     async pathAdd() {
-        const bin = await determine(path.join(this.prefix, this.version, 'bin', '*'));
-        if (bin === undefined) {
+        const matched = await expand(path.join(this.prefix, this.version, 'bin', '*'));
+        if (matched.length !== 1) {
+            core.debug(`Matched: ${matched}`);
             throw new Error('Unable to locate the bin directory');
         }
-        core.addPath(bin);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        core.addPath(matched[0]);
     }
 }
 exports.Manager = Manager;
-/**
- * Returns the only file path that matches the given glob pattern.
- * If it is not uniquely determined, it returns `undefined`.
- *
- * @param pattern - A glob pattern
- * @returns - The path of the matched file or directory
- */
-async function determine(pattern) {
-    const globber = await glob.create(pattern, { implicitDescendants: false });
-    const matched = await globber.glob();
-    return matched.length === 1 ? matched[0] : undefined;
-}
 function repository(version) {
-    return new URL(version === exports.LATEST_VERSION
-        ? 'https://mirror.ctan.org/systems/texlive/tlnet/'
-        : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/tlnet-final/`);
+    const base = version === exports.LATEST_VERSION
+        ? 'https://mirror.ctan.org/systems/texlive/'
+        : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`;
+    const tlnet = `tlnet${Number(version) < 2010 || version === exports.LATEST_VERSION ? '' : '-final'}/`;
+    const url = new url_1.URL(tlnet, base);
+    /**
+     * `install-tl` of versions prior to 2017 does not support HTTPS, and
+     * that of version 2017 supports HTTPS but does not work properly.
+     */
+    if (Number(version) < 2018) {
+        url.protocol = 'http';
+    }
+    return url;
 }
-async function download(version, platform) {
-    const filename = `install-tl${platform === 'win32' ? '.zip' : '-unx.tar.gz'}`;
-    return core.group(`Arquiring ${filename}`, async () => {
+class InstallTL {
+    constructor(version, prefix, platform) {
+        this.version = version;
+        this.prefix = prefix;
+        this.platform = platform;
+        _InstallTL_instances.add(this);
+    }
+    async run() {
+        const installtl = path.join(await __classPrivateFieldGet(this, _InstallTL_instances, "m", _InstallTL_download).call(this), InstallTL.executable(this.version, this.platform));
+        const env = { ...process.env, TEXLIVE_INSTALL_ENV_NOCHECK: '1' };
+        const options = ['-no-gui', '-profile', await __classPrivateFieldGet(this, _InstallTL_instances, "m", _InstallTL_profile).call(this)];
+        if (this.version !== exports.LATEST_VERSION) {
+            options.push(
+            /**
+             * Only version 2008 uses `-location` instead of `-repository`.
+             */
+            this.version === '2008' ? '-location' : '-repository', repository(this.version).href);
+        }
+        await core.group('Installing TeX Live', async () => {
+            await exec.exec(installtl, options, { env });
+            const tlmgr = new Manager(this.version, this.prefix);
+            core.info('Applying patches');
+            await patch(this.version, this.platform, tlmgr.conf().texdir);
+            await tlmgr.pathAdd();
+        });
+    }
+    static executable(version, platform) {
+        const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
+        return `install-tl${platform === 'win32' ? ext : ''}`;
+    }
+}
+_InstallTL_instances = new WeakSet(), _InstallTL_download = async function _InstallTL_download() {
+    const target = `install-tl${this.platform === 'win32' ? '.zip' : '-unx.tar.gz'}`;
+    return core.group(`Acquiring ${target}`, async () => {
         try {
-            const cache = tool.find(filename, version);
+            const cache = tool.find(target, this.version);
             if (cache !== '') {
                 core.info('Found in cache');
                 return cache;
@@ -60041,25 +60073,28 @@ async function download(version, platform) {
                 core.debug(error.stack);
             }
         }
-        const url = `${repository(version)}${filename}`;
+        const url = new url_1.URL(target, repository(this.version)).href;
         core.info(`Downloading ${url}`);
         const archive = await tool.downloadTool(url);
         core.info('Extracting');
         let dest;
-        if (platform === 'win32') {
-            const sub = await determine(path.join(await tool.extractZip(archive), 'install-tl-*'));
-            if (sub === undefined) {
+        if (this.platform === 'win32') {
+            const matched = await expand(path.join(await tool.extractZip(archive), 'install-tl*'));
+            if (matched.length !== 1) {
+                core.debug(`Matched: ${matched}`);
                 throw new Error('Unable to locate the installer path');
             }
-            dest = sub;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            dest = matched[0];
         }
         else {
-            const options = ['xz', '--strip=1'];
-            dest = await tool.extractTar(archive, undefined, options);
+            dest = await tool.extractTar(archive, undefined, ['xz', '--strip=1']);
         }
+        core.info('Applying patches');
+        await patch(this.version, this.platform, dest);
         try {
-            core.info(`Adding to the cache`);
-            await tool.cacheDir(dest, filename, version);
+            core.info('Adding to the cache');
+            await tool.cacheDir(dest, target, this.version);
         }
         catch (error) {
             core.info(`Failed to add to cache: ${error}`);
@@ -60069,37 +60104,94 @@ async function download(version, platform) {
         }
         return dest;
     });
-}
-async function createProfile(version, prefix) {
+}, _InstallTL_profile = async function _InstallTL_profile() {
     var _a;
-    const tlmgr = new Manager(version, prefix);
-    const texmf = tlmgr.conf();
-    const adjustrepo = version === exports.LATEST_VERSION ? 1 : 0;
-    const profile = `
-    TEXDIR ${texmf.texdir}
-    TEXMFLOCAL ${texmf.local}
-    TEXMFSYSCONFIG ${texmf.sysconfig}
-    TEXMFSYSVAR ${texmf.sysvar}
-    selected_scheme scheme-infraonly
-    instopt_adjustrepo ${adjustrepo}
-    tlpdbopt_autobackup 0
-    tlpdbopt_desktop_integration 0
-    tlpdbopt_file_assocs 0
-    tlpdbopt_install_docfiles 0
-    tlpdbopt_install_srcfiles 0
-    tlpdbopt_w32_multi_user 0
-  `
-        .trim()
-        .split(/\n\s*/)
-        .join('\n');
-    core.startGroup('Profile');
-    core.info(profile);
-    core.endGroup();
-    const tmp = (_a = process.env['RUNNER_TEMP']) !== null && _a !== void 0 ? _a : os.tmpdir();
-    const dest = path.join(await fs_1.promises.mkdtemp(path.join(tmp, 'setup-texlive-')), 'texlive.profile');
+    const texmf = new Manager(this.version, this.prefix).conf();
+    const adjustrepo = this.version === exports.LATEST_VERSION ? 1 : 0;
+    /**
+     * `scheme-infraonly` was first introduced in TeX Live 2016.
+     */
+    const scheme = Number(this.version) < 2016 ? 'minimal' : 'infraonly';
+    const profile = [
+        `TEXDIR ${texmf.texdir}`,
+        `TEXMFLOCAL ${texmf.local}`,
+        `TEXMFSYSCONFIG ${texmf.sysconfig}`,
+        `TEXMFSYSVAR ${texmf.sysvar}`,
+        `selected_scheme scheme-${scheme}`,
+        `option_adjustrepo ${adjustrepo}`,
+        'option_autobackup 0',
+        'option_desktop_integration 0',
+        'option_doc 0',
+        'option_file_assocs 0',
+        'option_menu_integration 0',
+        'option_src 0',
+        'option_w32_multi_user 0',
+    ].join('\n');
+    core.group('Profile', async () => core.info(profile));
+    const dest = path.join(await fs_1.promises.mkdtemp(path.join((_a = process.env['RUNNER_TEMP']) !== null && _a !== void 0 ? _a : os.tmpdir(), 'setup-texlive-')), 'texlive.profile');
     await fs_1.promises.writeFile(dest, profile);
     core.debug(`${dest} created`);
     return dest;
+};
+async function patch(version, platform, texdir) {
+    var _a;
+    const update = async (filename, map) => {
+        return fs_1.promises.writeFile(filename, map(await fs_1.promises.readFile(filename, 'utf8')));
+    };
+    /**
+     * Prevent `install-tl(-windows).bat` from being stopped by `pause`.
+     */
+    if (platform === 'win32') {
+        try {
+            await update(path.join(texdir, InstallTL.executable(version, platform)), (content) => content.replace(/\bpause(?: Done)?\b/gm, ''));
+        }
+        catch (error) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (((_a = error) === null || _a === void 0 ? void 0 : _a.code) !== 'ENOENT') {
+                throw error;
+            }
+        }
+    }
+    /**
+     * Fix a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
+     */
+    if (['2009', '2010'].includes(version)) {
+        await update(path.join(texdir, 'tlpkg', 'TeXLive', 'TLWinGoo.pm'), (content) => {
+            return content.replace(/foreach \$p qw\((.*)\)/, 'foreach $$p (qw($1))');
+        });
+    }
+    /**
+     * Define Code Page 65001 as an alias for UTF-8 on Windows.
+     * @see {@link https://github.com/dankogai/p5-encode/issues/37}
+     */
+    if (platform === 'win32' && version === '2015') {
+        await update(path.join(texdir, 'tlpkg', 'tlperl', 'lib', 'Encode', 'Alias.pm'), (content) => {
+            return content.replace('# utf8 is blessed :)', `define_alias(qr/cp65001/i => '"utf-8-strict"');`);
+        });
+    }
+    /**
+     * Make it possible to use `\` as a directory separator on Windows.
+     */
+    if (platform === 'win32' && Number(version) < 2019) {
+        await update(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), (content) => {
+            return content.replace(String.raw `split (/\//, $tree)`, String.raw `split (/[\/\\]/, $tree)`);
+        });
+    }
+    /**
+     * Add support for macOS 11.x.
+     */
+    if (platform === 'darwin' && ['2017', '2018', '2019'].includes(version)) {
+        await update(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), (content) => {
+            return content
+                .replace(
+            // prettier-ignore
+            'if ($os_major != 10)', 'if ($$os_major < 10)')
+                .replace('if ($os_minor >= $mactex_darwin)', 'if ($$os_major >= 11) { $$CPU = "x86_64"; $$OS = "darwin"; } els$&');
+        });
+    }
+}
+async function expand(pattern) {
+    return (await glob.create(pattern, { implicitDescendants: false })).glob();
 }
 
 
