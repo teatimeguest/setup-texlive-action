@@ -85,7 +85,7 @@ All inputs are optional.
 
 [MIT License](./LICENSE)
 
-[marketplace]: https://github.com/marketplace/actions/setup-tex-live-action
+[marketplace]: https://github.com/marketplace/actions/setup-texlive-action
 [marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
 [ci]: ../../actions/workflows/ci.yml
 [ci-badge]: ../../actions/workflows/ci.yml/badge.svg?branch=main
