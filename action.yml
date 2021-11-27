@@ -22,7 +22,8 @@ inputs:
   version:
     description: >-
       Version of TeX Live to install.
-      Supported values are `2019`, `2020`, `2021`, and `latest`.
+      Supported versions are `2008` to `2021` for Linux and Windows, and
+      `2013` to `2021` for macOS.
       If set to `latest`, the latest version will be installed.
     default: latest
     required: false

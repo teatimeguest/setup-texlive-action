@@ -11,7 +11,7 @@ Linux, Windows, and macOS are supported.
 
 ## Usage
 
-Installing the latest version of TeX Live with `scheme-infraonly`:
+Installing the latest version of TeX Live:
 
 ```yaml
 - name: Setup TeX Live
@@ -21,8 +21,10 @@ Installing the latest version of TeX Live with `scheme-infraonly`:
   run: tlmgr --version
 ```
 
-Additional TeX packages to be installed
-can be specified by the `packages` input:
+The action installs TeX Live with
+`scheme-infraonly` for `2016` or later versions, and
+`scheme-minimal` for the other versions.
+If you want to install additional packages, you can use the `packages` input:
 
 ```yaml
 - name: Setup TeX Live
@@ -34,17 +36,17 @@ can be specified by the `packages` input:
       hyperref
 ```
 
-An old version of TeX Live is also available:
+A legacy version of TeX Live is also available:
 
 ```yaml
-- name: Setup TeX Live 2019
+- name: Setup TeX Live 2008
   uses: teatimeguest/setup-texlive-action@v1
   with:
-    version: 2019
+    version: 2008
 ```
 
-Versions prior to `2019` are currently not supported
-as the `install-tl` script does not work properly on Windows and macOS.
+Supported versions are `2008` to `2021` for Linux and Windows, and
+`2013` to `2021` for macOS.
 
 ## Caching
 
@@ -59,6 +61,9 @@ If you want to disable caching, you can use the `cache` input:
     cache: false
 ```
 
+The value of the `packages` input is hashed and becomes part of the cache key,
+so it affects which cache is restored.
+
 ## Inputs
 
 All inputs are optional.
@@ -68,7 +73,7 @@ All inputs are optional.
 |`cache`|Bool|Enable caching for `TEXDIR`. The default is `true`.|
 |`packages`|String|Whitespace-separated list of TeX packages to install. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. The default is `C:\TEMP\setup-texlive` on Windows, `/tmp/setup-texlive` on Linux and macOS.|
-|`version`|String|Version of TeX Live to install. Supported values are `2019`, `2020`, `2021`, and `latest`.|
+|`version`|String|Version of TeX Live to install. Supported values are `2008` to `2021`, and `latest`.|
 
 ## Outputs
 

@@ -52,19 +52,15 @@ function getInputs(): Inputs {
     path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive'),
   ].find(Boolean) as string;
 
-  const getVersion = (version: string): tl.Version => {
-    if (version === 'latest') {
-      return tl.LATEST_VERSION;
-    } else if (tl.isVersion(version)) {
-      return version;
-    } else {
-      throw new Error("`version` must be specified by year or 'latest'");
-    }
-  };
+  let version = core.getInput('version');
 
-  const version = getVersion(core.getInput('version'));
+  if (version === 'latest') {
+    version = tl.LATEST_VERSION;
+  } else if (!tl.isVersion(version)) {
+    throw new Error("`version` must be specified by year or 'latest'");
+  }
 
-  return { cache, packages, prefix, version };
+  return { cache, packages, prefix, version: version as tl.Version };
 }
 
 function getCacheKeys(
