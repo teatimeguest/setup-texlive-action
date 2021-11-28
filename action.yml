@@ -10,7 +10,7 @@ inputs:
     required: false
   packages:
     description: >-
-      Whitespace-separated list of TeX packages to install.
+      Whitespace-separated list of TeX packages to be installed.
       Schemes and collections can also be specified.
     required: false
   prefix:
@@ -21,8 +21,8 @@ inputs:
     required: false
   version:
     description: >-
-      Version of TeX Live to install.
-      Supported versions are `2008` to `2021` for Linux and Windows, and
+      TeX Live version to install.
+      Supported versions are `2008` to `2021` for Linux and Windows,
       `2013` to `2021` for macOS.
       If set to `latest`, the latest version will be installed.
     default: latest

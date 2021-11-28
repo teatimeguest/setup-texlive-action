@@ -1,17 +1,22 @@
 # setup-texlive-action
 
+> A GitHub Action to set up TeX Live
+
 [![Marketplace][marketplace-badge]][marketplace]
 [![CI][ci-badge]][ci]
 [![Codecov][codecov-badge]][codecov]
 
-This action provides
-the functionality of installing and caching [TeX Live][texlive].
+This action provides the following functionality:
+
+* Installing and setting up a specific version of [TeX Live][texlive];
+* Optionally caching and restoring `TEXDIR` to improve workflow execution time;
+* Optionally configuring a package repository and installing additional TeX packages.
 
 Linux, Windows, and macOS are supported.
 
 ## Usage
 
-Installing the latest version of TeX Live:
+### Basic usage
 
 ```yaml
 - name: Setup TeX Live
@@ -21,9 +26,9 @@ Installing the latest version of TeX Live:
   run: tlmgr --version
 ```
 
-The action installs TeX Live with
-`scheme-infraonly` for `2016` or later versions, and
-`scheme-minimal` for the other versions.
+The action will install TeX Live with
+`scheme-infraonly` for versions `2016` and later, and
+`scheme-minimal` for other versions.
 If you want to install additional packages, you can use the `packages` input:
 
 ```yaml
@@ -36,7 +41,9 @@ If you want to install additional packages, you can use the `packages` input:
       hyperref
 ```
 
-A legacy version of TeX Live is also available:
+### Historic versions
+
+You can also use an older version of TeX Live by specifying the `version`:
 
 ```yaml
 - name: Setup TeX Live 2008
@@ -45,13 +52,20 @@ A legacy version of TeX Live is also available:
     version: 2008
 ```
 
+The action will install it by
+downloading the installation script from the [historic archives][historic] and
+configuring the package repository appropriately.
 Supported versions are `2008` to `2021` for Linux and Windows, and
 `2013` to `2021` for macOS.
 
-## Caching
+> Versions `2008` to `2012` can be installed on `macos-latest` but
+> do not work because the `kpsewhich` aborts with "Bad CPU type."
 
-By default, the action caches `TEXDIR` using [`@actions/cache`][actions-cache]
-to improve workflow execution time.
+### Caching
+
+By default,
+the action will cache `TEXDIR` using [`@actions/cache`][actions-cache]
+after the workflow job is completed.
 If you want to disable caching, you can use the `cache` input:
 
 ```yaml
@@ -61,8 +75,8 @@ If you want to disable caching, you can use the `cache` input:
     cache: false
 ```
 
-The value of the `packages` input is hashed and becomes part of the cache key,
-so it affects which cache is restored.
+The `packages` input will affect which cache will be restored
+because its hash will be used as part of the cache key.
 
 ## Inputs
 
@@ -71,9 +85,9 @@ All inputs are optional.
 |Name|Type|Description|
 |---|---|---|
 |`cache`|Bool|Enable caching for `TEXDIR`. The default is `true`.|
-|`packages`|String|Whitespace-separated list of TeX packages to install. Schemes and collections can also be specified.|
+|`packages`|String|Whitespace-separated list of TeX packages to be installed. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. The default is `C:\TEMP\setup-texlive` on Windows, `/tmp/setup-texlive` on Linux and macOS.|
-|`version`|String|Version of TeX Live to install. Supported values are `2008` to `2021`, and `latest`.|
+|`version`|String|TeX Live version to install. Supported values are `2008` to `2021`, and `latest`.|
 
 ## Outputs
 
@@ -85,11 +99,12 @@ All inputs are optional.
 
 [MIT License](./LICENSE)
 
-[marketplace]: https://github.com/marketplace/actions/setup-texlive-action
-[marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
-[ci]: ../../actions/workflows/ci.yml
-[ci-badge]: ../../actions/workflows/ci.yml/badge.svg?branch=main
-[codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
-[codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
-[texlive]: https://tug.org/texlive/
 [actions-cache]: https://github.com/actions/toolkit/tree/main/packages/cache
+[ci-badge]: ../../actions/workflows/ci.yml/badge.svg?branch=main
+[ci]: ../../actions/workflows/ci.yml
+[codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
+[codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
+[historic]: https://tug.org/historic/
+[marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
+[marketplace]: https://github.com/marketplace/actions/setup-texlive-action
+[texlive]: https://tug.org/texlive/
