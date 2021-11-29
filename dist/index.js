@@ -59818,21 +59818,22 @@ async function run() {
 }
 exports.run = run;
 function getInputs() {
-    let cache = core.getBooleanInput('cache');
-    if (cache &&
+    let caching = core.getBooleanInput('cache');
+    if (caching &&
         /**
          * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/src/internal/cacheHttpClient.ts}
          */
-        !process.env['ACTIONS_CACHE_URL'] &&
-        !process.env['ACTIONS_RUNTIME_URL']) {
-        cache = false;
+        !Boolean(process.env['ACTIONS_CACHE_URL']) &&
+        !Boolean(process.env['ACTIONS_RUNTIME_URL'])) {
+        caching = false;
         core.info('Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_CACHE_URL` is defined');
     }
     const packages = core
         .getInput('packages')
-        .split(/\s+/)
+        .split(/\s+/u)
         .filter((s) => s !== '')
         .sort();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const prefix = [
         core.getInput('prefix'),
         process.env['TEXLIVE_INSTALL_PREFIX'],
@@ -59845,7 +59846,12 @@ function getInputs() {
     else if (!tl.isVersion(version)) {
         throw new Error("`version` must be specified by year or 'latest'");
     }
-    return { cache, packages, prefix, version: version };
+    return {
+        cache: caching,
+        packages,
+        prefix,
+        version: version,
+    };
 }
 function getCacheKeys(version, packages) {
     const digest = (s) => {
@@ -59965,6 +59971,7 @@ function isVersion(version) {
     return VERSIONS.includes(version);
 }
 exports.isVersion = isVersion;
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 exports.LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
 async function install(version, prefix, platform = os.platform()) {
     /**
@@ -59977,7 +59984,7 @@ async function install(version, prefix, platform = os.platform()) {
     if (Number(version) < (platform === 'darwin' ? 2013 : 2008)) {
         throw new Error(`Installation of TeX Live ${version} on ${platform} is not supported`);
     }
-    return new InstallTL(version, prefix, platform).run();
+    await new InstallTL(version, prefix, platform).run();
 }
 exports.install = install;
 class Manager {
@@ -60035,7 +60042,7 @@ class InstallTL {
     }
     async run() {
         const installtl = path.join(await __classPrivateFieldGet(this, _InstallTL_instances, "m", _InstallTL_download).call(this), InstallTL.executable(this.version, this.platform));
-        const env = { ...process.env, TEXLIVE_INSTALL_ENV_NOCHECK: '1' };
+        const env = { ...process.env, ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1' };
         const options = ['-no-gui', '-profile', await __classPrivateFieldGet(this, _InstallTL_instances, "m", _InstallTL_profile).call(this)];
         if (this.version !== exports.LATEST_VERSION) {
             options.push(
@@ -60059,7 +60066,7 @@ class InstallTL {
 }
 _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _InstallTL_download() {
     const target = `install-tl${this.platform === 'win32' ? '.zip' : '-unx.tar.gz'}`;
-    return core.group(`Acquiring ${target}`, async () => {
+    return await core.group(`Acquiring ${target}`, async () => {
         try {
             const cache = tool.find(target, this.version);
             if (cache !== '') {
@@ -60127,7 +60134,9 @@ _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _Inst
         'option_src 0',
         'option_w32_multi_user 0',
     ].join('\n');
-    core.group('Profile', async () => core.info(profile));
+    await core.group('Profile', async () => {
+        core.info(profile);
+    });
     const dest = path.join(await fs_1.promises.mkdtemp(path.join((_a = process.env['RUNNER_TEMP']) !== null && _a !== void 0 ? _a : os.tmpdir(), 'setup-texlive-')), 'texlive.profile');
     await fs_1.promises.writeFile(dest, profile);
     core.debug(`${dest} created`);
@@ -60135,18 +60144,14 @@ _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _Inst
 };
 async function patch(version, platform, texdir) {
     var _a;
-    const update = async (filename, map) => {
-        return fs_1.promises.writeFile(filename, map(await fs_1.promises.readFile(filename, 'utf8')));
-    };
     /**
      * Prevent `install-tl(-windows).bat` from being stopped by `pause`.
      */
     if (platform === 'win32') {
         try {
-            await update(path.join(texdir, InstallTL.executable(version, platform)), (content) => content.replace(/\bpause(?: Done)?\b/gm, ''));
+            await updateFile(path.join(texdir, InstallTL.executable(version, platform)), (content) => content.replace(/\bpause(?: Done)?\b/gmu, ''));
         }
         catch (error) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if (((_a = error) === null || _a === void 0 ? void 0 : _a.code) !== 'ENOENT') {
                 throw error;
             }
@@ -60156,8 +60161,8 @@ async function patch(version, platform, texdir) {
      * Fix a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
      */
     if (['2009', '2010'].includes(version)) {
-        await update(path.join(texdir, 'tlpkg', 'TeXLive', 'TLWinGoo.pm'), (content) => {
-            return content.replace(/foreach \$p qw\((.*)\)/, 'foreach $$p (qw($1))');
+        await updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLWinGoo.pm'), (content) => {
+            return content.replace(/foreach \$p qw\((.*)\)/u, 'foreach $$p (qw($1))');
         });
     }
     /**
@@ -60165,7 +60170,7 @@ async function patch(version, platform, texdir) {
      * @see {@link https://github.com/dankogai/p5-encode/issues/37}
      */
     if (platform === 'win32' && version === '2015') {
-        await update(path.join(texdir, 'tlpkg', 'tlperl', 'lib', 'Encode', 'Alias.pm'), (content) => {
+        await updateFile(path.join(texdir, 'tlpkg', 'tlperl', 'lib', 'Encode', 'Alias.pm'), (content) => {
             return content.replace('# utf8 is blessed :)', `define_alias(qr/cp65001/i => '"utf-8-strict"');`);
         });
     }
@@ -60173,7 +60178,7 @@ async function patch(version, platform, texdir) {
      * Make it possible to use `\` as a directory separator on Windows.
      */
     if (platform === 'win32' && Number(version) < 2019) {
-        await update(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), (content) => {
+        await updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), (content) => {
             return content.replace(String.raw `split (/\//, $tree)`, String.raw `split (/[\/\\]/, $tree)`);
         });
     }
@@ -60181,7 +60186,7 @@ async function patch(version, platform, texdir) {
      * Add support for macOS 11.x.
      */
     if (platform === 'darwin' && ['2017', '2018', '2019'].includes(version)) {
-        await update(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), (content) => {
+        await updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), (content) => {
             return content
                 .replace(
             // prettier-ignore
@@ -60190,8 +60195,12 @@ async function patch(version, platform, texdir) {
         });
     }
 }
+async function updateFile(filename, map) {
+    await fs_1.promises.writeFile(filename, map(await fs_1.promises.readFile(filename, 'utf8')));
+}
 async function expand(pattern) {
-    return (await glob.create(pattern, { implicitDescendants: false })).glob();
+    const globber = await glob.create(pattern, { implicitDescendants: false });
+    return await globber.glob();
 }
 
 

@@ -22,7 +22,8 @@ export function isVersion(version: string): version is Version {
   return VERSIONS.includes(version as Version);
 }
 
-export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1] as Version;
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1]!;
 
 export async function install(
   version: Version,
@@ -41,7 +42,7 @@ export async function install(
       `Installation of TeX Live ${version} on ${platform} is not supported`,
     );
   }
-  return new InstallTL(version, prefix, platform).run();
+  await new InstallTL(version, prefix, platform).run();
 }
 
 export interface Texmf {
@@ -65,7 +66,7 @@ export class Manager {
     return { texdir, local, sysconfig, sysvar };
   }
 
-  async install(packages: Array<string>): Promise<void> {
+  async install(packages: ReadonlyArray<string>): Promise<void> {
     if (packages.length !== 0) {
       await exec.exec('tlmgr', ['install', ...packages]);
     }
@@ -118,7 +119,7 @@ class InstallTL {
       await this.#download(),
       InstallTL.executable(this.version, this.platform),
     );
-    const env = { ...process.env, TEXLIVE_INSTALL_ENV_NOCHECK: '1' };
+    const env = { ...process.env, ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1' };
     const options = ['-no-gui', '-profile', await this.#profile()];
 
     if (this.version !== LATEST_VERSION) {
@@ -144,7 +145,7 @@ class InstallTL {
     const target = `install-tl${
       this.platform === 'win32' ? '.zip' : '-unx.tar.gz'
     }`;
-    return core.group(`Acquiring ${target}`, async () => {
+    return await core.group(`Acquiring ${target}`, async () => {
       try {
         const cache = tool.find(target, this.version);
         if (cache !== '') {
@@ -219,7 +220,9 @@ class InstallTL {
       'option_w32_multi_user 0',
     ].join('\n');
 
-    core.group('Profile', async () => core.info(profile));
+    await core.group('Profile', async () => {
+      core.info(profile);
+    });
 
     const dest = path.join(
       await fs.mkdtemp(
@@ -243,21 +246,17 @@ async function patch(
   platform: NodeJS.Platform,
   texdir: string,
 ): Promise<void> {
-  const update = async (filename: string, map: (content: string) => string) => {
-    return fs.writeFile(filename, map(await fs.readFile(filename, 'utf8')));
-  };
   /**
    * Prevent `install-tl(-windows).bat` from being stopped by `pause`.
    */
   if (platform === 'win32') {
     try {
-      await update(
+      await updateFile(
         path.join(texdir, InstallTL.executable(version, platform)),
-        (content) => content.replace(/\bpause(?: Done)?\b/gm, ''),
+        (content) => content.replace(/\bpause(?: Done)?\b/gmu, ''),
       );
     } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((error as any)?.code !== 'ENOENT') {
+      if ((error as { code?: string } | null)?.code !== 'ENOENT') {
         throw error;
       }
     }
@@ -266,11 +265,11 @@ async function patch(
    * Fix a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
    */
   if (['2009', '2010'].includes(version)) {
-    await update(
+    await updateFile(
       path.join(texdir, 'tlpkg', 'TeXLive', 'TLWinGoo.pm'),
       (content) => {
         return content.replace(
-          /foreach \$p qw\((.*)\)/,
+          /foreach \$p qw\((.*)\)/u,
           'foreach $$p (qw($1))',
         );
       },
@@ -281,7 +280,7 @@ async function patch(
    * @see {@link https://github.com/dankogai/p5-encode/issues/37}
    */
   if (platform === 'win32' && version === '2015') {
-    await update(
+    await updateFile(
       path.join(texdir, 'tlpkg', 'tlperl', 'lib', 'Encode', 'Alias.pm'),
       (content) => {
         return content.replace(
@@ -295,7 +294,7 @@ async function patch(
    * Make it possible to use `\` as a directory separator on Windows.
    */
   if (platform === 'win32' && Number(version) < 2019) {
-    await update(
+    await updateFile(
       path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'),
       (content) => {
         return content.replace(
@@ -309,7 +308,7 @@ async function patch(
    * Add support for macOS 11.x.
    */
   if (platform === 'darwin' && ['2017', '2018', '2019'].includes(version)) {
-    await update(
+    await updateFile(
       path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'),
       (content) => {
         return content
@@ -327,6 +326,14 @@ async function patch(
   }
 }
 
+async function updateFile(
+  filename: string,
+  map: (content: string) => string,
+): Promise<void> {
+  await fs.writeFile(filename, map(await fs.readFile(filename, 'utf8')));
+}
+
 async function expand(pattern: string): Promise<Array<string>> {
-  return (await glob.create(pattern, { implicitDescendants: false })).glob();
+  const globber = await glob.create(pattern, { implicitDescendants: false });
+  return await globber.glob();
 }

@@ -39,7 +39,9 @@ beforeEach(() => {
   console.log('::stop-commands::stoptoken');
   process.env['GITHUB_PATH'] = '';
 
-  (path.join as jest.Mock).mockImplementation(path.posix.join);
+  (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
+    return path.posix.join(...paths);
+  });
   (glob.create as jest.Mock).mockResolvedValue({
     glob: async (): Promise<Array<string>> => [],
   } as glob.Globber);
@@ -71,13 +73,13 @@ describe('Manager', () => {
   describe('install', () => {
     it('does not invoke `tlmgr install` if the argument is empty', async () => {
       await tlmgr.install([]);
-      expect(exec.exec).not.toBeCalled();
+      expect(exec.exec).not.toHaveBeenCalled();
     });
 
     it('installs packages by invoking `tlmgr install`', async () => {
       const packages = ['foo', 'bar', 'baz'];
       await tlmgr.install(packages);
-      expect(exec.exec).toBeCalledWith('tlmgr', ['install', ...packages]);
+      expect(exec.exec).toHaveBeenCalledWith('tlmgr', ['install', ...packages]);
     });
   });
 
@@ -89,7 +91,7 @@ describe('Manager', () => {
         } as glob.Globber;
       });
       await tlmgr.pathAdd();
-      expect(core.addPath).toBeCalledWith(
+      expect(core.addPath).toHaveBeenCalledWith(
         '/usr/local/texlive/2019/bin/x86_64-linux',
       );
     });
@@ -122,12 +124,12 @@ describe('install', () => {
 
   it('installs TeX Live 2008 on Linux', async () => {
     await tl.install('2008', '/usr/local/texlive', 'linux');
-    expect(tool.find).toBeCalledWith('install-tl-unx.tar.gz', '2008');
-    expect(tool.downloadTool).toBeCalledWith(
+    expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2008');
+    expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/install-tl-unx.tar.gz',
     );
-    expect(fs.writeFile).toBeCalledWith(
-      expect.stringMatching(/texlive\.profile$/),
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
         [
           'TEXMFLOCAL /usr/local/texlive/texmf-local',
@@ -138,32 +140,34 @@ describe('install', () => {
         ].join('\n'),
       ),
     );
-    expect(exec.exec).toBeCalledWith(
-      expect.stringMatching(/install-tl$/),
+    expect(exec.exec).toHaveBeenCalledWith(
+      expect.stringMatching(/install-tl$/u),
       [
         '-no-gui',
         '-profile',
-        expect.stringMatching(/texlive\.profile$/),
+        expect.stringMatching(/texlive\.profile$/u),
         '-location',
         'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/',
       ],
       expect.anything(),
     );
-    expect(core.addPath).toBeCalledWith(
+    expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('/usr/local/texlive/2008/bin/'),
     );
-    expect(tool.cacheDir).toBeCalled();
+    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live 2008 on Windows', async () => {
-    (path.join as jest.Mock).mockImplementation(path.win32.join);
+    (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
+      return path.win32.join(...paths);
+    });
     await tl.install('2008', 'C:\\texlive', 'win32');
-    expect(tool.find).toBeCalledWith('install-tl.zip', '2008');
-    expect(tool.downloadTool).toBeCalledWith(
+    expect(tool.find).toHaveBeenCalledWith('install-tl.zip', '2008');
+    expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/install-tl.zip',
     );
-    expect(fs.writeFile).toBeCalledWith(
-      expect.stringMatching(/texlive\.profile$/),
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
         [
           'TEXMFLOCAL C:\\texlive\\texmf-local',
@@ -174,32 +178,34 @@ describe('install', () => {
         ].join('\n'),
       ),
     );
-    expect(exec.exec).toBeCalledWith(
-      expect.stringMatching(/install-tl.bat/),
+    expect(exec.exec).toHaveBeenCalledWith(
+      expect.stringMatching(/install-tl\.bat$/u),
       [
         '-no-gui',
         '-profile',
-        expect.stringMatching(/texlive\.profile$/),
+        expect.stringMatching(/texlive\.profile$/u),
         '-location',
         'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/',
       ],
       expect.anything(),
     );
-    expect(core.addPath).toBeCalledWith(
+    expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('C:\\texlive\\2008\\bin\\'),
     );
-    expect(tool.cacheDir).toBeCalled();
+    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live 2013 on Windows', async () => {
-    (path.join as jest.Mock).mockImplementation(path.win32.join);
+    (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
+      return path.win32.join(...paths);
+    });
     await tl.install('2013', 'C:\\texlive', 'win32');
-    expect(tool.find).toBeCalledWith('install-tl.zip', '2013');
-    expect(tool.downloadTool).toBeCalledWith(
+    expect(tool.find).toHaveBeenCalledWith('install-tl.zip', '2013');
+    expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2013/tlnet-final/install-tl.zip',
     );
-    expect(fs.writeFile).toBeCalledWith(
-      expect.stringMatching(/texlive\.profile$/),
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
         [
           'TEXMFLOCAL C:\\texlive\\texmf-local',
@@ -210,31 +216,31 @@ describe('install', () => {
         ].join('\n'),
       ),
     );
-    expect(exec.exec).toBeCalledWith(
-      expect.stringMatching(/install-tl-windows.bat/),
+    expect(exec.exec).toHaveBeenCalledWith(
+      expect.stringMatching(/install-tl-windows\.bat$/u),
       [
         '-no-gui',
         '-profile',
-        expect.stringMatching(/texlive\.profile$/),
+        expect.stringMatching(/texlive\.profile$/u),
         '-repository',
         'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2013/tlnet-final/',
       ],
       expect.anything(),
     );
-    expect(core.addPath).toBeCalledWith(
+    expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('C:\\texlive\\2013\\bin\\'),
     );
-    expect(tool.cacheDir).toBeCalled();
+    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live 2013 on macOS', async () => {
     await tl.install('2013', '/usr/local/texlive', 'darwin');
-    expect(tool.find).toBeCalledWith('install-tl-unx.tar.gz', '2013');
-    expect(tool.downloadTool).toBeCalledWith(
+    expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2013');
+    expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2013/tlnet-final/install-tl-unx.tar.gz',
     );
-    expect(fs.writeFile).toBeCalledWith(
-      expect.stringMatching(/texlive\.profile$/),
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
         [
           'TEXMFLOCAL /usr/local/texlive/texmf-local',
@@ -245,31 +251,31 @@ describe('install', () => {
         ].join('\n'),
       ),
     );
-    expect(exec.exec).toBeCalledWith(
-      expect.stringMatching(/install-tl$/),
+    expect(exec.exec).toHaveBeenCalledWith(
+      expect.stringMatching(/install-tl$/u),
       [
         '-no-gui',
         '-profile',
-        expect.stringMatching(/texlive\.profile$/),
+        expect.stringMatching(/texlive\.profile$/u),
         '-repository',
         'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2013/tlnet-final/',
       ],
       expect.anything(),
     );
-    expect(core.addPath).toBeCalledWith(
+    expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('/usr/local/texlive/2013/bin/'),
     );
-    expect(tool.cacheDir).toBeCalled();
+    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live 2016 on macOS', async () => {
     await tl.install('2016', '/usr/local/texlive', 'darwin');
-    expect(tool.find).toBeCalledWith('install-tl-unx.tar.gz', '2016');
-    expect(tool.downloadTool).toBeCalledWith(
+    expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2016');
+    expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2016/tlnet-final/install-tl-unx.tar.gz',
     );
-    expect(fs.writeFile).toBeCalledWith(
-      expect.stringMatching(/texlive\.profile$/),
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
         [
           'TEXMFLOCAL /usr/local/texlive/texmf-local',
@@ -280,31 +286,31 @@ describe('install', () => {
         ].join('\n'),
       ),
     );
-    expect(exec.exec).toBeCalledWith(
-      expect.stringMatching(/install-tl$/),
+    expect(exec.exec).toHaveBeenCalledWith(
+      expect.stringMatching(/install-tl$/u),
       [
         '-no-gui',
         '-profile',
-        expect.stringMatching(/texlive\.profile$/),
+        expect.stringMatching(/texlive\.profile$/u),
         '-repository',
         'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2016/tlnet-final/',
       ],
       expect.anything(),
     );
-    expect(core.addPath).toBeCalledWith(
+    expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('/usr/local/texlive/2016/bin/'),
     );
-    expect(tool.cacheDir).toBeCalled();
+    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs the latest version of TeX Live on Linux', async () => {
     await tl.install('2021', '/usr/local/texlive', 'linux');
-    expect(tool.find).toBeCalledWith('install-tl-unx.tar.gz', '2021');
-    expect(tool.downloadTool).toBeCalledWith(
+    expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2021');
+    expect(tool.downloadTool).toHaveBeenCalledWith(
       'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
     );
-    expect(fs.writeFile).toBeCalledWith(
-      expect.stringMatching(/texlive\.profile$/),
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
         [
           'TEXMFLOCAL /usr/local/texlive/texmf-local',
@@ -315,23 +321,23 @@ describe('install', () => {
         ].join('\n'),
       ),
     );
-    expect(exec.exec).toBeCalledWith(
-      expect.stringMatching(/install-tl$/),
-      ['-no-gui', '-profile', expect.stringMatching(/texlive\.profile$/)],
+    expect(exec.exec).toHaveBeenCalledWith(
+      expect.stringMatching(/install-tl$/u),
+      ['-no-gui', '-profile', expect.stringMatching(/texlive\.profile$/u)],
       expect.anything(),
     );
-    expect(core.addPath).toBeCalledWith(
+    expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('/usr/local/texlive/2021/bin/'),
     );
-    expect(tool.cacheDir).toBeCalled();
+    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live with a installer cache', async () => {
     (tool.find as jest.Mock).mockReturnValueOnce(random());
     await tl.install('2021', '/usr/local/texlive', 'linux');
-    expect(tool.find).toBeCalledWith('install-tl-unx.tar.gz', '2021');
-    expect(tool.downloadTool).not.toBeCalled();
-    expect(tool.cacheDir).not.toBeCalled();
+    expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2021');
+    expect(tool.downloadTool).not.toHaveBeenCalled();
+    expect(tool.cacheDir).not.toHaveBeenCalled();
   });
 
   it('continues the installation even if `tool-cache` throws an exception', async () => {
@@ -365,7 +371,7 @@ describe('install', () => {
       await expect(
         tl.install(version, '/usr/local/texlive', platform),
       ).rejects.toThrow(
-        /^Installation of TeX Live \d{4} on (?:\w+) is not supported$/,
+        /^Installation of TeX Live \d{4} on (?:\w+) is not supported$/u,
       );
     },
   );

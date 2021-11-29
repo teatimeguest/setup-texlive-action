@@ -24,17 +24,17 @@ interface Inputs {
 }
 
 function getInputs(): Inputs {
-  let cache = core.getBooleanInput('cache');
+  let caching = core.getBooleanInput('cache');
 
   if (
-    cache &&
+    caching &&
     /**
      * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/src/internal/cacheHttpClient.ts}
      */
-    !process.env['ACTIONS_CACHE_URL'] &&
-    !process.env['ACTIONS_RUNTIME_URL']
+    !Boolean(process.env['ACTIONS_CACHE_URL']) &&
+    !Boolean(process.env['ACTIONS_RUNTIME_URL'])
   ) {
-    cache = false;
+    caching = false;
     core.info(
       'Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_CACHE_URL` is defined',
     );
@@ -42,15 +42,16 @@ function getInputs(): Inputs {
 
   const packages = core
     .getInput('packages')
-    .split(/\s+/)
+    .split(/\s+/u)
     .filter((s) => s !== '')
     .sort();
 
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const prefix = [
     core.getInput('prefix'),
     process.env['TEXLIVE_INSTALL_PREFIX'],
     path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive'),
-  ].find(Boolean) as string;
+  ].find(Boolean)!;
 
   let version = core.getInput('version');
 
@@ -60,12 +61,17 @@ function getInputs(): Inputs {
     throw new Error("`version` must be specified by year or 'latest'");
   }
 
-  return { cache, packages, prefix, version: version as tl.Version };
+  return {
+    cache: caching,
+    packages,
+    prefix,
+    version: version as tl.Version,
+  };
 }
 
 function getCacheKeys(
   version: tl.Version,
-  packages: Array<string>,
+  packages: ReadonlyArray<string>,
 ): [string, Array<string>] {
   const digest = (s: string): string => {
     return crypto.createHash('sha256').update(s).digest('hex');
