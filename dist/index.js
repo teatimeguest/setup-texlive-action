@@ -59890,9 +59890,11 @@ async function setup() {
     else {
         await tl.install(inputs.version, inputs.prefix, os.platform());
     }
-    await core.group('Installing packages', async () => {
-        await tlmgr.install(inputs.packages);
-    });
+    if (inputs.packages.length !== 0) {
+        await core.group('Installing packages', async () => {
+            await tlmgr.install(inputs.packages);
+        });
+    }
     if (inputs.cache) {
         core.saveState('key', primaryKey);
     }

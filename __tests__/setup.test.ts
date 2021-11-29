@@ -107,7 +107,7 @@ describe('setup', () => {
       '/tmp/setup-texlive',
       'linux',
     );
-    expect(tl.Manager.prototype.install).toHaveBeenCalledWith([]);
+    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(core.saveState).toHaveBeenCalledWith('key', expect.anything());
     expect(core.saveState).toHaveBeenCalledWith('post', true);
     expect(core.setOutput).toHaveBeenCalledWith('cache-hit', false);
@@ -125,7 +125,7 @@ describe('setup', () => {
       'C:\\TEMP\\setup-texlive',
       'win32',
     );
-    expect(tl.Manager.prototype.install).toHaveBeenCalledWith([]);
+    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(core.saveState).toHaveBeenCalledWith('key', expect.anything());
     expect(core.saveState).toHaveBeenCalledWith('post', true);
     expect(core.setOutput).toHaveBeenCalledWith('cache-hit', false);
@@ -140,7 +140,7 @@ describe('setup', () => {
       '/tmp/setup-texlive',
       'darwin',
     );
-    expect(tl.Manager.prototype.install).toHaveBeenCalledWith([]);
+    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(core.saveState).toHaveBeenCalledWith('key', expect.anything());
     expect(core.saveState).toHaveBeenCalledWith('post', true);
     expect(core.setOutput).toHaveBeenCalledWith('cache-hit', false);
@@ -175,7 +175,7 @@ describe('setup', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(tl.install).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).toHaveBeenCalled();
+    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(core.saveState).toHaveBeenCalledWith('key', expect.anything());
     expect(core.saveState).toHaveBeenCalledWith('post', true);
     expect(core.setOutput).toHaveBeenCalledWith('cache-hit', true);
@@ -201,7 +201,7 @@ describe('setup', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(tl.install).toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).toHaveBeenCalled();
+    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(core.saveState).toHaveBeenCalledWith('key', expect.anything());
     expect(core.saveState).toHaveBeenCalledWith('post', true);
     expect(core.setOutput).toHaveBeenCalledWith('cache-hit', false);
