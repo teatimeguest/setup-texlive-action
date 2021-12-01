@@ -42,7 +42,15 @@ jest.spyOn(context, 'setPost').mockImplementation();
 jest.spyOn(context, 'setCacheHit').mockImplementation();
 jest.spyOn(tl, 'install').mockImplementation();
 jest.spyOn(tl.Manager.prototype, 'install').mockImplementation();
-jest.spyOn(tl.Manager.prototype, 'pathAdd').mockImplementation();
+jest
+  .spyOn(tl.Manager.prototype, 'path', 'get')
+  .mockReturnValue({ add: jest.fn() });
+jest
+  .spyOn(tl.Manager.prototype, 'pinning', 'get')
+  .mockReturnValue({ add: jest.fn() });
+jest
+  .spyOn(tl.Manager.prototype, 'repository', 'get')
+  .mockReturnValue({ add: jest.fn() });
 
 const setToLinux = (): void => {
   (os.platform as jest.Mock).mockReturnValue('linux');
@@ -53,6 +61,7 @@ const setToLinux = (): void => {
     cache: true,
     packages: [],
     prefix: '/tmp/setup-texlive',
+    tlcontrib: false,
     version: '2021',
   });
 };
@@ -71,6 +80,7 @@ const setToWindows = (): void => {
     cache: true,
     packages: [],
     prefix: 'C:\\TEMP\\setup-texlive',
+    tlcontrib: false,
     version: '2021',
   });
 };
@@ -89,6 +99,9 @@ describe('setup', () => {
       '/tmp/setup-texlive',
       'linux',
     );
+    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
@@ -104,6 +117,9 @@ describe('setup', () => {
       'C:\\TEMP\\setup-texlive',
       'win32',
     );
+    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
@@ -119,6 +135,9 @@ describe('setup', () => {
       '/tmp/setup-texlive',
       'darwin',
     );
+    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
@@ -131,6 +150,7 @@ describe('setup', () => {
       cache: false,
       packages: ['cleveref', 'hyperref', 'scheme-basic'],
       prefix: '/usr/local/texlive',
+      tlcontrib: false,
       version: '2008',
     });
     await setup.run();
@@ -140,6 +160,9 @@ describe('setup', () => {
       '/usr/local/texlive',
       'linux',
     );
+    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).toHaveBeenCalledWith([
       'cleveref',
       'hyperref',
@@ -150,15 +173,46 @@ describe('setup', () => {
     expect(context.setPost).toHaveBeenCalled();
   });
 
+  it('sets up TeX Live with TLContrib', async () => {
+    setToLinux();
+    (context.getInputs as jest.Mock).mockReset().mockReturnValueOnce({
+      cache: true,
+      packages: [],
+      prefix: '/usr/local/texlive',
+      tlcontrib: true,
+      version: '2021',
+    });
+    await setup.run();
+    expect(cache.restoreCache).toHaveBeenCalled();
+    expect(tl.install).toHaveBeenCalled();
+    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.pinning.add).toHaveBeenCalled();
+    expect(tl.Manager.prototype.repository.add).toHaveBeenCalled();
+    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
+    expect(context.setKey).toHaveBeenCalledWith(expect.anything());
+    expect(context.setCacheHit).not.toHaveBeenCalled();
+    expect(context.setPost).toHaveBeenCalled();
+  });
+
   it('sets up TeX Live with a system cache', async () => {
     setToLinux();
+    (context.getInputs as jest.Mock).mockReset().mockReturnValueOnce({
+      cache: true,
+      packages: ['scheme-basic'],
+      prefix: '/tmp/setup-texlive',
+      tlcontrib: false,
+      version: '2021',
+    });
     (cache.restoreCache as jest.Mock).mockImplementationOnce(
       async (paths, primaryKey, restoreKeys) => restoreKeys?.[0] ?? '',
     );
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(tl.install).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
+    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.install).toHaveBeenCalledWith(['scheme-basic']);
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
@@ -166,12 +220,22 @@ describe('setup', () => {
 
   it('sets up TeX Live with a full cache', async () => {
     setToLinux();
+    (context.getInputs as jest.Mock).mockReset().mockReturnValueOnce({
+      cache: true,
+      packages: ['scheme-basic'],
+      prefix: '/tmp/setup-texlive',
+      tlcontrib: false,
+      version: '2021',
+    });
     (cache.restoreCache as jest.Mock).mockImplementationOnce(
       async (paths, primaryKey) => primaryKey,
     );
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(tl.install).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
+    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).not.toHaveBeenCalled();
     expect(context.setCacheHit).toHaveBeenCalled();
@@ -186,6 +250,9 @@ describe('setup', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(tl.install).toHaveBeenCalled();
+    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();

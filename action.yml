@@ -19,6 +19,12 @@ inputs:
       The default is `C:\TEMP\setup-texlive` on Windows,
       `/tmp/setup-texlive` on Linux and macOS.
     required: false
+  tlcontrib:
+    description: >-
+      Set up TLContrib as an additional TeX package repository.
+      This input will be ignored if an older version is specified for `version`.
+    default: false
+    required: false
   version:
     description: >-
       TeX Live version to install.

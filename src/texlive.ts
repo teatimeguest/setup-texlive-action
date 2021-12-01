@@ -25,6 +25,10 @@ export function isVersion(version: string): version is Version {
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1]!;
 
+export const CONTRIB = new URL(
+  'https://mirror.ctan.org/systems/texlive/tlcontrib/',
+);
+
 export async function install(
   version: Version,
   prefix: string,
@@ -58,12 +62,18 @@ export class Manager {
     private readonly prefix: string,
   ) {}
 
-  conf(): Texmf {
-    const texdir = path.join(this.prefix, this.version);
-    const local = path.join(this.prefix, 'texmf-local');
-    const sysconfig = path.join(texdir, 'texmf-config');
-    const sysvar = path.join(texdir, 'texmf-var');
-    return { texdir, local, sysconfig, sysvar };
+  get conf(): Readonly<{
+    texmf: () => Texmf;
+  }> {
+    return {
+      texmf: () => {
+        const texdir = path.join(this.prefix, this.version);
+        const local = path.join(this.prefix, 'texmf-local');
+        const sysconfig = path.join(texdir, 'texmf-config');
+        const sysvar = path.join(texdir, 'texmf-var');
+        return { texdir, local, sysconfig, sysvar };
+      },
+    };
   }
 
   async install(packages: ReadonlyArray<string>): Promise<void> {
@@ -72,19 +82,73 @@ export class Manager {
     }
   }
 
-  /**
-   * @todo `install-tl -print-platform` and `tlmgr print-platform` may be useful
-   */
-  async pathAdd(): Promise<void> {
-    const matched = await expand(
-      path.join(this.prefix, this.version, 'bin', '*'),
-    );
-    if (matched.length !== 1) {
-      core.debug(`Matched: ${matched}`);
-      throw new Error('Unable to locate the bin directory');
+  get path(): Readonly<{
+    add: () => Promise<void>;
+  }> {
+    return {
+      /**
+       * @todo `install-tl -print-platform` and
+       *   `tlmgr print-platform` may be useful.
+       */
+      add: async () => {
+        const matched = await expand(
+          path.join(this.prefix, this.version, 'bin', '*'),
+        );
+        if (matched.length !== 1) {
+          core.debug(`Matched: ${matched}`);
+          throw new Error('Unable to locate the bin directory');
+        }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        core.addPath(matched[0]!);
+      },
+    };
+  }
+
+  get pinning(): Readonly<{
+    add: (
+      repo: string,
+      pattern: string,
+      ...rest: ReadonlyArray<string>
+    ) => Promise<void>;
+  }> {
+    if (Number(this.version) < 2013) {
+      throw new Error(
+        `\`pinning\` action is not implemented in TeX Live ${this.version}`,
+      );
     }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    core.addPath(matched[0]!);
+    return {
+      add: async (repo, pattern, ...rest) => {
+        await exec.exec('tlmgr', ['pinning', 'add', repo, pattern, ...rest]);
+      },
+    };
+  }
+
+  get repository(): Readonly<{
+    add: (repo: string, tag?: string) => Promise<void>;
+  }> {
+    if (Number(this.version) < 2012) {
+      throw new Error(
+        `\`repository\` action is not implemented in TeX Live ${this.version}`,
+      );
+    }
+    return {
+      add: async (repo, tag) => {
+        const { exitCode, stderr } = await exec.getExecOutput(
+          'tlmgr',
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          ['repository', 'add', repo, ...(Boolean(tag) ? [tag!] : [])],
+          { ignoreReturnCode: true },
+        );
+        if (
+          exitCode !== 0 &&
+          !stderr.includes('repository or its tag already defined')
+        ) {
+          throw new Error(
+            `\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`,
+          );
+        }
+      },
+    };
   }
 }
 
@@ -136,8 +200,8 @@ class InstallTL {
       await exec.exec(installtl, options, { env });
       const tlmgr = new Manager(this.version, this.prefix);
       core.info('Applying patches');
-      await patch(this.version, this.platform, tlmgr.conf().texdir);
-      await tlmgr.pathAdd();
+      await patch(this.version, this.platform, tlmgr.conf.texmf().texdir);
+      await tlmgr.path.add();
     });
   }
 
@@ -198,7 +262,8 @@ class InstallTL {
   }
 
   async #profile(): Promise<string> {
-    const texmf = new Manager(this.version, this.prefix).conf();
+    const tlmgr = new Manager(this.version, this.prefix);
+    const texmf = tlmgr.conf.texmf();
     const adjustrepo = this.version === LATEST_VERSION ? 1 : 0;
     /**
      * `scheme-infraonly` was first introduced in TeX Live 2016.

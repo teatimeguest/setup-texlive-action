@@ -14,6 +14,7 @@ let ctx: {
     cache: boolean;
     packages: string;
     prefix: string;
+    tlcontrib: boolean;
     version: string;
   };
   state: {
@@ -34,8 +35,9 @@ jest.mock('path', () => {
   };
 });
 jest.spyOn(core, 'getBooleanInput').mockImplementation((name) => {
-  if (name === 'cache') {
-    return ctx.inputs.cache;
+  const value = (ctx.inputs as Record<string, string | boolean>)[name];
+  if (typeof value === 'boolean') {
+    return value;
   }
   throw new Error(`Unexpected argument: ${name}`);
 });
@@ -54,6 +56,7 @@ jest.spyOn(core, 'getState').mockImplementation((name) => {
   throw new Error(`Unexpected argument: ${name}`);
 });
 jest.spyOn(core, 'info').mockImplementation();
+jest.spyOn(core, 'warning').mockImplementation();
 jest.spyOn(core, 'saveState').mockImplementation();
 jest.spyOn(core, 'setOutput').mockImplementation();
 jest.spyOn(core, 'warning').mockImplementation();
@@ -84,6 +87,7 @@ beforeEach(() => {
       cache: true,
       packages: '',
       prefix: '',
+      tlcontrib: false,
       version: 'latest',
     },
     state: {
@@ -101,6 +105,7 @@ describe('getInputs', () => {
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual([]);
     expect(inputs.prefix).toBe('/tmp/setup-texlive');
+    expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2021');
   });
 
@@ -110,6 +115,7 @@ describe('getInputs', () => {
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual([]);
     expect(inputs.prefix).toBe('C:\\TEMP\\setup-texlive');
+    expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2021');
   });
 
@@ -126,6 +132,7 @@ describe('getInputs', () => {
       'scheme-basic',
     ]);
     expect(inputs.prefix).toBe('/usr/local/texlive');
+    expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2008');
   });
 
@@ -133,6 +140,7 @@ describe('getInputs', () => {
     ctx.inputs.cache = false;
     ctx.inputs.packages = '  scheme-basic\ncleveref   hyperref ';
     ctx.inputs.prefix = 'C:\\texlive';
+    ctx.inputs.tlcontrib = true;
     ctx.inputs.version = '2021';
     const inputs = context.getInputs();
     expect(inputs.cache).toBe(false);
@@ -142,6 +150,7 @@ describe('getInputs', () => {
       'scheme-basic',
     ]);
     expect(inputs.prefix).toBe('C:\\texlive');
+    expect(inputs.tlcontrib).toBe(true);
     expect(inputs.version).toBe('2021');
   });
 
@@ -157,6 +166,15 @@ describe('getInputs', () => {
   it('uses `TEXLIVE_INSTALL_PREFIX` if set', () => {
     process.env['TEXLIVE_INSTALL_PREFIX'] = '/usr/local/texlive';
     expect(context.getInputs().prefix).toBe('/usr/local/texlive');
+  });
+
+  it('ignores `tlcontrib` if an older version of TeX Live is specified', () => {
+    ctx.inputs.tlcontrib = true;
+    ctx.inputs.version = '2020';
+    expect(context.getInputs().tlcontrib).toBe(false);
+    expect(core.warning).toHaveBeenCalledWith(
+      '`tlcontrib` is ignored since an older version of TeX Live is specified.',
+    );
   });
 
   it('throws an exception if the version input is invalid', () => {

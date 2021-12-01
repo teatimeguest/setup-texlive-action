@@ -87,6 +87,7 @@ All inputs are optional.
 |`cache`|Bool|Enable caching for `TEXDIR`. The default is `true`.|
 |`packages`|String|Whitespace-separated list of TeX packages to be installed. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. The default is `C:\TEMP\setup-texlive` on Windows, `/tmp/setup-texlive` on Linux and macOS.|
+|`tlcontrib`|Bool|Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored if an older version is specified for `version`. The default is `false`.|
 |`version`|String|TeX Live version to install. Supported values are `2008` to `2021`, and `latest`.|
 
 ## Outputs
@@ -108,3 +109,4 @@ All inputs are optional.
 [marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action
 [texlive]: https://tug.org/texlive/
+[tlcontrib]: https://contrib.texlive.info

@@ -59811,6 +59811,7 @@ function getInputs() {
         cache: core.getBooleanInput('cache'),
         packages: core.getInput('packages').split(/\s+/u).filter(Boolean).sort(),
         prefix: core.getInput('prefix'),
+        tlcontrib: core.getBooleanInput('tlcontrib'),
         version: tl.LATEST_VERSION,
     };
     /**
@@ -59832,6 +59833,10 @@ function getInputs() {
             throw new Error("`version` must be specified by year or 'latest'");
         }
         inputs.version = version;
+    }
+    if (inputs.tlcontrib && inputs.version !== tl.LATEST_VERSION) {
+        inputs.tlcontrib = false;
+        core.warning('`tlcontrib` is ignored since an older version of TeX Live is specified.');
     }
     return inputs;
 }
@@ -59914,7 +59919,7 @@ function getCacheKeys(version, packages) {
 async function setup() {
     const inputs = context.getInputs();
     const tlmgr = new tl.Manager(inputs.version, inputs.prefix);
-    const texdir = tlmgr.conf().texdir;
+    const texdir = tlmgr.conf.texmf().texdir;
     const [primaryKey, restoreKeys] = getCacheKeys(inputs.version, inputs.packages);
     let cacheKey = undefined;
     if (inputs.cache) {
@@ -59931,13 +59936,19 @@ async function setup() {
     if (Boolean(cacheKey)) {
         core.info('Cache restored');
         context.setCacheHit();
-        await tlmgr.pathAdd();
+        await tlmgr.path.add();
         if (cacheKey === primaryKey) {
             return;
         }
     }
     else {
         await tl.install(inputs.version, inputs.prefix, os.platform());
+    }
+    if (inputs.tlcontrib) {
+        await core.group('Setting up TLContrib', async () => {
+            await tlmgr.repository.add(tl.CONTRIB.href, 'tlcontrib');
+            await tlmgr.pinning.add('tlcontrib', '*');
+        });
     }
     if (inputs.packages.length !== 0) {
         await core.group('Installing packages', async () => {
@@ -59957,7 +59968,7 @@ async function saveCache() {
         return;
     }
     try {
-        await cache.saveCache([tlmgr.conf().texdir], primaryKey);
+        await cache.saveCache([tlmgr.conf.texmf().texdir], primaryKey);
         core.info(`Cache saved`);
     }
     catch (error) {
@@ -60002,7 +60013,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _InstallTL_instances, _InstallTL_download, _InstallTL_profile;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Manager = exports.install = exports.LATEST_VERSION = exports.isVersion = void 0;
+exports.Manager = exports.install = exports.CONTRIB = exports.LATEST_VERSION = exports.isVersion = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
@@ -60024,6 +60035,7 @@ function isVersion(version) {
 exports.isVersion = isVersion;
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 exports.LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
+exports.CONTRIB = new url_1.URL('https://mirror.ctan.org/systems/texlive/tlcontrib/');
 async function install(version, prefix, platform = os.platform()) {
     /**
      * - There is no `install-tl` for versions prior to 2005, and
@@ -60043,29 +60055,64 @@ class Manager {
         this.version = version;
         this.prefix = prefix;
     }
-    conf() {
-        const texdir = path.join(this.prefix, this.version);
-        const local = path.join(this.prefix, 'texmf-local');
-        const sysconfig = path.join(texdir, 'texmf-config');
-        const sysvar = path.join(texdir, 'texmf-var');
-        return { texdir, local, sysconfig, sysvar };
+    get conf() {
+        return {
+            texmf: () => {
+                const texdir = path.join(this.prefix, this.version);
+                const local = path.join(this.prefix, 'texmf-local');
+                const sysconfig = path.join(texdir, 'texmf-config');
+                const sysvar = path.join(texdir, 'texmf-var');
+                return { texdir, local, sysconfig, sysvar };
+            },
+        };
     }
     async install(packages) {
         if (packages.length !== 0) {
             await exec.exec('tlmgr', ['install', ...packages]);
         }
     }
-    /**
-     * @todo `install-tl -print-platform` and `tlmgr print-platform` may be useful
-     */
-    async pathAdd() {
-        const matched = await expand(path.join(this.prefix, this.version, 'bin', '*'));
-        if (matched.length !== 1) {
-            core.debug(`Matched: ${matched}`);
-            throw new Error('Unable to locate the bin directory');
+    get path() {
+        return {
+            /**
+             * @todo `install-tl -print-platform` and
+             *   `tlmgr print-platform` may be useful.
+             */
+            add: async () => {
+                const matched = await expand(path.join(this.prefix, this.version, 'bin', '*'));
+                if (matched.length !== 1) {
+                    core.debug(`Matched: ${matched}`);
+                    throw new Error('Unable to locate the bin directory');
+                }
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                core.addPath(matched[0]);
+            },
+        };
+    }
+    get pinning() {
+        if (Number(this.version) < 2013) {
+            throw new Error(`\`pinning\` action is not implemented in TeX Live ${this.version}`);
         }
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        core.addPath(matched[0]);
+        return {
+            add: async (repo, pattern, ...rest) => {
+                await exec.exec('tlmgr', ['pinning', 'add', repo, pattern, ...rest]);
+            },
+        };
+    }
+    get repository() {
+        if (Number(this.version) < 2012) {
+            throw new Error(`\`repository\` action is not implemented in TeX Live ${this.version}`);
+        }
+        return {
+            add: async (repo, tag) => {
+                const { exitCode, stderr } = await exec.getExecOutput('tlmgr', 
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                ['repository', 'add', repo, ...(Boolean(tag) ? [tag] : [])], { ignoreReturnCode: true });
+                if (exitCode !== 0 &&
+                    !stderr.includes('repository or its tag already defined')) {
+                    throw new Error(`\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`);
+                }
+            },
+        };
     }
 }
 exports.Manager = Manager;
@@ -60106,8 +60153,8 @@ class InstallTL {
             await exec.exec(installtl, options, { env });
             const tlmgr = new Manager(this.version, this.prefix);
             core.info('Applying patches');
-            await patch(this.version, this.platform, tlmgr.conf().texdir);
-            await tlmgr.pathAdd();
+            await patch(this.version, this.platform, tlmgr.conf.texmf().texdir);
+            await tlmgr.path.add();
         });
     }
     static executable(version, platform) {
@@ -60164,7 +60211,8 @@ _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _Inst
     });
 }, _InstallTL_profile = async function _InstallTL_profile() {
     var _a;
-    const texmf = new Manager(this.version, this.prefix).conf();
+    const tlmgr = new Manager(this.version, this.prefix);
+    const texmf = tlmgr.conf.texmf();
     const adjustrepo = this.version === exports.LATEST_VERSION ? 1 : 0;
     /**
      * `scheme-infraonly` was first introduced in TeX Live 2016.

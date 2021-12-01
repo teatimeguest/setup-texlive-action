@@ -9,6 +9,7 @@ export interface Inputs {
   readonly cache: boolean;
   readonly packages: ReadonlyArray<string>;
   readonly prefix: string;
+  readonly tlcontrib: boolean;
   readonly version: tl.Version;
 }
 
@@ -17,6 +18,7 @@ export function getInputs(): Inputs {
     cache: core.getBooleanInput('cache'),
     packages: core.getInput('packages').split(/\s+/u).filter(Boolean).sort(),
     prefix: core.getInput('prefix'),
+    tlcontrib: core.getBooleanInput('tlcontrib'),
     version: tl.LATEST_VERSION,
   };
 
@@ -47,6 +49,13 @@ export function getInputs(): Inputs {
       throw new Error("`version` must be specified by year or 'latest'");
     }
     inputs.version = version;
+  }
+
+  if (inputs.tlcontrib && inputs.version !== tl.LATEST_VERSION) {
+    inputs.tlcontrib = false;
+    core.warning(
+      '`tlcontrib` is ignored since an older version of TeX Live is specified.',
+    );
   }
 
   return inputs;
