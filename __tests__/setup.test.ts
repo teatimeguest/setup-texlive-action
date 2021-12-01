@@ -2,12 +2,15 @@ import * as os from 'os';
 import * as path from 'path';
 
 import * as cache from '@actions/cache';
+import * as core from '@actions/core';
 
 import * as context from '#/context';
 import * as setup from '#/setup';
 import * as tl from '#/texlive';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
+
+process.env['GITHUB_PATH'] = undefined;
 
 jest.mock('os', () => ({
   arch: jest.requireActual('os').arch,
@@ -23,6 +26,14 @@ jest.mock('path', () => {
 });
 jest.spyOn(cache, 'restoreCache').mockResolvedValue('');
 jest.spyOn(cache, 'saveCache').mockImplementation();
+jest.spyOn(core, 'debug').mockImplementation();
+jest
+  .spyOn(core, 'group')
+  .mockImplementation(
+    async <T>(name: string, fn: () => Promise<T>): Promise<T> => await fn(),
+  );
+jest.spyOn(core, 'info').mockImplementation();
+jest.spyOn(core, 'warning').mockImplementation();
 jest.spyOn(context, 'getInputs').mockImplementation();
 jest.spyOn(context, 'getKey').mockImplementation();
 jest.spyOn(context, 'setKey').mockImplementation();
@@ -64,20 +75,6 @@ const setToWindows = (): void => {
   });
 };
 
-beforeEach(() => {
-  console.log('::stop-commands::stoptoken');
-
-  process.env['GITHUB_PATH'] = '';
-});
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
-afterAll(async () => {
-  console.log('::stoptoken::');
-}, 100000);
-
 describe('setup', () => {
   beforeEach(() => {
     (context.getPost as jest.Mock).mockReturnValueOnce(false);
@@ -94,8 +91,8 @@ describe('setup', () => {
     );
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
-    expect(context.setPost).toHaveBeenCalled();
     expect(context.setCacheHit).not.toHaveBeenCalled();
+    expect(context.setPost).toHaveBeenCalled();
   });
 
   it('sets up TeX Live on Windows', async () => {
@@ -109,8 +106,8 @@ describe('setup', () => {
     );
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
-    expect(context.setPost).toHaveBeenCalled();
     expect(context.setCacheHit).not.toHaveBeenCalled();
+    expect(context.setPost).toHaveBeenCalled();
   });
 
   it('sets up TeX Live on macOS', async () => {
@@ -124,8 +121,8 @@ describe('setup', () => {
     );
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
-    expect(context.setPost).toHaveBeenCalled();
     expect(context.setCacheHit).not.toHaveBeenCalled();
+    expect(context.setPost).toHaveBeenCalled();
   });
 
   it('sets up TeX Live with custom settings', async () => {
@@ -149,8 +146,8 @@ describe('setup', () => {
       'scheme-basic',
     ]);
     expect(context.setKey).not.toHaveBeenCalledWith(expect.anything());
-    expect(context.setPost).toHaveBeenCalled();
     expect(context.setCacheHit).not.toHaveBeenCalled();
+    expect(context.setPost).toHaveBeenCalled();
   });
 
   it('sets up TeX Live with a system cache', async () => {
@@ -163,8 +160,8 @@ describe('setup', () => {
     expect(tl.install).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
-    expect(context.setPost).toHaveBeenCalled();
     expect(context.setCacheHit).toHaveBeenCalled();
+    expect(context.setPost).toHaveBeenCalled();
   });
 
   it('sets up TeX Live with a full cache', async () => {
@@ -177,11 +174,11 @@ describe('setup', () => {
     expect(tl.install).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).not.toHaveBeenCalled();
-    expect(context.setPost).toHaveBeenCalled();
     expect(context.setCacheHit).toHaveBeenCalled();
+    expect(context.setPost).toHaveBeenCalled();
   });
 
-  it('continues setup even if `cache.restoreCache` throws an exception', async () => {
+  it('continues setup even if `cache.restoreCache` fails', async () => {
     setToLinux();
     (cache.restoreCache as jest.Mock).mockImplementationOnce(async () => {
       throw new Error('oops');
@@ -191,8 +188,8 @@ describe('setup', () => {
     expect(tl.install).toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
-    expect(context.setPost).toHaveBeenCalled();
     expect(context.setCacheHit).not.toHaveBeenCalled();
+    expect(context.setPost).toHaveBeenCalled();
   });
 });
 

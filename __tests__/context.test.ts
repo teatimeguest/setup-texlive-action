@@ -95,10 +95,6 @@ beforeEach(() => {
   setToLinux();
 });
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('getInputs', () => {
   it('returns default values on Linux', () => {
     const inputs = context.getInputs();

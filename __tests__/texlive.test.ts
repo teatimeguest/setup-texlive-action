@@ -11,9 +11,12 @@ import * as tl from '#/texlive';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
+process.env['GITHUB_PATH'] = undefined;
+
 jest.mock('os', () => ({
   tmpdir: jest.fn(),
 }));
+(os.tmpdir as jest.Mock).mockReturnValue(random());
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
@@ -27,6 +30,13 @@ jest.spyOn(fs, 'mkdtemp').mockResolvedValue(random());
 jest.spyOn(fs, 'readFile').mockResolvedValue('');
 jest.spyOn(fs, 'writeFile').mockImplementation();
 jest.spyOn(core, 'addPath').mockImplementation();
+jest.spyOn(core, 'debug').mockImplementation();
+jest
+  .spyOn(core, 'group')
+  .mockImplementation(
+    async <T>(name: string, fn: () => Promise<T>): Promise<T> => await fn(),
+  );
+jest.spyOn(core, 'info').mockImplementation();
 jest.spyOn(exec, 'exec').mockImplementation();
 jest.spyOn(glob, 'create');
 jest.spyOn(tool, 'cacheDir').mockResolvedValue('');
@@ -36,9 +46,6 @@ jest.spyOn(tool, 'extractZip').mockResolvedValue(random());
 jest.spyOn(tool, 'find').mockReturnValue('');
 
 beforeEach(() => {
-  console.log('::stop-commands::stoptoken');
-  process.env['GITHUB_PATH'] = '';
-
   (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
     return path.posix.join(...paths);
   });
@@ -46,14 +53,6 @@ beforeEach(() => {
     glob: async (): Promise<Array<string>> => [],
   } as glob.Globber);
 });
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
-afterAll(async () => {
-  console.log('::stoptoken::');
-}, 100000);
 
 test.each([
   ['1995', false],
@@ -85,7 +84,7 @@ describe('Manager', () => {
 
   describe('pathAdd', () => {
     it('adds the bin directory to the PATH', async () => {
-      (glob.create as jest.Mock).mockImplementation(async (pattern) => {
+      (glob.create as jest.Mock).mockImplementationOnce(async (pattern) => {
         return {
           glob: async () => [pattern.replace('*', 'x86_64-linux')],
         } as glob.Globber;
@@ -101,7 +100,7 @@ describe('Manager', () => {
       [['x86_64-linux', 'universal-darwin']],
       [['x86_64-linux', 'universal-darwin', 'Windows']],
     ])('fails as the bin directory cannot be located', async (matched) => {
-      (glob.create as jest.Mock).mockImplementation(async (pattern) => {
+      (glob.create as jest.Mock).mockImplementationOnce(async (pattern) => {
         return {
           glob: async () => matched.map((x) => pattern.replace('*', x)),
         } as glob.Globber;
