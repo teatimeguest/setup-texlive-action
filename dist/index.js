@@ -59775,6 +59775,92 @@ module.exports.implForWrapper = function (wrapper) {
 
 /***/ }),
 
+/***/ 8954:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.getInputs = void 0;
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
+const core = __importStar(__nccwpck_require__(2186));
+const tl = __importStar(__nccwpck_require__(8313));
+function getInputs() {
+    var _a;
+    const inputs = {
+        cache: core.getBooleanInput('cache'),
+        packages: core.getInput('packages').split(/\s+/u).filter(Boolean).sort(),
+        prefix: core.getInput('prefix'),
+        version: tl.LATEST_VERSION,
+    };
+    /**
+     * @see @link {https://github.com/actions/toolkit/blob/main/packages/cache/}
+     */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const URLs = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'];
+    if (inputs.cache && URLs.every((url) => !Boolean(process.env[url]))) {
+        inputs.cache = false;
+        core.warning(`Caching is disabled because neither \`${URLs[0]}\` nor \`${URLs[1]}\` is defined`);
+    }
+    if (inputs.prefix === '') {
+        inputs.prefix =
+            (_a = process.env['TEXLIVE_INSTALL_PREFIX']) !== null && _a !== void 0 ? _a : path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive');
+    }
+    const version = core.getInput('version');
+    if (version !== 'latest') {
+        if (!tl.isVersion(version)) {
+            throw new Error("`version` must be specified by year or 'latest'");
+        }
+        inputs.version = version;
+    }
+    return inputs;
+}
+exports.getInputs = getInputs;
+function getKey() {
+    const key = core.getState('key');
+    return key === '' ? undefined : key;
+}
+exports.getKey = getKey;
+function setKey(key) {
+    core.saveState('key', key);
+}
+exports.setKey = setKey;
+function getPost() {
+    return core.getState('post') === 'true';
+}
+exports.getPost = getPost;
+function setPost(post = true) {
+    core.saveState('post', post);
+}
+exports.setPost = setPost;
+function setCacheHit(cacheHit = true) {
+    core.setOutput('cache-hit', cacheHit);
+}
+exports.setCacheHit = setCacheHit;
+
+
+/***/ }),
+
 /***/ 8429:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -59803,56 +59889,20 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const crypto = __importStar(__nccwpck_require__(6113));
 const os = __importStar(__nccwpck_require__(2037));
-const path = __importStar(__nccwpck_require__(1017));
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
+const context = __importStar(__nccwpck_require__(8954));
 const tl = __importStar(__nccwpck_require__(8313));
 async function run() {
-    if (core.getState('post') === '') {
-        await setup();
-        core.saveState('post', true);
+    if (context.getPost()) {
+        await saveCache();
     }
     else {
-        await saveCache();
+        await setup();
+        context.setPost();
     }
 }
 exports.run = run;
-function getInputs() {
-    let caching = core.getBooleanInput('cache');
-    if (caching &&
-        /**
-         * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/src/internal/cacheHttpClient.ts}
-         */
-        !Boolean(process.env['ACTIONS_CACHE_URL']) &&
-        !Boolean(process.env['ACTIONS_RUNTIME_URL'])) {
-        caching = false;
-        core.info('Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_CACHE_URL` is defined');
-    }
-    const packages = core
-        .getInput('packages')
-        .split(/\s+/u)
-        .filter((s) => s !== '')
-        .sort();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const prefix = [
-        core.getInput('prefix'),
-        process.env['TEXLIVE_INSTALL_PREFIX'],
-        path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive'),
-    ].find(Boolean);
-    let version = core.getInput('version');
-    if (version === 'latest') {
-        version = tl.LATEST_VERSION;
-    }
-    else if (!tl.isVersion(version)) {
-        throw new Error("`version` must be specified by year or 'latest'");
-    }
-    return {
-        cache: caching,
-        packages,
-        prefix,
-        version: version,
-    };
-}
 function getCacheKeys(version, packages) {
     const digest = (s) => {
         return crypto.createHash('sha256').update(s).digest('hex');
@@ -59862,7 +59912,7 @@ function getCacheKeys(version, packages) {
     return [primaryKey, [baseKey]];
 }
 async function setup() {
-    const inputs = getInputs();
+    const inputs = context.getInputs();
     const tlmgr = new tl.Manager(inputs.version, inputs.prefix);
     const texdir = tlmgr.conf().texdir;
     const [primaryKey, restoreKeys] = getCacheKeys(inputs.version, inputs.packages);
@@ -59878,10 +59928,9 @@ async function setup() {
             }
         }
     }
-    const cacheHit = Boolean(cacheKey);
-    core.setOutput('cache-hit', cacheHit);
-    if (cacheHit) {
+    if (Boolean(cacheKey)) {
         core.info('Cache restored');
+        context.setCacheHit();
         await tlmgr.pathAdd();
         if (cacheKey === primaryKey) {
             return;
@@ -59896,14 +59945,14 @@ async function setup() {
         });
     }
     if (inputs.cache) {
-        core.saveState('key', primaryKey);
+        context.setKey(primaryKey);
     }
 }
 async function saveCache() {
-    const { version, prefix } = getInputs();
+    const { version, prefix } = context.getInputs();
     const tlmgr = new tl.Manager(version, prefix);
-    const primaryKey = core.getState('key');
-    if (primaryKey === '') {
+    const primaryKey = context.getKey();
+    if (primaryKey === undefined) {
         core.info('Nothing to do');
         return;
     }

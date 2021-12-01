@@ -26,6 +26,7 @@
     "target": "es2019"
   },
   "files": [
+    "./src/context.ts",
     "./src/index.ts",
     "./src/setup.ts",
     "./src/texlive.ts"

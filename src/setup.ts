@@ -1,72 +1,19 @@
 import * as crypto from 'crypto';
 import * as os from 'os';
-import * as path from 'path';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
+import * as context from '#/context';
 import * as tl from '#/texlive';
 
 export async function run(): Promise<void> {
-  if (core.getState('post') === '') {
-    await setup();
-    core.saveState('post', true);
-  } else {
+  if (context.getPost()) {
     await saveCache();
+  } else {
+    await setup();
+    context.setPost();
   }
-}
-
-interface Inputs {
-  readonly cache: boolean;
-  readonly packages: Array<string>;
-  readonly prefix: string;
-  readonly version: tl.Version;
-}
-
-function getInputs(): Inputs {
-  let caching = core.getBooleanInput('cache');
-
-  if (
-    caching &&
-    /**
-     * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/src/internal/cacheHttpClient.ts}
-     */
-    !Boolean(process.env['ACTIONS_CACHE_URL']) &&
-    !Boolean(process.env['ACTIONS_RUNTIME_URL'])
-  ) {
-    caching = false;
-    core.info(
-      'Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_CACHE_URL` is defined',
-    );
-  }
-
-  const packages = core
-    .getInput('packages')
-    .split(/\s+/u)
-    .filter((s) => s !== '')
-    .sort();
-
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const prefix = [
-    core.getInput('prefix'),
-    process.env['TEXLIVE_INSTALL_PREFIX'],
-    path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive'),
-  ].find(Boolean)!;
-
-  let version = core.getInput('version');
-
-  if (version === 'latest') {
-    version = tl.LATEST_VERSION;
-  } else if (!tl.isVersion(version)) {
-    throw new Error("`version` must be specified by year or 'latest'");
-  }
-
-  return {
-    cache: caching,
-    packages,
-    prefix,
-    version: version as tl.Version,
-  };
 }
 
 function getCacheKeys(
@@ -82,7 +29,7 @@ function getCacheKeys(
 }
 
 async function setup(): Promise<void> {
-  const inputs = getInputs();
+  const inputs = context.getInputs();
   const tlmgr = new tl.Manager(inputs.version, inputs.prefix);
   const texdir = tlmgr.conf().texdir;
   const [primaryKey, restoreKeys] = getCacheKeys(
@@ -103,11 +50,9 @@ async function setup(): Promise<void> {
     }
   }
 
-  const cacheHit = Boolean(cacheKey);
-  core.setOutput('cache-hit', cacheHit);
-
-  if (cacheHit) {
+  if (Boolean(cacheKey)) {
     core.info('Cache restored');
+    context.setCacheHit();
     await tlmgr.pathAdd();
     if (cacheKey === primaryKey) {
       return;
@@ -123,16 +68,16 @@ async function setup(): Promise<void> {
   }
 
   if (inputs.cache) {
-    core.saveState('key', primaryKey);
+    context.setKey(primaryKey);
   }
 }
 
 async function saveCache(): Promise<void> {
-  const { version, prefix } = getInputs();
+  const { version, prefix } = context.getInputs();
   const tlmgr = new tl.Manager(version, prefix);
-  const primaryKey = core.getState('key');
+  const primaryKey = context.getKey();
 
-  if (primaryKey === '') {
+  if (primaryKey === undefined) {
     core.info('Nothing to do');
     return;
   }
