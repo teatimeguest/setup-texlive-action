@@ -281,4 +281,14 @@ describe('saveCache', () => {
     await setup.run();
     expect(cache.saveCache).not.toHaveBeenCalled();
   });
+
+  it('does not fail even if `cache.saveCache` fails', async () => {
+    setToLinux();
+    (context.getKey as jest.Mock).mockReturnValueOnce(random());
+    (cache.saveCache as jest.Mock).mockImplementationOnce(async () => {
+      throw new Error('oops');
+    });
+    await expect(setup.run()).resolves.not.toThrow();
+    expect(core.warning).toHaveBeenCalled();
+  });
 });
