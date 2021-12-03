@@ -305,7 +305,7 @@ class InstallTL {
      * - In version 2017, the option names have been changed, and
      *   new prefixes `instopt-` and `tlpdbopt-` have been introduced.
      *   Also, `option_path` and `option_symlinks` have been merged and
-     *   `tlpdbopt_adjustpath` has been introduced.
+     *   `instopt_adjustpath` has been introduced.
      *   The old option names are still valid in later versions.
      */
     const profile = [
@@ -320,9 +320,9 @@ class InstallTL {
       'option_doc 0',                       // tlpdbopt_install_docfiles
       'option_file_assocs 0',               // tlpdbopt_file_assocs
       'option_menu_integration 0',
-      'option_path 0',                      // tlpdbopt_adjustpath
+      'option_path 0',                      // instopt_adjustpath
       'option_src 0',                       // tlpdbopt_install_srcfiles
-      'option_symlinks 0',                  // tlpdbopt_adjustpath
+      'option_symlinks 0',                  // instopt_adjustpath
       'option_w32_multi_user 0',            // tlpdbopt_w32_multi_user
     ].join('\n');
 

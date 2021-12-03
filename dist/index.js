@@ -60258,7 +60258,7 @@ _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _Inst
      * - In version 2017, the option names have been changed, and
      *   new prefixes `instopt-` and `tlpdbopt-` have been introduced.
      *   Also, `option_path` and `option_symlinks` have been merged and
-     *   `tlpdbopt_adjustpath` has been introduced.
+     *   `instopt_adjustpath` has been introduced.
      *   The old option names are still valid in later versions.
      */
     const profile = [
