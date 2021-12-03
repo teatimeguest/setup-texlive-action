@@ -25,7 +25,6 @@ jest.mock('path', () => {
     win32: actual.win32,
   };
 });
-(os.tmpdir as jest.Mock).mockReturnValue(random());
 jest.spyOn(fs, 'mkdtemp').mockResolvedValue(random());
 jest.spyOn(fs, 'readFile').mockResolvedValue('');
 jest.spyOn(fs, 'writeFile').mockImplementation();
@@ -41,7 +40,11 @@ jest.spyOn(exec, 'exec').mockImplementation();
 jest
   .spyOn(exec, 'getExecOutput')
   .mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
-jest.spyOn(glob, 'create');
+jest.spyOn(glob, 'create').mockImplementation(async (pattern) => {
+  return {
+    glob: async () => [pattern.replace(/\*/, random())],
+  } as glob.Globber;
+});
 jest.spyOn(tool, 'cacheDir').mockResolvedValue('');
 jest.spyOn(tool, 'downloadTool').mockResolvedValue(random());
 jest.spyOn(tool, 'extractTar').mockResolvedValue(random());
@@ -52,9 +55,6 @@ beforeEach(() => {
   (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
     return path.posix.join(...paths);
   });
-  (glob.create as jest.Mock).mockResolvedValue({
-    glob: async (): Promise<Array<string>> => [],
-  } as glob.Globber);
 });
 
 test.each([
@@ -213,14 +213,6 @@ describe('Manager', () => {
 });
 
 describe('install', () => {
-  beforeEach(() => {
-    (glob.create as jest.Mock).mockImplementation(async (pattern) => {
-      return {
-        glob: async () => [pattern.replace('*', random())],
-      } as glob.Globber;
-    });
-  });
-
   it('installs TeX Live 2008 on Linux', async () => {
     await tl.install('2008', '/usr/local/texlive', 'linux');
     expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2008');
@@ -452,7 +444,7 @@ describe('install', () => {
   });
 
   it('fails as the installer cannot be located', async () => {
-    (glob.create as jest.Mock).mockReturnValue({
+    (glob.create as jest.Mock).mockReturnValueOnce({
       glob: async () => [] as Array<string>,
     } as glob.Globber);
     await expect(tl.install('2021', 'C:\\texlive', 'win32')).rejects.toThrow(
