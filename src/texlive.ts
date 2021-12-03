@@ -350,7 +350,7 @@ async function patch(
       (content) => {
         return content.replace(
           '# utf8 is blessed :)',
-          `define_alias(qr/cp65001/i => '"utf-8-strict"');`,
+          `$&\n    define_alias(qr/cp65001/i => '"utf-8-strict"');`,
         );
       },
     );
@@ -384,7 +384,7 @@ async function patch(
           )
           .replace(
             'if ($os_minor >= $mactex_darwin)',
-            'if ($$os_major >= 11) { $$CPU = "x86_64"; $$OS = "darwin"; } els$&',
+            'if ($$os_major >= 11) { $$CPU = "x86_64"; $$OS = "darwin"; }\n    els$&',
           );
       },
     );
