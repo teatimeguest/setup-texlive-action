@@ -60243,11 +60243,12 @@ _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _Inst
     const scheme = Number(this.version) < 2016 ? 'minimal' : 'infraonly';
     // prettier-ignore
     /**
-     * - `option_autobackup`, `option_doc`, and `option_src`
+     * - `option_autobackup`, `option_doc`, `option_src`, and `option_symlinks`
      *   already exist since version 2008.
      *
-     * - `option_desktop_integration`, `option_file_assocs`, and
-     *   `option_w32_multi_user` were first introduced in version 2009.
+     * - In version 2009, `option_desktop_integration`, `option_file_assocs`,
+     *   and `option_w32_multi_user` were first introduced.
+     *   Also, `option_symlinks` was renamed to `option_path`.
      *
      * - `option_adjustrepo` was first introduced in version 2011.
      *
@@ -60272,7 +60273,9 @@ _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _Inst
         'option_doc 0',
         'option_file_assocs 0',
         'option_menu_integration 0',
+        'option_path 0',
         'option_src 0',
+        'option_symlinks 0',
         'option_w32_multi_user 0', // tlpdbopt_w32_multi_user
     ].join('\n');
     await core.group('Profile', async () => {
