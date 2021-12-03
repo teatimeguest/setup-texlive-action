@@ -290,11 +290,12 @@ class InstallTL {
     const scheme = Number(this.version) < 2016 ? 'minimal' : 'infraonly';
     // prettier-ignore
     /**
-     * - `option_autobackup`, `option_doc`, and `option_src`
+     * - `option_autobackup`, `option_doc`, `option_src`, and `option_symlinks`
      *   already exist since version 2008.
      *
-     * - `option_desktop_integration`, `option_file_assocs`, and
-     *   `option_w32_multi_user` were first introduced in version 2009.
+     * - In version 2009, `option_desktop_integration`, `option_file_assocs`,
+     *   and `option_w32_multi_user` were first introduced.
+     *   Also, `option_symlinks` was renamed to `option_path`.
      *
      * - `option_adjustrepo` was first introduced in version 2011.
      *
@@ -303,6 +304,8 @@ class InstallTL {
      *
      * - In version 2017, the option names have been changed, and
      *   new prefixes `instopt-` and `tlpdbopt-` have been introduced.
+     *   Also, `option_path` and `option_symlinks` have been merged and
+     *   `tlpdbopt_adjustpath` has been introduced.
      *   The old option names are still valid in later versions.
      */
     const profile = [
@@ -317,7 +320,9 @@ class InstallTL {
       'option_doc 0',                       // tlpdbopt_install_docfiles
       'option_file_assocs 0',               // tlpdbopt_file_assocs
       'option_menu_integration 0',
+      'option_path 0',                      // tlpdbopt_adjustpath
       'option_src 0',                       // tlpdbopt_install_srcfiles
+      'option_symlinks 0',                  // tlpdbopt_adjustpath
       'option_w32_multi_user 0',            // tlpdbopt_w32_multi_user
     ].join('\n');
 
