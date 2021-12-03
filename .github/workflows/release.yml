@@ -31,7 +31,7 @@ jobs:
         run: |
           if ! git diff --quiet -- dist/index.js; then
             git add dist/index.js
-            git commit -m 'chore(dist): auto-update [skip ci]'
+            git commit -m 'chore(dist): auto-update by github-actions [skip ci]'
           fi
 
       - name: Prepare
@@ -39,10 +39,19 @@ jobs:
         run: |
           latest="$(git describe --tags --abbrev=0 --match='v*.*.*')"
           if ! git diff --quiet "${latest}" dist/index.js; then
-            next="$(npm version patch -m 'chore(release): prepare for v%s [skip ci]')"
-            git tag "${next}" -m "${next}"
+            HOMEBREW_NO_AUTO_UPDATE=1 \
+              brew install git-chglog/git-chglog/git-chglog
+
+            next="$(npm version patch)"
+            git add package-lock.json package.json
+            git commit -m "chore(release): prepare for ${next} [skip ci]"
+            git chglog --next-tag "${next}" \
+              | git tag -a "${next}" --cleanup=whitespace -F -
             git tag -f "${next%%.*}"
             git push --follow-tags -f origin
+
+            git for-each-ref "refs/tags/${next}" --format='%(contents:body)' \
+              > RELEASENOTES.md
             echo "::set-output name=tag::${next}"
           fi
 
@@ -50,6 +59,6 @@ jobs:
         if: startsWith(steps.prepare.outputs.tag, 'v')
         uses: softprops/action-gh-release@v1
         with:
-          generate_release_notes: true
+          body_path: RELEASENOTES.md
           name: ${{ steps.prepare.outputs.tag }}
           tag_name: ${{ steps.prepare.outputs.tag }}

@@ -12,11 +12,19 @@ options:
         - feat
         - fix
         - perf
+        - build
   commit_groups:
     title_maps:
       feat: Features
       fix: Bug Fixes
       perf: Performance Improvements
+      build: Bump Dependencies
+    sort_by: Custom
+    title_order:
+      - feat
+      - perf
+      - fix
+      - build
   header:
     pattern: "^(\\w*)(?:\\(([\\w\\$\\.\\-\\*\\s]*)\\))?\\:\\s(.*)$"
     pattern_maps:
