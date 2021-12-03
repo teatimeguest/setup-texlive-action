@@ -101,8 +101,8 @@ All inputs are optional.
 [MIT License](./LICENSE)
 
 [actions-cache]: https://github.com/actions/toolkit/tree/main/packages/cache
-[ci-badge]: ../../actions/workflows/ci.yml/badge.svg?branch=main
-[ci]: ../../actions/workflows/ci.yml
+[ci-badge]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml/badge.svg
+[ci]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml
 [codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
 [codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
 [historic]: https://tug.org/historic/
