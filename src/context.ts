@@ -21,9 +21,8 @@ export function getInputs(): Inputs {
     tlcontrib: core.getBooleanInput('tlcontrib'),
     version: tl.LATEST_VERSION,
   };
-
   /**
-   * @see @link {https://github.com/actions/toolkit/blob/main/packages/cache/}
+   * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/}
    */
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const URLs = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'] as const;

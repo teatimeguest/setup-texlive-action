@@ -56,6 +56,9 @@ export interface Texmf {
   readonly sysvar: string;
 }
 
+/**
+ * An interface for the `tlmgr` command.
+ */
 export class Manager {
   constructor(
     private readonly version: Version,
@@ -87,6 +90,10 @@ export class Manager {
   }> {
     return {
       /**
+       * Adds the bin directory of TeX Live directly to the PATH.
+       * This method does not invoke `tlmgr path add`
+       * to avoid to create symlinks in the system directory.
+       *
        * @todo `install-tl -print-platform` and
        *   `tlmgr print-platform` may be useful.
        */
@@ -140,6 +147,10 @@ export class Manager {
           { ignoreReturnCode: true },
         );
         if (
+          /**
+           * `tlmgr repository add` returns non-zero status code
+           * if the same repository or tag is added again.
+           */
           exitCode !== 0 &&
           !stderr.includes('repository or its tag already defined')
         ) {
@@ -152,6 +163,11 @@ export class Manager {
   }
 }
 
+/**
+ * Gets the URL of the main repository of TeX Live.
+ * Returns the `ctan` if the version is the latest, otherwise returns
+ * the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
+ */
 function repository(version: Version): URL {
   const base =
     version === LATEST_VERSION
@@ -171,6 +187,9 @@ function repository(version: Version): URL {
   return url;
 }
 
+/**
+ * A class for downloading and running the installer of TeX Live.
+ */
 class InstallTL {
   constructor(
     private readonly version: Version,
@@ -269,20 +288,37 @@ class InstallTL {
      * `scheme-infraonly` was first introduced in TeX Live 2016.
      */
     const scheme = Number(this.version) < 2016 ? 'minimal' : 'infraonly';
+    // prettier-ignore
+    /**
+     * - `option_autobackup`, `option_doc`, and `option_src`
+     *   already exist since version 2008.
+     *
+     * - `option_desktop_integration`, `option_file_assocs`, and
+     *   `option_w32_multi_user` were first introduced in version 2009.
+     *
+     * - `option_adjustrepo` was first introduced in version 2011.
+     *
+     * - `option_menu_integration` was first introduced in version 2012 and
+     *   removed in version 2017.
+     *
+     * - In version 2017, the option names have been changed, and
+     *   new prefixes `instopt-` and `tlpdbopt-` have been introduced.
+     *   The old option names are still valid in later versions.
+     */
     const profile = [
       `TEXDIR ${texmf.texdir}`,
       `TEXMFLOCAL ${texmf.local}`,
       `TEXMFSYSCONFIG ${texmf.sysconfig}`,
       `TEXMFSYSVAR ${texmf.sysvar}`,
       `selected_scheme scheme-${scheme}`,
-      `option_adjustrepo ${adjustrepo}`,
-      'option_autobackup 0',
-      'option_desktop_integration 0',
-      'option_doc 0',
-      'option_file_assocs 0',
+      `option_adjustrepo ${adjustrepo}`,    // instopt_adjustrepo
+      'option_autobackup 0',                // tlpdbopt_autobackup
+      'option_desktop_integration 0',       // tlpdbopt_desktop_integration
+      'option_doc 0',                       // tlpdbopt_install_docfiles
+      'option_file_assocs 0',               // tlpdbopt_file_assocs
       'option_menu_integration 0',
-      'option_src 0',
-      'option_w32_multi_user 0',
+      'option_src 0',                       // tlpdbopt_install_srcfiles
+      'option_w32_multi_user 0',            // tlpdbopt_w32_multi_user
     ].join('\n');
 
     await core.group('Profile', async () => {
@@ -300,19 +336,25 @@ class InstallTL {
     return dest;
   }
 
+  /**
+   * Returns the filename of the installer executable.
+   */
   static executable(version: Version, platform: NodeJS.Platform): string {
     const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
     return `install-tl${platform === 'win32' ? ext : ''}`;
   }
 }
 
+/**
+ * Fixes bugs in the installer files and modify them for use in workflows.
+ */
 async function patch(
   version: Version,
   platform: NodeJS.Platform,
   texdir: string,
 ): Promise<void> {
   /**
-   * Prevent `install-tl(-windows).bat` from being stopped by `pause`.
+   * Prevents `install-tl(-windows).bat` from being stopped by `pause`.
    */
   if (platform === 'win32') {
     try {
@@ -327,7 +369,7 @@ async function patch(
     }
   }
   /**
-   * Fix a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
+   * Fixes a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
    */
   if (['2009', '2010'].includes(version)) {
     await updateFile(
@@ -341,7 +383,7 @@ async function patch(
     );
   }
   /**
-   * Define Code Page 65001 as an alias for UTF-8 on Windows.
+   * Defines Code Page 65001 as an alias for UTF-8 on Windows.
    * @see {@link https://github.com/dankogai/p5-encode/issues/37}
    */
   if (platform === 'win32' && version === '2015') {
@@ -356,7 +398,7 @@ async function patch(
     );
   }
   /**
-   * Make it possible to use `\` as a directory separator on Windows.
+   * Makes it possible to use `\` as a directory separator on Windows.
    */
   if (platform === 'win32' && Number(version) < 2019) {
     await updateFile(
@@ -370,7 +412,7 @@ async function patch(
     );
   }
   /**
-   * Add support for macOS 11.x.
+   * Adds support for macOS 11.x.
    */
   if (platform === 'darwin' && ['2017', '2018', '2019'].includes(version)) {
     await updateFile(
@@ -391,6 +433,9 @@ async function patch(
   }
 }
 
+/**
+ * Updates the contents of a file.
+ */
 async function updateFile(
   filename: string,
   map: (content: string) => string,
@@ -398,6 +443,9 @@ async function updateFile(
   await fs.writeFile(filename, map(await fs.readFile(filename, 'utf8')));
 }
 
+/**
+ * Returns an array of paths that match the given glob pattern.
+ */
 async function expand(pattern: string): Promise<Array<string>> {
   const globber = await glob.create(pattern, { implicitDescendants: false });
   return await globber.glob();

@@ -59815,7 +59815,7 @@ function getInputs() {
         version: tl.LATEST_VERSION,
     };
     /**
-     * @see @link {https://github.com/actions/toolkit/blob/main/packages/cache/}
+     * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/}
      */
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const URLs = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'];
@@ -60050,6 +60050,9 @@ async function install(version, prefix, platform = os.platform()) {
     await new InstallTL(version, prefix, platform).run();
 }
 exports.install = install;
+/**
+ * An interface for the `tlmgr` command.
+ */
 class Manager {
     constructor(version, prefix) {
         this.version = version;
@@ -60074,6 +60077,10 @@ class Manager {
     get path() {
         return {
             /**
+             * Adds the bin directory of TeX Live directly to the PATH.
+             * This method does not invoke `tlmgr path add`
+             * to avoid to create symlinks in the system directory.
+             *
              * @todo `install-tl -print-platform` and
              *   `tlmgr print-platform` may be useful.
              */
@@ -60107,7 +60114,12 @@ class Manager {
                 const { exitCode, stderr } = await exec.getExecOutput('tlmgr', 
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 ['repository', 'add', repo, ...(Boolean(tag) ? [tag] : [])], { ignoreReturnCode: true });
-                if (exitCode !== 0 &&
+                if (
+                /**
+                 * `tlmgr repository add` returns non-zero status code
+                 * if the same repository or tag is added again.
+                 */
+                exitCode !== 0 &&
                     !stderr.includes('repository or its tag already defined')) {
                     throw new Error(`\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`);
                 }
@@ -60116,6 +60128,11 @@ class Manager {
     }
 }
 exports.Manager = Manager;
+/**
+ * Gets the URL of the main repository of TeX Live.
+ * Returns the `ctan` if the version is the latest, otherwise returns
+ * the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
+ */
 function repository(version) {
     const base = version === exports.LATEST_VERSION
         ? 'https://mirror.ctan.org/systems/texlive/'
@@ -60131,6 +60148,9 @@ function repository(version) {
     }
     return url;
 }
+/**
+ * A class for downloading and running the installer of TeX Live.
+ */
 class InstallTL {
     constructor(version, prefix, platform) {
         this.version = version;
@@ -60157,6 +60177,9 @@ class InstallTL {
             await tlmgr.path.add();
         });
     }
+    /**
+     * Returns the filename of the installer executable.
+     */
     static executable(version, platform) {
         const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
         return `install-tl${platform === 'win32' ? ext : ''}`;
@@ -60218,6 +60241,25 @@ _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _Inst
      * `scheme-infraonly` was first introduced in TeX Live 2016.
      */
     const scheme = Number(this.version) < 2016 ? 'minimal' : 'infraonly';
+    // prettier-ignore
+    /**
+     * - `option_autobackup`, `option_doc`, and `option_src`
+     *   already exist since version 2008.
+     *
+     * - `option_desktop_integration`, `option_file_assocs`, and
+     *   `option_w32_multi_user` were first introduced in version 2009.
+     *
+     * - `option_adjustrepo` was first introduced in version 2011.
+     *
+     * - `option_menu_integration` was first introduced in version 2012 and
+     *   removed in version 2017.
+     *
+     * - In version 2017, the option names have been changed, and
+     *   new prefixes `instopt-` and `tlpdbopt-` have been introduced.
+     *   Also, `option_path` and `option_symlinks` have been merged and
+     *   `tlpdbopt_adjustpath` has been introduced.
+     *   The old option names are still valid in later versions.
+     */
     const profile = [
         `TEXDIR ${texmf.texdir}`,
         `TEXMFLOCAL ${texmf.local}`,
@@ -60231,7 +60273,7 @@ _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _Inst
         'option_file_assocs 0',
         'option_menu_integration 0',
         'option_src 0',
-        'option_w32_multi_user 0',
+        'option_w32_multi_user 0', // tlpdbopt_w32_multi_user
     ].join('\n');
     await core.group('Profile', async () => {
         core.info(profile);
@@ -60241,10 +60283,13 @@ _InstallTL_instances = new WeakSet(), _InstallTL_download = async function _Inst
     core.debug(`${dest} created`);
     return dest;
 };
+/**
+ * Fixes bugs in the installer files and modify them for use in workflows.
+ */
 async function patch(version, platform, texdir) {
     var _a;
     /**
-     * Prevent `install-tl(-windows).bat` from being stopped by `pause`.
+     * Prevents `install-tl(-windows).bat` from being stopped by `pause`.
      */
     if (platform === 'win32') {
         try {
@@ -60257,7 +60302,7 @@ async function patch(version, platform, texdir) {
         }
     }
     /**
-     * Fix a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
+     * Fixes a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
      */
     if (['2009', '2010'].includes(version)) {
         await updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLWinGoo.pm'), (content) => {
@@ -60265,16 +60310,16 @@ async function patch(version, platform, texdir) {
         });
     }
     /**
-     * Define Code Page 65001 as an alias for UTF-8 on Windows.
+     * Defines Code Page 65001 as an alias for UTF-8 on Windows.
      * @see {@link https://github.com/dankogai/p5-encode/issues/37}
      */
     if (platform === 'win32' && version === '2015') {
         await updateFile(path.join(texdir, 'tlpkg', 'tlperl', 'lib', 'Encode', 'Alias.pm'), (content) => {
-            return content.replace('# utf8 is blessed :)', `define_alias(qr/cp65001/i => '"utf-8-strict"');`);
+            return content.replace('# utf8 is blessed :)', `$&\n    define_alias(qr/cp65001/i => '"utf-8-strict"');`);
         });
     }
     /**
-     * Make it possible to use `\` as a directory separator on Windows.
+     * Makes it possible to use `\` as a directory separator on Windows.
      */
     if (platform === 'win32' && Number(version) < 2019) {
         await updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), (content) => {
@@ -60282,7 +60327,7 @@ async function patch(version, platform, texdir) {
         });
     }
     /**
-     * Add support for macOS 11.x.
+     * Adds support for macOS 11.x.
      */
     if (platform === 'darwin' && ['2017', '2018', '2019'].includes(version)) {
         await updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), (content) => {
@@ -60290,13 +60335,19 @@ async function patch(version, platform, texdir) {
                 .replace(
             // prettier-ignore
             'if ($os_major != 10)', 'if ($$os_major < 10)')
-                .replace('if ($os_minor >= $mactex_darwin)', 'if ($$os_major >= 11) { $$CPU = "x86_64"; $$OS = "darwin"; } els$&');
+                .replace('if ($os_minor >= $mactex_darwin)', 'if ($$os_major >= 11) { $$CPU = "x86_64"; $$OS = "darwin"; }\n    els$&');
         });
     }
 }
+/**
+ * Updates the contents of a file.
+ */
 async function updateFile(filename, map) {
     await fs_1.promises.writeFile(filename, map(await fs_1.promises.readFile(filename, 'utf8')));
 }
+/**
+ * Returns an array of paths that match the given glob pattern.
+ */
 async function expand(pattern) {
     const globber = await glob.create(pattern, { implicitDescendants: false });
     return await globber.glob();
