@@ -46,9 +46,12 @@ jobs:
             git add package-lock.json package.json
             git commit -m "chore(release): prepare for ${next} [skip ci]"
             git chglog --next-tag "${next}" \
-              | git tag -a "${next}" --cleanup=whitespace -F -
-            git tag -f "${next%%.*}"
-            git push --follow-tags -f origin
+              | git tag "${next}" --cleanup=whitespace -F -
+            git tag -f "${next%%.*}" -m "${next}"
+
+            git push origin main
+            git push origin "${next}"
+            git push -f origin "${next%%.*}"
 
             git for-each-ref "refs/tags/${next}" --format='%(contents:body)' \
               > RELEASENOTES.md
