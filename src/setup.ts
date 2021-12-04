@@ -58,12 +58,12 @@ async function setup(): Promise<void> {
       return;
     }
   } else {
-    await tl.install(inputs.version, inputs.prefix, os.platform());
+    await tl.install(inputs.version, inputs.prefix);
   }
 
   if (inputs.tlcontrib) {
     await core.group('Setting up TLContrib', async () => {
-      await tlmgr.repository.add(tl.CONTRIB.href, 'tlcontrib');
+      await tlmgr.repository.add(tl.tlcontrib().href, 'tlcontrib');
       await tlmgr.pinning.add('tlcontrib', '*');
     });
   }

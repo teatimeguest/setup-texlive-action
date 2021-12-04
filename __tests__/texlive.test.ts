@@ -14,13 +14,18 @@ const random = (): string => (Math.random() + 1).toString(32).substring(7);
 process.env['GITHUB_PATH'] = undefined;
 
 jest.mock('os', () => ({
+  platform: jest.fn(),
   tmpdir: jest.fn(),
 }));
 (os.tmpdir as jest.Mock).mockReturnValue(random());
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
-    join: jest.fn(),
+    join: jest.fn((...paths: Array<string>) => {
+      return os.platform() === 'win32'
+        ? path.win32.join(...paths)
+        : path.posix.join(...paths);
+    }),
     posix: actual.posix,
     win32: actual.win32,
   };
@@ -50,12 +55,6 @@ jest.spyOn(tool, 'downloadTool').mockResolvedValue(random());
 jest.spyOn(tool, 'extractTar').mockResolvedValue(random());
 jest.spyOn(tool, 'extractZip').mockResolvedValue(random());
 jest.spyOn(tool, 'find').mockReturnValue('');
-
-beforeEach(() => {
-  (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-    return path.posix.join(...paths);
-  });
-});
 
 test.each([
   ['1995', false],
@@ -214,11 +213,13 @@ describe('Manager', () => {
 
 describe('install', () => {
   it('installs TeX Live 2008 on Linux', async () => {
-    await tl.install('2008', '/usr/local/texlive', 'linux');
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    await tl.install('2008', '/usr/local/texlive');
     expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2008');
     expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/install-tl-unx.tar.gz',
     );
+    expect(tool.cacheDir).toHaveBeenCalled();
     expect(fs.writeFile).toHaveBeenCalledWith(
       expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
@@ -245,18 +246,16 @@ describe('install', () => {
     expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('/usr/local/texlive/2008/bin/'),
     );
-    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live 2008 on Windows', async () => {
-    (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-      return path.win32.join(...paths);
-    });
-    await tl.install('2008', 'C:\\texlive', 'win32');
+    (os.platform as jest.Mock).mockReturnValue('win32');
+    await tl.install('2008', 'C:\\texlive');
     expect(tool.find).toHaveBeenCalledWith('install-tl.zip', '2008');
     expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/install-tl.zip',
     );
+    expect(tool.cacheDir).toHaveBeenCalled();
     expect(fs.writeFile).toHaveBeenCalledWith(
       expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
@@ -283,18 +282,16 @@ describe('install', () => {
     expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('C:\\texlive\\2008\\bin\\'),
     );
-    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live 2013 on Windows', async () => {
-    (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-      return path.win32.join(...paths);
-    });
-    await tl.install('2013', 'C:\\texlive', 'win32');
+    (os.platform as jest.Mock).mockReturnValue('win32');
+    await tl.install('2013', 'C:\\texlive');
     expect(tool.find).toHaveBeenCalledWith('install-tl.zip', '2013');
     expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2013/tlnet-final/install-tl.zip',
     );
+    expect(tool.cacheDir).toHaveBeenCalled();
     expect(fs.writeFile).toHaveBeenCalledWith(
       expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
@@ -321,15 +318,16 @@ describe('install', () => {
     expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('C:\\texlive\\2013\\bin\\'),
     );
-    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live 2013 on macOS', async () => {
-    await tl.install('2013', '/usr/local/texlive', 'darwin');
+    (os.platform as jest.Mock).mockReturnValue('darwin');
+    await tl.install('2013', '/usr/local/texlive');
     expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2013');
     expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2013/tlnet-final/install-tl-unx.tar.gz',
     );
+    expect(tool.cacheDir).toHaveBeenCalled();
     expect(fs.writeFile).toHaveBeenCalledWith(
       expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
@@ -356,15 +354,16 @@ describe('install', () => {
     expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('/usr/local/texlive/2013/bin/'),
     );
-    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live 2016 on macOS', async () => {
-    await tl.install('2016', '/usr/local/texlive', 'darwin');
+    (os.platform as jest.Mock).mockReturnValue('darwin');
+    await tl.install('2016', '/usr/local/texlive');
     expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2016');
     expect(tool.downloadTool).toHaveBeenCalledWith(
       'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2016/tlnet-final/install-tl-unx.tar.gz',
     );
+    expect(tool.cacheDir).toHaveBeenCalled();
     expect(fs.writeFile).toHaveBeenCalledWith(
       expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
@@ -391,15 +390,16 @@ describe('install', () => {
     expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('/usr/local/texlive/2016/bin/'),
     );
-    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs the latest version of TeX Live on Linux', async () => {
-    await tl.install('2021', '/usr/local/texlive', 'linux');
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    await tl.install('2021', '/usr/local/texlive');
     expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2021');
     expect(tool.downloadTool).toHaveBeenCalledWith(
       'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
     );
+    expect(tool.cacheDir).toHaveBeenCalled();
     expect(fs.writeFile).toHaveBeenCalledWith(
       expect.stringMatching(/texlive\.profile$/u),
       expect.stringContaining(
@@ -420,18 +420,19 @@ describe('install', () => {
     expect(core.addPath).toHaveBeenCalledWith(
       expect.stringContaining('/usr/local/texlive/2021/bin/'),
     );
-    expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('installs TeX Live with a installer cache', async () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
     (tool.find as jest.Mock).mockReturnValueOnce(random());
-    await tl.install('2021', '/usr/local/texlive', 'linux');
+    await tl.install('2021', '/usr/local/texlive');
     expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2021');
     expect(tool.downloadTool).not.toHaveBeenCalled();
     expect(tool.cacheDir).not.toHaveBeenCalled();
   });
 
   it('continues the installation even if `tool-cache` throws an exception', async () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
     (tool.find as jest.Mock).mockImplementationOnce(() => {
       throw new Error('oops');
     });
@@ -439,15 +440,16 @@ describe('install', () => {
       throw new Error('oops');
     });
     await expect(
-      tl.install('2021', '/usr/local/texlive', 'linux'),
+      tl.install('2021', '/usr/local/texlive'),
     ).resolves.not.toThrow();
   });
 
   it('fails as the installer cannot be located', async () => {
+    (os.platform as jest.Mock).mockReturnValue('win32');
     (glob.create as jest.Mock).mockReturnValueOnce({
       glob: async () => [] as Array<string>,
     } as glob.Globber);
-    await expect(tl.install('2021', 'C:\\texlive', 'win32')).rejects.toThrow(
+    await expect(tl.install('2021', 'C:\\texlive')).rejects.toThrow(
       'Unable to locate the installer path',
     );
   });
@@ -459,9 +461,8 @@ describe('install', () => {
   ])(
     'does not support the installation of TeX Live %s on %s',
     async (version, platform) => {
-      await expect(
-        tl.install(version, '/usr/local/texlive', platform),
-      ).rejects.toThrow(
+      (os.platform as jest.Mock).mockReturnValue(platform);
+      await expect(tl.install(version, random())).rejects.toThrow(
         /^Installation of TeX Live \d{4} on (?:\w+) is not supported$/u,
       );
     },
@@ -469,10 +470,6 @@ describe('install', () => {
 });
 
 describe('patch', () => {
-  afterAll(() => {
-    (fs.readFile as jest.Mock).mockResolvedValue(random());
-  });
-
   it('applies a patch to `install-tl(-windows).bat`', async () => {
     (fs.readFile as jest.Mock).mockResolvedValue(
       [
@@ -494,10 +491,8 @@ describe('patch', () => {
         String.raw`)`,
       ].join('\n'),
     );
-    (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-      return path.win32.join(...paths);
-    });
-    await tl.install('2021', 'C:\\TEMP\\setup-texlive', 'win32');
+    (os.platform as jest.Mock).mockReturnValue('win32');
+    await tl.install('2021', 'C:\\TEMP\\setup-texlive');
     expect(fs.writeFile).toHaveBeenCalledWith(
       expect.stringMatching(/install-tl(?:-windows)?\.bat/u),
       [
@@ -530,11 +525,9 @@ describe('patch', () => {
       }
       return random();
     });
-    (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-      return path.win32.join(...paths);
-    });
+    (os.platform as jest.Mock).mockReturnValue('win32');
     await expect(
-      tl.install('2021', 'C:\\TEMP\\setup-texlive', 'win32'),
+      tl.install('2021', 'C:\\TEMP\\setup-texlive'),
     ).resolves.not.toThrow();
   });
 
@@ -546,12 +539,10 @@ describe('patch', () => {
       }
       return random();
     });
-    (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-      return path.win32.join(...paths);
-    });
-    await expect(
-      tl.install('2021', 'C:\\TEMP\\setup-texlive', 'win32'),
-    ).rejects.toThrow('oops');
+    (os.platform as jest.Mock).mockReturnValue('win32');
+    await expect(tl.install('2021', 'C:\\TEMP\\setup-texlive')).rejects.toThrow(
+      'oops',
+    );
   });
 
   it('applies a patch to `tlpkg/TeXLive/TLWinGoo.pm`', async () => {
@@ -564,9 +555,10 @@ describe('patch', () => {
         String.raw`  }`,
       ].join('\n'),
     );
-    await tl.install('2010', '/tmp/setup-texlive', 'linux');
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    await tl.install('2010', '/tmp/setup-texlive');
     expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringMatching(/tlpkg\/TeXLive\/TLWinGoo\.pm$/u),
+      expect.stringMatching(/tlpkg.TeXLive.TLWinGoo\.pm$/u),
       [
         String.raw`  $sr = $sr . '/' unless $sr =~ m!/$!;`,
         String.raw`  return 0 if index($d, $sr)==0;`,
@@ -587,9 +579,10 @@ describe('patch', () => {
         String.raw``,
       ].join('\n'),
     );
-    await tl.install('2015', 'C:\\TEMP\\setup-texlive', 'win32');
+    (os.platform as jest.Mock).mockReturnValue('win32');
+    await tl.install('2015', 'C:\\TEMP\\setup-texlive');
     expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringMatching(/tlpkg\/tlperl\/lib\/Encode\/Alias.pm$/u),
+      expect.stringMatching(/tlpkg.tlperl.lib.Encode.Alias\.pm$/u),
       [
         String.raw`    }`,
         String.raw``,
@@ -611,9 +604,10 @@ describe('patch', () => {
         String.raw`      $subdir .= "$dir/";`,
       ].join('\n'),
     );
-    await tl.install('2018', 'C:\\TEMP\\setup-texlive', 'win32');
+    (os.platform as jest.Mock).mockReturnValue('win32');
+    await tl.install('2018', 'C:\\TEMP\\setup-texlive');
     expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringMatching(/tlpkg\/TeXLive\/TLUtils.pm$/u),
+      expect.stringMatching(/tlpkg.TeXLive.TLUtils\.pm$/u),
       [
         String.raw`    $subdir = $& if ( win32() && ($tree =~ s!^//[^/]+/!!) );`,
         String.raw``,
@@ -640,9 +634,10 @@ describe('patch', () => {
         String.raw`    } elsif ($os_minor >= 6 && $os_minor < $mactex_darwin) {`,
       ].join('\n'),
     );
-    await tl.install('2018', '/tmp/setup-texlive', 'darwin');
+    (os.platform as jest.Mock).mockReturnValue('darwin');
+    await tl.install('2018', '/tmp/setup-texlive');
     expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringMatching(/tlpkg\/TeXLive\/TLUtils.pm$/u),
+      expect.stringMatching(/tlpkg.TeXLive.TLUtils\.pm$/u),
       // prettier-ignore
       [
                   '    chomp (my $sw_vers = `sw_vers -productVersion`);',

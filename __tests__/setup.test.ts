@@ -19,7 +19,11 @@ jest.mock('os', () => ({
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
-    join: jest.fn(),
+    join: jest.fn((...paths: Array<string>) => {
+      return os.platform() === 'win32'
+        ? path.win32.join(...paths)
+        : path.posix.join(...paths);
+    }),
     posix: actual.posix,
     win32: actual.win32,
   };
@@ -34,7 +38,16 @@ jest
   );
 jest.spyOn(core, 'info').mockImplementation();
 jest.spyOn(core, 'warning').mockImplementation();
-jest.spyOn(context, 'getInputs').mockImplementation();
+jest.spyOn(context, 'getInputs').mockImplementation(() => ({
+  cache: true,
+  packages: [],
+  prefix:
+    os.platform() === 'win32'
+      ? 'C:\\TEMP\\setup-texlive'
+      : '/tmp/setup-texlive',
+  tlcontrib: false,
+  version: '2021',
+}));
 jest.spyOn(context, 'getKey').mockImplementation();
 jest.spyOn(context, 'setKey').mockImplementation();
 jest.spyOn(context, 'getPost').mockImplementation();
@@ -52,53 +65,16 @@ jest
   .spyOn(tl.Manager.prototype, 'repository', 'get')
   .mockReturnValue({ add: jest.fn() });
 
-const setToLinux = (): void => {
-  (os.platform as jest.Mock).mockReturnValue('linux');
-  (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-    return path.posix.join(...paths);
-  });
-  (context.getInputs as jest.Mock).mockReturnValueOnce({
-    cache: true,
-    packages: [],
-    prefix: '/tmp/setup-texlive',
-    tlcontrib: false,
-    version: '2021',
-  });
-};
-
-const setToMacos = (): void => {
-  setToLinux();
-  (os.platform as jest.Mock).mockReturnValue('darwin');
-};
-
-const setToWindows = (): void => {
-  (os.platform as jest.Mock).mockReturnValue('win32');
-  (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-    return path.win32.join(...paths);
-  });
-  (context.getInputs as jest.Mock).mockReturnValueOnce({
-    cache: true,
-    packages: [],
-    prefix: 'C:\\TEMP\\setup-texlive',
-    tlcontrib: false,
-    version: '2021',
-  });
-};
-
 describe('setup', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     (context.getPost as jest.Mock).mockReturnValueOnce(false);
   });
 
   it('sets up TeX Live on Linux', async () => {
-    setToLinux();
+    (os.platform as jest.Mock).mockReturnValue('linux');
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalledWith(
-      '2021',
-      '/tmp/setup-texlive',
-      'linux',
-    );
+    expect(tl.install).toHaveBeenCalledWith('2021', '/tmp/setup-texlive');
     expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -109,14 +85,10 @@ describe('setup', () => {
   });
 
   it('sets up TeX Live on Windows', async () => {
-    setToWindows();
+    (os.platform as jest.Mock).mockReturnValue('win32');
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalledWith(
-      '2021',
-      'C:\\TEMP\\setup-texlive',
-      'win32',
-    );
+    expect(tl.install).toHaveBeenCalledWith('2021', 'C:\\TEMP\\setup-texlive');
     expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -127,14 +99,10 @@ describe('setup', () => {
   });
 
   it('sets up TeX Live on macOS', async () => {
-    setToMacos();
+    (os.platform as jest.Mock).mockReturnValue('darwin');
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalledWith(
-      '2021',
-      '/tmp/setup-texlive',
-      'darwin',
-    );
+    expect(tl.install).toHaveBeenCalledWith('2021', '/tmp/setup-texlive');
     expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -145,8 +113,8 @@ describe('setup', () => {
   });
 
   it('sets up TeX Live with custom settings', async () => {
-    setToLinux();
-    (context.getInputs as jest.Mock).mockReset().mockReturnValueOnce({
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    (context.getInputs as jest.Mock).mockReturnValueOnce({
       cache: false,
       packages: ['cleveref', 'hyperref', 'scheme-basic'],
       prefix: '/usr/local/texlive',
@@ -155,11 +123,7 @@ describe('setup', () => {
     });
     await setup.run();
     expect(cache.restoreCache).not.toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalledWith(
-      '2008',
-      '/usr/local/texlive',
-      'linux',
-    );
+    expect(tl.install).toHaveBeenCalledWith('2008', '/usr/local/texlive');
     expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -174,8 +138,8 @@ describe('setup', () => {
   });
 
   it('sets up TeX Live with TLContrib', async () => {
-    setToLinux();
-    (context.getInputs as jest.Mock).mockReset().mockReturnValueOnce({
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    (context.getInputs as jest.Mock).mockReturnValueOnce({
       cache: true,
       packages: [],
       prefix: '/usr/local/texlive',
@@ -195,8 +159,8 @@ describe('setup', () => {
   });
 
   it('sets up TeX Live with a system cache', async () => {
-    setToLinux();
-    (context.getInputs as jest.Mock).mockReset().mockReturnValueOnce({
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    (context.getInputs as jest.Mock).mockReturnValueOnce({
       cache: true,
       packages: ['scheme-basic'],
       prefix: '/tmp/setup-texlive',
@@ -219,8 +183,8 @@ describe('setup', () => {
   });
 
   it('sets up TeX Live with a full cache', async () => {
-    setToLinux();
-    (context.getInputs as jest.Mock).mockReset().mockReturnValueOnce({
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    (context.getInputs as jest.Mock).mockReturnValueOnce({
       cache: true,
       packages: ['scheme-basic'],
       prefix: '/tmp/setup-texlive',
@@ -243,7 +207,7 @@ describe('setup', () => {
   });
 
   it('continues setup even if `cache.restoreCache` fails', async () => {
-    setToLinux();
+    (os.platform as jest.Mock).mockReturnValue('linux');
     (cache.restoreCache as jest.Mock).mockImplementationOnce(async () => {
       throw new Error('oops');
     });
@@ -261,12 +225,12 @@ describe('setup', () => {
 });
 
 describe('saveCache', () => {
-  beforeEach(() => {
+  beforeAll(() => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
     (context.getPost as jest.Mock).mockReturnValue(true);
   });
 
   it('saves `TEXDIR` if `key` is set', async () => {
-    setToLinux();
     (context.getKey as jest.Mock).mockReturnValueOnce(random());
     await setup.run();
     expect(cache.saveCache).toHaveBeenCalledWith(
@@ -276,14 +240,12 @@ describe('saveCache', () => {
   });
 
   it('does nothing if `key` is not set', async () => {
-    setToLinux();
     (context.getKey as jest.Mock).mockReturnValueOnce(undefined);
     await setup.run();
     expect(cache.saveCache).not.toHaveBeenCalled();
   });
 
   it('does not fail even if `cache.saveCache` fails', async () => {
-    setToLinux();
     (context.getKey as jest.Mock).mockReturnValueOnce(random());
     (cache.saveCache as jest.Mock).mockImplementationOnce(async () => {
       throw new Error('oops');

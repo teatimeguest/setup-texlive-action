@@ -29,7 +29,11 @@ jest.mock('os', () => ({
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
-    join: jest.fn(),
+    join: jest.fn((...paths: Array<string>) => {
+      return os.platform() === 'win32'
+        ? path.win32.join(...paths)
+        : path.posix.join(...paths);
+    }),
     posix: actual.posix,
     win32: actual.win32,
   };
@@ -61,20 +65,6 @@ jest.spyOn(core, 'saveState').mockImplementation();
 jest.spyOn(core, 'setOutput').mockImplementation();
 jest.spyOn(core, 'warning').mockImplementation();
 
-const setToLinux = (): void => {
-  (os.platform as jest.Mock).mockReturnValue('linux');
-  (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-    return path.posix.join(...paths);
-  });
-};
-
-const setToWindows = (): void => {
-  (os.platform as jest.Mock).mockReturnValue('win32');
-  (path.join as jest.Mock).mockImplementation((...paths: Array<string>) => {
-    return path.win32.join(...paths);
-  });
-};
-
 beforeEach(() => {
   process.env = { ...env };
   process.env['ACTIONS_CACHE_URL'] = random();
@@ -95,12 +85,11 @@ beforeEach(() => {
       key: '',
     },
   };
-
-  setToLinux();
 });
 
 describe('getInputs', () => {
   it('returns default values on Linux', () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
     const inputs = context.getInputs();
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual([]);
@@ -110,7 +99,7 @@ describe('getInputs', () => {
   });
 
   it('returns default values on Windows', () => {
-    setToWindows();
+    (os.platform as jest.Mock).mockReturnValue('win32');
     const inputs = context.getInputs();
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual([]);
@@ -120,6 +109,7 @@ describe('getInputs', () => {
   });
 
   it('returns custom user inputs on Linux', () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
     ctx.inputs.cache = false;
     ctx.inputs.packages = 'scheme-basic\ncleveref\nhyperref\n';
     ctx.inputs.prefix = '/usr/local/texlive';
@@ -137,6 +127,7 @@ describe('getInputs', () => {
   });
 
   it('returns custom user inputs on Windows', () => {
+    (os.platform as jest.Mock).mockReturnValue('win32');
     ctx.inputs.cache = false;
     ctx.inputs.packages = '  scheme-basic\ncleveref   hyperref ';
     ctx.inputs.prefix = 'C:\\texlive';
@@ -155,6 +146,7 @@ describe('getInputs', () => {
   });
 
   it('disables caching if environment variables are not set properly', () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
     process.env['ACTIONS_CACHE_URL'] = undefined;
     process.env['ACTIONS_RUNTIME_URL'] = undefined;
     expect(context.getInputs().cache).toBe(false);
@@ -164,11 +156,13 @@ describe('getInputs', () => {
   });
 
   it('uses `TEXLIVE_INSTALL_PREFIX` if set', () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
     process.env['TEXLIVE_INSTALL_PREFIX'] = '/usr/local/texlive';
     expect(context.getInputs().prefix).toBe('/usr/local/texlive');
   });
 
   it('ignores `tlcontrib` if an older version of TeX Live is specified', () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
     ctx.inputs.tlcontrib = true;
     ctx.inputs.version = '2020';
     expect(context.getInputs().tlcontrib).toBe(false);
@@ -178,6 +172,7 @@ describe('getInputs', () => {
   });
 
   it('throws an exception if the version input is invalid', () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
     ctx.inputs.version = 'version';
     expect(context.getInputs).toThrow(
       "`version` must be specified by year or 'latest'",
