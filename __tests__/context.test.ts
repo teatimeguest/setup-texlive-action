@@ -111,7 +111,7 @@ describe('getInputs', () => {
   it('returns custom user inputs on Linux', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     ctx.inputs.cache = false;
-    ctx.inputs.packages = 'scheme-basic\ncleveref\nhyperref\n';
+    ctx.inputs.packages = 'scheme-basic\ncleveref\nhyperref\ncleveref';
     ctx.inputs.prefix = '/usr/local/texlive';
     ctx.inputs.version = '2008';
     const inputs = context.getInputs();

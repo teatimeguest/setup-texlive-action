@@ -59823,6 +59823,7 @@ function getInputs() {
         inputs.cache = false;
         core.warning(`Caching is disabled because neither \`${URLs[0]}\` nor \`${URLs[1]}\` is defined`);
     }
+    inputs.packages = [...new Set(inputs.packages)];
     if (inputs.prefix === '') {
         inputs.prefix =
             (_a = process.env['TEXLIVE_INSTALL_PREFIX']) !== null && _a !== void 0 ? _a : path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive');

@@ -33,6 +33,8 @@ export function getInputs(): Inputs {
     );
   }
 
+  inputs.packages = [...new Set(inputs.packages)];
+
   if (inputs.prefix === '') {
     inputs.prefix =
       process.env['TEXLIVE_INSTALL_PREFIX'] ??
