@@ -38,9 +38,9 @@ jest
   );
 jest.spyOn(core, 'info').mockImplementation();
 jest.spyOn(core, 'warning').mockImplementation();
-jest.spyOn(context, 'getInputs').mockImplementation(() => ({
+jest.spyOn(context, 'loadConfig').mockImplementation(() => ({
   cache: true,
-  packages: [],
+  packages: new Set([]),
   prefix:
     os.platform() === 'win32'
       ? 'C:\\TEMP\\setup-texlive'
@@ -114,9 +114,9 @@ describe('setup', () => {
 
   it('sets up TeX Live with custom settings', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    (context.getInputs as jest.Mock).mockReturnValueOnce({
+    (context.loadConfig as jest.Mock).mockReturnValueOnce({
       cache: false,
-      packages: ['cleveref', 'hyperref', 'scheme-basic'],
+      packages: new Set(['cleveref', 'hyperref', 'scheme-basic']),
       prefix: '/usr/local/texlive',
       tlcontrib: false,
       version: '2008',
@@ -127,11 +127,9 @@ describe('setup', () => {
     expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).toHaveBeenCalledWith([
-      'cleveref',
-      'hyperref',
-      'scheme-basic',
-    ]);
+    expect(tl.Manager.prototype.install).toHaveBeenCalledWith(
+      new Set(['cleveref', 'hyperref', 'scheme-basic']),
+    );
     expect(context.setKey).not.toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
@@ -139,9 +137,9 @@ describe('setup', () => {
 
   it('sets up TeX Live with TLContrib', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    (context.getInputs as jest.Mock).mockReturnValueOnce({
+    (context.loadConfig as jest.Mock).mockReturnValueOnce({
       cache: true,
-      packages: [],
+      packages: new Set([]),
       prefix: '/usr/local/texlive',
       tlcontrib: true,
       version: '2021',
@@ -160,9 +158,9 @@ describe('setup', () => {
 
   it('sets up TeX Live with a system cache', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    (context.getInputs as jest.Mock).mockReturnValueOnce({
+    (context.loadConfig as jest.Mock).mockReturnValueOnce({
       cache: true,
-      packages: ['scheme-basic'],
+      packages: new Set(['scheme-basic']),
       prefix: '/tmp/setup-texlive',
       tlcontrib: false,
       version: '2021',
@@ -176,7 +174,9 @@ describe('setup', () => {
     expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).toHaveBeenCalledWith(['scheme-basic']);
+    expect(tl.Manager.prototype.install).toHaveBeenCalledWith(
+      new Set(['scheme-basic']),
+    );
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
@@ -184,7 +184,7 @@ describe('setup', () => {
 
   it('sets up TeX Live with a full cache', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    (context.getInputs as jest.Mock).mockReturnValueOnce({
+    (context.loadConfig as jest.Mock).mockReturnValueOnce({
       cache: true,
       packages: ['scheme-basic'],
       prefix: '/tmp/setup-texlive',

@@ -18,28 +18,28 @@ export async function run(): Promise<void> {
 
 function getCacheKeys(
   version: tl.Version,
-  packages: ReadonlyArray<string>,
+  packages: ReadonlySet<string>,
 ): [string, Array<string>] {
   const digest = (s: string): string => {
     return crypto.createHash('sha256').update(s).digest('hex');
   };
   const baseKey = `setup-texlive-${os.platform()}-${os.arch()}-${version}-`;
-  const primaryKey = `${baseKey}${digest(JSON.stringify(packages))}`;
+  const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
   return [primaryKey, [baseKey]];
 }
 
 async function setup(): Promise<void> {
-  const inputs = context.getInputs();
-  const tlmgr = new tl.Manager(inputs.version, inputs.prefix);
+  const config = context.loadConfig();
+  const tlmgr = new tl.Manager(config.version, config.prefix);
   const texdir = tlmgr.conf.texmf().texdir;
   const [primaryKey, restoreKeys] = getCacheKeys(
-    inputs.version,
-    inputs.packages,
+    config.version,
+    config.packages,
   );
 
   let cacheKey: string | undefined = undefined;
 
-  if (inputs.cache) {
+  if (config.cache) {
     try {
       cacheKey = await cache.restoreCache([texdir], primaryKey, restoreKeys);
     } catch (error) {
@@ -58,29 +58,29 @@ async function setup(): Promise<void> {
       return;
     }
   } else {
-    await tl.install(inputs.version, inputs.prefix);
+    await tl.install(config.version, config.prefix);
   }
 
-  if (inputs.tlcontrib) {
+  if (config.tlcontrib) {
     await core.group('Setting up TLContrib', async () => {
       await tlmgr.repository.add(tl.tlcontrib().href, 'tlcontrib');
       await tlmgr.pinning.add('tlcontrib', '*');
     });
   }
 
-  if (inputs.packages.length !== 0) {
+  if (config.packages.size !== 0) {
     await core.group('Installing packages', async () => {
-      await tlmgr.install(inputs.packages);
+      await tlmgr.install(config.packages);
     });
   }
 
-  if (inputs.cache) {
+  if (config.cache) {
     context.setKey(primaryKey);
   }
 }
 
 async function saveCache(): Promise<void> {
-  const { version, prefix } = context.getInputs();
+  const { version, prefix } = context.loadConfig();
   const tlmgr = new tl.Manager(version, prefix);
   const primaryKey = context.getKey();
 

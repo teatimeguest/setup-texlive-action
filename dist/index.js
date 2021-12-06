@@ -59800,48 +59800,64 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.getInputs = void 0;
+exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.loadConfig = void 0;
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const tl = __importStar(__nccwpck_require__(8313));
-function getInputs() {
-    var _a;
-    const inputs = {
-        cache: core.getBooleanInput('cache'),
-        packages: core.getInput('packages').split(/\s+/u).filter(Boolean).sort(),
-        prefix: core.getInput('prefix'),
-        tlcontrib: core.getBooleanInput('tlcontrib'),
-        version: tl.LATEST_VERSION,
-    };
+function loadConfig() {
+    const cache = getCache();
+    const packages = getPackages();
+    const prefix = getPrefix();
+    const version = getVersion();
+    const tlcontrib = getTlcontrib(version);
+    return { cache, packages, prefix, tlcontrib, version };
+}
+exports.loadConfig = loadConfig;
+function getCache() {
+    const cache = core.getBooleanInput('cache');
     /**
      * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/}
      */
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const URLs = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'];
-    if (inputs.cache && URLs.every((url) => !Boolean(process.env[url]))) {
-        inputs.cache = false;
+    if (cache && URLs.every((url) => !Boolean(process.env[url]))) {
         core.warning(`Caching is disabled because neither \`${URLs[0]}\` nor \`${URLs[1]}\` is defined`);
+        return false;
     }
-    inputs.packages = [...new Set(inputs.packages)];
-    if (inputs.prefix === '') {
-        inputs.prefix =
-            (_a = process.env['TEXLIVE_INSTALL_PREFIX']) !== null && _a !== void 0 ? _a : path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive');
-    }
-    const version = core.getInput('version');
-    if (version !== 'latest') {
-        if (!tl.isVersion(version)) {
-            throw new Error("`version` must be specified by year or 'latest'");
-        }
-        inputs.version = version;
-    }
-    if (inputs.tlcontrib && inputs.version !== tl.LATEST_VERSION) {
-        inputs.tlcontrib = false;
-        core.warning('`tlcontrib` is ignored since an older version of TeX Live is specified.');
-    }
-    return inputs;
+    return cache;
 }
-exports.getInputs = getInputs;
+function getPackages() {
+    const packages = new Set(core.getInput('packages').split(/\s+/u).sort());
+    packages.delete('');
+    return packages;
+}
+function getPrefix() {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return [
+        core.getInput('prefix'),
+        process.env['TEXLIVE_INSTALL_PREFIX'],
+        path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive'),
+    ].find(Boolean);
+}
+function getTlcontrib(version) {
+    const tlcontrib = core.getBooleanInput('tlcontrib');
+    if (tlcontrib && version !== tl.LATEST_VERSION) {
+        core.warning('`tlcontrib` is ignored since an older version of TeX Live is specified');
+        return false;
+    }
+    return tlcontrib;
+}
+function getVersion() {
+    const version = core.getInput('version');
+    if (tl.isVersion(version)) {
+        return version;
+    }
+    else if (version === 'latest') {
+        return tl.LATEST_VERSION;
+    }
+    throw new Error("`version` must be specified by year or 'latest'");
+}
 function getKey() {
     const key = core.getState('key');
     return key === '' ? undefined : key;
@@ -59914,16 +59930,16 @@ function getCacheKeys(version, packages) {
         return crypto.createHash('sha256').update(s).digest('hex');
     };
     const baseKey = `setup-texlive-${os.platform()}-${os.arch()}-${version}-`;
-    const primaryKey = `${baseKey}${digest(JSON.stringify(packages))}`;
+    const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
     return [primaryKey, [baseKey]];
 }
 async function setup() {
-    const inputs = context.getInputs();
-    const tlmgr = new tl.Manager(inputs.version, inputs.prefix);
+    const config = context.loadConfig();
+    const tlmgr = new tl.Manager(config.version, config.prefix);
     const texdir = tlmgr.conf.texmf().texdir;
-    const [primaryKey, restoreKeys] = getCacheKeys(inputs.version, inputs.packages);
+    const [primaryKey, restoreKeys] = getCacheKeys(config.version, config.packages);
     let cacheKey = undefined;
-    if (inputs.cache) {
+    if (config.cache) {
         try {
             cacheKey = await cache.restoreCache([texdir], primaryKey, restoreKeys);
         }
@@ -59943,25 +59959,25 @@ async function setup() {
         }
     }
     else {
-        await tl.install(inputs.version, inputs.prefix);
+        await tl.install(config.version, config.prefix);
     }
-    if (inputs.tlcontrib) {
+    if (config.tlcontrib) {
         await core.group('Setting up TLContrib', async () => {
             await tlmgr.repository.add(tl.tlcontrib().href, 'tlcontrib');
             await tlmgr.pinning.add('tlcontrib', '*');
         });
     }
-    if (inputs.packages.length !== 0) {
+    if (config.packages.size !== 0) {
         await core.group('Installing packages', async () => {
-            await tlmgr.install(inputs.packages);
+            await tlmgr.install(config.packages);
         });
     }
-    if (inputs.cache) {
+    if (config.cache) {
         context.setKey(primaryKey);
     }
 }
 async function saveCache() {
-    const { version, prefix } = context.getInputs();
+    const { version, prefix } = context.loadConfig();
     const tlmgr = new tl.Manager(version, prefix);
     const primaryKey = context.getKey();
     if (primaryKey === undefined) {
@@ -60070,7 +60086,7 @@ class Manager {
         };
     }
     async install(packages) {
-        if (packages.length !== 0) {
+        if (packages.size !== 0) {
             await exec.exec('tlmgr', ['install', ...packages]);
         }
     }

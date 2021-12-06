@@ -87,12 +87,12 @@ beforeEach(() => {
   };
 });
 
-describe('getInputs', () => {
+describe('loadConfig', () => {
   it('returns default values on Linux', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    const inputs = context.getInputs();
+    const inputs = context.loadConfig();
     expect(inputs.cache).toBe(true);
-    expect(inputs.packages).toStrictEqual([]);
+    expect(inputs.packages).toStrictEqual(new Set([]));
     expect(inputs.prefix).toBe('/tmp/setup-texlive');
     expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2021');
@@ -100,9 +100,9 @@ describe('getInputs', () => {
 
   it('returns default values on Windows', () => {
     (os.platform as jest.Mock).mockReturnValue('win32');
-    const inputs = context.getInputs();
+    const inputs = context.loadConfig();
     expect(inputs.cache).toBe(true);
-    expect(inputs.packages).toStrictEqual([]);
+    expect(inputs.packages).toStrictEqual(new Set([]));
     expect(inputs.prefix).toBe('C:\\TEMP\\setup-texlive');
     expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2021');
@@ -114,13 +114,11 @@ describe('getInputs', () => {
     ctx.inputs.packages = 'scheme-basic\ncleveref\nhyperref\ncleveref';
     ctx.inputs.prefix = '/usr/local/texlive';
     ctx.inputs.version = '2008';
-    const inputs = context.getInputs();
+    const inputs = context.loadConfig();
     expect(inputs.cache).toBe(false);
-    expect(inputs.packages).toStrictEqual([
-      'cleveref',
-      'hyperref',
-      'scheme-basic',
-    ]);
+    expect(inputs.packages).toStrictEqual(
+      new Set(['cleveref', 'hyperref', 'scheme-basic']),
+    );
     expect(inputs.prefix).toBe('/usr/local/texlive');
     expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2008');
@@ -133,13 +131,11 @@ describe('getInputs', () => {
     ctx.inputs.prefix = 'C:\\texlive';
     ctx.inputs.tlcontrib = true;
     ctx.inputs.version = '2021';
-    const inputs = context.getInputs();
+    const inputs = context.loadConfig();
     expect(inputs.cache).toBe(false);
-    expect(inputs.packages).toStrictEqual([
-      'cleveref',
-      'hyperref',
-      'scheme-basic',
-    ]);
+    expect(inputs.packages).toStrictEqual(
+      new Set(['cleveref', 'hyperref', 'scheme-basic']),
+    );
     expect(inputs.prefix).toBe('C:\\texlive');
     expect(inputs.tlcontrib).toBe(true);
     expect(inputs.version).toBe('2021');
@@ -149,7 +145,7 @@ describe('getInputs', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     process.env['ACTIONS_CACHE_URL'] = undefined;
     process.env['ACTIONS_RUNTIME_URL'] = undefined;
-    expect(context.getInputs().cache).toBe(false);
+    expect(context.loadConfig().cache).toBe(false);
     expect(core.warning).toHaveBeenCalledWith(
       'Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_RUNTIME_URL` is defined',
     );
@@ -158,23 +154,23 @@ describe('getInputs', () => {
   it('uses `TEXLIVE_INSTALL_PREFIX` if set', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     process.env['TEXLIVE_INSTALL_PREFIX'] = '/usr/local/texlive';
-    expect(context.getInputs().prefix).toBe('/usr/local/texlive');
+    expect(context.loadConfig().prefix).toBe('/usr/local/texlive');
   });
 
   it('ignores `tlcontrib` if an older version of TeX Live is specified', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     ctx.inputs.tlcontrib = true;
     ctx.inputs.version = '2020';
-    expect(context.getInputs().tlcontrib).toBe(false);
+    expect(context.loadConfig().tlcontrib).toBe(false);
     expect(core.warning).toHaveBeenCalledWith(
-      '`tlcontrib` is ignored since an older version of TeX Live is specified.',
+      '`tlcontrib` is ignored since an older version of TeX Live is specified',
     );
   });
 
   it('throws an exception if the version input is invalid', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     ctx.inputs.version = 'version';
-    expect(context.getInputs).toThrow(
+    expect(context.loadConfig).toThrow(
       "`version` must be specified by year or 'latest'",
     );
   });

@@ -73,12 +73,12 @@ describe('Manager', () => {
     const tlmgr = new tl.Manager('2019', '/usr/local/texlive');
 
     it('does not invoke `tlmgr install` if the argument is empty', async () => {
-      await tlmgr.install([]);
+      await tlmgr.install(new Set([]));
       expect(exec.exec).not.toHaveBeenCalled();
     });
 
     it('installs packages by invoking `tlmgr install`', async () => {
-      const packages = ['foo', 'bar', 'baz'];
+      const packages = new Set(['foo', 'bar', 'baz']);
       await tlmgr.install(packages);
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', ['install', ...packages]);
     });
