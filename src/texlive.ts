@@ -355,15 +355,20 @@ async function patch(version: Version, texdir: string): Promise<void> {
    * Prevents `install-tl(-windows).bat` from being stopped by `pause`.
    */
   if (os.platform() === 'win32') {
+    const target = path.join(
+      texdir,
+      InstallTL.executable(version, os.platform()),
+    );
     try {
-      await updateFile(
-        path.join(texdir, InstallTL.executable(version, os.platform())),
-        { search: /\bpause(?: Done)?\b/gmu, replace: '' },
-      );
+      await updateFile(target, {
+        search: /\bpause(?: Done)?\b/gmu,
+        replace: '',
+      });
     } catch (error) {
-      if (isNodejsError(error) && error.code !== 'ENOENT') {
+      if (!(isNodejsError(error) && error.code === 'ENOENT')) {
         throw error;
       }
+      core.info(`${target} not found`);
     }
   }
   /**

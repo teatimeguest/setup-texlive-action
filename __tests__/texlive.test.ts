@@ -531,10 +531,25 @@ describe('patch', () => {
     ).resolves.not.toThrow();
   });
 
-  it('rethrows the exception of which code is not `ENOENT`', async () => {
+  it('rethrows an error that is not of Node.js', async () => {
     (fs.readFile as jest.Mock).mockImplementation(async (filename: string) => {
       if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
         const error = new Error('oops');
+        throw error;
+      }
+      return random();
+    });
+    (os.platform as jest.Mock).mockReturnValue('win32');
+    await expect(tl.install('2021', 'C:\\TEMP\\setup-texlive')).rejects.toThrow(
+      'oops',
+    );
+  });
+
+  it('rethrows a Node.js error of which code is not `ENOENT`', async () => {
+    (fs.readFile as jest.Mock).mockImplementation(async (filename: string) => {
+      if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
+        const error = new Error('oops');
+        (error as NodeJS.ErrnoException).code = 'ENOTDIR';
         throw error;
       }
       return random();
