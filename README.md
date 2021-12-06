@@ -59,7 +59,9 @@ Supported versions are `2008` to `2021` for Linux and Windows, and
 `2013` to `2021` for macOS.
 
 > Versions `2008` to `2012` can be installed on `macos-latest` but
-> do not work because the `kpsewhich` aborts with "Bad CPU type."
+> do not work
+> because the `kpsewhich` for those versions is a 32-bit executable and
+> crashes with "Bad CPU type in executable."
 
 ### Caching
 
@@ -96,6 +98,10 @@ All inputs are optional.
 |---|---|---|
 |`cache-hit`|Bool|A boolean value to indicate if a cache was hit.|
 
+## Changelog
+
+See the [releases page][releases].
+
 ## License
 
 [MIT License](./LICENSE)
@@ -108,5 +114,6 @@ All inputs are optional.
 [historic]: https://tug.org/historic/
 [marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action
+[releases]: https://github.com/teatimeguest/setup-texlive-action/releases
 [texlive]: https://tug.org/texlive/
 [tlcontrib]: https://contrib.texlive.info
