@@ -41,6 +41,7 @@ async function setup(): Promise<void> {
 
   if (config.cache) {
     try {
+      core.info('Restoring cache');
       cacheKey = await cache.restoreCache([texdir], primaryKey, restoreKeys);
     } catch (error) {
       core.info(`Failed to restore cache: ${error}`);
@@ -51,13 +52,13 @@ async function setup(): Promise<void> {
   }
 
   if (Boolean(cacheKey)) {
-    core.info('Cache restored');
     context.setCacheHit();
     await tlmgr.path.add();
     if (cacheKey === primaryKey) {
       return;
     }
   } else {
+    core.info('Cache not found');
     await tl.install(config.version, config.prefix);
   }
 

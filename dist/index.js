@@ -59941,6 +59941,7 @@ async function setup() {
     let cacheKey = undefined;
     if (config.cache) {
         try {
+            core.info('Restoring cache');
             cacheKey = await cache.restoreCache([texdir], primaryKey, restoreKeys);
         }
         catch (error) {
@@ -59951,7 +59952,6 @@ async function setup() {
         }
     }
     if (Boolean(cacheKey)) {
-        core.info('Cache restored');
         context.setCacheHit();
         await tlmgr.path.add();
         if (cacheKey === primaryKey) {
@@ -59959,6 +59959,7 @@ async function setup() {
         }
     }
     else {
+        core.info('Cache not found');
         await tl.install(config.version, config.prefix);
     }
     if (config.tlcontrib) {
