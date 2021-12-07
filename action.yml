@@ -22,9 +22,7 @@ inputs:
     required: false
   prefix:
     description: >-
-      TeX Live installation prefix.
-      The default is `C:\TEMP\setup-texlive` on Windows,
-      `/tmp/setup-texlive` on Linux and macOS.
+      TeX Live installation prefix. The default is `$RUNNER_TEMP/setup-texlive`.
     required: false
   tlcontrib:
     description: >-

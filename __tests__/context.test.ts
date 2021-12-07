@@ -75,6 +75,7 @@ beforeEach(() => {
   process.env['ACTIONS_CACHE_URL'] = random();
   process.env['GITHUB_PATH'] = undefined;
   process.env['TEXLIVE_INSTALL_PREFIX'] = undefined;
+  process.env['RUNNER_TEMP'] ??= random();
 
   ctx = {
     // The default values defined in `action.yml`.
@@ -99,7 +100,9 @@ describe('loadConfig', () => {
     const inputs = await context.loadConfig();
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual(new Set([]));
-    expect(inputs.prefix).toBe('/tmp/setup-texlive');
+    expect(inputs.prefix).toBe(
+      path.join(process.env['RUNNER_TEMP']!, 'setup-texlive'),
+    );
     expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2021');
   });
@@ -109,7 +112,9 @@ describe('loadConfig', () => {
     const inputs = await context.loadConfig();
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual(new Set([]));
-    expect(inputs.prefix).toBe('C:\\TEMP\\setup-texlive');
+    expect(inputs.prefix).toBe(
+      path.join(process.env['RUNNER_TEMP']!, 'setup-texlive'),
+    );
     expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2021');
   });

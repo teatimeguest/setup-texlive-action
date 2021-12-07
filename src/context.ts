@@ -51,11 +51,12 @@ async function getPackages(): Promise<Set<string>> {
 }
 
 function getPrefix(): string {
+  const tmpdir = process.env['RUNNER_TEMP'] ?? os.tmpdir();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return [
     core.getInput('prefix'),
     process.env['TEXLIVE_INSTALL_PREFIX'],
-    path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive'),
+    path.join(tmpdir, 'setup-texlive'),
   ].find(Boolean)!;
 }
 
