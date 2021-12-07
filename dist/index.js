@@ -59856,7 +59856,7 @@ function getVersion() {
     else if (version === 'latest') {
         return tl.LATEST_VERSION;
     }
-    throw new Error("`version` must be specified by year or 'latest'");
+    throw new TypeError("`version` must be specified by year or 'latest'");
 }
 function getKey() {
     const key = core.getState('key');
@@ -60062,7 +60062,7 @@ async function install(version, prefix) {
      *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
      */
     if (Number(version) < (os.platform() === 'darwin' ? 2013 : 2008)) {
-        throw new Error(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
+        throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
     }
     await new InstallTL(version, prefix).run();
 }

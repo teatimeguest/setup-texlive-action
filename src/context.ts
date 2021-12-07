@@ -71,7 +71,7 @@ function getVersion(): tl.Version {
   } else if (version === 'latest') {
     return tl.LATEST_VERSION;
   }
-  throw new Error("`version` must be specified by year or 'latest'");
+  throw new TypeError("`version` must be specified by year or 'latest'");
 }
 
 export function getKey(): string | undefined {

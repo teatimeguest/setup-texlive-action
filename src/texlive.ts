@@ -34,7 +34,7 @@ export async function install(version: Version, prefix: string): Promise<void> {
    *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
    */
   if (Number(version) < (os.platform() === 'darwin' ? 2013 : 2008)) {
-    throw new Error(
+    throw new RangeError(
       `Installation of TeX Live ${version} on ${os.platform()} is not supported`,
     );
   }
