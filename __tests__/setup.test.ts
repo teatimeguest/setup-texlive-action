@@ -38,7 +38,7 @@ jest
   );
 jest.spyOn(core, 'info').mockImplementation();
 jest.spyOn(core, 'warning').mockImplementation();
-jest.spyOn(context, 'loadConfig').mockImplementation(() => ({
+jest.spyOn(context, 'loadConfig').mockImplementation(async () => ({
   cache: true,
   packages: new Set([]),
   prefix:
@@ -114,7 +114,7 @@ describe('setup', () => {
 
   it('sets up TeX Live with custom settings', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    (context.loadConfig as jest.Mock).mockReturnValueOnce({
+    (context.loadConfig as jest.Mock).mockResolvedValueOnce({
       cache: false,
       packages: new Set(['cleveref', 'hyperref', 'scheme-basic']),
       prefix: '/usr/local/texlive',
@@ -137,7 +137,7 @@ describe('setup', () => {
 
   it('sets up TeX Live with TLContrib', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    (context.loadConfig as jest.Mock).mockReturnValueOnce({
+    (context.loadConfig as jest.Mock).mockResolvedValueOnce({
       cache: true,
       packages: new Set([]),
       prefix: '/usr/local/texlive',
@@ -158,7 +158,7 @@ describe('setup', () => {
 
   it('sets up TeX Live with a system cache', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    (context.loadConfig as jest.Mock).mockReturnValueOnce({
+    (context.loadConfig as jest.Mock).mockResolvedValueOnce({
       cache: true,
       packages: new Set(['scheme-basic']),
       prefix: '/tmp/setup-texlive',
@@ -184,7 +184,7 @@ describe('setup', () => {
 
   it('sets up TeX Live with a full cache', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    (context.loadConfig as jest.Mock).mockReturnValueOnce({
+    (context.loadConfig as jest.Mock).mockResolvedValueOnce({
       cache: true,
       packages: ['scheme-basic'],
       prefix: '/tmp/setup-texlive',

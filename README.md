@@ -87,7 +87,8 @@ All inputs are optional.
 |Name|Type|Description|
 |---|---|---|
 |`cache`|Bool|Enable caching for `TEXDIR`. The default is `true`.|
-|`packages`|String|Whitespace-separated list of TeX packages to be installed. Schemes and collections can also be specified.|
+|`package-file`|String|File containing the whitespace-separated TeX package names to be installed. Schemes and collections can also be specified. Everything after a `#` is treated as a comment.|
+|`packages`|String|Whitespace-separated TeX package names to be installed. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. The default is `C:\TEMP\setup-texlive` on Windows, `/tmp/setup-texlive` on Linux and macOS.|
 |`tlcontrib`|Bool|Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored if an older version is specified for `version`. The default is `false`.|
 |`version`|String|TeX Live version to install. Supported values are `2008` to `2021`, and `latest`.|

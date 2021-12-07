@@ -1,3 +1,4 @@
+import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -13,9 +14,9 @@ export interface Config {
   readonly version: tl.Version;
 }
 
-export function loadConfig(): Config {
+export async function loadConfig(): Promise<Config> {
   const cache = getCache();
-  const packages = getPackages();
+  const packages = await getPackages();
   const prefix = getPrefix();
   const version = getVersion();
   const tlcontrib = getTlcontrib(version);
@@ -38,8 +39,13 @@ function getCache(): boolean {
   return cache;
 }
 
-function getPackages(): Set<string> {
-  const packages = new Set(core.getInput('packages').split(/\s+/u).sort());
+async function getPackages(): Promise<Set<string>> {
+  const inline = core.getInput('packages');
+  const filename = core.getInput('package-file');
+  const file = filename === '' ? '' : await fs.readFile(filename, 'utf8');
+  const packages = new Set(
+    [inline, file].flatMap((content) => content.split(/(?:#.*$|\s+)/mu)).sort(),
+  );
   packages.delete('');
   return packages;
 }

@@ -59801,13 +59801,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.loadConfig = void 0;
+const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const tl = __importStar(__nccwpck_require__(8313));
-function loadConfig() {
+async function loadConfig() {
     const cache = getCache();
-    const packages = getPackages();
+    const packages = await getPackages();
     const prefix = getPrefix();
     const version = getVersion();
     const tlcontrib = getTlcontrib(version);
@@ -59827,8 +59828,11 @@ function getCache() {
     }
     return cache;
 }
-function getPackages() {
-    const packages = new Set(core.getInput('packages').split(/\s+/u).sort());
+async function getPackages() {
+    const inline = core.getInput('packages');
+    const filename = core.getInput('package-file');
+    const file = filename === '' ? '' : await fs_1.promises.readFile(filename, 'utf8');
+    const packages = new Set([inline, file].flatMap((content) => content.split(/(?:#.*$|\s+)/mu)).sort());
     packages.delete('');
     return packages;
 }
@@ -59934,7 +59938,7 @@ function getCacheKeys(version, packages) {
     return [primaryKey, [baseKey]];
 }
 async function setup() {
-    const config = context.loadConfig();
+    const config = await context.loadConfig();
     const tlmgr = new tl.Manager(config.version, config.prefix);
     const texdir = tlmgr.conf.texmf().texdir;
     const [primaryKey, restoreKeys] = getCacheKeys(config.version, config.packages);
@@ -59978,7 +59982,7 @@ async function setup() {
     }
 }
 async function saveCache() {
-    const { version, prefix } = context.loadConfig();
+    const { version, prefix } = await context.loadConfig();
     const tlmgr = new tl.Manager(version, prefix);
     const primaryKey = context.getKey();
     if (primaryKey === undefined) {

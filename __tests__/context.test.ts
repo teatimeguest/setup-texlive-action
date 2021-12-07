@@ -1,3 +1,4 @@
+import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -12,6 +13,7 @@ const env = { ...process.env };
 let ctx: {
   inputs: {
     cache: boolean;
+    'package-file': string;
     packages: string;
     prefix: string;
     tlcontrib: boolean;
@@ -23,6 +25,9 @@ let ctx: {
   };
 };
 
+jest.spyOn(fs, 'readFile').mockImplementation(async (filename) => {
+  throw new Error(`Unexpected file access: ${filename}`);
+});
 jest.mock('os', () => ({
   platform: jest.fn(),
 }));
@@ -75,6 +80,7 @@ beforeEach(() => {
     // The default values defined in `action.yml`.
     inputs: {
       cache: true,
+      'package-file': '',
       packages: '',
       prefix: '',
       tlcontrib: false,
@@ -88,9 +94,9 @@ beforeEach(() => {
 });
 
 describe('loadConfig', () => {
-  it('returns default values on Linux', () => {
+  it('returns default values on Linux', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    const inputs = context.loadConfig();
+    const inputs = await context.loadConfig();
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual(new Set([]));
     expect(inputs.prefix).toBe('/tmp/setup-texlive');
@@ -98,9 +104,9 @@ describe('loadConfig', () => {
     expect(inputs.version).toBe('2021');
   });
 
-  it('returns default values on Windows', () => {
+  it('returns default values on Windows', async () => {
     (os.platform as jest.Mock).mockReturnValue('win32');
-    const inputs = context.loadConfig();
+    const inputs = await context.loadConfig();
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual(new Set([]));
     expect(inputs.prefix).toBe('C:\\TEMP\\setup-texlive');
@@ -108,13 +114,13 @@ describe('loadConfig', () => {
     expect(inputs.version).toBe('2021');
   });
 
-  it('returns custom user inputs on Linux', () => {
+  it('returns custom user inputs on Linux', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     ctx.inputs.cache = false;
     ctx.inputs.packages = 'scheme-basic\ncleveref\nhyperref\ncleveref';
     ctx.inputs.prefix = '/usr/local/texlive';
     ctx.inputs.version = '2008';
-    const inputs = context.loadConfig();
+    const inputs = await context.loadConfig();
     expect(inputs.cache).toBe(false);
     expect(inputs.packages).toStrictEqual(
       new Set(['cleveref', 'hyperref', 'scheme-basic']),
@@ -124,53 +130,63 @@ describe('loadConfig', () => {
     expect(inputs.version).toBe('2008');
   });
 
-  it('returns custom user inputs on Windows', () => {
+  it('returns custom user inputs on Windows', async () => {
+    (fs.readFile as jest.Mock).mockResolvedValueOnce(
+      [
+        '# this is a comment     ',
+        'latex-bin tex #   this is a coment',
+        '  xetex# this is a comment',
+        '      #',
+        'luatex ',
+      ].join('\n'),
+    );
     (os.platform as jest.Mock).mockReturnValue('win32');
     ctx.inputs.cache = false;
-    ctx.inputs.packages = '  scheme-basic\ncleveref   hyperref ';
+    ctx.inputs['package-file'] = '.github/tl_packages';
+    ctx.inputs.packages = '  luatex\ncleveref   hyperref ';
     ctx.inputs.prefix = 'C:\\texlive';
     ctx.inputs.tlcontrib = true;
     ctx.inputs.version = '2021';
-    const inputs = context.loadConfig();
+    const inputs = await context.loadConfig();
     expect(inputs.cache).toBe(false);
     expect(inputs.packages).toStrictEqual(
-      new Set(['cleveref', 'hyperref', 'scheme-basic']),
+      new Set(['cleveref', 'hyperref', 'latex-bin', 'luatex', 'tex', 'xetex']),
     );
     expect(inputs.prefix).toBe('C:\\texlive');
     expect(inputs.tlcontrib).toBe(true);
     expect(inputs.version).toBe('2021');
   });
 
-  it('disables caching if environment variables are not set properly', () => {
+  it('disables caching if environment variables are not set properly', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     process.env['ACTIONS_CACHE_URL'] = undefined;
     process.env['ACTIONS_RUNTIME_URL'] = undefined;
-    expect(context.loadConfig().cache).toBe(false);
+    expect((await context.loadConfig()).cache).toBe(false);
     expect(core.warning).toHaveBeenCalledWith(
       'Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_RUNTIME_URL` is defined',
     );
   });
 
-  it('uses `TEXLIVE_INSTALL_PREFIX` if set', () => {
+  it('uses `TEXLIVE_INSTALL_PREFIX` if set', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     process.env['TEXLIVE_INSTALL_PREFIX'] = '/usr/local/texlive';
-    expect(context.loadConfig().prefix).toBe('/usr/local/texlive');
+    expect((await context.loadConfig()).prefix).toBe('/usr/local/texlive');
   });
 
-  it('ignores `tlcontrib` if an older version of TeX Live is specified', () => {
+  it('ignores `tlcontrib` if an older version of TeX Live is specified', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     ctx.inputs.tlcontrib = true;
     ctx.inputs.version = '2020';
-    expect(context.loadConfig().tlcontrib).toBe(false);
+    expect((await context.loadConfig()).tlcontrib).toBe(false);
     expect(core.warning).toHaveBeenCalledWith(
       '`tlcontrib` is ignored since an older version of TeX Live is specified',
     );
   });
 
-  it('throws an exception if the version input is invalid', () => {
+  it('throws an exception if the version input is invalid', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     ctx.inputs.version = 'version';
-    expect(context.loadConfig).toThrow(
+    await expect(context.loadConfig).rejects.toThrow(
       "`version` must be specified by year or 'latest'",
     );
   });

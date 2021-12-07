@@ -29,7 +29,7 @@ function getCacheKeys(
 }
 
 async function setup(): Promise<void> {
-  const config = context.loadConfig();
+  const config = await context.loadConfig();
   const tlmgr = new tl.Manager(config.version, config.prefix);
   const texdir = tlmgr.conf.texmf().texdir;
   const [primaryKey, restoreKeys] = getCacheKeys(
@@ -81,7 +81,7 @@ async function setup(): Promise<void> {
 }
 
 async function saveCache(): Promise<void> {
-  const { version, prefix } = context.loadConfig();
+  const { version, prefix } = await context.loadConfig();
   const tlmgr = new tl.Manager(version, prefix);
   const primaryKey = context.getKey();
 

@@ -8,9 +8,16 @@ inputs:
       Enable caching for `TEXDIR`.
     default: true
     required: false
+  package-file:
+    description: >-
+      File containing
+      the whitespace-separated TeX package names to be installed.
+      Schemes and collections can also be specified.
+      Everything after a `#` is treated as a comment.
+    required: false
   packages:
     description: >-
-      Whitespace-separated list of TeX packages to be installed.
+      Whitespace-separated TeX package names to be installed.
       Schemes and collections can also be specified.
     required: false
   prefix:
