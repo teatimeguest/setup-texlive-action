@@ -59837,11 +59837,13 @@ async function getPackages() {
     return packages;
 }
 function getPrefix() {
+    var _a;
+    const tmpdir = (_a = process.env['RUNNER_TEMP']) !== null && _a !== void 0 ? _a : os.tmpdir();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return [
         core.getInput('prefix'),
         process.env['TEXLIVE_INSTALL_PREFIX'],
-        path.join(os.platform() === 'win32' ? 'C:\\TEMP' : '/tmp', 'setup-texlive'),
+        path.join(tmpdir, 'setup-texlive'),
     ].find(Boolean);
 }
 function getTlcontrib(version) {
