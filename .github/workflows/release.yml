@@ -42,13 +42,8 @@ jobs:
             HOMEBREW_NO_AUTO_UPDATE=1 \
               brew install git-chglog/git-chglog/git-chglog
 
-            next="$(npm version patch)"
-            git add package-lock.json package.json
-            git commit -m "chore(release): prepare for ${next} [skip ci]"
-            git chglog --next-tag "${next}" \
-              | git tag "${next}" --cleanup=whitespace -F -
-            git tag -f "${next%%.*}" -m "${next}"
-
+            npm run release patch
+            next="v$(jq -r .version package.json)"
             git push origin main
             git push origin "${next}"
             git push -f origin "${next%%.*}"
