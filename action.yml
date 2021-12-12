@@ -10,10 +10,9 @@ inputs:
     required: false
   package-file:
     description: >-
-      File containing
-      the whitespace-separated TeX package names to be installed.
-      Schemes and collections can also be specified.
-      Everything after a `#` is treated as a comment.
+      File containing TeX package names to be installed.
+      The file format is whitespace-delimited, and
+      everything after a `#` is treated as a comment.
     required: false
   packages:
     description: >-
@@ -22,7 +21,9 @@ inputs:
     required: false
   prefix:
     description: >-
-      TeX Live installation prefix. The default is `$RUNNER_TEMP/setup-texlive`.
+      TeX Live installation prefix.
+      This has the same effect as `TEXLIVE_INSTALL_PREFIX`.
+      The default is `$RUNNER_TEMP/setup-texlive`.
     required: false
   tlcontrib:
     description: >-

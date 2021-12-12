@@ -41,9 +41,11 @@ If you want to install additional packages, you can use the `packages` input:
       hyperref
 ```
 
+You can also specify packages by file using [`package-file`][inputs] input.
+
 ### Historic versions
 
-You can also use an older version of TeX Live by specifying the `version`:
+You can use an older version of TeX Live by specifying the `version`:
 
 ```yaml
 - name: Setup TeX Live 2008
@@ -55,9 +57,11 @@ You can also use an older version of TeX Live by specifying the `version`:
 The action will install it by
 downloading the installation script from the [historic archives][historic] and
 configuring the package repository appropriately.
+
 Supported versions are `2008` to `2021` for Linux and Windows, and
 `2013` to `2021` for macOS.
 
+> **Remark.**
 > Versions `2008` to `2012` can be installed on `macos-latest` but
 > do not work
 > because the `kpsewhich` for those versions is a 32-bit executable and
@@ -66,8 +70,8 @@ Supported versions are `2008` to `2021` for Linux and Windows, and
 ### Caching
 
 By default,
-the action will cache `TEXDIR` using [`@actions/cache`][actions-cache]
-after the workflow job is completed.
+the action will save `TEXDIR` to cache using [`@actions/cache`][actions-cache]
+after the workflow job completes.
 If you want to disable caching, you can use the `cache` input:
 
 ```yaml
@@ -86,10 +90,10 @@ All inputs are optional.
 
 |Name|Type|Description|
 |---|---|---|
-|`cache`|Bool|Enable caching for `TEXDIR`. The default is `true`.|
-|`package-file`|String|File containing the whitespace-separated TeX package names to be installed. Schemes and collections can also be specified. Everything after a `#` is treated as a comment.|
-|`packages`|String|Whitespace-separated TeX package names to be installed. Schemes and collections can also be specified.|
-|`prefix`|String|TeX Live installation prefix. The default is `$RUNNER_TEMP/setup-texlive`.|
+|`cache`|Bool|Enable caching for [`TEXDIR`][texdir]. The default is `true`.|
+|`package-file`|String|File containing TeX package names to be installed. The file format is whitespace-delimited, and everything after a `#` is treated as a comment.|
+|`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections can also be specified.|
+|`prefix`|String|TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-environment-variables]. The default is <code>[$RUNNER_TEMP][actions-environment-variables]/setup-texlive</code>.|
 |`tlcontrib`|Bool|Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored if an older version is specified for `version`. The default is `false`.|
 |`version`|String|TeX Live version to install. Supported values are `2008` to `2021`, and `latest`.|
 
@@ -108,13 +112,17 @@ See the [releases page][releases].
 [MIT License](./LICENSE)
 
 [actions-cache]: https://github.com/actions/toolkit/tree/main/packages/cache
+[actions-environment-variables]: https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
 [ci-badge]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml
 [codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
 [codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
 [historic]: https://tug.org/historic/
+[inputs]: https://github.com/teatimeguest/setup-texlive-action#inputs
+[install-tl-environment-variables]: https://tug.org/texlive/doc/install-tl.html#ENVIRONMENT-VARIABLES
 [marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action
 [releases]: https://github.com/teatimeguest/setup-texlive-action/releases
+[texdir]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#x1-250003.2.3
 [texlive]: https://tug.org/texlive/
 [tlcontrib]: https://contrib.texlive.info
