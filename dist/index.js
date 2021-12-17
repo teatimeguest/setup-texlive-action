@@ -59965,7 +59965,9 @@ async function setup() {
         }
     }
     else {
-        core.info('Cache not found');
+        if (config.cache) {
+            core.info('Cache not found');
+        }
         await tl.install(config.version, config.prefix);
     }
     if (config.tlcontrib) {

@@ -58,7 +58,9 @@ async function setup(): Promise<void> {
       return;
     }
   } else {
-    core.info('Cache not found');
+    if (config.cache) {
+      core.info('Cache not found');
+    }
     await tl.install(config.version, config.prefix);
   }
 
