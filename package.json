@@ -8,7 +8,7 @@
     "format": "prettier --write src/*.ts __tests__/*.ts",
     "format-check": "prettier --check __tests__/*.ts src/*.ts && ec",
     "lint": "eslint --ext .ts __tests__ src",
-    "release": "bash .github/workflows/release.sh",
+    "release": "bash scripts/release.sh",
     "test": "jest --coverage"
   },
   "author": "@teatimeguest",
