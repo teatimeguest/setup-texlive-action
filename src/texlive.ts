@@ -123,7 +123,10 @@ export class Manager {
   }
 
   get repository(): Readonly<{
-    add: (repo: string, tag?: string) => Promise<void>;
+    /**
+     * @returns `false` if the repository already exists, otherwise `true`.
+     */
+    add: (repo: string, tag?: string) => Promise<boolean>;
   }> {
     if (Number(this.version) < 2012) {
       throw new Error(
@@ -138,6 +141,7 @@ export class Manager {
           ['repository', 'add', repo, ...(Boolean(tag) ? [tag!] : [])],
           { ignoreReturnCode: true },
         );
+        const success = exitCode === 0;
         if (
           /**
            * `tlmgr repository add` returns non-zero status code
@@ -145,13 +149,14 @@ export class Manager {
            *
            * @todo (Need to make sure that the tagged repo is really tlcontrib?)
            */
-          exitCode !== 0 &&
+          !success &&
           !stderr.includes('repository or its tag already defined')
         ) {
           throw new Error(
             `\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`,
           );
         }
+        return success;
       },
     };
   }

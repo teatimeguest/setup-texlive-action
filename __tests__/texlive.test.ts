@@ -152,7 +152,7 @@ describe('Manager', () => {
   describe('repository.add', () => {
     it('adds a repository with a tag', async () => {
       const tlmgr = new tl.Manager('2019', '/usr/local/texlive');
-      await tlmgr.repository.add(random(), 'tag');
+      await expect(tlmgr.repository.add(random(), 'tag')).resolves.toBe(true);
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         'tlmgr',
         ['repository', 'add', expect.anything(), 'tag'],
@@ -162,7 +162,7 @@ describe('Manager', () => {
 
     it('adds a repository with no tags', async () => {
       const tlmgr = new tl.Manager('2019', '/usr/local/texlive');
-      await tlmgr.repository.add(random());
+      await expect(tlmgr.repository.add(random())).resolves.toBe(true);
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         'tlmgr',
         ['repository', 'add', expect.anything()],
@@ -180,9 +180,9 @@ describe('Manager', () => {
         ].join('\n'),
       });
       const tlmgr = new tl.Manager('2019', '/usr/local/texlive');
-      await expect(
-        tlmgr.repository.add(random(), random()),
-      ).resolves.not.toThrow();
+      await expect(tlmgr.repository.add(random(), random())).resolves.toBe(
+        false,
+      );
     });
 
     it('fails with non-zero status code', async () => {

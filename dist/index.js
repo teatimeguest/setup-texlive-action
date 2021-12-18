@@ -60131,6 +60131,7 @@ class Manager {
                 const { exitCode, stderr } = await exec.getExecOutput('tlmgr', 
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 ['repository', 'add', repo, ...(Boolean(tag) ? [tag] : [])], { ignoreReturnCode: true });
+                const success = exitCode === 0;
                 if (
                 /**
                  * `tlmgr repository add` returns non-zero status code
@@ -60138,10 +60139,11 @@ class Manager {
                  *
                  * @todo (Need to make sure that the tagged repo is really tlcontrib?)
                  */
-                exitCode !== 0 &&
+                !success &&
                     !stderr.includes('repository or its tag already defined')) {
                     throw new Error(`\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`);
                 }
+                return success;
             },
         };
     }
