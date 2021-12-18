@@ -160,6 +160,16 @@ describe('Manager', () => {
       );
     });
 
+    it('adds a repository with the empty tag', async () => {
+      const tlmgr = new tl.Manager('2019', '/usr/local/texlive');
+      await expect(tlmgr.repository.add(random(), '')).resolves.toBe(true);
+      expect(exec.getExecOutput).toHaveBeenCalledWith(
+        'tlmgr',
+        ['repository', 'add', expect.anything(), ''],
+        expect.objectContaining({ ignoreReturnCode: true }),
+      );
+    });
+
     it('adds a repository with no tags', async () => {
       const tlmgr = new tl.Manager('2019', '/usr/local/texlive');
       await expect(tlmgr.repository.add(random())).resolves.toBe(true);

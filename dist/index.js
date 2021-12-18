@@ -60128,9 +60128,7 @@ class Manager {
         }
         return {
             add: async (repo, tag) => {
-                const { exitCode, stderr } = await exec.getExecOutput('tlmgr', 
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                ['repository', 'add', repo, ...(Boolean(tag) ? [tag] : [])], { ignoreReturnCode: true });
+                const { exitCode, stderr } = await exec.getExecOutput('tlmgr', ['repository', 'add', repo, ...(tag === undefined ? [] : [tag])], { ignoreReturnCode: true });
                 const success = exitCode === 0;
                 if (
                 /**
