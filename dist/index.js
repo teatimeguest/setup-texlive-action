@@ -60101,14 +60101,6 @@ class Manager {
     }
     get path() {
         return {
-            /**
-             * Adds the bin directory of TeX Live directly to the PATH.
-             * This method does not invoke `tlmgr path add`
-             * to avoid to create symlinks in the system directory.
-             *
-             * @todo `install-tl -print-platform` and
-             *   `tlmgr print-platform` may be useful.
-             */
             add: async () => {
                 const matched = await expand(path.join(this.prefix, this.version, 'bin', '*'));
                 if (matched.length !== 1) {
@@ -60143,6 +60135,8 @@ class Manager {
                 /**
                  * `tlmgr repository add` returns non-zero status code
                  * if the same repository or tag is added again.
+                 *
+                 * @todo (Need to make sure that the tagged repo is really tlcontrib?)
                  */
                 exitCode !== 0 &&
                     !stderr.includes('repository or its tag already defined')) {
@@ -60155,8 +60149,11 @@ class Manager {
 exports.Manager = Manager;
 /**
  * Gets the URL of the main repository of TeX Live.
- * Returns the `ctan` if the version is the latest, otherwise returns
- * the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
+ *
+ * @returns The `ctan` if the version is the latest, otherwise
+ *   the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
+ *
+ * @todo Use other archives as well.
  */
 function repository(version) {
     const base = version === exports.LATEST_VERSION
@@ -60208,7 +60205,7 @@ class InstallTL {
         });
     }
     /**
-     * Returns the filename of the installer executable.
+     * @returns The filename of the installer executable.
      */
     static executable(version, platform) {
         const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
@@ -60385,7 +60382,7 @@ async function updateFile(filename, ...replacements) {
     await fs_1.promises.writeFile(filename, updated);
 }
 /**
- * Returns an array of paths that match the given glob pattern.
+ * @returns Array of paths that match the given glob pattern.
  */
 async function expand(pattern) {
     const globber = await glob.create(pattern, { implicitDescendants: false });

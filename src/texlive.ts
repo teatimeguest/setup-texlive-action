@@ -78,17 +78,17 @@ export class Manager {
   }
 
   get path(): Readonly<{
+    /**
+     * Adds the bin directory of TeX Live directly to the PATH.
+     * This method does not invoke `tlmgr path add`
+     * to avoid to create symlinks in the system directory.
+     *
+     * @todo `install-tl -print-platform` and
+     *   `tlmgr print-platform` may be useful.
+     */
     add: () => Promise<void>;
   }> {
     return {
-      /**
-       * Adds the bin directory of TeX Live directly to the PATH.
-       * This method does not invoke `tlmgr path add`
-       * to avoid to create symlinks in the system directory.
-       *
-       * @todo `install-tl -print-platform` and
-       *   `tlmgr print-platform` may be useful.
-       */
       add: async () => {
         const matched = await expand(
           path.join(this.prefix, this.version, 'bin', '*'),
@@ -142,6 +142,8 @@ export class Manager {
           /**
            * `tlmgr repository add` returns non-zero status code
            * if the same repository or tag is added again.
+           *
+           * @todo (Need to make sure that the tagged repo is really tlcontrib?)
            */
           exitCode !== 0 &&
           !stderr.includes('repository or its tag already defined')
@@ -157,8 +159,11 @@ export class Manager {
 
 /**
  * Gets the URL of the main repository of TeX Live.
- * Returns the `ctan` if the version is the latest, otherwise returns
- * the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
+ *
+ * @returns The `ctan` if the version is the latest, otherwise
+ *   the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
+ *
+ * @todo Use other archives as well.
  */
 function repository(version: Version): URL {
   const base =
@@ -339,7 +344,7 @@ class InstallTL {
   }
 
   /**
-   * Returns the filename of the installer executable.
+   * @returns The filename of the installer executable.
    */
   static executable(version: Version, platform: NodeJS.Platform): string {
     const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
@@ -439,7 +444,7 @@ async function updateFile(
 }
 
 /**
- * Returns an array of paths that match the given glob pattern.
+ * @returns Array of paths that match the given glob pattern.
  */
 async function expand(pattern: string): Promise<Array<string>> {
   const globber = await glob.create(pattern, { implicitDescendants: false });
