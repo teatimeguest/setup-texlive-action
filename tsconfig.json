@@ -28,7 +28,9 @@
   "files": [
     "./src/context.ts",
     "./src/index.ts",
+    "./src/install-tl.ts",
     "./src/setup.ts",
-    "./src/texlive.ts"
+    "./src/texlive.ts",
+    "./src/utility.ts"
   ]
 }

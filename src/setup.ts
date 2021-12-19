@@ -1,10 +1,12 @@
 import * as crypto from 'crypto';
 import * as os from 'os';
+import * as path from 'path';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import * as context from '#/context';
+import { InstallTL } from '#/install-tl';
 import * as tl from '#/texlive';
 
 export async function run(): Promise<void> {
@@ -30,8 +32,7 @@ function getCacheKeys(
 
 async function setup(): Promise<void> {
   const config = await context.loadConfig();
-  const tlmgr = new tl.Manager(config.version, config.prefix);
-  const texdir = tlmgr.conf.texmf().texdir;
+  const texdir = path.join(config.prefix, config.version);
   const [primaryKey, restoreKeys] = getCacheKeys(
     config.version,
     config.packages,
@@ -53,22 +54,31 @@ async function setup(): Promise<void> {
 
   if (Boolean(cacheKey)) {
     context.setCacheHit();
-    await tlmgr.path.add();
-    if (cacheKey === primaryKey) {
-      return;
-    }
   } else {
     if (config.cache) {
       core.info('Cache not found');
     }
-    await tl.install(config.version, config.prefix);
+    const installtl = await core.group(
+      'Acquiring install-tl',
+      async () => await InstallTL.download(config.version),
+    );
+    await core.group('Installing Tex Live', async () => {
+      await installtl.run(config.prefix);
+    });
   }
+
+  const tlmgr = new tl.Manager(config.version, config.prefix);
+  await tlmgr.path.add();
 
   if (config.tlcontrib) {
     await core.group('Setting up TLContrib', async () => {
-      await tlmgr.repository.add(tl.tlcontrib().href, 'tlcontrib');
+      await tlmgr.repository.add(tl.contrib().href, 'tlcontrib');
       await tlmgr.pinning.add('tlcontrib', '*');
     });
+  }
+
+  if (cacheKey === primaryKey) {
+    return;
   }
 
   if (config.packages.size !== 0) {
@@ -83,8 +93,6 @@ async function setup(): Promise<void> {
 }
 
 async function saveCache(): Promise<void> {
-  const { version, prefix } = await context.loadConfig();
-  const tlmgr = new tl.Manager(version, prefix);
   const primaryKey = context.getKey();
 
   if (primaryKey === undefined) {
@@ -92,8 +100,11 @@ async function saveCache(): Promise<void> {
     return;
   }
 
+  const { version, prefix } = await context.loadConfig();
+  const texdir = path.join(prefix, 'texlive', version);
+
   try {
-    await cache.saveCache([tlmgr.conf.texmf().texdir], primaryKey);
+    await cache.saveCache([texdir], primaryKey);
     core.info(`Cache saved`);
   } catch (error) {
     core.warning(`${error}`);
