@@ -105,7 +105,7 @@ All inputs are optional.
 
 ## Environment variables
 
-The [official environment variables][install-tl-environment-variables]
+The following [official environment variables][install-tl-environment-variables]
 are supported:
 
 |Name|Default|
@@ -118,10 +118,14 @@ are supported:
 |`TEXLIVE_INSTALL_NO_RESUME`||
 |`TEXLIVE_INSTALL_NO_WELCOME`|`true`|
 |`TEXLIVE_INSTALL_PAPER`||
+|`TEXLIVE_INSTALL_PREFIX`|<code>[$RUNNER_TEMP][actions-environment-variables]/setup-texlive</code>|
 |`TEXLIVE_INSTALL_TEXMFHOME`|`~/texmf`|
 |`TEXLIVE_INSTALL_TEXMFCONFIG`|`~/.local/texlive/<version>/texmf-config`|
 |`TEXLIVE_INSTALL_TEXMFVAR`|`~/.local/texlive/<version>/texmf-var`|
 |`NOPERLDOC`||
+
+If `prefix` and `TEXLIVE_INSTALL_PREFIX` are both specified,
+`prefix` will be used.
 
 ## Changelog
 
