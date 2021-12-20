@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: main
+  workflow_dispatch:
 
 jobs:
   ci:
@@ -38,6 +39,15 @@ jobs:
       - name: Install TeX Live
         uses: ./
         with:
-          cache: false
+          cache: true
+        env:
+          TEXLIVE_INSTALL_TEXMFSYSCONFIG: ${{ runner.temp }}/texmf-config
+          TEXLIVE_INSTALL_TEXMFHOME: ${{ runner.temp }}/texmf
+          TEXLIVE_INSTALL_TEXMFCONFIG: ${{ env.HOME }}/.local/texlive/2021/texmf-config
+          TEXLIVE_INSTALL_TEXMFVAR: ${{ env.HOME }}/.local/texlive/2021/texmf-var
 
-      - run: tlmgr --version
+      - run: |
+          kpsewhich -var-value TEXMFSYSCONFIG
+          kpsewhich -var-value TEXMFHOME
+          kpsewhich -var-value TEXMFCONFIG
+          kpsewhich -var-value TEXMFVAR

@@ -59941,7 +59941,17 @@ class InstallTL {
     }
     async run(prefix) {
         const texdir = path.join(prefix, this.version);
-        const env = { ...process.env, ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1' };
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const home = process.env['HOME'];
+        const userTexdir = path.join(home, '.local', 'texlive', this.version);
+        const env = {
+            ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+            ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+            ['TEXLIVE_INSTALL_TEXMFHOME']: path.join(home, 'texmf'),
+            ['TEXLIVE_INSTALL_TEXMFCONFIG']: path.join(userTexdir, 'texmf-config'),
+            ['TEXLIVE_INSTALL_TEXMFVAR']: path.join(userTexdir, 'texmf-var'),
+            ...process.env,
+        };
         const options = ['-no-gui', '-profile', await __classPrivateFieldGet(this, _InstallTL_instances, "m", _InstallTL_profile).call(this, prefix)];
         if (this.version !== tl.LATEST_VERSION) {
             options.push(
@@ -60254,6 +60264,17 @@ async function setup() {
         });
     }
     if (cacheKey === primaryKey) {
+        for (const variable of tl.TEXMF) {
+            const value = process.env['TEXLIVE_INSTALL_' + variable];
+            if (value !== undefined) {
+                // eslint-disable-next-line no-await-in-loop
+                const current = await tlmgr.conf.texmf(variable);
+                if (value !== current) {
+                    // eslint-disable-next-line no-await-in-loop
+                    await tlmgr.conf.texmf(variable, value);
+                }
+            }
+        }
         return;
     }
     if (config.packages.size !== 0) {
@@ -60313,7 +60334,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.contrib = exports.Manager = exports.LATEST_VERSION = exports.isVersion = void 0;
+exports.contrib = exports.Manager = exports.TEXMF = exports.LATEST_VERSION = exports.isVersion = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
@@ -60332,6 +60353,15 @@ function isVersion(version) {
 exports.isVersion = isVersion;
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 exports.LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
+exports.TEXMF = [
+    // 'TEXDIR',
+    'TEXMFCONFIG',
+    'TEXMFVAR',
+    'TEXMFHOME',
+    // 'TEXMFLOCAL',
+    // 'TEXMFSYSCONFIG',
+    // 'TEXMFSYSVAR',
+];
 /**
  * An interface for the `tlmgr` command.
  */
@@ -60339,6 +60369,27 @@ class Manager {
     constructor(version, prefix) {
         this.version = version;
         this.prefix = prefix;
+    }
+    get conf() {
+        return new (class {
+            constructor(tlmgr) {
+                this.tlmgr = tlmgr;
+            }
+            async texmf(key, value) {
+                if (value === undefined) {
+                    return (await exec.getExecOutput('kpsewhich', ['-var-value', key])).stdout.trim();
+                }
+                /**
+                 * `tlmgr conf` is not implemented before 2010.
+                 */
+                if (Number(this.tlmgr.version) < 2010) {
+                    core.exportVariable(key, value);
+                }
+                else {
+                    await exec.exec('tlmgr', ['conf', 'texmf', key, value]);
+                }
+            }
+        })(this);
     }
     async install(packages) {
         if (packages.size !== 0) {

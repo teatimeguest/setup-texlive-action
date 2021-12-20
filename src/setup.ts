@@ -78,6 +78,17 @@ async function setup(): Promise<void> {
   }
 
   if (cacheKey === primaryKey) {
+    for (const variable of tl.TEXMF) {
+      const value = process.env['TEXLIVE_INSTALL_' + variable];
+      if (value !== undefined) {
+        // eslint-disable-next-line no-await-in-loop
+        const current = await tlmgr.conf.texmf(variable);
+        if (value !== current) {
+          // eslint-disable-next-line no-await-in-loop
+          await tlmgr.conf.texmf(variable, value);
+        }
+      }
+    }
     return;
   }
 

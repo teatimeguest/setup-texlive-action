@@ -21,7 +21,17 @@ export class InstallTL {
 
   async run(prefix: string): Promise<void> {
     const texdir = path.join(prefix, this.version);
-    const env = { ...process.env, ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1' };
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const home = process.env['HOME']!;
+    const userTexdir = path.join(home, '.local', 'texlive', this.version);
+    const env = {
+      ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+      ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+      ['TEXLIVE_INSTALL_TEXMFHOME']: path.join(home, 'texmf'),
+      ['TEXLIVE_INSTALL_TEXMFCONFIG']: path.join(userTexdir, 'texmf-config'),
+      ['TEXLIVE_INSTALL_TEXMFVAR']: path.join(userTexdir, 'texmf-var'),
+      ...process.env,
+    };
     const options = ['-no-gui', '-profile', await this.#profile(prefix)];
 
     if (this.version !== tl.LATEST_VERSION) {
