@@ -23,6 +23,16 @@ export function isVersion(version: string): version is Version {
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1]!;
 
+export const TEXMF = [
+  // 'TEXDIR',
+  'TEXMFCONFIG',
+  'TEXMFVAR',
+  'TEXMFHOME',
+  // 'TEXMFLOCAL',
+  // 'TEXMFSYSCONFIG',
+  // 'TEXMFSYSVAR',
+] as const;
+
 /**
  * An interface for the `tlmgr` command.
  */
@@ -31,6 +41,37 @@ export class Manager {
     private readonly version: Version,
     private readonly prefix: string,
   ) {}
+
+  get conf(): Readonly<{
+    texmf: {
+      (key: typeof TEXMF[number]): Promise<string>;
+      (key: typeof TEXMF[number], value: string): Promise<void>;
+    };
+  }> {
+    return new (class {
+      texmf(key: typeof TEXMF[number]): Promise<string>;
+      texmf(key: typeof TEXMF[number], value: string): Promise<void>;
+      async texmf(
+        key: typeof TEXMF[number],
+        value?: string,
+      ): Promise<string | void> {
+        if (value === undefined) {
+          return (
+            await exec.getExecOutput('kpsewhich', ['-var-value', key])
+          ).stdout.trim();
+        }
+        /**
+         * `tlmgr conf` is not implemented before 2010.
+         */
+        if (Number(this.tlmgr.version) < 2010) {
+          core.exportVariable(key, value);
+        } else {
+          await exec.exec('tlmgr', ['conf', 'texmf', key, value]);
+        }
+      }
+      constructor(private readonly tlmgr: Manager) {}
+    })(this);
+  }
 
   async install(this: void, packages: ReadonlySet<string>): Promise<void> {
     if (packages.size !== 0) {

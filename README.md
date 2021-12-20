@@ -103,6 +103,26 @@ All inputs are optional.
 |---|---|---|
 |`cache-hit`|Bool|A boolean value to indicate if a cache was hit.|
 
+## Environment variables
+
+The [official environment variables][install-tl-environment-variables]
+are supported:
+
+|Name|Default|
+|---|---|
+|`TEXLIVE_DOWNLOADER`||
+|`TL_DOWNLOAD_PROGRAM`||
+|`TL_DOWNLOAD_ARGS`||
+|`TEXLIVE_INSTALL_ENV_NOCHECK`|`true`|
+|`TEXLIVE_INSTALL_NO_CONTEXT_CACHE`||
+|`TEXLIVE_INSTALL_NO_RESUME`||
+|`TEXLIVE_INSTALL_NO_WELCOME`|`true`|
+|`TEXLIVE_INSTALL_PAPER`||
+|`TEXLIVE_INSTALL_TEXMFHOME`|`~/texmf`|
+|`TEXLIVE_INSTALL_TEXMFCONFIG`|`~/.local/texlive/<version>/texmf-config`|
+|`TEXLIVE_INSTALL_TEXMFVAR`|`~/.local/texlive/<version>/texmf-var`|
+|`NOPERLDOC`||
+
 ## Changelog
 
 See the [releases page][releases].
