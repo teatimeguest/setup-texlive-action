@@ -21,8 +21,10 @@ export class InstallTL {
 
   async run(prefix: string): Promise<void> {
     const texdir = path.join(prefix, this.version);
-    const env = { ...process.env, ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1' };
+    const env = Environment.get(this.version);
     const options = ['-no-gui', '-profile', await this.#profile(prefix)];
+
+    core.info('Environment variables:\n' + env.toString());
 
     if (this.version !== tl.LATEST_VERSION) {
       options.push(
@@ -34,7 +36,7 @@ export class InstallTL {
       );
     }
 
-    await exec.exec(this.bin, options, { env });
+    await exec.exec(this.bin, options, { env: { ...env, ...process.env } });
     core.info('Applying patches');
     await patch(this.version, texdir);
   }
@@ -175,6 +177,61 @@ export namespace InstallTL {
       version,
       path.join(dest, executable(version, os.platform())),
     );
+  }
+}
+
+export class Environment {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  keys() {
+    return [
+      'TEXLIVE_DOWNLOADER',
+      'TL_DOWNLOAD_PROGRAM',
+      'TL_DOWNLOAD_ARGS',
+      'TEXLIVE_INSTALL_ENV_NOCHECK',
+      'TEXLIVE_INSTALL_NO_CONTEXT_CACHE',
+      'TEXLIVE_INSTALL_NO_RESUME',
+      'TEXLIVE_INSTALL_NO_WELCOME',
+      'TEXLIVE_INSTALL_PAPER',
+      'TEXLIVE_INSTALL_TEXMFHOME',
+      'TEXLIVE_INSTALL_TEXMFCONFIG',
+      'TEXLIVE_INSTALL_TEXMFVAR',
+      'NOPERLDOC',
+    ] as const;
+  }
+
+  private coerce(): Partial<
+    Record<ReturnType<typeof this.keys>[number], string>
+  > {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this as any as ReturnType<typeof this.coerce>;
+  }
+
+  private constructor(version: tl.Version) {
+    for (const key of this.keys()) {
+      this.coerce()[key] = process.env[key];
+    }
+    const home = os.homedir();
+    const texdir = path.join(home, '.local', 'texlive', version);
+    this.coerce().TEXLIVE_INSTALL_ENV_NOCHECK ??= 'true';
+    this.coerce().TEXLIVE_INSTALL_NO_WELCOME ??= 'true';
+    this.coerce().TEXLIVE_INSTALL_TEXMFHOME ??= path.join(home, 'texmf');
+    this.coerce().TEXLIVE_INSTALL_TEXMFCONFIG ??= path.join(
+      texdir,
+      'texmf-config',
+    );
+    this.coerce().TEXLIVE_INSTALL_TEXMFVAR ??= path.join(version, 'texmf-var');
+  }
+
+  toString(): string {
+    return this.keys()
+      .map((key) => `> ${key}='${this.coerce()[key] ?? ''}';`)
+      .join('\n');
+  }
+
+  static get(
+    version: tl.Version,
+  ): Readonly<ReturnType<typeof Environment.prototype.coerce>> {
+    return new Environment(version).coerce();
   }
 }
 

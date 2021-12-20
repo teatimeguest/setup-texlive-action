@@ -15,8 +15,10 @@ process.env['GITHUB_PATH'] = undefined;
 
 jest.mock('os', () => ({
   arch: jest.requireActual('os').arch,
+  homedir: jest.fn(),
   platform: jest.fn(),
 }));
+(os.homedir as jest.Mock).mockReturnValue(random());
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
@@ -59,6 +61,11 @@ jest
   .mockImplementation(async (version) => new InstallTL(version, random()));
 jest.spyOn(InstallTL.prototype, 'run').mockImplementation();
 jest.spyOn(tl.Manager.prototype, 'install').mockImplementation();
+jest.spyOn(tl.Manager.prototype, 'conf', 'get').mockReturnValue({
+  texmf: jest.fn(async (key, value) => {
+    return value === undefined ? undefined : random();
+  }) as any,
+});
 jest
   .spyOn(tl.Manager.prototype, 'path', 'get')
   .mockReturnValue({ add: jest.fn() });

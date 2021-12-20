@@ -18,9 +18,11 @@ jest.spyOn(fs, 'mkdtemp').mockResolvedValue(random());
 jest.spyOn(fs, 'readFile').mockImplementation();
 jest.spyOn(fs, 'writeFile').mockImplementation();
 jest.mock('os', () => ({
+  homedir: jest.fn(),
   platform: jest.fn(),
   tmpdir: jest.fn(),
 }));
+(os.homedir as jest.Mock).mockReturnValue(random());
 (os.tmpdir as jest.Mock).mockReturnValue(random());
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
