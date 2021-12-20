@@ -1,4 +1,5 @@
 import { promises as fs } from 'fs';
+import * as os from 'os';
 
 import * as glob from '@actions/glob';
 
@@ -34,4 +35,11 @@ export async function expand(pattern: string): Promise<Array<string>> {
  */
 export function isNodejsError(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error;
+}
+
+export function tmpdir(): string {
+  const runnerTemp = process.env['RUNNER_TEMP'];
+  return runnerTemp !== undefined && runnerTemp !== ''
+    ? runnerTemp
+    : os.tmpdir();
 }

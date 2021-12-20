@@ -1,10 +1,10 @@
 import { promises as fs } from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 
 import * as core from '@actions/core';
 
 import * as tl from '#/texlive';
+import * as util from '#/utility';
 
 export interface Config {
   readonly cache: boolean;
@@ -51,12 +51,11 @@ async function getPackages(): Promise<Set<string>> {
 }
 
 function getPrefix(): string {
-  const tmpdir = process.env['RUNNER_TEMP'] ?? os.tmpdir();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return [
     core.getInput('prefix'),
     process.env['TEXLIVE_INSTALL_PREFIX'],
-    path.join(tmpdir, 'setup-texlive'),
+    path.join(util.tmpdir(), 'setup-texlive'),
   ].find(Boolean)!;
 }
 

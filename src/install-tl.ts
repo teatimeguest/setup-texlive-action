@@ -21,10 +21,10 @@ export class InstallTL {
 
   async run(prefix: string): Promise<void> {
     const texdir = path.join(prefix, this.version);
-    const env = Environment.get(this.version);
+    const texenv = Environment.get(this.version);
     const options = ['-no-gui', '-profile', await this.#profile(prefix)];
 
-    core.info('Environment variables:\n' + env.toString());
+    core.info('Environment variables:\n' + texenv.toString());
 
     if (this.version !== tl.LATEST_VERSION) {
       options.push(
@@ -36,7 +36,7 @@ export class InstallTL {
       );
     }
 
-    await exec.exec(this.bin, options, { env: { ...env, ...process.env } });
+    await exec.exec(this.bin, options, { env: { ...process.env, ...texenv } });
     core.info('Applying patches');
     await patch(this.version, texdir);
   }
@@ -93,9 +93,7 @@ export class InstallTL {
     core.info('Profile:\n> ' + lines.join('\n> '));
 
     const dest = path.join(
-      await fs.mkdtemp(
-        path.join(process.env['RUNNER_TEMP'] ?? os.tmpdir(), 'setup-texlive-'),
-      ),
+      await fs.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-')),
       'texlive.profile',
     );
     await fs.writeFile(dest, lines.join('\n'));
@@ -208,7 +206,9 @@ export class Environment {
 
   private constructor(version: tl.Version) {
     for (const key of this.keys()) {
-      this.coerce()[key] = process.env[key];
+      if (process.env[key] !== undefined) {
+        this.coerce()[key] = process.env[key];
+      }
     }
     const home = os.homedir();
     const texdir = path.join(home, '.local', 'texlive', version);
@@ -219,7 +219,7 @@ export class Environment {
       texdir,
       'texmf-config',
     );
-    this.coerce().TEXLIVE_INSTALL_TEXMFVAR ??= path.join(version, 'texmf-var');
+    this.coerce().TEXLIVE_INSTALL_TEXMFVAR ??= path.join(texdir, 'texmf-var');
   }
 
   toString(): string {

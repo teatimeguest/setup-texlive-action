@@ -59802,10 +59802,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.loadConfig = void 0;
 const fs_1 = __nccwpck_require__(7147);
-const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const tl = __importStar(__nccwpck_require__(8313));
+const util = __importStar(__nccwpck_require__(5418));
 async function loadConfig() {
     const cache = getCache();
     const packages = await getPackages();
@@ -59837,13 +59837,11 @@ async function getPackages() {
     return packages;
 }
 function getPrefix() {
-    var _a;
-    const tmpdir = (_a = process.env['RUNNER_TEMP']) !== null && _a !== void 0 ? _a : os.tmpdir();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return [
         core.getInput('prefix'),
         process.env['TEXLIVE_INSTALL_PREFIX'],
-        path.join(tmpdir, 'setup-texlive'),
+        path.join(util.tmpdir(), 'setup-texlive'),
     ].find(Boolean);
 }
 function getTlcontrib(version) {
@@ -59941,9 +59939,9 @@ class InstallTL {
     }
     async run(prefix) {
         const texdir = path.join(prefix, this.version);
-        const env = Environment.get(this.version);
+        const texenv = Environment.get(this.version);
         const options = ['-no-gui', '-profile', await __classPrivateFieldGet(this, _InstallTL_instances, "m", _InstallTL_profile).call(this, prefix)];
-        core.info('Environment:\n' + env.toString());
+        core.info('Environment variables:\n' + texenv.toString());
         if (this.version !== tl.LATEST_VERSION) {
             options.push(
             /**
@@ -59951,14 +59949,13 @@ class InstallTL {
              */
             this.version === '2008' ? '-location' : '-repository', repository(this.version).href);
         }
-        await exec.exec(this.bin, options, { env: { ...env, ...process.env } });
+        await exec.exec(this.bin, options, { env: { ...process.env, ...texenv } });
         core.info('Applying patches');
         await patch(this.version, texdir);
     }
 }
 exports.InstallTL = InstallTL;
 _InstallTL_instances = new WeakSet(), _InstallTL_profile = async function _InstallTL_profile(prefix) {
-    var _a;
     const texdir = path.join(prefix, this.version);
     const local = path.join(prefix, 'texmf-local');
     const sysconfig = path.join(texdir, 'texmf-config');
@@ -60007,7 +60004,7 @@ _InstallTL_instances = new WeakSet(), _InstallTL_profile = async function _Insta
         'option_w32_multi_user 0', // tlpdbopt_w32_multi_user
     ];
     core.info('Profile:\n> ' + lines.join('\n> '));
-    const dest = path.join(await fs_1.promises.mkdtemp(path.join((_a = process.env['RUNNER_TEMP']) !== null && _a !== void 0 ? _a : os.tmpdir(), 'setup-texlive-')), 'texlive.profile');
+    const dest = path.join(await fs_1.promises.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-')), 'texlive.profile');
     await fs_1.promises.writeFile(dest, lines.join('\n'));
     core.debug(`${dest} created`);
     return dest;
@@ -60096,7 +60093,9 @@ class Environment {
         var _a, _b, _c, _d, _e;
         var _f, _g, _h, _j, _k;
         for (const key of this.keys()) {
-            this.coerce()[key] = process.env[key];
+            if (process.env[key] !== undefined) {
+                this.coerce()[key] = process.env[key];
+            }
         }
         const home = os.homedir();
         const texdir = path.join(home, '.local', 'texlive', version);
@@ -60104,7 +60103,7 @@ class Environment {
         (_b = (_g = this.coerce()).TEXLIVE_INSTALL_NO_WELCOME) !== null && _b !== void 0 ? _b : (_g.TEXLIVE_INSTALL_NO_WELCOME = 'true');
         (_c = (_h = this.coerce()).TEXLIVE_INSTALL_TEXMFHOME) !== null && _c !== void 0 ? _c : (_h.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf'));
         (_d = (_j = this.coerce()).TEXLIVE_INSTALL_TEXMFCONFIG) !== null && _d !== void 0 ? _d : (_j.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config'));
-        (_e = (_k = this.coerce()).TEXLIVE_INSTALL_TEXMFVAR) !== null && _e !== void 0 ? _e : (_k.TEXLIVE_INSTALL_TEXMFVAR = path.join(version, 'texmf-var'));
+        (_e = (_k = this.coerce()).TEXLIVE_INSTALL_TEXMFVAR) !== null && _e !== void 0 ? _e : (_k.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var'));
     }
     toString() {
         return this.keys()
@@ -60512,8 +60511,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isNodejsError = exports.expand = exports.updateFile = void 0;
+exports.tmpdir = exports.isNodejsError = exports.expand = exports.updateFile = void 0;
 const fs_1 = __nccwpck_require__(7147);
+const os = __importStar(__nccwpck_require__(2037));
 const glob = __importStar(__nccwpck_require__(8090));
 /**
  * Updates the contents of a file.
@@ -60541,6 +60541,13 @@ function isNodejsError(error) {
     return error instanceof Error;
 }
 exports.isNodejsError = isNodejsError;
+function tmpdir() {
+    const runnerTemp = process.env['RUNNER_TEMP'];
+    return runnerTemp !== undefined && runnerTemp !== ''
+        ? runnerTemp
+        : os.tmpdir();
+}
+exports.tmpdir = tmpdir;
 
 
 /***/ }),
