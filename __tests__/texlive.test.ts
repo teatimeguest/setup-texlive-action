@@ -6,10 +6,11 @@ import * as tl from '#/texlive';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
-process.env['GITHUB_PATH'] = undefined;
+process.env['GITHUB_PATH'] = '';
 
 jest.spyOn(core, 'addPath').mockImplementation();
 jest.spyOn(core, 'debug').mockImplementation();
+jest.spyOn(core, 'exportVariable').mockImplementation();
 jest
   .spyOn(core, 'group')
   .mockImplementation(
@@ -39,6 +40,37 @@ test.each([
 });
 
 describe('Manager', () => {
+  describe('conf.texmf', () => {
+    it('returns the value of the given key by using `kpsewhich`', async () => {
+      (exec.getExecOutput as jest.Mock).mockResolvedValueOnce({
+        exitCode: 0,
+        stdout: '/usr/local/texlive/2021/texmf-config\n',
+        stderr: '',
+      });
+      const tlmgr = new tl.Manager('2021', '/usr/local/texlive');
+      await expect(tlmgr.conf.texmf('TEXMFCONFIG')).resolves.toBe(
+        '/usr/local/texlive/2021/texmf-config',
+      );
+    });
+
+    it('sets the value to the given key with `tlmgr`', async () => {
+      const tlmgr = new tl.Manager('2021', '/usr/local/texlive');
+      await tlmgr.conf.texmf('TEXMFVAR', '~/.local/texlive/2021/texmf-var');
+      expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
+        'conf',
+        'texmf',
+        'TEXMFVAR',
+        '~/.local/texlive/2021/texmf-var',
+      ]);
+    });
+
+    it('sets the value to the given key by environment variable', async () => {
+      const tlmgr = new tl.Manager('2008', '/usr/local/texlive');
+      await tlmgr.conf.texmf('TEXMFHOME', '~/.texmf');
+      expect(core.exportVariable).toHaveBeenCalledWith('TEXMFHOME', '~/.texmf');
+    });
+  });
+
   describe('install', () => {
     const tlmgr = new tl.Manager('2019', '/usr/local/texlive');
 

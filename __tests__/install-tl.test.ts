@@ -6,13 +6,31 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tool from '@actions/tool-cache';
 
-import { InstallTL } from '#/install-tl';
+import { Environment, InstallTL } from '#/install-tl';
 import * as tl from '#/texlive';
 import * as util from '#/utility';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
-const env = { ...process.env };
+const env = (() => {
+  const {
+    GITHUB_PATH,
+    TEXLIVE_DOWNLOADER,
+    TL_DOWNLOAD_PROGRAM,
+    TL_DOWNLOAD_ARGS,
+    TEXLIVE_INSTALL_ENV_NOCHECK,
+    TEXLIVE_INSTALL_NO_CONTEXT_CACHE,
+    TEXLIVE_INSTALL_NO_RESUME,
+    TEXLIVE_INSTALL_NO_WELCOME,
+    TEXLIVE_INSTALL_PAPER,
+    TEXLIVE_INSTALL_TEXMFHOME,
+    TEXLIVE_INSTALL_TEXMFCONFIG,
+    TEXLIVE_INSTALL_TEXMFVAR,
+    NOPERLDOC,
+    ...rest
+  }: Partial<Record<string, string>> = { ...process.env };
+  return rest;
+})();
 
 jest.spyOn(fs, 'mkdtemp').mockResolvedValue(random());
 jest.spyOn(fs, 'readFile').mockImplementation();
@@ -50,7 +68,6 @@ jest.spyOn(util, 'updateFile').mockImplementation();
 
 beforeEach(() => {
   process.env = { ...env };
-  process.env['GITHUB_PATH'] = undefined;
   process.env['RUNNER_TEMP'] = random();
 });
 
@@ -69,7 +86,15 @@ describe('InstallTL', () => {
           '-location',
           'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/',
         ],
-        expect.anything(),
+        expect.objectContaining({
+          env: expect.objectContaining({
+            ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+            ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+            ['TEXLIVE_INSTALL_TEXMFHOME']: expect.anything(),
+            ['TEXLIVE_INSTALL_TEXMFCONFIG']: expect.anything(),
+            ['TEXLIVE_INSTALL_TEXMFVAR']: expect.anything(),
+          }),
+        }),
       );
     });
 
@@ -86,7 +111,15 @@ describe('InstallTL', () => {
           '-repository',
           'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2012/tlnet-final/',
         ],
-        expect.anything(),
+        expect.objectContaining({
+          env: expect.objectContaining({
+            ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+            ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+            ['TEXLIVE_INSTALL_TEXMFHOME']: expect.anything(),
+            ['TEXLIVE_INSTALL_TEXMFCONFIG']: expect.anything(),
+            ['TEXLIVE_INSTALL_TEXMFVAR']: expect.anything(),
+          }),
+        }),
       );
     });
 
@@ -97,7 +130,15 @@ describe('InstallTL', () => {
       expect(exec.exec).toHaveBeenCalledWith(
         expect.stringContaining(''),
         ['-no-gui', '-profile', expect.stringMatching(/texlive\.profile$/u)],
-        expect.anything(),
+        expect.objectContaining({
+          env: expect.objectContaining({
+            ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+            ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+            ['TEXLIVE_INSTALL_TEXMFHOME']: expect.anything(),
+            ['TEXLIVE_INSTALL_TEXMFCONFIG']: expect.anything(),
+            ['TEXLIVE_INSTALL_TEXMFVAR']: expect.anything(),
+          }),
+        }),
       );
     });
   });
@@ -177,7 +218,7 @@ describe('InstallTL', () => {
 
     it('uses `os.tmpdir()` if `RUNNER_TEMP` is not set', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
-      process.env['RUNNER_TEMP'] = undefined;
+      process.env['RUNNER_TEMP'] = '';
       const installtl = new InstallTL('2021', random());
       await installtl.run('/usr/local/texlive');
       expect(fs.mkdtemp).toHaveBeenCalledWith(
@@ -259,6 +300,36 @@ describe('InstallTL', () => {
       await expect(InstallTL.download('2021')).rejects.toThrow(
         'Unable to locate the installer',
       );
+    });
+  });
+});
+
+describe('Environment.get', () => {
+  it('returns the default values correctly', () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    (os.homedir as jest.Mock).mockReturnValueOnce('~');
+    expect({ ...Environment.get('2021') }).toStrictEqual({
+      ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+      ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+      ['TEXLIVE_INSTALL_TEXMFHOME']: '~/texmf',
+      ['TEXLIVE_INSTALL_TEXMFCONFIG']: '~/.local/texlive/2021/texmf-config',
+      ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
+    });
+  });
+
+  it('reads the user-defined values correctly', () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    (os.homedir as jest.Mock).mockReturnValueOnce('~');
+    process.env['TEXLIVE_INSTALL_NO_CONTEXT_CACHE'] = 'true';
+    process.env['TEXLIVE_INSTALL_NO_WELCOME'] = 'false';
+    process.env['TEXLIVE_INSTALL_TEXMFHOME'] = '~/.texmf';
+    expect({ ...Environment.get('2021') }).toStrictEqual({
+      ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+      ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']: 'true',
+      ['TEXLIVE_INSTALL_NO_WELCOME']: 'false',
+      ['TEXLIVE_INSTALL_TEXMFHOME']: '~/.texmf',
+      ['TEXLIVE_INSTALL_TEXMFCONFIG']: '~/.local/texlive/2021/texmf-config',
+      ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
     });
   });
 });

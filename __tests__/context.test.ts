@@ -8,7 +8,14 @@ import * as context from '#/context';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
-const env = { ...process.env };
+const env = (() => {
+  const {
+    GITHUB_PATH,
+    TEXLIVE_INSTALL_PREFIX,
+    ...rest
+  }: Partial<Record<string, string>> = { ...process.env };
+  return rest;
+})();
 
 let ctx: {
   inputs: {
@@ -75,8 +82,6 @@ jest.spyOn(core, 'warning').mockImplementation();
 beforeEach(() => {
   process.env = { ...env };
   process.env['ACTIONS_CACHE_URL'] = random();
-  process.env['GITHUB_PATH'] = undefined;
-  process.env['TEXLIVE_INSTALL_PREFIX'] = undefined;
   process.env['RUNNER_TEMP'] ??= random();
 
   ctx = {
@@ -166,8 +171,8 @@ describe('loadConfig', () => {
 
   it('disables caching if environment variables are not set properly', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    process.env['ACTIONS_CACHE_URL'] = undefined;
-    process.env['ACTIONS_RUNTIME_URL'] = undefined;
+    process.env['ACTIONS_CACHE_URL'] = '';
+    process.env['ACTIONS_RUNTIME_URL'] = '';
     expect((await context.loadConfig()).cache).toBe(false);
     expect(core.warning).toHaveBeenCalledWith(
       'Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_RUNTIME_URL` is defined',
@@ -182,8 +187,8 @@ describe('loadConfig', () => {
 
   it('uses `os.tmpdir()` if `RUNNER_TEMP` is not set', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    process.env['TEXLIVE_INSTALL_PREFIX'] = undefined;
-    process.env['RUNNER_TEMP'] = undefined;
+    process.env['TEXLIVE_INSTALL_PREFIX'] = '';
+    process.env['RUNNER_TEMP'] = '';
     expect((await context.loadConfig()).prefix).toBe(
       path.join(os.tmpdir(), 'setup-texlive'),
     );

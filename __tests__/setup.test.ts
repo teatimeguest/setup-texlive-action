@@ -5,13 +5,31 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import * as context from '#/context';
-import { InstallTL } from '#/install-tl';
+import { Environment, InstallTL } from '#/install-tl';
 import * as setup from '#/setup';
 import * as tl from '#/texlive';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
-process.env['GITHUB_PATH'] = undefined;
+process.env = (() => {
+  const {
+    GITHUB_PATH,
+    TEXLIVE_DOWNLOADER,
+    TL_DOWNLOAD_PROGRAM,
+    TL_DOWNLOAD_ARGS,
+    TEXLIVE_INSTALL_ENV_NOCHECK,
+    TEXLIVE_INSTALL_NO_CONTEXT_CACHE,
+    TEXLIVE_INSTALL_NO_RESUME,
+    TEXLIVE_INSTALL_NO_WELCOME,
+    TEXLIVE_INSTALL_PAPER,
+    TEXLIVE_INSTALL_TEXMFHOME,
+    TEXLIVE_INSTALL_TEXMFCONFIG,
+    TEXLIVE_INSTALL_TEXMFVAR,
+    NOPERLDOC,
+    ...rest
+  }: Partial<Record<string, string>> = process.env;
+  return rest;
+})();
 
 jest.mock('os', () => ({
   arch: jest.requireActual('os').arch,
@@ -56,6 +74,7 @@ jest.spyOn(context, 'setKey').mockImplementation();
 jest.spyOn(context, 'getPost').mockImplementation();
 jest.spyOn(context, 'setPost').mockImplementation();
 jest.spyOn(context, 'setCacheHit').mockImplementation();
+jest.spyOn(Environment, 'get');
 jest
   .spyOn(InstallTL, 'download')
   .mockImplementation(async (version) => new InstallTL(version, random()));
@@ -238,6 +257,39 @@ describe('setup', () => {
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
+  });
+
+  it('never sets the variables for a new installation', async () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    await setup.run();
+    expect(Environment.get).not.toHaveBeenCalled();
+  });
+
+  it('sets the variables appropriately if necessary', async () => {
+    (os.homedir as jest.Mock).mockReturnValueOnce('~');
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    (cache.restoreCache as jest.Mock).mockImplementationOnce(
+      async (paths, primaryKey, restoreKeys) => restoreKeys?.[0] ?? '',
+    );
+    (tl.Manager.prototype.conf.texmf as jest.Mock)
+      .mockResolvedValueOnce('~/.texlive')
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce('~/.local/texlive/2021/texmf-config')
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce('/usr/local/texlive/2021/texmf-var');
+    await setup.run();
+    expect(tl.Manager.prototype.conf.texmf).toHaveBeenCalledWith(
+      'TEXMFHOME',
+      '~/texmf',
+    );
+    expect(tl.Manager.prototype.conf.texmf).not.toHaveBeenCalledWith(
+      'TEXMFHCONFIG',
+      expect.anything(),
+    );
+    expect(tl.Manager.prototype.conf.texmf).toHaveBeenCalledWith(
+      'TEXMFVAR',
+      '~/.local/texlive/2021/texmf-var',
+    );
   });
 });
 
