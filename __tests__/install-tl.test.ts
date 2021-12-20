@@ -36,11 +36,6 @@ jest.mock('path', () => {
 });
 jest.spyOn(core, 'addPath').mockImplementation();
 jest.spyOn(core, 'debug').mockImplementation();
-jest
-  .spyOn(core, 'group')
-  .mockImplementation(
-    async <T>(name: string, fn: () => Promise<T>): Promise<T> => await fn(),
-  );
 jest.spyOn(core, 'info').mockImplementation();
 jest.spyOn(exec, 'exec').mockImplementation();
 jest.spyOn(tool, 'cacheDir').mockResolvedValue('');

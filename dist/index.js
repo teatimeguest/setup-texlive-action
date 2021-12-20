@@ -59987,7 +59987,7 @@ _InstallTL_instances = new WeakSet(), _InstallTL_profile = async function _Insta
      *   `instopt_adjustpath` has been introduced.
      *   The old option names are still valid in later versions.
      */
-    const profile = [
+    const lines = [
         `TEXDIR ${texdir}`,
         `TEXMFLOCAL ${local}`,
         `TEXMFSYSCONFIG ${sysconfig}`,
@@ -60004,12 +60004,10 @@ _InstallTL_instances = new WeakSet(), _InstallTL_profile = async function _Insta
         'option_src 0',
         'option_symlinks 0',
         'option_w32_multi_user 0', // tlpdbopt_w32_multi_user
-    ].join('\n');
-    await core.group('Profile', async () => {
-        core.info(profile);
-    });
+    ];
+    core.info('Profile:\n> ' + lines.join('\n> '));
     const dest = path.join(await fs_1.promises.mkdtemp(path.join((_a = process.env['RUNNER_TEMP']) !== null && _a !== void 0 ? _a : os.tmpdir(), 'setup-texlive-')), 'texlive.profile');
-    await fs_1.promises.writeFile(dest, profile);
+    await fs_1.promises.writeFile(dest, lines.join('\n'));
     core.debug(`${dest} created`);
     return dest;
 };

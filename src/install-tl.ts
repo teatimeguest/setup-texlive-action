@@ -69,7 +69,7 @@ export class InstallTL {
      *   `instopt_adjustpath` has been introduced.
      *   The old option names are still valid in later versions.
      */
-    const profile = [
+    const lines = [
       `TEXDIR ${texdir}`,
       `TEXMFLOCAL ${local}`,
       `TEXMFSYSCONFIG ${sysconfig}`,
@@ -86,11 +86,9 @@ export class InstallTL {
       'option_src 0',                       // tlpdbopt_install_srcfiles
       'option_symlinks 0',                  // instopt_adjustpath
       'option_w32_multi_user 0',            // tlpdbopt_w32_multi_user
-    ].join('\n');
+    ];
 
-    await core.group('Profile', async () => {
-      core.info(profile);
-    });
+    core.info('Profile:\n> ' + lines.join('\n> '));
 
     const dest = path.join(
       await fs.mkdtemp(
@@ -98,7 +96,7 @@ export class InstallTL {
       ),
       'texlive.profile',
     );
-    await fs.writeFile(dest, profile);
+    await fs.writeFile(dest, lines.join('\n'));
     core.debug(`${dest} created`);
 
     return dest;
