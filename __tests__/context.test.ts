@@ -30,7 +30,9 @@ jest.spyOn(fs, 'readFile').mockImplementation(async (filename) => {
 });
 jest.mock('os', () => ({
   platform: jest.fn(),
+  tmpdir: jest.fn(),
 }));
+(os.tmpdir as jest.Mock).mockReturnValue(random());
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
@@ -176,6 +178,15 @@ describe('loadConfig', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     process.env['TEXLIVE_INSTALL_PREFIX'] = '/usr/local/texlive';
     expect((await context.loadConfig()).prefix).toBe('/usr/local/texlive');
+  });
+
+  it('uses `os.tmpdir()` if `RUNNER_TEMP` is not set', async () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    process.env['TEXLIVE_INSTALL_PREFIX'] = undefined;
+    process.env['RUNNER_TEMP'] = undefined;
+    expect((await context.loadConfig()).prefix).toBe(
+      path.join(os.tmpdir(), 'setup-texlive'),
+    );
   });
 
   it('ignores `tlcontrib` if an older version of TeX Live is specified', async () => {

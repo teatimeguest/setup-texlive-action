@@ -5,6 +5,7 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import * as context from '#/context';
+import { InstallTL } from '#/install-tl';
 import * as setup from '#/setup';
 import * as tl from '#/texlive';
 
@@ -53,7 +54,10 @@ jest.spyOn(context, 'setKey').mockImplementation();
 jest.spyOn(context, 'getPost').mockImplementation();
 jest.spyOn(context, 'setPost').mockImplementation();
 jest.spyOn(context, 'setCacheHit').mockImplementation();
-jest.spyOn(tl, 'install').mockImplementation();
+jest
+  .spyOn(InstallTL, 'download')
+  .mockImplementation(async (version) => new InstallTL(version, random()));
+jest.spyOn(InstallTL.prototype, 'run').mockImplementation();
 jest.spyOn(tl.Manager.prototype, 'install').mockImplementation();
 jest
   .spyOn(tl.Manager.prototype, 'path', 'get')
@@ -74,8 +78,9 @@ describe('setup', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalledWith('2021', '/tmp/setup-texlive');
-    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(InstallTL.download).toHaveBeenCalledWith('2021');
+    expect(InstallTL.prototype.run).toHaveBeenCalledWith('/tmp/setup-texlive');
+    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
@@ -88,8 +93,11 @@ describe('setup', () => {
     (os.platform as jest.Mock).mockReturnValue('win32');
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalledWith('2021', 'C:\\TEMP\\setup-texlive');
-    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(InstallTL.download).toHaveBeenCalledWith('2021');
+    expect(InstallTL.prototype.run).toHaveBeenCalledWith(
+      'C:\\TEMP\\setup-texlive',
+    );
+    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
@@ -102,8 +110,9 @@ describe('setup', () => {
     (os.platform as jest.Mock).mockReturnValue('darwin');
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalledWith('2021', '/tmp/setup-texlive');
-    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(InstallTL.download).toHaveBeenCalledWith('2021');
+    expect(InstallTL.prototype.run).toHaveBeenCalledWith('/tmp/setup-texlive');
+    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
@@ -123,8 +132,9 @@ describe('setup', () => {
     });
     await setup.run();
     expect(cache.restoreCache).not.toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalledWith('2008', '/usr/local/texlive');
-    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(InstallTL.download).toHaveBeenCalledWith('2008');
+    expect(InstallTL.prototype.run).toHaveBeenCalledWith('/usr/local/texlive');
+    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).toHaveBeenCalledWith(
@@ -146,8 +156,8 @@ describe('setup', () => {
     });
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(InstallTL.prototype.run).toHaveBeenCalled();
+    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
@@ -170,7 +180,7 @@ describe('setup', () => {
     );
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).not.toHaveBeenCalled();
+    expect(InstallTL.download).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -196,7 +206,7 @@ describe('setup', () => {
     );
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).not.toHaveBeenCalled();
+    expect(InstallTL.download).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -213,8 +223,8 @@ describe('setup', () => {
     });
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(tl.install).toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).not.toHaveBeenCalled();
+    expect(InstallTL.prototype.run).toHaveBeenCalled();
+    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
