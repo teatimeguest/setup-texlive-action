@@ -49,7 +49,7 @@ jest.mock('path', () => {
     win32: actual.win32,
   };
 });
-jest.spyOn(cache, 'restoreCache').mockResolvedValue('');
+jest.spyOn(cache, 'restoreCache').mockResolvedValue(undefined);
 jest.spyOn(cache, 'saveCache').mockImplementation();
 jest.spyOn(core, 'debug').mockImplementation();
 jest

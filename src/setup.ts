@@ -41,21 +41,24 @@ async function setup(): Promise<void> {
   let cacheKey: string | undefined = undefined;
 
   if (config.cache) {
-    try {
-      core.info('Restoring cache');
-      cacheKey = await cache.restoreCache([texdir], primaryKey, restoreKeys);
-    } catch (error) {
-      core.info(`Failed to restore cache: ${error}`);
-      if (error instanceof Error && error.stack !== undefined) {
-        core.debug(error.stack);
+    cacheKey = await core.group('Restoring cache', async () => {
+      try {
+        const key = await cache.restoreCache([texdir], primaryKey, restoreKeys);
+        if (key === undefined) {
+          core.info('Cache not found');
+        }
+        return key;
+      } catch (error) {
+        core.info(`Failed to restore cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+          core.debug(error.stack);
+        }
+        return undefined;
       }
-    }
+    });
   }
 
-  if (!Boolean(cacheKey)) {
-    if (config.cache) {
-      core.info('Cache not found');
-    }
+  if (cacheKey === undefined) {
     const installtl = await core.group(
       'Acquiring install-tl',
       async () => await InstallTL.download(config.version),
@@ -70,15 +73,20 @@ async function setup(): Promise<void> {
 
   if (Boolean(cacheKey)) {
     context.setCacheHit();
-    const env = Environment.get(config.version);
-    for (const variable of tl.TEXMF) {
-      const value = env[`TEXLIVE_INSTALL_${variable}`];
-      // eslint-disable-next-line no-await-in-loop
-      if (value !== (await tlmgr.conf.texmf(variable)) && value !== undefined) {
-        // eslint-disable-next-line no-await-in-loop
-        await tlmgr.conf.texmf(variable, value);
+    await core.group('Configuring TEXMF', async () => {
+      const env = Environment.get(config.version);
+      for (const variable of tl.TEXMF) {
+        const value = env[`TEXLIVE_INSTALL_${variable}`];
+        if (
+          // eslint-disable-next-line no-await-in-loop
+          value !== (await tlmgr.conf.texmf(variable)) &&
+          value !== undefined
+        ) {
+          // eslint-disable-next-line no-await-in-loop
+          await tlmgr.conf.texmf(variable, value);
+        }
       }
-    }
+    });
   }
 
   if (config.tlcontrib) {

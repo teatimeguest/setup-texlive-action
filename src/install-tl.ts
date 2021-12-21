@@ -90,7 +90,7 @@ export class InstallTL {
       'option_w32_multi_user 0',            // tlpdbopt_w32_multi_user
     ];
 
-    core.info('Profile:\n> ' + lines.join('\n> '));
+    core.info('Profile:\n| ' + lines.join('\n| '));
 
     const dest = path.join(
       await fs.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-')),
@@ -223,8 +223,13 @@ export class Environment {
   }
 
   toString(): string {
+    const coerced = this.coerce();
     return this.keys()
-      .map((key) => `> ${key}='${this.coerce()[key] ?? ''}';`)
+      .map((key) => {
+        const value = coerced[key];
+        const quote = value === undefined ? '' : `'`;
+        return `| ${key}=${quote}${value ?? ''}${quote}`;
+      })
       .join('\n');
   }
 

@@ -60003,7 +60003,7 @@ _InstallTL_instances = new WeakSet(), _InstallTL_profile = async function _Insta
         'option_symlinks 0',
         'option_w32_multi_user 0', // tlpdbopt_w32_multi_user
     ];
-    core.info('Profile:\n> ' + lines.join('\n> '));
+    core.info('Profile:\n| ' + lines.join('\n| '));
     const dest = path.join(await fs_1.promises.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-')), 'texlive.profile');
     await fs_1.promises.writeFile(dest, lines.join('\n'));
     core.debug(`${dest} created`);
@@ -60106,8 +60106,13 @@ class Environment {
         (_e = (_k = this.coerce()).TEXLIVE_INSTALL_TEXMFVAR) !== null && _e !== void 0 ? _e : (_k.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var'));
     }
     toString() {
+        const coerced = this.coerce();
         return this.keys()
-            .map((key) => { var _a; return `> ${key}='${(_a = this.coerce()[key]) !== null && _a !== void 0 ? _a : ''}';`; })
+            .map((key) => {
+            const value = coerced[key];
+            const quote = value === undefined ? '' : `'`;
+            return `| ${key}=${quote}${value !== null && value !== void 0 ? value : ''}${quote}`;
+        })
             .join('\n');
     }
     static get(version) {
@@ -60268,21 +60273,24 @@ async function setup() {
     const [primaryKey, restoreKeys] = getCacheKeys(config.version, config.packages);
     let cacheKey = undefined;
     if (config.cache) {
-        try {
-            core.info('Restoring cache');
-            cacheKey = await cache.restoreCache([texdir], primaryKey, restoreKeys);
-        }
-        catch (error) {
-            core.info(`Failed to restore cache: ${error}`);
-            if (error instanceof Error && error.stack !== undefined) {
-                core.debug(error.stack);
+        cacheKey = await core.group('Restoring cache', async () => {
+            try {
+                const key = await cache.restoreCache([texdir], primaryKey, restoreKeys);
+                if (key === undefined) {
+                    core.info('Cache not found');
+                }
+                return key;
             }
-        }
+            catch (error) {
+                core.info(`Failed to restore cache: ${error}`);
+                if (error instanceof Error && error.stack !== undefined) {
+                    core.debug(error.stack);
+                }
+                return;
+            }
+        });
     }
-    if (!Boolean(cacheKey)) {
-        if (config.cache) {
-            core.info('Cache not found');
-        }
+    if (cacheKey === undefined) {
         const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.download(config.version));
         await core.group('Installing Tex Live', async () => {
             await installtl.run(config.prefix);
@@ -60292,15 +60300,19 @@ async function setup() {
     await tlmgr.path.add();
     if (Boolean(cacheKey)) {
         context.setCacheHit();
-        const env = install_tl_1.Environment.get(config.version);
-        for (const variable of tl.TEXMF) {
-            const value = env[`TEXLIVE_INSTALL_${variable}`];
-            // eslint-disable-next-line no-await-in-loop
-            if (value !== (await tlmgr.conf.texmf(variable)) && value !== undefined) {
+        await core.group('Configuring TEXMF', async () => {
+            const env = install_tl_1.Environment.get(config.version);
+            for (const variable of tl.TEXMF) {
+                const value = env[`TEXLIVE_INSTALL_${variable}`];
+                if (
                 // eslint-disable-next-line no-await-in-loop
-                await tlmgr.conf.texmf(variable, value);
+                value !== (await tlmgr.conf.texmf(variable)) &&
+                    value !== undefined) {
+                    // eslint-disable-next-line no-await-in-loop
+                    await tlmgr.conf.texmf(variable, value);
+                }
             }
-        }
+        });
     }
     if (config.tlcontrib) {
         await core.group('Setting up TLContrib', async () => {
