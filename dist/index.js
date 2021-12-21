@@ -60279,7 +60279,17 @@ async function setup() {
             }
         }
     }
+    if (!Boolean(cacheKey)) {
+        if (config.cache) {
+            core.info('Cache not found');
+        }
+        const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.download(config.version));
+        await core.group('Installing Tex Live', async () => {
+            await installtl.run(config.prefix);
+        });
+    }
     const tlmgr = new tl.Manager(config.version, config.prefix);
+    await tlmgr.path.add();
     if (Boolean(cacheKey)) {
         context.setCacheHit();
         const env = install_tl_1.Environment.get(config.version);
@@ -60292,16 +60302,6 @@ async function setup() {
             }
         }
     }
-    else {
-        if (config.cache) {
-            core.info('Cache not found');
-        }
-        const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.download(config.version));
-        await core.group('Installing Tex Live', async () => {
-            await installtl.run(config.prefix);
-        });
-    }
-    await tlmgr.path.add();
     if (config.tlcontrib) {
         await core.group('Setting up TLContrib', async () => {
             await tlmgr.repository.add(tl.contrib().href, 'tlcontrib');

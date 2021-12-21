@@ -52,20 +52,7 @@ async function setup(): Promise<void> {
     }
   }
 
-  const tlmgr = new tl.Manager(config.version, config.prefix);
-
-  if (Boolean(cacheKey)) {
-    context.setCacheHit();
-    const env = Environment.get(config.version);
-    for (const variable of tl.TEXMF) {
-      const value = env[`TEXLIVE_INSTALL_${variable}`];
-      // eslint-disable-next-line no-await-in-loop
-      if (value !== (await tlmgr.conf.texmf(variable)) && value !== undefined) {
-        // eslint-disable-next-line no-await-in-loop
-        await tlmgr.conf.texmf(variable, value);
-      }
-    }
-  } else {
+  if (!Boolean(cacheKey)) {
     if (config.cache) {
       core.info('Cache not found');
     }
@@ -78,7 +65,21 @@ async function setup(): Promise<void> {
     });
   }
 
+  const tlmgr = new tl.Manager(config.version, config.prefix);
   await tlmgr.path.add();
+
+  if (Boolean(cacheKey)) {
+    context.setCacheHit();
+    const env = Environment.get(config.version);
+    for (const variable of tl.TEXMF) {
+      const value = env[`TEXLIVE_INSTALL_${variable}`];
+      // eslint-disable-next-line no-await-in-loop
+      if (value !== (await tlmgr.conf.texmf(variable)) && value !== undefined) {
+        // eslint-disable-next-line no-await-in-loop
+        await tlmgr.conf.texmf(variable, value);
+      }
+    }
+  }
 
   if (config.tlcontrib) {
     await core.group('Setting up TLContrib', async () => {
