@@ -60286,7 +60286,7 @@ async function setup() {
                 if (error instanceof Error && error.stack !== undefined) {
                     core.debug(error.stack);
                 }
-                return;
+                return undefined;
             }
         });
     }
