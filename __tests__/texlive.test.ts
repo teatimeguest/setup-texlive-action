@@ -41,6 +41,33 @@ test.each([
 
 describe('Manager', () => {
   describe('conf.texmf', () => {
+    it('returns all values of TEXMF', async () => {
+      const mock = async (
+        cmd: string,
+        args: ReadonlyArray<string>,
+      ): exec.ExecOutput => {
+        if (
+          cmd === 'kpsewhich' &&
+          args.length === 2 &&
+          args[0] === '-var-value' &&
+          args[1] !== undefined
+        ) {
+          return { exitCode: 0, stdout: args[1], stderr: '' };
+        }
+        throw new Error(`Unexpected arguments: ${cmd}; ${args}`);
+      };
+      (exec.getExecOutput as jest.Mock)
+        .mockImplementationOnce(mock)
+        .mockImplementationOnce(mock)
+        .mockImplementationOnce(mock);
+      const tlmgr = new tl.Manager('2021', '/usr/local/texlive');
+      await expect(tlmgr.conf.texmf()).resolves.toStrictEqual({
+        ['TEXMFHOME']: 'TEXMFHOME',
+        ['TEXMFCONFIG']: 'TEXMFCONFIG',
+        ['TEXMFVAR']: 'TEXMFVAR',
+      });
+    });
+
     it('returns the value of the given key by using `kpsewhich`', async () => {
       (exec.getExecOutput as jest.Mock).mockResolvedValueOnce({
         exitCode: 0,

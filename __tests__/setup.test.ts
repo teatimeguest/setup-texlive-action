@@ -88,6 +88,13 @@ jest.spyOn(Profile.prototype, 'write').mockResolvedValue(random());
 jest.spyOn(tl.Manager.prototype, 'install').mockImplementation();
 jest.spyOn(tl.Manager.prototype, 'conf', 'get').mockReturnValue({
   texmf: jest.fn(async (key, value) => {
+    if (key === undefined) {
+      return {
+        ['TEXMFHOME']: random(),
+        ['TEXMFHCONFIG']: random(),
+        ['TEXMFVAR']: random(),
+      };
+    }
     return value === undefined ? undefined : random();
   }) as any,
 });

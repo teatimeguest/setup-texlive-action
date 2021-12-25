@@ -23,15 +23,22 @@ export function isVersion(version: string): version is Version {
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1]!;
 
-export const TEXMF = [
-  // 'TEXDIR',
-  'TEXMFCONFIG',
-  'TEXMFVAR',
-  'TEXMFHOME',
-  // 'TEXMFLOCAL',
-  // 'TEXMFSYSCONFIG',
-  // 'TEXMFSYSVAR',
-] as const;
+export namespace Texmf {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  export function keys() {
+    return [
+      // prettier-ignore
+      'TEXMFHOME',
+      'TEXMFCONFIG',
+      'TEXMFVAR',
+    ] as const;
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type Texmf = {
+  readonly [Key in ReturnType<typeof Texmf.keys>[number]]: string;
+};
 
 /**
  * An interface for the `tlmgr` command.
@@ -44,17 +51,28 @@ export class Manager {
 
   get conf(): Readonly<{
     texmf: {
-      (key: typeof TEXMF[number]): Promise<string>;
-      (key: typeof TEXMF[number], value: string): Promise<void>;
+      (): Promise<Texmf>;
+      (key: keyof Texmf): Promise<string>;
+      (key: keyof Texmf, value: string): Promise<void>;
     };
   }> {
     return new (class {
-      texmf(key: typeof TEXMF[number]): Promise<string>;
-      texmf(key: typeof TEXMF[number], value: string): Promise<void>;
+      texmf(): Promise<Texmf>;
+      texmf(key: keyof Texmf): Promise<string>;
+      texmf(key: keyof Texmf, value: string): Promise<void>;
       async texmf(
-        key: typeof TEXMF[number],
+        key?: keyof Texmf,
         value?: string,
-      ): Promise<string | void> {
+      ): Promise<Texmf | string | void> {
+        if (key === undefined) {
+          // eslint-disable-next-line @typescript-eslint/promise-function-async
+          const promises = Texmf.keys().map((variable) => {
+            return (async () => {
+              return [variable, await this.texmf(variable)];
+            })();
+          });
+          return Object.fromEntries(await Promise.all(promises)) as Texmf;
+        }
         if (value === undefined) {
           return (
             await exec.getExecOutput('kpsewhich', ['-var-value', key])

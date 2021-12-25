@@ -59977,8 +59977,9 @@ class Environment {
     constructor(version) {
         var _a, _b, _c, _d, _e, _f;
         for (const key of Environment.keys()) {
-            if (Boolean(process.env[key])) {
-                this[key] = process.env[key];
+            const value = process.env[key];
+            if (value !== undefined) {
+                this[key] = value;
             }
         }
         const home = os.homedir();
@@ -60278,14 +60279,12 @@ async function main() {
     if (cacheType !== 'none') {
         context.setCacheHit();
         await core.group('Adjusting TEXMF', async () => {
-            for (const variable of tl.TEXMF) {
-                const value = env[`TEXLIVE_INSTALL_${variable}`];
-                if (
-                // eslint-disable-next-line no-await-in-loop
-                value !== (await tlmgr.conf.texmf(variable)) &&
-                    value !== undefined) {
+            const texmf = await tlmgr.conf.texmf();
+            for (const key of tl.Texmf.keys()) {
+                const value = env[`TEXLIVE_INSTALL_${key}`];
+                if (value !== texmf[key]) {
                     // eslint-disable-next-line no-await-in-loop
-                    await tlmgr.conf.texmf(variable, value);
+                    await tlmgr.conf.texmf(key, value);
                 }
             }
         });
@@ -60386,7 +60385,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.contrib = exports.Manager = exports.TEXMF = exports.LATEST_VERSION = exports.isVersion = void 0;
+exports.contrib = exports.Manager = exports.Texmf = exports.LATEST_VERSION = exports.isVersion = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
@@ -60405,15 +60404,19 @@ function isVersion(version) {
 exports.isVersion = isVersion;
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 exports.LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
-exports.TEXMF = [
-    // 'TEXDIR',
-    'TEXMFCONFIG',
-    'TEXMFVAR',
-    'TEXMFHOME',
-    // 'TEXMFLOCAL',
-    // 'TEXMFSYSCONFIG',
-    // 'TEXMFSYSVAR',
-];
+var Texmf;
+(function (Texmf) {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    function keys() {
+        return [
+            // prettier-ignore
+            'TEXMFHOME',
+            'TEXMFCONFIG',
+            'TEXMFVAR',
+        ];
+    }
+    Texmf.keys = keys;
+})(Texmf = exports.Texmf || (exports.Texmf = {}));
 /**
  * An interface for the `tlmgr` command.
  */
@@ -60428,6 +60431,15 @@ class Manager {
                 this.tlmgr = tlmgr;
             }
             async texmf(key, value) {
+                if (key === undefined) {
+                    // eslint-disable-next-line @typescript-eslint/promise-function-async
+                    const promises = Texmf.keys().map((variable) => {
+                        return (async () => {
+                            return [variable, await this.texmf(variable)];
+                        })();
+                    });
+                    return Object.fromEntries(await Promise.all(promises));
+                }
                 if (value === undefined) {
                     return (await exec.getExecOutput('kpsewhich', ['-var-value', key])).stdout.trim();
                 }

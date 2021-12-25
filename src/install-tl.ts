@@ -128,22 +128,23 @@ export class Environment
   readonly TEXLIVE_DOWNLOADER?: string;
   readonly TL_DOWNLOAD_PROGRAM?: string;
   readonly TL_DOWNLOAD_ARGS?: string;
-  readonly TEXLIVE_INSTALL_ENV_NOCHECK?: string;
+  readonly TEXLIVE_INSTALL_ENV_NOCHECK: string;
   readonly TEXLIVE_INSTALL_NO_CONTEXT_CACHE?: string;
   readonly TEXLIVE_INSTALL_NO_RESUME?: string;
-  readonly TEXLIVE_INSTALL_NO_WELCOME?: string;
+  readonly TEXLIVE_INSTALL_NO_WELCOME: string;
   readonly TEXLIVE_INSTALL_PAPER?: string;
-  readonly TEXLIVE_INSTALL_PREFIX?: string;
-  readonly TEXLIVE_INSTALL_TEXMFHOME?: string;
-  readonly TEXLIVE_INSTALL_TEXMFCONFIG?: string;
-  readonly TEXLIVE_INSTALL_TEXMFVAR?: string;
+  readonly TEXLIVE_INSTALL_PREFIX: string;
+  readonly TEXLIVE_INSTALL_TEXMFHOME: string;
+  readonly TEXLIVE_INSTALL_TEXMFCONFIG: string;
+  readonly TEXLIVE_INSTALL_TEXMFVAR: string;
   readonly NOPERLDOC?: string;
   /* eslint-enable @typescript-eslint/naming-convention */
 
   private constructor(version: tl.Version) {
     for (const key of Environment.keys()) {
-      if (Boolean(process.env[key])) {
-        this[key] = process.env[key];
+      const value = process.env[key];
+      if (value !== undefined) {
+        this[key] = value;
       }
     }
     const home = os.homedir();
