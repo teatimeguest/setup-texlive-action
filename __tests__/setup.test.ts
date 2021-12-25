@@ -5,7 +5,7 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import * as context from '#/context';
-import { Environment, InstallTL } from '#/install-tl';
+import { Environment, InstallTL, Profile } from '#/install-tl';
 import * as setup from '#/setup';
 import * as tl from '#/texlive';
 
@@ -59,6 +59,7 @@ jest
   );
 jest.spyOn(core, 'info').mockImplementation();
 jest.spyOn(core, 'warning').mockImplementation();
+jest.spyOn(core, 'setFailed').mockImplementation();
 jest.spyOn(context, 'loadConfig').mockImplementation(async () => ({
   cache: true,
   packages: new Set([]),
@@ -77,8 +78,9 @@ jest.spyOn(context, 'setCacheHit').mockImplementation();
 jest.spyOn(Environment, 'get');
 jest
   .spyOn(InstallTL, 'download')
-  .mockImplementation(async (version) => new InstallTL(version, random()));
+  .mockImplementation((version) => new (InstallTL as any)(version, random()));
 jest.spyOn(InstallTL.prototype, 'run').mockImplementation();
+jest.spyOn(Profile.prototype, 'write').mockResolvedValue(random());
 jest.spyOn(tl.Manager.prototype, 'install').mockImplementation();
 jest.spyOn(tl.Manager.prototype, 'conf', 'get').mockReturnValue({
   texmf: jest.fn(async (key, value) => {
@@ -95,7 +97,7 @@ jest
   .spyOn(tl.Manager.prototype, 'repository', 'get')
   .mockReturnValue({ add: jest.fn() });
 
-describe('setup', () => {
+describe('main', () => {
   beforeAll(() => {
     (context.getPost as jest.Mock).mockReturnValueOnce(false);
   });
@@ -105,7 +107,7 @@ describe('setup', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.download).toHaveBeenCalledWith('2021');
-    expect(InstallTL.prototype.run).toHaveBeenCalledWith('/tmp/setup-texlive');
+    expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -120,9 +122,7 @@ describe('setup', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.download).toHaveBeenCalledWith('2021');
-    expect(InstallTL.prototype.run).toHaveBeenCalledWith(
-      'C:\\TEMP\\setup-texlive',
-    );
+    expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -137,7 +137,7 @@ describe('setup', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.download).toHaveBeenCalledWith('2021');
-    expect(InstallTL.prototype.run).toHaveBeenCalledWith('/tmp/setup-texlive');
+    expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -159,7 +159,7 @@ describe('setup', () => {
     await setup.run();
     expect(cache.restoreCache).not.toHaveBeenCalled();
     expect(InstallTL.download).toHaveBeenCalledWith('2008');
-    expect(InstallTL.prototype.run).toHaveBeenCalledWith('/usr/local/texlive');
+    expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
     expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -262,7 +262,10 @@ describe('setup', () => {
   it('never sets the variables for a new installation', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     await setup.run();
-    expect(Environment.get).not.toHaveBeenCalled();
+    expect(core.group).not.toHaveBeenCalledWith(
+      'Adjusting TEXMF',
+      expect.anything(),
+    );
   });
 
   it('sets the variables appropriately if necessary', async () => {
@@ -293,7 +296,7 @@ describe('setup', () => {
   });
 });
 
-describe('saveCache', () => {
+describe('post', () => {
   beforeAll(() => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     (context.getPost as jest.Mock).mockReturnValue(true);

@@ -14,17 +14,16 @@ import * as util from '#/utility';
  * A class for downloading and running the installer of TeX Live.
  */
 export class InstallTL {
-  constructor(
+  private constructor(
     private readonly version: tl.Version,
     private readonly bin: string,
   ) {}
 
-  async run(prefix: string): Promise<void> {
-    const texdir = path.join(prefix, this.version);
-    const texenv = Environment.get(this.version);
-    const options = ['-no-gui', '-profile', await this.#profile(prefix)];
-
-    core.info('Environment variables:\n' + texenv.toString());
+  async run(
+    profile: Readonly<Profile>,
+    env: Readonly<Environment> = Environment.get(this.version),
+  ): Promise<void> {
+    const options = ['-no-gui', '-profile', await profile.write()];
 
     if (this.version !== tl.LATEST_VERSION) {
       options.push(
@@ -36,75 +35,16 @@ export class InstallTL {
       );
     }
 
-    await exec.exec(this.bin, options, { env: { ...process.env, ...texenv } });
+    await exec.exec(this.bin, options, {
+      // This coercion is necessary; otherwise `tsc` would complain that
+      // "Property 'toString' is incompatible with index signature.'
+      env: { ...process.env, ...(env as Environment) },
+    });
     core.info('Applying patches');
-    await patch(this.version, texdir);
+    await patch(this.version, profile.TEXDIR);
   }
 
-  async #profile(prefix: string): Promise<string> {
-    const texdir = path.join(prefix, this.version);
-    const local = path.join(prefix, 'texmf-local');
-    const sysconfig = path.join(texdir, 'texmf-config');
-    const sysvar = path.join(texdir, 'texmf-var');
-    const adjustrepo = this.version === tl.LATEST_VERSION ? 1 : 0;
-    /**
-     * `scheme-infraonly` was first introduced in TeX Live 2016.
-     */
-    const scheme = Number(this.version) < 2016 ? 'minimal' : 'infraonly';
-    // prettier-ignore
-    /**
-     * - `option_autobackup`, `option_doc`, `option_src`, and `option_symlinks`
-     *   already exist since version 2008.
-     *
-     * - In version 2009, `option_desktop_integration`, `option_file_assocs`,
-     *   and `option_w32_multi_user` were first introduced.
-     *   Also, `option_symlinks` was renamed to `option_path`.
-     *
-     * - `option_adjustrepo` was first introduced in version 2011.
-     *
-     * - `option_menu_integration` was first introduced in version 2012 and
-     *   removed in version 2017.
-     *
-     * - In version 2017, the option names have been changed, and
-     *   new prefixes `instopt-` and `tlpdbopt-` have been introduced.
-     *   Also, `option_path` and `option_symlinks` have been merged and
-     *   `instopt_adjustpath` has been introduced.
-     *   The old option names are still valid in later versions.
-     */
-    const lines = [
-      `TEXDIR ${texdir}`,
-      `TEXMFLOCAL ${local}`,
-      `TEXMFSYSCONFIG ${sysconfig}`,
-      `TEXMFSYSVAR ${sysvar}`,
-      `selected_scheme scheme-${scheme}`,
-      // Old name                           // Current name
-      `option_adjustrepo ${adjustrepo}`,    // instopt_adjustrepo
-      'option_autobackup 0',                // tlpdbopt_autobackup
-      'option_desktop_integration 0',       // tlpdbopt_desktop_integration
-      'option_doc 0',                       // tlpdbopt_install_docfiles
-      'option_file_assocs 0',               // tlpdbopt_file_assocs
-      'option_menu_integration 0',
-      'option_path 0',                      // instopt_adjustpath
-      'option_src 0',                       // tlpdbopt_install_srcfiles
-      'option_symlinks 0',                  // instopt_adjustpath
-      'option_w32_multi_user 0',            // tlpdbopt_w32_multi_user
-    ];
-
-    core.info('Profile:\n| ' + lines.join('\n| '));
-
-    const dest = path.join(
-      await fs.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-')),
-      'texlive.profile',
-    );
-    await fs.writeFile(dest, lines.join('\n'));
-    core.debug(`${dest} created`);
-
-    return dest;
-  }
-}
-
-export namespace InstallTL {
-  export async function download(version: tl.Version): Promise<InstallTL> {
+  static async download(version: tl.Version): Promise<InstallTL> {
     /**
      * - There is no `install-tl` for versions prior to 2005, and
      *   versions 2005--2007 do not seem to be archived.
@@ -178,9 +118,56 @@ export namespace InstallTL {
   }
 }
 
-export class Environment {
+export class Environment
+  implements
+    Partial<
+      Readonly<Record<ReturnType<typeof Environment.keys>[number], string>>
+    >
+{
+  /* eslint-disable @typescript-eslint/naming-convention */
+  readonly TEXLIVE_DOWNLOADER?: string;
+  readonly TL_DOWNLOAD_PROGRAM?: string;
+  readonly TL_DOWNLOAD_ARGS?: string;
+  readonly TEXLIVE_INSTALL_ENV_NOCHECK?: string;
+  readonly TEXLIVE_INSTALL_NO_CONTEXT_CACHE?: string;
+  readonly TEXLIVE_INSTALL_NO_RESUME?: string;
+  readonly TEXLIVE_INSTALL_NO_WELCOME?: string;
+  readonly TEXLIVE_INSTALL_PAPER?: string;
+  readonly TEXLIVE_INSTALL_TEXMFHOME?: string;
+  readonly TEXLIVE_INSTALL_TEXMFCONFIG?: string;
+  readonly TEXLIVE_INSTALL_TEXMFVAR?: string;
+  readonly NOPERLDOC?: string;
+  /* eslint-enable @typescript-eslint/naming-convention */
+
+  private constructor(version: tl.Version) {
+    for (const key of Environment.keys()) {
+      if (Boolean(process.env[key])) {
+        this[key] = process.env[key];
+      }
+    }
+    const home = os.homedir();
+    const texdir = path.join(home, '.local', 'texlive', version);
+    this.TEXLIVE_INSTALL_ENV_NOCHECK ??= 'true';
+    this.TEXLIVE_INSTALL_NO_WELCOME ??= 'true';
+    this.TEXLIVE_INSTALL_TEXMFHOME ??= path.join(home, 'texmf');
+    this.TEXLIVE_INSTALL_TEXMFCONFIG ??= path.join(texdir, 'texmf-config');
+    this.TEXLIVE_INSTALL_TEXMFVAR ??= path.join(texdir, 'texmf-var');
+  }
+
+  toString(): string {
+    return Environment.keys()
+      .map((key) => {
+        return `${key}='${this[key] ?? ''}'`;
+      })
+      .join('\n');
+  }
+
+  static get(version: tl.Version): Environment {
+    return new Environment(version);
+  }
+
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  keys() {
+  static keys() {
     return [
       'TEXLIVE_DOWNLOADER',
       'TL_DOWNLOAD_PROGRAM',
@@ -196,47 +183,98 @@ export class Environment {
       'NOPERLDOC',
     ] as const;
   }
+}
 
-  private coerce(): Partial<
-    Record<ReturnType<typeof this.keys>[number], string>
-  > {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this as any as ReturnType<typeof this.coerce>;
-  }
+export class Profile
+  implements Readonly<Record<ReturnType<typeof Profile.keys>[number], string>>
+{
+  constructor(
+    private readonly version: tl.Version,
+    private readonly prefix: string,
+  ) {}
 
-  private constructor(version: tl.Version) {
-    for (const key of this.keys()) {
-      if (process.env[key] !== undefined) {
-        this.coerce()[key] = process.env[key];
-      }
-    }
-    const home = os.homedir();
-    const texdir = path.join(home, '.local', 'texlive', version);
-    this.coerce().TEXLIVE_INSTALL_ENV_NOCHECK ??= 'true';
-    this.coerce().TEXLIVE_INSTALL_NO_WELCOME ??= 'true';
-    this.coerce().TEXLIVE_INSTALL_TEXMFHOME ??= path.join(home, 'texmf');
-    this.coerce().TEXLIVE_INSTALL_TEXMFCONFIG ??= path.join(
-      texdir,
-      'texmf-config',
-    );
-    this.coerce().TEXLIVE_INSTALL_TEXMFVAR ??= path.join(texdir, 'texmf-var');
-  }
+  /* eslint-disable @typescript-eslint/naming-convention */
+  /**
+   * - `option_autobackup`, `option_doc`, `option_src`, and `option_symlinks`
+   *   already exist since version 2008.
+   *
+   * - In version 2009, `option_desktop_integration`, `option_file_assocs`,
+   *   and `option_w32_multi_user` were first introduced.
+   *   Also, `option_symlinks` was renamed to `option_path`.
+   *
+   * - `option_adjustrepo` was first introduced in version 2011.
+   *
+   * - `option_menu_integration` was first introduced in version 2012 and
+   *   removed in version 2017.
+   *
+   * - In version 2017, the option names have been changed, and
+   *   new prefixes `instopt-` and `tlpdbopt-` have been introduced.
+   *   Also, `option_path` and `option_symlinks` have been merged and
+   *   `instopt_adjustpath` has been introduced.
+   *   The old option names are still valid in later versions.
+   */
+  readonly TEXDIR: string = path.join(this.prefix, this.version);
+  readonly TEXMFLOCAL: string = path.join(this.prefix, 'texmf-local');
+  readonly TEXMFSYSCONFIG: string = path.join(this.TEXDIR, 'texmf-config');
+  readonly TEXMFSYSVAR: string = path.join(this.TEXDIR, 'texmf-var');
+  /**
+   * `scheme-infraonly` was first introduced in TeX Live 2016.
+   */
+  readonly selected_scheme: string = `scheme-${
+    Number(this.version) < 2016 ? 'minimal' : 'infraonly'
+  }`;
+  readonly option_adjustrepo: string =
+    this.version === tl.LATEST_VERSION ? '1' : '0';
+  readonly option_autobackup: string = '0';
+  readonly option_desktop_integration: string = '0';
+  readonly option_doc: string = '0';
+  readonly option_file_assocs: string = '0';
+  readonly option_menu_integration: string = '0';
+  readonly option_path: string = '0';
+  readonly option_src: string = '0';
+  readonly option_symlinks: string = '0';
+  readonly option_w32_multi_user: string = '0';
+  /* eslint-enable @typescript-eslint/naming-convention */
 
-  toString(): string {
-    const coerced = this.coerce();
-    return this.keys()
-      .map((key) => {
-        const value = coerced[key];
-        const quote = value === undefined ? '' : `'`;
-        return `| ${key}=${quote}${value ?? ''}${quote}`;
-      })
+  filepath: string | undefined = undefined;
+
+  toString(this: Readonly<this>): string {
+    return Profile.keys()
+      .map((key) => `${key} ${this[key]}`)
       .join('\n');
   }
 
-  static get(
-    version: tl.Version,
-  ): Readonly<ReturnType<typeof Environment.prototype.coerce>> {
-    return new Environment(version).coerce();
+  async write(): Promise<string> {
+    if (this.filepath === undefined) {
+      const tmp = await fs.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-'));
+      this.filepath = path.join(tmp, 'texlive.profile');
+      await fs.writeFile(this.filepath, this.toString());
+      core.debug(`${this.filepath} created`);
+    }
+    return this.filepath;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  static keys() {
+    // prettier-ignore
+    return [
+      'TEXDIR',
+      'TEXMFLOCAL',
+      'TEXMFSYSCONFIG',
+      'TEXMFSYSVAR',
+      'selected_scheme',
+      // Old name                    // Current name
+      'option_adjustrepo',           // instopt_adjustrepo
+      'option_autobackup',           // tlpdbopt_autobackup
+      'option_desktop_integration',  // tlpdbopt_desktop_integration
+      'option_doc',                  // tlpdbopt_install_docfiles
+      'option_file_assocs',          // tlpdbopt_file_assocs
+      'option_menu_integration',
+      'option_path',                 // instopt_adjustpath
+      'option_src',                  // tlpdbopt_install_srcfiles
+      'option_symlinks',             // instopt_adjustpath
+      'option_w32_multi_user',       // tlpdbopt_w32_multi_user
+    ] as const;
   }
 }
 
