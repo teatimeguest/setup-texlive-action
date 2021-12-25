@@ -59975,7 +59975,7 @@ exports.InstallTL = InstallTL;
 class Environment {
     /* eslint-enable @typescript-eslint/naming-convention */
     constructor(version) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f;
         for (const key of Environment.keys()) {
             if (Boolean(process.env[key])) {
                 this[key] = process.env[key];
@@ -59985,9 +59985,10 @@ class Environment {
         const texdir = path.join(home, '.local', 'texlive', version);
         (_a = this.TEXLIVE_INSTALL_ENV_NOCHECK) !== null && _a !== void 0 ? _a : (this.TEXLIVE_INSTALL_ENV_NOCHECK = 'true');
         (_b = this.TEXLIVE_INSTALL_NO_WELCOME) !== null && _b !== void 0 ? _b : (this.TEXLIVE_INSTALL_NO_WELCOME = 'true');
-        (_c = this.TEXLIVE_INSTALL_TEXMFHOME) !== null && _c !== void 0 ? _c : (this.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf'));
-        (_d = this.TEXLIVE_INSTALL_TEXMFCONFIG) !== null && _d !== void 0 ? _d : (this.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config'));
-        (_e = this.TEXLIVE_INSTALL_TEXMFVAR) !== null && _e !== void 0 ? _e : (this.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var'));
+        (_c = this.TEXLIVE_INSTALL_PREFIX) !== null && _c !== void 0 ? _c : (this.TEXLIVE_INSTALL_PREFIX = path.join(util.tmpdir(), 'setup-texlive'));
+        (_d = this.TEXLIVE_INSTALL_TEXMFHOME) !== null && _d !== void 0 ? _d : (this.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf'));
+        (_e = this.TEXLIVE_INSTALL_TEXMFCONFIG) !== null && _e !== void 0 ? _e : (this.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config'));
+        (_f = this.TEXLIVE_INSTALL_TEXMFVAR) !== null && _f !== void 0 ? _f : (this.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var'));
     }
     toString() {
         return Environment.keys()
@@ -60011,6 +60012,7 @@ class Environment {
             'TEXLIVE_INSTALL_NO_RESUME',
             'TEXLIVE_INSTALL_NO_WELCOME',
             'TEXLIVE_INSTALL_PAPER',
+            'TEXLIVE_INSTALL_PREFIX',
             'TEXLIVE_INSTALL_TEXMFHOME',
             'TEXLIVE_INSTALL_TEXMFCONFIG',
             'TEXLIVE_INSTALL_TEXMFVAR',

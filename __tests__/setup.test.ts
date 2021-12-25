@@ -5,7 +5,7 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import * as context from '#/context';
-import { Environment, InstallTL, Profile } from '#/install-tl';
+import { InstallTL, Profile } from '#/install-tl';
 import * as setup from '#/setup';
 import * as tl from '#/texlive';
 
@@ -22,6 +22,7 @@ process.env = (() => {
     TEXLIVE_INSTALL_NO_RESUME,
     TEXLIVE_INSTALL_NO_WELCOME,
     TEXLIVE_INSTALL_PAPER,
+    TEXLIVE_INSTALL_PREFIX,
     TEXLIVE_INSTALL_TEXMFHOME,
     TEXLIVE_INSTALL_TEXMFCONFIG,
     TEXLIVE_INSTALL_TEXMFVAR,
@@ -35,8 +36,10 @@ jest.mock('os', () => ({
   arch: jest.requireActual('os').arch,
   homedir: jest.fn(),
   platform: jest.fn(),
+  tmpdir: jest.fn(),
 }));
 (os.homedir as jest.Mock).mockReturnValue(random());
+(os.tmpdir as jest.Mock).mockReturnValue(random());
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
@@ -59,7 +62,9 @@ jest
   );
 jest.spyOn(core, 'info').mockImplementation();
 jest.spyOn(core, 'warning').mockImplementation();
-jest.spyOn(core, 'setFailed').mockImplementation();
+jest.spyOn(core, 'setFailed').mockImplementation((error) => {
+  throw new Error(`${error}`);
+});
 jest.spyOn(context, 'loadConfig').mockImplementation(async () => ({
   cache: true,
   packages: new Set([]),
@@ -75,7 +80,6 @@ jest.spyOn(context, 'setKey').mockImplementation();
 jest.spyOn(context, 'getPost').mockImplementation();
 jest.spyOn(context, 'setPost').mockImplementation();
 jest.spyOn(context, 'setCacheHit').mockImplementation();
-jest.spyOn(Environment, 'get');
 jest
   .spyOn(InstallTL, 'download')
   .mockImplementation((version) => new (InstallTL as any)(version, random()));

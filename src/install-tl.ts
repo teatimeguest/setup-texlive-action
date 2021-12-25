@@ -133,6 +133,7 @@ export class Environment
   readonly TEXLIVE_INSTALL_NO_RESUME?: string;
   readonly TEXLIVE_INSTALL_NO_WELCOME?: string;
   readonly TEXLIVE_INSTALL_PAPER?: string;
+  readonly TEXLIVE_INSTALL_PREFIX?: string;
   readonly TEXLIVE_INSTALL_TEXMFHOME?: string;
   readonly TEXLIVE_INSTALL_TEXMFCONFIG?: string;
   readonly TEXLIVE_INSTALL_TEXMFVAR?: string;
@@ -149,6 +150,7 @@ export class Environment
     const texdir = path.join(home, '.local', 'texlive', version);
     this.TEXLIVE_INSTALL_ENV_NOCHECK ??= 'true';
     this.TEXLIVE_INSTALL_NO_WELCOME ??= 'true';
+    this.TEXLIVE_INSTALL_PREFIX ??= path.join(util.tmpdir(), 'setup-texlive');
     this.TEXLIVE_INSTALL_TEXMFHOME ??= path.join(home, 'texmf');
     this.TEXLIVE_INSTALL_TEXMFCONFIG ??= path.join(texdir, 'texmf-config');
     this.TEXLIVE_INSTALL_TEXMFVAR ??= path.join(texdir, 'texmf-var');
@@ -177,6 +179,7 @@ export class Environment
       'TEXLIVE_INSTALL_NO_RESUME',
       'TEXLIVE_INSTALL_NO_WELCOME',
       'TEXLIVE_INSTALL_PAPER',
+      'TEXLIVE_INSTALL_PREFIX',
       'TEXLIVE_INSTALL_TEXMFHOME',
       'TEXLIVE_INSTALL_TEXMFCONFIG',
       'TEXLIVE_INSTALL_TEXMFVAR',
