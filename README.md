@@ -91,7 +91,7 @@ All inputs are optional.
 |Name|Type|Description|
 |---|---|---|
 |`cache`|Bool|Enable caching for [`TEXDIR`][texdir]. The default is `true`.|
-|`package-file`|String|File containing TeX package names to be installed. The file format is whitespace-delimited, and everything after a `#` is treated as a comment.|
+|`package-file`|String|File containing TeX package names to be installed. The file format is whitespace-delimited, and everything after a `#` is treated as a comment[^1].|
 |`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-environment-variables]. The default is <code>[$RUNNER_TEMP][actions-environment-variables]/setup-texlive</code>.|
 |`tlcontrib`|Bool|Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored if an older version is specified for `version`. The default is `false`.|
@@ -135,6 +135,10 @@ See the [releases page][releases].
 
 [MIT License](./LICENSE)
 
+[^1]: Such a file is used in the [official LaTeX3 repository][latex3]
+  with [`zauguin/install-texlive`][install-texlive] action
+  (see [`.github/tl_packages`][tl_packages]).
+
 [actions-cache]: https://github.com/actions/toolkit/tree/main/packages/cache
 [actions-environment-variables]: https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
 [ci-badge]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml/badge.svg
@@ -143,10 +147,13 @@ See the [releases page][releases].
 [codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
 [historic]: https://tug.org/historic/
 [inputs]: https://github.com/teatimeguest/setup-texlive-action#inputs
+[install-texlive]: https://github.com/zauguin/install-texlive
 [install-tl-environment-variables]: https://tug.org/texlive/doc/install-tl.html#ENVIRONMENT-VARIABLES
+[latex3]: https://github.com/latex3/latex3
 [marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action
 [releases]: https://github.com/teatimeguest/setup-texlive-action/releases
 [texdir]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#x1-250003.2.3
 [texlive]: https://tug.org/texlive/
+[tl_packages]: https://github.com/latex3/latex3/blob/0f7a169811f327119c703eaa0231fd0e6123f267/.github/tl_packages
 [tlcontrib]: https://contrib.texlive.info
