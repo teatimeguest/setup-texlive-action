@@ -50,7 +50,8 @@ export class InstallTL {
      *   versions 2005--2007 do not seem to be archived.
      *
      * - Versions 2008--2012 can be installed on `macos-latest`, but
-     *   do not work properly because the `kpsewhich aborts with "Bad CPU type." */
+     *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
+     */
     if (Number(version) < (os.platform() === 'darwin' ? 2013 : 2008)) {
       throw new RangeError(
         `Installation of TeX Live ${version} on ${os.platform()} is not supported`,

@@ -104,9 +104,6 @@ export class Manager {
      * Adds the bin directory of TeX Live directly to the PATH.
      * This method does not invoke `tlmgr path add`
      * to avoid to create symlinks in the system directory.
-     *
-     * @todo `install-tl -print-platform` and
-     *   `tlmgr print-platform` may be useful.
      */
     add: () => Promise<void>;
   }> {
