@@ -28,11 +28,10 @@ function getCache(): boolean {
   /**
    * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/}
    */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const URLs = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'] as const;
-  if (cache && URLs.every((url) => !Boolean(process.env[url]))) {
+  const urls = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'] as const;
+  if (cache && urls.every((url) => !Boolean(process.env[url]))) {
     core.warning(
-      `Caching is disabled because neither \`${URLs[0]}\` nor \`${URLs[1]}\` is defined`,
+      `Caching is disabled because neither \`${urls[0]}\` nor \`${urls[1]}\` is defined`,
     );
     return false;
   }
@@ -51,12 +50,11 @@ async function getPackages(): Promise<Set<string>> {
 }
 
 function getPrefix(): string {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return [
-    core.getInput('prefix'),
-    process.env['TEXLIVE_INSTALL_PREFIX'],
-    path.join(util.tmpdir(), 'setup-texlive'),
-  ].find(Boolean)!;
+  return (
+    [core.getInput('prefix'), process.env['TEXLIVE_INSTALL_PREFIX']].find(
+      Boolean,
+    ) ?? path.join(util.tmpdir(), 'setup-texlive')
+  );
 }
 
 function getTlcontrib(version: tl.Version): boolean {

@@ -8,9 +8,11 @@ import * as util from '#/utility';
 
 // prettier-ignore
 const VERSIONS = [
-                                                  '1996', '1997', '1998', '1999',
-  '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
-  '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
+          '1996', '1997', '1998', '1999',
+  '2000', '2001', '2002', '2003', '2004',
+  '2005', '2006', '2007', '2008', '2009',
+  '2010', '2011', '2012', '2013', '2014',
+  '2015', '2016', '2017', '2018', '2019',
   '2020', '2021',
 ] as const;
 
@@ -65,8 +67,8 @@ export class Manager {
         value?: string,
       ): Promise<Texmf | string | void> {
         if (key === undefined) {
-          // eslint-disable-next-line @typescript-eslint/promise-function-async
-          const promises = Texmf.keys().map((variable) => {
+          const promises = Texmf.keys().map(async (variable) => {
+            // eslint-disable-next-line @typescript-eslint/return-await
             return (async () => {
               return [variable, await this.texmf(variable)];
             })();
@@ -113,12 +115,11 @@ export class Manager {
         const matched = await util.expand(
           path.join(this.prefix, this.version, 'bin', '*'),
         );
-        if (matched.length !== 1) {
+        if (matched.length !== 1 || matched[0] === undefined) {
           core.debug(`Matched: ${matched}`);
           throw new Error('Unable to locate the bin directory');
         }
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        core.addPath(matched[0]!);
+        core.addPath(matched[0]);
       },
     };
   }

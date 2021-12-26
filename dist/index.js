@@ -59788,10 +59788,9 @@ function getCache() {
     /**
      * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/}
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const URLs = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'];
-    if (cache && URLs.every((url) => !Boolean(process.env[url]))) {
-        core.warning(`Caching is disabled because neither \`${URLs[0]}\` nor \`${URLs[1]}\` is defined`);
+    const urls = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'];
+    if (cache && urls.every((url) => !Boolean(process.env[url]))) {
+        core.warning(`Caching is disabled because neither \`${urls[0]}\` nor \`${urls[1]}\` is defined`);
         return false;
     }
     return cache;
@@ -59805,12 +59804,8 @@ async function getPackages() {
     return packages;
 }
 function getPrefix() {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return [
-        core.getInput('prefix'),
-        process.env['TEXLIVE_INSTALL_PREFIX'],
-        path.join(util.tmpdir(), 'setup-texlive'),
-    ].find(Boolean);
+    var _a;
+    return ((_a = [core.getInput('prefix'), process.env['TEXLIVE_INSTALL_PREFIX']].find(Boolean)) !== null && _a !== void 0 ? _a : path.join(util.tmpdir(), 'setup-texlive'));
 }
 function getTlcontrib(version) {
     const tlcontrib = core.getBooleanInput('tlcontrib');
@@ -59946,11 +59941,10 @@ class InstallTL {
         let dest;
         if (os.platform() === 'win32') {
             const matched = await util.expand(path.join(await tool.extractZip(archive), 'install-tl*'));
-            if (matched.length !== 1) {
+            if (matched.length !== 1 || matched[0] === undefined) {
                 core.debug(`Matched: ${matched}`);
                 throw new Error('Unable to locate the installer');
             }
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             dest = matched[0];
         }
         else {
@@ -60394,8 +60388,10 @@ const util = __importStar(__nccwpck_require__(5418));
 // prettier-ignore
 const VERSIONS = [
     '1996', '1997', '1998', '1999',
-    '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
-    '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
+    '2000', '2001', '2002', '2003', '2004',
+    '2005', '2006', '2007', '2008', '2009',
+    '2010', '2011', '2012', '2013', '2014',
+    '2015', '2016', '2017', '2018', '2019',
     '2020', '2021',
 ];
 function isVersion(version) {
@@ -60432,8 +60428,8 @@ class Manager {
             }
             async texmf(key, value) {
                 if (key === undefined) {
-                    // eslint-disable-next-line @typescript-eslint/promise-function-async
-                    const promises = Texmf.keys().map((variable) => {
+                    const promises = Texmf.keys().map(async (variable) => {
+                        // eslint-disable-next-line @typescript-eslint/return-await
                         return (async () => {
                             return [variable, await this.texmf(variable)];
                         })();
@@ -60464,11 +60460,10 @@ class Manager {
         return {
             add: async () => {
                 const matched = await util.expand(path.join(this.prefix, this.version, 'bin', '*'));
-                if (matched.length !== 1) {
+                if (matched.length !== 1 || matched[0] === undefined) {
                     core.debug(`Matched: ${matched}`);
                     throw new Error('Unable to locate the bin directory');
                 }
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 core.addPath(matched[0]);
             },
         };

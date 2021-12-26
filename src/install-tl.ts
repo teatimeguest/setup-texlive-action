@@ -88,12 +88,11 @@ export class InstallTL {
       const matched = await util.expand(
         path.join(await tool.extractZip(archive), 'install-tl*'),
       );
-      if (matched.length !== 1) {
+      if (matched.length !== 1 || matched[0] === undefined) {
         core.debug(`Matched: ${matched}`);
         throw new Error('Unable to locate the installer');
       }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      dest = matched[0]!;
+      dest = matched[0];
     } else {
       dest = await tool.extractTar(archive, undefined, ['xz', '--strip=1']);
     }
