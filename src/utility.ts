@@ -43,3 +43,22 @@ export function tmpdir(): string {
     ? runnerTemp
     : os.tmpdir();
 }
+
+type Mutable<T> = {
+  -readonly [Key in keyof T]: Mutable<T[Key]>;
+};
+type FromEntries<Entries> = Entries extends Array<[infer Keys, unknown]>
+  ? {
+      [Key in Keys extends string ? Keys : never]: Extract<
+        Entries extends ReadonlyArray<infer Entry> ? Entry : never,
+        [Key, unknown]
+      >[1];
+    }
+  : never;
+
+declare global {
+  interface ObjectConstructor {
+    // eslint-disable-next-line @typescript-eslint/method-signature-style
+    fromEntries<T>(entries: T): FromEntries<Mutable<T>>;
+  }
+}
