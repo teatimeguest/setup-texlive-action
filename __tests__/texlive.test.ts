@@ -45,7 +45,7 @@ describe('Manager', () => {
       const mock = async (
         cmd: string,
         args: ReadonlyArray<string>,
-      ): exec.ExecOutput => {
+      ): Promise<exec.ExecOutput> => {
         if (
           cmd === 'kpsewhich' &&
           args.length === 2 &&
