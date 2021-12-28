@@ -59939,18 +59939,7 @@ class InstallTL {
         core.info(`Downloading ${url}`);
         const archive = await tool.downloadTool(url);
         core.info('Extracting');
-        let dest;
-        if (os.platform() === 'win32') {
-            const matched = await util.expand(path.join(await tool.extractZip(archive), 'install-tl*'));
-            if (matched.length !== 1 || matched[0] === undefined) {
-                core.debug(`Matched: ${matched}`);
-                throw new Error('Unable to locate the installer');
-            }
-            dest = matched[0];
-        }
-        else {
-            dest = await tool.extractTar(archive, undefined, ['xz', '--strip=1']);
-        }
+        const dest = await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tar.gz');
         core.info('Applying patches');
         await patch(version, dest);
         try {
@@ -60537,10 +60526,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.tmpdir = exports.isNodejsError = exports.expand = exports.updateFile = void 0;
+exports.tmpdir = exports.isNodejsError = exports.expand = exports.extract = exports.updateFile = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
+const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
+const tool = __importStar(__nccwpck_require__(7784));
 /**
  * Updates the contents of a file.
  */
@@ -60550,6 +60542,26 @@ async function updateFile(filename, ...replacements) {
     await fs_1.promises.writeFile(filename, updated);
 }
 exports.updateFile = updateFile;
+/**
+ * Extracts files from an archive.
+ *
+ * @returns Path to the directory containing the files.
+ */
+async function extract(filepath, kind) {
+    switch (kind) {
+        case 'tar.gz':
+            return await tool.extractTar(filepath, undefined, ['xz', '--strip=1']);
+        case 'zip': {
+            const subdir = await expand(path.join(await tool.extractZip(filepath), '*'));
+            if (subdir.length !== 1 || subdir[0] === undefined) {
+                core.debug(`Matched: ${subdir}`);
+                throw new Error('Unable to locate the unzipped directory');
+            }
+            return subdir[0];
+        }
+    }
+}
+exports.extract = extract;
 /**
  * @returns Array of paths that match the given glob pattern.
  */

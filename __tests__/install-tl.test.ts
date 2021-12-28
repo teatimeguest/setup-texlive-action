@@ -4,6 +4,7 @@ import * as path from 'path';
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
 import { Environment, InstallTL, Profile } from '#/install-tl';
@@ -61,6 +62,9 @@ jest.spyOn(core, 'addPath').mockImplementation();
 jest.spyOn(core, 'debug').mockImplementation();
 jest.spyOn(core, 'info').mockImplementation();
 jest.spyOn(exec, 'exec').mockImplementation();
+jest.spyOn(glob, 'create').mockResolvedValue({
+  glob: async () => [random()],
+} as glob.Globber);
 jest.spyOn(tool, 'cacheDir').mockResolvedValue('');
 jest.spyOn(tool, 'downloadTool').mockResolvedValue(random());
 jest.spyOn(tool, 'extractTar').mockResolvedValue(random());
@@ -211,13 +215,17 @@ describe('InstallTL', () => {
 
     it('fails as the installer cannot be located', async () => {
       (os.platform as jest.Mock).mockReturnValue('win32');
-      (util.expand as jest.Mock).mockResolvedValueOnce([]);
+      (glob.create as jest.Mock).mockResolvedValueOnce({
+        glob: async (): Promise<Array<string>> => [],
+      } as glob.Globber);
       await expect(InstallTL.download('2021')).rejects.toThrow(
-        'Unable to locate the installer',
+        'Unable to locate the unzipped directory',
       );
-      (util.expand as jest.Mock).mockResolvedValueOnce([random(), random()]);
+      (glob.create as jest.Mock).mockResolvedValueOnce({
+        glob: async () => [random(), random()],
+      } as glob.Globber);
       await expect(InstallTL.download('2021')).rejects.toThrow(
-        'Unable to locate the installer',
+        'Unable to locate the unzipped directory',
       );
     });
   });

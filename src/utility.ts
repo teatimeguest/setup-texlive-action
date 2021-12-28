@@ -1,7 +1,10 @@
 import { promises as fs } from 'fs';
 import * as os from 'os';
+import * as path from 'path';
 
+import * as core from '@actions/core';
 import * as glob from '@actions/glob';
+import * as tool from '@actions/tool-cache';
 
 /**
  * Updates the contents of a file.
@@ -18,6 +21,33 @@ export async function updateFile(
     content,
   );
   await fs.writeFile(filename, updated);
+}
+
+export type ArchiveType = 'tar.gz' | 'zip';
+
+/**
+ * Extracts files from an archive.
+ *
+ * @returns Path to the directory containing the files.
+ */
+export async function extract(
+  filepath: string,
+  kind: ArchiveType,
+): Promise<string> {
+  switch (kind) {
+    case 'tar.gz':
+      return await tool.extractTar(filepath, undefined, ['xz', '--strip=1']);
+    case 'zip': {
+      const subdir = await expand(
+        path.join(await tool.extractZip(filepath), '*'),
+      );
+      if (subdir.length !== 1 || subdir[0] === undefined) {
+        core.debug(`Matched: ${subdir}`);
+        throw new Error('Unable to locate the unzipped directory');
+      }
+      return subdir[0];
+    }
+  }
 }
 
 /**

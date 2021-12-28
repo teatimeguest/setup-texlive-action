@@ -83,20 +83,10 @@ export class InstallTL {
     const archive = await tool.downloadTool(url);
 
     core.info('Extracting');
-    let dest: string;
-
-    if (os.platform() === 'win32') {
-      const matched = await util.expand(
-        path.join(await tool.extractZip(archive), 'install-tl*'),
-      );
-      if (matched.length !== 1 || matched[0] === undefined) {
-        core.debug(`Matched: ${matched}`);
-        throw new Error('Unable to locate the installer');
-      }
-      dest = matched[0];
-    } else {
-      dest = await tool.extractTar(archive, undefined, ['xz', '--strip=1']);
-    }
+    const dest = await util.extract(
+      archive,
+      os.platform() === 'win32' ? 'zip' : 'tar.gz',
+    );
 
     core.info('Applying patches');
     await patch(version, dest);
