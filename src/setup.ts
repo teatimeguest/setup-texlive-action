@@ -62,12 +62,11 @@ async function main(): Promise<void> {
   if (cacheType !== 'none') {
     context.setCacheHit();
     await core.group('Adjusting TEXMF', async () => {
-      const texmf = await tlmgr.conf.texmf();
-      for (const key of tl.Texmf.keys()) {
-        const value = env[`TEXLIVE_INSTALL_${key}`];
-        if (value !== texmf[key]) {
+      for (const [key, value] of await tlmgr.conf.texmf()) {
+        const specified = env[`TEXLIVE_INSTALL_${key}`];
+        if (value !== specified) {
           // eslint-disable-next-line no-await-in-loop
-          await tlmgr.conf.texmf(key, value);
+          await tlmgr.conf.texmf(key, specified);
         }
       }
     });

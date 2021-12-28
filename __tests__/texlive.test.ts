@@ -61,7 +61,7 @@ describe('Manager', () => {
         .mockImplementationOnce(mock)
         .mockImplementationOnce(mock);
       const tlmgr = new tl.Manager('2021', '/usr/local/texlive');
-      await expect(tlmgr.conf.texmf()).resolves.toStrictEqual({
+      expect(Object.fromEntries(await tlmgr.conf.texmf())).toStrictEqual({
         ['TEXMFHOME']: 'TEXMFHOME',
         ['TEXMFCONFIG']: 'TEXMFCONFIG',
         ['TEXMFVAR']: 'TEXMFVAR',

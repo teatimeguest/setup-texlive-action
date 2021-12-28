@@ -89,11 +89,11 @@ jest.spyOn(tl.Manager.prototype, 'install').mockImplementation();
 jest.spyOn(tl.Manager.prototype, 'conf', 'get').mockReturnValue({
   texmf: jest.fn(async (key, value) => {
     if (key === undefined) {
-      return {
-        ['TEXMFHOME']: random(),
-        ['TEXMFHCONFIG']: random(),
-        ['TEXMFVAR']: random(),
-      };
+      return new Map([
+        ['TEXMFHOME', random()],
+        ['TEXMFHCONFIG', random()],
+        ['TEXMFVAR', random()],
+      ]);
     }
     return value === undefined ? undefined : random();
   }) as any,
@@ -285,12 +285,13 @@ describe('main', () => {
     (cache.restoreCache as jest.Mock).mockImplementationOnce(
       async (paths, primaryKey, restoreKeys) => restoreKeys?.[0] ?? '',
     );
-    (tl.Manager.prototype.conf.texmf as jest.Mock)
-      .mockResolvedValueOnce('~/.texlive')
-      .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce('~/.local/texlive/2021/texmf-config')
-      .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce('/usr/local/texlive/2021/texmf-var');
+    (tl.Manager.prototype.conf.texmf as jest.Mock).mockResolvedValueOnce(
+      new Map([
+        ['TEXMFHOME', '~/.texlive'],
+        ['TEXMFHCONFIG', '~/.local/texlive/2021/texmf-config'],
+        ['TEXMFVAR', '/usr/local/texlive/2021/texmf-var'],
+      ]),
+    );
     await setup.run();
     expect(tl.Manager.prototype.conf.texmf).toHaveBeenCalledWith(
       'TEXMFHOME',

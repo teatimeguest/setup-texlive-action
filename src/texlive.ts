@@ -25,7 +25,10 @@ export function isVersion(version: string): version is Version {
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1]!;
 
-export namespace Texmf {
+export type Texmf = ReadonlyMap<Texmf.Key, string>;
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+namespace Texmf {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   export function keys() {
     return [
@@ -35,12 +38,8 @@ export namespace Texmf {
       'TEXMFVAR',
     ] as const;
   }
+  export type Key = ReturnType<typeof keys>[number];
 }
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export type Texmf = {
-  readonly [Key in ReturnType<typeof Texmf.keys>[number]]: string;
-};
 
 /**
  * An interface for the `tlmgr` command.
@@ -54,26 +53,24 @@ export class Manager {
   get conf(): Readonly<{
     texmf: {
       (): Promise<Texmf>;
-      (key: keyof Texmf): Promise<string>;
-      (key: keyof Texmf, value: string): Promise<void>;
+      (key: Texmf.Key): Promise<string>;
+      (key: Texmf.Key, value: string): Promise<void>;
     };
   }> {
     return new (class {
       texmf(): Promise<Texmf>;
-      texmf(key: keyof Texmf): Promise<string>;
-      texmf(key: keyof Texmf, value: string): Promise<void>;
+      texmf(key: Texmf.Key): Promise<string>;
+      texmf(key: Texmf.Key, value: string): Promise<void>;
       async texmf(
-        key?: keyof Texmf,
+        key?: Texmf.Key,
         value?: string,
       ): Promise<Texmf | string | void> {
         if (key === undefined) {
-          const promises = Texmf.keys().map(async (variable) => {
-            // eslint-disable-next-line @typescript-eslint/return-await
-            return (async (): Promise<[keyof Texmf, string]> => {
-              return [variable, await this.texmf(variable)];
-            })();
-          });
-          return Object.fromEntries(await Promise.all(promises));
+          // eslint-disable-next-line @typescript-eslint/return-await
+          const promises = Texmf.keys().map<Promise<[Texmf.Key, string]>>(
+            async (variable) => [variable, await this.texmf(variable)],
+          );
+          return new Map(await Promise.all(promises));
         }
         if (value === undefined) {
           return (

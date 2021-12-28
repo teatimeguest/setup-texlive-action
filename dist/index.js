@@ -60263,12 +60263,11 @@ async function main() {
     if (cacheType !== 'none') {
         context.setCacheHit();
         await core.group('Adjusting TEXMF', async () => {
-            const texmf = await tlmgr.conf.texmf();
-            for (const key of tl.Texmf.keys()) {
-                const value = env[`TEXLIVE_INSTALL_${key}`];
-                if (value !== texmf[key]) {
+            for (const [key, value] of await tlmgr.conf.texmf()) {
+                const specified = env[`TEXLIVE_INSTALL_${key}`];
+                if (value !== specified) {
                     // eslint-disable-next-line no-await-in-loop
-                    await tlmgr.conf.texmf(key, value);
+                    await tlmgr.conf.texmf(key, specified);
                 }
             }
         });
@@ -60369,7 +60368,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.contrib = exports.Manager = exports.Texmf = exports.LATEST_VERSION = exports.isVersion = void 0;
+exports.contrib = exports.Manager = exports.LATEST_VERSION = exports.isVersion = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
@@ -60390,6 +60389,7 @@ function isVersion(version) {
 exports.isVersion = isVersion;
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 exports.LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 var Texmf;
 (function (Texmf) {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -60402,7 +60402,7 @@ var Texmf;
         ];
     }
     Texmf.keys = keys;
-})(Texmf = exports.Texmf || (exports.Texmf = {}));
+})(Texmf || (Texmf = {}));
 /**
  * An interface for the `tlmgr` command.
  */
@@ -60418,13 +60418,9 @@ class Manager {
             }
             async texmf(key, value) {
                 if (key === undefined) {
-                    const promises = Texmf.keys().map(async (variable) => {
-                        // eslint-disable-next-line @typescript-eslint/return-await
-                        return (async () => {
-                            return [variable, await this.texmf(variable)];
-                        })();
-                    });
-                    return Object.fromEntries(await Promise.all(promises));
+                    // eslint-disable-next-line @typescript-eslint/return-await
+                    const promises = Texmf.keys().map(async (variable) => [variable, await this.texmf(variable)]);
+                    return new Map(await Promise.all(promises));
                 }
                 if (value === undefined) {
                     return (await exec.getExecOutput('kpsewhich', ['-var-value', key])).stdout.trim();
