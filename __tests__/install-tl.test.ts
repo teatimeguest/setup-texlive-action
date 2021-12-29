@@ -4,7 +4,6 @@ import * as path from 'path';
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
 import { Environment, InstallTL, Profile } from '#/install-tl';
@@ -42,10 +41,8 @@ jest.spyOn(fs, 'writeFile').mockImplementation();
 jest.mock('os', () => ({
   homedir: jest.fn(),
   platform: jest.fn(),
-  tmpdir: jest.fn(),
 }));
 (os.homedir as jest.Mock).mockReturnValue(random());
-(os.tmpdir as jest.Mock).mockReturnValue(random());
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
@@ -62,15 +59,11 @@ jest.spyOn(core, 'addPath').mockImplementation();
 jest.spyOn(core, 'debug').mockImplementation();
 jest.spyOn(core, 'info').mockImplementation();
 jest.spyOn(exec, 'exec').mockImplementation();
-jest.spyOn(glob, 'create').mockResolvedValue({
-  glob: async () => [random()],
-} as glob.Globber);
 jest.spyOn(tool, 'cacheDir').mockResolvedValue('');
 jest.spyOn(tool, 'downloadTool').mockResolvedValue(random());
-jest.spyOn(tool, 'extractTar').mockResolvedValue(random());
-jest.spyOn(tool, 'extractZip').mockResolvedValue(random());
 jest.spyOn(tool, 'find').mockReturnValue('');
-jest.spyOn(util, 'expand').mockResolvedValue([random()]);
+jest.spyOn(util, 'extract').mockResolvedValue(random());
+jest.spyOn(util, 'tmpdir').mockReturnValue(random());
 jest.spyOn(util, 'updateFile').mockImplementation();
 
 beforeEach(() => {
@@ -158,7 +151,7 @@ describe('InstallTL', () => {
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
       );
-      expect(tool.extractTar).toHaveBeenCalled();
+      expect(util.extract).toHaveBeenCalled();
       expect(tool.cacheDir).toHaveBeenCalled();
     });
 
@@ -169,7 +162,7 @@ describe('InstallTL', () => {
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip',
       );
-      expect(tool.extractZip).toHaveBeenCalled();
+      expect(util.extract).toHaveBeenCalled();
       expect(tool.cacheDir).toHaveBeenCalled();
     });
 
@@ -180,7 +173,7 @@ describe('InstallTL', () => {
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
       );
-      expect(tool.extractTar).toHaveBeenCalled();
+      expect(util.extract).toHaveBeenCalled();
       expect(tool.cacheDir).toHaveBeenCalled();
     });
 
@@ -211,22 +204,6 @@ describe('InstallTL', () => {
       (tool.find as jest.Mock).mockImplementationOnce(fail);
       (tool.cacheDir as jest.Mock).mockImplementationOnce(fail);
       await expect(InstallTL.download('2021')).resolves.not.toThrow();
-    });
-
-    it('fails as the installer cannot be located', async () => {
-      (os.platform as jest.Mock).mockReturnValue('win32');
-      (glob.create as jest.Mock).mockResolvedValueOnce({
-        glob: async (): Promise<Array<string>> => [],
-      } as glob.Globber);
-      await expect(InstallTL.download('2021')).rejects.toThrow(
-        'Unable to locate the unzipped directory',
-      );
-      (glob.create as jest.Mock).mockResolvedValueOnce({
-        glob: async () => [random(), random()],
-      } as glob.Globber);
-      await expect(InstallTL.download('2021')).rejects.toThrow(
-        'Unable to locate the unzipped directory',
-      );
     });
   });
 });
@@ -278,7 +255,7 @@ describe('Environment', () => {
           "TEXLIVE_INSTALL_NO_RESUME=''",
           "TEXLIVE_INSTALL_NO_WELCOME='true'",
           "TEXLIVE_INSTALL_PAPER=''",
-          `TEXLIVE_INSTALL_PREFIX='${process.env['RUNNER_TEMP']}/setup-texlive'`,
+          `TEXLIVE_INSTALL_PREFIX='${util.tmpdir()}/setup-texlive'`,
           "TEXLIVE_INSTALL_TEXMFHOME='~/texmf'",
           "TEXLIVE_INSTALL_TEXMFCONFIG='~/.local/texlive/2021/texmf-config'",
           "TEXLIVE_INSTALL_TEXMFVAR='~/.local/texlive/2021/texmf-var'",

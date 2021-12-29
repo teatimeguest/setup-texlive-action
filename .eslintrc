@@ -100,6 +100,7 @@ overrides:
       - ./__tests__/install-tl.test.ts
       - ./__tests__/setup.test.ts
       - ./__tests__/texlive.test.ts
+      - ./__tests__/utility.test.ts
     extends:
       - plugin:jest/recommended
       - plugin:jest/style
