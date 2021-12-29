@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { types } from 'util';
 import { URL } from 'url';
 
 import * as core from '@actions/core';
@@ -322,7 +323,7 @@ async function patch(version: tl.Version, texdir: string): Promise<void> {
         replace: '',
       });
     } catch (error) {
-      if (!(util.isNodejsError(error) && error.code === 'ENOENT')) {
+      if (!(types.isNativeError(error) && error.code === 'ENOENT')) {
         throw error;
       }
       core.info(`${target} not found`);

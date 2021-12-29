@@ -59879,6 +59879,7 @@ exports.Profile = exports.Environment = exports.InstallTL = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
+const util_1 = __nccwpck_require__(3837);
 const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
@@ -60135,7 +60136,7 @@ async function patch(version, texdir) {
             });
         }
         catch (error) {
-            if (!(util.isNodejsError(error) && error.code === 'ENOENT')) {
+            if (!(util_1.types.isNativeError(error) && error.code === 'ENOENT')) {
                 throw error;
             }
             core.info(`${target} not found`);
@@ -60522,7 +60523,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.tmpdir = exports.isNodejsError = exports.expand = exports.extract = exports.updateFile = void 0;
+exports.tmpdir = exports.expand = exports.extract = exports.updateFile = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
@@ -60566,15 +60567,6 @@ async function expand(pattern) {
     return await globber.glob();
 }
 exports.expand = expand;
-/**
- * A type-guard for the error type of Node.js.
- * Since `NodeJS.ErrnoException` is defined as an interface,
- * we cannot write `error instanceof ErrnoException`.
- */
-function isNodejsError(error) {
-    return error instanceof Error;
-}
-exports.isNodejsError = isNodejsError;
 function tmpdir() {
     const runnerTemp = process.env['RUNNER_TEMP'];
     return runnerTemp !== undefined && runnerTemp !== ''

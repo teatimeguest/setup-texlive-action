@@ -58,18 +58,20 @@ export async function expand(pattern: string): Promise<Array<string>> {
   return await globber.glob();
 }
 
-/**
- * A type-guard for the error type of Node.js.
- * Since `NodeJS.ErrnoException` is defined as an interface,
- * we cannot write `error instanceof ErrnoException`.
- */
-export function isNodejsError(error: unknown): error is NodeJS.ErrnoException {
-  return error instanceof Error;
-}
-
 export function tmpdir(): string {
   const runnerTemp = process.env['RUNNER_TEMP'];
   return runnerTemp !== undefined && runnerTemp !== ''
     ? runnerTemp
     : os.tmpdir();
+}
+
+declare module 'util/types' {
+  /**
+   * A type-guard for the error type of Node.js.
+   * Since `NodeJS.ErrnoException` is defined as an interface,
+   * we cannot write `error instanceof NodeJS.ErrnoException`, but
+   * `util.types.isNativeError` is sufficient
+   * because all properties of `NodeJS.ErrnoException` are optional.
+   */
+  function isNativeError(error: unknown): error is NodeJS.ErrnoException;
 }
