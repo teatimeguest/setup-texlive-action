@@ -59772,7 +59772,7 @@ exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = expor
 const fs_1 = __nccwpck_require__(7147);
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
-const tl = __importStar(__nccwpck_require__(8313));
+const texlive_1 = __nccwpck_require__(8313);
 const util = __importStar(__nccwpck_require__(5418));
 async function loadConfig() {
     const cache = getCache();
@@ -59809,7 +59809,7 @@ function getPrefix() {
 }
 function getTlcontrib(version) {
     const tlcontrib = core.getBooleanInput('tlcontrib');
-    if (tlcontrib && version !== tl.LATEST_VERSION) {
+    if (tlcontrib && version !== texlive_1.Version.LATEST) {
         core.warning('`tlcontrib` is ignored since an older version of TeX Live is specified');
         return false;
     }
@@ -59817,11 +59817,11 @@ function getTlcontrib(version) {
 }
 function getVersion() {
     const version = core.getInput('version');
-    if (tl.isVersion(version)) {
+    if (texlive_1.Version.isVersion(version)) {
         return version;
     }
     else if (version === 'latest') {
-        return tl.LATEST_VERSION;
+        return texlive_1.Version.LATEST;
     }
     throw new TypeError("`version` must be specified by year or 'latest'");
 }
@@ -59884,7 +59884,7 @@ const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const tool = __importStar(__nccwpck_require__(7784));
-const tl = __importStar(__nccwpck_require__(8313));
+const texlive_1 = __nccwpck_require__(8313);
 const util = __importStar(__nccwpck_require__(5418));
 /**
  * A class for downloading and running the installer of TeX Live.
@@ -59894,9 +59894,9 @@ class InstallTL {
         this.version = version;
         this.bin = bin;
     }
-    async run(profile, env = Environment.get(this.version)) {
+    async run(profile, env = new Environment(this.version)) {
         const options = ['-no-gui', '-profile', await profile.write()];
-        if (this.version !== tl.LATEST_VERSION) {
+        if (this.version !== texlive_1.Version.LATEST) {
             options.push(
             /**
              * Only version 2008 uses `-location` instead of `-repository`.
@@ -59978,17 +59978,14 @@ class Environment {
     }
     toString() {
         return Environment.keys()
-            .map((key) => {
-            var _a;
-            return `${key}='${(_a = this[key]) !== null && _a !== void 0 ? _a : ''}'`;
-        })
+            .map((key) => { var _a; return `${key}='${(_a = this[key]) !== null && _a !== void 0 ? _a : ''}'`; })
             .join('\n');
     }
-    static get(version) {
-        return new Environment(version);
-    }
+}
+exports.Environment = Environment;
+(function (Environment) {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    static keys() {
+    function keys() {
         return [
             'TEXLIVE_DOWNLOADER',
             'TL_DOWNLOAD_PROGRAM',
@@ -60005,8 +60002,8 @@ class Environment {
             'NOPERLDOC',
         ];
     }
-}
-exports.Environment = Environment;
+    Environment.keys = keys;
+})(Environment = exports.Environment || (exports.Environment = {}));
 class Profile {
     constructor(version, prefix) {
         this.version = version;
@@ -60039,7 +60036,7 @@ class Profile {
          * `scheme-infraonly` was first introduced in TeX Live 2016.
          */
         this.selected_scheme = `scheme-${Number(this.version) < 2016 ? 'minimal' : 'infraonly'}`;
-        this.option_adjustrepo = this.version === tl.LATEST_VERSION ? '1' : '0';
+        this.option_adjustrepo = this.version === texlive_1.Version.LATEST ? '1' : '0';
         this.option_autobackup = '0';
         this.option_desktop_integration = '0';
         this.option_doc = '0';
@@ -60066,8 +60063,11 @@ class Profile {
         }
         return this.filepath;
     }
+}
+exports.Profile = Profile;
+(function (Profile) {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    static keys() {
+    function keys() {
         // prettier-ignore
         return [
             'TEXDIR',
@@ -60088,8 +60088,8 @@ class Profile {
             'option_w32_multi_user', // tlpdbopt_w32_multi_user
         ];
     }
-}
-exports.Profile = Profile;
+    Profile.keys = keys;
+})(Profile = exports.Profile || (exports.Profile = {}));
 /**
  * @returns The filename of the installer executable.
  */
@@ -60106,10 +60106,10 @@ function executable(version, platform) {
  * @todo Use other archives as well.
  */
 function repository(version) {
-    const base = version === tl.LATEST_VERSION
+    const base = version === texlive_1.Version.LATEST
         ? 'https://mirror.ctan.org/systems/texlive/'
         : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`;
-    const tlnet = `tlnet${Number(version) < 2010 || version === tl.LATEST_VERSION ? '' : '-final'}/`;
+    const tlnet = `tlnet${Number(version) < 2010 || version === texlive_1.Version.LATEST ? '' : '-final'}/`;
     const url = new url_1.URL(tlnet, base);
     /**
      * `install-tl` of versions prior to 2017 does not support HTTPS, and
@@ -60217,7 +60217,7 @@ const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const context = __importStar(__nccwpck_require__(8954));
 const install_tl_1 = __nccwpck_require__(1436);
-const tl = __importStar(__nccwpck_require__(8313));
+const texlive_1 = __nccwpck_require__(8313);
 async function run() {
     try {
         if (!context.getPost()) {
@@ -60246,7 +60246,7 @@ async function main() {
             return await restoreCache(profile.TEXDIR, ...keys);
         });
     }
-    const env = install_tl_1.Environment.get(config.version);
+    const env = new install_tl_1.Environment(config.version);
     await core.group('Environment variables', async () => {
         core.info(env.toString());
     });
@@ -60259,7 +60259,7 @@ async function main() {
             await installtl.run(profile, env);
         });
     }
-    const tlmgr = new tl.Manager(config.version, config.prefix);
+    const tlmgr = new texlive_1.Manager(config.version, config.prefix);
     await tlmgr.path.add();
     if (cacheType !== 'none') {
         context.setCacheHit();
@@ -60275,7 +60275,7 @@ async function main() {
     }
     if (config.tlcontrib) {
         await core.group('Setting up TLContrib', async () => {
-            await tlmgr.repository.add(tl.contrib().href, 'tlcontrib');
+            await tlmgr.repository.add((0, texlive_1.contrib)().href, 'tlcontrib');
             await tlmgr.pinning.add('tlcontrib', '*');
         });
     }
@@ -60369,7 +60369,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.contrib = exports.Manager = exports.LATEST_VERSION = exports.isVersion = void 0;
+exports.contrib = exports.Manager = exports.Version = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
@@ -60384,12 +60384,15 @@ const VERSIONS = [
     '2015', '2016', '2017', '2018', '2019',
     '2020', '2021',
 ];
-function isVersion(version) {
-    return VERSIONS.includes(version);
-}
-exports.isVersion = isVersion;
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-exports.LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
+var Version;
+(function (Version) {
+    function isVersion(version) {
+        return VERSIONS.includes(version);
+    }
+    Version.isVersion = isVersion;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    Version.LATEST = VERSIONS[VERSIONS.length - 1];
+})(Version = exports.Version || (exports.Version = {}));
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 var Texmf;
 (function (Texmf) {

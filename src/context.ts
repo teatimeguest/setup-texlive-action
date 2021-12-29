@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import * as core from '@actions/core';
 
-import * as tl from '#/texlive';
+import { Version } from '#/texlive';
 import * as util from '#/utility';
 
 export interface Config {
@@ -11,7 +11,7 @@ export interface Config {
   readonly packages: ReadonlySet<string>;
   readonly prefix: string;
   readonly tlcontrib: boolean;
-  readonly version: tl.Version;
+  readonly version: Version;
 }
 
 export async function loadConfig(): Promise<Config> {
@@ -57,9 +57,9 @@ function getPrefix(): string {
   );
 }
 
-function getTlcontrib(version: tl.Version): boolean {
+function getTlcontrib(version: Version): boolean {
   const tlcontrib = core.getBooleanInput('tlcontrib');
-  if (tlcontrib && version !== tl.LATEST_VERSION) {
+  if (tlcontrib && version !== Version.LATEST) {
     core.warning(
       '`tlcontrib` is ignored since an older version of TeX Live is specified',
     );
@@ -68,12 +68,12 @@ function getTlcontrib(version: tl.Version): boolean {
   return tlcontrib;
 }
 
-function getVersion(): tl.Version {
+function getVersion(): Version {
   const version = core.getInput('version');
-  if (tl.isVersion(version)) {
+  if (Version.isVersion(version)) {
     return version;
   } else if (version === 'latest') {
-    return tl.LATEST_VERSION;
+    return Version.LATEST;
   }
   throw new TypeError("`version` must be specified by year or 'latest'");
 }

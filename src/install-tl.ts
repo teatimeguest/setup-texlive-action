@@ -8,7 +8,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tool from '@actions/tool-cache';
 
-import * as tl from '#/texlive';
+import { Version } from '#/texlive';
 import * as util from '#/utility';
 
 /**
@@ -16,17 +16,17 @@ import * as util from '#/utility';
  */
 export class InstallTL {
   private constructor(
-    private readonly version: tl.Version,
+    private readonly version: Version,
     private readonly bin: string,
   ) {}
 
   async run(
     profile: Readonly<Profile>,
-    env: Readonly<Environment> = Environment.get(this.version),
+    env: Readonly<Environment> = new Environment(this.version),
   ): Promise<void> {
     const options = ['-no-gui', '-profile', await profile.write()];
 
-    if (this.version !== tl.LATEST_VERSION) {
+    if (this.version !== Version.LATEST) {
       options.push(
         /**
          * Only version 2008 uses `-location` instead of `-repository`.
@@ -45,7 +45,7 @@ export class InstallTL {
     await patch(this.version, profile.TEXDIR);
   }
 
-  static async download(version: tl.Version): Promise<InstallTL> {
+  static async download(version: Version): Promise<InstallTL> {
     /**
      * - There is no `install-tl` for versions prior to 2005, and
      *   versions 2005--2007 do not seem to be archived.
@@ -110,10 +110,7 @@ export class InstallTL {
 }
 
 export class Environment
-  implements
-    Partial<
-      Readonly<Record<ReturnType<typeof Environment.keys>[number], string>>
-    >
+  implements Partial<Readonly<Record<Environment.Key, string>>>
 {
   /* eslint-disable @typescript-eslint/naming-convention */
   readonly TEXLIVE_DOWNLOADER?: string;
@@ -131,7 +128,7 @@ export class Environment
   readonly NOPERLDOC?: string;
   /* eslint-enable @typescript-eslint/naming-convention */
 
-  private constructor(version: tl.Version) {
+  constructor(version: Version) {
     for (const key of Environment.keys()) {
       const value = process.env[key];
       if (value !== undefined) {
@@ -150,18 +147,14 @@ export class Environment
 
   toString(): string {
     return Environment.keys()
-      .map((key) => {
-        return `${key}='${this[key] ?? ''}'`;
-      })
+      .map((key) => `${key}='${this[key] ?? ''}'`)
       .join('\n');
   }
+}
 
-  static get(version: tl.Version): Environment {
-    return new Environment(version);
-  }
-
+export namespace Environment {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  static keys() {
+  export function keys() {
     return [
       'TEXLIVE_DOWNLOADER',
       'TL_DOWNLOAD_PROGRAM',
@@ -178,13 +171,13 @@ export class Environment
       'NOPERLDOC',
     ] as const;
   }
+
+  export type Key = ReturnType<typeof keys>[number];
 }
 
-export class Profile
-  implements Readonly<Record<ReturnType<typeof Profile.keys>[number], string>>
-{
+export class Profile implements Readonly<Record<Profile.Key, string>> {
   constructor(
-    private readonly version: tl.Version,
+    private readonly version: Version,
     private readonly prefix: string,
   ) {}
 
@@ -219,7 +212,7 @@ export class Profile
     Number(this.version) < 2016 ? 'minimal' : 'infraonly'
   }`;
   readonly option_adjustrepo: string =
-    this.version === tl.LATEST_VERSION ? '1' : '0';
+    this.version === Version.LATEST ? '1' : '0';
   readonly option_autobackup: string = '0';
   readonly option_desktop_integration: string = '0';
   readonly option_doc: string = '0';
@@ -248,9 +241,11 @@ export class Profile
     }
     return this.filepath;
   }
+}
 
+export namespace Profile {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  static keys() {
+  export function keys() {
     // prettier-ignore
     return [
       'TEXDIR',
@@ -271,12 +266,14 @@ export class Profile
       'option_w32_multi_user',       // tlpdbopt_w32_multi_user
     ] as const;
   }
+
+  export type Key = ReturnType<typeof keys>[number];
 }
 
 /**
  * @returns The filename of the installer executable.
  */
-function executable(version: tl.Version, platform: NodeJS.Platform): string {
+function executable(version: Version, platform: NodeJS.Platform): string {
   const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
   return `install-tl${platform === 'win32' ? ext : ''}`;
 }
@@ -289,13 +286,13 @@ function executable(version: tl.Version, platform: NodeJS.Platform): string {
  *
  * @todo Use other archives as well.
  */
-function repository(version: tl.Version): URL {
+function repository(version: Version): URL {
   const base =
-    version === tl.LATEST_VERSION
+    version === Version.LATEST
       ? 'https://mirror.ctan.org/systems/texlive/'
       : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`;
   const tlnet = `tlnet${
-    Number(version) < 2010 || version === tl.LATEST_VERSION ? '' : '-final'
+    Number(version) < 2010 || version === Version.LATEST ? '' : '-final'
   }/`;
   const url = new URL(tlnet, base);
   /**
@@ -311,7 +308,7 @@ function repository(version: tl.Version): URL {
 /**
  * Fixes bugs in the installer files and modify them for use in workflows.
  */
-async function patch(version: tl.Version, texdir: string): Promise<void> {
+async function patch(version: Version, texdir: string): Promise<void> {
   /**
    * Prevents `install-tl(-windows).bat` from being stopped by `pause`.
    */

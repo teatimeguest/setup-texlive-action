@@ -6,7 +6,7 @@ import * as core from '@actions/core';
 
 import * as context from '#/context';
 import { Environment, InstallTL, Profile } from '#/install-tl';
-import * as tl from '#/texlive';
+import { contrib as tlcontrib, Manager, Version } from '#/texlive';
 
 export async function run(): Promise<void> {
   try {
@@ -38,7 +38,7 @@ async function main(): Promise<void> {
     });
   }
 
-  const env = Environment.get(config.version);
+  const env = new Environment(config.version);
   await core.group('Environment variables', async () => {
     core.info(env.toString());
   });
@@ -56,7 +56,7 @@ async function main(): Promise<void> {
     });
   }
 
-  const tlmgr = new tl.Manager(config.version, config.prefix);
+  const tlmgr = new Manager(config.version, config.prefix);
   await tlmgr.path.add();
 
   if (cacheType !== 'none') {
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
 
   if (config.tlcontrib) {
     await core.group('Setting up TLContrib', async () => {
-      await tlmgr.repository.add(tl.contrib().href, 'tlcontrib');
+      await tlmgr.repository.add(tlcontrib().href, 'tlcontrib');
       await tlmgr.pinning.add('tlcontrib', '*');
     });
   }
@@ -141,7 +141,7 @@ async function restoreCache(
 }
 
 function getCacheKeys(
-  version: tl.Version,
+  version: Version,
   packages: ReadonlySet<string>,
 ): [string, Array<string>] {
   const digest = (s: string): string => {

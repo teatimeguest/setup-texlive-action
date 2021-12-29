@@ -7,7 +7,7 @@ import * as core from '@actions/core';
 import * as context from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
 import * as setup from '#/setup';
-import * as tl from '#/texlive';
+import { Manager } from '#/texlive';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
@@ -85,8 +85,8 @@ jest
   .mockImplementation((version) => new (InstallTL as any)(version, random()));
 jest.spyOn(InstallTL.prototype, 'run').mockImplementation();
 jest.spyOn(Profile.prototype, 'write').mockResolvedValue(random());
-jest.spyOn(tl.Manager.prototype, 'install').mockImplementation();
-jest.spyOn(tl.Manager.prototype, 'conf', 'get').mockReturnValue({
+jest.spyOn(Manager.prototype, 'install').mockImplementation();
+jest.spyOn(Manager.prototype, 'conf', 'get').mockReturnValue({
   texmf: jest.fn(async (key, value) => {
     if (key === undefined) {
       return new Map([
@@ -99,13 +99,13 @@ jest.spyOn(tl.Manager.prototype, 'conf', 'get').mockReturnValue({
   }) as any,
 });
 jest
-  .spyOn(tl.Manager.prototype, 'path', 'get')
+  .spyOn(Manager.prototype, 'path', 'get')
   .mockReturnValue({ add: jest.fn() });
 jest
-  .spyOn(tl.Manager.prototype, 'pinning', 'get')
+  .spyOn(Manager.prototype, 'pinning', 'get')
   .mockReturnValue({ add: jest.fn() });
 jest
-  .spyOn(tl.Manager.prototype, 'repository', 'get')
+  .spyOn(Manager.prototype, 'repository', 'get')
   .mockReturnValue({ add: jest.fn() });
 
 describe('main', () => {
@@ -119,10 +119,10 @@ describe('main', () => {
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.download).toHaveBeenCalledWith('2021');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
+    expect(Manager.prototype.path.add).toHaveBeenCalled();
+    expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
@@ -134,10 +134,10 @@ describe('main', () => {
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.download).toHaveBeenCalledWith('2021');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
+    expect(Manager.prototype.path.add).toHaveBeenCalled();
+    expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
@@ -149,10 +149,10 @@ describe('main', () => {
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.download).toHaveBeenCalledWith('2021');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
+    expect(Manager.prototype.path.add).toHaveBeenCalled();
+    expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
@@ -171,10 +171,10 @@ describe('main', () => {
     expect(cache.restoreCache).not.toHaveBeenCalled();
     expect(InstallTL.download).toHaveBeenCalledWith('2008');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).toHaveBeenCalledWith(
+    expect(Manager.prototype.path.add).toHaveBeenCalled();
+    expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.install).toHaveBeenCalledWith(
       new Set(['cleveref', 'hyperref', 'scheme-basic']),
     );
     expect(context.setKey).not.toHaveBeenCalledWith(expect.anything());
@@ -194,10 +194,10 @@ describe('main', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.prototype.run).toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.pinning.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.repository.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
+    expect(Manager.prototype.path.add).toHaveBeenCalled();
+    expect(Manager.prototype.pinning.add).toHaveBeenCalled();
+    expect(Manager.prototype.repository.add).toHaveBeenCalled();
+    expect(Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
@@ -218,10 +218,10 @@ describe('main', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.download).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).toHaveBeenCalledWith(
+    expect(Manager.prototype.path.add).toHaveBeenCalled();
+    expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.install).toHaveBeenCalledWith(
       new Set(['scheme-basic']),
     );
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
@@ -244,10 +244,10 @@ describe('main', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.download).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
+    expect(Manager.prototype.path.add).toHaveBeenCalled();
+    expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).not.toHaveBeenCalled();
     expect(context.setCacheHit).toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
@@ -261,10 +261,10 @@ describe('main', () => {
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
     expect(InstallTL.prototype.run).toHaveBeenCalled();
-    expect(tl.Manager.prototype.path.add).toHaveBeenCalled();
-    expect(tl.Manager.prototype.pinning.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(tl.Manager.prototype.install).not.toHaveBeenCalled();
+    expect(Manager.prototype.path.add).toHaveBeenCalled();
+    expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
+    expect(Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
@@ -285,7 +285,7 @@ describe('main', () => {
     (cache.restoreCache as jest.Mock).mockImplementationOnce(
       async (paths, primaryKey, restoreKeys) => restoreKeys?.[0] ?? '',
     );
-    (tl.Manager.prototype.conf.texmf as jest.Mock).mockResolvedValueOnce(
+    (Manager.prototype.conf.texmf as jest.Mock).mockResolvedValueOnce(
       new Map([
         ['TEXMFHOME', '~/.texlive'],
         ['TEXMFHCONFIG', '~/.local/texlive/2021/texmf-config'],
@@ -293,15 +293,15 @@ describe('main', () => {
       ]),
     );
     await setup.run();
-    expect(tl.Manager.prototype.conf.texmf).toHaveBeenCalledWith(
+    expect(Manager.prototype.conf.texmf).toHaveBeenCalledWith(
       'TEXMFHOME',
       '~/texmf',
     );
-    expect(tl.Manager.prototype.conf.texmf).not.toHaveBeenCalledWith(
+    expect(Manager.prototype.conf.texmf).not.toHaveBeenCalledWith(
       'TEXMFHCONFIG',
       expect.anything(),
     );
-    expect(tl.Manager.prototype.conf.texmf).toHaveBeenCalledWith(
+    expect(Manager.prototype.conf.texmf).toHaveBeenCalledWith(
       'TEXMFVAR',
       '~/.local/texlive/2021/texmf-var',
     );

@@ -18,12 +18,15 @@ const VERSIONS = [
 
 export type Version = typeof VERSIONS[number];
 
-export function isVersion(version: string): version is Version {
-  return VERSIONS.includes(version as Version);
-}
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace Version {
+  export function isVersion(version: string): version is Version {
+    return VERSIONS.includes(version as Version);
+  }
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1]!;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  export const LATEST = VERSIONS[VERSIONS.length - 1]!;
+}
 
 export type Texmf = ReadonlyMap<Texmf.Key, string>;
 

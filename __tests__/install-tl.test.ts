@@ -7,7 +7,7 @@ import * as exec from '@actions/exec';
 import * as tool from '@actions/tool-cache';
 
 import { Environment, InstallTL, Profile } from '#/install-tl';
-import * as tl from '#/texlive';
+import { Version } from '#/texlive';
 import * as util from '#/utility';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
@@ -177,7 +177,7 @@ describe('InstallTL', () => {
       expect(tool.cacheDir).toHaveBeenCalled();
     });
 
-    it.each<[tl.Version, NodeJS.Platform]>([
+    it.each<[Version, NodeJS.Platform]>([
       ['2007', 'linux'],
       ['2007', 'win32'],
       ['2012', 'darwin'],
@@ -209,11 +209,11 @@ describe('InstallTL', () => {
 });
 
 describe('Environment', () => {
-  describe('get', () => {
+  describe('constructor', () => {
     it('returns the default values correctly', () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
       (os.homedir as jest.Mock).mockReturnValueOnce('~');
-      expect({ ...Environment.get('2021') }).toStrictEqual({
+      expect({ ...new Environment('2021') }).toStrictEqual({
         ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
         ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
         ['TEXLIVE_INSTALL_PREFIX']: expect.stringMatching('/setup-texlive$'),
@@ -229,7 +229,7 @@ describe('Environment', () => {
       process.env['TEXLIVE_INSTALL_NO_CONTEXT_CACHE'] = 'true';
       process.env['TEXLIVE_INSTALL_NO_WELCOME'] = 'false';
       process.env['TEXLIVE_INSTALL_TEXMFHOME'] = '~/.texmf';
-      expect({ ...Environment.get('2021') }).toStrictEqual({
+      expect({ ...new Environment('2021') }).toStrictEqual({
         ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
         ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']: 'true',
         ['TEXLIVE_INSTALL_NO_WELCOME']: 'false',
@@ -245,7 +245,7 @@ describe('Environment', () => {
     it('returns a proper string', () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
       (os.homedir as jest.Mock).mockReturnValueOnce('~');
-      expect(Environment.get('2021').toString()).toBe(
+      expect(new Environment('2021').toString()).toBe(
         [
           "TEXLIVE_DOWNLOADER=''",
           "TL_DOWNLOAD_PROGRAM=''",
