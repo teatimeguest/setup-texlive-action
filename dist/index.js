@@ -60062,6 +60062,36 @@ exports.Profile = Profile;
     }
     Profile.keys = keys;
 })(Profile = exports.Profile || (exports.Profile = {}));
+/**
+ * @returns The filename of the installer executable.
+ */
+function executable(version, platform) {
+    const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
+    return `install-tl${platform === 'win32' ? ext : ''}`;
+}
+/**
+ * Gets the URL of the main repository of TeX Live.
+ *
+ * @returns The `ctan` if the version is the latest, otherwise
+ *   the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
+ *
+ * @todo Use other archives as well.
+ */
+function repository(version) {
+    const base = version === texlive_1.Version.LATEST
+        ? 'https://mirror.ctan.org/systems/texlive/'
+        : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`;
+    const tlnet = `tlnet${Number(version) < 2010 || version === texlive_1.Version.LATEST ? '' : '-final'}/`;
+    const url = new url_1.URL(tlnet, base);
+    /**
+     * `install-tl` of versions prior to 2017 does not support HTTPS, and
+     * that of version 2017 supports HTTPS but does not work properly.
+     */
+    if (Number(version) < 2018) {
+        url.protocol = 'http';
+    }
+    return url;
+}
 async function download(target, version) {
     const url = new url_1.URL(target, repository(version)).href;
     core.info(`Downloading ${url}`);
@@ -60097,36 +60127,6 @@ async function restoreCache(target, version) {
         }
     }
     return undefined;
-}
-/**
- * @returns The filename of the installer executable.
- */
-function executable(version, platform) {
-    const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
-    return `install-tl${platform === 'win32' ? ext : ''}`;
-}
-/**
- * Gets the URL of the main repository of TeX Live.
- *
- * @returns The `ctan` if the version is the latest, otherwise
- *   the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
- *
- * @todo Use other archives as well.
- */
-function repository(version) {
-    const base = version === texlive_1.Version.LATEST
-        ? 'https://mirror.ctan.org/systems/texlive/'
-        : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`;
-    const tlnet = `tlnet${Number(version) < 2010 || version === texlive_1.Version.LATEST ? '' : '-final'}/`;
-    const url = new url_1.URL(tlnet, base);
-    /**
-     * `install-tl` of versions prior to 2017 does not support HTTPS, and
-     * that of version 2017 supports HTTPS but does not work properly.
-     */
-    if (Number(version) < 2018) {
-        url.protocol = 'http';
-    }
-    return url;
 }
 /**
  * Fixes bugs in the installer files and modify them for use in workflows.
@@ -60254,12 +60254,12 @@ async function main() {
             return await restoreCache(profile.TEXDIR, ...keys);
         });
     }
-    await core.group('Environment variables', async () => {
+    await core.group('Environment variables for Tex Live', async () => {
         core.info(install_tl_1.Env.format(config.env));
     });
     if (cacheType === 'none') {
         const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.acquire(config.version));
-        await core.group('Profile', async () => {
+        await core.group('Installation profile', async () => {
             core.info(profile.format());
         });
         await core.group('Installing Tex Live', async () => {
