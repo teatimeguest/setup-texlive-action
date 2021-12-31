@@ -20,10 +20,7 @@ export class InstallTL {
     private readonly bin: string,
   ) {}
 
-  async run(
-    profile: Readonly<Profile>,
-    env: Readonly<Environment> = new Environment(this.version),
-  ): Promise<void> {
+  async run(profile: Readonly<Profile>, env: Readonly<Env>): Promise<void> {
     const options = ['-no-gui', '-profile', await profile.write()];
 
     if (this.version !== Version.LATEST) {
@@ -36,11 +33,7 @@ export class InstallTL {
       );
     }
 
-    await exec.exec(this.bin, options, {
-      // This coercion is necessary; otherwise `tsc` would complain that
-      // "Property 'toString' is incompatible with index signature.'
-      env: { ...process.env, ...(env as Environment) },
-    });
+    await exec.exec(this.bin, options, { env: { ...process.env, ...env } });
     core.info('Applying patches');
     await patch(this.version, profile.TEXDIR);
   }
@@ -109,50 +102,16 @@ export class InstallTL {
   }
 }
 
-export class Environment
-  implements Partial<Readonly<Record<Environment.Key, string>>>
-{
-  /* eslint-disable @typescript-eslint/naming-convention */
-  readonly TEXLIVE_DOWNLOADER?: string;
-  readonly TL_DOWNLOAD_PROGRAM?: string;
-  readonly TL_DOWNLOAD_ARGS?: string;
-  readonly TEXLIVE_INSTALL_ENV_NOCHECK: string;
-  readonly TEXLIVE_INSTALL_NO_CONTEXT_CACHE?: string;
-  readonly TEXLIVE_INSTALL_NO_RESUME?: string;
-  readonly TEXLIVE_INSTALL_NO_WELCOME: string;
-  readonly TEXLIVE_INSTALL_PAPER?: string;
-  readonly TEXLIVE_INSTALL_PREFIX: string;
-  readonly TEXLIVE_INSTALL_TEXMFHOME: string;
-  readonly TEXLIVE_INSTALL_TEXMFCONFIG: string;
-  readonly TEXLIVE_INSTALL_TEXMFVAR: string;
-  readonly NOPERLDOC?: string;
-  /* eslint-enable @typescript-eslint/naming-convention */
+export type Env = Partial<Record<Env.Key, string>>;
 
-  constructor(version: Version) {
-    for (const key of Environment.keys()) {
-      const value = process.env[key];
-      if (value !== undefined) {
-        this[key] = value;
-      }
-    }
-    const home = os.homedir();
-    const texdir = path.join(home, '.local', 'texlive', version);
-    this.TEXLIVE_INSTALL_ENV_NOCHECK ??= 'true';
-    this.TEXLIVE_INSTALL_NO_WELCOME ??= 'true';
-    this.TEXLIVE_INSTALL_PREFIX ??= path.join(util.tmpdir(), 'setup-texlive');
-    this.TEXLIVE_INSTALL_TEXMFHOME ??= path.join(home, 'texmf');
-    this.TEXLIVE_INSTALL_TEXMFCONFIG ??= path.join(texdir, 'texmf-config');
-    this.TEXLIVE_INSTALL_TEXMFVAR ??= path.join(texdir, 'texmf-var');
-  }
-
-  toString(): string {
-    return Environment.keys()
-      .map((key) => `${key}='${this[key] ?? ''}'`)
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace Env {
+  export function format(env: Readonly<Env>): string {
+    return keys()
+      .map((key) => `${key}='${env[key] ?? ''}'`)
       .join('\n');
   }
-}
 
-export namespace Environment {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   export function keys() {
     return [
@@ -180,6 +139,8 @@ export class Profile implements Readonly<Record<Profile.Key, string>> {
     private readonly version: Version,
     private readonly prefix: string,
   ) {}
+
+  filepath: string | undefined = undefined;
 
   /* eslint-disable @typescript-eslint/naming-convention */
   /**
@@ -224,9 +185,7 @@ export class Profile implements Readonly<Record<Profile.Key, string>> {
   readonly option_w32_multi_user: string = '0';
   /* eslint-enable @typescript-eslint/naming-convention */
 
-  filepath: string | undefined = undefined;
-
-  toString(this: Readonly<this>): string {
+  format(this: Readonly<this>): string {
     return Profile.keys()
       .map((key) => `${key} ${this[key]}`)
       .join('\n');
@@ -236,7 +195,7 @@ export class Profile implements Readonly<Record<Profile.Key, string>> {
     if (this.filepath === undefined) {
       const tmp = await fs.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-'));
       this.filepath = path.join(tmp, 'texlive.profile');
-      await fs.writeFile(this.filepath, this.toString());
+      await fs.writeFile(this.filepath, this.format());
       core.debug(`${this.filepath} created`);
     }
     return this.filepath;

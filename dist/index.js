@@ -59770,17 +59770,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.loadConfig = void 0;
 const fs_1 = __nccwpck_require__(7147);
+const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
+const install_tl_1 = __nccwpck_require__(1436);
 const texlive_1 = __nccwpck_require__(8313);
 const util = __importStar(__nccwpck_require__(5418));
 async function loadConfig() {
     const cache = getCache();
     const packages = await getPackages();
-    const prefix = getPrefix();
     const version = getVersion();
+    const env = getEnv(version);
+    const prefix = getPrefix(env);
     const tlcontrib = getTlcontrib(version);
-    return { cache, packages, prefix, tlcontrib, version };
+    return { cache, packages, prefix, tlcontrib, version, env };
 }
 exports.loadConfig = loadConfig;
 function getCache() {
@@ -59803,9 +59806,9 @@ async function getPackages() {
     packages.delete('');
     return packages;
 }
-function getPrefix() {
-    var _a;
-    return ((_a = [core.getInput('prefix'), process.env['TEXLIVE_INSTALL_PREFIX']].find(Boolean)) !== null && _a !== void 0 ? _a : path.join(util.tmpdir(), 'setup-texlive'));
+function getPrefix(env) {
+    const prefix = core.getInput('prefix');
+    return prefix === '' ? env.TEXLIVE_INSTALL_PREFIX : prefix;
 }
 function getTlcontrib(version) {
     const tlcontrib = core.getBooleanInput('tlcontrib');
@@ -59824,6 +59827,25 @@ function getVersion() {
         return texlive_1.Version.LATEST;
     }
     throw new TypeError("`version` must be specified by year or 'latest'");
+}
+function getEnv(version) {
+    var _a, _b, _c, _d, _e, _f;
+    const env = {};
+    for (const key of install_tl_1.Env.keys()) {
+        const value = process.env[key];
+        if (value !== undefined) {
+            env[key] = value;
+        }
+    }
+    const home = os.homedir();
+    const texdir = path.join(home, '.local', 'texlive', version);
+    (_a = env.TEXLIVE_INSTALL_ENV_NOCHECK) !== null && _a !== void 0 ? _a : (env.TEXLIVE_INSTALL_ENV_NOCHECK = 'true');
+    (_b = env.TEXLIVE_INSTALL_NO_WELCOME) !== null && _b !== void 0 ? _b : (env.TEXLIVE_INSTALL_NO_WELCOME = 'true');
+    (_c = env.TEXLIVE_INSTALL_PREFIX) !== null && _c !== void 0 ? _c : (env.TEXLIVE_INSTALL_PREFIX = path.join(util.tmpdir(), 'setup-texlive'));
+    (_d = env.TEXLIVE_INSTALL_TEXMFHOME) !== null && _d !== void 0 ? _d : (env.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf'));
+    (_e = env.TEXLIVE_INSTALL_TEXMFCONFIG) !== null && _e !== void 0 ? _e : (env.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config'));
+    (_f = env.TEXLIVE_INSTALL_TEXMFVAR) !== null && _f !== void 0 ? _f : (env.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var'));
+    return env;
 }
 function getKey() {
     const key = core.getState('key');
@@ -59875,7 +59897,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Profile = exports.Environment = exports.InstallTL = void 0;
+exports.Profile = exports.Env = exports.InstallTL = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
@@ -59894,7 +59916,7 @@ class InstallTL {
         this.version = version;
         this.bin = bin;
     }
-    async run(profile, env = new Environment(this.version)) {
+    async run(profile, env) {
         const options = ['-no-gui', '-profile', await profile.write()];
         if (this.version !== texlive_1.Version.LATEST) {
             options.push(
@@ -59903,11 +59925,7 @@ class InstallTL {
              */
             this.version === '2008' ? '-location' : '-repository', repository(this.version).href);
         }
-        await exec.exec(this.bin, options, {
-            // This coercion is necessary; otherwise `tsc` would complain that
-            // "Property 'toString' is incompatible with index signature.'
-            env: { ...process.env, ...env },
-        });
+        await exec.exec(this.bin, options, { env: { ...process.env, ...env } });
         core.info('Applying patches');
         await patch(this.version, profile.TEXDIR);
     }
@@ -59957,33 +59975,15 @@ class InstallTL {
     }
 }
 exports.InstallTL = InstallTL;
-class Environment {
-    /* eslint-enable @typescript-eslint/naming-convention */
-    constructor(version) {
-        var _a, _b, _c, _d, _e, _f;
-        for (const key of Environment.keys()) {
-            const value = process.env[key];
-            if (value !== undefined) {
-                this[key] = value;
-            }
-        }
-        const home = os.homedir();
-        const texdir = path.join(home, '.local', 'texlive', version);
-        (_a = this.TEXLIVE_INSTALL_ENV_NOCHECK) !== null && _a !== void 0 ? _a : (this.TEXLIVE_INSTALL_ENV_NOCHECK = 'true');
-        (_b = this.TEXLIVE_INSTALL_NO_WELCOME) !== null && _b !== void 0 ? _b : (this.TEXLIVE_INSTALL_NO_WELCOME = 'true');
-        (_c = this.TEXLIVE_INSTALL_PREFIX) !== null && _c !== void 0 ? _c : (this.TEXLIVE_INSTALL_PREFIX = path.join(util.tmpdir(), 'setup-texlive'));
-        (_d = this.TEXLIVE_INSTALL_TEXMFHOME) !== null && _d !== void 0 ? _d : (this.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf'));
-        (_e = this.TEXLIVE_INSTALL_TEXMFCONFIG) !== null && _e !== void 0 ? _e : (this.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config'));
-        (_f = this.TEXLIVE_INSTALL_TEXMFVAR) !== null && _f !== void 0 ? _f : (this.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var'));
-    }
-    toString() {
-        return Environment.keys()
-            .map((key) => { var _a; return `${key}='${(_a = this[key]) !== null && _a !== void 0 ? _a : ''}'`; })
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+var Env;
+(function (Env) {
+    function format(env) {
+        return keys()
+            .map((key) => { var _a; return `${key}='${(_a = env[key]) !== null && _a !== void 0 ? _a : ''}'`; })
             .join('\n');
     }
-}
-exports.Environment = Environment;
-(function (Environment) {
+    Env.format = format;
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     function keys() {
         return [
@@ -60002,12 +60002,13 @@ exports.Environment = Environment;
             'NOPERLDOC',
         ];
     }
-    Environment.keys = keys;
-})(Environment = exports.Environment || (exports.Environment = {}));
+    Env.keys = keys;
+})(Env = exports.Env || (exports.Env = {}));
 class Profile {
     constructor(version, prefix) {
         this.version = version;
         this.prefix = prefix;
+        this.filepath = undefined;
         /* eslint-disable @typescript-eslint/naming-convention */
         /**
          * - `option_autobackup`, `option_doc`, `option_src`, and `option_symlinks`
@@ -60046,10 +60047,9 @@ class Profile {
         this.option_src = '0';
         this.option_symlinks = '0';
         this.option_w32_multi_user = '0';
-        /* eslint-enable @typescript-eslint/naming-convention */
-        this.filepath = undefined;
     }
-    toString() {
+    /* eslint-enable @typescript-eslint/naming-convention */
+    format() {
         return Profile.keys()
             .map((key) => `${key} ${this[key]}`)
             .join('\n');
@@ -60058,7 +60058,7 @@ class Profile {
         if (this.filepath === undefined) {
             const tmp = await fs_1.promises.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-'));
             this.filepath = path.join(tmp, 'texlive.profile');
-            await fs_1.promises.writeFile(this.filepath, this.toString());
+            await fs_1.promises.writeFile(this.filepath, this.format());
             core.debug(`${this.filepath} created`);
         }
         return this.filepath;
@@ -60246,17 +60246,16 @@ async function main() {
             return await restoreCache(profile.TEXDIR, ...keys);
         });
     }
-    const env = new install_tl_1.Environment(config.version);
     await core.group('Environment variables', async () => {
-        core.info(env.toString());
+        core.info(install_tl_1.Env.format(config.env));
     });
     if (cacheType === 'none') {
         const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.download(config.version));
         await core.group('Profile', async () => {
-            core.info(profile.toString());
+            core.info(profile.format());
         });
         await core.group('Installing Tex Live', async () => {
-            await installtl.run(profile, env);
+            await installtl.run(profile, config.env);
         });
     }
     const tlmgr = new texlive_1.Manager(config.version, config.prefix);
@@ -60265,7 +60264,7 @@ async function main() {
         context.setCacheHit();
         await core.group('Adjusting TEXMF', async () => {
             for (const [key, value] of await tlmgr.conf.texmf()) {
-                const specified = env[`TEXLIVE_INSTALL_${key}`];
+                const specified = config.env[`TEXLIVE_INSTALL_${key}`];
                 if (value !== specified) {
                     // eslint-disable-next-line no-await-in-loop
                     await tlmgr.conf.texmf(key, specified);
@@ -60384,6 +60383,7 @@ const VERSIONS = [
     '2015', '2016', '2017', '2018', '2019',
     '2020', '2021',
 ];
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 var Version;
 (function (Version) {
     function isVersion(version) {
@@ -60422,9 +60422,8 @@ class Manager {
             }
             async texmf(key, value) {
                 if (key === undefined) {
-                    // eslint-disable-next-line @typescript-eslint/return-await
-                    const promises = Texmf.keys().map(async (variable) => [variable, await this.texmf(variable)]);
-                    return new Map(await Promise.all(promises));
+                    const entries = Texmf.keys().map(async (variable) => [variable, await this.texmf(variable)]);
+                    return new Map(await Promise.all(entries));
                 }
                 if (value === undefined) {
                     return (await exec.getExecOutput('kpsewhich', ['-var-value', key])).stdout.trim();

@@ -5,7 +5,7 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import * as context from '#/context';
-import { Environment, InstallTL, Profile } from '#/install-tl';
+import { Env, InstallTL, Profile } from '#/install-tl';
 import { contrib as tlcontrib, Manager, Version } from '#/texlive';
 
 export async function run(): Promise<void> {
@@ -38,9 +38,8 @@ async function main(): Promise<void> {
     });
   }
 
-  const env = new Environment(config.version);
   await core.group('Environment variables', async () => {
-    core.info(env.toString());
+    core.info(Env.format(config.env));
   });
 
   if (cacheType === 'none') {
@@ -49,10 +48,10 @@ async function main(): Promise<void> {
       async () => await InstallTL.download(config.version),
     );
     await core.group('Profile', async () => {
-      core.info(profile.toString());
+      core.info(profile.format());
     });
     await core.group('Installing Tex Live', async () => {
-      await installtl.run(profile, env);
+      await installtl.run(profile, config.env);
     });
   }
 
@@ -63,7 +62,7 @@ async function main(): Promise<void> {
     context.setCacheHit();
     await core.group('Adjusting TEXMF', async () => {
       for (const [key, value] of await tlmgr.conf.texmf()) {
-        const specified = env[`TEXLIVE_INSTALL_${key}`];
+        const specified = config.env[`TEXLIVE_INSTALL_${key}`];
         if (value !== specified) {
           // eslint-disable-next-line no-await-in-loop
           await tlmgr.conf.texmf(key, specified);

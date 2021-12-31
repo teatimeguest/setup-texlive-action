@@ -11,27 +11,6 @@ import { Manager } from '#/texlive';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
-process.env = (() => {
-  const {
-    GITHUB_PATH,
-    TEXLIVE_DOWNLOADER,
-    TL_DOWNLOAD_PROGRAM,
-    TL_DOWNLOAD_ARGS,
-    TEXLIVE_INSTALL_ENV_NOCHECK,
-    TEXLIVE_INSTALL_NO_CONTEXT_CACHE,
-    TEXLIVE_INSTALL_NO_RESUME,
-    TEXLIVE_INSTALL_NO_WELCOME,
-    TEXLIVE_INSTALL_PAPER,
-    TEXLIVE_INSTALL_PREFIX,
-    TEXLIVE_INSTALL_TEXMFHOME,
-    TEXLIVE_INSTALL_TEXMFCONFIG,
-    TEXLIVE_INSTALL_TEXMFVAR,
-    NOPERLDOC,
-    ...rest
-  }: Partial<Record<string, string>> = process.env;
-  return rest;
-})();
-
 jest.mock('os', () => ({
   arch: jest.requireActual('os').arch,
   homedir: jest.fn(),
@@ -74,6 +53,14 @@ jest.spyOn(context, 'loadConfig').mockImplementation(async () => ({
       : '/tmp/setup-texlive',
   tlcontrib: false,
   version: '2021',
+  env: {
+    ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+    ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+    ['TEXLIVE_INSTALL_PREFIX']: '/tmp/setup-texlive',
+    ['TEXLIVE_INSTALL_TEXMFHOME']: '~/texmf',
+    ['TEXLIVE_INSTALL_TEXMFCONFIG']: '~/.local/texlive/2021/texmf-config',
+    ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
+  },
 }));
 jest.spyOn(context, 'getKey').mockImplementation();
 jest.spyOn(context, 'setKey').mockImplementation();
@@ -166,6 +153,14 @@ describe('main', () => {
       prefix: '/usr/local/texlive',
       tlcontrib: false,
       version: '2008',
+      env: {
+        ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+        ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+        ['TEXLIVE_INSTALL_PREFIX']: '/tmp/setup-texlive',
+        ['TEXLIVE_INSTALL_TEXMFHOME']: '~/texmf',
+        ['TEXLIVE_INSTALL_TEXMFCONFIG']: '~/.local/texlive/2021/texmf-config',
+        ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
+      },
     });
     await setup.run();
     expect(cache.restoreCache).not.toHaveBeenCalled();
@@ -190,6 +185,14 @@ describe('main', () => {
       prefix: '/usr/local/texlive',
       tlcontrib: true,
       version: '2021',
+      env: {
+        ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+        ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+        ['TEXLIVE_INSTALL_PREFIX']: '/tmp/setup-texlive',
+        ['TEXLIVE_INSTALL_TEXMFHOME']: '~/texmf',
+        ['TEXLIVE_INSTALL_TEXMFCONFIG']: '~/.local/texlive/2021/texmf-config',
+        ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
+      },
     });
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
@@ -211,6 +214,14 @@ describe('main', () => {
       prefix: '/tmp/setup-texlive',
       tlcontrib: false,
       version: '2021',
+      env: {
+        ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+        ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+        ['TEXLIVE_INSTALL_PREFIX']: '/tmp/setup-texlive',
+        ['TEXLIVE_INSTALL_TEXMFHOME']: '~/texmf',
+        ['TEXLIVE_INSTALL_TEXMFCONFIG']: '~/.local/texlive/2021/texmf-config',
+        ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
+      },
     });
     (cache.restoreCache as jest.Mock).mockImplementationOnce(
       async (paths, primaryKey, restoreKeys) => restoreKeys?.[0] ?? '',
@@ -237,6 +248,14 @@ describe('main', () => {
       prefix: '/tmp/setup-texlive',
       tlcontrib: false,
       version: '2021',
+      env: {
+        ['TEXLIVE_INSTALL_ENV_NOCHECK']: 'true',
+        ['TEXLIVE_INSTALL_NO_WELCOME']: 'true',
+        ['TEXLIVE_INSTALL_PREFIX']: '/tmp/setup-texlive',
+        ['TEXLIVE_INSTALL_TEXMFHOME']: '~/texmf',
+        ['TEXLIVE_INSTALL_TEXMFCONFIG']: '~/.local/texlive/2021/texmf-config',
+        ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
+      },
     });
     (cache.restoreCache as jest.Mock).mockImplementationOnce(
       async (paths, primaryKey) => primaryKey,

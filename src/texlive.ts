@@ -69,11 +69,10 @@ export class Manager {
         value?: string,
       ): Promise<Texmf | string | void> {
         if (key === undefined) {
-          // eslint-disable-next-line @typescript-eslint/return-await
-          const promises = Texmf.keys().map<Promise<[Texmf.Key, string]>>(
+          const entries = Texmf.keys().map<Promise<[Texmf.Key, string]>>(
             async (variable) => [variable, await this.texmf(variable)],
           );
-          return new Map(await Promise.all(promises));
+          return new Map(await Promise.all(entries));
         }
         if (value === undefined) {
           return (
