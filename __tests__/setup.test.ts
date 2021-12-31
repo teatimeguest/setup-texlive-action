@@ -68,7 +68,7 @@ jest.spyOn(context, 'getPost').mockImplementation();
 jest.spyOn(context, 'setPost').mockImplementation();
 jest.spyOn(context, 'setCacheHit').mockImplementation();
 jest
-  .spyOn(InstallTL, 'download')
+  .spyOn(InstallTL, 'acquire')
   .mockImplementation((version) => new (InstallTL as any)(version, random()));
 jest.spyOn(InstallTL.prototype, 'run').mockImplementation();
 jest.spyOn(Profile.prototype, 'write').mockResolvedValue(random());
@@ -104,7 +104,7 @@ describe('main', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(InstallTL.download).toHaveBeenCalledWith('2021');
+    expect(InstallTL.acquire).toHaveBeenCalledWith('2021');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
@@ -119,7 +119,7 @@ describe('main', () => {
     (os.platform as jest.Mock).mockReturnValue('win32');
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(InstallTL.download).toHaveBeenCalledWith('2021');
+    expect(InstallTL.acquire).toHaveBeenCalledWith('2021');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
@@ -134,7 +134,7 @@ describe('main', () => {
     (os.platform as jest.Mock).mockReturnValue('darwin');
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(InstallTL.download).toHaveBeenCalledWith('2021');
+    expect(InstallTL.acquire).toHaveBeenCalledWith('2021');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
@@ -164,7 +164,7 @@ describe('main', () => {
     });
     await setup.run();
     expect(cache.restoreCache).not.toHaveBeenCalled();
-    expect(InstallTL.download).toHaveBeenCalledWith('2008');
+    expect(InstallTL.acquire).toHaveBeenCalledWith('2008');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
@@ -228,7 +228,7 @@ describe('main', () => {
     );
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(InstallTL.download).not.toHaveBeenCalled();
+    expect(InstallTL.acquire).not.toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
@@ -262,7 +262,7 @@ describe('main', () => {
     );
     await setup.run();
     expect(cache.restoreCache).toHaveBeenCalled();
-    expect(InstallTL.download).not.toHaveBeenCalled();
+    expect(InstallTL.acquire).not.toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(Manager.prototype.repository.add).not.toHaveBeenCalled();

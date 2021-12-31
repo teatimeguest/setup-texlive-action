@@ -38,7 +38,7 @@ export class InstallTL {
     await patch(this.version, profile.TEXDIR);
   }
 
-  static async download(version: Version): Promise<InstallTL> {
+  static async acquire(version: Version): Promise<InstallTL> {
     /**
      * - There is no `install-tl` for versions prior to 2005, and
      *   versions 2005--2007 do not seem to be archived.
@@ -55,45 +55,9 @@ export class InstallTL {
     const target = `install-tl${
       os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'
     }`;
-
-    try {
-      const cache = tool.find(target, version);
-      if (cache !== '') {
-        core.info('Found in cache');
-        return new InstallTL(
-          version,
-          path.join(cache, executable(version, os.platform())),
-        );
-      }
-    } catch (error) {
-      core.info(`Failed to restore cache: ${error}`);
-      if (error instanceof Error && error.stack !== undefined) {
-        core.debug(error.stack);
-      }
-    }
-
-    const url = new URL(target, repository(version)).href;
-    core.info(`Downloading ${url}`);
-    const archive = await tool.downloadTool(url);
-
-    core.info('Extracting');
-    const dest = await util.extract(
-      archive,
-      os.platform() === 'win32' ? 'zip' : 'tar.gz',
-    );
-
-    core.info('Applying patches');
-    await patch(version, dest);
-
-    try {
-      core.info('Adding to the cache');
-      await tool.cacheDir(dest, target, version);
-    } catch (error) {
-      core.info(`Failed to add to cache: ${error}`);
-      if (error instanceof Error && error.stack !== undefined) {
-        core.debug(error.stack);
-      }
-    }
+    const dest =
+      (await restoreCache(target, version)) ??
+      (await download(target, version));
 
     return new InstallTL(
       version,
@@ -262,6 +226,52 @@ function repository(version: Version): URL {
     url.protocol = 'http';
   }
   return url;
+}
+
+async function download(target: string, version: Version): Promise<string> {
+  const url = new URL(target, repository(version)).href;
+  core.info(`Downloading ${url}`);
+  const archive = await tool.downloadTool(url);
+
+  core.info('Extracting');
+  const dest = await util.extract(
+    archive,
+    os.platform() === 'win32' ? 'zip' : 'tar.gz',
+  );
+
+  core.info('Applying patches');
+  await patch(version, dest);
+
+  try {
+    core.info('Adding to the cache');
+    await tool.cacheDir(dest, target, version);
+  } catch (error) {
+    core.info(`Failed to add to cache: ${error}`);
+    if (error instanceof Error && error.stack !== undefined) {
+      core.debug(error.stack);
+    }
+  }
+
+  return dest;
+}
+
+async function restoreCache(
+  target: string,
+  version: Version,
+): Promise<string | undefined> {
+  try {
+    const cache = tool.find(target, version);
+    if (cache !== '') {
+      core.info('Found in cache');
+      return cache;
+    }
+  } catch (error) {
+    core.info(`Failed to restore cache: ${error}`);
+    if (error instanceof Error && error.stack !== undefined) {
+      core.debug(error.stack);
+    }
+  }
+  return undefined;
 }
 
 /**

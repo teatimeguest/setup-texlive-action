@@ -59929,7 +59929,8 @@ class InstallTL {
         core.info('Applying patches');
         await patch(this.version, profile.TEXDIR);
     }
-    static async download(version) {
+    static async acquire(version) {
+        var _a;
         /**
          * - There is no `install-tl` for versions prior to 2005, and
          *   versions 2005--2007 do not seem to be archived.
@@ -59941,36 +59942,7 @@ class InstallTL {
             throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
         }
         const target = `install-tl${os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'}`;
-        try {
-            const cache = tool.find(target, version);
-            if (cache !== '') {
-                core.info('Found in cache');
-                return new InstallTL(version, path.join(cache, executable(version, os.platform())));
-            }
-        }
-        catch (error) {
-            core.info(`Failed to restore cache: ${error}`);
-            if (error instanceof Error && error.stack !== undefined) {
-                core.debug(error.stack);
-            }
-        }
-        const url = new url_1.URL(target, repository(version)).href;
-        core.info(`Downloading ${url}`);
-        const archive = await tool.downloadTool(url);
-        core.info('Extracting');
-        const dest = await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tar.gz');
-        core.info('Applying patches');
-        await patch(version, dest);
-        try {
-            core.info('Adding to the cache');
-            await tool.cacheDir(dest, target, version);
-        }
-        catch (error) {
-            core.info(`Failed to add to cache: ${error}`);
-            if (error instanceof Error && error.stack !== undefined) {
-                core.debug(error.stack);
-            }
-        }
+        const dest = (_a = (await restoreCache(target, version))) !== null && _a !== void 0 ? _a : (await download(target, version));
         return new InstallTL(version, path.join(dest, executable(version, os.platform())));
     }
 }
@@ -60090,6 +60062,42 @@ exports.Profile = Profile;
     }
     Profile.keys = keys;
 })(Profile = exports.Profile || (exports.Profile = {}));
+async function download(target, version) {
+    const url = new url_1.URL(target, repository(version)).href;
+    core.info(`Downloading ${url}`);
+    const archive = await tool.downloadTool(url);
+    core.info('Extracting');
+    const dest = await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tar.gz');
+    core.info('Applying patches');
+    await patch(version, dest);
+    try {
+        core.info('Adding to the cache');
+        await tool.cacheDir(dest, target, version);
+    }
+    catch (error) {
+        core.info(`Failed to add to cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+    return dest;
+}
+async function restoreCache(target, version) {
+    try {
+        const cache = tool.find(target, version);
+        if (cache !== '') {
+            core.info('Found in cache');
+            return cache;
+        }
+    }
+    catch (error) {
+        core.info(`Failed to restore cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+    return undefined;
+}
 /**
  * @returns The filename of the installer executable.
  */
@@ -60250,7 +60258,7 @@ async function main() {
         core.info(install_tl_1.Env.format(config.env));
     });
     if (cacheType === 'none') {
-        const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.download(config.version));
+        const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.acquire(config.version));
         await core.group('Profile', async () => {
             core.info(profile.format());
         });

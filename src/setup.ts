@@ -45,7 +45,7 @@ async function main(): Promise<void> {
   if (cacheType === 'none') {
     const installtl = await core.group(
       'Acquiring install-tl',
-      async () => await InstallTL.download(config.version),
+      async () => await InstallTL.acquire(config.version),
     );
     await core.group('Profile', async () => {
       core.info(profile.format());
