@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import * as glob from '@actions/glob';
 
 import { Manager, Version } from '#/texlive';
+import * as util from '#/utility';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
@@ -21,11 +21,6 @@ jest.spyOn(exec, 'exec').mockImplementation();
 jest
   .spyOn(exec, 'getExecOutput')
   .mockResolvedValue({ exitCode: 0, stdout: random(), stderr: random() });
-jest.spyOn(glob, 'create').mockImplementation(async (pattern) => {
-  return {
-    glob: async () => [pattern.replace(/\*/u, random())],
-  } as glob.Globber;
-});
 
 describe('Version', () => {
   test.each([
@@ -119,27 +114,13 @@ describe('Manager', () => {
     const tlmgr = new Manager('2019', '/usr/local/texlive');
 
     it('adds the bin directory to the PATH', async () => {
-      (glob.create as jest.Mock).mockImplementationOnce(async (pattern) => {
-        return {
-          glob: async () => [pattern.replace('*', 'x86_64-linux')],
-        } as glob.Globber;
-      });
+      jest.spyOn(util, 'determine').mockResolvedValueOnce('<path>');
       await tlmgr.path.add();
-      expect(core.addPath).toHaveBeenCalledWith(
-        '/usr/local/texlive/2019/bin/x86_64-linux',
-      );
+      expect(core.addPath).toHaveBeenCalledWith('<path>');
     });
 
-    it.each([
-      [[]],
-      [['x86_64-linux', 'universal-darwin']],
-      [['x86_64-linux', 'universal-darwin', 'Windows']],
-    ])('fails as the bin directory cannot be located', async (matched) => {
-      (glob.create as jest.Mock).mockImplementationOnce(async (pattern) => {
-        return {
-          glob: async () => matched.map((x) => pattern.replace('*', x)),
-        } as glob.Globber;
-      });
+    it('fails as the bin directory cannot be located', async () => {
+      jest.spyOn(util, 'determine').mockResolvedValueOnce(undefined);
       await expect(tlmgr.path.add()).rejects.toThrow(
         'Unable to locate the bin directory',
       );

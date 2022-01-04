@@ -108,14 +108,13 @@ export class Manager {
   }> {
     return {
       add: async () => {
-        const matched = await util.expand(
+        const binpath = await util.determine(
           path.join(this.prefix, this.version, 'bin', '*'),
         );
-        if (matched.length !== 1 || matched[0] === undefined) {
-          core.debug(`Matched: ${matched}`);
+        if (binpath === undefined) {
           throw new Error('Unable to locate the bin directory');
         }
-        core.addPath(matched[0]);
+        core.addPath(binpath);
       },
     };
   }

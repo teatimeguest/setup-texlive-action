@@ -80,6 +80,28 @@ describe('extract', () => {
   });
 });
 
+describe('determine', () => {
+  it('returns a unique path that matches the given pattern', async () => {
+    jest.spyOn(glob, 'create').mockResolvedValueOnce({
+      glob: async () => ['<path>'],
+    } as glob.Globber);
+    await expect(util.determine('<some pattern>')).resolves.toBe('<path>');
+  });
+
+  it('returns `undefined` if the matched path is not unique', async () => {
+    jest
+      .spyOn(glob, 'create')
+      .mockResolvedValueOnce({
+        glob: async (): Promise<Array<string>> => [],
+      } as glob.Globber)
+      .mockResolvedValueOnce({
+        glob: async () => ['<some path>', '<other path>'],
+      } as glob.Globber);
+    await expect(util.determine('<some pattern>')).resolves.toBeUndefined();
+    await expect(util.determine('<some pattern>')).resolves.toBeUndefined();
+  });
+});
+
 describe('tmpdir', () => {
   it('returns $RUNNER_TEMP if set', () => {
     process.env['RUNNER_TEMP'] = '<RUNNER_TEMP>';

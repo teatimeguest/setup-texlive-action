@@ -60456,12 +60456,11 @@ class Manager {
     get path() {
         return {
             add: async () => {
-                const matched = await util.expand(path.join(this.prefix, this.version, 'bin', '*'));
-                if (matched.length !== 1 || matched[0] === undefined) {
-                    core.debug(`Matched: ${matched}`);
+                const binpath = await util.determine(path.join(this.prefix, this.version, 'bin', '*'));
+                if (binpath === undefined) {
                     throw new Error('Unable to locate the bin directory');
                 }
-                core.addPath(matched[0]);
+                core.addPath(binpath);
             },
         };
     }
@@ -60533,7 +60532,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.tmpdir = exports.expand = exports.extract = exports.updateFile = void 0;
+exports.tmpdir = exports.determine = exports.extract = exports.updateFile = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
@@ -60559,24 +60558,28 @@ async function extract(filepath, kind) {
         case 'tar.gz':
             return await tool.extractTar(filepath, undefined, ['xz', '--strip=1']);
         case 'zip': {
-            const subdir = await expand(path.join(await tool.extractZip(filepath), '*'));
-            if (subdir.length !== 1 || subdir[0] === undefined) {
-                core.debug(`Matched: ${subdir}`);
+            const subdir = await determine(path.join(await tool.extractZip(filepath), '*'));
+            if (subdir === undefined) {
                 throw new Error('Unable to locate the unzipped directory');
             }
-            return subdir[0];
+            return subdir;
         }
     }
 }
 exports.extract = extract;
 /**
- * @returns Array of paths that match the given glob pattern.
+ * @returns The unique path that matches the given glob pattern.
  */
-async function expand(pattern) {
+async function determine(pattern) {
     const globber = await glob.create(pattern, { implicitDescendants: false });
-    return await globber.glob();
+    const matched = await globber.glob();
+    if (matched.length === 1) {
+        return matched[0];
+    }
+    core.debug(`Found ${matched.length === 0 ? 'no' : 'multiple'} matches to the pattern ${pattern}${matched.length === 0 ? '' : `: ${matched}`}`);
+    return undefined;
 }
-exports.expand = expand;
+exports.determine = determine;
 function tmpdir() {
     const runnerTemp = process.env['RUNNER_TEMP'];
     return runnerTemp !== undefined && runnerTemp !== ''

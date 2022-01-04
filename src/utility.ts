@@ -38,24 +38,34 @@ export async function extract(
     case 'tar.gz':
       return await tool.extractTar(filepath, undefined, ['xz', '--strip=1']);
     case 'zip': {
-      const subdir = await expand(
+      const subdir = await determine(
         path.join(await tool.extractZip(filepath), '*'),
       );
-      if (subdir.length !== 1 || subdir[0] === undefined) {
-        core.debug(`Matched: ${subdir}`);
+      if (subdir === undefined) {
         throw new Error('Unable to locate the unzipped directory');
       }
-      return subdir[0];
+      return subdir;
     }
   }
 }
 
 /**
- * @returns Array of paths that match the given glob pattern.
+ * @returns The unique path that matches the given glob pattern.
  */
-export async function expand(pattern: string): Promise<Array<string>> {
+export async function determine(pattern: string): Promise<string | undefined> {
   const globber = await glob.create(pattern, { implicitDescendants: false });
-  return await globber.glob();
+  const matched = await globber.glob();
+  if (matched.length === 1) {
+    return matched[0];
+  }
+  core.debug(
+    `Found ${
+      matched.length === 0 ? 'no' : 'multiple'
+    } matches to the pattern ${pattern}${
+      matched.length === 0 ? '' : `: ${matched}`
+    }`,
+  );
+  return undefined;
 }
 
 export function tmpdir(): string {
