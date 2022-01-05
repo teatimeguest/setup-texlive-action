@@ -23,7 +23,11 @@
 
     "esModuleInterop": true,
 
-    "target": "es2019"
+    "target": "es2019",
+    // For ttypescript
+    "plugins": [
+      { "transform": "ts-transformer-keys/transformer" }
+    ]
   },
   "files": [
     "./src/context.ts",

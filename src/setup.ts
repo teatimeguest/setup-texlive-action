@@ -4,9 +4,9 @@ import * as os from 'os';
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
-import * as context from '#/context';
-import { Env, InstallTL, Profile } from '#/install-tl';
-import { contrib as tlcontrib, Manager, Version } from '#/texlive';
+import * as context from './context';
+import { Env, InstallTL, Profile } from './install-tl';
+import { contrib as tlcontrib, Manager, Version } from './texlive';
 
 export async function run(): Promise<void> {
   try {
@@ -48,7 +48,7 @@ async function main(): Promise<void> {
       async () => await InstallTL.acquire(config.version),
     );
     await core.group('Installation profile', async () => {
-      core.info(profile.format());
+      core.info(Profile.format(profile));
     });
     await core.group('Installing Tex Live', async () => {
       await installtl.run(profile, config.env);

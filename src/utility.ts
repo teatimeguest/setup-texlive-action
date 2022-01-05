@@ -23,6 +23,8 @@ export async function updateFile(
   await fs.writeFile(filename, updated);
 }
 
+export type EntriesOf<T extends object> = Iterable<[keyof T, T[keyof T]]>;
+
 export type ArchiveType = 'tar.gz' | 'zip';
 
 /**

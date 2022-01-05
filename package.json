@@ -4,7 +4,7 @@
   "version": "1.5.3",
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
-    "build": "tsc && ncc build",
+    "build": "ttsc && ncc build",
     "format": "prettier --write src/*.ts __tests__/*.ts",
     "format-check": "prettier --check __tests__/*.ts src/*.ts && ec",
     "lint": "eslint --ext .ts __tests__ src",
@@ -35,6 +35,8 @@
     "jest-circus": "27.4.5",
     "prettier": "2.5.1",
     "ts-jest": "27.1.2",
+    "ts-transformer-keys": "0.4.3",
+    "ttypescript": "1.5.13",
     "typescript": "4.5.4"
   }
 }

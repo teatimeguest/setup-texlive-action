@@ -1,6 +1,763 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 3842:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.loadConfig = void 0;
+const fs_1 = __nccwpck_require__(7147);
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
+const core = __importStar(__nccwpck_require__(2186));
+const texlive_1 = __nccwpck_require__(9758);
+const util = __importStar(__nccwpck_require__(2857));
+async function loadConfig() {
+    const cache = getCache();
+    const packages = await getPackages();
+    const version = getVersion();
+    const env = getEnv(version);
+    const prefix = getPrefix(env);
+    const tlcontrib = getTlcontrib(version);
+    return { cache, packages, prefix, tlcontrib, version, env };
+}
+exports.loadConfig = loadConfig;
+function getCache() {
+    const cache = core.getBooleanInput('cache');
+    /**
+     * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/}
+     */
+    const urls = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'];
+    if (cache && urls.every((url) => !Boolean(process.env[url]))) {
+        core.warning(`Caching is disabled because neither \`${urls[0]}\` nor \`${urls[1]}\` is defined`);
+        return false;
+    }
+    return cache;
+}
+async function getPackages() {
+    const inline = core.getInput('packages');
+    const filename = core.getInput('package-file');
+    const file = filename === '' ? '' : await fs_1.promises.readFile(filename, 'utf8');
+    const packages = new Set([inline, file].flatMap((content) => content.split(/(?:#.*$|\s+)/mu)).sort());
+    packages.delete('');
+    return packages;
+}
+function getPrefix(env) {
+    const prefix = core.getInput('prefix');
+    return prefix === '' ? env.TEXLIVE_INSTALL_PREFIX : prefix;
+}
+function getTlcontrib(version) {
+    const tlcontrib = core.getBooleanInput('tlcontrib');
+    if (tlcontrib && version !== texlive_1.Version.LATEST) {
+        core.warning('`tlcontrib` is ignored since an older version of TeX Live is specified');
+        return false;
+    }
+    return tlcontrib;
+}
+function getVersion() {
+    const version = core.getInput('version');
+    if (texlive_1.Version.isVersion(version)) {
+        return version;
+    }
+    else if (version === 'latest') {
+        return texlive_1.Version.LATEST;
+    }
+    throw new TypeError("`version` must be specified by year or 'latest'");
+}
+function getEnv(version) {
+    var _a, _b, _c, _d, _e, _f;
+    const env = {};
+    for (const key of ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"]) {
+        const value = process.env[key];
+        if (value !== undefined) {
+            env[key] = value;
+        }
+    }
+    const home = os.homedir();
+    const texdir = path.join(home, '.local', 'texlive', version);
+    (_a = env.TEXLIVE_INSTALL_ENV_NOCHECK) !== null && _a !== void 0 ? _a : (env.TEXLIVE_INSTALL_ENV_NOCHECK = 'true');
+    (_b = env.TEXLIVE_INSTALL_NO_WELCOME) !== null && _b !== void 0 ? _b : (env.TEXLIVE_INSTALL_NO_WELCOME = 'true');
+    (_c = env.TEXLIVE_INSTALL_PREFIX) !== null && _c !== void 0 ? _c : (env.TEXLIVE_INSTALL_PREFIX = path.join(util.tmpdir(), 'setup-texlive'));
+    (_d = env.TEXLIVE_INSTALL_TEXMFHOME) !== null && _d !== void 0 ? _d : (env.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf'));
+    (_e = env.TEXLIVE_INSTALL_TEXMFCONFIG) !== null && _e !== void 0 ? _e : (env.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config'));
+    (_f = env.TEXLIVE_INSTALL_TEXMFVAR) !== null && _f !== void 0 ? _f : (env.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var'));
+    return env;
+}
+function getKey() {
+    const key = core.getState('key');
+    return key === '' ? undefined : key;
+}
+exports.getKey = getKey;
+function setKey(key) {
+    core.saveState('key', key);
+}
+exports.setKey = setKey;
+function getPost() {
+    return core.getState('post') === 'true';
+}
+exports.getPost = getPost;
+function setPost(post = true) {
+    core.saveState('post', post);
+}
+exports.setPost = setPost;
+function setCacheHit(cacheHit = true) {
+    core.setOutput('cache-hit', cacheHit);
+}
+exports.setCacheHit = setCacheHit;
+//# sourceMappingURL=context.js.map
+
+/***/ }),
+
+/***/ 2381:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Profile = exports.Env = exports.InstallTL = void 0;
+const fs_1 = __nccwpck_require__(7147);
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
+const util_1 = __nccwpck_require__(3837);
+const url_1 = __nccwpck_require__(7310);
+const core = __importStar(__nccwpck_require__(2186));
+const exec = __importStar(__nccwpck_require__(1514));
+const tool = __importStar(__nccwpck_require__(7784));
+const texlive_1 = __nccwpck_require__(9758);
+const util = __importStar(__nccwpck_require__(2857));
+/**
+ * A class for downloading and running the installer of TeX Live.
+ */
+class InstallTL {
+    constructor(version, bin) {
+        this.version = version;
+        this.bin = bin;
+    }
+    async run(profile, env) {
+        const target = path.join(util.tmpdir(), 'texlive.profile');
+        await fs_1.promises.writeFile(target, Profile.format(profile));
+        const options = ['-no-gui', '-profile', target];
+        if (this.version !== texlive_1.Version.LATEST) {
+            options.push(
+            /**
+             * Only version 2008 uses `-location` instead of `-repository`.
+             */
+            this.version === '2008' ? '-location' : '-repository', repository(this.version).href);
+        }
+        await exec.exec(this.bin, options, { env: { ...process.env, ...env } });
+        core.info('Applying patches');
+        await patch(this.version, profile.TEXDIR);
+    }
+    static async acquire(version) {
+        var _a;
+        /**
+         * - There is no `install-tl` for versions prior to 2005, and
+         *   versions 2005--2007 do not seem to be archived.
+         *
+         * - Versions 2008--2012 can be installed on `macos-latest`, but
+         *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
+         */
+        if (Number(version) < (os.platform() === 'darwin' ? 2013 : 2008)) {
+            throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
+        }
+        const target = `install-tl${os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'}`;
+        const dest = (_a = (await restoreCache(target, version))) !== null && _a !== void 0 ? _a : (await download(target, version));
+        return new InstallTL(version, path.join(dest, executable(version, os.platform())));
+    }
+}
+exports.InstallTL = InstallTL;
+var Env;
+(function (Env) {
+    function format(env) {
+        return ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"].map((key) => { var _a; return `${key}='${(_a = env[key]) !== null && _a !== void 0 ? _a : ''}'`; })
+            .join('\n');
+    }
+    Env.format = format;
+})(Env = exports.Env || (exports.Env = {}));
+class Profile {
+    constructor(version, prefix) {
+        this.option_autobackup = '0';
+        this.option_desktop_integration = '0';
+        this.option_doc = '0';
+        this.option_file_assocs = '0';
+        this.option_menu_integration = '0';
+        this.option_path = '0';
+        this.option_src = '0';
+        this.option_symlinks = '0';
+        this.option_w32_multi_user = '0';
+        this.TEXDIR = path.join(prefix, version);
+        this.TEXMFLOCAL = path.join(prefix, 'texmf-local');
+        this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
+        this.TEXMFSYSVAR = path.join(this.TEXDIR, 'texmf-var');
+        /**
+         * `scheme-infraonly` was first introduced in TeX Live 2016.
+         */
+        this.selected_scheme = `scheme-${Number(version) < 2016 ? 'minimal' : 'infraonly'}`;
+        this.option_adjustrepo = version === texlive_1.Version.LATEST ? '1' : '0';
+    }
+}
+exports.Profile = Profile;
+(function (Profile) {
+    function format(profile) {
+        return ["TEXDIR", "TEXMFLOCAL", "TEXMFSYSCONFIG", "TEXMFSYSVAR", "selected_scheme", "option_adjustrepo", "option_autobackup", "option_desktop_integration", "option_doc", "option_file_assocs", "option_menu_integration", "option_path", "option_src", "option_symlinks", "option_w32_multi_user"].map((key) => `${key} ${profile[key]}`)
+            .join('\n');
+    }
+    Profile.format = format;
+})(Profile = exports.Profile || (exports.Profile = {}));
+/**
+ * @returns The filename of the installer executable.
+ */
+function executable(version, platform) {
+    const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
+    return `install-tl${platform === 'win32' ? ext : ''}`;
+}
+/**
+ * Gets the URL of the main repository of TeX Live.
+ *
+ * @returns The `ctan` if the version is the latest, otherwise
+ *   the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
+ *
+ * @todo Use other archives as well.
+ */
+function repository(version) {
+    const base = version === texlive_1.Version.LATEST
+        ? 'https://mirror.ctan.org/systems/texlive/'
+        : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`;
+    const tlnet = `tlnet${Number(version) < 2010 || version === texlive_1.Version.LATEST ? '' : '-final'}/`;
+    const url = new url_1.URL(tlnet, base);
+    /**
+     * `install-tl` of versions prior to 2017 does not support HTTPS, and
+     * that of version 2017 supports HTTPS but does not work properly.
+     */
+    if (Number(version) < 2018) {
+        url.protocol = 'http';
+    }
+    return url;
+}
+async function download(target, version) {
+    const url = new url_1.URL(target, repository(version)).href;
+    core.info(`Downloading ${url}`);
+    const archive = await tool.downloadTool(url);
+    core.info('Extracting');
+    const dest = await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tar.gz');
+    core.info('Applying patches');
+    await patch(version, dest);
+    try {
+        core.info('Adding to the cache');
+        await tool.cacheDir(dest, target, version);
+    }
+    catch (error) {
+        core.info(`Failed to add to cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+    return dest;
+}
+async function restoreCache(target, version) {
+    try {
+        const cache = tool.find(target, version);
+        if (cache !== '') {
+            core.info('Found in cache');
+            return cache;
+        }
+    }
+    catch (error) {
+        core.info(`Failed to restore cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+    return undefined;
+}
+/**
+ * Fixes bugs in the installer files and modify them for use in workflows.
+ */
+async function patch(version, texdir) {
+    /**
+     * Prevents `install-tl(-windows).bat` from being stopped by `pause`.
+     */
+    if (os.platform() === 'win32') {
+        const target = path.join(texdir, executable(version, os.platform()));
+        try {
+            await util.updateFile(target, {
+                search: /\bpause(?: Done)?\b/gmu,
+                replace: '',
+            });
+        }
+        catch (error) {
+            if (!(util_1.types.isNativeError(error) && error.code === 'ENOENT')) {
+                throw error;
+            }
+            core.info(`${target} not found`);
+        }
+    }
+    /**
+     * Fixes a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
+     */
+    if (['2009', '2010'].includes(version)) {
+        await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLWinGoo.pm'), {
+            search: /foreach \$p qw\((.*)\)/u,
+            replace: 'foreach $$p (qw($1))',
+        });
+    }
+    /**
+     * Defines Code Page 65001 as an alias for UTF-8 on Windows.
+     * @see {@link https://github.com/dankogai/p5-encode/issues/37}
+     */
+    if (os.platform() === 'win32' && version === '2015') {
+        await util.updateFile(path.join(texdir, 'tlpkg', 'tlperl', 'lib', 'Encode', 'Alias.pm'), {
+            search: '# utf8 is blessed :)',
+            replace: `$&\n    define_alias(qr/cp65001/i => '"utf-8-strict"');`,
+        });
+    }
+    /**
+     * Makes it possible to use `\` as a directory separator on Windows.
+     */
+    if (os.platform() === 'win32' && Number(version) < 2019) {
+        await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), {
+            search: String.raw `split (/\//, $tree)`,
+            replace: String.raw `split (/[\/\\]/, $tree)`,
+        });
+    }
+    /**
+     * Adds support for macOS 11.x.
+     */
+    if (os.platform() === 'darwin' &&
+        ['2017', '2018', '2019'].includes(version)) {
+        await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), { search: 'if ($os_major != 10)', replace: 'if ($$os_major < 10)' }, {
+            search: 'if ($os_minor >= $mactex_darwin)',
+            replace: 'if ($$os_major >= 11) { $$CPU = "x86_64"; $$OS = "darwin"; }\n    els$&',
+        });
+    }
+}
+//# sourceMappingURL=install-tl.js.map
+
+/***/ }),
+
+/***/ 7391:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
+const crypto = __importStar(__nccwpck_require__(6113));
+const os = __importStar(__nccwpck_require__(2037));
+const cache = __importStar(__nccwpck_require__(7799));
+const core = __importStar(__nccwpck_require__(2186));
+const context = __importStar(__nccwpck_require__(3842));
+const install_tl_1 = __nccwpck_require__(2381);
+const texlive_1 = __nccwpck_require__(9758);
+async function run() {
+    try {
+        if (!context.getPost()) {
+            await main();
+            context.setPost();
+        }
+        else {
+            await post();
+        }
+    }
+    catch (error) {
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(`The action failed: ${error.stack}`);
+        }
+        core.setFailed(`${error}`);
+    }
+}
+exports.run = run;
+async function main() {
+    const config = await context.loadConfig();
+    const profile = new install_tl_1.Profile(config.version, config.prefix);
+    let cacheType = 'none';
+    if (config.cache) {
+        cacheType = await core.group('Restoring cache', async () => {
+            const keys = getCacheKeys(config.version, config.packages);
+            return await restoreCache(profile.TEXDIR, ...keys);
+        });
+    }
+    await core.group('Environment variables for Tex Live', async () => {
+        core.info(install_tl_1.Env.format(config.env));
+    });
+    if (cacheType === 'none') {
+        const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.acquire(config.version));
+        await core.group('Installation profile', async () => {
+            core.info(install_tl_1.Profile.format(profile));
+        });
+        await core.group('Installing Tex Live', async () => {
+            await installtl.run(profile, config.env);
+        });
+    }
+    const tlmgr = new texlive_1.Manager(config.version, config.prefix);
+    await tlmgr.path.add();
+    if (cacheType !== 'none') {
+        context.setCacheHit();
+        await core.group('Adjusting TEXMF', async () => {
+            for (const [key, value] of await tlmgr.conf.texmf()) {
+                const specified = config.env[`TEXLIVE_INSTALL_${key}`];
+                if (value !== specified) {
+                    // eslint-disable-next-line no-await-in-loop
+                    await tlmgr.conf.texmf(key, specified);
+                }
+            }
+        });
+    }
+    if (config.tlcontrib) {
+        await core.group('Setting up TLContrib', async () => {
+            await tlmgr.repository.add((0, texlive_1.contrib)().href, 'tlcontrib');
+            await tlmgr.pinning.add('tlcontrib', '*');
+        });
+    }
+    if (cacheType === 'primary') {
+        return;
+    }
+    if (config.packages.size !== 0) {
+        await core.group('Installing packages', async () => {
+            await tlmgr.install(config.packages);
+        });
+    }
+}
+async function post() {
+    const config = await context.loadConfig();
+    const profile = new install_tl_1.Profile(config.version, config.prefix);
+    const primaryKey = context.getKey();
+    if (primaryKey === undefined) {
+        core.info('Nothing to do');
+        return;
+    }
+    await saveCache(profile.TEXDIR, primaryKey);
+}
+async function saveCache(texdir, primaryKey) {
+    try {
+        await cache.saveCache([texdir], primaryKey);
+        core.info(`Cache saved`);
+    }
+    catch (error) {
+        core.warning(`${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+}
+async function restoreCache(texdir, primaryKey, 
+// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+restoreKeys) {
+    let key = undefined;
+    try {
+        key = await cache.restoreCache([texdir], primaryKey, restoreKeys);
+        if (key === undefined) {
+            core.info('Cache not found');
+        }
+    }
+    catch (error) {
+        core.info(`Failed to restore cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+    if (key === primaryKey) {
+        return 'primary';
+    }
+    context.setKey(primaryKey);
+    return key === undefined ? 'none' : 'secondary';
+}
+function getCacheKeys(version, packages) {
+    const digest = (s) => {
+        return crypto.createHash('sha256').update(s).digest('hex');
+    };
+    const baseKey = `setup-texlive-${os.platform()}-${os.arch()}-${version}-`;
+    const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
+    return [primaryKey, [baseKey]];
+}
+//# sourceMappingURL=setup.js.map
+
+/***/ }),
+
+/***/ 9758:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.contrib = exports.Manager = exports.Version = void 0;
+const path = __importStar(__nccwpck_require__(1017));
+const url_1 = __nccwpck_require__(7310);
+const core = __importStar(__nccwpck_require__(2186));
+const exec = __importStar(__nccwpck_require__(1514));
+const util = __importStar(__nccwpck_require__(2857));
+// prettier-ignore
+const VERSIONS = [
+    '1996', '1997', '1998', '1999',
+    '2000', '2001', '2002', '2003', '2004',
+    '2005', '2006', '2007', '2008', '2009',
+    '2010', '2011', '2012', '2013', '2014',
+    '2015', '2016', '2017', '2018', '2019',
+    '2020', '2021',
+];
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+var Version;
+(function (Version) {
+    function isVersion(version) {
+        return VERSIONS.includes(version);
+    }
+    Version.isVersion = isVersion;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    Version.LATEST = VERSIONS[VERSIONS.length - 1];
+})(Version = exports.Version || (exports.Version = {}));
+/**
+ * An interface for the `tlmgr` command.
+ */
+class Manager {
+    constructor(version, prefix) {
+        this.version = version;
+        this.prefix = prefix;
+    }
+    get conf() {
+        return new (class {
+            constructor(version) {
+                this.version = version;
+            }
+            async texmf(key, value) {
+                if (key === undefined) {
+                    return await Promise.all(["TEXMFHOME", "TEXMFCONFIG", "TEXMFVAR"].map(async (variable) => [variable, await this.texmf(variable)]));
+                }
+                if (value === undefined) {
+                    return (await exec.getExecOutput('kpsewhich', ['-var-value', key])).stdout.trim();
+                }
+                /**
+                 * `tlmgr conf` is not implemented before 2010.
+                 */
+                if (Number(this.version) < 2010) {
+                    core.exportVariable(key, value);
+                }
+                else {
+                    await exec.exec('tlmgr', ['conf', 'texmf', key, value]);
+                }
+            }
+        })(this.version);
+    }
+    async install(packages) {
+        if (packages.size !== 0) {
+            await exec.exec('tlmgr', ['install', ...packages]);
+        }
+    }
+    get path() {
+        return {
+            add: async () => {
+                const binpath = await util.determine(path.join(this.prefix, this.version, 'bin', '*'));
+                if (binpath === undefined) {
+                    throw new Error('Unable to locate the bin directory');
+                }
+                core.addPath(binpath);
+            },
+        };
+    }
+    get pinning() {
+        if (Number(this.version) < 2013) {
+            throw new Error(`\`pinning\` action is not implemented in TeX Live ${this.version}`);
+        }
+        return {
+            add: async (repo, pattern, ...rest) => {
+                await exec.exec('tlmgr', ['pinning', 'add', repo, pattern, ...rest]);
+            },
+        };
+    }
+    get repository() {
+        if (Number(this.version) < 2012) {
+            throw new Error(`\`repository\` action is not implemented in TeX Live ${this.version}`);
+        }
+        return {
+            add: async (repo, tag) => {
+                const { exitCode, stderr } = await exec.getExecOutput('tlmgr', ['repository', 'add', repo, ...(tag === undefined ? [] : [tag])], { ignoreReturnCode: true });
+                const success = exitCode === 0;
+                if (
+                /**
+                 * `tlmgr repository add` returns non-zero status code
+                 * if the same repository or tag is added again.
+                 *
+                 * @todo (Need to make sure that the tagged repo is really tlcontrib?)
+                 */
+                !success &&
+                    !stderr.includes('repository or its tag already defined')) {
+                    throw new Error(`\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`);
+                }
+                return success;
+            },
+        };
+    }
+}
+exports.Manager = Manager;
+function contrib() {
+    return new url_1.URL('https://mirror.ctan.org/systems/texlive/tlcontrib/');
+}
+exports.contrib = contrib;
+//# sourceMappingURL=texlive.js.map
+
+/***/ }),
+
+/***/ 2857:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.tmpdir = exports.determine = exports.extract = exports.updateFile = void 0;
+const fs_1 = __nccwpck_require__(7147);
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
+const core = __importStar(__nccwpck_require__(2186));
+const glob = __importStar(__nccwpck_require__(8090));
+const tool = __importStar(__nccwpck_require__(7784));
+/**
+ * Updates the contents of a file.
+ */
+async function updateFile(filename, ...replacements) {
+    const content = await fs_1.promises.readFile(filename, 'utf8');
+    const updated = replacements.reduce((str, { search, replace }) => str.replace(search, replace), content);
+    await fs_1.promises.writeFile(filename, updated);
+}
+exports.updateFile = updateFile;
+/**
+ * Extracts files from an archive.
+ *
+ * @returns Path to the directory containing the files.
+ */
+async function extract(filepath, kind) {
+    switch (kind) {
+        case 'tar.gz':
+            return await tool.extractTar(filepath, undefined, ['xz', '--strip=1']);
+        case 'zip': {
+            const subdir = await determine(path.join(await tool.extractZip(filepath), '*'));
+            if (subdir === undefined) {
+                throw new Error('Unable to locate the unzipped directory');
+            }
+            return subdir;
+        }
+    }
+}
+exports.extract = extract;
+/**
+ * @returns The unique path that matches the given glob pattern.
+ */
+async function determine(pattern) {
+    const globber = await glob.create(pattern, { implicitDescendants: false });
+    const matched = await globber.glob();
+    if (matched.length === 1) {
+        return matched[0];
+    }
+    core.debug(`Found ${matched.length === 0 ? 'no' : 'multiple'} matches to the pattern ${pattern}${matched.length === 0 ? '' : `: ${matched}`}`);
+    return undefined;
+}
+exports.determine = determine;
+function tmpdir() {
+    const runnerTemp = process.env['RUNNER_TEMP'];
+    return runnerTemp !== undefined && runnerTemp !== ''
+        ? runnerTemp
+        : os.tmpdir();
+}
+exports.tmpdir = tmpdir;
+//# sourceMappingURL=utility.js.map
+
+/***/ }),
+
 /***/ 7799:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -59743,854 +60500,6 @@ module.exports = v4;
 
 /***/ }),
 
-/***/ 8954:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.loadConfig = void 0;
-const fs_1 = __nccwpck_require__(7147);
-const os = __importStar(__nccwpck_require__(2037));
-const path = __importStar(__nccwpck_require__(1017));
-const core = __importStar(__nccwpck_require__(2186));
-const install_tl_1 = __nccwpck_require__(1436);
-const texlive_1 = __nccwpck_require__(8313);
-const util = __importStar(__nccwpck_require__(5418));
-async function loadConfig() {
-    const cache = getCache();
-    const packages = await getPackages();
-    const version = getVersion();
-    const env = getEnv(version);
-    const prefix = getPrefix(env);
-    const tlcontrib = getTlcontrib(version);
-    return { cache, packages, prefix, tlcontrib, version, env };
-}
-exports.loadConfig = loadConfig;
-function getCache() {
-    const cache = core.getBooleanInput('cache');
-    /**
-     * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/}
-     */
-    const urls = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'];
-    if (cache && urls.every((url) => !Boolean(process.env[url]))) {
-        core.warning(`Caching is disabled because neither \`${urls[0]}\` nor \`${urls[1]}\` is defined`);
-        return false;
-    }
-    return cache;
-}
-async function getPackages() {
-    const inline = core.getInput('packages');
-    const filename = core.getInput('package-file');
-    const file = filename === '' ? '' : await fs_1.promises.readFile(filename, 'utf8');
-    const packages = new Set([inline, file].flatMap((content) => content.split(/(?:#.*$|\s+)/mu)).sort());
-    packages.delete('');
-    return packages;
-}
-function getPrefix(env) {
-    const prefix = core.getInput('prefix');
-    return prefix === '' ? env.TEXLIVE_INSTALL_PREFIX : prefix;
-}
-function getTlcontrib(version) {
-    const tlcontrib = core.getBooleanInput('tlcontrib');
-    if (tlcontrib && version !== texlive_1.Version.LATEST) {
-        core.warning('`tlcontrib` is ignored since an older version of TeX Live is specified');
-        return false;
-    }
-    return tlcontrib;
-}
-function getVersion() {
-    const version = core.getInput('version');
-    if (texlive_1.Version.isVersion(version)) {
-        return version;
-    }
-    else if (version === 'latest') {
-        return texlive_1.Version.LATEST;
-    }
-    throw new TypeError("`version` must be specified by year or 'latest'");
-}
-function getEnv(version) {
-    var _a, _b, _c, _d, _e, _f;
-    const env = {};
-    for (const key of install_tl_1.Env.keys()) {
-        const value = process.env[key];
-        if (value !== undefined) {
-            env[key] = value;
-        }
-    }
-    const home = os.homedir();
-    const texdir = path.join(home, '.local', 'texlive', version);
-    (_a = env.TEXLIVE_INSTALL_ENV_NOCHECK) !== null && _a !== void 0 ? _a : (env.TEXLIVE_INSTALL_ENV_NOCHECK = 'true');
-    (_b = env.TEXLIVE_INSTALL_NO_WELCOME) !== null && _b !== void 0 ? _b : (env.TEXLIVE_INSTALL_NO_WELCOME = 'true');
-    (_c = env.TEXLIVE_INSTALL_PREFIX) !== null && _c !== void 0 ? _c : (env.TEXLIVE_INSTALL_PREFIX = path.join(util.tmpdir(), 'setup-texlive'));
-    (_d = env.TEXLIVE_INSTALL_TEXMFHOME) !== null && _d !== void 0 ? _d : (env.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf'));
-    (_e = env.TEXLIVE_INSTALL_TEXMFCONFIG) !== null && _e !== void 0 ? _e : (env.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config'));
-    (_f = env.TEXLIVE_INSTALL_TEXMFVAR) !== null && _f !== void 0 ? _f : (env.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var'));
-    return env;
-}
-function getKey() {
-    const key = core.getState('key');
-    return key === '' ? undefined : key;
-}
-exports.getKey = getKey;
-function setKey(key) {
-    core.saveState('key', key);
-}
-exports.setKey = setKey;
-function getPost() {
-    return core.getState('post') === 'true';
-}
-exports.getPost = getPost;
-function setPost(post = true) {
-    core.saveState('post', post);
-}
-exports.setPost = setPost;
-function setCacheHit(cacheHit = true) {
-    core.setOutput('cache-hit', cacheHit);
-}
-exports.setCacheHit = setCacheHit;
-
-
-/***/ }),
-
-/***/ 1436:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Profile = exports.Env = exports.InstallTL = void 0;
-const fs_1 = __nccwpck_require__(7147);
-const os = __importStar(__nccwpck_require__(2037));
-const path = __importStar(__nccwpck_require__(1017));
-const util_1 = __nccwpck_require__(3837);
-const url_1 = __nccwpck_require__(7310);
-const core = __importStar(__nccwpck_require__(2186));
-const exec = __importStar(__nccwpck_require__(1514));
-const tool = __importStar(__nccwpck_require__(7784));
-const texlive_1 = __nccwpck_require__(8313);
-const util = __importStar(__nccwpck_require__(5418));
-/**
- * A class for downloading and running the installer of TeX Live.
- */
-class InstallTL {
-    constructor(version, bin) {
-        this.version = version;
-        this.bin = bin;
-    }
-    async run(profile, env) {
-        const options = ['-no-gui', '-profile', await profile.write()];
-        if (this.version !== texlive_1.Version.LATEST) {
-            options.push(
-            /**
-             * Only version 2008 uses `-location` instead of `-repository`.
-             */
-            this.version === '2008' ? '-location' : '-repository', repository(this.version).href);
-        }
-        await exec.exec(this.bin, options, { env: { ...process.env, ...env } });
-        core.info('Applying patches');
-        await patch(this.version, profile.TEXDIR);
-    }
-    static async acquire(version) {
-        var _a;
-        /**
-         * - There is no `install-tl` for versions prior to 2005, and
-         *   versions 2005--2007 do not seem to be archived.
-         *
-         * - Versions 2008--2012 can be installed on `macos-latest`, but
-         *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
-         */
-        if (Number(version) < (os.platform() === 'darwin' ? 2013 : 2008)) {
-            throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
-        }
-        const target = `install-tl${os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'}`;
-        const dest = (_a = (await restoreCache(target, version))) !== null && _a !== void 0 ? _a : (await download(target, version));
-        return new InstallTL(version, path.join(dest, executable(version, os.platform())));
-    }
-}
-exports.InstallTL = InstallTL;
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-var Env;
-(function (Env) {
-    function format(env) {
-        return keys()
-            .map((key) => { var _a; return `${key}='${(_a = env[key]) !== null && _a !== void 0 ? _a : ''}'`; })
-            .join('\n');
-    }
-    Env.format = format;
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    function keys() {
-        return [
-            'TEXLIVE_DOWNLOADER',
-            'TL_DOWNLOAD_PROGRAM',
-            'TL_DOWNLOAD_ARGS',
-            'TEXLIVE_INSTALL_ENV_NOCHECK',
-            'TEXLIVE_INSTALL_NO_CONTEXT_CACHE',
-            'TEXLIVE_INSTALL_NO_RESUME',
-            'TEXLIVE_INSTALL_NO_WELCOME',
-            'TEXLIVE_INSTALL_PAPER',
-            'TEXLIVE_INSTALL_PREFIX',
-            'TEXLIVE_INSTALL_TEXMFHOME',
-            'TEXLIVE_INSTALL_TEXMFCONFIG',
-            'TEXLIVE_INSTALL_TEXMFVAR',
-            'NOPERLDOC',
-        ];
-    }
-    Env.keys = keys;
-})(Env = exports.Env || (exports.Env = {}));
-class Profile {
-    constructor(version, prefix) {
-        this.version = version;
-        this.prefix = prefix;
-        this.filepath = undefined;
-        /* eslint-disable @typescript-eslint/naming-convention */
-        /**
-         * - `option_autobackup`, `option_doc`, `option_src`, and `option_symlinks`
-         *   already exist since version 2008.
-         *
-         * - In version 2009, `option_desktop_integration`, `option_file_assocs`,
-         *   and `option_w32_multi_user` were first introduced.
-         *   Also, `option_symlinks` was renamed to `option_path`.
-         *
-         * - `option_adjustrepo` was first introduced in version 2011.
-         *
-         * - `option_menu_integration` was first introduced in version 2012 and
-         *   removed in version 2017.
-         *
-         * - In version 2017, the option names have been changed, and
-         *   new prefixes `instopt-` and `tlpdbopt-` have been introduced.
-         *   Also, `option_path` and `option_symlinks` have been merged and
-         *   `instopt_adjustpath` has been introduced.
-         *   The old option names are still valid in later versions.
-         */
-        this.TEXDIR = path.join(this.prefix, this.version);
-        this.TEXMFLOCAL = path.join(this.prefix, 'texmf-local');
-        this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
-        this.TEXMFSYSVAR = path.join(this.TEXDIR, 'texmf-var');
-        /**
-         * `scheme-infraonly` was first introduced in TeX Live 2016.
-         */
-        this.selected_scheme = `scheme-${Number(this.version) < 2016 ? 'minimal' : 'infraonly'}`;
-        this.option_adjustrepo = this.version === texlive_1.Version.LATEST ? '1' : '0';
-        this.option_autobackup = '0';
-        this.option_desktop_integration = '0';
-        this.option_doc = '0';
-        this.option_file_assocs = '0';
-        this.option_menu_integration = '0';
-        this.option_path = '0';
-        this.option_src = '0';
-        this.option_symlinks = '0';
-        this.option_w32_multi_user = '0';
-    }
-    /* eslint-enable @typescript-eslint/naming-convention */
-    format() {
-        return Profile.keys()
-            .map((key) => `${key} ${this[key]}`)
-            .join('\n');
-    }
-    async write() {
-        if (this.filepath === undefined) {
-            const tmp = await fs_1.promises.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-'));
-            this.filepath = path.join(tmp, 'texlive.profile');
-            await fs_1.promises.writeFile(this.filepath, this.format());
-            core.debug(`${this.filepath} created`);
-        }
-        return this.filepath;
-    }
-}
-exports.Profile = Profile;
-(function (Profile) {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    function keys() {
-        // prettier-ignore
-        return [
-            'TEXDIR',
-            'TEXMFLOCAL',
-            'TEXMFSYSCONFIG',
-            'TEXMFSYSVAR',
-            'selected_scheme',
-            // Old name                    // Current name
-            'option_adjustrepo',
-            'option_autobackup',
-            'option_desktop_integration',
-            'option_doc',
-            'option_file_assocs',
-            'option_menu_integration',
-            'option_path',
-            'option_src',
-            'option_symlinks',
-            'option_w32_multi_user', // tlpdbopt_w32_multi_user
-        ];
-    }
-    Profile.keys = keys;
-})(Profile = exports.Profile || (exports.Profile = {}));
-/**
- * @returns The filename of the installer executable.
- */
-function executable(version, platform) {
-    const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
-    return `install-tl${platform === 'win32' ? ext : ''}`;
-}
-/**
- * Gets the URL of the main repository of TeX Live.
- *
- * @returns The `ctan` if the version is the latest, otherwise
- *   the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
- *
- * @todo Use other archives as well.
- */
-function repository(version) {
-    const base = version === texlive_1.Version.LATEST
-        ? 'https://mirror.ctan.org/systems/texlive/'
-        : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`;
-    const tlnet = `tlnet${Number(version) < 2010 || version === texlive_1.Version.LATEST ? '' : '-final'}/`;
-    const url = new url_1.URL(tlnet, base);
-    /**
-     * `install-tl` of versions prior to 2017 does not support HTTPS, and
-     * that of version 2017 supports HTTPS but does not work properly.
-     */
-    if (Number(version) < 2018) {
-        url.protocol = 'http';
-    }
-    return url;
-}
-async function download(target, version) {
-    const url = new url_1.URL(target, repository(version)).href;
-    core.info(`Downloading ${url}`);
-    const archive = await tool.downloadTool(url);
-    core.info('Extracting');
-    const dest = await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tar.gz');
-    core.info('Applying patches');
-    await patch(version, dest);
-    try {
-        core.info('Adding to the cache');
-        await tool.cacheDir(dest, target, version);
-    }
-    catch (error) {
-        core.info(`Failed to add to cache: ${error}`);
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(error.stack);
-        }
-    }
-    return dest;
-}
-async function restoreCache(target, version) {
-    try {
-        const cache = tool.find(target, version);
-        if (cache !== '') {
-            core.info('Found in cache');
-            return cache;
-        }
-    }
-    catch (error) {
-        core.info(`Failed to restore cache: ${error}`);
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(error.stack);
-        }
-    }
-    return undefined;
-}
-/**
- * Fixes bugs in the installer files and modify them for use in workflows.
- */
-async function patch(version, texdir) {
-    /**
-     * Prevents `install-tl(-windows).bat` from being stopped by `pause`.
-     */
-    if (os.platform() === 'win32') {
-        const target = path.join(texdir, executable(version, os.platform()));
-        try {
-            await util.updateFile(target, {
-                search: /\bpause(?: Done)?\b/gmu,
-                replace: '',
-            });
-        }
-        catch (error) {
-            if (!(util_1.types.isNativeError(error) && error.code === 'ENOENT')) {
-                throw error;
-            }
-            core.info(`${target} not found`);
-        }
-    }
-    /**
-     * Fixes a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
-     */
-    if (['2009', '2010'].includes(version)) {
-        await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLWinGoo.pm'), {
-            search: /foreach \$p qw\((.*)\)/u,
-            replace: 'foreach $$p (qw($1))',
-        });
-    }
-    /**
-     * Defines Code Page 65001 as an alias for UTF-8 on Windows.
-     * @see {@link https://github.com/dankogai/p5-encode/issues/37}
-     */
-    if (os.platform() === 'win32' && version === '2015') {
-        await util.updateFile(path.join(texdir, 'tlpkg', 'tlperl', 'lib', 'Encode', 'Alias.pm'), {
-            search: '# utf8 is blessed :)',
-            replace: `$&\n    define_alias(qr/cp65001/i => '"utf-8-strict"');`,
-        });
-    }
-    /**
-     * Makes it possible to use `\` as a directory separator on Windows.
-     */
-    if (os.platform() === 'win32' && Number(version) < 2019) {
-        await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), {
-            search: String.raw `split (/\//, $tree)`,
-            replace: String.raw `split (/[\/\\]/, $tree)`,
-        });
-    }
-    /**
-     * Adds support for macOS 11.x.
-     */
-    if (os.platform() === 'darwin' &&
-        ['2017', '2018', '2019'].includes(version)) {
-        await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), { search: 'if ($os_major != 10)', replace: 'if ($$os_major < 10)' }, {
-            search: 'if ($os_minor >= $mactex_darwin)',
-            replace: 'if ($$os_major >= 11) { $$CPU = "x86_64"; $$OS = "darwin"; }\n    els$&',
-        });
-    }
-}
-
-
-/***/ }),
-
-/***/ 8429:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
-const crypto = __importStar(__nccwpck_require__(6113));
-const os = __importStar(__nccwpck_require__(2037));
-const cache = __importStar(__nccwpck_require__(7799));
-const core = __importStar(__nccwpck_require__(2186));
-const context = __importStar(__nccwpck_require__(8954));
-const install_tl_1 = __nccwpck_require__(1436);
-const texlive_1 = __nccwpck_require__(8313);
-async function run() {
-    try {
-        if (!context.getPost()) {
-            await main();
-            context.setPost();
-        }
-        else {
-            await post();
-        }
-    }
-    catch (error) {
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(`The action failed: ${error.stack}`);
-        }
-        core.setFailed(`${error}`);
-    }
-}
-exports.run = run;
-async function main() {
-    const config = await context.loadConfig();
-    const profile = new install_tl_1.Profile(config.version, config.prefix);
-    let cacheType = 'none';
-    if (config.cache) {
-        cacheType = await core.group('Restoring cache', async () => {
-            const keys = getCacheKeys(config.version, config.packages);
-            return await restoreCache(profile.TEXDIR, ...keys);
-        });
-    }
-    await core.group('Environment variables for Tex Live', async () => {
-        core.info(install_tl_1.Env.format(config.env));
-    });
-    if (cacheType === 'none') {
-        const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.acquire(config.version));
-        await core.group('Installation profile', async () => {
-            core.info(profile.format());
-        });
-        await core.group('Installing Tex Live', async () => {
-            await installtl.run(profile, config.env);
-        });
-    }
-    const tlmgr = new texlive_1.Manager(config.version, config.prefix);
-    await tlmgr.path.add();
-    if (cacheType !== 'none') {
-        context.setCacheHit();
-        await core.group('Adjusting TEXMF', async () => {
-            for (const [key, value] of await tlmgr.conf.texmf()) {
-                const specified = config.env[`TEXLIVE_INSTALL_${key}`];
-                if (value !== specified) {
-                    // eslint-disable-next-line no-await-in-loop
-                    await tlmgr.conf.texmf(key, specified);
-                }
-            }
-        });
-    }
-    if (config.tlcontrib) {
-        await core.group('Setting up TLContrib', async () => {
-            await tlmgr.repository.add((0, texlive_1.contrib)().href, 'tlcontrib');
-            await tlmgr.pinning.add('tlcontrib', '*');
-        });
-    }
-    if (cacheType === 'primary') {
-        return;
-    }
-    if (config.packages.size !== 0) {
-        await core.group('Installing packages', async () => {
-            await tlmgr.install(config.packages);
-        });
-    }
-}
-async function post() {
-    const config = await context.loadConfig();
-    const profile = new install_tl_1.Profile(config.version, config.prefix);
-    const primaryKey = context.getKey();
-    if (primaryKey === undefined) {
-        core.info('Nothing to do');
-        return;
-    }
-    await saveCache(profile.TEXDIR, primaryKey);
-}
-async function saveCache(texdir, primaryKey) {
-    try {
-        await cache.saveCache([texdir], primaryKey);
-        core.info(`Cache saved`);
-    }
-    catch (error) {
-        core.warning(`${error}`);
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(error.stack);
-        }
-    }
-}
-async function restoreCache(texdir, primaryKey, 
-// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-restoreKeys) {
-    let key = undefined;
-    try {
-        key = await cache.restoreCache([texdir], primaryKey, restoreKeys);
-        if (key === undefined) {
-            core.info('Cache not found');
-        }
-    }
-    catch (error) {
-        core.info(`Failed to restore cache: ${error}`);
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(error.stack);
-        }
-    }
-    if (key === primaryKey) {
-        return 'primary';
-    }
-    context.setKey(primaryKey);
-    return key === undefined ? 'none' : 'secondary';
-}
-function getCacheKeys(version, packages) {
-    const digest = (s) => {
-        return crypto.createHash('sha256').update(s).digest('hex');
-    };
-    const baseKey = `setup-texlive-${os.platform()}-${os.arch()}-${version}-`;
-    const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
-    return [primaryKey, [baseKey]];
-}
-
-
-/***/ }),
-
-/***/ 8313:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.contrib = exports.Manager = exports.Version = void 0;
-const path = __importStar(__nccwpck_require__(1017));
-const url_1 = __nccwpck_require__(7310);
-const core = __importStar(__nccwpck_require__(2186));
-const exec = __importStar(__nccwpck_require__(1514));
-const util = __importStar(__nccwpck_require__(5418));
-// prettier-ignore
-const VERSIONS = [
-    '1996', '1997', '1998', '1999',
-    '2000', '2001', '2002', '2003', '2004',
-    '2005', '2006', '2007', '2008', '2009',
-    '2010', '2011', '2012', '2013', '2014',
-    '2015', '2016', '2017', '2018', '2019',
-    '2020', '2021',
-];
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-var Version;
-(function (Version) {
-    function isVersion(version) {
-        return VERSIONS.includes(version);
-    }
-    Version.isVersion = isVersion;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    Version.LATEST = VERSIONS[VERSIONS.length - 1];
-})(Version = exports.Version || (exports.Version = {}));
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-var Texmf;
-(function (Texmf) {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    function keys() {
-        return [
-            // prettier-ignore
-            'TEXMFHOME',
-            'TEXMFCONFIG',
-            'TEXMFVAR',
-        ];
-    }
-    Texmf.keys = keys;
-})(Texmf || (Texmf = {}));
-/**
- * An interface for the `tlmgr` command.
- */
-class Manager {
-    constructor(version, prefix) {
-        this.version = version;
-        this.prefix = prefix;
-    }
-    get conf() {
-        return new (class {
-            constructor(tlmgr) {
-                this.tlmgr = tlmgr;
-            }
-            async texmf(key, value) {
-                if (key === undefined) {
-                    const entries = Texmf.keys().map(async (variable) => [variable, await this.texmf(variable)]);
-                    return new Map(await Promise.all(entries));
-                }
-                if (value === undefined) {
-                    return (await exec.getExecOutput('kpsewhich', ['-var-value', key])).stdout.trim();
-                }
-                /**
-                 * `tlmgr conf` is not implemented before 2010.
-                 */
-                if (Number(this.tlmgr.version) < 2010) {
-                    core.exportVariable(key, value);
-                }
-                else {
-                    await exec.exec('tlmgr', ['conf', 'texmf', key, value]);
-                }
-            }
-        })(this);
-    }
-    async install(packages) {
-        if (packages.size !== 0) {
-            await exec.exec('tlmgr', ['install', ...packages]);
-        }
-    }
-    get path() {
-        return {
-            add: async () => {
-                const binpath = await util.determine(path.join(this.prefix, this.version, 'bin', '*'));
-                if (binpath === undefined) {
-                    throw new Error('Unable to locate the bin directory');
-                }
-                core.addPath(binpath);
-            },
-        };
-    }
-    get pinning() {
-        if (Number(this.version) < 2013) {
-            throw new Error(`\`pinning\` action is not implemented in TeX Live ${this.version}`);
-        }
-        return {
-            add: async (repo, pattern, ...rest) => {
-                await exec.exec('tlmgr', ['pinning', 'add', repo, pattern, ...rest]);
-            },
-        };
-    }
-    get repository() {
-        if (Number(this.version) < 2012) {
-            throw new Error(`\`repository\` action is not implemented in TeX Live ${this.version}`);
-        }
-        return {
-            add: async (repo, tag) => {
-                const { exitCode, stderr } = await exec.getExecOutput('tlmgr', ['repository', 'add', repo, ...(tag === undefined ? [] : [tag])], { ignoreReturnCode: true });
-                const success = exitCode === 0;
-                if (
-                /**
-                 * `tlmgr repository add` returns non-zero status code
-                 * if the same repository or tag is added again.
-                 *
-                 * @todo (Need to make sure that the tagged repo is really tlcontrib?)
-                 */
-                !success &&
-                    !stderr.includes('repository or its tag already defined')) {
-                    throw new Error(`\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`);
-                }
-                return success;
-            },
-        };
-    }
-}
-exports.Manager = Manager;
-function contrib() {
-    return new url_1.URL('https://mirror.ctan.org/systems/texlive/tlcontrib/');
-}
-exports.contrib = contrib;
-
-
-/***/ }),
-
-/***/ 5418:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.tmpdir = exports.determine = exports.extract = exports.updateFile = void 0;
-const fs_1 = __nccwpck_require__(7147);
-const os = __importStar(__nccwpck_require__(2037));
-const path = __importStar(__nccwpck_require__(1017));
-const core = __importStar(__nccwpck_require__(2186));
-const glob = __importStar(__nccwpck_require__(8090));
-const tool = __importStar(__nccwpck_require__(7784));
-/**
- * Updates the contents of a file.
- */
-async function updateFile(filename, ...replacements) {
-    const content = await fs_1.promises.readFile(filename, 'utf8');
-    const updated = replacements.reduce((str, { search, replace }) => str.replace(search, replace), content);
-    await fs_1.promises.writeFile(filename, updated);
-}
-exports.updateFile = updateFile;
-/**
- * Extracts files from an archive.
- *
- * @returns Path to the directory containing the files.
- */
-async function extract(filepath, kind) {
-    switch (kind) {
-        case 'tar.gz':
-            return await tool.extractTar(filepath, undefined, ['xz', '--strip=1']);
-        case 'zip': {
-            const subdir = await determine(path.join(await tool.extractZip(filepath), '*'));
-            if (subdir === undefined) {
-                throw new Error('Unable to locate the unzipped directory');
-            }
-            return subdir;
-        }
-    }
-}
-exports.extract = extract;
-/**
- * @returns The unique path that matches the given glob pattern.
- */
-async function determine(pattern) {
-    const globber = await glob.create(pattern, { implicitDescendants: false });
-    const matched = await globber.glob();
-    if (matched.length === 1) {
-        return matched[0];
-    }
-    core.debug(`Found ${matched.length === 0 ? 'no' : 'multiple'} matches to the pattern ${pattern}${matched.length === 0 ? '' : `: ${matched}`}`);
-    return undefined;
-}
-exports.determine = determine;
-function tmpdir() {
-    const runnerTemp = process.env['RUNNER_TEMP'];
-    return runnerTemp !== undefined && runnerTemp !== ''
-        ? runnerTemp
-        : os.tmpdir();
-}
-exports.tmpdir = tmpdir;
-
-
-/***/ }),
-
 /***/ 2877:
 /***/ ((module) => {
 
@@ -60820,7 +60729,7 @@ var __webpack_exports__ = {};
 var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const setup_1 = __nccwpck_require__(8429);
+const setup_1 = __nccwpck_require__(7391);
 (0, setup_1.run)();
 //# sourceMappingURL=index.js.map
 })();

@@ -3,10 +3,11 @@ import * as os from 'os';
 import * as path from 'path';
 
 import * as core from '@actions/core';
+import { keys } from 'ts-transformer-keys';
 
-import { Env } from '#/install-tl';
-import { Version } from '#/texlive';
-import * as util from '#/utility';
+import { Env } from './install-tl';
+import { Version } from './texlive';
+import * as util from './utility';
 
 export interface Config {
   readonly cache: boolean;
@@ -90,7 +91,7 @@ function getVersion(): Version {
 
 function getEnv(version: Version): Config['env'] {
   const env = {} as { -readonly [K in keyof Config['env']]: string };
-  for (const key of Env.keys()) {
+  for (const key of keys<Env>()) {
     const value = process.env[key];
     if (value !== undefined) {
       env[key] = value;

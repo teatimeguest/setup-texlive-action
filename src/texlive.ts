@@ -3,8 +3,10 @@ import { URL } from 'url';
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import { keys } from 'ts-transformer-keys';
 
-import * as util from '#/utility';
+import * as util from './utility';
+import EntriesOf = util.EntriesOf;
 
 // prettier-ignore
 const VERSIONS = [
@@ -28,20 +30,10 @@ export namespace Version {
   export const LATEST = VERSIONS[VERSIONS.length - 1]!;
 }
 
-export type Texmf = ReadonlyMap<Texmf.Key, string>;
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-namespace Texmf {
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  export function keys() {
-    return [
-      // prettier-ignore
-      'TEXMFHOME',
-      'TEXMFCONFIG',
-      'TEXMFVAR',
-    ] as const;
-  }
-  export type Key = ReturnType<typeof keys>[number];
+export interface Texmf {
+  readonly ['TEXMFHOME']: string;
+  readonly ['TEXMFCONFIG']: string;
+  readonly ['TEXMFVAR']: string;
 }
 
 /**
@@ -55,24 +47,25 @@ export class Manager {
 
   get conf(): Readonly<{
     texmf: {
-      (): Promise<Texmf>;
-      (key: Texmf.Key): Promise<string>;
-      (key: Texmf.Key, value: string): Promise<void>;
+      (): Promise<EntriesOf<Texmf>>;
+      (key: keyof Texmf): Promise<string>;
+      (key: keyof Texmf, value: string): Promise<void>;
     };
   }> {
     return new (class {
-      texmf(): Promise<Texmf>;
-      texmf(key: Texmf.Key): Promise<string>;
-      texmf(key: Texmf.Key, value: string): Promise<void>;
+      texmf(): Promise<EntriesOf<Texmf>>;
+      texmf(key: keyof Texmf): Promise<string>;
+      texmf(key: keyof Texmf, value: string): Promise<void>;
       async texmf(
-        key?: Texmf.Key,
+        key?: keyof Texmf,
         value?: string,
-      ): Promise<Texmf | string | void> {
+      ): Promise<EntriesOf<Texmf> | string | void> {
         if (key === undefined) {
-          const entries = Texmf.keys().map<Promise<[Texmf.Key, string]>>(
-            async (variable) => [variable, await this.texmf(variable)],
+          return await Promise.all(
+            keys<Texmf>().map<Promise<[keyof Texmf, string]>>(
+              async (variable) => [variable, await this.texmf(variable)],
+            ),
           );
-          return new Map(await Promise.all(entries));
         }
         if (value === undefined) {
           return (
@@ -82,14 +75,14 @@ export class Manager {
         /**
          * `tlmgr conf` is not implemented before 2010.
          */
-        if (Number(this.tlmgr.version) < 2010) {
+        if (Number(this.version) < 2010) {
           core.exportVariable(key, value);
         } else {
           await exec.exec('tlmgr', ['conf', 'texmf', key, value]);
         }
       }
-      constructor(private readonly tlmgr: Manager) {}
-    })(this);
+      constructor(private readonly version: Version) {}
+    })(this.version);
   }
 
   async install(this: void, packages: ReadonlySet<string>): Promise<void> {

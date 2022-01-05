@@ -7,9 +7,10 @@ import { URL } from 'url';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tool from '@actions/tool-cache';
+import { keys } from 'ts-transformer-keys';
 
-import { Version } from '#/texlive';
-import * as util from '#/utility';
+import { Version } from './texlive';
+import * as util from './utility';
 
 /**
  * A class for downloading and running the installer of TeX Live.
@@ -21,7 +22,9 @@ export class InstallTL {
   ) {}
 
   async run(profile: Readonly<Profile>, env: Readonly<Env>): Promise<void> {
-    const options = ['-no-gui', '-profile', await profile.write()];
+    const target = path.join(util.tmpdir(), 'texlive.profile');
+    await fs.writeFile(target, Profile.format(profile));
+    const options = ['-no-gui', '-profile', target];
 
     if (this.version !== Version.LATEST) {
       options.push(
@@ -66,45 +69,44 @@ export class InstallTL {
   }
 }
 
-export type Env = Partial<Record<Env.Key, string>>;
+export interface Env {
+  readonly ['TEXLIVE_DOWNLOADER']?: string;
+  readonly ['TL_DOWNLOAD_PROGRAM']?: string;
+  readonly ['TL_DOWNLOAD_ARGS']?: string;
+  readonly ['TEXLIVE_INSTALL_ENV_NOCHECK']?: string;
+  readonly ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']?: string;
+  readonly ['TEXLIVE_INSTALL_NO_RESUME']?: string;
+  readonly ['TEXLIVE_INSTALL_NO_WELCOME']?: string;
+  readonly ['TEXLIVE_INSTALL_PAPER']?: string;
+  readonly ['TEXLIVE_INSTALL_PREFIX']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFHOME']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFCONFIG']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFVAR']?: string;
+  readonly ['NOPERLDOC']?: string;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace Env {
   export function format(env: Readonly<Env>): string {
-    return keys()
+    return keys<Env>()
       .map((key) => `${key}='${env[key] ?? ''}'`)
       .join('\n');
   }
-
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  export function keys() {
-    return [
-      'TEXLIVE_DOWNLOADER',
-      'TL_DOWNLOAD_PROGRAM',
-      'TL_DOWNLOAD_ARGS',
-      'TEXLIVE_INSTALL_ENV_NOCHECK',
-      'TEXLIVE_INSTALL_NO_CONTEXT_CACHE',
-      'TEXLIVE_INSTALL_NO_RESUME',
-      'TEXLIVE_INSTALL_NO_WELCOME',
-      'TEXLIVE_INSTALL_PAPER',
-      'TEXLIVE_INSTALL_PREFIX',
-      'TEXLIVE_INSTALL_TEXMFHOME',
-      'TEXLIVE_INSTALL_TEXMFCONFIG',
-      'TEXLIVE_INSTALL_TEXMFVAR',
-      'NOPERLDOC',
-    ] as const;
-  }
-
-  export type Key = ReturnType<typeof keys>[number];
 }
 
-export class Profile implements Readonly<Record<Profile.Key, string>> {
-  constructor(
-    private readonly version: Version,
-    private readonly prefix: string,
-  ) {}
-
-  filepath: string | undefined = undefined;
+export class Profile {
+  constructor(version: Version, prefix: string) {
+    this.TEXDIR = path.join(prefix, version);
+    this.TEXMFLOCAL = path.join(prefix, 'texmf-local');
+    this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
+    this.TEXMFSYSVAR = path.join(this.TEXDIR, 'texmf-var');
+    /**
+     * `scheme-infraonly` was first introduced in TeX Live 2016.
+     */
+    this.selected_scheme = `scheme-${
+      Number(version) < 2016 ? 'minimal' : 'infraonly'
+    }`;
+    this.option_adjustrepo = version === Version.LATEST ? '1' : '0';
+  }
 
   /* eslint-disable @typescript-eslint/naming-convention */
   /**
@@ -126,18 +128,12 @@ export class Profile implements Readonly<Record<Profile.Key, string>> {
    *   `instopt_adjustpath` has been introduced.
    *   The old option names are still valid in later versions.
    */
-  readonly TEXDIR: string = path.join(this.prefix, this.version);
-  readonly TEXMFLOCAL: string = path.join(this.prefix, 'texmf-local');
-  readonly TEXMFSYSCONFIG: string = path.join(this.TEXDIR, 'texmf-config');
-  readonly TEXMFSYSVAR: string = path.join(this.TEXDIR, 'texmf-var');
-  /**
-   * `scheme-infraonly` was first introduced in TeX Live 2016.
-   */
-  readonly selected_scheme: string = `scheme-${
-    Number(this.version) < 2016 ? 'minimal' : 'infraonly'
-  }`;
-  readonly option_adjustrepo: string =
-    this.version === Version.LATEST ? '1' : '0';
+  readonly TEXDIR: string;
+  readonly TEXMFLOCAL: string;
+  readonly TEXMFSYSCONFIG: string;
+  readonly TEXMFSYSVAR: string;
+  readonly selected_scheme: string;
+  readonly option_adjustrepo: string;
   readonly option_autobackup: string = '0';
   readonly option_desktop_integration: string = '0';
   readonly option_doc: string = '0';
@@ -148,49 +144,14 @@ export class Profile implements Readonly<Record<Profile.Key, string>> {
   readonly option_symlinks: string = '0';
   readonly option_w32_multi_user: string = '0';
   /* eslint-enable @typescript-eslint/naming-convention */
-
-  format(this: Readonly<this>): string {
-    return Profile.keys()
-      .map((key) => `${key} ${this[key]}`)
-      .join('\n');
-  }
-
-  async write(): Promise<string> {
-    if (this.filepath === undefined) {
-      const tmp = await fs.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-'));
-      this.filepath = path.join(tmp, 'texlive.profile');
-      await fs.writeFile(this.filepath, this.format());
-      core.debug(`${this.filepath} created`);
-    }
-    return this.filepath;
-  }
 }
 
 export namespace Profile {
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  export function keys() {
-    // prettier-ignore
-    return [
-      'TEXDIR',
-      'TEXMFLOCAL',
-      'TEXMFSYSCONFIG',
-      'TEXMFSYSVAR',
-      'selected_scheme',
-      // Old name                    // Current name
-      'option_adjustrepo',           // instopt_adjustrepo
-      'option_autobackup',           // tlpdbopt_autobackup
-      'option_desktop_integration',  // tlpdbopt_desktop_integration
-      'option_doc',                  // tlpdbopt_install_docfiles
-      'option_file_assocs',          // tlpdbopt_file_assocs
-      'option_menu_integration',
-      'option_path',                 // instopt_adjustpath
-      'option_src',                  // tlpdbopt_install_srcfiles
-      'option_symlinks',             // instopt_adjustpath
-      'option_w32_multi_user',       // tlpdbopt_w32_multi_user
-    ] as const;
+  export function format(profile: Profile): string {
+    return keys<Profile>()
+      .map((key) => `${key} ${profile[key]}`)
+      .join('\n');
   }
-
-  export type Key = ReturnType<typeof keys>[number];
 }
 
 /**

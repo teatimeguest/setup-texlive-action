@@ -1,3 +1,4 @@
+import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -5,12 +6,13 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import * as context from '#/context';
-import { InstallTL, Profile } from '#/install-tl';
+import { InstallTL } from '#/install-tl';
 import * as setup from '#/setup';
 import { Manager } from '#/texlive';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
+jest.spyOn(fs, 'writeFile').mockImplementation();
 jest.mock('os', () => ({
   arch: jest.requireActual('os').arch,
   homedir: jest.fn(),
@@ -71,7 +73,6 @@ jest
   .spyOn(InstallTL, 'acquire')
   .mockImplementation((version) => new (InstallTL as any)(version, random()));
 jest.spyOn(InstallTL.prototype, 'run').mockImplementation();
-jest.spyOn(Profile.prototype, 'write').mockResolvedValue(random());
 jest.spyOn(Manager.prototype, 'install').mockImplementation();
 jest.spyOn(Manager.prototype, 'conf', 'get').mockReturnValue({
   texmf: jest.fn(async (key, value) => {

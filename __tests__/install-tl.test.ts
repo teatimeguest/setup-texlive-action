@@ -254,7 +254,7 @@ describe('Profile', () => {
   describe('format', () => {
     it('returns a profile string', () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
-      expect(new Profile('2021', '/usr/local/texlive').format()).toBe(
+      expect(Profile.format(new Profile('2021', '/usr/local/texlive'))).toBe(
         [
           'TEXDIR /usr/local/texlive/2021',
           'TEXMFLOCAL /usr/local/texlive/texmf-local',
@@ -273,27 +273,6 @@ describe('Profile', () => {
           'option_w32_multi_user 0',
         ].join('\n'),
       );
-    });
-  });
-
-  describe('write', () => {
-    it('writes the contents to a temporal file', async () => {
-      (os.platform as jest.Mock).mockReturnValue('linux');
-      jest.spyOn(Profile.prototype, 'format').mockReturnValueOnce('<profile>');
-      await new Profile('2021', '/usr/local/texlive').write();
-      expect(fs.writeFile).toHaveBeenCalledWith(
-        expect.stringMatching('/setup-texlive-.{6}/texlive.profile$'),
-        '<profile>',
-      );
-    });
-
-    it('does not write twice', async () => {
-      (os.platform as jest.Mock).mockReturnValue('linux');
-      const profile = new Profile('2021', '/usr/local/texlive');
-      const dest1 = await profile.write();
-      const dest2 = await profile.write();
-      expect(dest1).toBe(dest2);
-      expect(fs.writeFile).toHaveBeenCalledTimes(1);
     });
   });
 });

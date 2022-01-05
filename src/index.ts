@@ -1,2 +1,2 @@
-import { run } from '#/setup';
+import { run } from './setup';
 run();

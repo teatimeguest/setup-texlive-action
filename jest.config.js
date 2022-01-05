@@ -1,5 +1,10 @@
 module.exports = {
   clearMocks: true,
+  globals: {
+    'ts-jest': {
+      compiler: 'ttypescript'
+    }
+  },
   moduleFileExtensions: ['js', 'ts'],
   moduleNameMapper: {
     "^#/(.*)": "<rootDir>/src/$1",
