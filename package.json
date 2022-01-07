@@ -1,7 +1,7 @@
 {
   "name": "setup-texlive-action",
   "private": true,
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "build": "ttsc && ncc build",
