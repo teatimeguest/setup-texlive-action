@@ -6,25 +6,6 @@ import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
-/**
- * Updates the contents of a file.
- */
-export async function updateFile(
-  filename: string,
-  ...replacements: ReadonlyArray<
-    Readonly<{ search: string | RegExp; replace: string }>
-  >
-): Promise<void> {
-  const content = await fs.readFile(filename, 'utf8');
-  const updated = replacements.reduce(
-    (str, { search, replace }) => str.replace(search, replace),
-    content,
-  );
-  await fs.writeFile(filename, updated);
-}
-
-export type EntriesOf<T extends object> = Iterable<[keyof T, T[keyof T]]>;
-
 export type ArchiveType = 'tar.gz' | 'zip';
 
 /**
@@ -76,6 +57,59 @@ export function tmpdir(): string {
     ? runnerTemp
     : os.tmpdir();
 }
+
+/**
+ * Updates the contents of a file.
+ */
+export async function updateFile(
+  filename: string,
+  ...replacements: ReadonlyArray<
+    Readonly<{ search: string | RegExp; replace: string }>
+  >
+): Promise<void> {
+  const content = await fs.readFile(filename, 'utf8');
+  const updated = replacements.reduce(
+    (str, { search, replace }) => str.replace(search, replace),
+    content,
+  );
+  await fs.writeFile(filename, updated);
+}
+
+export type EntryOf<T extends object> = [keyof T, T[keyof T]];
+
+/**
+ * Creates a union type consisting of all string literals from `Begin` to `End`.
+ *
+ * ```typescript
+ * type T = Indices<'10', '15'>   // ['10', '11', '12', '13', '14']
+ * type U = Indices<'foo', 'bar'> // never
+ * ```
+ */
+export type Indices<Begin extends string, End extends string> = Exclude<
+  keyof Times<End, [unknown]>,
+  keyof Times<Begin, [unknown]>
+>;
+
+type Digits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
+type Init<T extends string> = T extends `${infer Rest}${Digits}` ? Rest : never;
+
+type Last<T extends string> = T extends `${Init<T>}${infer N}` ? N : never;
+
+type Times<N extends string, T extends Array<unknown>> =
+  // prettier-ignore
+  | N extends '0' ? []
+  : N extends '1' ? [...T]
+  : N extends '2' ? [...T, ...T]
+  : N extends '3' ? [...T, ...T, ...T]
+  : N extends '4' ? [...T, ...T, ...T, ...T]
+  : N extends '5' ? [...T, ...T, ...T, ...T, ...T]
+  : N extends '6' ? [...T, ...T, ...T, ...T, ...T, ...T]
+  : N extends '7' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T]
+  : N extends '8' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
+  : N extends '9' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
+  : N extends '10' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
+  : [...Times<'10', Times<Init<N>, T>>, ...Times<Last<N>, T>];
 
 declare module 'util/types' {
   /**

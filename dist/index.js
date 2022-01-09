@@ -564,24 +564,13 @@ const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const util = __importStar(__nccwpck_require__(2857));
-// prettier-ignore
-const VERSIONS = [
-    '1996', '1997', '1998', '1999',
-    '2000', '2001', '2002', '2003', '2004',
-    '2005', '2006', '2007', '2008', '2009',
-    '2010', '2011', '2012', '2013', '2014',
-    '2015', '2016', '2017', '2018', '2019',
-    '2020', '2021',
-];
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 var Version;
 (function (Version) {
     function isVersion(version) {
-        return VERSIONS.includes(version);
+        return ["1996", "2021", "2020", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"].includes(version);
     }
     Version.isVersion = isVersion;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    Version.LATEST = VERSIONS[VERSIONS.length - 1];
+    Version.LATEST = '2021';
 })(Version = exports.Version || (exports.Version = {}));
 /**
  * An interface for the `tlmgr` command.
@@ -699,22 +688,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.tmpdir = exports.determine = exports.extract = exports.updateFile = void 0;
+exports.updateFile = exports.tmpdir = exports.determine = exports.extract = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
 const tool = __importStar(__nccwpck_require__(7784));
-/**
- * Updates the contents of a file.
- */
-async function updateFile(filename, ...replacements) {
-    const content = await fs_1.promises.readFile(filename, 'utf8');
-    const updated = replacements.reduce((str, { search, replace }) => str.replace(search, replace), content);
-    await fs_1.promises.writeFile(filename, updated);
-}
-exports.updateFile = updateFile;
 /**
  * Extracts files from an archive.
  *
@@ -754,6 +734,15 @@ function tmpdir() {
         : os.tmpdir();
 }
 exports.tmpdir = tmpdir;
+/**
+ * Updates the contents of a file.
+ */
+async function updateFile(filename, ...replacements) {
+    const content = await fs_1.promises.readFile(filename, 'utf8');
+    const updated = replacements.reduce((str, { search, replace }) => str.replace(search, replace), content);
+    await fs_1.promises.writeFile(filename, updated);
+}
+exports.updateFile = updateFile;
 //# sourceMappingURL=utility.js.map
 
 /***/ }),

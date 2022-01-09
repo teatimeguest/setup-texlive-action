@@ -6,29 +6,18 @@ import * as exec from '@actions/exec';
 import { keys } from 'ts-transformer-keys';
 
 import * as util from './utility';
-import EntriesOf = util.EntriesOf;
 
-// prettier-ignore
-const VERSIONS = [
-          '1996', '1997', '1998', '1999',
-  '2000', '2001', '2002', '2003', '2004',
-  '2005', '2006', '2007', '2008', '2009',
-  '2010', '2011', '2012', '2013', '2014',
-  '2015', '2016', '2017', '2018', '2019',
-  '2020', '2021',
-] as const;
-
-export type Version = typeof VERSIONS[number];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace Version {
   export function isVersion(version: string): version is Version {
-    return VERSIONS.includes(version as Version);
+    return keys<Record<Version, unknown>>().includes(version as Version);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  export const LATEST = VERSIONS[VERSIONS.length - 1]!;
+  export const LATEST = '2021';
 }
+
+export type Version =  // eslint-disable-line @typescript-eslint/no-redeclare
+  | util.Indices<'1996', typeof Version.LATEST>
+  | typeof Version.LATEST;
 
 export interface Texmf {
   readonly ['TEXMFHOME']: string;
@@ -47,22 +36,22 @@ export class Manager {
 
   get conf(): Readonly<{
     texmf: {
-      (): Promise<EntriesOf<Texmf>>;
+      (): Promise<Iterable<util.EntryOf<Texmf>>>;
       (key: keyof Texmf): Promise<string>;
       (key: keyof Texmf, value: string): Promise<void>;
     };
   }> {
     return new (class {
-      texmf(): Promise<EntriesOf<Texmf>>;
+      texmf(): Promise<Iterable<util.EntryOf<Texmf>>>;
       texmf(key: keyof Texmf): Promise<string>;
       texmf(key: keyof Texmf, value: string): Promise<void>;
       async texmf(
         key?: keyof Texmf,
         value?: string,
-      ): Promise<EntriesOf<Texmf> | string | void> {
+      ): Promise<Iterable<util.EntryOf<Texmf>> | string | void> {
         if (key === undefined) {
           return await Promise.all(
-            keys<Texmf>().map<Promise<[keyof Texmf, string]>>(
+            keys<Texmf>().map<Promise<util.EntryOf<Texmf>>>(
               async (variable) => [variable, await this.texmf(variable)],
             ),
           );
