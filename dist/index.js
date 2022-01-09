@@ -226,15 +226,15 @@ exports.Env = Env;
 })(Env = exports.Env || (exports.Env = {}));
 class Profile {
     constructor(version, prefix) {
-        this.option_autobackup = '0';
-        this.option_desktop_integration = '0';
-        this.option_doc = '0';
-        this.option_file_assocs = '0';
-        this.option_menu_integration = '0';
-        this.option_path = '0';
-        this.option_src = '0';
-        this.option_symlinks = '0';
-        this.option_w32_multi_user = '0';
+        this['option_autobackup'] = '0';
+        this['option_desktop_integration'] = '0';
+        this['option_doc'] = '0';
+        this['option_file_assocs'] = '0';
+        this['option_menu_integration'] = '0';
+        this['option_path'] = '0';
+        this['option_src'] = '0';
+        this['option_symlinks'] = '0';
+        this['option_w32_multi_user'] = '0';
         this.TEXDIR = path.join(prefix, version);
         this.TEXMFLOCAL = path.join(prefix, 'texmf-local');
         this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');

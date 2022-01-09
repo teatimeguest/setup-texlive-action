@@ -133,8 +133,6 @@ export class Profile {
     }`;
     this.option_adjustrepo = version === Version.LATEST ? '1' : '0';
   }
-
-  /* eslint-disable @typescript-eslint/naming-convention */
   /**
    * - `option_autobackup`, `option_doc`, `option_src`, and `option_symlinks`
    *   already exist since version 2008.
@@ -154,22 +152,21 @@ export class Profile {
    *   `instopt_adjustpath` has been introduced.
    *   The old option names are still valid in later versions.
    */
-  readonly TEXDIR: string;
-  readonly TEXMFLOCAL: string;
-  readonly TEXMFSYSCONFIG: string;
-  readonly TEXMFSYSVAR: string;
-  readonly selected_scheme: string;
-  readonly option_adjustrepo: string;
-  readonly option_autobackup: string = '0';
-  readonly option_desktop_integration: string = '0';
-  readonly option_doc: string = '0';
-  readonly option_file_assocs: string = '0';
-  readonly option_menu_integration: string = '0';
-  readonly option_path: string = '0';
-  readonly option_src: string = '0';
-  readonly option_symlinks: string = '0';
-  readonly option_w32_multi_user: string = '0';
-  /* eslint-enable @typescript-eslint/naming-convention */
+  readonly ['TEXDIR']: string;
+  readonly ['TEXMFLOCAL']: string;
+  readonly ['TEXMFSYSCONFIG']: string;
+  readonly ['TEXMFSYSVAR']: string;
+  readonly ['selected_scheme']: string;
+  readonly ['option_adjustrepo']: string;
+  readonly ['option_autobackup']: string = '0';
+  readonly ['option_desktop_integration']: string = '0';
+  readonly ['option_doc']: string = '0';
+  readonly ['option_file_assocs']: string = '0';
+  readonly ['option_menu_integration']: string = '0';
+  readonly ['option_path']: string = '0';
+  readonly ['option_src']: string = '0';
+  readonly ['option_symlinks']: string = '0';
+  readonly ['option_w32_multi_user']: string = '0';
 }
 
 export namespace Profile {
