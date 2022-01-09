@@ -82,13 +82,15 @@ export interface Env {
   readonly ['TEXLIVE_INSTALL_TEXMFHOME']?: string;
   readonly ['TEXLIVE_INSTALL_TEXMFCONFIG']?: string;
   readonly ['TEXLIVE_INSTALL_TEXMFVAR']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFVAR']?: string;
   readonly ['NOPERLDOC']?: string;
 }
 
 export namespace Env {
   export function format(env: Readonly<Env>): string {
     return keys<Env>()
-      .map((key) => `${key}='${env[key] ?? ''}'`)
+      .map((key) => (env[key] === undefined ? '' : `${key}='${env[key]}'`))
+      .filter((s) => s !== '')
       .join('\n');
   }
 }

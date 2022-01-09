@@ -209,7 +209,8 @@ exports.InstallTL = InstallTL;
 var Env;
 (function (Env) {
     function format(env) {
-        return ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"].map((key) => { var _a; return `${key}='${(_a = env[key]) !== null && _a !== void 0 ? _a : ''}'`; })
+        return ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"].map((key) => (env[key] === undefined ? '' : `${key}='${env[key]}'`))
+            .filter((s) => s !== '')
             .join('\n');
     }
     Env.format = format;
