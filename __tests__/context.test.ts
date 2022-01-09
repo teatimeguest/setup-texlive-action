@@ -8,15 +8,6 @@ import * as context from '#/context';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
 
-const env = (() => {
-  const {
-    GITHUB_PATH,
-    TEXLIVE_INSTALL_PREFIX,
-    ...rest
-  }: Partial<Record<string, string>> = { ...process.env };
-  return rest;
-})();
-
 let ctx: {
   inputs: {
     cache: boolean;
@@ -38,9 +29,8 @@ jest.spyOn(fs, 'readFile').mockImplementation(async (filename) => {
 jest.mock('os', () => ({
   homedir: jest.fn().mockReturnValue('~'),
   platform: jest.fn(),
-  tmpdir: jest.fn(),
+  tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
 }));
-(os.tmpdir as jest.Mock).mockReturnValue(random());
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
@@ -81,9 +71,10 @@ jest.spyOn(core, 'setOutput').mockImplementation();
 jest.spyOn(core, 'warning').mockImplementation();
 
 beforeEach(() => {
-  process.env = { ...env };
-  process.env['ACTIONS_CACHE_URL'] = random();
-  process.env['RUNNER_TEMP'] ??= random();
+  process.env = {
+    ['ACTIONS_CACHE_URL']: '<ACTIONS_CACHE_URL>',
+    ['RUNNER_TEMP']: '<RUNNER_TEMP>',
+  };
 
   ctx = {
     // The default values defined in `action.yml`.
@@ -201,6 +192,21 @@ describe('loadConfig', () => {
     ctx.inputs.version = 'version';
     await expect(context.loadConfig).rejects.toThrow(
       "`version` must be specified by year or 'latest'",
+    );
+  });
+
+  it('issues warnings if environment variables to be discarded are set', async () => {
+    (os.platform as jest.Mock).mockReturnValue('linux');
+    process.env['TEXLIVE_INSTALL_TEXMFLOCAL'] = '';
+    process.env['TEXLIVE_INSTALL_TEXMFSYSCONFIG'] =
+      '/usr/local/texlive/2021/texmf-config';
+    await context.loadConfig();
+    expect(core.warning).toHaveBeenCalledTimes(2);
+    expect(core.warning).toHaveBeenCalledWith(
+      `TEXLIVE_INSTALL_TEXMFLOCAL is set to '${process.env['TEXLIVE_INSTALL_TEXMFLOCAL']}', but ignored`,
+    );
+    expect(core.warning).toHaveBeenCalledWith(
+      `TEXLIVE_INSTALL_TEXMFSYSCONFIG is set to '${process.env['TEXLIVE_INSTALL_TEXMFSYSCONFIG']}', but ignored`,
     );
   });
 });

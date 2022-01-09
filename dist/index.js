@@ -28,16 +28,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.loadConfig = void 0;
 const fs_1 = __nccwpck_require__(7147);
-const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
+const install_tl_1 = __nccwpck_require__(2381);
 const texlive_1 = __nccwpck_require__(9758);
 const util = __importStar(__nccwpck_require__(2857));
 async function loadConfig() {
     const cache = getCache();
     const packages = await getPackages();
     const version = getVersion();
-    const env = getEnv(version);
+    const env = new install_tl_1.Env(version, path.join(util.tmpdir(), 'setup-texlive'));
     const prefix = getPrefix(env);
     const tlcontrib = getTlcontrib(version);
     return { cache, packages, prefix, tlcontrib, version, env };
@@ -84,25 +84,6 @@ function getVersion() {
         return texlive_1.Version.LATEST;
     }
     throw new TypeError("`version` must be specified by year or 'latest'");
-}
-function getEnv(version) {
-    var _a, _b, _c, _d, _e, _f;
-    const env = {};
-    for (const key of ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"]) {
-        const value = process.env[key];
-        if (value !== undefined) {
-            env[key] = value;
-        }
-    }
-    const home = os.homedir();
-    const texdir = path.join(home, '.local', 'texlive', version);
-    (_a = env.TEXLIVE_INSTALL_ENV_NOCHECK) !== null && _a !== void 0 ? _a : (env.TEXLIVE_INSTALL_ENV_NOCHECK = 'true');
-    (_b = env.TEXLIVE_INSTALL_NO_WELCOME) !== null && _b !== void 0 ? _b : (env.TEXLIVE_INSTALL_NO_WELCOME = 'true');
-    (_c = env.TEXLIVE_INSTALL_PREFIX) !== null && _c !== void 0 ? _c : (env.TEXLIVE_INSTALL_PREFIX = path.join(util.tmpdir(), 'setup-texlive'));
-    (_d = env.TEXLIVE_INSTALL_TEXMFHOME) !== null && _d !== void 0 ? _d : (env.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf'));
-    (_e = env.TEXLIVE_INSTALL_TEXMFCONFIG) !== null && _e !== void 0 ? _e : (env.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config'));
-    (_f = env.TEXLIVE_INSTALL_TEXMFVAR) !== null && _f !== void 0 ? _f : (env.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var'));
-    return env;
 }
 function getKey() {
     const key = core.getState('key');
@@ -206,7 +187,35 @@ class InstallTL {
     }
 }
 exports.InstallTL = InstallTL;
-var Env;
+class Env {
+    constructor(version, prefix) {
+        var _a, _b;
+        this['TEXLIVE_INSTALL_ENV_NOCHECK'] = 'true';
+        this['TEXLIVE_INSTALL_NO_WELCOME'] = 'true';
+        for (const key of [
+            'TEXLIVE_INSTALL_TEXDIR',
+            'TEXLIVE_INSTALL_TEXMFLOCAL',
+            'TEXLIVE_INSTALL_TEXMFSYSCONFIG',
+            'TEXLIVE_INSTALL_TEXMFSYSVAR',
+        ]) {
+            if (key in process.env) {
+                core.warning(`${key} is set to '${(_a = process.env[key]) !== null && _a !== void 0 ? _a : ''}', but ignored`);
+            }
+        }
+        const home = os.homedir();
+        const texdir = path.join(home, '.local', 'texlive', version);
+        this.TEXLIVE_INSTALL_PREFIX = prefix;
+        this.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf');
+        this.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config');
+        this.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var');
+        for (const key of ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"]) {
+            if (key in process.env) {
+                this[key] = (_b = process.env[key]) !== null && _b !== void 0 ? _b : '';
+            }
+        }
+    }
+}
+exports.Env = Env;
 (function (Env) {
     function format(env) {
         return ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"].map((key) => (env[key] === undefined ? '' : `${key}='${env[key]}'`))

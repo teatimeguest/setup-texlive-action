@@ -18,6 +18,7 @@ jest
 jest.spyOn(fs, 'readFile').mockImplementation();
 jest.spyOn(fs, 'writeFile').mockImplementation();
 jest.mock('os', () => ({
+  homedir: jest.fn().mockReturnValue('~'),
   platform: jest.fn(),
 }));
 jest.mock('path', () => {
@@ -48,7 +49,10 @@ describe('InstallTL', () => {
     it('installs TeX Live 2008', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
       const installtl = await InstallTL.acquire('2008');
-      await installtl.run(new Profile('2008', '/usr/local/texlive'), {});
+      await installtl.run(
+        new Profile('2008', '/usr/local/texlive'),
+        new Env('2008', '/usr/local/texlive'),
+      );
       expect(exec.exec).toHaveBeenCalledWith(
         expect.stringContaining(''),
         [
@@ -65,7 +69,10 @@ describe('InstallTL', () => {
     it('installs TeX Live 2012', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
       const installtl = await InstallTL.acquire('2012');
-      await installtl.run(new Profile('2012', '/usr/local/texlive'), {});
+      await installtl.run(
+        new Profile('2012', '/usr/local/texlive'),
+        new Env('2012', '/usr/local/texlive'),
+      );
       expect(exec.exec).toHaveBeenCalledWith(
         expect.stringContaining(''),
         [
@@ -82,7 +89,10 @@ describe('InstallTL', () => {
     it('installs TeX Live 2021', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
       const installtl = await InstallTL.acquire('2021');
-      await installtl.run(new Profile('2021', '/usr/local/texlive'), {});
+      await installtl.run(
+        new Profile('2021', '/usr/local/texlive'),
+        new Env('2021', '/usr/local/texlive'),
+      );
       expect(exec.exec).toHaveBeenCalledWith(
         expect.stringContaining(''),
         ['-no-gui', '-profile', expect.stringMatching(/texlive\.profile$/u)],
@@ -159,16 +169,17 @@ describe('InstallTL', () => {
 describe('Env', () => {
   describe('format', () => {
     it('returns a proper string', () => {
-      expect(
-        Env.format({
-          ['TEXLIVE_INSTALL_ENV_NOCHECK']: '',
-          ['TEXLIVE_INSTALL_TEXMFCONFIG']: '~/texmf-config',
-          ['NOPERLDOC']: '',
-        }),
-      ).toBe(
+      process.env['TEXLIVE_INSTALL_ENV_NOCHECK'] = '';
+      process.env['TEXLIVE_INSTALL_TEXMFCONFIG'] = '~/texmf-config';
+      process.env['NOPERLDOC'] = '';
+      expect(Env.format(new Env('2021', '/usr/local/texlive'))).toBe(
         [
           "TEXLIVE_INSTALL_ENV_NOCHECK=''",
+          "TEXLIVE_INSTALL_NO_WELCOME='true'",
+          "TEXLIVE_INSTALL_PREFIX='/usr/local/texlive'",
+          "TEXLIVE_INSTALL_TEXMFHOME='~/texmf'",
           "TEXLIVE_INSTALL_TEXMFCONFIG='~/texmf-config'",
+          "TEXLIVE_INSTALL_TEXMFVAR='~/.local/texlive/2021/texmf-var'",
           "NOPERLDOC=''",
         ].join('\n'),
       );
@@ -272,7 +283,10 @@ describe('executable', () => {
   it('returns the filename for TeX Live 2021 on Linux', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     const installtl = await InstallTL.acquire('2021');
-    await installtl.run(new Profile('2021', '/usr/local/texlive'), {});
+    await installtl.run(
+      new Profile('2021', '/usr/local/texlive'),
+      new Env('2021', '/usr/local/texlive'),
+    );
     expect(exec.exec).toHaveBeenCalledWith(
       expect.stringMatching(/install-tl$/u),
       expect.anything(),
@@ -283,7 +297,10 @@ describe('executable', () => {
   it('returns the filename for TeX Live 2012 on Windows', async () => {
     (os.platform as jest.Mock).mockReturnValue('win32');
     const installtl = await InstallTL.acquire('2012');
-    await installtl.run(new Profile('2012', 'C:\\texlive'), {});
+    await installtl.run(
+      new Profile('2012', 'C:\\texlive'),
+      new Env('2012', 'C:\\texlive'),
+    );
     expect(exec.exec).toHaveBeenCalledWith(
       expect.stringMatching(/install-tl\.bat$/u),
       expect.anything(),
@@ -294,7 +311,10 @@ describe('executable', () => {
   it('returns the filename for TeX Live 2016 on Windows', async () => {
     (os.platform as jest.Mock).mockReturnValue('win32');
     const installtl = await InstallTL.acquire('2016');
-    await installtl.run(new Profile('2016', 'C:\\texlive'), {});
+    await installtl.run(
+      new Profile('2016', 'C:\\texlive'),
+      new Env('2016', 'C:\\texlive'),
+    );
     expect(exec.exec).toHaveBeenCalledWith(
       expect.stringMatching(/install-tl-windows\.bat$/u),
       expect.anything(),

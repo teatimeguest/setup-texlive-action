@@ -69,20 +69,44 @@ export class InstallTL {
   }
 }
 
-export interface Env {
+export class Env {
+  constructor(version: Version, prefix: string) {
+    for (const key of [
+      'TEXLIVE_INSTALL_TEXDIR',
+      'TEXLIVE_INSTALL_TEXMFLOCAL',
+      'TEXLIVE_INSTALL_TEXMFSYSCONFIG',
+      'TEXLIVE_INSTALL_TEXMFSYSVAR',
+    ]) {
+      if (key in process.env) {
+        core.warning(
+          `${key} is set to '${process.env[key] ?? ''}', but ignored`,
+        );
+      }
+    }
+    const home = os.homedir();
+    const texdir = path.join(home, '.local', 'texlive', version);
+    this.TEXLIVE_INSTALL_PREFIX = prefix;
+    this.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf');
+    this.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config');
+    this.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var');
+    for (const key of keys<Env>()) {
+      if (key in process.env) {
+        this[key] = process.env[key] ?? '';
+      }
+    }
+  }
   readonly ['TEXLIVE_DOWNLOADER']?: string;
   readonly ['TL_DOWNLOAD_PROGRAM']?: string;
   readonly ['TL_DOWNLOAD_ARGS']?: string;
-  readonly ['TEXLIVE_INSTALL_ENV_NOCHECK']?: string;
+  readonly ['TEXLIVE_INSTALL_ENV_NOCHECK']: string = 'true';
   readonly ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']?: string;
   readonly ['TEXLIVE_INSTALL_NO_RESUME']?: string;
-  readonly ['TEXLIVE_INSTALL_NO_WELCOME']?: string;
+  readonly ['TEXLIVE_INSTALL_NO_WELCOME']: string = 'true';
   readonly ['TEXLIVE_INSTALL_PAPER']?: string;
-  readonly ['TEXLIVE_INSTALL_PREFIX']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFHOME']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFCONFIG']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFVAR']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFVAR']?: string;
+  readonly ['TEXLIVE_INSTALL_PREFIX']: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFHOME']: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFCONFIG']: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFVAR']: string;
   readonly ['NOPERLDOC']?: string;
 }
 
