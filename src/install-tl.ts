@@ -59,7 +59,7 @@ export class InstallTL {
       os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'
     }`;
     const dest =
-      (await restoreCache(target, version)) ??
+      (await restoreToolCache(target, version)) ??
       (await download(target, version));
 
     return new InstallTL(
@@ -225,32 +225,39 @@ async function download(target: string, version: Version): Promise<string> {
 
   core.info('Applying patches');
   await patch(version, dest);
-
-  try {
-    core.info('Adding to the cache');
-    await tool.cacheDir(dest, target, version);
-  } catch (error) {
-    core.info(`Failed to add to cache: ${error}`);
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(error.stack);
-    }
-  }
+  await saveToolCache(dest, target, version);
 
   return dest;
 }
 
-async function restoreCache(
+async function saveToolCache(
+  directory: string,
+  target: string,
+  version: Version,
+): Promise<void> {
+  try {
+    core.info('Adding to the tool cache');
+    await tool.cacheDir(directory, target, version);
+  } catch (error) {
+    core.info(`Failed to add to tool cache: ${error}`);
+    if (error instanceof Error && error.stack !== undefined) {
+      core.debug(error.stack);
+    }
+  }
+}
+
+async function restoreToolCache(
   target: string,
   version: Version,
 ): Promise<string | undefined> {
   try {
     const cache = tool.find(target, version);
     if (cache !== '') {
-      core.info('Found in cache');
+      core.info('Found in the tool cache');
       return cache;
     }
   } catch (error) {
-    core.info(`Failed to restore cache: ${error}`);
+    core.info(`Failed to restore tool cache: ${error}`);
     if (error instanceof Error && error.stack !== undefined) {
       core.debug(error.stack);
     }

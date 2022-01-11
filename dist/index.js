@@ -182,7 +182,7 @@ class InstallTL {
             throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
         }
         const target = `install-tl${os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'}`;
-        const dest = (_a = (await restoreCache(target, version))) !== null && _a !== void 0 ? _a : (await download(target, version));
+        const dest = (_a = (await restoreToolCache(target, version))) !== null && _a !== void 0 ? _a : (await download(target, version));
         return new InstallTL(version, path.join(dest, executable(version, os.platform())));
     }
 }
@@ -292,28 +292,31 @@ async function download(target, version) {
     const dest = await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tar.gz');
     core.info('Applying patches');
     await patch(version, dest);
+    await saveToolCache(dest, target, version);
+    return dest;
+}
+async function saveToolCache(directory, target, version) {
     try {
-        core.info('Adding to the cache');
-        await tool.cacheDir(dest, target, version);
+        core.info('Adding to the tool cache');
+        await tool.cacheDir(directory, target, version);
     }
     catch (error) {
-        core.info(`Failed to add to cache: ${error}`);
+        core.info(`Failed to add to tool cache: ${error}`);
         if (error instanceof Error && error.stack !== undefined) {
             core.debug(error.stack);
         }
     }
-    return dest;
 }
-async function restoreCache(target, version) {
+async function restoreToolCache(target, version) {
     try {
         const cache = tool.find(target, version);
         if (cache !== '') {
-            core.info('Found in cache');
+            core.info('Found in the tool cache');
             return cache;
         }
     }
     catch (error) {
-        core.info(`Failed to restore cache: ${error}`);
+        core.info(`Failed to restore tool cache: ${error}`);
         if (error instanceof Error && error.stack !== undefined) {
             core.debug(error.stack);
         }
