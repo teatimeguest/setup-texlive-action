@@ -38,7 +38,7 @@ async function main(): Promise<void> {
     });
   }
 
-  await core.group('Environment variables for Tex Live', async () => {
+  await core.group('Environment variables for TeX Live', async () => {
     core.info(Env.format(config.env));
   });
 
@@ -50,7 +50,7 @@ async function main(): Promise<void> {
     await core.group('Installation profile', async () => {
       core.info(Profile.format(profile));
     });
-    await core.group('Installing Tex Live', async () => {
+    await core.group('Installing TeX Live', async () => {
       await installtl.run(profile, config.env);
     });
   }

@@ -449,7 +449,7 @@ async function main() {
             return await restoreCache(profile.TEXDIR, ...keys);
         });
     }
-    await core.group('Environment variables for Tex Live', async () => {
+    await core.group('Environment variables for TeX Live', async () => {
         core.info(install_tl_1.Env.format(config.env));
     });
     if (cacheType === 'none') {
@@ -457,7 +457,7 @@ async function main() {
         await core.group('Installation profile', async () => {
             core.info(install_tl_1.Profile.format(profile));
         });
-        await core.group('Installing Tex Live', async () => {
+        await core.group('Installing TeX Live', async () => {
             await installtl.run(profile, config.env);
         });
     }
