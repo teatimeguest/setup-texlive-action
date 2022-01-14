@@ -453,7 +453,9 @@ async function main() {
         core.info(install_tl_1.Env.format(config.env));
     });
     if (cacheType === 'none') {
-        const installtl = await core.group('Acquiring install-tl', async () => await install_tl_1.InstallTL.acquire(config.version));
+        const installtl = await core.group('Acquiring install-tl', async () => {
+            return await install_tl_1.InstallTL.acquire(config.version);
+        });
         await core.group('Installation profile', async () => {
             core.info(install_tl_1.Profile.format(profile));
         });
@@ -481,10 +483,7 @@ async function main() {
             await tlmgr.pinning.add('tlcontrib', '*');
         });
     }
-    if (cacheType === 'primary') {
-        return;
-    }
-    if (config.packages.size !== 0) {
+    if (cacheType !== 'primary' && config.packages.size !== 0) {
         await core.group('Installing packages', async () => {
             await tlmgr.install(...config.packages);
         });
