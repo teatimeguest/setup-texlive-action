@@ -74,8 +74,8 @@ export class Manager {
     })(this.version);
   }
 
-  async install(this: void, packages: ReadonlySet<string>): Promise<void> {
-    if (packages.size !== 0) {
+  async install(this: void, ...packages: ReadonlyArray<string>): Promise<void> {
+    if (packages.length !== 0) {
       await exec.exec('tlmgr', ['install', ...packages]);
     }
   }

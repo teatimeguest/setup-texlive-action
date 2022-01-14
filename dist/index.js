@@ -486,7 +486,7 @@ async function main() {
     }
     if (config.packages.size !== 0) {
         await core.group('Installing packages', async () => {
-            await tlmgr.install(config.packages);
+            await tlmgr.install(...config.packages);
         });
     }
 }
@@ -617,8 +617,8 @@ class Manager {
             }
         })(this.version);
     }
-    async install(packages) {
-        if (packages.size !== 0) {
+    async install(...packages) {
+        if (packages.length !== 0) {
             await exec.exec('tlmgr', ['install', ...packages]);
         }
     }

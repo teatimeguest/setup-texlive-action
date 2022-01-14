@@ -171,7 +171,9 @@ describe('main', () => {
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
     expect(Manager.prototype.install).toHaveBeenCalledWith(
-      new Set(['cleveref', 'hyperref', 'scheme-basic']),
+      'cleveref',
+      'hyperref',
+      'scheme-basic',
     );
     expect(context.setKey).not.toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).not.toHaveBeenCalled();
@@ -233,9 +235,7 @@ describe('main', () => {
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
     expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(Manager.prototype.install).toHaveBeenCalledWith(
-      new Set(['scheme-basic']),
-    );
+    expect(Manager.prototype.install).toHaveBeenCalledWith('scheme-basic');
     expect(context.setKey).toHaveBeenCalledWith(expect.anything());
     expect(context.setCacheHit).toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();

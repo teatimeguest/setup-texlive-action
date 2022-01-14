@@ -84,7 +84,7 @@ async function main(): Promise<void> {
 
   if (config.packages.size !== 0) {
     await core.group('Installing packages', async () => {
-      await tlmgr.install(config.packages);
+      await tlmgr.install(...config.packages);
     });
   }
 }
