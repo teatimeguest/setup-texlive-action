@@ -113,8 +113,7 @@ export class Env {
 export namespace Env {
   export function format(env: Readonly<Env>): string {
     return keys<Env>()
-      .map((key) => (env[key] === undefined ? '' : `${key}='${env[key]}'`))
-      .filter((s) => s !== '')
+      .flatMap((key) => (env[key] === undefined ? [] : `${key}='${env[key]}'`))
       .join('\n');
   }
 }
