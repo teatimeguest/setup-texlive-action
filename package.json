@@ -30,7 +30,7 @@
     "editorconfig-checker": "4.0.2",
     "eslint": "8.6.0",
     "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-jest": "25.3.4",
+    "eslint-plugin-jest": "25.7.0",
     "jest": "27.4.7",
     "jest-circus": "27.4.6",
     "prettier": "2.5.1",
