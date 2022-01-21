@@ -64,7 +64,7 @@ export function tmpdir(): string {
 export async function updateFile(
   filename: string,
   ...replacements: ReadonlyArray<
-    Readonly<{ search: string | RegExp; replace: string }>
+    Readonly<{ search: string | Readonly<RegExp>; replace: string }>
   >
 ): Promise<void> {
   const content = await fs.readFile(filename, 'utf8');
