@@ -20,7 +20,7 @@ Linux, Windows, and macOS are supported.
 
 ```yaml
 - name: Setup TeX Live
-  uses: teatimeguest/setup-texlive-action@v1
+  uses: teatimeguest/setup-texlive-action@v2
 
 - name: Check `tlmgr` version
   run: tlmgr --version
@@ -33,7 +33,7 @@ If you want to install additional packages, you can use the `packages` input:
 
 ```yaml
 - name: Setup TeX Live
-  uses: teatimeguest/setup-texlive-action@v1
+  uses: teatimeguest/setup-texlive-action@v2
   with:
     packages: >-
       scheme-basic
@@ -49,7 +49,7 @@ You can use an older version of TeX Live by specifying the `version`:
 
 ```yaml
 - name: Setup TeX Live 2008
-  uses: teatimeguest/setup-texlive-action@v1
+  uses: teatimeguest/setup-texlive-action@v2
   with:
     version: 2008
 ```
@@ -76,7 +76,7 @@ If you want to disable caching, you can use the `cache` input:
 
 ```yaml
 - name: Setup TeX Live
-  uses: teatimeguest/setup-texlive-action@v1
+  uses: teatimeguest/setup-texlive-action@v2
   with:
     cache: false
 ```
