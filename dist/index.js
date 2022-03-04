@@ -170,7 +170,6 @@ class InstallTL {
         await patch(this.version, profile.TEXDIR);
     }
     static async acquire(version) {
-        var _a;
         /**
          * - There is no `install-tl` for versions prior to 2005, and
          *   versions 2005--2007 do not seem to be archived.
@@ -182,14 +181,14 @@ class InstallTL {
             throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
         }
         const target = `install-tl${os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'}`;
-        const dest = (_a = (await restoreToolCache(target, version))) !== null && _a !== void 0 ? _a : (await download(target, version));
+        const dest = (await restoreToolCache(target, version)) ??
+            (await download(target, version));
         return new InstallTL(version, path.join(dest, executable(version, os.platform())));
     }
 }
 exports.InstallTL = InstallTL;
 class Env {
     constructor(version, prefix) {
-        var _a, _b;
         this['TEXLIVE_INSTALL_ENV_NOCHECK'] = 'true';
         this['TEXLIVE_INSTALL_NO_WELCOME'] = 'true';
         for (const key of [
@@ -199,7 +198,7 @@ class Env {
             'TEXLIVE_INSTALL_TEXMFSYSVAR',
         ]) {
             if (key in process.env) {
-                core.warning(`${key} is set to '${(_a = process.env[key]) !== null && _a !== void 0 ? _a : ''}', but ignored`);
+                core.warning(`${key} is set to '${process.env[key] ?? ''}', but ignored`);
             }
         }
         const home = os.homedir();
@@ -210,7 +209,7 @@ class Env {
         this.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var');
         for (const key of ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"]) {
             if (key in process.env) {
-                this[key] = (_b = process.env[key]) !== null && _b !== void 0 ? _b : '';
+                this[key] = process.env[key] ?? '';
             }
         }
     }
