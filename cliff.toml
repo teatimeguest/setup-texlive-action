@@ -1,0 +1,38 @@
+[changelog]
+header = ""
+body = """
+{% if version -%}
+  {{ version }}
+  {%- for commit in commits | filter(attribute="breaking", value=true) %}
+    {% if loop.first %}
+      ### BREAKING CHANGE
+    {% endif %}
+    - {{ commit.message -}}
+  {% endfor %}
+  {% for group, commits in commits | group_by(attribute="group") %}
+    {%- if group != "Others" %}
+      ### {{ group }}
+      {% for commit in commits | sort(attribute="scope") %}
+        - {% if commit.scope != "" -%}
+            **{{ commit.scope ~ ":" }}**{{ " " }}
+          {%- endif -%}
+          {{ commit.message -}}
+      {% endfor %}
+    {% endif -%}
+  {% endfor -%}
+{% endif -%}
+"""
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+filter_commits = false
+commit_parsers = [
+  { message = "^feat", group = "Features", default_scope = "" },
+  { message = "^fix", group = "Bug Fixes", default_scope = "" },
+  { message = "^perf", group = "Performance Improvements", default_scope = "" },
+  { message = "^build", group = "Dependency Updates", default_scope = "" },
+  { message = ".*", group = "Others", default_scope = "" },
+]
+tag_pattern = "v*.*.*"

@@ -18,13 +18,11 @@ function validate() {
 
 function release() {
   [[ "$(git rev-parse --abbrev-ref HEAD)" == main ]]
-  git --no-pager diff --exit-code --staged
-  git --no-pager diff --exit-code -- package-lock.json package.json
 
   local -r next="$(npm version "$1")"
   git add package-lock.json package.json
   git commit -m "chore(release): prepare for ${next}"
-  git chglog --next-tag "${next}" | git tag "${next}" --cleanup=whitespace -F -
+  git cliff -ut "${next}" | git tag "${next}" --cleanup=whitespace -F -
   git tag -f "${next%%.*}" -m "${next}"
 
   git --no-pager show "${next}"

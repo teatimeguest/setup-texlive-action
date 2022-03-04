@@ -39,8 +39,7 @@ jobs:
         run: |
           latest="$(git describe --tags --abbrev=0 --match='v*.*.*')"
           if ! git diff --quiet "${latest}" dist/index.js; then
-            HOMEBREW_NO_AUTO_UPDATE=1 \
-              brew install git-chglog/git-chglog/git-chglog
+            HOMEBREW_NO_AUTO_UPDATE=1 brew install git-cliff
 
             npm run release patch
             next="v$(jq -r .version package.json)"
