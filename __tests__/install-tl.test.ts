@@ -98,35 +98,97 @@ describe('InstallTL', () => {
   });
 
   describe('acquire', () => {
+    const setVersion = (version: string): void => {
+      (fs.readFile as jest.Mock).mockResolvedValueOnce(
+        `TeX Live (https://tug.org/texlive) version ${version}`,
+      );
+    };
+
     it('downloads the installer on Linux', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
+      setVersion('2021');
       await InstallTL.acquire('2021');
       expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2021');
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
       );
+      expect(tool.downloadTool).toHaveBeenCalledTimes(1);
       expect(util.extract).toHaveBeenCalled();
       expect(tool.cacheDir).toHaveBeenCalled();
     });
 
     it('downloads the installer on Windows', async () => {
       (os.platform as jest.Mock).mockReturnValue('win32');
+      setVersion('2021');
       await InstallTL.acquire('2021');
       expect(tool.find).toHaveBeenCalledWith('install-tl.zip', '2021');
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip',
       );
+      expect(tool.downloadTool).toHaveBeenCalledTimes(1);
       expect(util.extract).toHaveBeenCalled();
       expect(tool.cacheDir).toHaveBeenCalled();
     });
 
     it('downloads the installer on macOS', async () => {
       (os.platform as jest.Mock).mockReturnValue('darwin');
+      setVersion('2021');
       await InstallTL.acquire('2021');
       expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2021');
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
       );
+      expect(tool.downloadTool).toHaveBeenCalledTimes(1);
+      expect(util.extract).toHaveBeenCalled();
+      expect(tool.cacheDir).toHaveBeenCalled();
+    });
+
+    it(`re-downloads the installer if the latest version is not ${Version.LATEST}`, async () => {
+      (os.platform as jest.Mock).mockReturnValue('linux');
+      setVersion('2050');
+      await InstallTL.acquire(Version.LATEST);
+      expect(tool.find).toHaveBeenCalledWith(
+        'install-tl-unx.tar.gz',
+        Version.LATEST,
+      );
+      expect(tool.downloadTool).toHaveBeenCalledWith(
+        'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
+      );
+      expect(tool.downloadTool).toHaveBeenCalledWith(
+        `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${Version.LATEST}/install-tl-unx.tar.gz`,
+      );
+      expect(util.extract).toHaveBeenCalledTimes(2);
+      expect(tool.cacheDir).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-downloads the installer if version checking is failed', async () => {
+      (os.platform as jest.Mock).mockReturnValue('linux');
+      (fs.readFile as jest.Mock).mockImplementationOnce(async () => {
+        throw new Error('oops');
+      });
+      await InstallTL.acquire(Version.LATEST);
+      expect(tool.find).toHaveBeenCalledWith(
+        'install-tl-unx.tar.gz',
+        Version.LATEST,
+      );
+      expect(tool.downloadTool).toHaveBeenCalledWith(
+        'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
+      );
+      expect(tool.downloadTool).toHaveBeenCalledWith(
+        `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${Version.LATEST}/install-tl-unx.tar.gz`,
+      );
+      expect(util.extract).toHaveBeenCalledTimes(2);
+      expect(tool.cacheDir).toHaveBeenCalledTimes(1);
+    });
+
+    it('downloads the installer for TeX Live 2008', async () => {
+      (os.platform as jest.Mock).mockReturnValue('linux');
+      await InstallTL.acquire('2008');
+      expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2008');
+      expect(tool.downloadTool).toHaveBeenCalledWith(
+        `http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/install-tl-unx.tar.gz`,
+      );
+      expect(tool.downloadTool).toHaveBeenCalledTimes(1);
       expect(util.extract).toHaveBeenCalled();
       expect(tool.cacheDir).toHaveBeenCalled();
     });
@@ -152,6 +214,7 @@ describe('InstallTL', () => {
 
     it('does not fail even if restoring and saving cache fails', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
+      setVersion('2021');
       const fail = (): string => {
         throw new Error('oops');
       };

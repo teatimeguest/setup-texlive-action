@@ -184,6 +184,12 @@ function executable(version: Version, platform: NodeJS.Platform): string {
   return `install-tl${platform === 'win32' ? ext : ''}`;
 }
 
+function historic(version: Version): URL {
+  return new URL(
+    `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`,
+  );
+}
+
 /**
  * Gets the URL of the main repository of TeX Live.
  *
@@ -196,7 +202,7 @@ function repository(version: Version): URL {
   const base =
     version === Version.LATEST
       ? 'https://mirror.ctan.org/systems/texlive/'
-      : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`;
+      : historic(version);
   const tlnet = `tlnet${
     Number(version) < 2010 || version === Version.LATEST ? '' : '-final'
   }/`;
@@ -212,21 +218,48 @@ function repository(version: Version): URL {
 }
 
 async function download(target: string, version: Version): Promise<string> {
-  const url = new URL(target, repository(version)).href;
-  core.info(`Downloading ${url}`);
-  const archive = await tool.downloadTool(url);
+  const get = async (url: Readonly<URL>): Promise<string> => {
+    core.info(`Downloading ${url.href}`);
+    const archive = await tool.downloadTool(url.href);
 
-  core.info('Extracting');
-  const dest = await util.extract(
-    archive,
-    os.platform() === 'win32' ? 'zip' : 'tar.gz',
-  );
+    core.info('Extracting');
+    return await util.extract(
+      archive,
+      os.platform() === 'win32' ? 'zip' : 'tar.gz',
+    );
+  };
+
+  let dest = await get(new URL(target, repository(version)));
+
+  redownload: if (version === Version.LATEST) {
+    try {
+      /**
+       * Checks the latest version is really `Version.LATEST`.
+       */
+      const detected = await detectVersion(dest);
+      if (detected === version) {
+        break redownload;
+      }
+      core.info(`Unexpected version: ${detected}`);
+    } catch (error) {
+      core.info(`Unexpected error: ${error}`);
+      if (error instanceof Error && error.stack !== undefined) {
+        core.debug(error.stack);
+      }
+    }
+    dest = await get(new URL(target, historic(version)));
+  }
 
   core.info('Applying patches');
   await patch(version, dest);
   await saveToolCache(dest, target, version);
 
   return dest;
+}
+
+async function detectVersion(dest: string): Promise<string> {
+  const txt = path.join(dest, 'release-texlive.txt');
+  return (await fs.readFile(txt, 'utf8')).slice(43, 47);
 }
 
 async function saveToolCache(

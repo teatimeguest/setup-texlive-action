@@ -267,6 +267,9 @@ function executable(version, platform) {
     const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
     return `install-tl${platform === 'win32' ? ext : ''}`;
 }
+function historic(version) {
+    return new url_1.URL(`https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`);
+}
 /**
  * Gets the URL of the main repository of TeX Live.
  *
@@ -278,7 +281,7 @@ function executable(version, platform) {
 function repository(version) {
     const base = version === texlive_1.Version.LATEST
         ? 'https://mirror.ctan.org/systems/texlive/'
-        : `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`;
+        : historic(version);
     const tlnet = `tlnet${Number(version) < 2010 || version === texlive_1.Version.LATEST ? '' : '-final'}/`;
     const url = new url_1.URL(tlnet, base);
     /**
@@ -291,15 +294,40 @@ function repository(version) {
     return url;
 }
 async function download(target, version) {
-    const url = new url_1.URL(target, repository(version)).href;
-    core.info(`Downloading ${url}`);
-    const archive = await tool.downloadTool(url);
-    core.info('Extracting');
-    const dest = await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tar.gz');
+    const get = async (url) => {
+        core.info(`Downloading ${url.href}`);
+        const archive = await tool.downloadTool(url.href);
+        core.info('Extracting');
+        return await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tar.gz');
+    };
+    let dest = await get(new url_1.URL(target, repository(version)));
+    redownload: if (version === texlive_1.Version.LATEST) {
+        try {
+            /**
+             * Checks the latest version is really `Version.LATEST`.
+             */
+            const detected = await detectVersion(dest);
+            if (detected === version) {
+                break redownload;
+            }
+            core.info(`Unexpected version: ${detected}`);
+        }
+        catch (error) {
+            core.info(`Unexpected error: ${error}`);
+            if (error instanceof Error && error.stack !== undefined) {
+                core.debug(error.stack);
+            }
+        }
+        dest = await get(new url_1.URL(target, historic(version)));
+    }
     core.info('Applying patches');
     await patch(version, dest);
     await saveToolCache(dest, target, version);
     return dest;
+}
+async function detectVersion(dest) {
+    const txt = path.join(dest, 'release-texlive.txt');
+    return (await fs_1.promises.readFile(txt, 'utf8')).slice(43, 47);
 }
 async function saveToolCache(directory, target, version) {
     try {
