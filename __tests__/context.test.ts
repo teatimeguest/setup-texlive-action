@@ -23,7 +23,10 @@ let ctx: {
   };
 };
 
-jest.spyOn(fs, 'readFile').mockImplementation(async (filename) => {
+jest.mock('fs', () => ({
+  promises: jest.createMockFromModule('fs/promises'),
+}));
+(fs.readFile as jest.Mock).mockImplementation(async (filename) => {
   throw new Error(`Unexpected file access: ${filename}`);
 });
 jest.mock('os', () => ({
@@ -36,44 +39,46 @@ jest.mock('path', () => {
   return {
     join: jest.fn((...paths: Array<string>) => {
       return os.platform() === 'win32'
-        ? path.win32.join(...paths)
-        : path.posix.join(...paths);
+        ? actual.win32.join(...paths)
+        : actual.posix.join(...paths);
     }),
-    posix: actual.posix,
-    win32: actual.win32,
   };
 });
-jest.spyOn(core, 'getBooleanInput').mockImplementation((name) => {
+(core.getBooleanInput as jest.Mock).mockImplementation((name) => {
   const value = (ctx.inputs as Record<string, string | boolean>)[name];
   if (typeof value === 'boolean') {
     return value;
   }
   throw new Error(`Unexpected argument: ${name}`);
 });
-jest.spyOn(core, 'getInput').mockImplementation((name) => {
+(core.getInput as jest.Mock).mockImplementation((name) => {
   const value = (ctx.inputs as Record<string, string | boolean>)[name];
   if (typeof value === 'string') {
     return value;
   }
   throw new Error(`Unexpected argument: ${name}`);
 });
-jest.spyOn(core, 'getState').mockImplementation((name) => {
+(core.getState as jest.Mock).mockImplementation((name) => {
   const value = (ctx.state as Record<string, string | boolean>)[name];
   if (typeof value === 'string') {
     return value;
   }
   throw new Error(`Unexpected argument: ${name}`);
 });
-jest.spyOn(core, 'info').mockImplementation();
-jest.spyOn(core, 'warning').mockImplementation();
-jest.spyOn(core, 'saveState').mockImplementation();
-jest.spyOn(core, 'setOutput').mockImplementation();
-jest.spyOn(core, 'warning').mockImplementation();
+jest.mock('#/install-tl', () => ({
+  Env: jest.requireActual('#/install-tl').Env,
+}));
+jest.mock('#/texlive', () => ({
+  Version: jest.requireActual('#/texlive').Version,
+}));
+jest.mock('#/utility', () => ({
+  tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
+}));
+jest.unmock('#/context');
 
 beforeEach(() => {
   process.env = {
     ['ACTIONS_CACHE_URL']: '<ACTIONS_CACHE_URL>',
-    ['RUNNER_TEMP']: '<RUNNER_TEMP>',
   };
 
   ctx = {
@@ -99,9 +104,7 @@ describe('loadConfig', () => {
     const inputs = await context.loadConfig();
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual(new Set([]));
-    expect(inputs.prefix).toBe(
-      path.join(process.env['RUNNER_TEMP']!, 'setup-texlive'),
-    );
+    expect(inputs.prefix).toBe(path.join('<tmpdir>', 'setup-texlive'));
     expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2021');
   });
@@ -111,9 +114,7 @@ describe('loadConfig', () => {
     const inputs = await context.loadConfig();
     expect(inputs.cache).toBe(true);
     expect(inputs.packages).toStrictEqual(new Set([]));
-    expect(inputs.prefix).toBe(
-      path.join(process.env['RUNNER_TEMP']!, 'setup-texlive'),
-    );
+    expect(inputs.prefix).toBe(path.join('<tmpdir>', 'setup-texlive'));
     expect(inputs.tlcontrib).toBe(false);
     expect(inputs.version).toBe('2021');
   });

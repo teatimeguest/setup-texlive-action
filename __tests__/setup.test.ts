@@ -1,6 +1,4 @@
-import { promises as fs } from 'fs';
 import * as os from 'os';
-import * as path from 'path';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
@@ -10,43 +8,26 @@ import { InstallTL } from '#/install-tl';
 import * as setup from '#/setup';
 import { Manager } from '#/texlive';
 
-const random = (): string => (Math.random() + 1).toString(32).substring(7);
-
-jest.spyOn(fs, 'writeFile').mockImplementation();
-jest.mock('os', () => ({
-  arch: jest.requireActual('os').arch,
-  homedir: jest.fn(),
-  platform: jest.fn(),
-  tmpdir: jest.fn(),
-}));
-(os.homedir as jest.Mock).mockReturnValue(random());
-(os.tmpdir as jest.Mock).mockReturnValue(random());
+jest.mock('os');
+(os.arch as jest.Mock).mockReturnValue('<arch>');
+(os.homedir as jest.Mock).mockReturnValue('~');
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
     join: jest.fn((...paths: Array<string>) => {
       return os.platform() === 'win32'
-        ? path.win32.join(...paths)
-        : path.posix.join(...paths);
+        ? actual.win32.join(...paths)
+        : actual.posix.join(...paths);
     }),
-    posix: actual.posix,
-    win32: actual.win32,
   };
 });
-jest.spyOn(cache, 'restoreCache').mockResolvedValue(undefined);
-jest.spyOn(cache, 'saveCache').mockImplementation();
-jest.spyOn(core, 'debug').mockImplementation();
-jest
-  .spyOn(core, 'group')
-  .mockImplementation(
-    async <T>(name: string, fn: () => Promise<T>): Promise<T> => await fn(),
-  );
-jest.spyOn(core, 'info').mockImplementation();
-jest.spyOn(core, 'warning').mockImplementation();
-jest.spyOn(core, 'setFailed').mockImplementation((error) => {
+(core.group as jest.Mock).mockImplementation(
+  async <T>(name: string, fn: () => Promise<T>): Promise<T> => await fn(),
+);
+(core.setFailed as jest.Mock).mockImplementation((error) => {
   throw new Error(`${error}`);
 });
-jest.spyOn(context, 'loadConfig').mockImplementation(async () => ({
+(context.loadConfig as jest.Mock).mockImplementation(async () => ({
   cache: true,
   packages: new Set([]),
   prefix:
@@ -64,28 +45,41 @@ jest.spyOn(context, 'loadConfig').mockImplementation(async () => ({
     ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
   },
 }));
-jest.spyOn(context, 'getKey').mockImplementation();
-jest.spyOn(context, 'setKey').mockImplementation();
-jest.spyOn(context, 'getPost').mockImplementation();
-jest.spyOn(context, 'setPost').mockImplementation();
-jest.spyOn(context, 'setCacheHit').mockImplementation();
+jest.mock('#/install-tl', () => {
+  const actual = jest.requireActual('#/install-tl');
+  return {
+    Env: actual.Env,
+    InstallTL: actual.InstallTL,
+    Profile: actual.Profile,
+  };
+});
 jest
   .spyOn(InstallTL, 'acquire')
-  .mockImplementation((version) => new (InstallTL as any)(version, random()));
+  .mockImplementation(
+    async (version) => new (InstallTL as any)(version, '<version>'),
+  );
 jest.spyOn(InstallTL.prototype, 'run').mockImplementation();
-jest.spyOn(Manager.prototype, 'install').mockImplementation();
+jest.mock('#/texlive', () => {
+  const actual = jest.requireActual('#/texlive');
+  return {
+    contrib: actual.contrib,
+    Manager: actual.Manager,
+    Version: actual.Version,
+  };
+});
 jest.spyOn(Manager.prototype, 'conf', 'get').mockReturnValue({
-  texmf: jest.fn(async (key, value) => {
+  texmf: jest.fn(async (key?: string, value?: string) => {
     if (key === undefined) {
       return new Map([
-        ['TEXMFHOME', random()],
-        ['TEXMFHCONFIG', random()],
-        ['TEXMFVAR', random()],
+        ['TEXMFHOME', '<TEXMFHOME>'],
+        ['TEXMFHCONFIG', '<TEXMFCONFIG>'],
+        ['TEXMFVAR', '<TEXMFVAR>'],
       ]);
     }
-    return value === undefined ? undefined : random();
+    return value === undefined ? undefined : `<${key}>`;
   }) as any,
 });
+jest.spyOn(Manager.prototype, 'install').mockImplementation();
 jest
   .spyOn(Manager.prototype, 'path', 'get')
   .mockReturnValue({ add: jest.fn() });
@@ -95,6 +89,7 @@ jest
 jest
   .spyOn(Manager.prototype, 'repository', 'get')
   .mockReturnValue({ add: jest.fn() });
+jest.unmock('#/setup');
 
 describe('main', () => {
   beforeAll(() => {
@@ -335,7 +330,7 @@ describe('post', () => {
   });
 
   it('saves `TEXDIR` if `key` is set', async () => {
-    (context.getKey as jest.Mock).mockReturnValueOnce(random());
+    (context.getKey as jest.Mock).mockReturnValueOnce('<key>');
     await setup.run();
     expect(cache.saveCache).toHaveBeenCalledWith(
       expect.arrayContaining([]),
@@ -350,7 +345,7 @@ describe('post', () => {
   });
 
   it('does not fail even if `cache.saveCache` fails', async () => {
-    (context.getKey as jest.Mock).mockReturnValueOnce(random());
+    (context.getKey as jest.Mock).mockReturnValueOnce('<key>');
     (cache.saveCache as jest.Mock).mockImplementationOnce(async () => {
       throw new Error('oops');
     });

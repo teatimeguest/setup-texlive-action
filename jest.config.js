@@ -1,4 +1,5 @@
 module.exports = {
+  automock: true,
   clearMocks: true,
   globals: {
     'ts-jest': {

@@ -1,25 +1,27 @@
 import { promises as fs } from 'fs';
 
-import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
 import * as util from '#/utility';
 
+jest.mock('fs', () => ({
+  promises: jest.createMockFromModule('fs/promises'),
+}));
 jest.mock('os', () => ({
   tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
 }));
 jest.mock('path', () => jest.requireActual('path').posix);
-jest.spyOn(core, 'debug').mockImplementation();
+jest.spyOn(glob, 'create').mockResolvedValue({
+  glob: async () => ['<globbed>'],
+} as glob.Globber);
+jest.unmock('#/utility');
 
 describe('updateFile', () => {
   it('updates the contents of the file', async () => {
-    jest
-      .spyOn(fs, 'readFile')
-      .mockResolvedValueOnce(
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
-      );
-    jest.spyOn(fs, 'writeFile').mockImplementationOnce(jest.fn());
+    (fs.readFile as jest.Mock).mockResolvedValueOnce(
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+    );
     await util.updateFile(
       '<filename>',
       { search: /p/gu, replace: 'P' },
@@ -34,7 +36,7 @@ describe('updateFile', () => {
 
 describe('extract', () => {
   it('extracts files from a tarball', async () => {
-    jest.spyOn(tool, 'extractTar').mockResolvedValueOnce('<extractTar>');
+    (tool.extractTar as jest.Mock).mockResolvedValueOnce('<extractTar>');
     await expect(util.extract('<tarball>', 'tar.gz')).resolves.toBe(
       '<extractTar>',
     );
@@ -45,35 +47,16 @@ describe('extract', () => {
   });
 
   it('extracts files from a zipfile', async () => {
-    jest.spyOn(glob, 'create').mockImplementationOnce(
-      async (pattern) =>
-        ({
-          glob: async () => [pattern.replace(/\*/gu, '<subdir>')],
-        } as glob.Globber),
-    );
     jest.spyOn(tool, 'extractZip').mockResolvedValueOnce('<extractZip>');
-    await expect(util.extract('<zipfile>', 'zip')).resolves.toBe(
-      '<extractZip>/<subdir>',
-    );
+    await expect(util.extract('<zipfile>', 'zip')).resolves.toBe('<globbed>');
     expect(tool.extractZip).toHaveBeenCalledWith('<zipfile>');
   });
 
   it('throws an exception if the directory cannot be located', async () => {
-    jest
-      .spyOn(glob, 'create')
-      .mockResolvedValueOnce({
-        glob: async (): Promise<Array<string>> => [],
-      } as glob.Globber)
-      .mockResolvedValueOnce({
-        glob: async () => [undefined] as any as Array<string>,
-      } as glob.Globber);
-    jest
-      .spyOn(tool, 'extractZip')
-      .mockResolvedValueOnce('<extractZip>')
-      .mockResolvedValueOnce('<extractZip>');
-    await expect(util.extract('<zipfile>', 'zip')).rejects.toThrow(
-      'Unable to locate the unzipped directory',
-    );
+    (glob.create as jest.Mock).mockResolvedValueOnce({
+      glob: async (): Promise<Array<string>> => [],
+    } as glob.Globber);
+    (tool.extractZip as jest.Mock).mockResolvedValueOnce('<extractZip>');
     await expect(util.extract('<zipfile>', 'zip')).rejects.toThrow(
       'Unable to locate the unzipped directory',
     );
@@ -82,24 +65,18 @@ describe('extract', () => {
 
 describe('determine', () => {
   it('returns a unique path that matches the given pattern', async () => {
-    jest.spyOn(glob, 'create').mockResolvedValueOnce({
-      glob: async () => ['<path>'],
-    } as glob.Globber);
-    await expect(util.determine('<some pattern>')).resolves.toBe('<path>');
+    await expect(util.determine('<pattern>')).resolves.toBe('<globbed>');
   });
 
-  it('returns `undefined` if the matched path is not unique', async () => {
-    jest
-      .spyOn(glob, 'create')
-      .mockResolvedValueOnce({
-        glob: async (): Promise<Array<string>> => [],
-      } as glob.Globber)
-      .mockResolvedValueOnce({
-        glob: async () => ['<some path>', '<other path>'],
+  it.each<[Array<string>]>([[[]], [['<some>', '<other>']]])(
+    'returns `undefined` if the matched path is not unique',
+    async (matched) => {
+      (glob.create as jest.Mock).mockResolvedValueOnce({
+        glob: async () => matched,
       } as glob.Globber);
-    await expect(util.determine('<some pattern>')).resolves.toBeUndefined();
-    await expect(util.determine('<some pattern>')).resolves.toBeUndefined();
-  });
+      await expect(util.determine('<pattern>')).resolves.toBeUndefined();
+    },
+  );
 });
 
 describe('tmpdir', () => {

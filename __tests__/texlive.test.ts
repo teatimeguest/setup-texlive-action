@@ -4,23 +4,17 @@ import * as exec from '@actions/exec';
 import { Manager, Version } from '#/texlive';
 import * as util from '#/utility';
 
-const random = (): string => (Math.random() + 1).toString(32).substring(7);
+process.env = {};
 
-process.env['GITHUB_PATH'] = '';
-
-jest.spyOn(core, 'addPath').mockImplementation();
-jest.spyOn(core, 'debug').mockImplementation();
-jest.spyOn(core, 'exportVariable').mockImplementation();
-jest
-  .spyOn(core, 'group')
-  .mockImplementation(
-    async <T>(name: string, fn: () => Promise<T>): Promise<T> => await fn(),
-  );
-jest.spyOn(core, 'info').mockImplementation();
-jest.spyOn(exec, 'exec').mockImplementation();
-jest
-  .spyOn(exec, 'getExecOutput')
-  .mockResolvedValue({ exitCode: 0, stdout: random(), stderr: random() });
+(core.group as jest.Mock).mockImplementation(
+  async <T>(name: string, fn: () => Promise<T>): Promise<T> => await fn(),
+);
+(exec.getExecOutput as jest.Mock).mockResolvedValue({
+  exitCode: 0,
+  stdout: '<stdout>',
+  stderr: '',
+});
+jest.unmock('#/texlive');
 
 describe('Version', () => {
   test.each([
@@ -114,13 +108,13 @@ describe('Manager', () => {
     const tlmgr = new Manager('2019', '/usr/local/texlive');
 
     it('adds the bin directory to the PATH', async () => {
-      jest.spyOn(util, 'determine').mockResolvedValueOnce('<path>');
+      (util.determine as jest.Mock).mockResolvedValueOnce('<path>');
       await tlmgr.path.add();
       expect(core.addPath).toHaveBeenCalledWith('<path>');
     });
 
     it('fails as the bin directory cannot be located', async () => {
-      jest.spyOn(util, 'determine').mockResolvedValueOnce(undefined);
+      (util.determine as jest.Mock).mockResolvedValueOnce(undefined);
       await expect(tlmgr.path.add()).rejects.toThrow(
         'Unable to locate the bin directory',
       );
@@ -130,31 +124,31 @@ describe('Manager', () => {
   describe('pinning.add', () => {
     it('pins a repository with a glob', async () => {
       const tlmgr = new Manager('2019', '/usr/local/texlive');
-      await tlmgr.pinning.add(random(), '*');
+      await tlmgr.pinning.add('<repository>', '*');
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'pinning',
         'add',
-        expect.anything(),
+        '<repository>',
         '*',
       ]);
     });
 
     it('pins a repository with globs', async () => {
       const tlmgr = new Manager('2019', '/usr/local/texlive');
-      await tlmgr.pinning.add(random(), 'ams*', 'tikz*');
+      await tlmgr.pinning.add('<repository>', '<glob1>', '<glob2>');
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'pinning',
         'add',
-        expect.anything(),
-        'ams*',
-        'tikz*',
+        '<repository>',
+        '<glob1>',
+        '<glob2>',
       ]);
     });
 
     it('fails since the `pinning` action is not implemented', async () => {
       const tlmgr = new Manager('2012', '/usr/local/texlive');
       await expect(async () => {
-        await tlmgr.pinning.add(random(), random());
+        await tlmgr.pinning.add('<repository>', '*');
       }).rejects.toThrow(
         '`pinning` action is not implemented in TeX Live 2012',
       );
@@ -164,30 +158,34 @@ describe('Manager', () => {
   describe('repository.add', () => {
     it('adds a repository with a tag', async () => {
       const tlmgr = new Manager('2019', '/usr/local/texlive');
-      await expect(tlmgr.repository.add(random(), 'tag')).resolves.toBe(true);
+      await expect(tlmgr.repository.add('<repository>', '<tag>')).resolves.toBe(
+        true,
+      );
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         'tlmgr',
-        ['repository', 'add', expect.anything(), 'tag'],
+        ['repository', 'add', '<repository>', '<tag>'],
         expect.objectContaining({ ignoreReturnCode: true }),
       );
     });
 
     it('adds a repository with the empty tag', async () => {
       const tlmgr = new Manager('2019', '/usr/local/texlive');
-      await expect(tlmgr.repository.add(random(), '')).resolves.toBe(true);
+      await expect(tlmgr.repository.add('<repository>', '')).resolves.toBe(
+        true,
+      );
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         'tlmgr',
-        ['repository', 'add', expect.anything(), ''],
+        ['repository', 'add', '<repository>', ''],
         expect.objectContaining({ ignoreReturnCode: true }),
       );
     });
 
     it('adds a repository with no tags', async () => {
       const tlmgr = new Manager('2019', '/usr/local/texlive');
-      await expect(tlmgr.repository.add(random())).resolves.toBe(true);
+      await expect(tlmgr.repository.add('<repository>')).resolves.toBe(true);
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         'tlmgr',
-        ['repository', 'add', expect.anything()],
+        ['repository', 'add', '<repository>'],
         expect.objectContaining({ ignoreReturnCode: true }),
       );
     });
@@ -197,12 +195,12 @@ describe('Manager', () => {
         exitCode: 2,
         stdout: '',
         stderr: [
-          `tlmgr: repository or its tag already defined, no action: ${random()}`,
+          'tlmgr: repository or its tag already defined, no action: <repository>',
           'tlmgr: An error has occurred. See above messages. Exiting.',
         ].join('\n'),
       });
       const tlmgr = new Manager('2019', '/usr/local/texlive');
-      await expect(tlmgr.repository.add(random(), random())).resolves.toBe(
+      await expect(tlmgr.repository.add('<repository>', '<tag>')).resolves.toBe(
         false,
       );
     });
@@ -212,20 +210,20 @@ describe('Manager', () => {
         exitCode: 2,
         stdout: '',
         stderr: [
-          `tlmgr: neither https?/ftp/ssh/scp/file URI nor absolute path, no action: ${random()}`,
-          `tlmgr: An error has occurred. See above messages. Exiting.`,
+          'tlmgr: neither https?/ftp/ssh/scp/file URI nor absolute path, no action: <repository>',
+          'tlmgr: An error has occurred. See above messages. Exiting.',
         ].join('\n'),
       });
       const tlmgr = new Manager('2019', '/usr/local/texlive');
-      await expect(tlmgr.repository.add(random(), random())).rejects.toThrow(
-        /^`tlmgr` failed with exit code 2: /u,
-      );
+      await expect(
+        tlmgr.repository.add('<repository>', '<tag>'),
+      ).rejects.toThrow(/^`tlmgr` failed with exit code 2: /u);
     });
 
     it('fails since the `repository` action is not implemented', async () => {
       const tlmgr = new Manager('2011', '/usr/local/texlive');
       await expect(async () => {
-        await tlmgr.repository.add(random(), random());
+        await tlmgr.repository.add('<repository>', '<tag>');
       }).rejects.toThrow(
         '`repository` action is not implemented in TeX Live 2011',
       );

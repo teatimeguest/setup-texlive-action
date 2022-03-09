@@ -2,7 +2,6 @@ import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tool from '@actions/tool-cache';
 
@@ -10,17 +9,14 @@ import { Env, InstallTL, Profile } from '#/install-tl';
 import { Version } from '#/texlive';
 import * as util from '#/utility';
 
-const random = (): string => (Math.random() + 1).toString(32).substring(7);
-
-jest
-  .spyOn(fs, 'mkdtemp')
-  .mockImplementation(async (template) => template + 'XXXXXX');
-jest.spyOn(fs, 'readFile').mockImplementation();
-jest.spyOn(fs, 'writeFile').mockImplementation();
-jest.mock('os', () => ({
-  homedir: jest.fn().mockReturnValue('~'),
-  platform: jest.fn(),
+jest.mock('fs', () => ({
+  promises: jest.createMockFromModule('fs/promises'),
 }));
+(fs.mkdtemp as jest.Mock).mockImplementation(
+  async (template: string) => template + 'XXXXXX',
+);
+jest.mock('os');
+(os.homedir as jest.Mock).mockReturnValue('~');
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
@@ -33,16 +29,16 @@ jest.mock('path', () => {
     win32: actual.win32,
   };
 });
-jest.spyOn(core, 'addPath').mockImplementation();
-jest.spyOn(core, 'debug').mockImplementation();
-jest.spyOn(core, 'info').mockImplementation();
-jest.spyOn(exec, 'exec').mockImplementation();
-jest.spyOn(tool, 'cacheDir').mockResolvedValue('');
-jest.spyOn(tool, 'downloadTool').mockResolvedValue(random());
-jest.spyOn(tool, 'find').mockReturnValue('');
-jest.spyOn(util, 'extract').mockResolvedValue(random());
-jest.spyOn(util, 'tmpdir').mockReturnValue(random());
-jest.spyOn(util, 'updateFile').mockImplementation();
+(tool.cacheDir as jest.Mock).mockResolvedValue('');
+(tool.downloadTool as jest.Mock).mockResolvedValue('<downloadTool>');
+(tool.find as jest.Mock).mockReturnValue('');
+(util.extract as jest.Mock).mockResolvedValue('<extract>');
+(util.tmpdir as jest.Mock).mockReturnValue('<tmpdir>');
+jest.unmock('#/install-tl');
+
+beforeEach(() => {
+  process.env = {};
+});
 
 describe('InstallTL', () => {
   describe('run', () => {
@@ -148,7 +144,7 @@ describe('InstallTL', () => {
 
     it('uses cache instead of downloading', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
-      (tool.find as jest.Mock).mockReturnValueOnce(random());
+      (tool.find as jest.Mock).mockReturnValueOnce('<find>');
       await InstallTL.acquire('2021');
       expect(tool.find).toHaveBeenCalled();
       expect(tool.downloadTool).not.toHaveBeenCalled();
@@ -367,11 +363,13 @@ describe('repository', () => {
 
 describe('patch', () => {
   beforeEach(() => {
-    (util.updateFile as jest.Mock).mockRestore();
+    (util.updateFile as jest.Mock).mockImplementation(
+      jest.requireActual('#/utility').updateFile as () => unknown,
+    );
   });
 
   afterEach(() => {
-    jest.spyOn(util, 'updateFile').mockImplementation();
+    (util.updateFile as jest.Mock).mockImplementation();
   });
 
   it('applies a patch to `install-tl(-windows).bat`', async () => {
@@ -427,7 +425,7 @@ describe('patch', () => {
         (error as { code?: string }).code = 'ENOENT';
         throw error;
       }
-      return random();
+      return '';
     });
     (os.platform as jest.Mock).mockReturnValue('win32');
     await expect(InstallTL.acquire('2021')).resolves.not.toThrow();
@@ -439,7 +437,7 @@ describe('patch', () => {
         const error = new Error('oops');
         throw error;
       }
-      return random();
+      return '';
     });
     (os.platform as jest.Mock).mockReturnValue('win32');
     await expect(InstallTL.acquire('2021')).rejects.toThrow('oops');
@@ -452,7 +450,7 @@ describe('patch', () => {
         (error as NodeJS.ErrnoException).code = 'ENOTDIR';
         throw error;
       }
-      return random();
+      return '';
     });
     (os.platform as jest.Mock).mockReturnValue('win32');
     await expect(InstallTL.acquire('2021')).rejects.toThrow('oops');
