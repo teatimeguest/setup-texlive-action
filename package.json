@@ -18,11 +18,11 @@
     "node": ">=16"
   },
   "dependencies": {
-    "@actions/cache": "1.0.9",
+    "@actions/cache": "1.0.10",
     "@actions/core": "1.6.0",
     "@actions/exec": "1.1.0",
     "@actions/glob": "0.2.0",
-    "@actions/tool-cache": "1.7.1"
+    "@actions/tool-cache": "1.7.2"
   },
   "devDependencies": {
     "@types/jest": "27.4.1",
@@ -31,7 +31,7 @@
     "@typescript-eslint/parser": "5.14.0",
     "@vercel/ncc": "0.33.3",
     "editorconfig-checker": "4.0.2",
-    "eslint": "8.10.0",
+    "eslint": "8.11.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-jest": "26.1.1",
     "jest": "27.5.1",
