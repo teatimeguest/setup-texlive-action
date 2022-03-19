@@ -15,7 +15,8 @@ export namespace Version {
   export const LATEST = '2021';
 }
 
-export type Version =  // eslint-disable-line @typescript-eslint/no-redeclare
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type Version =
   | util.Indices<'1996', typeof Version.LATEST>
   | typeof Version.LATEST;
 
