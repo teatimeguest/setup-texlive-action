@@ -82,12 +82,12 @@ describe('InstallTL', () => {
       );
     });
 
-    it('installs TeX Live 2021', async () => {
+    it(`installs TeX Live ${Version.LATEST}`, async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
-      const installtl = await InstallTL.acquire('2021');
+      const installtl = await InstallTL.acquire(Version.LATEST);
       await installtl.run(
-        new Profile('2021', '/usr/local/texlive'),
-        new Env('2021', '/usr/local/texlive'),
+        new Profile(Version.LATEST, '/usr/local/texlive'),
+        new Env(Version.LATEST, '/usr/local/texlive'),
       );
       expect(exec.exec).toHaveBeenCalledWith(
         expect.stringContaining(''),
@@ -106,9 +106,12 @@ describe('InstallTL', () => {
 
     it('downloads the installer on Linux', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
-      setVersion('2021');
-      await InstallTL.acquire('2021');
-      expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2021');
+      setVersion(Version.LATEST);
+      await InstallTL.acquire(Version.LATEST);
+      expect(tool.find).toHaveBeenCalledWith(
+        'install-tl-unx.tar.gz',
+        Version.LATEST,
+      );
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
       );
@@ -119,9 +122,9 @@ describe('InstallTL', () => {
 
     it('downloads the installer on Windows', async () => {
       (os.platform as jest.Mock).mockReturnValue('win32');
-      setVersion('2021');
-      await InstallTL.acquire('2021');
-      expect(tool.find).toHaveBeenCalledWith('install-tl.zip', '2021');
+      setVersion(Version.LATEST);
+      await InstallTL.acquire(Version.LATEST);
+      expect(tool.find).toHaveBeenCalledWith('install-tl.zip', Version.LATEST);
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip',
       );
@@ -132,9 +135,12 @@ describe('InstallTL', () => {
 
     it('downloads the installer on macOS', async () => {
       (os.platform as jest.Mock).mockReturnValue('darwin');
-      setVersion('2021');
-      await InstallTL.acquire('2021');
-      expect(tool.find).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2021');
+      setVersion(Version.LATEST);
+      await InstallTL.acquire(Version.LATEST);
+      expect(tool.find).toHaveBeenCalledWith(
+        'install-tl-unx.tar.gz',
+        Version.LATEST,
+      );
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
       );
@@ -207,20 +213,20 @@ describe('InstallTL', () => {
     it('uses cache instead of downloading', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
       (tool.find as jest.Mock).mockReturnValueOnce('<find>');
-      await InstallTL.acquire('2021');
+      await InstallTL.acquire(Version.LATEST);
       expect(tool.find).toHaveBeenCalled();
       expect(tool.downloadTool).not.toHaveBeenCalled();
     });
 
     it('does not fail even if restoring and saving cache fails', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
-      setVersion('2021');
+      setVersion(Version.LATEST);
       const fail = (): string => {
         throw new Error('oops');
       };
       (tool.find as jest.Mock).mockImplementationOnce(fail);
       (tool.cacheDir as jest.Mock).mockImplementationOnce(fail);
-      await expect(InstallTL.acquire('2021')).resolves.not.toThrow();
+      await expect(InstallTL.acquire(Version.LATEST)).resolves.not.toThrow();
     });
   });
 });
@@ -231,14 +237,14 @@ describe('Env', () => {
       process.env['TEXLIVE_INSTALL_ENV_NOCHECK'] = '';
       process.env['TEXLIVE_INSTALL_TEXMFCONFIG'] = '~/texmf-config';
       process.env['NOPERLDOC'] = '';
-      expect(Env.format(new Env('2021', '/usr/local/texlive'))).toBe(
+      expect(Env.format(new Env(Version.LATEST, '/usr/local/texlive'))).toBe(
         [
           "TEXLIVE_INSTALL_ENV_NOCHECK=''",
           "TEXLIVE_INSTALL_NO_WELCOME='true'",
           "TEXLIVE_INSTALL_PREFIX='/usr/local/texlive'",
           "TEXLIVE_INSTALL_TEXMFHOME='~/texmf'",
           "TEXLIVE_INSTALL_TEXMFCONFIG='~/texmf-config'",
-          "TEXLIVE_INSTALL_TEXMFVAR='~/.local/texlive/2021/texmf-var'",
+          `TEXLIVE_INSTALL_TEXMFVAR='~/.local/texlive/${Version.LATEST}/texmf-var'`,
           "NOPERLDOC=''",
         ].join('\n'),
       );
@@ -292,11 +298,11 @@ describe('Profile', () => {
 
     it('creates a profile for TeX Live 2021', () => {
       (os.platform as jest.Mock).mockReturnValue('win32');
-      expect(new Profile('2021', 'C:\\texlive')).toMatchObject({
-        TEXDIR: 'C:\\texlive\\2021',
+      expect(new Profile(Version.LATEST, 'C:\\texlive')).toMatchObject({
+        TEXDIR: `C:\\texlive\\${Version.LATEST}`,
         TEXMFLOCAL: 'C:\\texlive\\texmf-local',
-        TEXMFSYSCONFIG: 'C:\\texlive\\2021\\texmf-config',
-        TEXMFSYSVAR: 'C:\\texlive\\2021\\texmf-var',
+        TEXMFSYSCONFIG: `C:\\texlive\\${Version.LATEST}\\texmf-config`,
+        TEXMFSYSVAR: `C:\\texlive\\${Version.LATEST}\\texmf-var`,
         selected_scheme: 'scheme-infraonly',
         option_adjustrepo: '1',
         option_autobackup: '0',
@@ -315,12 +321,14 @@ describe('Profile', () => {
   describe('format', () => {
     it('returns a profile string', () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
-      expect(Profile.format(new Profile('2021', '/usr/local/texlive'))).toBe(
+      expect(
+        Profile.format(new Profile(Version.LATEST, '/usr/local/texlive')),
+      ).toBe(
         [
-          'TEXDIR /usr/local/texlive/2021',
+          `TEXDIR /usr/local/texlive/${Version.LATEST}`,
           'TEXMFLOCAL /usr/local/texlive/texmf-local',
-          'TEXMFSYSCONFIG /usr/local/texlive/2021/texmf-config',
-          'TEXMFSYSVAR /usr/local/texlive/2021/texmf-var',
+          `TEXMFSYSCONFIG /usr/local/texlive/${Version.LATEST}/texmf-config`,
+          `TEXMFSYSVAR /usr/local/texlive/${Version.LATEST}/texmf-var`,
           'selected_scheme scheme-infraonly',
           'option_adjustrepo 1',
           'option_autobackup 0',
@@ -339,12 +347,12 @@ describe('Profile', () => {
 });
 
 describe('executable', () => {
-  it('returns the filename for TeX Live 2021 on Linux', async () => {
+  it(`returns the filename for TeX Live ${Version.LATEST} on Linux`, async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    const installtl = await InstallTL.acquire('2021');
+    const installtl = await InstallTL.acquire(Version.LATEST);
     await installtl.run(
-      new Profile('2021', '/usr/local/texlive'),
-      new Env('2021', '/usr/local/texlive'),
+      new Profile(Version.LATEST, '/usr/local/texlive'),
+      new Env(Version.LATEST, '/usr/local/texlive'),
     );
     expect(exec.exec).toHaveBeenCalledWith(
       expect.stringMatching(/install-tl$/u),
@@ -385,7 +393,7 @@ describe('executable', () => {
 describe('repository', () => {
   it('returns the url of the ctan', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    await InstallTL.acquire('2021');
+    await InstallTL.acquire(Version.LATEST);
     expect(tool.downloadTool).toHaveBeenCalledWith(
       expect.stringMatching(
         '^https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
@@ -457,7 +465,7 @@ describe('patch', () => {
       ].join('\n'),
     );
     (os.platform as jest.Mock).mockReturnValue('win32');
-    await InstallTL.acquire('2021');
+    await InstallTL.acquire(Version.LATEST);
     expect(fs.writeFile).toHaveBeenCalledWith(
       expect.stringMatching(/install-tl(?:-windows)?\.bat/u),
       [
@@ -491,7 +499,7 @@ describe('patch', () => {
       return '';
     });
     (os.platform as jest.Mock).mockReturnValue('win32');
-    await expect(InstallTL.acquire('2021')).resolves.not.toThrow();
+    await expect(InstallTL.acquire(Version.LATEST)).resolves.not.toThrow();
   });
 
   it('rethrows an error that is not of Node.js', async () => {
@@ -503,7 +511,7 @@ describe('patch', () => {
       return '';
     });
     (os.platform as jest.Mock).mockReturnValue('win32');
-    await expect(InstallTL.acquire('2021')).rejects.toThrow('oops');
+    await expect(InstallTL.acquire(Version.LATEST)).rejects.toThrow('oops');
   });
 
   it('rethrows a Node.js error of which code is not `ENOENT`', async () => {
@@ -516,7 +524,7 @@ describe('patch', () => {
       return '';
     });
     (os.platform as jest.Mock).mockReturnValue('win32');
-    await expect(InstallTL.acquire('2021')).rejects.toThrow('oops');
+    await expect(InstallTL.acquire(Version.LATEST)).rejects.toThrow('oops');
   });
 
   it('applies a patch to `tlpkg/TeXLive/TLWinGoo.pm`', async () => {

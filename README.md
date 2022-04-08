@@ -58,8 +58,8 @@ The action will install it by
 downloading the installation script from the [historic archives][historic] and
 configuring the package repository appropriately.
 
-Supported versions are `2008` to `2021` for Linux and Windows, and
-`2013` to `2021` for macOS.
+Supported versions are `2008` to `2022` for Linux and Windows, and
+`2013` to `2022` for macOS.
 
 > **Remark.**
 > Versions `2008` to `2012` can be installed on `macos-latest` but
@@ -95,7 +95,7 @@ All inputs are optional.
 |`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-environment-variables]. The default is <code>[$RUNNER_TEMP][actions-environment-variables]/setup-texlive</code>.|
 |`tlcontrib`|Bool|Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored if an older version is specified for `version`. The default is `false`.|
-|`version`|String|TeX Live version to install. Supported values are `2008` to `2021`, and `latest`.|
+|`version`|String|TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.|
 
 ## Outputs
 

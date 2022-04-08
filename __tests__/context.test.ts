@@ -4,6 +4,7 @@ import * as path from 'path';
 
 import * as core from '@actions/core';
 
+import { Version } from '#/texlive';
 import * as context from '#/context';
 
 const random = (): string => (Math.random() + 1).toString(32).substring(7);
@@ -106,7 +107,7 @@ describe('loadConfig', () => {
     expect(inputs.packages).toStrictEqual(new Set([]));
     expect(inputs.prefix).toBe(path.join('<tmpdir>', 'setup-texlive'));
     expect(inputs.tlcontrib).toBe(false);
-    expect(inputs.version).toBe('2021');
+    expect(inputs.version).toBe(Version.LATEST);
   });
 
   it('returns default values on Windows', async () => {
@@ -116,7 +117,7 @@ describe('loadConfig', () => {
     expect(inputs.packages).toStrictEqual(new Set([]));
     expect(inputs.prefix).toBe(path.join('<tmpdir>', 'setup-texlive'));
     expect(inputs.tlcontrib).toBe(false);
-    expect(inputs.version).toBe('2021');
+    expect(inputs.version).toBe(Version.LATEST);
   });
 
   it('returns custom user inputs on Linux', async () => {
@@ -151,7 +152,7 @@ describe('loadConfig', () => {
     ctx.inputs.packages = '  luatex\ncleveref   hyperref ';
     ctx.inputs.prefix = 'C:\\texlive';
     ctx.inputs.tlcontrib = true;
-    ctx.inputs.version = '2021';
+    ctx.inputs.version = Version.LATEST;
     const inputs = await context.loadConfig();
     expect(inputs.cache).toBe(false);
     expect(inputs.packages).toStrictEqual(
@@ -159,7 +160,7 @@ describe('loadConfig', () => {
     );
     expect(inputs.prefix).toBe('C:\\texlive');
     expect(inputs.tlcontrib).toBe(true);
-    expect(inputs.version).toBe('2021');
+    expect(inputs.version).toBe(Version.LATEST);
   });
 
   it('disables caching if environment variables are not set properly', async () => {

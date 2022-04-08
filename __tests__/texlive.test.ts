@@ -22,8 +22,8 @@ describe('Version', () => {
     ['1996', true],
     ['2008', true],
     ['2015', true],
-    ['2021', true],
-    ['2022', false],
+    ['2022', true],
+    ['2023', false],
     ['latest', false],
   ])('isVersion(%o)', (version, result) => {
     expect(Version.isVersion(version)).toBe(result);

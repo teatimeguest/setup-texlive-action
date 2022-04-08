@@ -12,7 +12,7 @@ export namespace Version {
     return keys<Record<Version, unknown>>().includes(version as Version);
   }
 
-  export const LATEST = '2021';
+  export const LATEST = '2022';
 }
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
