@@ -1,4 +1,5 @@
-import { promises as fs } from 'fs';
+import * as fs from 'fs/promises';
+import * as process from 'process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
@@ -12,14 +13,16 @@ const fail = (): unknown => {
   throw new Error('<error>');
 };
 
-jest.mock('fs', () => ({
-  promises: jest.createMockFromModule('fs/promises'),
+jest.mock('fs/promises', () => ({
+  readFile: jest.fn(),
   stat: jest.fn(), // required for @azure/storage-blob
+  writeFile: jest.fn(),
 }));
 jest.mock('os', () => ({
   tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
 }));
 jest.mock('path', () => jest.requireActual('path').posix);
+jest.mock('process', () => ({ env: {} }));
 jest.spyOn(glob, 'create').mockResolvedValue({
   glob: async () => ['<globbed>'],
 } as glob.Globber);

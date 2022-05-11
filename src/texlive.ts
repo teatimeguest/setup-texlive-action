@@ -1,5 +1,4 @@
 import * as path from 'path';
-import { URL } from 'url';
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';

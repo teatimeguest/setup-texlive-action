@@ -1,6 +1,6 @@
-import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as process from 'process';
 
 import * as exec from '@actions/exec';
 import * as tool from '@actions/tool-cache';
@@ -10,15 +10,16 @@ import * as tl from '#/texlive';
 import Version = tl.Version;
 import * as util from '#/utility';
 
-jest.mock('fs', () => ({
-  promises: jest.createMockFromModule('fs/promises'),
+jest.mock('fs/promises', () => ({
+  mkdtemp: jest.fn(async (template: string) => template + 'XXXXXX'),
+  readFile: jest.fn(),
   stat: jest.fn(), // required for @azure/storage-blob
+  writeFile: jest.fn(),
 }));
-(fs.mkdtemp as jest.Mock).mockImplementation(
-  async (template: string) => template + 'XXXXXX',
-);
-jest.mock('os');
-(os.homedir as jest.Mock).mockReturnValue('~');
+jest.mock('os', () => ({
+  homedir: jest.fn().mockReturnValue('~'),
+  platform: jest.fn(),
+}));
 jest.mock('path', () => {
   const actual = jest.requireActual('path');
   return {
@@ -31,6 +32,7 @@ jest.mock('path', () => {
     win32: actual.win32,
   };
 });
+jest.mock('process', () => ({ env: {} }));
 (tool.downloadTool as jest.Mock).mockResolvedValue('<downloadTool>');
 (util.extract as jest.Mock).mockResolvedValue('<extract>');
 (util.tmpdir as jest.Mock).mockReturnValue('<tmpdir>');
@@ -38,10 +40,6 @@ jest.mock('path', () => {
   jest.requireActual<typeof tl>('#/texlive').historic,
 );
 jest.unmock('#/install-tl');
-
-beforeEach(() => {
-  process.env = {};
-});
 
 describe('InstallTL', () => {
   describe('run', () => {
@@ -375,207 +373,44 @@ describe('repository', () => {
 });
 
 describe('patch', () => {
-  beforeEach(() => {
-    (util.updateFile as jest.Mock).mockImplementation(
-      jest.requireActual('#/utility').updateFile as () => unknown,
-    );
-  });
-
-  afterEach(() => {
-    (util.updateFile as jest.Mock).mockImplementation();
-  });
-
-  it('applies a patch to `install-tl(-windows).bat`', async () => {
-    (fs.readFile as jest.Mock).mockResolvedValue(
-      [
-        String.raw`if %ver_str:~,3% == 6.0 (`,
-        String.raw`  echo WARNING: Windows 7 is the earliest supported version.`,
-        String.raw`  echo TeX Live 2020 has not been tested on Windows Vista.`,
-        String.raw`  pause`,
-        String.raw`)`,
-        String.raw``,
-        String.raw`rem Start installer`,
-        String.raw`if %tcl% == yes (`,
-        String.raw`rem echo "%wish%" "%instroot%tlpkg\installer\install-tl-gui.tcl" -- %args%`,
-        String.raw`rem pause`,
-        String.raw`"%wish%" "%instroot%tlpkg\installer\install-tl-gui.tcl" -- %args%`,
-        String.raw`) else (`,
-        String.raw`rem echo perl "%instroot%install-tl" %args%`,
-        String.raw`rem pause`,
-        String.raw`perl "%instroot%install-tl" %args%`,
-        String.raw`)`,
-      ].join('\n'),
-    );
-    (os.platform as jest.Mock).mockReturnValue('win32');
-    await InstallTL.acquire(Version.LATEST);
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringMatching(/install-tl(?:-windows)?\.bat/u),
-      [
-        String.raw`if %ver_str:~,3% == 6.0 (`,
-        String.raw`  echo WARNING: Windows 7 is the earliest supported version.`,
-        String.raw`  echo TeX Live 2020 has not been tested on Windows Vista.`,
-        String.raw`  `,
-        String.raw`)`,
-        String.raw``,
-        String.raw`rem Start installer`,
-        String.raw`if %tcl% == yes (`,
-        String.raw`rem echo "%wish%" "%instroot%tlpkg\installer\install-tl-gui.tcl" -- %args%`,
-        String.raw`rem `,
-        String.raw`"%wish%" "%instroot%tlpkg\installer\install-tl-gui.tcl" -- %args%`,
-        String.raw`) else (`,
-        String.raw`rem echo perl "%instroot%install-tl" %args%`,
-        String.raw`rem `,
-        String.raw`perl "%instroot%install-tl" %args%`,
-        String.raw`)`,
-      ].join('\n'),
-    );
-  });
-
   it('does not fail even if `install-tl(-windows).bat` does not exist', async () => {
-    (fs.readFile as jest.Mock).mockImplementation(async (filename: string) => {
-      if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
-        const error = new Error('oops');
-        (error as { code?: string }).code = 'ENOENT';
-        throw error;
-      }
-      return '';
-    });
+    jest
+      .spyOn(util, 'updateFile')
+      .mockImplementation(async (filename: string) => {
+        if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
+          const error = new Error('oops');
+          (error as { code?: string }).code = 'ENOENT';
+          throw error;
+        }
+      });
     (os.platform as jest.Mock).mockReturnValue('win32');
     await expect(InstallTL.acquire(Version.LATEST)).resolves.not.toThrow();
   });
 
   it('rethrows an error that is not of Node.js', async () => {
-    (fs.readFile as jest.Mock).mockImplementation(async (filename: string) => {
-      if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
-        const error = new Error('oops');
-        throw error;
-      }
-      return '';
-    });
+    jest
+      .spyOn(util, 'updateFile')
+      .mockImplementation(async (filename: string) => {
+        if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
+          const error = new Error('oops');
+          throw error;
+        }
+      });
     (os.platform as jest.Mock).mockReturnValue('win32');
     await expect(InstallTL.acquire(Version.LATEST)).rejects.toThrow('oops');
   });
 
   it('rethrows a Node.js error of which code is not `ENOENT`', async () => {
-    (fs.readFile as jest.Mock).mockImplementation(async (filename: string) => {
-      if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
-        const error = new Error('oops');
-        (error as NodeJS.ErrnoException).code = 'ENOTDIR';
-        throw error;
-      }
-      return '';
-    });
+    jest
+      .spyOn(util, 'updateFile')
+      .mockImplementation(async (filename: string) => {
+        if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
+          const error = new Error('oops');
+          (error as NodeJS.ErrnoException).code = 'ENOTDIR';
+          throw error;
+        }
+      });
     (os.platform as jest.Mock).mockReturnValue('win32');
     await expect(InstallTL.acquire(Version.LATEST)).rejects.toThrow('oops');
-  });
-
-  it('applies a patch to `tlpkg/TeXLive/TLWinGoo.pm`', async () => {
-    (fs.readFile as jest.Mock).mockResolvedValue(
-      [
-        String.raw`  $sr = $sr . '/' unless $sr =~ m!/$!;`,
-        String.raw`  return 0 if index($d, $sr)==0;`,
-        String.raw`  foreach $p qw(luatex.exe mktexlsr.exe pdftex.exe tex.exe xetex.exe) {`,
-        String.raw`    return 1 if (-e $d.$p);`,
-        String.raw`  }`,
-      ].join('\n'),
-    );
-    (os.platform as jest.Mock).mockReturnValue('linux');
-    await InstallTL.acquire('2010');
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringMatching(/tlpkg.TeXLive.TLWinGoo\.pm$/u),
-      [
-        String.raw`  $sr = $sr . '/' unless $sr =~ m!/$!;`,
-        String.raw`  return 0 if index($d, $sr)==0;`,
-        String.raw`  foreach $p (qw(luatex.exe mktexlsr.exe pdftex.exe tex.exe xetex.exe)) {`,
-        String.raw`    return 1 if (-e $d.$p);`,
-        String.raw`  }`,
-      ].join('\n'),
-    );
-  });
-
-  it('applies a patch to `tlpkg/tlperl/lib/Encode/Alias.pm`', async () => {
-    (fs.readFile as jest.Mock).mockResolvedValue(
-      [
-        String.raw`    }`,
-        String.raw``,
-        String.raw`    # utf8 is blessed :)`,
-        String.raw`    define_alias( qr/\bUTF-8$/i => '"utf-8-strict"' );`,
-        String.raw``,
-      ].join('\n'),
-    );
-    (os.platform as jest.Mock).mockReturnValue('win32');
-    await InstallTL.acquire('2015');
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringMatching(/tlpkg.tlperl.lib.Encode.Alias\.pm$/u),
-      [
-        String.raw`    }`,
-        String.raw``,
-        String.raw`    # utf8 is blessed :)`,
-        String.raw`    define_alias(qr/cp65001/i => '"utf-8-strict"');`,
-        String.raw`    define_alias( qr/\bUTF-8$/i => '"utf-8-strict"' );`,
-        String.raw``,
-      ].join('\n'),
-    );
-  });
-
-  it('applies a patch to `tlpkg/TeXLive/TLUtils.pm` on Windows', async () => {
-    (fs.readFile as jest.Mock).mockResolvedValue(
-      [
-        String.raw`    $subdir = $& if ( win32() && ($tree =~ s!^//[^/]+/!!) );`,
-        String.raw``,
-        String.raw`    @dirs = split (/\//, $tree);`,
-        String.raw`    for my $dir (@dirs) {`,
-        String.raw`      $subdir .= "$dir/";`,
-      ].join('\n'),
-    );
-    (os.platform as jest.Mock).mockReturnValue('win32');
-    await InstallTL.acquire('2018');
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringMatching(/tlpkg.TeXLive.TLUtils\.pm$/u),
-      [
-        String.raw`    $subdir = $& if ( win32() && ($tree =~ s!^//[^/]+/!!) );`,
-        String.raw``,
-        String.raw`    @dirs = split (/[\/\\]/, $tree);`,
-        String.raw`    for my $dir (@dirs) {`,
-        String.raw`      $subdir .= "$dir/";`,
-      ].join('\n'),
-    );
-  });
-
-  it('applies a patch to `tlpkg/TeXLive/TLUtils.pm` on macOS', async () => {
-    (fs.readFile as jest.Mock).mockResolvedValue(
-      // prettier-ignore
-      [
-                  '    chomp (my $sw_vers = `sw_vers -productVersion`);',
-        String.raw`    my ($os_major,$os_minor) = split (/\./, $sw_vers);`,
-        String.raw`    if ($os_major != 10) {`,
-        String.raw`      warn "$0: only MacOSX is supported, not $OS $os_major.$os_minor "`,
-        String.raw`           . " (from sw_vers -productVersion: $sw_vers)\n";`,
-        String.raw`      return "unknown-unknown";`,
-        String.raw`    }`,
-        String.raw`    if ($os_minor >= $mactex_darwin) {`,
-        String.raw`      ; # current version, default is ok (x86_64-darwin).`,
-        String.raw`    } elsif ($os_minor >= 6 && $os_minor < $mactex_darwin) {`,
-      ].join('\n'),
-    );
-    (os.platform as jest.Mock).mockReturnValue('darwin');
-    await InstallTL.acquire('2018');
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringMatching(/tlpkg.TeXLive.TLUtils\.pm$/u),
-      // prettier-ignore
-      [
-                  '    chomp (my $sw_vers = `sw_vers -productVersion`);',
-        String.raw`    my ($os_major,$os_minor) = split (/\./, $sw_vers);`,
-        String.raw`    if ($os_major < 10) {`,
-        String.raw`      warn "$0: only MacOSX is supported, not $OS $os_major.$os_minor "`,
-        String.raw`           . " (from sw_vers -productVersion: $sw_vers)\n";`,
-        String.raw`      return "unknown-unknown";`,
-        String.raw`    }`,
-        String.raw`    if ($os_major >= 11) { $CPU = "x86_64"; $OS = "darwin"; }`,
-        String.raw`    elsif ($os_minor >= $mactex_darwin) {`,
-        String.raw`      ; # current version, default is ok (x86_64-darwin).`,
-        String.raw`    } elsif ($os_minor >= 6 && $os_minor < $mactex_darwin) {`,
-      ].join('\n'),
-    );
   });
 });

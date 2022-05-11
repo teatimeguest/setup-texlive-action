@@ -2,10 +2,12 @@ root: true
 parser: '@typescript-eslint/parser'
 parserOptions:
   project: ./tsconfig.eslint.json
+  ecmaVersion: 2020
 ignorePatterns:
   - /src/index.ts
 extends:
   - eslint:recommended
+  - plugin:node/recommended
   - plugin:@typescript-eslint/eslint-recommended
   - plugin:@typescript-eslint/recommended
   - plugin:@typescript-eslint/recommended-requiring-type-checking
@@ -36,6 +38,14 @@ rules:
   prefer-promise-reject-errors: error
   prefer-regex-literals: error
   require-unicode-regexp: error
+  # eslint-plugin-node
+  node/no-unsupported-features/es-syntax: off
+  node/no-missing-import: off
+  node/no-unpublished-import: off
+  node/prefer-global/process:
+    - error
+    - never
+  node/prefer-global/url: error
   # @typescript-eslint
   '@typescript-eslint/array-type':
     - error

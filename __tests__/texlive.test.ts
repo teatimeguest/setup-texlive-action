@@ -4,8 +4,6 @@ import * as exec from '@actions/exec';
 import { Manager, Version } from '#/texlive';
 import * as util from '#/utility';
 
-process.env = {};
-
 (core.group as jest.Mock).mockImplementation(
   async <T>(name: string, fn: () => Promise<T>): Promise<T> => await fn(),
 );

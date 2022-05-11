@@ -1,6 +1,7 @@
-import { promises as fs } from 'fs';
+import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
+import * as process from 'process';
 
 import * as core from '@actions/core';
 
@@ -24,12 +25,7 @@ let ctx: {
   };
 };
 
-jest.mock('fs', () => ({
-  promises: jest.createMockFromModule('fs/promises'),
-}));
-(fs.readFile as jest.Mock).mockImplementation(async (filename) => {
-  throw new Error(`Unexpected file access: ${filename}`);
-});
+jest.mock('fs/promises');
 jest.mock('os', () => ({
   homedir: jest.fn().mockReturnValue('~'),
   platform: jest.fn(),
@@ -45,6 +41,7 @@ jest.mock('path', () => {
     }),
   };
 });
+jest.mock('process', () => ({ env: {} }));
 (core.getBooleanInput as jest.Mock).mockImplementation((name) => {
   const value = (ctx.inputs as Record<string, string | boolean>)[name];
   if (typeof value === 'boolean') {
@@ -78,9 +75,7 @@ jest.mock('#/utility', () => ({
 jest.unmock('#/context');
 
 beforeEach(() => {
-  process.env = {
-    ['ACTIONS_CACHE_URL']: '<ACTIONS_CACHE_URL>',
-  };
+  process.env['ACTIONS_CACHE_URL'] = '<ACTIONS_CACHE_URL>';
 
   ctx = {
     // The default values defined in `action.yml`.
@@ -165,8 +160,8 @@ describe('loadConfig', () => {
 
   it('disables caching if environment variables are not set properly', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    process.env['ACTIONS_CACHE_URL'] = '';
-    process.env['ACTIONS_RUNTIME_URL'] = '';
+    delete process.env['ACTIONS_CACHE_URL'];
+    delete process.env['ACTIONS_RUNTIME_URL'];
     expect((await context.loadConfig()).cache).toBe(false);
     expect(core.warning).toHaveBeenCalledWith(
       'Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_RUNTIME_URL` is defined',

@@ -1,6 +1,7 @@
-import { promises as fs } from 'fs';
+import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
+import * as process from 'process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
