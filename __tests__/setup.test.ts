@@ -1,12 +1,12 @@
 import * as os from 'os';
 
-import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import * as context from '#/context';
 import { InstallTL } from '#/install-tl';
 import * as setup from '#/setup';
 import { Manager } from '#/texlive';
+import * as util from '#/utility';
 
 jest.mock('os');
 (os.arch as jest.Mock).mockReturnValue('<arch>');
@@ -99,7 +99,7 @@ describe('main', () => {
   it('sets up TeX Live on Linux', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     await setup.run();
-    expect(cache.restoreCache).toHaveBeenCalled();
+    expect(util.restoreCache).toHaveBeenCalled();
     expect(InstallTL.acquire).toHaveBeenCalledWith('2021');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
@@ -114,7 +114,7 @@ describe('main', () => {
   it('sets up TeX Live on Windows', async () => {
     (os.platform as jest.Mock).mockReturnValue('win32');
     await setup.run();
-    expect(cache.restoreCache).toHaveBeenCalled();
+    expect(util.restoreCache).toHaveBeenCalled();
     expect(InstallTL.acquire).toHaveBeenCalledWith('2021');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
@@ -129,7 +129,7 @@ describe('main', () => {
   it('sets up TeX Live on macOS', async () => {
     (os.platform as jest.Mock).mockReturnValue('darwin');
     await setup.run();
-    expect(cache.restoreCache).toHaveBeenCalled();
+    expect(util.restoreCache).toHaveBeenCalled();
     expect(InstallTL.acquire).toHaveBeenCalledWith('2021');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
@@ -159,7 +159,7 @@ describe('main', () => {
       },
     });
     await setup.run();
-    expect(cache.restoreCache).not.toHaveBeenCalled();
+    expect(util.restoreCache).not.toHaveBeenCalled();
     expect(InstallTL.acquire).toHaveBeenCalledWith('2008');
     expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
@@ -193,7 +193,7 @@ describe('main', () => {
       },
     });
     await setup.run();
-    expect(cache.restoreCache).toHaveBeenCalled();
+    expect(util.restoreCache).toHaveBeenCalled();
     expect(InstallTL.prototype.run).toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).toHaveBeenCalled();
@@ -221,11 +221,9 @@ describe('main', () => {
         ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
       },
     });
-    (cache.restoreCache as jest.Mock).mockImplementationOnce(
-      async (paths, primaryKey, restoreKeys) => restoreKeys?.[0] ?? '',
-    );
+    (util.restoreCache as jest.Mock).mockResolvedValueOnce('secondary');
     await setup.run();
-    expect(cache.restoreCache).toHaveBeenCalled();
+    expect(util.restoreCache).toHaveBeenCalled();
     expect(InstallTL.acquire).not.toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
@@ -253,11 +251,9 @@ describe('main', () => {
         ['TEXLIVE_INSTALL_TEXMFVAR']: '~/.local/texlive/2021/texmf-var',
       },
     });
-    (cache.restoreCache as jest.Mock).mockImplementationOnce(
-      async (paths, primaryKey) => primaryKey,
-    );
+    (util.restoreCache as jest.Mock).mockResolvedValueOnce('primary');
     await setup.run();
-    expect(cache.restoreCache).toHaveBeenCalled();
+    expect(util.restoreCache).toHaveBeenCalled();
     expect(InstallTL.acquire).not.toHaveBeenCalled();
     expect(Manager.prototype.path.add).toHaveBeenCalled();
     expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
@@ -265,23 +261,6 @@ describe('main', () => {
     expect(Manager.prototype.install).not.toHaveBeenCalled();
     expect(context.setKey).not.toHaveBeenCalled();
     expect(context.setCacheHit).toHaveBeenCalled();
-    expect(context.setPost).toHaveBeenCalled();
-  });
-
-  it('continues setup even if `cache.restoreCache` fails', async () => {
-    (os.platform as jest.Mock).mockReturnValue('linux');
-    (cache.restoreCache as jest.Mock).mockImplementationOnce(async () => {
-      throw new Error('oops');
-    });
-    await setup.run();
-    expect(cache.restoreCache).toHaveBeenCalled();
-    expect(InstallTL.prototype.run).toHaveBeenCalled();
-    expect(Manager.prototype.path.add).toHaveBeenCalled();
-    expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
-    expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
-    expect(Manager.prototype.install).not.toHaveBeenCalled();
-    expect(context.setKey).toHaveBeenCalledWith(expect.anything());
-    expect(context.setCacheHit).not.toHaveBeenCalled();
     expect(context.setPost).toHaveBeenCalled();
   });
 
@@ -297,7 +276,7 @@ describe('main', () => {
   it('sets the variables appropriately if necessary', async () => {
     (os.homedir as jest.Mock).mockReturnValueOnce('~');
     (os.platform as jest.Mock).mockReturnValue('linux');
-    (cache.restoreCache as jest.Mock).mockImplementationOnce(
+    (util.restoreCache as jest.Mock).mockImplementationOnce(
       async (paths, primaryKey, restoreKeys) => restoreKeys?.[0] ?? '',
     );
     (Manager.prototype.conf.texmf as jest.Mock).mockResolvedValueOnce(
@@ -332,7 +311,7 @@ describe('post', () => {
   it('saves `TEXDIR` if `key` is set', async () => {
     (context.getKey as jest.Mock).mockReturnValueOnce('<key>');
     await setup.run();
-    expect(cache.saveCache).toHaveBeenCalledWith(
+    expect(util.saveCache).toHaveBeenCalledWith(
       expect.arrayContaining([]),
       expect.anything(),
     );
@@ -341,15 +320,6 @@ describe('post', () => {
   it('does nothing if `key` is not set', async () => {
     (context.getKey as jest.Mock).mockReturnValueOnce(undefined);
     await setup.run();
-    expect(cache.saveCache).not.toHaveBeenCalled();
-  });
-
-  it('does not fail even if `cache.saveCache` fails', async () => {
-    (context.getKey as jest.Mock).mockReturnValueOnce('<key>');
-    (cache.saveCache as jest.Mock).mockImplementationOnce(async () => {
-      throw new Error('oops');
-    });
-    await expect(setup.run()).resolves.not.toThrow();
-    expect(core.warning).toHaveBeenCalled();
+    expect(util.saveCache).not.toHaveBeenCalled();
   });
 });

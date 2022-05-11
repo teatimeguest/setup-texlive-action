@@ -189,7 +189,7 @@ class InstallTL {
             throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
         }
         const target = `install-tl${os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'}`;
-        const dest = (await restoreToolCache(target, version)) ??
+        const dest = (await util.restoreToolCache(target, version)) ??
             (await download(target, version));
         return new InstallTL(version, path.join(dest, executable(version, os.platform())));
     }
@@ -298,7 +298,7 @@ async function download(target, version) {
         core.info(`Downloading ${url.href}`);
         const archive = await tool.downloadTool(url.href);
         core.info('Extracting');
-        return await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tar.gz');
+        return await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tgz');
     };
     let dest = await get(new url_1.URL(target, repository(version)));
     redownload: if (version === texlive_1.Version.LATEST) {
@@ -322,40 +322,12 @@ async function download(target, version) {
     }
     core.info('Applying patches');
     await patch(version, dest);
-    await saveToolCache(dest, target, version);
+    await util.saveToolCache(dest, target, version);
     return dest;
 }
 async function detectVersion(dest) {
     const txt = path.join(dest, 'release-texlive.txt');
     return (await fs_1.promises.readFile(txt, 'utf8')).slice(43, 47);
-}
-async function saveToolCache(directory, target, version) {
-    try {
-        core.info('Adding to the tool cache');
-        await tool.cacheDir(directory, target, version);
-    }
-    catch (error) {
-        core.info(`Failed to add to tool cache: ${error}`);
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(error.stack);
-        }
-    }
-}
-async function restoreToolCache(target, version) {
-    try {
-        const cache = tool.find(target, version);
-        if (cache !== '') {
-            core.info('Found in the tool cache');
-            return cache;
-        }
-    }
-    catch (error) {
-        core.info(`Failed to restore tool cache: ${error}`);
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(error.stack);
-        }
-    }
-    return undefined;
 }
 /**
  * Fixes bugs in the installer files and modify them for use in workflows.
@@ -454,11 +426,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const crypto = __importStar(__nccwpck_require__(6113));
 const os = __importStar(__nccwpck_require__(2037));
-const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const context = __importStar(__nccwpck_require__(3842));
 const install_tl_1 = __nccwpck_require__(2381);
 const texlive_1 = __nccwpck_require__(9758);
+const util = __importStar(__nccwpck_require__(2857));
 async function run() {
     try {
         if (!context.getPost()) {
@@ -480,17 +452,20 @@ exports.run = run;
 async function main() {
     const config = await context.loadConfig();
     const profile = new install_tl_1.Profile(config.version, config.prefix);
-    let cacheType = 'none';
+    let cacheType = undefined;
     if (config.cache) {
+        const keys = getCacheKeys(config.version, config.packages);
         cacheType = await core.group('Restoring cache', async () => {
-            const keys = getCacheKeys(config.version, config.packages);
-            return await restoreCache(profile.TEXDIR, ...keys);
+            return await util.restoreCache(profile.TEXDIR, ...keys);
         });
+        if (cacheType !== 'primary') {
+            context.setKey(keys[1][0]);
+        }
     }
     await core.group('Environment variables for TeX Live', async () => {
         core.info(install_tl_1.Env.format(config.env));
     });
-    if (cacheType === 'none') {
+    if (cacheType === undefined) {
         const installtl = await core.group('Acquiring install-tl', async () => {
             return await install_tl_1.InstallTL.acquire(config.version);
         });
@@ -503,7 +478,7 @@ async function main() {
     }
     const tlmgr = new texlive_1.Manager(config.version, config.prefix);
     await tlmgr.path.add();
-    if (cacheType !== 'none') {
+    if (cacheType !== undefined) {
         context.setCacheHit();
         await core.group('Adjusting TEXMF', async () => {
             for (const [key, value] of await tlmgr.conf.texmf()) {
@@ -535,41 +510,7 @@ async function post() {
         core.info('Nothing to do');
         return;
     }
-    await saveCache(profile.TEXDIR, primaryKey);
-}
-async function saveCache(texdir, primaryKey) {
-    try {
-        await cache.saveCache([texdir], primaryKey);
-        core.info(`Cache saved`);
-    }
-    catch (error) {
-        core.warning(`${error}`);
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(error.stack);
-        }
-    }
-}
-async function restoreCache(texdir, primaryKey, 
-// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-restoreKeys) {
-    let key = undefined;
-    try {
-        key = await cache.restoreCache([texdir], primaryKey, restoreKeys);
-        if (key === undefined) {
-            core.info('Cache not found');
-        }
-    }
-    catch (error) {
-        core.info(`Failed to restore cache: ${error}`);
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(error.stack);
-        }
-    }
-    if (key === primaryKey) {
-        return 'primary';
-    }
-    context.setKey(primaryKey);
-    return key === undefined ? 'none' : 'secondary';
+    await util.saveCache(profile.TEXDIR, primaryKey);
 }
 function getCacheKeys(version, packages) {
     const digest = (s) => {
@@ -746,10 +687,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateFile = exports.tmpdir = exports.determine = exports.extract = void 0;
+exports.updateFile = exports.tmpdir = exports.restoreCache = exports.saveCache = exports.restoreToolCache = exports.saveToolCache = exports.determine = exports.extract = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
+const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
 const tool = __importStar(__nccwpck_require__(7784));
@@ -760,7 +702,7 @@ const tool = __importStar(__nccwpck_require__(7784));
  */
 async function extract(filepath, kind) {
     switch (kind) {
-        case 'tar.gz':
+        case 'tgz':
             return await tool.extractTar(filepath, undefined, ['xz', '--strip=1']);
         case 'zip': {
             const subdir = await determine(path.join(await tool.extractZip(filepath), '*'));
@@ -785,6 +727,69 @@ async function determine(pattern) {
     return undefined;
 }
 exports.determine = determine;
+async function saveToolCache(directory, target, version) {
+    try {
+        core.info('Adding to tool cache');
+        await tool.cacheDir(directory, target, version);
+    }
+    catch (error) {
+        core.info(`Failed to add to tool cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+}
+exports.saveToolCache = saveToolCache;
+async function restoreToolCache(target, version) {
+    try {
+        const dest = tool.find(target, version);
+        if (dest !== '') {
+            core.info('Found in the tool cache');
+            return dest;
+        }
+    }
+    catch (error) {
+        core.info(`Failed to restore tool cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+    return undefined;
+}
+exports.restoreToolCache = restoreToolCache;
+async function saveCache(target, primaryKey) {
+    try {
+        await cache.saveCache([target], primaryKey);
+        core.info(`Cache saved`);
+    }
+    catch (error) {
+        core.warning(`Failed to save to cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+}
+exports.saveCache = saveCache;
+async function restoreCache(target, primaryKey, 
+// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+restoreKeys) {
+    let key = undefined;
+    try {
+        key = await cache.restoreCache([target], primaryKey, restoreKeys);
+        if (key !== undefined) {
+            return key === primaryKey ? 'primary' : 'secondary';
+        }
+        core.info('Cache not found');
+    }
+    catch (error) {
+        core.info(`Failed to restore cache: ${error}`);
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(error.stack);
+        }
+    }
+    return undefined;
+}
+exports.restoreCache = restoreCache;
 function tmpdir() {
     const runnerTemp = process.env['RUNNER_TEMP'];
     return runnerTemp !== undefined && runnerTemp !== ''

@@ -59,7 +59,7 @@ export class InstallTL {
       os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'
     }`;
     const dest =
-      (await restoreToolCache(target, version)) ??
+      (await util.restoreToolCache(target, version)) ??
       (await download(target, version));
 
     return new InstallTL(
@@ -225,7 +225,7 @@ async function download(target: string, version: Version): Promise<string> {
     core.info('Extracting');
     return await util.extract(
       archive,
-      os.platform() === 'win32' ? 'zip' : 'tar.gz',
+      os.platform() === 'win32' ? 'zip' : 'tgz',
     );
   };
 
@@ -252,7 +252,7 @@ async function download(target: string, version: Version): Promise<string> {
 
   core.info('Applying patches');
   await patch(version, dest);
-  await saveToolCache(dest, target, version);
+  await util.saveToolCache(dest, target, version);
 
   return dest;
 }
@@ -260,41 +260,6 @@ async function download(target: string, version: Version): Promise<string> {
 async function detectVersion(dest: string): Promise<string> {
   const txt = path.join(dest, 'release-texlive.txt');
   return (await fs.readFile(txt, 'utf8')).slice(43, 47);
-}
-
-async function saveToolCache(
-  directory: string,
-  target: string,
-  version: Version,
-): Promise<void> {
-  try {
-    core.info('Adding to the tool cache');
-    await tool.cacheDir(directory, target, version);
-  } catch (error) {
-    core.info(`Failed to add to tool cache: ${error}`);
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(error.stack);
-    }
-  }
-}
-
-async function restoreToolCache(
-  target: string,
-  version: Version,
-): Promise<string | undefined> {
-  try {
-    const cache = tool.find(target, version);
-    if (cache !== '') {
-      core.info('Found in the tool cache');
-      return cache;
-    }
-  } catch (error) {
-    core.info(`Failed to restore tool cache: ${error}`);
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(error.stack);
-    }
-  }
-  return undefined;
 }
 
 /**

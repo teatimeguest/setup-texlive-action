@@ -1,12 +1,12 @@
 import * as crypto from 'crypto';
 import * as os from 'os';
 
-import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import * as context from './context';
 import { Env, InstallTL, Profile } from './install-tl';
 import { contrib as tlcontrib, Manager, Version } from './texlive';
+import * as util from './utility';
 
 export async function run(): Promise<void> {
   try {
@@ -24,25 +24,26 @@ export async function run(): Promise<void> {
   }
 }
 
-type CacheType = 'primary' | 'secondary' | 'none';
-
 async function main(): Promise<void> {
   const config = await context.loadConfig();
   const profile = new Profile(config.version, config.prefix);
-  let cacheType: CacheType = 'none';
+  let cacheType = undefined;
 
   if (config.cache) {
+    const keys = getCacheKeys(config.version, config.packages);
     cacheType = await core.group('Restoring cache', async () => {
-      const keys = getCacheKeys(config.version, config.packages);
-      return await restoreCache(profile.TEXDIR, ...keys);
+      return await util.restoreCache(profile.TEXDIR, ...keys);
     });
+    if (cacheType !== 'primary') {
+      context.setKey(keys[1][0]);
+    }
   }
 
   await core.group('Environment variables for TeX Live', async () => {
     core.info(Env.format(config.env));
   });
 
-  if (cacheType === 'none') {
+  if (cacheType === undefined) {
     const installtl = await core.group('Acquiring install-tl', async () => {
       return await InstallTL.acquire(config.version);
     });
@@ -57,7 +58,7 @@ async function main(): Promise<void> {
   const tlmgr = new Manager(config.version, config.prefix);
   await tlmgr.path.add();
 
-  if (cacheType !== 'none') {
+  if (cacheType !== undefined) {
     context.setCacheHit();
     await core.group('Adjusting TEXMF', async () => {
       for (const [key, value] of await tlmgr.conf.texmf()) {
@@ -94,50 +95,13 @@ async function post(): Promise<void> {
     return;
   }
 
-  await saveCache(profile.TEXDIR, primaryKey);
-}
-
-async function saveCache(texdir: string, primaryKey: string): Promise<void> {
-  try {
-    await cache.saveCache([texdir], primaryKey);
-    core.info(`Cache saved`);
-  } catch (error) {
-    core.warning(`${error}`);
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(error.stack);
-    }
-  }
-}
-
-async function restoreCache(
-  texdir: string,
-  primaryKey: string,
-  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-  restoreKeys: Array<string>,
-): Promise<CacheType> {
-  let key: string | undefined = undefined;
-  try {
-    key = await cache.restoreCache([texdir], primaryKey, restoreKeys);
-    if (key === undefined) {
-      core.info('Cache not found');
-    }
-  } catch (error) {
-    core.info(`Failed to restore cache: ${error}`);
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(error.stack);
-    }
-  }
-  if (key === primaryKey) {
-    return 'primary';
-  }
-  context.setKey(primaryKey);
-  return key === undefined ? 'none' : 'secondary';
+  await util.saveCache(profile.TEXDIR, primaryKey);
 }
 
 function getCacheKeys(
   version: Version,
   packages: ReadonlySet<string>,
-): [string, Array<string>] {
+): [string, [string]] {
   const digest = (s: string): string => {
     return crypto.createHash('sha256').update(s).digest('hex');
   };

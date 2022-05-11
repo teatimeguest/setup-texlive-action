@@ -2,11 +2,12 @@ import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
-export type ArchiveType = 'tar.gz' | 'zip';
+export type ArchiveType = 'tgz' | 'zip';
 
 /**
  * Extracts files from an archive.
@@ -18,7 +19,7 @@ export async function extract(
   kind: ArchiveType,
 ): Promise<string> {
   switch (kind) {
-    case 'tar.gz':
+    case 'tgz':
       return await tool.extractTar(filepath, undefined, ['xz', '--strip=1']);
     case 'zip': {
       const subdir = await determine(
@@ -48,6 +49,80 @@ export async function determine(pattern: string): Promise<string | undefined> {
       matched.length === 0 ? '' : `: ${matched}`
     }`,
   );
+  return undefined;
+}
+
+export async function saveToolCache(
+  directory: string,
+  target: string,
+  version: string,
+): Promise<void> {
+  try {
+    core.info('Adding to tool cache');
+    await tool.cacheDir(directory, target, version);
+  } catch (error) {
+    core.info(`Failed to add to tool cache: ${error}`);
+    if (error instanceof Error && error.stack !== undefined) {
+      core.debug(error.stack);
+    }
+  }
+}
+
+export async function restoreToolCache(
+  target: string,
+  version: string,
+): Promise<string | undefined> {
+  try {
+    const dest = tool.find(target, version);
+    if (dest !== '') {
+      core.info('Found in the tool cache');
+      return dest;
+    }
+  } catch (error) {
+    core.info(`Failed to restore tool cache: ${error}`);
+    if (error instanceof Error && error.stack !== undefined) {
+      core.debug(error.stack);
+    }
+  }
+  return undefined;
+}
+
+export async function saveCache(
+  target: string,
+  primaryKey: string,
+): Promise<void> {
+  try {
+    await cache.saveCache([target], primaryKey);
+    core.info(`Cache saved`);
+  } catch (error) {
+    core.warning(`Failed to save to cache: ${error}`);
+    if (error instanceof Error && error.stack !== undefined) {
+      core.debug(error.stack);
+    }
+  }
+}
+
+export type CacheType = 'primary' | 'secondary';
+
+export async function restoreCache(
+  target: string,
+  primaryKey: string,
+  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+  restoreKeys: Array<string>,
+): Promise<CacheType | undefined> {
+  let key: string | undefined = undefined;
+  try {
+    key = await cache.restoreCache([target], primaryKey, restoreKeys);
+    if (key !== undefined) {
+      return key === primaryKey ? 'primary' : 'secondary';
+    }
+    core.info('Cache not found');
+  } catch (error) {
+    core.info(`Failed to restore cache: ${error}`);
+    if (error instanceof Error && error.stack !== undefined) {
+      core.debug(error.stack);
+    }
+  }
   return undefined;
 }
 
