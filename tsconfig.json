@@ -23,7 +23,7 @@
 
     "esModuleInterop": true,
 
-    "target": "es2021",
+    "target": "es2020",
     // For ttypescript
     "plugins": [
       { "transform": "ts-transformer-keys/transformer" }
