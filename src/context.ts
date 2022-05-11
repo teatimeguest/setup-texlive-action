@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as process from 'process';
 
+import { isFeatureAvailable as isCacheAvailable } from '@actions/cache';
 import * as core from '@actions/core';
 
 import { Env } from './install-tl';
@@ -29,14 +29,8 @@ export async function loadConfig(): Promise<Config> {
 
 function getCache(): boolean {
   const cache = core.getBooleanInput('cache');
-  /**
-   * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/}
-   */
-  const urls = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'] as const;
-  if (cache && urls.every((url) => !Boolean(process.env[url]))) {
-    core.warning(
-      `Caching is disabled because neither \`${urls[0]}\` nor \`${urls[1]}\` is defined`,
-    );
+  if (cache && !isCacheAvailable()) {
+    core.warning('Caching is disabled because cache service is not available');
     return false;
   }
   return cache;

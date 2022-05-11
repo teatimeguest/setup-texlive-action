@@ -33,7 +33,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.loadConfig = void 0;
 const fs = __importStar(__nccwpck_require__(3292));
 const path = __importStar(__nccwpck_require__(1017));
-const process = __importStar(__nccwpck_require__(7282));
+const cache_1 = __nccwpck_require__(7799);
 const core = __importStar(__nccwpck_require__(2186));
 const install_tl_1 = __nccwpck_require__(2381);
 const texlive_1 = __nccwpck_require__(9758);
@@ -50,12 +50,8 @@ async function loadConfig() {
 exports.loadConfig = loadConfig;
 function getCache() {
     const cache = core.getBooleanInput('cache');
-    /**
-     * @see {@link https://github.com/actions/toolkit/blob/main/packages/cache/}
-     */
-    const urls = ['ACTIONS_CACHE_URL', 'ACTIONS_RUNTIME_URL'];
-    if (cache && urls.every((url) => !Boolean(process.env[url]))) {
-        core.warning(`Caching is disabled because neither \`${urls[0]}\` nor \`${urls[1]}\` is defined`);
+    if (cache && !(0, cache_1.isFeatureAvailable)()) {
+        core.warning('Caching is disabled because cache service is not available');
         return false;
     }
     return cache;

@@ -3,6 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as process from 'process';
 
+import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 
 import { Version } from '#/texlive';
@@ -42,6 +43,9 @@ jest.mock('path', () => {
   };
 });
 jest.mock('process', () => ({ env: {} }));
+jest.mock('@actions/cache', () => ({
+  isFeatureAvailable: jest.fn().mockReturnValue(true),
+}));
 (core.getBooleanInput as jest.Mock).mockImplementation((name) => {
   const value = (ctx.inputs as Record<string, string | boolean>)[name];
   if (typeof value === 'boolean') {
@@ -75,8 +79,6 @@ jest.mock('#/utility', () => ({
 jest.unmock('#/context');
 
 beforeEach(() => {
-  process.env['ACTIONS_CACHE_URL'] = '<ACTIONS_CACHE_URL>';
-
   ctx = {
     // The default values defined in `action.yml`.
     inputs: {
@@ -158,13 +160,12 @@ describe('loadConfig', () => {
     expect(inputs.version).toBe(Version.LATEST);
   });
 
-  it('disables caching if environment variables are not set properly', async () => {
+  it('disables caching if cache service is not available', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
-    delete process.env['ACTIONS_CACHE_URL'];
-    delete process.env['ACTIONS_RUNTIME_URL'];
+    (cache.isFeatureAvailable as jest.Mock).mockReturnValueOnce(false);
     expect((await context.loadConfig()).cache).toBe(false);
     expect(core.warning).toHaveBeenCalledWith(
-      'Caching is disabled because neither `ACTIONS_CACHE_URL` nor `ACTIONS_RUNTIME_URL` is defined',
+      'Caching is disabled because cache service is not available',
     );
   });
 
