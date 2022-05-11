@@ -9,7 +9,8 @@ import * as exec from '@actions/exec';
 import * as tool from '@actions/tool-cache';
 import { keys } from 'ts-transformer-keys';
 
-import { Version } from './texlive';
+import * as tl from './texlive';
+import Version = tl.Version;
 import * as util from './utility';
 
 /**
@@ -27,12 +28,20 @@ export class InstallTL {
     const options = ['-no-gui', '-profile', target];
 
     if (this.version !== Version.LATEST) {
+      const repo = tl.historic(this.version);
+      /**
+       * `install-tl` of versions prior to 2017 does not support HTTPS, and
+       * that of version 2017 supports HTTPS but does not work properly.
+       */
+      if (Number(this.version) < 2018) {
+        repo.protocol = 'http';
+      }
       options.push(
         /**
          * Only version 2008 uses `-location` instead of `-repository`.
          */
         this.version === '2008' ? '-location' : '-repository',
-        repository(this.version).href,
+        repo.href,
       );
     }
 
@@ -55,12 +64,25 @@ export class InstallTL {
       );
     }
 
-    const target = `install-tl${
-      os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'
-    }`;
-    const dest =
-      (await util.restoreToolCache(target, version)) ??
-      (await download(target, version));
+    const isWin = os.platform() === 'win32';
+    const target = isWin ? 'install-tl.zip' : 'install-tl-unx.tar.gz';
+    let dest = await util.restoreToolCache(target, version);
+
+    if (dest === undefined) {
+      const url = new URL(
+        version === Version.LATEST ? `../${target}` : target,
+        tl.historic(version),
+      );
+      core.info(`Downloading ${url.href}`);
+      const archive = await tool.downloadTool(url.href);
+
+      core.info('Extracting');
+      dest = await util.extract(archive, isWin ? 'zip' : 'tgz');
+
+      core.info('Applying patches');
+      await patch(version, dest);
+      await util.saveToolCache(dest, target, version);
+    }
 
     return new InstallTL(
       version,
@@ -182,84 +204,6 @@ export namespace Profile {
 function executable(version: Version, platform: NodeJS.Platform): string {
   const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
   return `install-tl${platform === 'win32' ? ext : ''}`;
-}
-
-function historic(version: Version): URL {
-  return new URL(
-    `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`,
-  );
-}
-
-/**
- * Gets the URL of the main repository of TeX Live.
- *
- * @returns The `ctan` if the version is the latest, otherwise
- *   the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
- *
- * @todo Use other archives as well.
- */
-function repository(version: Version): URL {
-  const base =
-    version === Version.LATEST
-      ? 'https://mirror.ctan.org/systems/texlive/'
-      : historic(version);
-  const tlnet = `tlnet${
-    Number(version) < 2010 || version === Version.LATEST ? '' : '-final'
-  }/`;
-  const url = new URL(tlnet, base);
-  /**
-   * `install-tl` of versions prior to 2017 does not support HTTPS, and
-   * that of version 2017 supports HTTPS but does not work properly.
-   */
-  if (Number(version) < 2018) {
-    url.protocol = 'http';
-  }
-  return url;
-}
-
-async function download(target: string, version: Version): Promise<string> {
-  const get = async (url: Readonly<URL>): Promise<string> => {
-    core.info(`Downloading ${url.href}`);
-    const archive = await tool.downloadTool(url.href);
-
-    core.info('Extracting');
-    return await util.extract(
-      archive,
-      os.platform() === 'win32' ? 'zip' : 'tgz',
-    );
-  };
-
-  let dest = await get(new URL(target, repository(version)));
-
-  redownload: if (version === Version.LATEST) {
-    try {
-      /**
-       * Checks the latest version is really `Version.LATEST`.
-       */
-      const detected = await detectVersion(dest);
-      if (detected === version) {
-        break redownload;
-      }
-      core.info(`Unexpected version: ${detected}`);
-    } catch (error) {
-      core.info(`Unexpected error: ${error}`);
-      if (error instanceof Error && error.stack !== undefined) {
-        core.debug(error.stack);
-      }
-    }
-    dest = await get(new URL(target, historic(version)));
-  }
-
-  core.info('Applying patches');
-  await patch(version, dest);
-  await util.saveToolCache(dest, target, version);
-
-  return dest;
-}
-
-async function detectVersion(dest: string): Promise<string> {
-  const txt = path.join(dest, 'release-texlive.txt');
-  return (await fs.readFile(txt, 'utf8')).slice(43, 47);
 }
 
 /**

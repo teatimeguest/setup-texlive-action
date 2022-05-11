@@ -152,7 +152,8 @@ const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const tool = __importStar(__nccwpck_require__(7784));
-const texlive_1 = __nccwpck_require__(9758);
+const tl = __importStar(__nccwpck_require__(9758));
+var Version = tl.Version;
 const util = __importStar(__nccwpck_require__(2857));
 /**
  * A class for downloading and running the installer of TeX Live.
@@ -166,12 +167,20 @@ class InstallTL {
         const target = path.join(util.tmpdir(), 'texlive.profile');
         await fs_1.promises.writeFile(target, Profile.format(profile));
         const options = ['-no-gui', '-profile', target];
-        if (this.version !== texlive_1.Version.LATEST) {
+        if (this.version !== Version.LATEST) {
+            const repo = tl.historic(this.version);
+            /**
+             * `install-tl` of versions prior to 2017 does not support HTTPS, and
+             * that of version 2017 supports HTTPS but does not work properly.
+             */
+            if (Number(this.version) < 2018) {
+                repo.protocol = 'http';
+            }
             options.push(
             /**
              * Only version 2008 uses `-location` instead of `-repository`.
              */
-            this.version === '2008' ? '-location' : '-repository', repository(this.version).href);
+            this.version === '2008' ? '-location' : '-repository', repo.href);
         }
         await exec.exec(this.bin, options, { env: { ...process.env, ...env } });
         core.info('Applying patches');
@@ -188,9 +197,19 @@ class InstallTL {
         if (Number(version) < (os.platform() === 'darwin' ? 2013 : 2008)) {
             throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
         }
-        const target = `install-tl${os.platform() === 'win32' ? '.zip' : '-unx.tar.gz'}`;
-        const dest = (await util.restoreToolCache(target, version)) ??
-            (await download(target, version));
+        const isWin = os.platform() === 'win32';
+        const target = isWin ? 'install-tl.zip' : 'install-tl-unx.tar.gz';
+        let dest = await util.restoreToolCache(target, version);
+        if (dest === undefined) {
+            const url = new url_1.URL(version === Version.LATEST ? `../${target}` : target, tl.historic(version));
+            core.info(`Downloading ${url.href}`);
+            const archive = await tool.downloadTool(url.href);
+            core.info('Extracting');
+            dest = await util.extract(archive, isWin ? 'zip' : 'tgz');
+            core.info('Applying patches');
+            await patch(version, dest);
+            await util.saveToolCache(dest, target, version);
+        }
         return new InstallTL(version, path.join(dest, executable(version, os.platform())));
     }
 }
@@ -249,7 +268,7 @@ class Profile {
          * `scheme-infraonly` was first introduced in TeX Live 2016.
          */
         this.selected_scheme = `scheme-${Number(version) < 2016 ? 'minimal' : 'infraonly'}`;
-        this.option_adjustrepo = version === texlive_1.Version.LATEST ? '1' : '0';
+        this.option_adjustrepo = version === Version.LATEST ? '1' : '0';
     }
 }
 exports.Profile = Profile;
@@ -266,68 +285,6 @@ exports.Profile = Profile;
 function executable(version, platform) {
     const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
     return `install-tl${platform === 'win32' ? ext : ''}`;
-}
-function historic(version) {
-    return new url_1.URL(`https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`);
-}
-/**
- * Gets the URL of the main repository of TeX Live.
- *
- * @returns The `ctan` if the version is the latest, otherwise
- *   the URL of the historic archive on `https://ftp.math.utah.edu/pub/tex/`.
- *
- * @todo Use other archives as well.
- */
-function repository(version) {
-    const base = version === texlive_1.Version.LATEST
-        ? 'https://mirror.ctan.org/systems/texlive/'
-        : historic(version);
-    const tlnet = `tlnet${Number(version) < 2010 || version === texlive_1.Version.LATEST ? '' : '-final'}/`;
-    const url = new url_1.URL(tlnet, base);
-    /**
-     * `install-tl` of versions prior to 2017 does not support HTTPS, and
-     * that of version 2017 supports HTTPS but does not work properly.
-     */
-    if (Number(version) < 2018) {
-        url.protocol = 'http';
-    }
-    return url;
-}
-async function download(target, version) {
-    const get = async (url) => {
-        core.info(`Downloading ${url.href}`);
-        const archive = await tool.downloadTool(url.href);
-        core.info('Extracting');
-        return await util.extract(archive, os.platform() === 'win32' ? 'zip' : 'tgz');
-    };
-    let dest = await get(new url_1.URL(target, repository(version)));
-    redownload: if (version === texlive_1.Version.LATEST) {
-        try {
-            /**
-             * Checks the latest version is really `Version.LATEST`.
-             */
-            const detected = await detectVersion(dest);
-            if (detected === version) {
-                break redownload;
-            }
-            core.info(`Unexpected version: ${detected}`);
-        }
-        catch (error) {
-            core.info(`Unexpected error: ${error}`);
-            if (error instanceof Error && error.stack !== undefined) {
-                core.debug(error.stack);
-            }
-        }
-        dest = await get(new url_1.URL(target, historic(version)));
-    }
-    core.info('Applying patches');
-    await patch(version, dest);
-    await util.saveToolCache(dest, target, version);
-    return dest;
-}
-async function detectVersion(dest) {
-    const txt = path.join(dest, 'release-texlive.txt');
-    return (await fs_1.promises.readFile(txt, 'utf8')).slice(43, 47);
 }
 /**
  * Fixes bugs in the installer files and modify them for use in workflows.
@@ -553,7 +510,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.contrib = exports.Manager = exports.Version = void 0;
+exports.historic = exports.contrib = exports.Manager = exports.Version = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const url_1 = __nccwpck_require__(7310);
 const core = __importStar(__nccwpck_require__(2186));
@@ -654,6 +611,10 @@ function contrib() {
     return new url_1.URL('https://mirror.ctan.org/systems/texlive/tlcontrib/');
 }
 exports.contrib = contrib;
+function historic(version) {
+    return new url_1.URL(Number(version) < 2010 ? 'tlnet/' : 'tlnet-final/', `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`);
+}
+exports.historic = historic;
 //# sourceMappingURL=texlive.js.map
 
 /***/ }),

@@ -163,3 +163,10 @@ export class Manager {
 export function contrib(): URL {
   return new URL('https://mirror.ctan.org/systems/texlive/tlcontrib/');
 }
+
+export function historic(version: Version): URL {
+  return new URL(
+    Number(version) < 2010 ? 'tlnet/' : 'tlnet-final/',
+    `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`,
+  );
+}

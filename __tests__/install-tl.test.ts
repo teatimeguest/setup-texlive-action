@@ -6,7 +6,8 @@ import * as exec from '@actions/exec';
 import * as tool from '@actions/tool-cache';
 
 import { Env, InstallTL, Profile } from '#/install-tl';
-import { Version } from '#/texlive';
+import * as tl from '#/texlive';
+import Version = tl.Version;
 import * as util from '#/utility';
 
 jest.mock('fs', () => ({
@@ -33,6 +34,9 @@ jest.mock('path', () => {
 (tool.downloadTool as jest.Mock).mockResolvedValue('<downloadTool>');
 (util.extract as jest.Mock).mockResolvedValue('<extract>');
 (util.tmpdir as jest.Mock).mockReturnValue('<tmpdir>');
+(tl.historic as jest.Mock).mockImplementation(
+  jest.requireActual<typeof tl>('#/texlive').historic,
+);
 jest.unmock('#/install-tl');
 
 beforeEach(() => {
@@ -97,22 +101,15 @@ describe('InstallTL', () => {
   });
 
   describe('acquire', () => {
-    const setVersion = (version: string): void => {
-      (fs.readFile as jest.Mock).mockResolvedValueOnce(
-        `TeX Live (https://tug.org/texlive) version ${version}`,
-      );
-    };
-
     it('downloads the installer on Linux', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
-      setVersion(Version.LATEST);
       await InstallTL.acquire(Version.LATEST);
       expect(util.restoreToolCache).toHaveBeenCalledWith(
         'install-tl-unx.tar.gz',
         Version.LATEST,
       );
       expect(tool.downloadTool).toHaveBeenCalledWith(
-        'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
+        expect.stringContaining(`/${Version.LATEST}/install-tl-unx.tar.gz`),
       );
       expect(tool.downloadTool).toHaveBeenCalledTimes(1);
       expect(util.extract).toHaveBeenCalled();
@@ -121,14 +118,13 @@ describe('InstallTL', () => {
 
     it('downloads the installer on Windows', async () => {
       (os.platform as jest.Mock).mockReturnValue('win32');
-      setVersion(Version.LATEST);
       await InstallTL.acquire(Version.LATEST);
       expect(util.restoreToolCache).toHaveBeenCalledWith(
         'install-tl.zip',
         Version.LATEST,
       );
       expect(tool.downloadTool).toHaveBeenCalledWith(
-        'https://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip',
+        expect.stringContaining(`/${Version.LATEST}/install-tl.zip`),
       );
       expect(tool.downloadTool).toHaveBeenCalledTimes(1);
       expect(util.extract).toHaveBeenCalled();
@@ -137,56 +133,17 @@ describe('InstallTL', () => {
 
     it('downloads the installer on macOS', async () => {
       (os.platform as jest.Mock).mockReturnValue('darwin');
-      setVersion(Version.LATEST);
       await InstallTL.acquire(Version.LATEST);
       expect(util.restoreToolCache).toHaveBeenCalledWith(
         'install-tl-unx.tar.gz',
         Version.LATEST,
       );
       expect(tool.downloadTool).toHaveBeenCalledWith(
-        'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
+        expect.stringContaining(`/${Version.LATEST}/install-tl-unx.tar.gz`),
       );
       expect(tool.downloadTool).toHaveBeenCalledTimes(1);
       expect(util.extract).toHaveBeenCalled();
       expect(util.saveToolCache).toHaveBeenCalled();
-    });
-
-    it(`re-downloads the installer if the latest version is not ${Version.LATEST}`, async () => {
-      (os.platform as jest.Mock).mockReturnValue('linux');
-      setVersion('2050');
-      await InstallTL.acquire(Version.LATEST);
-      expect(util.restoreToolCache).toHaveBeenCalledWith(
-        'install-tl-unx.tar.gz',
-        Version.LATEST,
-      );
-      expect(tool.downloadTool).toHaveBeenCalledWith(
-        'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
-      );
-      expect(tool.downloadTool).toHaveBeenCalledWith(
-        `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${Version.LATEST}/install-tl-unx.tar.gz`,
-      );
-      expect(util.extract).toHaveBeenCalledTimes(2);
-      expect(util.saveToolCache).toHaveBeenCalledTimes(1);
-    });
-
-    it('re-downloads the installer if version checking is failed', async () => {
-      (os.platform as jest.Mock).mockReturnValue('linux');
-      (fs.readFile as jest.Mock).mockImplementationOnce(async () => {
-        throw new Error('oops');
-      });
-      await InstallTL.acquire(Version.LATEST);
-      expect(util.restoreToolCache).toHaveBeenCalledWith(
-        'install-tl-unx.tar.gz',
-        Version.LATEST,
-      );
-      expect(tool.downloadTool).toHaveBeenCalledWith(
-        'https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
-      );
-      expect(tool.downloadTool).toHaveBeenCalledWith(
-        `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${Version.LATEST}/install-tl-unx.tar.gz`,
-      );
-      expect(util.extract).toHaveBeenCalledTimes(2);
-      expect(util.saveToolCache).toHaveBeenCalledTimes(1);
     });
 
     it('downloads the installer for TeX Live 2008', async () => {
@@ -197,7 +154,7 @@ describe('InstallTL', () => {
         '2008',
       );
       expect(tool.downloadTool).toHaveBeenCalledWith(
-        `http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/install-tl-unx.tar.gz`,
+        expect.stringContaining('/tlnet/install-tl-unx.tar.gz'),
       );
       expect(tool.downloadTool).toHaveBeenCalledTimes(1);
       expect(util.extract).toHaveBeenCalled();
@@ -384,13 +341,11 @@ describe('executable', () => {
 });
 
 describe('repository', () => {
-  it('returns the url of the ctan', async () => {
+  it('returns the url for the latest TeX Live', async () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     await InstallTL.acquire(Version.LATEST);
     expect(tool.downloadTool).toHaveBeenCalledWith(
-      expect.stringMatching(
-        '^https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz',
-      ),
+      expect.stringContaining(`/${Version.LATEST}/install-tl-unx.tar.gz`),
     );
   });
 
@@ -398,9 +353,7 @@ describe('repository', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     await InstallTL.acquire('2008');
     expect(tool.downloadTool).toHaveBeenCalledWith(
-      expect.stringMatching(
-        'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/install-tl-unx.tar.gz$',
-      ),
+      expect.stringContaining('/tlnet/install-tl-unx.tar.gz'),
     );
   });
 
@@ -408,9 +361,7 @@ describe('repository', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     await InstallTL.acquire('2010');
     expect(tool.downloadTool).toHaveBeenCalledWith(
-      expect.stringMatching(
-        'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2010/tlnet-final/install-tl-unx.tar.gz$',
-      ),
+      expect.stringContaining('/tlnet-final/install-tl-unx.tar.gz'),
     );
   });
 
@@ -418,9 +369,7 @@ describe('repository', () => {
     (os.platform as jest.Mock).mockReturnValue('linux');
     await InstallTL.acquire('2018');
     expect(tool.downloadTool).toHaveBeenCalledWith(
-      expect.stringMatching(
-        'https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2018/tlnet-final/install-tl-unx.tar.gz$',
-      ),
+      expect.stringContaining('/tlnet-final/install-tl-unx.tar.gz'),
     );
   });
 });
