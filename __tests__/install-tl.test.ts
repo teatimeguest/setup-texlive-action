@@ -123,7 +123,10 @@ describe('InstallTL', () => {
       (os.platform as jest.Mock).mockReturnValue('win32');
       setVersion(Version.LATEST);
       await InstallTL.acquire(Version.LATEST);
-      expect(util.restoreToolCache).toHaveBeenCalledWith('install-tl.zip', Version.LATEST);
+      expect(util.restoreToolCache).toHaveBeenCalledWith(
+        'install-tl.zip',
+        Version.LATEST,
+      );
       expect(tool.downloadTool).toHaveBeenCalledWith(
         'https://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip',
       );
@@ -189,7 +192,10 @@ describe('InstallTL', () => {
     it('downloads the installer for TeX Live 2008', async () => {
       (os.platform as jest.Mock).mockReturnValue('linux');
       await InstallTL.acquire('2008');
-      expect(util.restoreToolCache).toHaveBeenCalledWith('install-tl-unx.tar.gz', '2008');
+      expect(util.restoreToolCache).toHaveBeenCalledWith(
+        'install-tl-unx.tar.gz',
+        '2008',
+      );
       expect(tool.downloadTool).toHaveBeenCalledWith(
         `http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/install-tl-unx.tar.gz`,
       );

@@ -4,6 +4,7 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
+import 'jest-extended';
 
 import * as util from '#/utility';
 
@@ -96,7 +97,7 @@ describe('saveToolCache', () => {
     (tool.cacheDir as jest.Mock).mockImplementationOnce(fail);
     await expect(
       util.saveToolCache('<directory>', '<target>', '<version>'),
-    ).resolves.not.toThrow();
+    ).toResolve();
     expect(core.info).toHaveBeenCalledWith(
       expect.stringContaining('Failed to add to tool cache: '),
     );
@@ -130,8 +131,8 @@ describe('restoreToolCache', () => {
 
 describe('saveCache', () => {
   it('saves directory to cache', async () => {
-    await expect(util.saveCache('<target>', '<key>')).resolves.not.toThrow();
-    expect(cache.saveCache).toHaveBeenCalled();
+    await expect(util.saveCache('<target>', '<key>')).toResolve();
+    expect(cache.saveCache).toHaveBeenCalledOnce();
   });
 
   it("doesn't itself fail even if cache.saveCache fails", async () => {
@@ -152,7 +153,7 @@ describe('restoreCache', () => {
 
   it("returns 'primary' if primary cache restored", async () => {
     (cache.restoreCache as jest.Mock).mockImplementationOnce(
-      async (target: string, key: string) => key,
+      async (target, key) => key,
     );
     await expect(util.restoreCache('<target>', '<key>', [])).resolves.toBe(
       'primary',
@@ -161,7 +162,7 @@ describe('restoreCache', () => {
 
   it("returns 'secondary' if secondary cache restored", async () => {
     (cache.restoreCache as jest.Mock).mockImplementationOnce(
-      async (target: string, key: string, keys: [string]) => keys[0],
+      async (target, key, keys) => keys[0]!,
     );
     await expect(
       util.restoreCache('<target>', '<key>', ['<other key>']),
