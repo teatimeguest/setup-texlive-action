@@ -106,9 +106,9 @@ rules:
   '@typescript-eslint/return-await': [error, always]
 overrides:
   - files:
+      - ./__tests__/action.test.ts
       - ./__tests__/context.test.ts
       - ./__tests__/install-tl.test.ts
-      - ./__tests__/setup.test.ts
       - ./__tests__/texlive.test.ts
       - ./__tests__/utility.test.ts
     extends:

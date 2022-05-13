@@ -1,6 +1,143 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 9139:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
+const crypto = __importStar(__nccwpck_require__(6113));
+const os = __importStar(__nccwpck_require__(2037));
+const core = __importStar(__nccwpck_require__(2186));
+const context_1 = __nccwpck_require__(3842);
+const install_tl_1 = __nccwpck_require__(2381);
+const texlive_1 = __nccwpck_require__(9758);
+const util = __importStar(__nccwpck_require__(2857));
+async function run() {
+    try {
+        if (core.getState('post') !== 'true') {
+            await main();
+            core.saveState('post', true);
+        }
+        else {
+            await post();
+        }
+    }
+    catch (error) {
+        if (error instanceof Error && error.stack !== undefined) {
+            core.debug(`The action failed: ${error.stack}`);
+        }
+        core.setFailed(`${error}`);
+    }
+}
+exports.run = run;
+async function main() {
+    const { inputs, outputs, env } = await context_1.Context.get();
+    const profile = new install_tl_1.Profile(inputs.version, inputs.prefix);
+    let cacheType = undefined;
+    if (inputs.cache) {
+        const keys = getCacheKeys(inputs.version, inputs.packages);
+        cacheType = await core.group('Restoring cache', async () => {
+            return await util.restoreCache(profile.TEXDIR, ...keys);
+        });
+        if (cacheType !== 'primary') {
+            State.set({ key: keys[1][0], texdir: profile.TEXDIR });
+        }
+    }
+    if (cacheType === undefined) {
+        const installtl = await core.group('Acquiring install-tl', async () => {
+            return await install_tl_1.InstallTL.acquire(inputs.version);
+        });
+        await core.group('Installation profile', async () => {
+            core.info(install_tl_1.Profile.format(profile));
+        });
+        await core.group('Installing TeX Live', async () => {
+            await installtl.run(profile);
+        });
+    }
+    const tlmgr = new texlive_1.Manager(inputs.version, inputs.prefix);
+    await tlmgr.path.add();
+    if (cacheType !== undefined) {
+        outputs.cacheHit();
+        await core.group('Adjusting TEXMF', async () => {
+            /* eslint-disable no-await-in-loop */
+            for (const key of ['TEXMFHOME', 'TEXMFCONFIG', 'TEXMFVAR']) {
+                const value = env[`TEXLIVE_INSTALL_${key}`];
+                if ((await tlmgr.conf.texmf(key)) !== value) {
+                    await tlmgr.conf.texmf(key, value);
+                }
+            } /* eslint-enable */
+        });
+    }
+    if (inputs.tlcontrib) {
+        await core.group('Setting up TLContrib', async () => {
+            await tlmgr.repository.add((0, texlive_1.contrib)().href, 'tlcontrib');
+            await tlmgr.pinning.add('tlcontrib', '*');
+        });
+    }
+    if (cacheType !== 'primary' && inputs.packages.size !== 0) {
+        await core.group('Installing packages', async () => {
+            await tlmgr.install(...inputs.packages);
+        });
+    }
+}
+async function post() {
+    const { key, texdir } = State.get();
+    if (key !== '' && texdir !== '') {
+        await util.saveCache(texdir, key);
+    }
+}
+function getCacheKeys(version, packages) {
+    const digest = (s) => {
+        return crypto.createHash('sha256').update(s).digest('hex');
+    };
+    const baseKey = `setup-texlive-${os.platform()}-${os.arch()}-${version}-`;
+    const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
+    return [primaryKey, [baseKey]];
+}
+var State;
+(function (State) {
+    function get() {
+        const key = core.getState('key');
+        const texdir = core.getState('texdir');
+        return { key, texdir };
+    }
+    State.get = get;
+    function set(state) {
+        core.saveState('key', state.key);
+        core.saveState('texdir', state.texdir);
+    }
+    State.set = set;
+})(State || (State = {}));
+//# sourceMappingURL=action.js.map
+
+/***/ }),
+
 /***/ 3842:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -30,84 +167,147 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setCacheHit = exports.setPost = exports.getPost = exports.setKey = exports.getKey = exports.loadConfig = void 0;
+exports.Context = void 0;
 const fs = __importStar(__nccwpck_require__(3292));
+const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
-const cache_1 = __nccwpck_require__(7799);
+const process = __importStar(__nccwpck_require__(7282));
+const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
-const install_tl_1 = __nccwpck_require__(2381);
 const texlive_1 = __nccwpck_require__(9758);
 const util = __importStar(__nccwpck_require__(2857));
-async function loadConfig() {
-    const cache = getCache();
-    const packages = await getPackages();
-    const version = getVersion();
-    const env = new install_tl_1.Env(version, path.join(util.tmpdir(), 'setup-texlive'));
-    const prefix = getPrefix(env);
-    const tlcontrib = getTlcontrib(version);
-    return { cache, packages, prefix, tlcontrib, version, env };
-}
-exports.loadConfig = loadConfig;
-function getCache() {
-    const cache = core.getBooleanInput('cache');
-    if (cache && !(0, cache_1.isFeatureAvailable)()) {
-        core.warning('Caching is disabled because cache service is not available');
-        return false;
+var Context;
+(function (Context) {
+    async function get() {
+        const inputs = await Inputs.get();
+        const outputs = Outputs.get();
+        const env = Env.get(inputs.version);
+        return { env, inputs, outputs };
     }
-    return cache;
-}
-async function getPackages() {
-    const inline = core.getInput('packages');
-    const filename = core.getInput('package-file');
-    const file = filename === '' ? '' : await fs.readFile(filename, 'utf8');
-    const packages = new Set([inline, file].flatMap((content) => content.split(/(?:#.*$|\s+)/mu)).sort());
-    packages.delete('');
-    return packages;
-}
-function getPrefix(env) {
-    const prefix = core.getInput('prefix');
-    return prefix === '' ? env.TEXLIVE_INSTALL_PREFIX : prefix;
-}
-function getTlcontrib(version) {
-    const tlcontrib = core.getBooleanInput('tlcontrib');
-    if (tlcontrib && version !== texlive_1.Version.LATEST) {
-        core.warning('`tlcontrib` is ignored since an older version of TeX Live is specified');
-        return false;
+    Context.get = get;
+})(Context = exports.Context || (exports.Context = {}));
+var Inputs;
+(function (Inputs) {
+    async function get() {
+        const re = /(?:#.*$|\s+)/mu;
+        const packages = core.getInput('packages').split(re);
+        const packageFile = core.getInput('package-file');
+        if (packageFile !== '') {
+            const contents = await fs.readFile(packageFile, 'utf8');
+            packages.push(...contents.split(re));
+        }
+        const inputs = {
+            cache: core.getBooleanInput('cache'),
+            packages: new Set(packages.sort()),
+            prefix: core.getInput('prefix'),
+            tlcontrib: core.getBooleanInput('tlcontrib'),
+            version: texlive_1.Version.LATEST,
+        };
+        inputs.packages.delete('');
+        if (inputs.cache && !cache.isFeatureAvailable()) {
+            core.warning('Caching is disabled since cache service is not available');
+            inputs.cache = false;
+        }
+        if (inputs.prefix === '') {
+            inputs.prefix =
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                process.env['TEXLIVE_INSTALL_PREFIX'] ?? defaultPrefix();
+        }
+        const version = core.getInput('version');
+        if (texlive_1.Version.isVersion(version)) {
+            inputs.version = version;
+        }
+        else if (version !== 'latest') {
+            throw new TypeError("version must be specified by year or 'latest'");
+        }
+        if (inputs.tlcontrib && inputs.version !== texlive_1.Version.LATEST) {
+            core.warning('tlcontrib is ignored for an older version');
+            inputs.tlcontrib = false;
+        }
+        return inputs;
     }
-    return tlcontrib;
-}
-function getVersion() {
-    const version = core.getInput('version');
-    if (texlive_1.Version.isVersion(version)) {
-        return version;
+    Inputs.get = get;
+})(Inputs || (Inputs = {}));
+var Outputs;
+(function (Outputs) {
+    function get() {
+        return {
+            cacheHit: () => {
+                core.setOutput('cache-hit', true);
+            },
+        };
     }
-    else if (version === 'latest') {
-        return texlive_1.Version.LATEST;
+    Outputs.get = get;
+})(Outputs || (Outputs = {}));
+var Env;
+(function (Env) {
+    function get(version) {
+        var _a;
+        for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFLOCAL", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
+            if (key in process.env) {
+                core.warning(`${key} is set, but ignored`);
+                delete process.env[key];
+            }
+        }
+        for (const [key, value] of Object.entries(defaults(version))) {
+            (_a = process.env)[key] ?? (_a[key] = value);
+        }
+        return process.env;
     }
-    throw new TypeError("`version` must be specified by year or 'latest'");
+    Env.get = get;
+    function defaults(version) {
+        const home = os.homedir();
+        const texdir = path.join(home, '.local', 'texlive', version);
+        return {
+            ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1',
+            ['TEXLIVE_INSTALL_NO_WELCOME']: '1',
+            ['TEXLIVE_INSTALL_PREFIX']: defaultPrefix(),
+            ['TEXLIVE_INSTALL_TEXMFCONFIG']: path.join(texdir, 'texmf-config'),
+            ['TEXLIVE_INSTALL_TEXMFVAR']: path.join(texdir, 'texmf-var'),
+            ['TEXLIVE_INSTALL_TEXMFHOME']: path.join(home, 'texmf'),
+        };
+    }
+    Env.defaults = defaults;
+})(Env || (Env = {}));
+function defaultPrefix() {
+    return path.join(util.tmpdir(), 'setup-texlive');
 }
-function getKey() {
-    const key = core.getState('key');
-    return key === '' ? undefined : key;
-}
-exports.getKey = getKey;
-function setKey(key) {
-    core.saveState('key', key);
-}
-exports.setKey = setKey;
-function getPost() {
-    return core.getState('post') === 'true';
-}
-exports.getPost = getPost;
-function setPost(post = true) {
-    core.saveState('post', post);
-}
-exports.setPost = setPost;
-function setCacheHit(cacheHit = true) {
-    core.setOutput('cache-hit', cacheHit);
-}
-exports.setCacheHit = setCacheHit;
 //# sourceMappingURL=context.js.map
+
+/***/ }),
+
+/***/ 4822:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const action = __importStar(__nccwpck_require__(9139));
+action.run();
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 
@@ -140,11 +340,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Profile = exports.Env = exports.InstallTL = void 0;
+exports.Profile = exports.InstallTL = void 0;
 const fs = __importStar(__nccwpck_require__(3292));
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
-const process = __importStar(__nccwpck_require__(7282));
 const util_1 = __nccwpck_require__(3837);
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
@@ -160,7 +359,7 @@ class InstallTL {
         this.version = version;
         this.bin = bin;
     }
-    async run(profile, env) {
+    async run(profile) {
         const target = path.join(util.tmpdir(), 'texlive.profile');
         await fs.writeFile(target, Profile.format(profile));
         const options = ['-no-gui', '-profile', target];
@@ -179,7 +378,7 @@ class InstallTL {
              */
             this.version === '2008' ? '-location' : '-repository', repo.href);
         }
-        await exec.exec(this.bin, options, { env: { ...process.env, ...env } });
+        await exec.exec(this.bin, options);
         core.info('Applying patches');
         await patch(this.version, profile.TEXDIR);
     }
@@ -211,41 +410,6 @@ class InstallTL {
     }
 }
 exports.InstallTL = InstallTL;
-class Env {
-    constructor(version, prefix) {
-        this['TEXLIVE_INSTALL_ENV_NOCHECK'] = 'true';
-        this['TEXLIVE_INSTALL_NO_WELCOME'] = 'true';
-        for (const key of [
-            'TEXLIVE_INSTALL_TEXDIR',
-            'TEXLIVE_INSTALL_TEXMFLOCAL',
-            'TEXLIVE_INSTALL_TEXMFSYSCONFIG',
-            'TEXLIVE_INSTALL_TEXMFSYSVAR',
-        ]) {
-            if (key in process.env) {
-                core.warning(`${key} is set to '${process.env[key] ?? ''}', but ignored`);
-            }
-        }
-        const home = os.homedir();
-        const texdir = path.join(home, '.local', 'texlive', version);
-        this.TEXLIVE_INSTALL_PREFIX = prefix;
-        this.TEXLIVE_INSTALL_TEXMFHOME = path.join(home, 'texmf');
-        this.TEXLIVE_INSTALL_TEXMFCONFIG = path.join(texdir, 'texmf-config');
-        this.TEXLIVE_INSTALL_TEXMFVAR = path.join(texdir, 'texmf-var');
-        for (const key of ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"]) {
-            if (key in process.env) {
-                this[key] = process.env[key] ?? '';
-            }
-        }
-    }
-}
-exports.Env = Env;
-(function (Env) {
-    function format(env) {
-        return ["TEXLIVE_DOWNLOADER", "TL_DOWNLOAD_PROGRAM", "TL_DOWNLOAD_ARGS", "TEXLIVE_INSTALL_ENV_NOCHECK", "TEXLIVE_INSTALL_NO_CONTEXT_CACHE", "TEXLIVE_INSTALL_NO_RESUME", "TEXLIVE_INSTALL_NO_WELCOME", "TEXLIVE_INSTALL_PAPER", "TEXLIVE_INSTALL_PREFIX", "TEXLIVE_INSTALL_TEXMFHOME", "TEXLIVE_INSTALL_TEXMFCONFIG", "TEXLIVE_INSTALL_TEXMFVAR", "NOPERLDOC"].flatMap((key) => (env[key] === undefined ? [] : `${key}='${env[key]}'`))
-            .join('\n');
-    }
-    Env.format = format;
-})(Env = exports.Env || (exports.Env = {}));
 class Profile {
     constructor(version, prefix) {
         this['option_autobackup'] = '0';
@@ -348,136 +512,6 @@ async function patch(version, texdir) {
 
 /***/ }),
 
-/***/ 7391:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
-const crypto = __importStar(__nccwpck_require__(6113));
-const os = __importStar(__nccwpck_require__(2037));
-const core = __importStar(__nccwpck_require__(2186));
-const context = __importStar(__nccwpck_require__(3842));
-const install_tl_1 = __nccwpck_require__(2381);
-const texlive_1 = __nccwpck_require__(9758);
-const util = __importStar(__nccwpck_require__(2857));
-async function run() {
-    try {
-        if (!context.getPost()) {
-            await main();
-            context.setPost();
-        }
-        else {
-            await post();
-        }
-    }
-    catch (error) {
-        if (error instanceof Error && error.stack !== undefined) {
-            core.debug(`The action failed: ${error.stack}`);
-        }
-        core.setFailed(`${error}`);
-    }
-}
-exports.run = run;
-async function main() {
-    const config = await context.loadConfig();
-    const profile = new install_tl_1.Profile(config.version, config.prefix);
-    let cacheType = undefined;
-    if (config.cache) {
-        const keys = getCacheKeys(config.version, config.packages);
-        cacheType = await core.group('Restoring cache', async () => {
-            return await util.restoreCache(profile.TEXDIR, ...keys);
-        });
-        if (cacheType !== 'primary') {
-            context.setKey(keys[1][0]);
-        }
-    }
-    await core.group('Environment variables for TeX Live', async () => {
-        core.info(install_tl_1.Env.format(config.env));
-    });
-    if (cacheType === undefined) {
-        const installtl = await core.group('Acquiring install-tl', async () => {
-            return await install_tl_1.InstallTL.acquire(config.version);
-        });
-        await core.group('Installation profile', async () => {
-            core.info(install_tl_1.Profile.format(profile));
-        });
-        await core.group('Installing TeX Live', async () => {
-            await installtl.run(profile, config.env);
-        });
-    }
-    const tlmgr = new texlive_1.Manager(config.version, config.prefix);
-    await tlmgr.path.add();
-    if (cacheType !== undefined) {
-        context.setCacheHit();
-        await core.group('Adjusting TEXMF', async () => {
-            for (const [key, value] of await tlmgr.conf.texmf()) {
-                const specified = config.env[`TEXLIVE_INSTALL_${key}`];
-                if (value !== specified) {
-                    // eslint-disable-next-line no-await-in-loop
-                    await tlmgr.conf.texmf(key, specified);
-                }
-            }
-        });
-    }
-    if (config.tlcontrib) {
-        await core.group('Setting up TLContrib', async () => {
-            await tlmgr.repository.add((0, texlive_1.contrib)().href, 'tlcontrib');
-            await tlmgr.pinning.add('tlcontrib', '*');
-        });
-    }
-    if (cacheType !== 'primary' && config.packages.size !== 0) {
-        await core.group('Installing packages', async () => {
-            await tlmgr.install(...config.packages);
-        });
-    }
-}
-async function post() {
-    const config = await context.loadConfig();
-    const profile = new install_tl_1.Profile(config.version, config.prefix);
-    const primaryKey = context.getKey();
-    if (primaryKey === undefined) {
-        core.info('Nothing to do');
-        return;
-    }
-    await util.saveCache(profile.TEXDIR, primaryKey);
-}
-function getCacheKeys(version, packages) {
-    const digest = (s) => {
-        return crypto.createHash('sha256').update(s).digest('hex');
-    };
-    const baseKey = `setup-texlive-${os.platform()}-${os.arch()}-${version}-`;
-    const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
-    return [primaryKey, [baseKey]];
-}
-//# sourceMappingURL=setup.js.map
-
-/***/ }),
-
 /***/ 9758:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -534,9 +568,6 @@ class Manager {
                 this.version = version;
             }
             async texmf(key, value) {
-                if (key === undefined) {
-                    return await Promise.all(["TEXMFHOME", "TEXMFCONFIG", "TEXMFVAR"].map(async (variable) => [variable, await this.texmf(variable)]));
-                }
                 if (value === undefined) {
                     return (await exec.getExecOutput('kpsewhich', ['-var-value', key])).stdout.trim();
                 }
@@ -981,8 +1012,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const http_client_1 = __nccwpck_require__(9925);
-const auth_1 = __nccwpck_require__(3702);
+const http_client_1 = __nccwpck_require__(6255);
+const auth_1 = __nccwpck_require__(5526);
 const crypto = __importStar(__nccwpck_require__(6113));
 const fs = __importStar(__nccwpck_require__(7147));
 const url_1 = __nccwpck_require__(7310);
@@ -1414,7 +1445,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const http_client_1 = __nccwpck_require__(9925);
+const http_client_1 = __nccwpck_require__(6255);
 const storage_blob_1 = __nccwpck_require__(4100);
 const buffer = __importStar(__nccwpck_require__(4300));
 const fs = __importStar(__nccwpck_require__(7147));
@@ -1652,7 +1683,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const http_client_1 = __nccwpck_require__(9925);
+const http_client_1 = __nccwpck_require__(6255);
 const constants_1 = __nccwpck_require__(8840);
 function isSuccessStatusCode(statusCode) {
     if (!statusCode) {
@@ -1729,7 +1760,7 @@ function retryTypedResponse(name, method, maxAttempts = constants_1.DefaultRetry
     return __awaiter(this, void 0, void 0, function* () {
         return yield retry(name, method, (response) => response.statusCode, maxAttempts, delay, 
         // If the error object contains the statusCode property, extract it and return
-        // an ITypedResponse<T> so it can be processed by the retry logic.
+        // an TypedResponse<T> so it can be processed by the retry logic.
         (error) => {
             if (error instanceof http_client_1.HttpClientError) {
                 return {
@@ -3552,8 +3583,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OidcClient = void 0;
-const http_client_1 = __nccwpck_require__(9925);
-const auth_1 = __nccwpck_require__(3702);
+const http_client_1 = __nccwpck_require__(6255);
+const auth_1 = __nccwpck_require__(5526);
 const core_1 = __nccwpck_require__(2186);
 class OidcClient {
     static createHttpClient(allowRetry = true, maxRetry = 10) {
@@ -5880,28 +5911,41 @@ exports.SearchState = SearchState;
 
 /***/ }),
 
-/***/ 3702:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ 5526:
+/***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PersonalAccessTokenCredentialHandler = exports.BearerCredentialHandler = exports.BasicCredentialHandler = void 0;
 class BasicCredentialHandler {
     constructor(username, password) {
         this.username = username;
         this.password = password;
     }
     prepareRequest(options) {
-        options.headers['Authorization'] =
-            'Basic ' +
-                Buffer.from(this.username + ':' + this.password).toString('base64');
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`;
     }
     // This handler cannot handle 401
-    canHandleAuthentication(response) {
+    canHandleAuthentication() {
         return false;
     }
-    handleAuthentication(httpClient, requestInfo, objs) {
-        return null;
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
     }
 }
 exports.BasicCredentialHandler = BasicCredentialHandler;
@@ -5912,14 +5956,19 @@ class BearerCredentialHandler {
     // currently implements pre-authorization
     // TODO: support preAuth = false where it hooks on 401
     prepareRequest(options) {
-        options.headers['Authorization'] = 'Bearer ' + this.token;
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Bearer ${this.token}`;
     }
     // This handler cannot handle 401
-    canHandleAuthentication(response) {
+    canHandleAuthentication() {
         return false;
     }
-    handleAuthentication(httpClient, requestInfo, objs) {
-        return null;
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
     }
 }
 exports.BearerCredentialHandler = BearerCredentialHandler;
@@ -5930,32 +5979,66 @@ class PersonalAccessTokenCredentialHandler {
     // currently implements pre-authorization
     // TODO: support preAuth = false where it hooks on 401
     prepareRequest(options) {
-        options.headers['Authorization'] =
-            'Basic ' + Buffer.from('PAT:' + this.token).toString('base64');
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Basic ${Buffer.from(`PAT:${this.token}`).toString('base64')}`;
     }
     // This handler cannot handle 401
-    canHandleAuthentication(response) {
+    canHandleAuthentication() {
         return false;
     }
-    handleAuthentication(httpClient, requestInfo, objs) {
-        return null;
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
     }
 }
 exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHandler;
-
+//# sourceMappingURL=auth.js.map
 
 /***/ }),
 
-/***/ 9925:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ 6255:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const http = __nccwpck_require__(3685);
-const https = __nccwpck_require__(5687);
-const pm = __nccwpck_require__(6443);
-let tunnel;
+exports.HttpClient = exports.isHttps = exports.HttpClientResponse = exports.HttpClientError = exports.getProxyUrl = exports.MediaTypes = exports.Headers = exports.HttpCodes = void 0;
+const http = __importStar(__nccwpck_require__(3685));
+const https = __importStar(__nccwpck_require__(5687));
+const pm = __importStar(__nccwpck_require__(9835));
+const tunnel = __importStar(__nccwpck_require__(4294));
 var HttpCodes;
 (function (HttpCodes) {
     HttpCodes[HttpCodes["OK"] = 200] = "OK";
@@ -6000,7 +6083,7 @@ var MediaTypes;
  * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
  */
 function getProxyUrl(serverUrl) {
-    let proxyUrl = pm.getProxyUrl(new URL(serverUrl));
+    const proxyUrl = pm.getProxyUrl(new URL(serverUrl));
     return proxyUrl ? proxyUrl.href : '';
 }
 exports.getProxyUrl = getProxyUrl;
@@ -6033,20 +6116,22 @@ class HttpClientResponse {
         this.message = message;
     }
     readBody() {
-        return new Promise(async (resolve, reject) => {
-            let output = Buffer.alloc(0);
-            this.message.on('data', (chunk) => {
-                output = Buffer.concat([output, chunk]);
-            });
-            this.message.on('end', () => {
-                resolve(output.toString());
-            });
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+                let output = Buffer.alloc(0);
+                this.message.on('data', (chunk) => {
+                    output = Buffer.concat([output, chunk]);
+                });
+                this.message.on('end', () => {
+                    resolve(output.toString());
+                });
+            }));
         });
     }
 }
 exports.HttpClientResponse = HttpClientResponse;
 function isHttps(requestUrl) {
-    let parsedUrl = new URL(requestUrl);
+    const parsedUrl = new URL(requestUrl);
     return parsedUrl.protocol === 'https:';
 }
 exports.isHttps = isHttps;
@@ -6089,141 +6174,169 @@ class HttpClient {
         }
     }
     options(requestUrl, additionalHeaders) {
-        return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
+        });
     }
     get(requestUrl, additionalHeaders) {
-        return this.request('GET', requestUrl, null, additionalHeaders || {});
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('GET', requestUrl, null, additionalHeaders || {});
+        });
     }
     del(requestUrl, additionalHeaders) {
-        return this.request('DELETE', requestUrl, null, additionalHeaders || {});
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('DELETE', requestUrl, null, additionalHeaders || {});
+        });
     }
     post(requestUrl, data, additionalHeaders) {
-        return this.request('POST', requestUrl, data, additionalHeaders || {});
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('POST', requestUrl, data, additionalHeaders || {});
+        });
     }
     patch(requestUrl, data, additionalHeaders) {
-        return this.request('PATCH', requestUrl, data, additionalHeaders || {});
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('PATCH', requestUrl, data, additionalHeaders || {});
+        });
     }
     put(requestUrl, data, additionalHeaders) {
-        return this.request('PUT', requestUrl, data, additionalHeaders || {});
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('PUT', requestUrl, data, additionalHeaders || {});
+        });
     }
     head(requestUrl, additionalHeaders) {
-        return this.request('HEAD', requestUrl, null, additionalHeaders || {});
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('HEAD', requestUrl, null, additionalHeaders || {});
+        });
     }
     sendStream(verb, requestUrl, stream, additionalHeaders) {
-        return this.request(verb, requestUrl, stream, additionalHeaders);
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request(verb, requestUrl, stream, additionalHeaders);
+        });
     }
     /**
      * Gets a typed object from an endpoint
      * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
      */
-    async getJson(requestUrl, additionalHeaders = {}) {
-        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-        let res = await this.get(requestUrl, additionalHeaders);
-        return this._processResponse(res, this.requestOptions);
+    getJson(requestUrl, additionalHeaders = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            const res = yield this.get(requestUrl, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
     }
-    async postJson(requestUrl, obj, additionalHeaders = {}) {
-        let data = JSON.stringify(obj, null, 2);
-        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
-        let res = await this.post(requestUrl, data, additionalHeaders);
-        return this._processResponse(res, this.requestOptions);
+    postJson(requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = JSON.stringify(obj, null, 2);
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+            const res = yield this.post(requestUrl, data, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
     }
-    async putJson(requestUrl, obj, additionalHeaders = {}) {
-        let data = JSON.stringify(obj, null, 2);
-        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
-        let res = await this.put(requestUrl, data, additionalHeaders);
-        return this._processResponse(res, this.requestOptions);
+    putJson(requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = JSON.stringify(obj, null, 2);
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+            const res = yield this.put(requestUrl, data, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
     }
-    async patchJson(requestUrl, obj, additionalHeaders = {}) {
-        let data = JSON.stringify(obj, null, 2);
-        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
-        let res = await this.patch(requestUrl, data, additionalHeaders);
-        return this._processResponse(res, this.requestOptions);
+    patchJson(requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = JSON.stringify(obj, null, 2);
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+            const res = yield this.patch(requestUrl, data, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
     }
     /**
      * Makes a raw http request.
      * All other methods such as get, post, patch, and request ultimately call this.
      * Prefer get, del, post and patch
      */
-    async request(verb, requestUrl, data, headers) {
-        if (this._disposed) {
-            throw new Error('Client has already been disposed.');
-        }
-        let parsedUrl = new URL(requestUrl);
-        let info = this._prepareRequest(verb, parsedUrl, headers);
-        // Only perform retries on reads since writes may not be idempotent.
-        let maxTries = this._allowRetries && RetryableHttpVerbs.indexOf(verb) != -1
-            ? this._maxRetries + 1
-            : 1;
-        let numTries = 0;
-        let response;
-        while (numTries < maxTries) {
-            response = await this.requestRaw(info, data);
-            // Check if it's an authentication challenge
-            if (response &&
-                response.message &&
-                response.message.statusCode === HttpCodes.Unauthorized) {
-                let authenticationHandler;
-                for (let i = 0; i < this.handlers.length; i++) {
-                    if (this.handlers[i].canHandleAuthentication(response)) {
-                        authenticationHandler = this.handlers[i];
-                        break;
-                    }
-                }
-                if (authenticationHandler) {
-                    return authenticationHandler.handleAuthentication(this, info, data);
-                }
-                else {
-                    // We have received an unauthorized response but have no handlers to handle it.
-                    // Let the response return to the caller.
-                    return response;
-                }
+    request(verb, requestUrl, data, headers) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._disposed) {
+                throw new Error('Client has already been disposed.');
             }
-            let redirectsRemaining = this._maxRedirects;
-            while (HttpRedirectCodes.indexOf(response.message.statusCode) != -1 &&
-                this._allowRedirects &&
-                redirectsRemaining > 0) {
-                const redirectUrl = response.message.headers['location'];
-                if (!redirectUrl) {
-                    // if there's no location to redirect to, we won't
-                    break;
-                }
-                let parsedRedirectUrl = new URL(redirectUrl);
-                if (parsedUrl.protocol == 'https:' &&
-                    parsedUrl.protocol != parsedRedirectUrl.protocol &&
-                    !this._allowRedirectDowngrade) {
-                    throw new Error('Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.');
-                }
-                // we need to finish reading the response before reassigning response
-                // which will leak the open socket.
-                await response.readBody();
-                // strip authorization header if redirected to a different hostname
-                if (parsedRedirectUrl.hostname !== parsedUrl.hostname) {
-                    for (let header in headers) {
-                        // header names are case insensitive
-                        if (header.toLowerCase() === 'authorization') {
-                            delete headers[header];
+            const parsedUrl = new URL(requestUrl);
+            let info = this._prepareRequest(verb, parsedUrl, headers);
+            // Only perform retries on reads since writes may not be idempotent.
+            const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb)
+                ? this._maxRetries + 1
+                : 1;
+            let numTries = 0;
+            let response;
+            do {
+                response = yield this.requestRaw(info, data);
+                // Check if it's an authentication challenge
+                if (response &&
+                    response.message &&
+                    response.message.statusCode === HttpCodes.Unauthorized) {
+                    let authenticationHandler;
+                    for (const handler of this.handlers) {
+                        if (handler.canHandleAuthentication(response)) {
+                            authenticationHandler = handler;
+                            break;
                         }
                     }
+                    if (authenticationHandler) {
+                        return authenticationHandler.handleAuthentication(this, info, data);
+                    }
+                    else {
+                        // We have received an unauthorized response but have no handlers to handle it.
+                        // Let the response return to the caller.
+                        return response;
+                    }
                 }
-                // let's make the request with the new redirectUrl
-                info = this._prepareRequest(verb, parsedRedirectUrl, headers);
-                response = await this.requestRaw(info, data);
-                redirectsRemaining--;
-            }
-            if (HttpResponseRetryCodes.indexOf(response.message.statusCode) == -1) {
-                // If not a retry code, return immediately instead of retrying
-                return response;
-            }
-            numTries += 1;
-            if (numTries < maxTries) {
-                await response.readBody();
-                await this._performExponentialBackoff(numTries);
-            }
-        }
-        return response;
+                let redirectsRemaining = this._maxRedirects;
+                while (response.message.statusCode &&
+                    HttpRedirectCodes.includes(response.message.statusCode) &&
+                    this._allowRedirects &&
+                    redirectsRemaining > 0) {
+                    const redirectUrl = response.message.headers['location'];
+                    if (!redirectUrl) {
+                        // if there's no location to redirect to, we won't
+                        break;
+                    }
+                    const parsedRedirectUrl = new URL(redirectUrl);
+                    if (parsedUrl.protocol === 'https:' &&
+                        parsedUrl.protocol !== parsedRedirectUrl.protocol &&
+                        !this._allowRedirectDowngrade) {
+                        throw new Error('Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.');
+                    }
+                    // we need to finish reading the response before reassigning response
+                    // which will leak the open socket.
+                    yield response.readBody();
+                    // strip authorization header if redirected to a different hostname
+                    if (parsedRedirectUrl.hostname !== parsedUrl.hostname) {
+                        for (const header in headers) {
+                            // header names are case insensitive
+                            if (header.toLowerCase() === 'authorization') {
+                                delete headers[header];
+                            }
+                        }
+                    }
+                    // let's make the request with the new redirectUrl
+                    info = this._prepareRequest(verb, parsedRedirectUrl, headers);
+                    response = yield this.requestRaw(info, data);
+                    redirectsRemaining--;
+                }
+                if (!response.message.statusCode ||
+                    !HttpResponseRetryCodes.includes(response.message.statusCode)) {
+                    // If not a retry code, return immediately instead of retrying
+                    return response;
+                }
+                numTries += 1;
+                if (numTries < maxTries) {
+                    yield response.readBody();
+                    yield this._performExponentialBackoff(numTries);
+                }
+            } while (numTries < maxTries);
+            return response;
+        });
     }
     /**
      * Needs to be called if keepAlive is set to true in request options.
@@ -6240,14 +6353,22 @@ class HttpClient {
      * @param data
      */
     requestRaw(info, data) {
-        return new Promise((resolve, reject) => {
-            let callbackForResult = function (err, res) {
-                if (err) {
-                    reject(err);
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                function callbackForResult(err, res) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else if (!res) {
+                        // If `err` is not passed, then `res` must be passed.
+                        reject(new Error('Unknown error'));
+                    }
+                    else {
+                        resolve(res);
+                    }
                 }
-                resolve(res);
-            };
-            this.requestRawWithCallback(info, data, callbackForResult);
+                this.requestRawWithCallback(info, data, callbackForResult);
+            });
         });
     }
     /**
@@ -6257,21 +6378,24 @@ class HttpClient {
      * @param onResult
      */
     requestRawWithCallback(info, data, onResult) {
-        let socket;
         if (typeof data === 'string') {
+            if (!info.options.headers) {
+                info.options.headers = {};
+            }
             info.options.headers['Content-Length'] = Buffer.byteLength(data, 'utf8');
         }
         let callbackCalled = false;
-        let handleResult = (err, res) => {
+        function handleResult(err, res) {
             if (!callbackCalled) {
                 callbackCalled = true;
                 onResult(err, res);
             }
-        };
-        let req = info.httpModule.request(info.options, (msg) => {
-            let res = new HttpClientResponse(msg);
-            handleResult(null, res);
+        }
+        const req = info.httpModule.request(info.options, (msg) => {
+            const res = new HttpClientResponse(msg);
+            handleResult(undefined, res);
         });
+        let socket;
         req.on('socket', sock => {
             socket = sock;
         });
@@ -6280,12 +6404,12 @@ class HttpClient {
             if (socket) {
                 socket.end();
             }
-            handleResult(new Error('Request timeout: ' + info.options.path), null);
+            handleResult(new Error(`Request timeout: ${info.options.path}`));
         });
         req.on('error', function (err) {
             // err has statusCode property
             // res should have headers
-            handleResult(err, null);
+            handleResult(err);
         });
         if (data && typeof data === 'string') {
             req.write(data, 'utf8');
@@ -6306,7 +6430,7 @@ class HttpClient {
      * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
      */
     getAgent(serverUrl) {
-        let parsedUrl = new URL(serverUrl);
+        const parsedUrl = new URL(serverUrl);
         return this._getAgent(parsedUrl);
     }
     _prepareRequest(method, requestUrl, headers) {
@@ -6330,21 +6454,19 @@ class HttpClient {
         info.options.agent = this._getAgent(info.parsedUrl);
         // gives handlers an opportunity to participate
         if (this.handlers) {
-            this.handlers.forEach(handler => {
+            for (const handler of this.handlers) {
                 handler.prepareRequest(info.options);
-            });
+            }
         }
         return info;
     }
     _mergeHeaders(headers) {
-        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
         if (this.requestOptions && this.requestOptions.headers) {
-            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers));
+            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers || {}));
         }
         return lowercaseKeys(headers || {});
     }
     _getExistingOrDefaultHeader(additionalHeaders, header, _default) {
-        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
         let clientHeader;
         if (this.requestOptions && this.requestOptions.headers) {
             clientHeader = lowercaseKeys(this.requestOptions.headers)[header];
@@ -6353,8 +6475,8 @@ class HttpClient {
     }
     _getAgent(parsedUrl) {
         let agent;
-        let proxyUrl = pm.getProxyUrl(parsedUrl);
-        let useProxy = proxyUrl && proxyUrl.hostname;
+        const proxyUrl = pm.getProxyUrl(parsedUrl);
+        const useProxy = proxyUrl && proxyUrl.hostname;
         if (this._keepAlive && useProxy) {
             agent = this._proxyAgent;
         }
@@ -6362,29 +6484,22 @@ class HttpClient {
             agent = this._agent;
         }
         // if agent is already assigned use that agent.
-        if (!!agent) {
+        if (agent) {
             return agent;
         }
         const usingSsl = parsedUrl.protocol === 'https:';
         let maxSockets = 100;
-        if (!!this.requestOptions) {
+        if (this.requestOptions) {
             maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
         }
-        if (useProxy) {
-            // If using proxy, need tunnel
-            if (!tunnel) {
-                tunnel = __nccwpck_require__(4294);
-            }
+        // This is `useProxy` again, but we need to check `proxyURl` directly for TypeScripts's flow analysis.
+        if (proxyUrl && proxyUrl.hostname) {
             const agentOptions = {
-                maxSockets: maxSockets,
+                maxSockets,
                 keepAlive: this._keepAlive,
-                proxy: {
-                    ...((proxyUrl.username || proxyUrl.password) && {
-                        proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`
-                    }),
-                    host: proxyUrl.hostname,
-                    port: proxyUrl.port
-                }
+                proxy: Object.assign(Object.assign({}, ((proxyUrl.username || proxyUrl.password) && {
+                    proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`
+                })), { host: proxyUrl.hostname, port: proxyUrl.port })
             };
             let tunnelAgent;
             const overHttps = proxyUrl.protocol === 'https:';
@@ -6399,7 +6514,7 @@ class HttpClient {
         }
         // if reusing agent across request and tunneling agent isn't assigned create a new agent
         if (this._keepAlive && !agent) {
-            const options = { keepAlive: this._keepAlive, maxSockets: maxSockets };
+            const options = { keepAlive: this._keepAlive, maxSockets };
             agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
             this._agent = agent;
         }
@@ -6418,109 +6533,117 @@ class HttpClient {
         return agent;
     }
     _performExponentialBackoff(retryNumber) {
-        retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
-        const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
-        return new Promise(resolve => setTimeout(() => resolve(), ms));
+        return __awaiter(this, void 0, void 0, function* () {
+            retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
+            const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
+            return new Promise(resolve => setTimeout(() => resolve(), ms));
+        });
     }
-    static dateTimeDeserializer(key, value) {
-        if (typeof value === 'string') {
-            let a = new Date(value);
-            if (!isNaN(a.valueOf())) {
-                return a;
-            }
-        }
-        return value;
-    }
-    async _processResponse(res, options) {
-        return new Promise(async (resolve, reject) => {
-            const statusCode = res.message.statusCode;
-            const response = {
-                statusCode: statusCode,
-                result: null,
-                headers: {}
-            };
-            // not found leads to null obj returned
-            if (statusCode == HttpCodes.NotFound) {
-                resolve(response);
-            }
-            let obj;
-            let contents;
-            // get the result from the body
-            try {
-                contents = await res.readBody();
-                if (contents && contents.length > 0) {
-                    if (options && options.deserializeDates) {
-                        obj = JSON.parse(contents, HttpClient.dateTimeDeserializer);
+    _processResponse(res, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                const statusCode = res.message.statusCode || 0;
+                const response = {
+                    statusCode,
+                    result: null,
+                    headers: {}
+                };
+                // not found leads to null obj returned
+                if (statusCode === HttpCodes.NotFound) {
+                    resolve(response);
+                }
+                // get the result from the body
+                function dateTimeDeserializer(key, value) {
+                    if (typeof value === 'string') {
+                        const a = new Date(value);
+                        if (!isNaN(a.valueOf())) {
+                            return a;
+                        }
+                    }
+                    return value;
+                }
+                let obj;
+                let contents;
+                try {
+                    contents = yield res.readBody();
+                    if (contents && contents.length > 0) {
+                        if (options && options.deserializeDates) {
+                            obj = JSON.parse(contents, dateTimeDeserializer);
+                        }
+                        else {
+                            obj = JSON.parse(contents);
+                        }
+                        response.result = obj;
+                    }
+                    response.headers = res.message.headers;
+                }
+                catch (err) {
+                    // Invalid resource (contents not json);  leaving result obj null
+                }
+                // note that 3xx redirects are handled by the http layer.
+                if (statusCode > 299) {
+                    let msg;
+                    // if exception/error in body, attempt to get better error
+                    if (obj && obj.message) {
+                        msg = obj.message;
+                    }
+                    else if (contents && contents.length > 0) {
+                        // it may be the case that the exception is in the body message as string
+                        msg = contents;
                     }
                     else {
-                        obj = JSON.parse(contents);
+                        msg = `Failed request: (${statusCode})`;
                     }
-                    response.result = obj;
-                }
-                response.headers = res.message.headers;
-            }
-            catch (err) {
-                // Invalid resource (contents not json);  leaving result obj null
-            }
-            // note that 3xx redirects are handled by the http layer.
-            if (statusCode > 299) {
-                let msg;
-                // if exception/error in body, attempt to get better error
-                if (obj && obj.message) {
-                    msg = obj.message;
-                }
-                else if (contents && contents.length > 0) {
-                    // it may be the case that the exception is in the body message as string
-                    msg = contents;
+                    const err = new HttpClientError(msg, statusCode);
+                    err.result = response.result;
+                    reject(err);
                 }
                 else {
-                    msg = 'Failed request: (' + statusCode + ')';
+                    resolve(response);
                 }
-                let err = new HttpClientError(msg, statusCode);
-                err.result = response.result;
-                reject(err);
-            }
-            else {
-                resolve(response);
-            }
+            }));
         });
     }
 }
 exports.HttpClient = HttpClient;
-
+const lowercaseKeys = (obj) => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 
-/***/ 6443:
+/***/ 9835:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkBypass = exports.getProxyUrl = void 0;
 function getProxyUrl(reqUrl) {
-    let usingSsl = reqUrl.protocol === 'https:';
-    let proxyUrl;
+    const usingSsl = reqUrl.protocol === 'https:';
     if (checkBypass(reqUrl)) {
-        return proxyUrl;
+        return undefined;
     }
-    let proxyVar;
-    if (usingSsl) {
-        proxyVar = process.env['https_proxy'] || process.env['HTTPS_PROXY'];
+    const proxyVar = (() => {
+        if (usingSsl) {
+            return process.env['https_proxy'] || process.env['HTTPS_PROXY'];
+        }
+        else {
+            return process.env['http_proxy'] || process.env['HTTP_PROXY'];
+        }
+    })();
+    if (proxyVar) {
+        return new URL(proxyVar);
     }
     else {
-        proxyVar = process.env['http_proxy'] || process.env['HTTP_PROXY'];
+        return undefined;
     }
-    if (proxyVar) {
-        proxyUrl = new URL(proxyVar);
-    }
-    return proxyUrl;
 }
 exports.getProxyUrl = getProxyUrl;
 function checkBypass(reqUrl) {
     if (!reqUrl.hostname) {
         return false;
     }
-    let noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
+    const noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
     if (!noProxy) {
         return false;
     }
@@ -6536,12 +6659,12 @@ function checkBypass(reqUrl) {
         reqPort = 443;
     }
     // Format the request hostname and hostname with port
-    let upperReqHosts = [reqUrl.hostname.toUpperCase()];
+    const upperReqHosts = [reqUrl.hostname.toUpperCase()];
     if (typeof reqPort === 'number') {
         upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
     }
     // Compare request host against noproxy
-    for (let upperNoProxyItem of noProxy
+    for (const upperNoProxyItem of noProxy
         .split(',')
         .map(x => x.trim().toUpperCase())
         .filter(x => x)) {
@@ -6552,7 +6675,7 @@ function checkBypass(reqUrl) {
     return false;
 }
 exports.checkBypass = checkBypass;
-
+//# sourceMappingURL=proxy.js.map
 
 /***/ }),
 
@@ -7357,13 +7480,13 @@ const fs = __importStar(__nccwpck_require__(7147));
 const mm = __importStar(__nccwpck_require__(2473));
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
-const httpm = __importStar(__nccwpck_require__(9925));
+const httpm = __importStar(__nccwpck_require__(6255));
 const semver = __importStar(__nccwpck_require__(5911));
 const stream = __importStar(__nccwpck_require__(2781));
 const util = __importStar(__nccwpck_require__(3837));
+const assert_1 = __nccwpck_require__(9491);
 const v4_1 = __importDefault(__nccwpck_require__(824));
 const exec_1 = __nccwpck_require__(1514);
-const assert_1 = __nccwpck_require__(9491);
 const retry_helper_1 = __nccwpck_require__(8279);
 class HTTPError extends Error {
     constructor(httpStatusCode) {
@@ -61121,18 +61244,12 @@ module.exports = JSON.parse('["ac","com.ac","edu.ac","gov.ac","net.ac","mil.ac",
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-var exports = __webpack_exports__;
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const setup_1 = __nccwpck_require__(7391);
-(0, setup_1.run)();
-//# sourceMappingURL=index.js.map
-})();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(4822);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;

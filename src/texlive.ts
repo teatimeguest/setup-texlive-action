@@ -11,18 +11,21 @@ export namespace Version {
     return keys<Record<Version, unknown>>().includes(version as Version);
   }
 
-  export const LATEST = '2022';
+  export type Latest = '2022';
+  export const LATEST: Version = '2022';
 }
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type Version =
-  | util.Indices<'1996', typeof Version.LATEST>
-  | typeof Version.LATEST;
+export type Version = util.Range<'1996', Version.Latest> | Version.Latest;
 
 export interface Texmf {
-  readonly ['TEXMFHOME']: string;
-  readonly ['TEXMFCONFIG']: string;
-  readonly ['TEXMFVAR']: string;
+  ['TEXDIR']?: string;
+  ['TEXMFCONFIG']?: string;
+  ['TEXMFVAR']?: string;
+  ['TEXMFHOME']?: string;
+  ['TEXMFLOCAL']?: string;
+  ['TEXMFSYSCONFIG']?: string;
+  ['TEXMFSYSVAR']?: string;
 }
 
 /**
@@ -36,26 +39,14 @@ export class Manager {
 
   get conf(): Readonly<{
     texmf: {
-      (): Promise<Iterable<util.EntryOf<Texmf>>>;
       (key: keyof Texmf): Promise<string>;
       (key: keyof Texmf, value: string): Promise<void>;
     };
   }> {
     return new (class {
-      texmf(): Promise<Iterable<util.EntryOf<Texmf>>>;
       texmf(key: keyof Texmf): Promise<string>;
       texmf(key: keyof Texmf, value: string): Promise<void>;
-      async texmf(
-        key?: keyof Texmf,
-        value?: string,
-      ): Promise<Iterable<util.EntryOf<Texmf>> | string | void> {
-        if (key === undefined) {
-          return await Promise.all(
-            keys<Texmf>().map<Promise<util.EntryOf<Texmf>>>(
-              async (variable) => [variable, await this.texmf(variable)],
-            ),
-          );
-        }
+      async texmf(key: keyof Texmf, value?: string): Promise<string | void> {
         if (value === undefined) {
           return (
             await exec.getExecOutput('kpsewhich', ['-var-value', key])

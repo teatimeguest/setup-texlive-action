@@ -4,10 +4,8 @@ import * as exec from '@actions/exec';
 import { Manager, Version } from '#/texlive';
 import * as util from '#/utility';
 
-(core.group as jest.Mock).mockImplementation(
-  async <T>(name: string, fn: () => Promise<T>): Promise<T> => await fn(),
-);
-(exec.getExecOutput as jest.Mock).mockResolvedValue({
+jest.mocked(core.group).mockImplementation(async (name, fn) => await fn());
+jest.mocked(exec.getExecOutput).mockResolvedValue({
   exitCode: 0,
   stdout: '<stdout>',
   stderr: '',
@@ -30,35 +28,8 @@ describe('Version', () => {
 
 describe('Manager', () => {
   describe('conf.texmf', () => {
-    it('returns all values of TEXMF', async () => {
-      const mock = async (
-        cmd: string,
-        args: ReadonlyArray<string>,
-      ): Promise<exec.ExecOutput> => {
-        if (
-          cmd === 'kpsewhich' &&
-          args.length === 2 &&
-          args[0] === '-var-value' &&
-          args[1] !== undefined
-        ) {
-          return { exitCode: 0, stdout: args[1], stderr: '' };
-        }
-        throw new Error(`Unexpected arguments: ${cmd}; ${args}`);
-      };
-      (exec.getExecOutput as jest.Mock)
-        .mockImplementationOnce(mock)
-        .mockImplementationOnce(mock)
-        .mockImplementationOnce(mock);
-      const tlmgr = new Manager('2021', '/usr/local/texlive');
-      expect(Object.fromEntries(await tlmgr.conf.texmf())).toStrictEqual({
-        ['TEXMFHOME']: 'TEXMFHOME',
-        ['TEXMFCONFIG']: 'TEXMFCONFIG',
-        ['TEXMFVAR']: 'TEXMFVAR',
-      });
-    });
-
     it('returns the value of the given key by using `kpsewhich`', async () => {
-      (exec.getExecOutput as jest.Mock).mockResolvedValueOnce({
+      jest.mocked(exec.getExecOutput).mockResolvedValueOnce({
         exitCode: 0,
         stdout: '/usr/local/texlive/2021/texmf-config\n',
         stderr: '',
@@ -106,13 +77,13 @@ describe('Manager', () => {
     const tlmgr = new Manager('2019', '/usr/local/texlive');
 
     it('adds the bin directory to the PATH', async () => {
-      (util.determine as jest.Mock).mockResolvedValueOnce('<path>');
+      jest.mocked(util.determine).mockResolvedValueOnce('<path>');
       await tlmgr.path.add();
       expect(core.addPath).toHaveBeenCalledWith('<path>');
     });
 
     it('fails as the bin directory cannot be located', async () => {
-      (util.determine as jest.Mock).mockResolvedValueOnce(undefined);
+      jest.mocked(util.determine).mockResolvedValueOnce(undefined);
       await expect(tlmgr.path.add()).rejects.toThrow(
         'Unable to locate the bin directory',
       );
@@ -189,7 +160,7 @@ describe('Manager', () => {
     });
 
     it('can safely add the repository again', async () => {
-      (exec.getExecOutput as jest.Mock).mockResolvedValueOnce({
+      jest.mocked(exec.getExecOutput).mockResolvedValueOnce({
         exitCode: 2,
         stdout: '',
         stderr: [
@@ -204,7 +175,7 @@ describe('Manager', () => {
     });
 
     it('fails with non-zero status code', async () => {
-      (exec.getExecOutput as jest.Mock).mockResolvedValueOnce({
+      jest.mocked(exec.getExecOutput).mockResolvedValueOnce({
         exitCode: 2,
         stdout: '',
         stderr: [

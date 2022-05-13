@@ -151,28 +151,26 @@ export async function updateFile(
   await fs.writeFile(filename, updated);
 }
 
-export type EntryOf<T extends object> = [keyof T, T[keyof T]];
-
 /**
  * Creates a union type consisting of all string literals from `Begin` to `End`.
  *
  * ```typescript
- * type T = Indices<'10', '15'>   // ['10', '11', '12', '13', '14']
- * type U = Indices<'foo', 'bar'> // never
+ * type T = Range<'10', '15'>   // ['10', '11', '12', '13', '14']
+ * type U = Range<'foo', 'bar'> // never
  * ```
  */
-export type Indices<Begin extends string, End extends string> = Exclude<
-  keyof Times<End, [unknown]>,
-  keyof Times<Begin, [unknown]>
+export type Range<Begin extends string, End extends string> = Exclude<
+  keyof Replicate<End, [never]>,
+  keyof Replicate<Begin, [never]>
 >;
 
-type Digits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-type Init<T extends string> = T extends `${infer Rest}${Digits}` ? Rest : never;
+type Init<T> = T extends `${infer L}${Digit}` ? L : never;
 
-type Last<T extends string> = T extends `${Init<T>}${infer N}` ? N : never;
+type Last<T> = T extends `${Init<T>}${infer N}` ? N : never;
 
-type Times<N extends string, T extends Array<unknown>> =
+type Replicate<N, T extends Array<unknown>> =
   // prettier-ignore
   | N extends '0' ? []
   : N extends '1' ? [...T]
@@ -185,7 +183,7 @@ type Times<N extends string, T extends Array<unknown>> =
   : N extends '8' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
   : N extends '9' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
   : N extends '10' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
-  : [...Times<'10', Times<Init<N>, T>>, ...Times<Last<N>, T>];
+  : [...Replicate<'10', Replicate<Init<N>, T>>, ...Replicate<Last<N>, T>];
 
 declare module 'util/types' {
   /**

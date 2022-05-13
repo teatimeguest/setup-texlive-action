@@ -9,10 +9,6 @@ import 'jest-extended';
 
 import * as util from '#/utility';
 
-const fail = (): unknown => {
-  throw new Error('<error>');
-};
-
 jest.mock('fs/promises', () => ({
   readFile: jest.fn(),
   stat: jest.fn(), // required for @azure/storage-blob
@@ -30,9 +26,11 @@ jest.unmock('#/utility');
 
 describe('updateFile', () => {
   it('updates the contents of the file', async () => {
-    (fs.readFile as jest.Mock).mockResolvedValueOnce(
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
-    );
+    jest
+      .mocked(fs.readFile)
+      .mockResolvedValueOnce(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+      );
     await util.updateFile(
       '<filename>',
       { search: /p/gu, replace: 'P' },
@@ -47,7 +45,7 @@ describe('updateFile', () => {
 
 describe('extract', () => {
   it('extracts files from a tarball', async () => {
-    (tool.extractTar as jest.Mock).mockResolvedValueOnce('<extractTar>');
+    jest.mocked(tool.extractTar).mockResolvedValueOnce('<extractTar>');
     await expect(util.extract('<tarball>', 'tgz')).resolves.toBe(
       '<extractTar>',
     );
@@ -64,10 +62,10 @@ describe('extract', () => {
   });
 
   it('throws an exception if the directory cannot be located', async () => {
-    (glob.create as jest.Mock).mockResolvedValueOnce({
+    jest.mocked(glob.create).mockResolvedValueOnce({
       glob: async (): Promise<Array<string>> => [],
     } as glob.Globber);
-    (tool.extractZip as jest.Mock).mockResolvedValueOnce('<extractZip>');
+    jest.mocked(tool.extractZip).mockResolvedValueOnce('<extractZip>');
     await expect(util.extract('<zipfile>', 'zip')).rejects.toThrow(
       'Unable to locate the unzipped directory',
     );
@@ -82,7 +80,7 @@ describe('determine', () => {
   it.each<[Array<string>]>([[[]], [['<some>', '<other>']]])(
     'returns `undefined` if the matched path is not unique',
     async (matched) => {
-      (glob.create as jest.Mock).mockResolvedValueOnce({
+      jest.mocked(glob.create).mockResolvedValueOnce({
         glob: async () => matched,
       } as glob.Globber);
       await expect(util.determine('<pattern>')).resolves.toBeUndefined();
@@ -97,7 +95,7 @@ describe('saveToolCache', () => {
   });
 
   it("doesn't itself fail even if storing cache fails", async () => {
-    (tool.cacheDir as jest.Mock).mockImplementationOnce(fail);
+    jest.mocked(tool.cacheDir).mockRejectedValueOnce(new Error(''));
     await expect(
       util.saveToolCache('<directory>', '<target>', '<version>'),
     ).toResolve();
@@ -115,14 +113,16 @@ describe('restoreToolCache', () => {
   });
 
   it('returns a cache key if cache found', async () => {
-    (tool.find as jest.Mock).mockReturnValueOnce('<key>');
+    jest.mocked(tool.find).mockReturnValueOnce('<key>');
     await expect(util.restoreToolCache('<target>', '<version>')).resolves.toBe(
       '<key>',
     );
   });
 
   it('returns undefined if cache restoration fails', async () => {
-    (tool.find as jest.Mock).mockImplementationOnce(fail);
+    jest.mocked(tool.find).mockImplementationOnce(() => {
+      throw new Error('');
+    });
     await expect(
       util.restoreToolCache('<target>', '<version>'),
     ).resolves.toBeUndefined();
@@ -139,7 +139,7 @@ describe('saveCache', () => {
   });
 
   it("doesn't itself fail even if cache.saveCache fails", async () => {
-    (cache.saveCache as jest.Mock).mockImplementationOnce(fail);
+    jest.mocked(cache.saveCache).mockRejectedValueOnce(new Error(''));
     await expect(util.saveCache('<target>', '<key>')).resolves.not.toThrow();
     expect(core.warning).toHaveBeenCalledWith(
       expect.stringContaining('Failed to save to cache: '),
@@ -155,25 +155,25 @@ describe('restoreCache', () => {
   });
 
   it("returns 'primary' if primary cache restored", async () => {
-    (cache.restoreCache as jest.Mock).mockImplementationOnce(
-      async (target, key) => key,
-    );
+    jest
+      .mocked(cache.restoreCache)
+      .mockImplementationOnce(async (target, key) => key);
     await expect(util.restoreCache('<target>', '<key>', [])).resolves.toBe(
       'primary',
     );
   });
 
   it("returns 'secondary' if secondary cache restored", async () => {
-    (cache.restoreCache as jest.Mock).mockImplementationOnce(
-      async (target, key, keys) => keys[0]!,
-    );
+    jest
+      .mocked(cache.restoreCache)
+      .mockImplementationOnce(async (target, key, keys) => keys?.[0]);
     await expect(
       util.restoreCache('<target>', '<key>', ['<other key>']),
     ).resolves.toBe('secondary');
   });
 
   it('returns undefined if cache.restoreCache fails', async () => {
-    (cache.restoreCache as jest.Mock).mockImplementationOnce(fail);
+    jest.mocked(cache.restoreCache).mockRejectedValueOnce(new Error(''));
     await expect(
       util.restoreCache('<target>', '<key>', []),
     ).resolves.toBeUndefined();
