@@ -22,6 +22,7 @@ jobs:
           - 2019
           - 2020
           - 2021
+          - 2022
       fail-fast: false
     steps:
       - name: Checkout
@@ -54,6 +55,7 @@ jobs:
           - 2019
           - 2020
           - 2021
+          - 2022
       fail-fast: false
     steps:
       - name: Checkout
@@ -81,6 +83,7 @@ jobs:
           - 2019
           - 2020
           - 2021
+          - 2022
       fail-fast: false
     steps:
       - name: Checkout
