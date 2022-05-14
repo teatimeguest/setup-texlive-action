@@ -94,6 +94,7 @@ export interface Env {
   readonly ['TL_DOWNLOAD_ARGS']?: string;
   readonly ['TEXLIVE_INSTALL_ENV_NOCHECK']: string;
   readonly ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']?: string;
+  readonly ['TEXLIVE_INSTALL_NO_DISKCHECK']?: string;
   readonly ['TEXLIVE_INSTALL_NO_RESUME']?: string;
   readonly ['TEXLIVE_INSTALL_NO_WELCOME']: string;
   readonly ['TEXLIVE_INSTALL_PAPER']?: string;

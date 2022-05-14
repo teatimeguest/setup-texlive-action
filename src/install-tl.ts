@@ -96,6 +96,7 @@ export interface Env {
   ['TL_DOWNLOAD_ARGS']?: string;
   ['TEXLIVE_INSTALL_ENV_NOCHECK']?: string;
   ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']?: string;
+  ['TEXLIVE_INSTALL_NO_DISKCHECK']?: string;
   ['TEXLIVE_INSTALL_NO_RESUME']?: string;
   ['TEXLIVE_INSTALL_NO_WELCOME']?: string;
   ['TEXLIVE_INSTALL_PAPER']?: string;
