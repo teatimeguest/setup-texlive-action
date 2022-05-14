@@ -32,7 +32,7 @@ export class InstallTL {
        * `install-tl` of versions prior to 2017 does not support HTTPS, and
        * that of version 2017 supports HTTPS but does not work properly.
        */
-      if (Number(this.version) < 2018) {
+      if (this.version < '2018') {
         repo.protocol = 'http';
       }
       options.push(
@@ -57,7 +57,7 @@ export class InstallTL {
      * - Versions 2008--2012 can be installed on `macos-latest`, but
      *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
      */
-    if (Number(version) < (os.platform() === 'darwin' ? 2013 : 2008)) {
+    if (version < (os.platform() === 'darwin' ? '2013' : '2008')) {
       throw new RangeError(
         `Installation of TeX Live ${version} on ${os.platform()} is not supported`,
       );
@@ -121,7 +121,7 @@ export class Profile {
      * `scheme-infraonly` was first introduced in TeX Live 2016.
      */
     this.selected_scheme = `scheme-${
-      Number(version) < 2016 ? 'minimal' : 'infraonly'
+      version < '2016' ? 'minimal' : 'infraonly'
     }`;
     this.option_adjustrepo = version === Version.LATEST ? '1' : '0';
   }
@@ -173,7 +173,7 @@ export namespace Profile {
  * @returns The filename of the installer executable.
  */
 function executable(version: Version, platform: NodeJS.Platform): string {
-  const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
+  const ext = `${version > '2012' ? '-windows' : ''}.bat`;
   return `install-tl${platform === 'win32' ? ext : ''}`;
 }
 
@@ -226,7 +226,7 @@ async function patch(version: Version, texdir: string): Promise<void> {
   /**
    * Makes it possible to use `\` as a directory separator on Windows.
    */
-  if (os.platform() === 'win32' && Number(version) < 2019) {
+  if (os.platform() === 'win32' && version < '2019') {
     await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), {
       search: String.raw`split (/\//, $tree)`,
       replace: String.raw`split (/[\/\\]/, $tree)`,

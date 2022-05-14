@@ -369,7 +369,7 @@ class InstallTL {
              * `install-tl` of versions prior to 2017 does not support HTTPS, and
              * that of version 2017 supports HTTPS but does not work properly.
              */
-            if (Number(this.version) < 2018) {
+            if (this.version < '2018') {
                 repo.protocol = 'http';
             }
             options.push(
@@ -390,7 +390,7 @@ class InstallTL {
          * - Versions 2008--2012 can be installed on `macos-latest`, but
          *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
          */
-        if (Number(version) < (os.platform() === 'darwin' ? 2013 : 2008)) {
+        if (version < (os.platform() === 'darwin' ? '2013' : '2008')) {
             throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
         }
         const isWin = os.platform() === 'win32';
@@ -428,7 +428,7 @@ class Profile {
         /**
          * `scheme-infraonly` was first introduced in TeX Live 2016.
          */
-        this.selected_scheme = `scheme-${Number(version) < 2016 ? 'minimal' : 'infraonly'}`;
+        this.selected_scheme = `scheme-${version < '2016' ? 'minimal' : 'infraonly'}`;
         this.option_adjustrepo = version === Version.LATEST ? '1' : '0';
     }
 }
@@ -444,7 +444,7 @@ exports.Profile = Profile;
  * @returns The filename of the installer executable.
  */
 function executable(version, platform) {
-    const ext = `${Number(version) > 2012 ? '-windows' : ''}.bat`;
+    const ext = `${version > '2012' ? '-windows' : ''}.bat`;
     return `install-tl${platform === 'win32' ? ext : ''}`;
 }
 /**
@@ -491,7 +491,7 @@ async function patch(version, texdir) {
     /**
      * Makes it possible to use `\` as a directory separator on Windows.
      */
-    if (os.platform() === 'win32' && Number(version) < 2019) {
+    if (os.platform() === 'win32' && version < '2019') {
         await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), {
             search: String.raw `split (/\//, $tree)`,
             replace: String.raw `split (/[\/\\]/, $tree)`,
@@ -574,7 +574,7 @@ class Manager {
                 /**
                  * `tlmgr conf` is not implemented before 2010.
                  */
-                if (Number(this.version) < 2010) {
+                if (this.version < '2010') {
                     core.exportVariable(key, value);
                 }
                 else {
@@ -600,7 +600,7 @@ class Manager {
         };
     }
     get pinning() {
-        if (Number(this.version) < 2013) {
+        if (this.version < '2013') {
             throw new Error(`\`pinning\` action is not implemented in TeX Live ${this.version}`);
         }
         return {
@@ -610,7 +610,7 @@ class Manager {
         };
     }
     get repository() {
-        if (Number(this.version) < 2012) {
+        if (this.version < '2012') {
             throw new Error(`\`repository\` action is not implemented in TeX Live ${this.version}`);
         }
         return {
@@ -639,7 +639,7 @@ function contrib() {
 }
 exports.contrib = contrib;
 function historic(version) {
-    return new URL(Number(version) < 2010 ? 'tlnet/' : 'tlnet-final/', `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`);
+    return new URL(version < '2010' ? 'tlnet/' : 'tlnet-final/', `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`);
 }
 exports.historic = historic;
 //# sourceMappingURL=texlive.js.map

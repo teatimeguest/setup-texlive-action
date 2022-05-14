@@ -55,7 +55,7 @@ export class Manager {
         /**
          * `tlmgr conf` is not implemented before 2010.
          */
-        if (Number(this.version) < 2010) {
+        if (this.version < '2010') {
           core.exportVariable(key, value);
         } else {
           await exec.exec('tlmgr', ['conf', 'texmf', key, value]);
@@ -99,7 +99,7 @@ export class Manager {
       ...rest: ReadonlyArray<string>
     ) => Promise<void>;
   }> {
-    if (Number(this.version) < 2013) {
+    if (this.version < '2013') {
       throw new Error(
         `\`pinning\` action is not implemented in TeX Live ${this.version}`,
       );
@@ -117,7 +117,7 @@ export class Manager {
      */
     add: (repo: string, tag?: string) => Promise<boolean>;
   }> {
-    if (Number(this.version) < 2012) {
+    if (this.version < '2012') {
       throw new Error(
         `\`repository\` action is not implemented in TeX Live ${this.version}`,
       );
@@ -156,7 +156,7 @@ export function contrib(): URL {
 
 export function historic(version: Version): URL {
   return new URL(
-    Number(version) < 2010 ? 'tlnet/' : 'tlnet-final/',
+    version < '2010' ? 'tlnet/' : 'tlnet-final/',
     `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`,
   );
 }
