@@ -4,7 +4,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import { keys } from 'ts-transformer-keys';
 
-import * as util from './utility';
+import * as util from '#/utility';
 
 export namespace Version {
   export function isVersion(version: string): version is Version {

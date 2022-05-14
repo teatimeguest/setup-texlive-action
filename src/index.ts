@@ -1,2 +1,2 @@
-import * as action from './action';
+import * as action from '#/action';
 action.run();

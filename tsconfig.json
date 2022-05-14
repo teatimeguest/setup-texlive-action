@@ -15,7 +15,7 @@
     "paths": {
       "#/*": ["*"]
     },
-    "rootDir": "./src",
+    "rootDirs": ["./src", "./__tests__"],
 
     "newLine": "lf",
     "outDir": "./lib",
@@ -26,7 +26,8 @@
     "target": "es2020",
     // For ttypescript
     "plugins": [
-      { "transform": "ts-transformer-keys/transformer" }
+      { "transform": "ts-transformer-keys/transformer" },
+      { "transform": "typescript-transform-paths", "useRootDirs": true }
     ]
   },
   "files": [

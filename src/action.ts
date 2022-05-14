@@ -3,10 +3,10 @@ import * as os from 'os';
 
 import * as core from '@actions/core';
 
-import { Context } from './context';
-import { InstallTL, Profile } from './install-tl';
-import { contrib as tlcontrib, Manager, Version } from './texlive';
-import * as util from './utility';
+import { Context } from '#/context';
+import { InstallTL, Profile } from '#/install-tl';
+import { contrib as tlcontrib, Manager, Version } from '#/texlive';
+import * as util from '#/utility';
 
 export async function run(): Promise<void> {
   try {

@@ -8,9 +8,9 @@ import * as exec from '@actions/exec';
 import * as tool from '@actions/tool-cache';
 import { keys } from 'ts-transformer-keys';
 
-import * as tl from './texlive';
+import * as tl from '#/texlive';
 import Version = tl.Version;
-import * as util from './utility';
+import * as util from '#/utility';
 
 /**
  * A class for downloading and running the installer of TeX Live.

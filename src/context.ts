@@ -7,9 +7,9 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import { keys } from 'ts-transformer-keys';
 
-import type * as installtl from './install-tl';
-import { Version } from './texlive';
-import * as util from './utility';
+import type * as installtl from '#/install-tl';
+import { Version } from '#/texlive';
+import * as util from '#/utility';
 
 export interface Context {
   readonly env: Readonly<Env>;
