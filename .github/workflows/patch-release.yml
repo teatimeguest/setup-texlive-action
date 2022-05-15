@@ -38,19 +38,23 @@ jobs:
         id: prepare
         run: |
           latest="$(git describe --tags --abbrev=0 --match='v*.*.*')"
-          if ! git diff --quiet "${latest}" dist/index.js; then
-            HOMEBREW_NO_AUTO_UPDATE=1 brew install git-cliff
-
-            npm run release patch
-            next="v$(jq -r .version package.json)"
-            git push origin main
-            git push origin "${next}"
-            git push -f origin "${next%%.*}"
-
-            git for-each-ref "refs/tags/${next}" --format='%(contents:body)' \
-              > RELEASENOTES.md
-            echo "::set-output name=tag::${next}"
+          if git diff --quiet "${latest}" dist/index.js; then
+            exit
           fi
+
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install git-cliff
+          if ! npm run release patch; then
+            exit
+          fi
+
+          next="v$(jq -r .version package.json)"
+          git push origin main
+          git push origin "${next}"
+          git push -f origin "${next%%.*}"
+
+          git for-each-ref "refs/tags/${next}" --format='%(contents:body)' \
+            > RELEASENOTES.md
+          echo "::set-output name=tag::${next}"
 
       - name: Release
         if: startsWith(steps.prepare.outputs.tag, 'v')

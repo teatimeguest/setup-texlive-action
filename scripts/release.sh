@@ -19,13 +19,16 @@ function validate() {
 function release() {
   [[ "$(git rev-parse --abbrev-ref HEAD)" == main ]]
 
+  local -r notes="$(git cliff -ut ' ')"
+  grep -q '^#' <<< "${notes}"
+
   local -r next="$(npm version "$1")"
   git add package-lock.json package.json
   git commit -m "chore(release): prepare for ${next}"
-  git cliff -ut "${next}" | git tag "${next}" --cleanup=whitespace -F -
+  git tag "${next}" --cleanup=whitespace -m "${next}" -m "${notes}"
   git tag -f "${next%%.*}" -m "${next}"
 
-  git --no-pager show "${next}"
+  git --no-pager show --no-patch "${next}"
 }
 
 validate "$@"
