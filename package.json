@@ -5,17 +5,18 @@
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "build": "ttsc && ncc build",
-    "format": "prettier --write src/*.ts __tests__/*.ts",
-    "format-check": "prettier --check __tests__/*.ts src/*.ts && ec",
+    "format": "prettier --write {src,__tests__}/*.ts",
+    "format-check": "prettier --check {src,__tests__}/*.ts && ec --exclude=^dist",
     "lint": "eslint --ext .ts __tests__ src",
     "release": "bash scripts/release.sh",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "type-check": "ttsc --noEmit"
   },
   "author": "@teatimeguest",
   "license": "MIT",
   "main": "lib/index.js",
   "engines": {
-    "node": ">=16"
+    "node": ">=14"
   },
   "dependencies": {
     "@actions/cache": "2.0.3",

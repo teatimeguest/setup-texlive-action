@@ -1,7 +1,7 @@
 root: true
 parser: '@typescript-eslint/parser'
 parserOptions:
-  project: ./tsconfig.eslint.json
+  project: ./tsconfig.tests.json
   ecmaVersion: 2020
 ignorePatterns:
   - /src/index.ts
@@ -106,11 +106,7 @@ rules:
   '@typescript-eslint/return-await': [error, always]
 overrides:
   - files:
-      - ./__tests__/action.test.ts
-      - ./__tests__/context.test.ts
-      - ./__tests__/install-tl.test.ts
-      - ./__tests__/texlive.test.ts
-      - ./__tests__/utility.test.ts
+      - "./__tests__/*.ts"
     extends:
       - plugin:jest/recommended
       - plugin:jest/style

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    // type checking
     "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -8,34 +9,26 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "strict": true,
-
+    // module
     "baseUrl": "./src",
     "module": "commonjs",
     "moduleResolution": "node",
-    "paths": {
-      "#/*": ["*"]
-    },
-    "rootDirs": ["./src", "./__tests__"],
-
+    "paths": { "#/*": ["*"] },
+    "rootDirs": ["./src"],
+    // emit
     "newLine": "lf",
     "outDir": "./lib",
+    "removeComments": true,
     "sourceMap": true,
-
+    // interop constraints
     "esModuleInterop": true,
-
+    // language and environment
     "target": "es2020",
-    // For ttypescript
+    // ttypescript
     "plugins": [
       { "transform": "ts-transformer-keys/transformer" },
       { "transform": "typescript-transform-paths", "useRootDirs": true }
     ]
   },
-  "files": [
-    "./src/action.ts",
-    "./src/context.ts",
-    "./src/index.ts",
-    "./src/install-tl.ts",
-    "./src/texlive.ts",
-    "./src/utility.ts"
-  ]
+  "include": ["./src/*.ts"]
 }

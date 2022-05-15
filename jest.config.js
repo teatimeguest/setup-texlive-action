@@ -3,12 +3,13 @@ module.exports = {
   clearMocks: true,
   globals: {
     'ts-jest': {
-      compiler: 'ttypescript'
-    }
+      compiler: 'ttypescript',
+      tsconfig: '<rootDir>/tsconfig.tests.json',
+    },
   },
   moduleFileExtensions: ['js', 'ts'],
   moduleNameMapper: {
-    "^#/(.*)": "<rootDir>/src/$1",
+    '^#/(.*)': '<rootDir>/src/$1',
   },
   resetModules: true,
   setupFilesAfterEnv: ['jest-extended/all'],
@@ -22,4 +23,4 @@ module.exports = {
     '<rootDir>/node_modules/jest-extended/',
   ],
   verbose: false,
-}
+};
