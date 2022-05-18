@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
-import { Manager, Version } from '#/texlive';
+import { DependsTxt, Manager, Version } from '#/texlive';
 import * as util from '#/utility';
 
 jest.mocked(core.group).mockImplementation(async (name, fn) => await fn());
@@ -197,5 +197,51 @@ describe('Manager', () => {
         '`repository` action is not implemented in TeX Live 2011',
       );
     });
+  });
+});
+
+describe('DependsTxt.parse', () => {
+  it('parses DEPENDS.txt', () => {
+    const manifest = DependsTxt.parse(
+      [
+        'foo bar  baz',
+        'hard\tqux ',
+        ' soft quux# this is a comment',
+        '',
+        'package corge\t# this is a comment',
+        '#',
+        '  package  grault  ',
+        'soft garply#',
+        ' waldo',
+      ].join('\n'),
+    );
+    expect(manifest.get(null)).toHaveProperty(
+      'hard',
+      new Set(['foo', 'bar', 'baz', 'qux']),
+    );
+    expect(manifest.get(null)).toHaveProperty('soft', new Set(['quux']));
+    expect(manifest.get('corge')).toHaveProperty('hard', new Set());
+    expect(manifest.get('corge')).toHaveProperty('soft', new Set());
+    expect(manifest.get('grault')).toHaveProperty('hard', new Set(['waldo']));
+    expect(manifest.get('grault')).toHaveProperty('soft', new Set(['garply']));
+    expect([...manifest.keys()]).toStrictEqual([null, 'corge', 'grault']);
+  });
+
+  it('tolerates some syntax errors', () => {
+    const manifest = DependsTxt.parse(
+      [
+        'package', // no argument
+        'hard', // no argument
+        'soft', // no argument
+        'package foo bar', // multiple arguments
+      ].join('\n'),
+    );
+    expect(manifest.get(null)).toHaveProperty('hard', new Set());
+    expect(manifest.get(null)).toHaveProperty('soft', new Set());
+    expect([...manifest.keys()]).toStrictEqual([null]);
+    expect(core.warning).toHaveBeenNthCalledWith(
+      2,
+      'package directive must have exactly one argument',
+    );
   });
 });

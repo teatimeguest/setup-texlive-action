@@ -2,6 +2,7 @@ import * as path from 'path';
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import { DeepWritable } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as util from '#/utility';
@@ -159,4 +160,53 @@ export function historic(version: Version): URL {
     version < '2010' ? 'tlnet/' : 'tlnet-final/',
     `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`,
   );
+}
+
+/**
+ * Type for DEPENDS.txt.
+ */
+export type DependsTxt = ReadonlyMap<
+  string | null,
+  {
+    hard: ReadonlySet<string>;
+    soft: ReadonlySet<string>;
+  }
+>;
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export namespace DependsTxt {
+  export function parse(txt: string): DependsTxt {
+    const manifest: DeepWritable<DependsTxt> = new Map();
+    const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?([^#\n]*)(?:#[^\n]*)?$/gmu;
+    for (const [name, chunk] of eachPackage(txt)) {
+      if (!manifest.has(name)) {
+        manifest.set(name, { hard: new Set(), soft: new Set() });
+      }
+      type Kind = keyof NonNullable<ReturnType<DependsTxt['get']>>;
+      for (const [, kind = 'hard', args = ''] of chunk.matchAll(hardOrSoft)) {
+        for (const dependency of args.trim().split(/\s+/u)) {
+          if (dependency !== '') {
+            manifest.get(name)?.[kind as Kind].add(dependency);
+          }
+        }
+      }
+    }
+    return manifest;
+  }
+
+  // eslint-disable-next-line no-inner-declarations
+  function* eachPackage(txt: string): Generator<[string | null, string], void> {
+    const [chunk = '', ...rest] = txt.split(
+      /^\s*package(?=\s|$)([^#\n]*)(?:#[^\n]*)?$/mu,
+    );
+    yield [null, chunk];
+    for (let i = 0; i < rest.length; ++i) {
+      let name: string | null = (rest[i] ?? '').trim();
+      if (name.length === 0 || /\s/u.test(name)) {
+        core.warning('package directive must have exactly one argument');
+        name = null;
+      }
+      yield [name, rest[++i] ?? ''];
+    }
+  }
 }

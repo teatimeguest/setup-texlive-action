@@ -91,7 +91,7 @@ All inputs are optional.
 |Name|Type|Description|
 |---|---|---|
 |`cache`|Bool|Enable caching for [`TEXDIR`][texdir]. The default is `true`.|
-|`package-file`|String|File containing TeX package names to be installed. The file format is whitespace-delimited, and everything after a `#` is treated as a comment[^1].|
+|`package-file`|String|File containing TeX package names to be installed. The file format is whitespace-delimited, and everything after a `#` is treated as a comment[^1]. [`DEPENDS.txt`][depends-txt] format is also acceptable.|
 |`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-environment-variables]. The default is <code>[$RUNNER_TEMP][actions-environment-variables]/setup-texlive</code>.|
 |`tlcontrib`|Bool|Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored if an older version is specified for `version`. The default is `false`.|
@@ -146,6 +146,7 @@ See the [releases page][releases].
 [ci]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml
 [codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
 [codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
+[depends-txt]: https://tug.org/texlive/pkgcontrib.html#deps
 [historic]: https://tug.org/historic/
 [inputs]: https://github.com/teatimeguest/setup-texlive-action#inputs
 [install-texlive]: https://github.com/zauguin/install-texlive

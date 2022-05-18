@@ -13,6 +13,7 @@ inputs:
       File containing TeX package names to be installed.
       The file format is whitespace-delimited, and
       everything after a `#` is treated as a comment.
+      `DEPENDS.txt` format is also acceptable.
     default: ''
     required: false
   packages:

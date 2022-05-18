@@ -9,7 +9,7 @@ import type { RequiredKeys } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import type * as installtl from '#/install-tl';
-import { Version } from '#/texlive';
+import { DependsTxt, Version } from '#/texlive';
 import * as util from '#/utility';
 
 export interface Context {
@@ -42,7 +42,9 @@ namespace Inputs {
     const packageFile = core.getInput('package-file');
     if (packageFile !== '') {
       const contents = await fs.readFile(packageFile, 'utf8');
-      packages.push(...contents.split(re));
+      for (const { hard, soft } of DependsTxt.parse(contents).values()) {
+        packages.push(...hard, ...soft);
+      }
     }
     const inputs = {
       cache: core.getBooleanInput('cache'),

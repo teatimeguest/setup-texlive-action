@@ -85,13 +85,12 @@ async function main() {
     if (cacheType !== undefined) {
         outputs.cacheHit();
         await core.group('Adjusting TEXMF', async () => {
-            /* eslint-disable no-await-in-loop */
             for (const key of ['TEXMFHOME', 'TEXMFCONFIG', 'TEXMFVAR']) {
                 const value = env[`TEXLIVE_INSTALL_${key}`];
                 if ((await tlmgr.conf.texmf(key)) !== value) {
                     await tlmgr.conf.texmf(key, value);
                 }
-            } /* eslint-enable */
+            }
         });
     }
     if (inputs.tlcontrib) {
@@ -194,7 +193,9 @@ var Inputs;
         const packageFile = core.getInput('package-file');
         if (packageFile !== '') {
             const contents = await fs.readFile(packageFile, 'utf8');
-            packages.push(...contents.split(re));
+            for (const { hard, soft } of texlive_1.DependsTxt.parse(contents).values()) {
+                packages.push(...hard, ...soft);
+            }
         }
         const inputs = {
             cache: core.getBooleanInput('cache'),
@@ -210,7 +211,6 @@ var Inputs;
         }
         if (inputs.prefix === '') {
             inputs.prefix =
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 process.env['TEXLIVE_INSTALL_PREFIX'] ?? defaultPrefix();
         }
         const version = core.getInput('version');
@@ -351,9 +351,6 @@ const tool = __importStar(__nccwpck_require__(7784));
 const tl = __importStar(__nccwpck_require__(9758));
 var Version = tl.Version;
 const util = __importStar(__nccwpck_require__(2857));
-/**
- * A class for downloading and running the installer of TeX Live.
- */
 class InstallTL {
     constructor(version, bin) {
         this.version = version;
@@ -365,31 +362,16 @@ class InstallTL {
         const options = ['-no-gui', '-profile', target];
         if (this.version !== Version.LATEST) {
             const repo = tl.historic(this.version);
-            /**
-             * `install-tl` of versions prior to 2017 does not support HTTPS, and
-             * that of version 2017 supports HTTPS but does not work properly.
-             */
             if (this.version < '2018') {
                 repo.protocol = 'http';
             }
-            options.push(
-            /**
-             * Only version 2008 uses `-location` instead of `-repository`.
-             */
-            this.version === '2008' ? '-location' : '-repository', repo.href);
+            options.push(this.version === '2008' ? '-location' : '-repository', repo.href);
         }
         await exec.exec(this.bin, options);
         core.info('Applying patches');
         await patch(this.version, profile.TEXDIR);
     }
     static async acquire(version) {
-        /**
-         * - There is no `install-tl` for versions prior to 2005, and
-         *   versions 2005--2007 do not seem to be archived.
-         *
-         * - Versions 2008--2012 can be installed on `macos-latest`, but
-         *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
-         */
         if (version < (os.platform() === 'darwin' ? '2013' : '2008')) {
             throw new RangeError(`Installation of TeX Live ${version} on ${os.platform()} is not supported`);
         }
@@ -425,9 +407,6 @@ class Profile {
         this.TEXMFLOCAL = path.join(prefix, 'texmf-local');
         this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
         this.TEXMFSYSVAR = path.join(this.TEXDIR, 'texmf-var');
-        /**
-         * `scheme-infraonly` was first introduced in TeX Live 2016.
-         */
         this.selected_scheme = `scheme-${version < '2016' ? 'minimal' : 'infraonly'}`;
         this.option_adjustrepo = version === Version.LATEST ? '1' : '0';
     }
@@ -440,20 +419,11 @@ exports.Profile = Profile;
     }
     Profile.format = format;
 })(Profile = exports.Profile || (exports.Profile = {}));
-/**
- * @returns The filename of the installer executable.
- */
 function executable(version, platform) {
     const ext = `${version > '2012' ? '-windows' : ''}.bat`;
     return `install-tl${platform === 'win32' ? ext : ''}`;
 }
-/**
- * Fixes bugs in the installer files and modify them for use in workflows.
- */
 async function patch(version, texdir) {
-    /**
-     * Prevents `install-tl(-windows).bat` from being stopped by `pause`.
-     */
     if (os.platform() === 'win32') {
         const target = path.join(texdir, executable(version, os.platform()));
         try {
@@ -469,37 +439,24 @@ async function patch(version, texdir) {
             core.info(`${target} not found`);
         }
     }
-    /**
-     * Fixes a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
-     */
     if (['2009', '2010'].includes(version)) {
         await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLWinGoo.pm'), {
             search: /foreach \$p qw\((.*)\)/u,
             replace: 'foreach $$p (qw($1))',
         });
     }
-    /**
-     * Defines Code Page 65001 as an alias for UTF-8 on Windows.
-     * @see {@link https://github.com/dankogai/p5-encode/issues/37}
-     */
     if (os.platform() === 'win32' && version === '2015') {
         await util.updateFile(path.join(texdir, 'tlpkg', 'tlperl', 'lib', 'Encode', 'Alias.pm'), {
             search: '# utf8 is blessed :)',
             replace: `$&\n    define_alias(qr/cp65001/i => '"utf-8-strict"');`,
         });
     }
-    /**
-     * Makes it possible to use `\` as a directory separator on Windows.
-     */
     if (os.platform() === 'win32' && version < '2019') {
         await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), {
             search: String.raw `split (/\//, $tree)`,
             replace: String.raw `split (/[\/\\]/, $tree)`,
         });
     }
-    /**
-     * Adds support for macOS 11.x.
-     */
     if (os.platform() === 'darwin' &&
         ['2017', '2018', '2019'].includes(version)) {
         await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), { search: 'if ($os_major != 10)', replace: 'if ($$os_major < 10)' }, {
@@ -541,7 +498,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.historic = exports.contrib = exports.Manager = exports.Version = void 0;
+exports.DependsTxt = exports.historic = exports.contrib = exports.Manager = exports.Version = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
@@ -554,9 +511,6 @@ var Version;
     Version.isVersion = isVersion;
     Version.LATEST = '2022';
 })(Version = exports.Version || (exports.Version = {}));
-/**
- * An interface for the `tlmgr` command.
- */
 class Manager {
     constructor(version, prefix) {
         this.version = version;
@@ -571,9 +525,6 @@ class Manager {
                 if (value === undefined) {
                     return (await exec.getExecOutput('kpsewhich', ['-var-value', key])).stdout.trim();
                 }
-                /**
-                 * `tlmgr conf` is not implemented before 2010.
-                 */
                 if (this.version < '2010') {
                     core.exportVariable(key, value);
                 }
@@ -617,14 +568,7 @@ class Manager {
             add: async (repo, tag) => {
                 const { exitCode, stderr } = await exec.getExecOutput('tlmgr', ['repository', 'add', repo, ...(tag === undefined ? [] : [tag])], { ignoreReturnCode: true });
                 const success = exitCode === 0;
-                if (
-                /**
-                 * `tlmgr repository add` returns non-zero status code
-                 * if the same repository or tag is added again.
-                 *
-                 * @todo (Need to make sure that the tagged repo is really tlcontrib?)
-                 */
-                !success &&
+                if (!success &&
                     !stderr.includes('repository or its tag already defined')) {
                     throw new Error(`\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`);
                 }
@@ -642,6 +586,39 @@ function historic(version) {
     return new URL(version < '2010' ? 'tlnet/' : 'tlnet-final/', `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`);
 }
 exports.historic = historic;
+var DependsTxt;
+(function (DependsTxt) {
+    function parse(txt) {
+        const manifest = new Map();
+        const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?([^#\n]*)(?:#[^\n]*)?$/gmu;
+        for (const [name, chunk] of eachPackage(txt)) {
+            if (!manifest.has(name)) {
+                manifest.set(name, { hard: new Set(), soft: new Set() });
+            }
+            for (const [, kind = 'hard', args = ''] of chunk.matchAll(hardOrSoft)) {
+                for (const dependency of args.trim().split(/\s+/u)) {
+                    if (dependency !== '') {
+                        manifest.get(name)?.[kind].add(dependency);
+                    }
+                }
+            }
+        }
+        return manifest;
+    }
+    DependsTxt.parse = parse;
+    function* eachPackage(txt) {
+        const [chunk = '', ...rest] = txt.split(/^\s*package(?=\s|$)([^#\n]*)(?:#[^\n]*)?$/mu);
+        yield [null, chunk];
+        for (let i = 0; i < rest.length; ++i) {
+            let name = (rest[i] ?? '').trim();
+            if (name.length === 0 || /\s/u.test(name)) {
+                core.warning('package directive must have exactly one argument');
+                name = null;
+            }
+            yield [name, rest[++i] ?? ''];
+        }
+    }
+})(DependsTxt = exports.DependsTxt || (exports.DependsTxt = {}));
 //# sourceMappingURL=texlive.js.map
 
 /***/ }),
@@ -684,11 +661,6 @@ const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
 const tool = __importStar(__nccwpck_require__(7784));
-/**
- * Extracts files from an archive.
- *
- * @returns Path to the directory containing the files.
- */
 async function extract(filepath, kind) {
     switch (kind) {
         case 'tgz':
@@ -703,9 +675,6 @@ async function extract(filepath, kind) {
     }
 }
 exports.extract = extract;
-/**
- * @returns The unique path that matches the given glob pattern.
- */
 async function determine(pattern) {
     const globber = await glob.create(pattern, { implicitDescendants: false });
     const matched = await globber.glob();
@@ -759,9 +728,7 @@ async function saveCache(target, primaryKey) {
     }
 }
 exports.saveCache = saveCache;
-async function restoreCache(target, primaryKey, 
-// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-restoreKeys) {
+async function restoreCache(target, primaryKey, restoreKeys) {
     let key = undefined;
     try {
         key = await cache.restoreCache([target], primaryKey, restoreKeys);
@@ -786,9 +753,6 @@ function tmpdir() {
         : os.tmpdir();
 }
 exports.tmpdir = tmpdir;
-/**
- * Updates the contents of a file.
- */
 async function updateFile(filename, ...replacements) {
     const content = await fs.readFile(filename, 'utf8');
     const updated = replacements.reduce((str, { search, replace }) => str.replace(search, replace), content);

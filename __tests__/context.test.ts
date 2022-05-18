@@ -36,9 +36,10 @@ const { getInput, getBooleanInput } =
 jest.mocked(core.getInput).mockImplementation(getInput);
 jest.mocked(core.getBooleanInput).mockImplementation(getBooleanInput);
 
-jest.mock('#/texlive', () => ({
-  Version: jest.requireActual('#/texlive').Version,
-}));
+jest.mock('#/texlive', () => {
+  const actual = jest.requireActual('#/texlive');
+  return { DependsTxt: actual.DependsTxt, Version: actual.Version };
+});
 jest.mock('#/utility', () => ({
   tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
 }));
