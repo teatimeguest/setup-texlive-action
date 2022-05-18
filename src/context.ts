@@ -5,6 +5,7 @@ import * as process from 'process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
+import type { RequiredKeys } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import type * as installtl from '#/install-tl';
@@ -119,9 +120,7 @@ namespace Env {
     return process.env as unknown as Env;
   }
 
-  export function defaults(version: Version): {
-    [K in keyof Env as Env extends Record<K, Env[K]> ? K : never]: Env[K];
-  } {
+  export function defaults(version: Version): Pick<Env, RequiredKeys<Env>> {
     const home = os.homedir();
     const texdir = path.join(home, '.local', 'texlive', version);
     return {

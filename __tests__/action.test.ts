@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import 'jest-extended';
+import type { DeepWritable } from 'ts-essentials';
 
 import { Context } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
@@ -23,11 +24,7 @@ jest.mocked(core.setFailed).mockImplementation((error) => {
   throw new Error(`${error}`);
 });
 
-let ctx: {
-  -readonly [K in keyof Context]: {
-    -readonly [L in keyof Context[K]]: Context[K][L];
-  };
-};
+let ctx: DeepWritable<Context>;
 beforeEach(() => {
   ctx = {
     inputs: {
