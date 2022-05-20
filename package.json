@@ -34,7 +34,7 @@
     "editorconfig-checker": "4.0.2",
     "eslint": "8.15.0",
     "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-jest": "26.1.5",
+    "eslint-plugin-jest": "26.2.2",
     "eslint-plugin-node": "11.1.0",
     "jest": "28.1.0",
     "jest-circus": "28.1.0",
