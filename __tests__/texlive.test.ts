@@ -229,11 +229,14 @@ describe('DependsTxt.parse', () => {
 
   it('tolerates some syntax errors', () => {
     const manifest = DependsTxt.parse(
+      // prettier-ignore
       [
-        'package', // no argument
-        'hard', // no argument
-        'soft', // no argument
+        'package',         // no argument
+        'package#',        // no argument
+        'hard',            // no argument
+        'soft#',           // no argument, immediately followed by a comment
         'package foo bar', // multiple arguments
+        'soft',            // no argument, with immediate EOF
       ].join('\n'),
     );
     expect(manifest.get(null)).toHaveProperty('hard', new Set());

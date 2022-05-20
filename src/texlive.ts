@@ -177,17 +177,15 @@ export type DependsTxt = ReadonlyMap<
 export namespace DependsTxt {
   export function parse(txt: string): DependsTxt {
     const manifest: DeepWritable<DependsTxt> = new Map();
-    const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?([^#\n]*)(?:#[^\n]*)?$/gmu;
-    for (const [name, chunk] of eachPackage(txt)) {
+    const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
+    for (const [name, chunk] of eachPackage(txt.replace(/\s*#.*$/gmu, ''))) {
       if (!manifest.has(name)) {
         manifest.set(name, { hard: new Set(), soft: new Set() });
       }
       type Kind = keyof NonNullable<ReturnType<DependsTxt['get']>>;
       for (const [, kind = 'hard', args = ''] of chunk.matchAll(hardOrSoft)) {
-        for (const dependency of args.trim().split(/\s+/u)) {
-          if (dependency !== '') {
-            manifest.get(name)?.[kind as Kind].add(dependency);
-          }
+        for (const dependency of args.split(/\s+/u).filter((s) => s !== '')) {
+          manifest.get(name)?.[kind as Kind].add(dependency);
         }
       }
     }
@@ -196,13 +194,11 @@ export namespace DependsTxt {
 
   // eslint-disable-next-line no-inner-declarations
   function* eachPackage(txt: string): Generator<[string | null, string], void> {
-    const [chunk = '', ...rest] = txt.split(
-      /^\s*package(?=\s|$)([^#\n]*)(?:#[^\n]*)?$/mu,
-    );
+    const [chunk = '', ...rest] = txt.split(/^\s*package(?=\s|$)(.*)$/mu);
     yield [null, chunk];
     for (let i = 0; i < rest.length; ++i) {
       let name: string | null = (rest[i] ?? '').trim();
-      if (name.length === 0 || /\s/u.test(name)) {
+      if (name === '' || /\s/u.test(name)) {
         core.warning('package directive must have exactly one argument');
         name = null;
       }
