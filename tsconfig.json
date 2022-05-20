@@ -23,7 +23,7 @@
     // interop constraints
     "esModuleInterop": true,
     // language and environment
-    "target": "es2020",
+    "target": "es2021",
     // ttypescript
     "plugins": [
       { "transform": "ts-transformer-keys/transformer" },

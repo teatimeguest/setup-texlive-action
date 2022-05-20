@@ -242,7 +242,6 @@ var Outputs;
 var Env;
 (function (Env) {
     function get(version) {
-        var _a;
         for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFLOCAL", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
             if (key in process.env) {
                 core.warning(`${key} is set, but ignored`);
@@ -250,7 +249,7 @@ var Env;
             }
         }
         for (const [key, value] of Object.entries(defaults(version))) {
-            (_a = process.env)[key] ?? (_a[key] = value);
+            process.env[key] ??= value;
         }
         return process.env;
     }
