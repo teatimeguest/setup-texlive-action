@@ -20663,9 +20663,9 @@ var require_tslib = __commonJS({
     var __extends5;
     var __assign5;
     var __rest5;
-    var __decorate5;
+    var __decorate6;
     var __param5;
-    var __metadata5;
+    var __metadata6;
     var __awaiter5;
     var __generator5;
     var __exportStar5;
@@ -20746,7 +20746,7 @@ var require_tslib = __commonJS({
           }
         return t;
       };
-      __decorate5 = function(decorators, target, key, desc) {
+      __decorate6 = function(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
           r = Reflect.decorate(decorators, target, key, desc);
@@ -20761,7 +20761,7 @@ var require_tslib = __commonJS({
           decorator(target, key, paramIndex);
         };
       };
-      __metadata5 = function(metadataKey, metadataValue) {
+      __metadata6 = function(metadataKey, metadataValue) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
           return Reflect.metadata(metadataKey, metadataValue);
       };
@@ -21071,9 +21071,9 @@ var require_tslib = __commonJS({
       exporter("__extends", __extends5);
       exporter("__assign", __assign5);
       exporter("__rest", __rest5);
-      exporter("__decorate", __decorate5);
+      exporter("__decorate", __decorate6);
       exporter("__param", __param5);
-      exporter("__metadata", __metadata5);
+      exporter("__metadata", __metadata6);
       exporter("__awaiter", __awaiter5);
       exporter("__generator", __generator5);
       exporter("__exportStar", __exportStar5);
@@ -31798,9 +31798,9 @@ var require_tslib2 = __commonJS({
     var __extends5;
     var __assign5;
     var __rest5;
-    var __decorate5;
+    var __decorate6;
     var __param5;
-    var __metadata5;
+    var __metadata6;
     var __awaiter5;
     var __generator5;
     var __exportStar5;
@@ -31881,7 +31881,7 @@ var require_tslib2 = __commonJS({
           }
         return t;
       };
-      __decorate5 = function(decorators, target, key, desc) {
+      __decorate6 = function(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
           r = Reflect.decorate(decorators, target, key, desc);
@@ -31896,7 +31896,7 @@ var require_tslib2 = __commonJS({
           decorator(target, key, paramIndex);
         };
       };
-      __metadata5 = function(metadataKey, metadataValue) {
+      __metadata6 = function(metadataKey, metadataValue) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
           return Reflect.metadata(metadataKey, metadataValue);
       };
@@ -32206,9 +32206,9 @@ var require_tslib2 = __commonJS({
       exporter("__extends", __extends5);
       exporter("__assign", __assign5);
       exporter("__rest", __rest5);
-      exporter("__decorate", __decorate5);
+      exporter("__decorate", __decorate6);
       exporter("__param", __param5);
-      exporter("__metadata", __metadata5);
+      exporter("__metadata", __metadata6);
       exporter("__awaiter", __awaiter5);
       exporter("__generator", __generator5);
       exporter("__exportStar", __exportStar5);
@@ -41303,9 +41303,9 @@ var require_tslib3 = __commonJS({
     var __extends5;
     var __assign5;
     var __rest5;
-    var __decorate5;
+    var __decorate6;
     var __param5;
-    var __metadata5;
+    var __metadata6;
     var __awaiter5;
     var __generator5;
     var __exportStar5;
@@ -41386,7 +41386,7 @@ var require_tslib3 = __commonJS({
           }
         return t;
       };
-      __decorate5 = function(decorators, target, key, desc) {
+      __decorate6 = function(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
           r = Reflect.decorate(decorators, target, key, desc);
@@ -41401,7 +41401,7 @@ var require_tslib3 = __commonJS({
           decorator(target, key, paramIndex);
         };
       };
-      __metadata5 = function(metadataKey, metadataValue) {
+      __metadata6 = function(metadataKey, metadataValue) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
           return Reflect.metadata(metadataKey, metadataValue);
       };
@@ -41711,9 +41711,9 @@ var require_tslib3 = __commonJS({
       exporter("__extends", __extends5);
       exporter("__assign", __assign5);
       exporter("__rest", __rest5);
-      exporter("__decorate", __decorate5);
+      exporter("__decorate", __decorate6);
       exporter("__param", __param5);
-      exporter("__metadata", __metadata5);
+      exporter("__metadata", __metadata6);
       exporter("__awaiter", __awaiter5);
       exporter("__generator", __generator5);
       exporter("__exportStar", __exportStar5);
@@ -57052,9 +57052,9 @@ var require_tslib4 = __commonJS({
     var __extends5;
     var __assign5;
     var __rest5;
-    var __decorate5;
+    var __decorate6;
     var __param5;
-    var __metadata5;
+    var __metadata6;
     var __awaiter5;
     var __generator5;
     var __exportStar5;
@@ -57135,7 +57135,7 @@ var require_tslib4 = __commonJS({
           }
         return t;
       };
-      __decorate5 = function(decorators, target, key, desc) {
+      __decorate6 = function(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
           r = Reflect.decorate(decorators, target, key, desc);
@@ -57150,7 +57150,7 @@ var require_tslib4 = __commonJS({
           decorator(target, key, paramIndex);
         };
       };
-      __metadata5 = function(metadataKey, metadataValue) {
+      __metadata6 = function(metadataKey, metadataValue) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
           return Reflect.metadata(metadataKey, metadataValue);
       };
@@ -57460,9 +57460,9 @@ var require_tslib4 = __commonJS({
       exporter("__extends", __extends5);
       exporter("__assign", __assign5);
       exporter("__rest", __rest5);
-      exporter("__decorate", __decorate5);
+      exporter("__decorate", __decorate6);
       exporter("__param", __param5);
-      exporter("__metadata", __metadata5);
+      exporter("__metadata", __metadata6);
       exporter("__awaiter", __awaiter5);
       exporter("__generator", __generator5);
       exporter("__exportStar", __exportStar5);
@@ -62885,6 +62885,30 @@ var require_cache = __commonJS({
   }
 });
 
+// node_modules/decorator-cache-getter/dist/index.js
+var require_dist2 = __commonJS({
+  "node_modules/decorator-cache-getter/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function cache3(target, name, descriptor) {
+      var getter = descriptor.get;
+      if (!getter)
+        throw new TypeError("Getter property descriptor expected");
+      descriptor.get = function() {
+        var value = getter.call(this);
+        Object.defineProperty(this, name, {
+          configurable: descriptor.configurable,
+          enumerable: descriptor.enumerable,
+          writable: false,
+          value
+        });
+        return value;
+      };
+    }
+    exports.cache = cache3;
+  }
+});
+
 // node_modules/@actions/glob/lib/internal-glob-options-helper.js
 var require_internal_glob_options_helper2 = __commonJS({
   "node_modules/@actions/glob/lib/internal-glob-options-helper.js"(exports) {
@@ -64765,6 +64789,7 @@ var core3 = __toESM(require_core());
 var path2 = __toESM(require("path"));
 var core2 = __toESM(require_core());
 var exec = __toESM(require_exec());
+var import_decorator_cache_getter = __toESM(require_dist2());
 
 // lib/utility.js
 var fs2 = __toESM(require("fs/promises"));
@@ -64861,6 +64886,20 @@ async function updateFile(filename, ...replacements) {
 }
 
 // lib/texlive.js
+var __decorate5 = function(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata5 = function(k, v) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+    return Reflect.metadata(k, v);
+};
 var Version;
 (function(Version3) {
   function isVersion(version3) {
@@ -64875,21 +64914,17 @@ var Manager = class {
     this.prefix = prefix2;
   }
   get conf() {
-    return new class {
-      constructor(version3) {
-        this.version = version3;
+    async function texmf(key, value) {
+      if (value === void 0) {
+        return (await exec.getExecOutput("kpsewhich", ["-var-value", key])).stdout.trim();
       }
-      async texmf(key, value) {
-        if (value === void 0) {
-          return (await exec.getExecOutput("kpsewhich", ["-var-value", key])).stdout.trim();
-        }
-        if (this.version < "2010") {
-          core2.exportVariable(key, value);
-        } else {
-          await exec.exec("tlmgr", ["conf", "texmf", key, value]);
-        }
+      if (this.version < "2010") {
+        core2.exportVariable(key, value);
+      } else {
+        await exec.exec("tlmgr", ["conf", "texmf", key, value]);
       }
-    }(this.version);
+    }
+    return { texmf: texmf.bind({ version: this.version }) };
   }
   async install(...packages) {
     if (packages.length !== 0) {
@@ -64912,8 +64947,8 @@ var Manager = class {
       throw new Error(`\`pinning\` action is not implemented in TeX Live ${this.version}`);
     }
     return {
-      add: async (repo, pattern, ...rest) => {
-        await exec.exec("tlmgr", ["pinning", "add", repo, pattern, ...rest]);
+      add: async (repo, ...globs) => {
+        await exec.exec("tlmgr", ["pinning", "add", repo, ...globs]);
       }
     };
   }
@@ -64933,6 +64968,26 @@ var Manager = class {
     };
   }
 };
+__decorate5([
+  import_decorator_cache_getter.cache,
+  __metadata5("design:type", Object),
+  __metadata5("design:paramtypes", [])
+], Manager.prototype, "conf", null);
+__decorate5([
+  import_decorator_cache_getter.cache,
+  __metadata5("design:type", Object),
+  __metadata5("design:paramtypes", [])
+], Manager.prototype, "path", null);
+__decorate5([
+  import_decorator_cache_getter.cache,
+  __metadata5("design:type", Object),
+  __metadata5("design:paramtypes", [])
+], Manager.prototype, "pinning", null);
+__decorate5([
+  import_decorator_cache_getter.cache,
+  __metadata5("design:type", Object),
+  __metadata5("design:paramtypes", [])
+], Manager.prototype, "repository", null);
 function contrib() {
   return new URL("https://mirror.ctan.org/systems/texlive/tlcontrib/");
 }

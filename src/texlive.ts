@@ -2,6 +2,7 @@ import * as path from 'path';
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import { cache as Cache } from 'decorator-cache-getter';
 import { DeepWritable } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
@@ -38,32 +39,34 @@ export class Manager {
     private readonly prefix: string,
   ) {}
 
-  get conf(): Readonly<{
+  @Cache get conf(): Readonly<{
     texmf: {
       (key: keyof Texmf): Promise<string>;
       (key: keyof Texmf, value: string): Promise<void>;
     };
   }> {
-    return new (class {
-      texmf(key: keyof Texmf): Promise<string>;
-      texmf(key: keyof Texmf, value: string): Promise<void>;
-      async texmf(key: keyof Texmf, value?: string): Promise<string | void> {
-        if (value === undefined) {
-          return (
-            await exec.getExecOutput('kpsewhich', ['-var-value', key])
-          ).stdout.trim();
-        }
-        /**
-         * `tlmgr conf` is not implemented before 2010.
-         */
-        if (this.version < '2010') {
-          core.exportVariable(key, value);
-        } else {
-          await exec.exec('tlmgr', ['conf', 'texmf', key, value]);
-        }
+    function texmf(key: keyof Texmf): Promise<string>;
+    function texmf(key: keyof Texmf, value: string): Promise<void>;
+    async function texmf(
+      this: Readonly<{ version: Version }>,
+      key: keyof Texmf,
+      value?: string,
+    ): Promise<string | void> {
+      if (value === undefined) {
+        return (
+          await exec.getExecOutput('kpsewhich', ['-var-value', key])
+        ).stdout.trim();
       }
-      constructor(private readonly version: Version) {}
-    })(this.version);
+      /**
+       * `tlmgr conf` is not implemented before 2010.
+       */
+      if (this.version < '2010') {
+        core.exportVariable(key, value);
+      } else {
+        await exec.exec('tlmgr', ['conf', 'texmf', key, value]);
+      }
+    }
+    return { texmf: texmf.bind({ version: this.version }) };
   }
 
   async install(this: void, ...packages: ReadonlyArray<string>): Promise<void> {
@@ -72,15 +75,13 @@ export class Manager {
     }
   }
 
-  get path(): Readonly<{
-    /**
-     * Adds the bin directory of TeX Live directly to the PATH.
-     * This method does not invoke `tlmgr path add`
-     * to avoid to create symlinks in the system directory.
-     */
-    add: () => Promise<void>;
-  }> {
+  @Cache get path(): Readonly<{ add: () => Promise<void> }> {
     return {
+      /**
+       * Adds the bin directory of TeX Live directly to the PATH.
+       * This method does not invoke `tlmgr path add`
+       * to avoid to create symlinks in the system directory.
+       */
       add: async () => {
         const binpath = await util.determine(
           path.join(this.prefix, this.version, 'bin', '*'),
@@ -93,11 +94,10 @@ export class Manager {
     };
   }
 
-  get pinning(): Readonly<{
+  @Cache get pinning(): Readonly<{
     add: (
       repo: string,
-      pattern: string,
-      ...rest: ReadonlyArray<string>
+      ...globs: readonly [string, ...Array<string>]
     ) => Promise<void>;
   }> {
     if (this.version < '2013') {
@@ -106,13 +106,13 @@ export class Manager {
       );
     }
     return {
-      add: async (repo, pattern, ...rest) => {
-        await exec.exec('tlmgr', ['pinning', 'add', repo, pattern, ...rest]);
+      add: async (repo, ...globs: ReadonlyArray<string>) => {
+        await exec.exec('tlmgr', ['pinning', 'add', repo, ...globs]);
       },
     };
   }
 
-  get repository(): Readonly<{
+  @Cache get repository(): Readonly<{
     /**
      * @returns `false` if the repository already exists, otherwise `true`.
      */
@@ -124,7 +124,7 @@ export class Manager {
       );
     }
     return {
-      add: async (repo, tag) => {
+      add: async (repo, tag?) => {
         const { exitCode, stderr } = await exec.getExecOutput(
           'tlmgr',
           ['repository', 'add', repo, ...(tag === undefined ? [] : [tag])],

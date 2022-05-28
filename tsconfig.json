@@ -23,6 +23,8 @@
     // interop constraints
     "esModuleInterop": true,
     // language and environment
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "target": "es2021",
     // ttypescript
     "plugins": [
