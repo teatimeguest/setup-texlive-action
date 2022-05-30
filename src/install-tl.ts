@@ -5,8 +5,10 @@ import { types } from 'util';
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as io from '@actions/io';
 import * as tool from '@actions/tool-cache';
-import { keys } from 'ts-transformer-keys';
+import { Exclude, Expose, instanceToPlain, Type } from 'class-transformer';
+import 'reflect-metadata';
 
 import * as tl from '#/texlive';
 import Version = tl.Version;
@@ -22,29 +24,27 @@ export class InstallTL {
   ) {}
 
   async run(profile: Readonly<Profile>): Promise<void> {
-    const target = path.join(util.tmpdir(), 'texlive.profile');
-    await fs.writeFile(target, Profile.format(profile));
-    const options = ['-no-gui', '-profile', target];
-
-    if (this.version !== Version.LATEST) {
-      const repo = tl.historic(this.version);
-      /**
-       * `install-tl` of versions prior to 2017 does not support HTTPS, and
-       * that of version 2017 supports HTTPS but does not work properly.
-       */
-      if (this.version < '2018') {
-        repo.protocol = 'http';
-      }
-      options.push(
+    for await (const target of profile.open()) {
+      const options = ['-no-gui', '-profile', target];
+      if (this.version !== Version.LATEST) {
+        const repo = tl.historic(this.version);
         /**
-         * Only version 2008 uses `-location` instead of `-repository`.
+         * `install-tl` of versions prior to 2017 does not support HTTPS, and
+         * that of version 2017 supports HTTPS but does not work properly.
          */
-        this.version === '2008' ? '-location' : '-repository',
-        repo.href,
-      );
+        if (this.version < '2018') {
+          repo.protocol = 'http';
+        }
+        options.push(
+          /**
+           * Only version 2008 uses `-location` instead of `-repository`.
+           */
+          this.version === '2008' ? '-location' : '-repository',
+          repo.href,
+        );
+      }
+      await exec.exec(this.bin, options);
     }
-
-    await exec.exec(this.bin, options);
     core.info('Applying patches');
     await patch(this.version, profile.TEXDIR);
   }
@@ -111,8 +111,9 @@ export interface Env {
   ['NOPERLDOC']?: string;
 }
 
+@Exclude()
 export class Profile {
-  constructor(version: Version, prefix: string) {
+  constructor(readonly version: Version, prefix: string) {
     this.TEXDIR = path.join(prefix, version);
     this.TEXMFLOCAL = path.join(prefix, 'texmf-local');
     this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
@@ -123,49 +124,114 @@ export class Profile {
     this.selected_scheme = `scheme-${
       version < '2016' ? 'minimal' : 'infraonly'
     }`;
-    this.option_adjustrepo = version === Version.LATEST ? '1' : '0';
+    this.instopt_adjustrepo = version === Version.LATEST;
   }
-  /**
-   * - `option_autobackup`, `option_doc`, `option_src`, and `option_symlinks`
-   *   already exist since version 2008.
-   *
-   * - In version 2009, `option_desktop_integration`, `option_file_assocs`,
-   *   and `option_w32_multi_user` were first introduced.
-   *   Also, `option_symlinks` was renamed to `option_path`.
-   *
-   * - `option_adjustrepo` was first introduced in version 2011.
-   *
-   * - `option_menu_integration` was first introduced in version 2012 and
-   *   removed in version 2017.
-   *
-   * - In version 2017, the option names have been changed, and
-   *   new prefixes `instopt-` and `tlpdbopt-` have been introduced.
-   *   Also, `option_path` and `option_symlinks` have been merged and
-   *   `instopt_adjustpath` has been introduced.
-   *   The old option names are still valid in later versions.
-   */
-  readonly ['TEXDIR']: string;
-  readonly ['TEXMFLOCAL']: string;
-  readonly ['TEXMFSYSCONFIG']: string;
-  readonly ['TEXMFSYSVAR']: string;
-  readonly ['selected_scheme']: string;
-  readonly ['option_adjustrepo']: string;
-  readonly ['option_autobackup']: string = '0';
-  readonly ['option_desktop_integration']: string = '0';
-  readonly ['option_doc']: string = '0';
-  readonly ['option_file_assocs']: string = '0';
-  readonly ['option_menu_integration']: string = '0';
-  readonly ['option_path']: string = '0';
-  readonly ['option_src']: string = '0';
-  readonly ['option_symlinks']: string = '0';
-  readonly ['option_w32_multi_user']: string = '0';
-}
 
-export namespace Profile {
-  export function format(profile: Profile): string {
-    return keys<Profile>()
-      .map((key) => `${key} ${profile[key]}`)
+  async *open(this: Readonly<this>): AsyncGenerator<string, void> {
+    const tmpdir = await fs.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-'));
+    const target = path.join(tmpdir, 'texlive.profile');
+    await fs.writeFile(target, this.toString());
+    try {
+      yield target;
+    } finally {
+      await io.rmRF(tmpdir);
+    }
+  }
+
+  toString(this: Readonly<this>): string {
+    const plain = instanceToPlain(this, {
+      version: Number(this.version),
+      groups: [os.platform()],
+    });
+    return Object.entries(plain)
+      .map(([key, value]) => `${key} ${value}`)
       .join('\n');
+  }
+
+  @Expose() readonly ['selected_scheme']: string;
+
+  @Expose() readonly ['TEXDIR']: string;
+  @Expose() readonly ['TEXMFLOCAL']: string;
+  @Expose() readonly ['TEXMFSYSCONFIG']: string;
+  @Expose() readonly ['TEXMFSYSVAR']: string;
+
+  @Expose({ since: 2017 })
+  @Type(() => Number)
+  readonly ['instopt_adjustpath']: boolean = false;
+  @Expose({ since: 2017 })
+  @Type(() => Number)
+  readonly ['instopt_adjustrepo']: boolean;
+  @Expose({ since: 2017 })
+  @Type(() => Number)
+  readonly ['tlpdbopt_autobackup']: boolean = false;
+  @Expose({ since: 2017 })
+  @Type(() => Number)
+  readonly ['tlpdbopt_install_docfiles']: boolean = false;
+  @Expose({ since: 2017 })
+  @Type(() => Number)
+  readonly ['tlpdbopt_install_srcfiles']: boolean = false;
+
+  // Options for Windows
+  @Expose({ since: 2017, groups: ['win32'] })
+  @Type(() => Number)
+  readonly ['tlpdbopt_desktop_integration']: boolean = false;
+  @Expose({ since: 2017, groups: ['win32'] })
+  @Type(() => Number)
+  readonly ['tlpdbopt_file_assocs']: boolean = false;
+  @Expose({ since: 2017, groups: ['win32'] })
+  @Type(() => Number)
+  readonly ['tlpdbopt_w32_multi_user']: boolean = false;
+
+  // Deleted option
+  @Expose({ since: 2012, until: 2017, groups: ['win32'] })
+  @Type(() => Number)
+  readonly ['option_menu_integration']: boolean = false;
+
+  // Old option names
+  @Expose({ until: 2009 })
+  @Type(() => Number)
+  get ['option_symlinks'](): boolean {
+    return this.instopt_adjustpath;
+  }
+  @Expose({ since: 2009, until: 2017 })
+  @Type(() => Number)
+  get ['option_path'](): boolean {
+    return this.instopt_adjustpath;
+  }
+  @Expose({ since: 2011, until: 2017 })
+  @Type(() => Number)
+  get ['option_adjustrepo'](): boolean {
+    return this.instopt_adjustrepo;
+  }
+  @Expose({ until: 2017 })
+  @Type(() => Number)
+  get ['option_autobackup'](): boolean {
+    return this.tlpdbopt_autobackup;
+  }
+  @Expose({ until: 2017 })
+  @Type(() => Number)
+  get ['option_doc'](): boolean {
+    return this.tlpdbopt_install_docfiles;
+  }
+  @Expose({ until: 2017 })
+  @Type(() => Number)
+  get ['option_src'](): boolean {
+    return this.tlpdbopt_install_srcfiles;
+  }
+  @Expose({ since: 2009, until: 2017, groups: ['win32'] })
+  @Type(() => Number)
+  get ['option_desktop_integration'](): boolean {
+    return this.tlpdbopt_desktop_integration;
+  }
+  @Expose({ until: 2017, groups: ['win32'] })
+  @Type(() => Number)
+  get ['option_file_assocs'](): boolean {
+    return this.tlpdbopt_file_assocs;
+  }
+  @Expose({ since: 2009, until: 2017, groups: ['win32'] })
+  @Type(() => Number)
+  get ['option_w32_multi_user'](): boolean {
+    return this.tlpdbopt_w32_multi_user;
   }
 }
 

@@ -44,7 +44,7 @@ async function main(): Promise<void> {
       return await InstallTL.acquire(inputs.version);
     });
     await core.group('Installation profile', async () => {
-      core.info(Profile.format(profile));
+      core.info(profile.toString());
     });
     await core.group('Installing TeX Live', async () => {
       await installtl.run(profile);

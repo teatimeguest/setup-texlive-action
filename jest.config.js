@@ -19,6 +19,7 @@ module.exports = {
     '^.+\\.ts$': 'ts-jest',
   },
   unmockedModulePathPatterns: [
+    '<rootDir>/node_modules/class-transformer/',
     '<rootDir>/node_modules/decorator-cache-getter/',
     '<rootDir>/node_modules/jest-extended/',
   ],

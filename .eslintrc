@@ -75,8 +75,9 @@ rules:
   '@typescript-eslint/prefer-optional-chain': error
   '@typescript-eslint/prefer-readonly-parameter-types':
     - error
-    # https://github.com/typescript-eslint/typescript-eslint/issues/1758
-    - treatMethodsAsReadonly: true
+    - ignoreInferredTypes: true
+      # https://github.com/typescript-eslint/typescript-eslint/issues/1758
+      treatMethodsAsReadonly: true
   '@typescript-eslint/prefer-regexp-exec': error
   '@typescript-eslint/prefer-return-this-type': error
   '@typescript-eslint/promise-function-async': error

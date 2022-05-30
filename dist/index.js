@@ -1887,7 +1887,7 @@ var require_io = __commonJS({
           }
           if (destExists) {
             if (options.force == null || options.force) {
-              yield rmRF(dest);
+              yield rmRF2(dest);
             } else {
               throw new Error("Destination already exists");
             }
@@ -1898,7 +1898,7 @@ var require_io = __commonJS({
       });
     }
     exports.mv = mv;
-    function rmRF(inputPath) {
+    function rmRF2(inputPath) {
       return __awaiter5(this, void 0, void 0, function* () {
         if (ioUtil.IS_WINDOWS) {
           if (/[*"<>|]/.test(inputPath)) {
@@ -1942,7 +1942,7 @@ var require_io = __commonJS({
         }
       });
     }
-    exports.rmRF = rmRF;
+    exports.rmRF = rmRF2;
     function mkdirP(fsPath) {
       return __awaiter5(this, void 0, void 0, function* () {
         assert_1.ok(fsPath, "a path argument must be provided");
@@ -2129,7 +2129,7 @@ var require_toolrunner = __commonJS({
     var events = __importStar5(require("events"));
     var child = __importStar5(require("child_process"));
     var path5 = __importStar5(require("path"));
-    var io = __importStar5(require_io());
+    var io2 = __importStar5(require_io());
     var ioUtil = __importStar5(require_io_util());
     var timers_1 = require("timers");
     var IS_WINDOWS = process.platform === "win32";
@@ -2336,7 +2336,7 @@ var require_toolrunner = __commonJS({
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
             this.toolPath = path5.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
-          this.toolPath = yield io.which(this.toolPath, true);
+          this.toolPath = yield io2.which(this.toolPath, true);
           return new Promise((resolve, reject) => __awaiter5(this, void 0, void 0, function* () {
             this._debug(`exec tool: ${this.toolPath}`);
             this._debug("arguments:");
@@ -5508,9 +5508,9 @@ var require_semver = __commonJS({
 // node_modules/uuid/lib/rng.js
 var require_rng = __commonJS({
   "node_modules/uuid/lib/rng.js"(exports, module2) {
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     module2.exports = function nodeRNG() {
-      return crypto2.randomBytes(16);
+      return crypto3.randomBytes(16);
     };
   }
 });
@@ -5748,7 +5748,7 @@ var require_cacheUtils = __commonJS({
     var core6 = __importStar5(require_core());
     var exec5 = __importStar5(require_exec());
     var glob2 = __importStar5(require_glob());
-    var io = __importStar5(require_io());
+    var io2 = __importStar5(require_io());
     var fs5 = __importStar5(require("fs"));
     var path5 = __importStar5(require("path"));
     var semver = __importStar5(require_semver());
@@ -5773,7 +5773,7 @@ var require_cacheUtils = __commonJS({
           tempDirectory = path5.join(baseLocation, "actions", "temp");
         }
         const dest = path5.join(tempDirectory, uuid_1.v4());
-        yield io.mkdirP(dest);
+        yield io2.mkdirP(dest);
         return dest;
       });
     }
@@ -20661,11 +20661,11 @@ var init_lib = __esm({
 var require_tslib = __commonJS({
   "node_modules/@azure/abort-controller/node_modules/tslib/tslib.js"(exports, module2) {
     var __extends5;
-    var __assign5;
+    var __assign6;
     var __rest5;
-    var __decorate6;
+    var __decorate7;
     var __param5;
-    var __metadata6;
+    var __metadata7;
     var __awaiter5;
     var __generator5;
     var __exportStar5;
@@ -20673,7 +20673,7 @@ var require_tslib = __commonJS({
     var __read5;
     var __spread5;
     var __spreadArrays5;
-    var __spreadArray7;
+    var __spreadArray8;
     var __await5;
     var __asyncGenerator5;
     var __asyncDelegator5;
@@ -20725,7 +20725,7 @@ var require_tslib = __commonJS({
         }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
       };
-      __assign5 = Object.assign || function(t) {
+      __assign6 = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
           s = arguments[i];
           for (var p in s)
@@ -20746,7 +20746,7 @@ var require_tslib = __commonJS({
           }
         return t;
       };
-      __decorate6 = function(decorators, target, key, desc) {
+      __decorate7 = function(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
           r = Reflect.decorate(decorators, target, key, desc);
@@ -20761,7 +20761,7 @@ var require_tslib = __commonJS({
           decorator(target, key, paramIndex);
         };
       };
-      __metadata6 = function(metadataKey, metadataValue) {
+      __metadata7 = function(metadataKey, metadataValue) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
           return Reflect.metadata(metadataKey, metadataValue);
       };
@@ -20936,7 +20936,7 @@ var require_tslib = __commonJS({
             r[k] = a[j];
         return r;
       };
-      __spreadArray7 = function(to, from, pack) {
+      __spreadArray8 = function(to, from, pack) {
         if (pack || arguments.length === 2)
           for (var i = 0, l = from.length, ar; i < l; i++) {
             if (ar || !(i in from)) {
@@ -21069,11 +21069,11 @@ var require_tslib = __commonJS({
         return typeof state === "function" ? receiver === state : state.has(receiver);
       };
       exporter("__extends", __extends5);
-      exporter("__assign", __assign5);
+      exporter("__assign", __assign6);
       exporter("__rest", __rest5);
-      exporter("__decorate", __decorate6);
+      exporter("__decorate", __decorate7);
       exporter("__param", __param5);
-      exporter("__metadata", __metadata6);
+      exporter("__metadata", __metadata7);
       exporter("__awaiter", __awaiter5);
       exporter("__generator", __generator5);
       exporter("__exportStar", __exportStar5);
@@ -21082,7 +21082,7 @@ var require_tslib = __commonJS({
       exporter("__read", __read5);
       exporter("__spread", __spread5);
       exporter("__spreadArrays", __spreadArrays5);
-      exporter("__spreadArray", __spreadArray7);
+      exporter("__spreadArray", __spreadArray8);
       exporter("__await", __await5);
       exporter("__asyncGenerator", __asyncGenerator5);
       exporter("__asyncDelegator", __asyncDelegator5);
@@ -31796,11 +31796,11 @@ var init_httpPipelineLogLevel = __esm({
 var require_tslib2 = __commonJS({
   "node_modules/@azure/core-http/node_modules/tslib/tslib.js"(exports, module2) {
     var __extends5;
-    var __assign5;
+    var __assign6;
     var __rest5;
-    var __decorate6;
+    var __decorate7;
     var __param5;
-    var __metadata6;
+    var __metadata7;
     var __awaiter5;
     var __generator5;
     var __exportStar5;
@@ -31808,7 +31808,7 @@ var require_tslib2 = __commonJS({
     var __read5;
     var __spread5;
     var __spreadArrays5;
-    var __spreadArray7;
+    var __spreadArray8;
     var __await5;
     var __asyncGenerator5;
     var __asyncDelegator5;
@@ -31860,7 +31860,7 @@ var require_tslib2 = __commonJS({
         }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
       };
-      __assign5 = Object.assign || function(t) {
+      __assign6 = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
           s = arguments[i];
           for (var p in s)
@@ -31881,7 +31881,7 @@ var require_tslib2 = __commonJS({
           }
         return t;
       };
-      __decorate6 = function(decorators, target, key, desc) {
+      __decorate7 = function(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
           r = Reflect.decorate(decorators, target, key, desc);
@@ -31896,7 +31896,7 @@ var require_tslib2 = __commonJS({
           decorator(target, key, paramIndex);
         };
       };
-      __metadata6 = function(metadataKey, metadataValue) {
+      __metadata7 = function(metadataKey, metadataValue) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
           return Reflect.metadata(metadataKey, metadataValue);
       };
@@ -32071,7 +32071,7 @@ var require_tslib2 = __commonJS({
             r[k] = a[j];
         return r;
       };
-      __spreadArray7 = function(to, from, pack) {
+      __spreadArray8 = function(to, from, pack) {
         if (pack || arguments.length === 2)
           for (var i = 0, l = from.length, ar; i < l; i++) {
             if (ar || !(i in from)) {
@@ -32204,11 +32204,11 @@ var require_tslib2 = __commonJS({
         return typeof state === "function" ? receiver === state : state.has(receiver);
       };
       exporter("__extends", __extends5);
-      exporter("__assign", __assign5);
+      exporter("__assign", __assign6);
       exporter("__rest", __rest5);
-      exporter("__decorate", __decorate6);
+      exporter("__decorate", __decorate7);
       exporter("__param", __param5);
-      exporter("__metadata", __metadata6);
+      exporter("__metadata", __metadata7);
       exporter("__awaiter", __awaiter5);
       exporter("__generator", __generator5);
       exporter("__exportStar", __exportStar5);
@@ -32217,7 +32217,7 @@ var require_tslib2 = __commonJS({
       exporter("__read", __read5);
       exporter("__spread", __spread5);
       exporter("__spreadArrays", __spreadArrays5);
-      exporter("__spreadArray", __spreadArray7);
+      exporter("__spreadArray", __spreadArray8);
       exporter("__await", __await5);
       exporter("__asyncGenerator", __asyncGenerator5);
       exporter("__asyncDelegator", __asyncDelegator5);
@@ -41301,11 +41301,11 @@ var init_coreHttp = __esm({
 var require_tslib3 = __commonJS({
   "node_modules/@azure/storage-blob/node_modules/tslib/tslib.js"(exports, module2) {
     var __extends5;
-    var __assign5;
+    var __assign6;
     var __rest5;
-    var __decorate6;
+    var __decorate7;
     var __param5;
-    var __metadata6;
+    var __metadata7;
     var __awaiter5;
     var __generator5;
     var __exportStar5;
@@ -41313,7 +41313,7 @@ var require_tslib3 = __commonJS({
     var __read5;
     var __spread5;
     var __spreadArrays5;
-    var __spreadArray7;
+    var __spreadArray8;
     var __await5;
     var __asyncGenerator5;
     var __asyncDelegator5;
@@ -41365,7 +41365,7 @@ var require_tslib3 = __commonJS({
         }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
       };
-      __assign5 = Object.assign || function(t) {
+      __assign6 = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
           s = arguments[i];
           for (var p in s)
@@ -41386,7 +41386,7 @@ var require_tslib3 = __commonJS({
           }
         return t;
       };
-      __decorate6 = function(decorators, target, key, desc) {
+      __decorate7 = function(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
           r = Reflect.decorate(decorators, target, key, desc);
@@ -41401,7 +41401,7 @@ var require_tslib3 = __commonJS({
           decorator(target, key, paramIndex);
         };
       };
-      __metadata6 = function(metadataKey, metadataValue) {
+      __metadata7 = function(metadataKey, metadataValue) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
           return Reflect.metadata(metadataKey, metadataValue);
       };
@@ -41576,7 +41576,7 @@ var require_tslib3 = __commonJS({
             r[k] = a[j];
         return r;
       };
-      __spreadArray7 = function(to, from, pack) {
+      __spreadArray8 = function(to, from, pack) {
         if (pack || arguments.length === 2)
           for (var i = 0, l = from.length, ar; i < l; i++) {
             if (ar || !(i in from)) {
@@ -41709,11 +41709,11 @@ var require_tslib3 = __commonJS({
         return typeof state === "function" ? receiver === state : state.has(receiver);
       };
       exporter("__extends", __extends5);
-      exporter("__assign", __assign5);
+      exporter("__assign", __assign6);
       exporter("__rest", __rest5);
-      exporter("__decorate", __decorate6);
+      exporter("__decorate", __decorate7);
       exporter("__param", __param5);
-      exporter("__metadata", __metadata6);
+      exporter("__metadata", __metadata7);
       exporter("__awaiter", __awaiter5);
       exporter("__generator", __generator5);
       exporter("__exportStar", __exportStar5);
@@ -41722,7 +41722,7 @@ var require_tslib3 = __commonJS({
       exporter("__read", __read5);
       exporter("__spread", __spread5);
       exporter("__spreadArrays", __spreadArrays5);
-      exporter("__spreadArray", __spreadArray7);
+      exporter("__spreadArray", __spreadArray8);
       exporter("__await", __await5);
       exporter("__asyncGenerator", __asyncGenerator5);
       exporter("__asyncDelegator", __asyncDelegator5);
@@ -57050,11 +57050,11 @@ var init_models2 = __esm({
 var require_tslib4 = __commonJS({
   "node_modules/@azure/core-paging/node_modules/tslib/tslib.js"(exports, module2) {
     var __extends5;
-    var __assign5;
+    var __assign6;
     var __rest5;
-    var __decorate6;
+    var __decorate7;
     var __param5;
-    var __metadata6;
+    var __metadata7;
     var __awaiter5;
     var __generator5;
     var __exportStar5;
@@ -57062,7 +57062,7 @@ var require_tslib4 = __commonJS({
     var __read5;
     var __spread5;
     var __spreadArrays5;
-    var __spreadArray7;
+    var __spreadArray8;
     var __await5;
     var __asyncGenerator5;
     var __asyncDelegator5;
@@ -57114,7 +57114,7 @@ var require_tslib4 = __commonJS({
         }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
       };
-      __assign5 = Object.assign || function(t) {
+      __assign6 = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
           s = arguments[i];
           for (var p in s)
@@ -57135,7 +57135,7 @@ var require_tslib4 = __commonJS({
           }
         return t;
       };
-      __decorate6 = function(decorators, target, key, desc) {
+      __decorate7 = function(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
           r = Reflect.decorate(decorators, target, key, desc);
@@ -57150,7 +57150,7 @@ var require_tslib4 = __commonJS({
           decorator(target, key, paramIndex);
         };
       };
-      __metadata6 = function(metadataKey, metadataValue) {
+      __metadata7 = function(metadataKey, metadataValue) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
           return Reflect.metadata(metadataKey, metadataValue);
       };
@@ -57325,7 +57325,7 @@ var require_tslib4 = __commonJS({
             r[k] = a[j];
         return r;
       };
-      __spreadArray7 = function(to, from, pack) {
+      __spreadArray8 = function(to, from, pack) {
         if (pack || arguments.length === 2)
           for (var i = 0, l = from.length, ar; i < l; i++) {
             if (ar || !(i in from)) {
@@ -57458,11 +57458,11 @@ var require_tslib4 = __commonJS({
         return typeof state === "function" ? receiver === state : state.has(receiver);
       };
       exporter("__extends", __extends5);
-      exporter("__assign", __assign5);
+      exporter("__assign", __assign6);
       exporter("__rest", __rest5);
-      exporter("__decorate", __decorate6);
+      exporter("__decorate", __decorate7);
       exporter("__param", __param5);
-      exporter("__metadata", __metadata6);
+      exporter("__metadata", __metadata7);
       exporter("__awaiter", __awaiter5);
       exporter("__generator", __generator5);
       exporter("__exportStar", __exportStar5);
@@ -57471,7 +57471,7 @@ var require_tslib4 = __commonJS({
       exporter("__read", __read5);
       exporter("__spread", __spread5);
       exporter("__spreadArrays", __spreadArrays5);
-      exporter("__spreadArray", __spreadArray7);
+      exporter("__spreadArray", __spreadArray8);
       exporter("__await", __await5);
       exporter("__asyncGenerator", __asyncGenerator5);
       exporter("__asyncDelegator", __asyncDelegator5);
@@ -62359,7 +62359,7 @@ var require_cacheHttpClient = __commonJS({
     var core6 = __importStar5(require_core());
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
-    var crypto2 = __importStar5(require("crypto"));
+    var crypto3 = __importStar5(require("crypto"));
     var fs5 = __importStar5(require("fs"));
     var url_1 = require("url");
     var utils = __importStar5(require_cacheUtils());
@@ -62396,7 +62396,7 @@ var require_cacheHttpClient = __commonJS({
     function getCacheVersion(paths, compressionMethod) {
       const components = paths.concat(!compressionMethod || compressionMethod === constants_1.CompressionMethod.Gzip ? [] : [compressionMethod]);
       components.push(versionSalt);
-      return crypto2.createHash("sha256").update(components.join("|")).digest("hex");
+      return crypto3.createHash("sha256").update(components.join("|")).digest("hex");
     }
     exports.getCacheVersion = getCacheVersion;
     function getCacheEntry(keys, paths, options) {
@@ -62577,7 +62577,7 @@ var require_tar = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var exec_1 = require_exec();
-    var io = __importStar5(require_io());
+    var io2 = __importStar5(require_io());
     var fs_1 = require("fs");
     var path5 = __importStar5(require("path"));
     var utils = __importStar5(require_cacheUtils());
@@ -62597,7 +62597,7 @@ var require_tar = __commonJS({
             break;
           }
           case "darwin": {
-            const gnuTar = yield io.which("gtar", false);
+            const gnuTar = yield io2.which("gtar", false);
             if (gnuTar) {
               args.push("--delay-directory-restore");
               return gnuTar;
@@ -62607,7 +62607,7 @@ var require_tar = __commonJS({
           default:
             break;
         }
-        return yield io.which("tar", true);
+        return yield io2.which("tar", true);
       });
     }
     function execTar(args, compressionMethod, cwd) {
@@ -62626,7 +62626,7 @@ var require_tar = __commonJS({
     function extractTar2(archivePath, compressionMethod) {
       return __awaiter5(this, void 0, void 0, function* () {
         const workingDirectory = getWorkingDirectory();
-        yield io.mkdirP(workingDirectory);
+        yield io2.mkdirP(workingDirectory);
         function getCompressionProgram() {
           switch (compressionMethod) {
             case constants_1.CompressionMethod.Zstd:
@@ -63861,7 +63861,7 @@ var require_internal_hash_files = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.hashFiles = void 0;
-    var crypto2 = __importStar5(require("crypto"));
+    var crypto3 = __importStar5(require("crypto"));
     var core6 = __importStar5(require_core());
     var fs5 = __importStar5(require("fs"));
     var stream = __importStar5(require("stream"));
@@ -63874,7 +63874,7 @@ var require_internal_hash_files = __commonJS({
         const writeDelegate = verbose ? core6.info : core6.debug;
         let hasMatch = false;
         const githubWorkspace = (_b = process.env["GITHUB_WORKSPACE"]) !== null && _b !== void 0 ? _b : process.cwd();
-        const result = crypto2.createHash("sha256");
+        const result = crypto3.createHash("sha256");
         let count = 0;
         try {
           for (var _c = __asyncValues5(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done; ) {
@@ -63888,7 +63888,7 @@ var require_internal_hash_files = __commonJS({
               writeDelegate(`Skip directory '${file}'.`);
               continue;
             }
-            const hash = crypto2.createHash("sha256");
+            const hash = crypto3.createHash("sha256");
             const pipeline = util3.promisify(stream.pipeline);
             yield pipeline(fs5.createReadStream(file), hash);
             result.write(hash.digest());
@@ -64289,7 +64289,7 @@ var require_tool_cache = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.evaluateVersions = exports.isExplicitVersion = exports.findFromManifest = exports.getManifestFromRepo = exports.findAllVersions = exports.find = exports.cacheFile = exports.cacheDir = exports.extractZip = exports.extractXar = exports.extractTar = exports.extract7z = exports.downloadTool = exports.HTTPError = void 0;
     var core6 = __importStar5(require_core());
-    var io = __importStar5(require_io());
+    var io2 = __importStar5(require_io());
     var fs5 = __importStar5(require("fs"));
     var mm = __importStar5(require_manifest());
     var os7 = __importStar5(require("os"));
@@ -64316,7 +64316,7 @@ var require_tool_cache = __commonJS({
     function downloadTool2(url2, dest, auth, headers) {
       return __awaiter5(this, void 0, void 0, function* () {
         dest = dest || path5.join(_getTempDirectory(), v4_1.default());
-        yield io.mkdirP(path5.dirname(dest));
+        yield io2.mkdirP(path5.dirname(dest));
         core6.debug(`Downloading ${url2}`);
         core6.debug(`Destination ${dest}`);
         const maxAttempts = 3;
@@ -64370,7 +64370,7 @@ var require_tool_cache = __commonJS({
           if (!succeeded) {
             core6.debug("download failed");
             try {
-              yield io.rmRF(dest);
+              yield io2.rmRF(dest);
             } catch (err) {
               core6.debug(`Failed to delete '${dest}'. ${err.message}`);
             }
@@ -64421,7 +64421,7 @@ var require_tool_cache = __commonJS({
             silent: true
           };
           try {
-            const powershellPath = yield io.which("powershell", true);
+            const powershellPath = yield io2.which("powershell", true);
             yield exec_1.exec(`"${powershellPath}"`, args, options);
           } finally {
             process.chdir(originalCwd);
@@ -64490,7 +64490,7 @@ var require_tool_cache = __commonJS({
         if (core6.isDebug()) {
           args.push("-v");
         }
-        const xarPath = yield io.which("xar", true);
+        const xarPath = yield io2.which("xar", true);
         yield exec_1.exec(`"${xarPath}"`, _unique(args));
         return dest;
       });
@@ -64515,7 +64515,7 @@ var require_tool_cache = __commonJS({
       return __awaiter5(this, void 0, void 0, function* () {
         const escapedFile = file.replace(/'/g, "''").replace(/"|\n|\r/g, "");
         const escapedDest = dest.replace(/'/g, "''").replace(/"|\n|\r/g, "");
-        const pwshPath = yield io.which("pwsh", false);
+        const pwshPath = yield io2.which("pwsh", false);
         if (pwshPath) {
           const pwshCommand = [
             `$ErrorActionPreference = 'Stop' ;`,
@@ -64551,7 +64551,7 @@ var require_tool_cache = __commonJS({
             "-Command",
             powershellCommand
           ];
-          const powershellPath = yield io.which("powershell", true);
+          const powershellPath = yield io2.which("powershell", true);
           core6.debug(`Using powershell at path: ${powershellPath}`);
           yield exec_1.exec(`"${powershellPath}"`, args);
         }
@@ -64559,7 +64559,7 @@ var require_tool_cache = __commonJS({
     }
     function extractZipNix(file, dest) {
       return __awaiter5(this, void 0, void 0, function* () {
-        const unzipPath = yield io.which("unzip", true);
+        const unzipPath = yield io2.which("unzip", true);
         const args = [file];
         if (!core6.isDebug()) {
           args.unshift("-q");
@@ -64580,7 +64580,7 @@ var require_tool_cache = __commonJS({
         const destPath = yield _createToolPath(tool3, version3, arch3);
         for (const itemName of fs5.readdirSync(sourceDir)) {
           const s = path5.join(sourceDir, itemName);
-          yield io.cp(s, destPath, { recursive: true });
+          yield io2.cp(s, destPath, { recursive: true });
         }
         _completeToolPath(tool3, version3, arch3);
         return destPath;
@@ -64599,7 +64599,7 @@ var require_tool_cache = __commonJS({
         const destFolder = yield _createToolPath(tool3, version3, arch3);
         const destPath = path5.join(destFolder, targetFile);
         core6.debug(`destination file ${destPath}`);
-        yield io.cp(sourceFile, destPath);
+        yield io2.cp(sourceFile, destPath);
         _completeToolPath(tool3, version3, arch3);
         return destFolder;
       });
@@ -64698,7 +64698,7 @@ var require_tool_cache = __commonJS({
         if (!dest) {
           dest = path5.join(_getTempDirectory(), v4_1.default());
         }
-        yield io.mkdirP(dest);
+        yield io2.mkdirP(dest);
         return dest;
       });
     }
@@ -64707,9 +64707,9 @@ var require_tool_cache = __commonJS({
         const folderPath = path5.join(_getCacheDirectory(), tool3, semver.clean(version3) || version3, arch3 || "");
         core6.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
-        yield io.rmRF(folderPath);
-        yield io.rmRF(markerPath);
-        yield io.mkdirP(folderPath);
+        yield io2.rmRF(folderPath);
+        yield io2.rmRF(markerPath);
+        yield io2.mkdirP(folderPath);
         return folderPath;
       });
     }
@@ -64773,7 +64773,7 @@ var require_tool_cache = __commonJS({
 });
 
 // lib/action.js
-var crypto = __toESM(require("crypto"));
+var crypto2 = __toESM(require("crypto"));
 var os6 = __toESM(require("os"));
 var core5 = __toESM(require_core());
 
@@ -65129,7 +65129,1488 @@ var path4 = __toESM(require("path"));
 var import_util3 = require("util");
 var core4 = __toESM(require_core());
 var exec3 = __toESM(require_exec());
+var io = __toESM(require_io());
 var tool2 = __toESM(require_tool_cache());
+
+// node_modules/class-transformer/esm5/enums/transformation-type.enum.js
+var TransformationType;
+(function(TransformationType2) {
+  TransformationType2[TransformationType2["PLAIN_TO_CLASS"] = 0] = "PLAIN_TO_CLASS";
+  TransformationType2[TransformationType2["CLASS_TO_PLAIN"] = 1] = "CLASS_TO_PLAIN";
+  TransformationType2[TransformationType2["CLASS_TO_CLASS"] = 2] = "CLASS_TO_CLASS";
+})(TransformationType || (TransformationType = {}));
+
+// node_modules/class-transformer/esm5/MetadataStorage.js
+var MetadataStorage = function() {
+  function MetadataStorage2() {
+    this._typeMetadatas = /* @__PURE__ */ new Map();
+    this._transformMetadatas = /* @__PURE__ */ new Map();
+    this._exposeMetadatas = /* @__PURE__ */ new Map();
+    this._excludeMetadatas = /* @__PURE__ */ new Map();
+    this._ancestorsMap = /* @__PURE__ */ new Map();
+  }
+  MetadataStorage2.prototype.addTypeMetadata = function(metadata2) {
+    if (!this._typeMetadatas.has(metadata2.target)) {
+      this._typeMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
+    }
+    this._typeMetadatas.get(metadata2.target).set(metadata2.propertyName, metadata2);
+  };
+  MetadataStorage2.prototype.addTransformMetadata = function(metadata2) {
+    if (!this._transformMetadatas.has(metadata2.target)) {
+      this._transformMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
+    }
+    if (!this._transformMetadatas.get(metadata2.target).has(metadata2.propertyName)) {
+      this._transformMetadatas.get(metadata2.target).set(metadata2.propertyName, []);
+    }
+    this._transformMetadatas.get(metadata2.target).get(metadata2.propertyName).push(metadata2);
+  };
+  MetadataStorage2.prototype.addExposeMetadata = function(metadata2) {
+    if (!this._exposeMetadatas.has(metadata2.target)) {
+      this._exposeMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
+    }
+    this._exposeMetadatas.get(metadata2.target).set(metadata2.propertyName, metadata2);
+  };
+  MetadataStorage2.prototype.addExcludeMetadata = function(metadata2) {
+    if (!this._excludeMetadatas.has(metadata2.target)) {
+      this._excludeMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
+    }
+    this._excludeMetadatas.get(metadata2.target).set(metadata2.propertyName, metadata2);
+  };
+  MetadataStorage2.prototype.findTransformMetadatas = function(target, propertyName, transformationType) {
+    return this.findMetadatas(this._transformMetadatas, target, propertyName).filter(function(metadata2) {
+      if (!metadata2.options)
+        return true;
+      if (metadata2.options.toClassOnly === true && metadata2.options.toPlainOnly === true)
+        return true;
+      if (metadata2.options.toClassOnly === true) {
+        return transformationType === TransformationType.CLASS_TO_CLASS || transformationType === TransformationType.PLAIN_TO_CLASS;
+      }
+      if (metadata2.options.toPlainOnly === true) {
+        return transformationType === TransformationType.CLASS_TO_PLAIN;
+      }
+      return true;
+    });
+  };
+  MetadataStorage2.prototype.findExcludeMetadata = function(target, propertyName) {
+    return this.findMetadata(this._excludeMetadatas, target, propertyName);
+  };
+  MetadataStorage2.prototype.findExposeMetadata = function(target, propertyName) {
+    return this.findMetadata(this._exposeMetadatas, target, propertyName);
+  };
+  MetadataStorage2.prototype.findExposeMetadataByCustomName = function(target, name) {
+    return this.getExposedMetadatas(target).find(function(metadata2) {
+      return metadata2.options && metadata2.options.name === name;
+    });
+  };
+  MetadataStorage2.prototype.findTypeMetadata = function(target, propertyName) {
+    return this.findMetadata(this._typeMetadatas, target, propertyName);
+  };
+  MetadataStorage2.prototype.getStrategy = function(target) {
+    var excludeMap = this._excludeMetadatas.get(target);
+    var exclude = excludeMap && excludeMap.get(void 0);
+    var exposeMap = this._exposeMetadatas.get(target);
+    var expose = exposeMap && exposeMap.get(void 0);
+    if (exclude && expose || !exclude && !expose)
+      return "none";
+    return exclude ? "excludeAll" : "exposeAll";
+  };
+  MetadataStorage2.prototype.getExposedMetadatas = function(target) {
+    return this.getMetadata(this._exposeMetadatas, target);
+  };
+  MetadataStorage2.prototype.getExcludedMetadatas = function(target) {
+    return this.getMetadata(this._excludeMetadatas, target);
+  };
+  MetadataStorage2.prototype.getExposedProperties = function(target, transformationType) {
+    return this.getExposedMetadatas(target).filter(function(metadata2) {
+      if (!metadata2.options)
+        return true;
+      if (metadata2.options.toClassOnly === true && metadata2.options.toPlainOnly === true)
+        return true;
+      if (metadata2.options.toClassOnly === true) {
+        return transformationType === TransformationType.CLASS_TO_CLASS || transformationType === TransformationType.PLAIN_TO_CLASS;
+      }
+      if (metadata2.options.toPlainOnly === true) {
+        return transformationType === TransformationType.CLASS_TO_PLAIN;
+      }
+      return true;
+    }).map(function(metadata2) {
+      return metadata2.propertyName;
+    });
+  };
+  MetadataStorage2.prototype.getExcludedProperties = function(target, transformationType) {
+    return this.getExcludedMetadatas(target).filter(function(metadata2) {
+      if (!metadata2.options)
+        return true;
+      if (metadata2.options.toClassOnly === true && metadata2.options.toPlainOnly === true)
+        return true;
+      if (metadata2.options.toClassOnly === true) {
+        return transformationType === TransformationType.CLASS_TO_CLASS || transformationType === TransformationType.PLAIN_TO_CLASS;
+      }
+      if (metadata2.options.toPlainOnly === true) {
+        return transformationType === TransformationType.CLASS_TO_PLAIN;
+      }
+      return true;
+    }).map(function(metadata2) {
+      return metadata2.propertyName;
+    });
+  };
+  MetadataStorage2.prototype.clear = function() {
+    this._typeMetadatas.clear();
+    this._exposeMetadatas.clear();
+    this._excludeMetadatas.clear();
+    this._ancestorsMap.clear();
+  };
+  MetadataStorage2.prototype.getMetadata = function(metadatas, target) {
+    var metadataFromTargetMap = metadatas.get(target);
+    var metadataFromTarget;
+    if (metadataFromTargetMap) {
+      metadataFromTarget = Array.from(metadataFromTargetMap.values()).filter(function(meta) {
+        return meta.propertyName !== void 0;
+      });
+    }
+    var metadataFromAncestors = [];
+    for (var _i = 0, _a = this.getAncestors(target); _i < _a.length; _i++) {
+      var ancestor = _a[_i];
+      var ancestorMetadataMap = metadatas.get(ancestor);
+      if (ancestorMetadataMap) {
+        var metadataFromAncestor = Array.from(ancestorMetadataMap.values()).filter(function(meta) {
+          return meta.propertyName !== void 0;
+        });
+        metadataFromAncestors.push.apply(metadataFromAncestors, metadataFromAncestor);
+      }
+    }
+    return metadataFromAncestors.concat(metadataFromTarget || []);
+  };
+  MetadataStorage2.prototype.findMetadata = function(metadatas, target, propertyName) {
+    var metadataFromTargetMap = metadatas.get(target);
+    if (metadataFromTargetMap) {
+      var metadataFromTarget = metadataFromTargetMap.get(propertyName);
+      if (metadataFromTarget) {
+        return metadataFromTarget;
+      }
+    }
+    for (var _i = 0, _a = this.getAncestors(target); _i < _a.length; _i++) {
+      var ancestor = _a[_i];
+      var ancestorMetadataMap = metadatas.get(ancestor);
+      if (ancestorMetadataMap) {
+        var ancestorResult = ancestorMetadataMap.get(propertyName);
+        if (ancestorResult) {
+          return ancestorResult;
+        }
+      }
+    }
+    return void 0;
+  };
+  MetadataStorage2.prototype.findMetadatas = function(metadatas, target, propertyName) {
+    var metadataFromTargetMap = metadatas.get(target);
+    var metadataFromTarget;
+    if (metadataFromTargetMap) {
+      metadataFromTarget = metadataFromTargetMap.get(propertyName);
+    }
+    var metadataFromAncestorsTarget = [];
+    for (var _i = 0, _a = this.getAncestors(target); _i < _a.length; _i++) {
+      var ancestor = _a[_i];
+      var ancestorMetadataMap = metadatas.get(ancestor);
+      if (ancestorMetadataMap) {
+        if (ancestorMetadataMap.has(propertyName)) {
+          metadataFromAncestorsTarget.push.apply(metadataFromAncestorsTarget, ancestorMetadataMap.get(propertyName));
+        }
+      }
+    }
+    return metadataFromAncestorsTarget.slice().reverse().concat((metadataFromTarget || []).slice().reverse());
+  };
+  MetadataStorage2.prototype.getAncestors = function(target) {
+    if (!target)
+      return [];
+    if (!this._ancestorsMap.has(target)) {
+      var ancestors = [];
+      for (var baseClass = Object.getPrototypeOf(target.prototype.constructor); typeof baseClass.prototype !== "undefined"; baseClass = Object.getPrototypeOf(baseClass.prototype.constructor)) {
+        ancestors.push(baseClass);
+      }
+      this._ancestorsMap.set(target, ancestors);
+    }
+    return this._ancestorsMap.get(target);
+  };
+  return MetadataStorage2;
+}();
+
+// node_modules/class-transformer/esm5/storage.js
+var defaultMetadataStorage = new MetadataStorage();
+
+// node_modules/class-transformer/esm5/utils/get-global.util.js
+function getGlobal2() {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+}
+
+// node_modules/class-transformer/esm5/utils/is-promise.util.js
+function isPromise(p) {
+  return p !== null && typeof p === "object" && typeof p.then === "function";
+}
+
+// node_modules/class-transformer/esm5/TransformOperationExecutor.js
+var __spreadArray7 = function(to, from, pack) {
+  if (pack || arguments.length === 2)
+    for (var i = 0, l = from.length, ar; i < l; i++) {
+      if (ar || !(i in from)) {
+        if (!ar)
+          ar = Array.prototype.slice.call(from, 0, i);
+        ar[i] = from[i];
+      }
+    }
+  return to.concat(ar || Array.prototype.slice.call(from));
+};
+function instantiateArrayType(arrayType) {
+  var array = new arrayType();
+  if (!(array instanceof Set) && !("push" in array)) {
+    return [];
+  }
+  return array;
+}
+var TransformOperationExecutor = function() {
+  function TransformOperationExecutor2(transformationType, options) {
+    this.transformationType = transformationType;
+    this.options = options;
+    this.recursionStack = /* @__PURE__ */ new Set();
+  }
+  TransformOperationExecutor2.prototype.transform = function(source, value, targetType, arrayType, isMap, level) {
+    var _this = this;
+    if (level === void 0) {
+      level = 0;
+    }
+    if (Array.isArray(value) || value instanceof Set) {
+      var newValue_1 = arrayType && this.transformationType === TransformationType.PLAIN_TO_CLASS ? instantiateArrayType(arrayType) : [];
+      value.forEach(function(subValue, index) {
+        var subSource = source ? source[index] : void 0;
+        if (!_this.options.enableCircularCheck || !_this.isCircular(subValue)) {
+          var realTargetType = void 0;
+          if (typeof targetType !== "function" && targetType && targetType.options && targetType.options.discriminator && targetType.options.discriminator.property && targetType.options.discriminator.subTypes) {
+            if (_this.transformationType === TransformationType.PLAIN_TO_CLASS) {
+              realTargetType = targetType.options.discriminator.subTypes.find(function(subType) {
+                return subType.name === subValue[targetType.options.discriminator.property];
+              });
+              var options = { newObject: newValue_1, object: subValue, property: void 0 };
+              var newType = targetType.typeFunction(options);
+              realTargetType === void 0 ? realTargetType = newType : realTargetType = realTargetType.value;
+              if (!targetType.options.keepDiscriminatorProperty)
+                delete subValue[targetType.options.discriminator.property];
+            }
+            if (_this.transformationType === TransformationType.CLASS_TO_CLASS) {
+              realTargetType = subValue.constructor;
+            }
+            if (_this.transformationType === TransformationType.CLASS_TO_PLAIN) {
+              subValue[targetType.options.discriminator.property] = targetType.options.discriminator.subTypes.find(function(subType) {
+                return subType.value === subValue.constructor;
+              }).name;
+            }
+          } else {
+            realTargetType = targetType;
+          }
+          var value_1 = _this.transform(subSource, subValue, realTargetType, void 0, subValue instanceof Map, level + 1);
+          if (newValue_1 instanceof Set) {
+            newValue_1.add(value_1);
+          } else {
+            newValue_1.push(value_1);
+          }
+        } else if (_this.transformationType === TransformationType.CLASS_TO_CLASS) {
+          if (newValue_1 instanceof Set) {
+            newValue_1.add(subValue);
+          } else {
+            newValue_1.push(subValue);
+          }
+        }
+      });
+      return newValue_1;
+    } else if (targetType === String && !isMap) {
+      if (value === null || value === void 0)
+        return value;
+      return String(value);
+    } else if (targetType === Number && !isMap) {
+      if (value === null || value === void 0)
+        return value;
+      return Number(value);
+    } else if (targetType === Boolean && !isMap) {
+      if (value === null || value === void 0)
+        return value;
+      return Boolean(value);
+    } else if ((targetType === Date || value instanceof Date) && !isMap) {
+      if (value instanceof Date) {
+        return new Date(value.valueOf());
+      }
+      if (value === null || value === void 0)
+        return value;
+      return new Date(value);
+    } else if (!!getGlobal2().Buffer && (targetType === Buffer || value instanceof Buffer) && !isMap) {
+      if (value === null || value === void 0)
+        return value;
+      return Buffer.from(value);
+    } else if (isPromise(value) && !isMap) {
+      return new Promise(function(resolve, reject) {
+        value.then(function(data) {
+          return resolve(_this.transform(void 0, data, targetType, void 0, void 0, level + 1));
+        }, reject);
+      });
+    } else if (!isMap && value !== null && typeof value === "object" && typeof value.then === "function") {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      if (!targetType && value.constructor !== Object)
+        if (!Array.isArray(value) && value.constructor === Array) {
+        } else {
+          targetType = value.constructor;
+        }
+      if (!targetType && source)
+        targetType = source.constructor;
+      if (this.options.enableCircularCheck) {
+        this.recursionStack.add(value);
+      }
+      var keys = this.getKeys(targetType, value, isMap);
+      var newValue = source ? source : {};
+      if (!source && (this.transformationType === TransformationType.PLAIN_TO_CLASS || this.transformationType === TransformationType.CLASS_TO_CLASS)) {
+        if (isMap) {
+          newValue = /* @__PURE__ */ new Map();
+        } else if (targetType) {
+          newValue = new targetType();
+        } else {
+          newValue = {};
+        }
+      }
+      var _loop_1 = function(key2) {
+        if (key2 === "__proto__" || key2 === "constructor") {
+          return "continue";
+        }
+        var valueKey = key2;
+        var newValueKey = key2, propertyName = key2;
+        if (!this_1.options.ignoreDecorators && targetType) {
+          if (this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
+            var exposeMetadata = defaultMetadataStorage.findExposeMetadataByCustomName(targetType, key2);
+            if (exposeMetadata) {
+              propertyName = exposeMetadata.propertyName;
+              newValueKey = exposeMetadata.propertyName;
+            }
+          } else if (this_1.transformationType === TransformationType.CLASS_TO_PLAIN || this_1.transformationType === TransformationType.CLASS_TO_CLASS) {
+            var exposeMetadata = defaultMetadataStorage.findExposeMetadata(targetType, key2);
+            if (exposeMetadata && exposeMetadata.options && exposeMetadata.options.name) {
+              newValueKey = exposeMetadata.options.name;
+            }
+          }
+        }
+        var subValue = void 0;
+        if (this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
+          subValue = value[valueKey];
+        } else {
+          if (value instanceof Map) {
+            subValue = value.get(valueKey);
+          } else if (value[valueKey] instanceof Function) {
+            subValue = value[valueKey]();
+          } else {
+            subValue = value[valueKey];
+          }
+        }
+        var type3 = void 0, isSubValueMap = subValue instanceof Map;
+        if (targetType && isMap) {
+          type3 = targetType;
+        } else if (targetType) {
+          var metadata_1 = defaultMetadataStorage.findTypeMetadata(targetType, propertyName);
+          if (metadata_1) {
+            var options = { newObject: newValue, object: value, property: propertyName };
+            var newType = metadata_1.typeFunction ? metadata_1.typeFunction(options) : metadata_1.reflectedType;
+            if (metadata_1.options && metadata_1.options.discriminator && metadata_1.options.discriminator.property && metadata_1.options.discriminator.subTypes) {
+              if (!(value[valueKey] instanceof Array)) {
+                if (this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
+                  type3 = metadata_1.options.discriminator.subTypes.find(function(subType) {
+                    if (subValue && subValue instanceof Object && metadata_1.options.discriminator.property in subValue) {
+                      return subType.name === subValue[metadata_1.options.discriminator.property];
+                    }
+                  });
+                  type3 === void 0 ? type3 = newType : type3 = type3.value;
+                  if (!metadata_1.options.keepDiscriminatorProperty) {
+                    if (subValue && subValue instanceof Object && metadata_1.options.discriminator.property in subValue) {
+                      delete subValue[metadata_1.options.discriminator.property];
+                    }
+                  }
+                }
+                if (this_1.transformationType === TransformationType.CLASS_TO_CLASS) {
+                  type3 = subValue.constructor;
+                }
+                if (this_1.transformationType === TransformationType.CLASS_TO_PLAIN) {
+                  if (subValue) {
+                    subValue[metadata_1.options.discriminator.property] = metadata_1.options.discriminator.subTypes.find(function(subType) {
+                      return subType.value === subValue.constructor;
+                    }).name;
+                  }
+                }
+              } else {
+                type3 = metadata_1;
+              }
+            } else {
+              type3 = newType;
+            }
+            isSubValueMap = isSubValueMap || metadata_1.reflectedType === Map;
+          } else if (this_1.options.targetMaps) {
+            this_1.options.targetMaps.filter(function(map) {
+              return map.target === targetType && !!map.properties[propertyName];
+            }).forEach(function(map) {
+              return type3 = map.properties[propertyName];
+            });
+          } else if (this_1.options.enableImplicitConversion && this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
+            var reflectedType = Reflect.getMetadata("design:type", targetType.prototype, propertyName);
+            if (reflectedType) {
+              type3 = reflectedType;
+            }
+          }
+        }
+        var arrayType_1 = Array.isArray(value[valueKey]) ? this_1.getReflectedType(targetType, propertyName) : void 0;
+        var subSource = source ? source[valueKey] : void 0;
+        if (newValue.constructor.prototype) {
+          var descriptor = Object.getOwnPropertyDescriptor(newValue.constructor.prototype, newValueKey);
+          if ((this_1.transformationType === TransformationType.PLAIN_TO_CLASS || this_1.transformationType === TransformationType.CLASS_TO_CLASS) && (descriptor && !descriptor.set || newValue[newValueKey] instanceof Function))
+            return "continue";
+        }
+        if (!this_1.options.enableCircularCheck || !this_1.isCircular(subValue)) {
+          var transformKey = this_1.transformationType === TransformationType.PLAIN_TO_CLASS ? newValueKey : key2;
+          var finalValue = void 0;
+          if (this_1.transformationType === TransformationType.CLASS_TO_PLAIN) {
+            finalValue = value[transformKey];
+            finalValue = this_1.applyCustomTransformations(finalValue, targetType, transformKey, value, this_1.transformationType);
+            finalValue = value[transformKey] === finalValue ? subValue : finalValue;
+            finalValue = this_1.transform(subSource, finalValue, type3, arrayType_1, isSubValueMap, level + 1);
+          } else {
+            if (subValue === void 0 && this_1.options.exposeDefaultValues) {
+              finalValue = newValue[newValueKey];
+            } else {
+              finalValue = this_1.transform(subSource, subValue, type3, arrayType_1, isSubValueMap, level + 1);
+              finalValue = this_1.applyCustomTransformations(finalValue, targetType, transformKey, value, this_1.transformationType);
+            }
+          }
+          if (finalValue !== void 0 || this_1.options.exposeUnsetFields) {
+            if (newValue instanceof Map) {
+              newValue.set(newValueKey, finalValue);
+            } else {
+              newValue[newValueKey] = finalValue;
+            }
+          }
+        } else if (this_1.transformationType === TransformationType.CLASS_TO_CLASS) {
+          var finalValue = subValue;
+          finalValue = this_1.applyCustomTransformations(finalValue, targetType, key2, value, this_1.transformationType);
+          if (finalValue !== void 0 || this_1.options.exposeUnsetFields) {
+            if (newValue instanceof Map) {
+              newValue.set(newValueKey, finalValue);
+            } else {
+              newValue[newValueKey] = finalValue;
+            }
+          }
+        }
+      };
+      var this_1 = this;
+      for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+        var key = keys_1[_i];
+        _loop_1(key);
+      }
+      if (this.options.enableCircularCheck) {
+        this.recursionStack.delete(value);
+      }
+      return newValue;
+    } else {
+      return value;
+    }
+  };
+  TransformOperationExecutor2.prototype.applyCustomTransformations = function(value, target, key, obj, transformationType) {
+    var _this = this;
+    var metadatas = defaultMetadataStorage.findTransformMetadatas(target, key, this.transformationType);
+    if (this.options.version !== void 0) {
+      metadatas = metadatas.filter(function(metadata2) {
+        if (!metadata2.options)
+          return true;
+        return _this.checkVersion(metadata2.options.since, metadata2.options.until);
+      });
+    }
+    if (this.options.groups && this.options.groups.length) {
+      metadatas = metadatas.filter(function(metadata2) {
+        if (!metadata2.options)
+          return true;
+        return _this.checkGroups(metadata2.options.groups);
+      });
+    } else {
+      metadatas = metadatas.filter(function(metadata2) {
+        return !metadata2.options || !metadata2.options.groups || !metadata2.options.groups.length;
+      });
+    }
+    metadatas.forEach(function(metadata2) {
+      value = metadata2.transformFn({ value, key, obj, type: transformationType, options: _this.options });
+    });
+    return value;
+  };
+  TransformOperationExecutor2.prototype.isCircular = function(object) {
+    return this.recursionStack.has(object);
+  };
+  TransformOperationExecutor2.prototype.getReflectedType = function(target, propertyName) {
+    if (!target)
+      return void 0;
+    var meta = defaultMetadataStorage.findTypeMetadata(target, propertyName);
+    return meta ? meta.reflectedType : void 0;
+  };
+  TransformOperationExecutor2.prototype.getKeys = function(target, object, isMap) {
+    var _this = this;
+    var strategy = defaultMetadataStorage.getStrategy(target);
+    if (strategy === "none")
+      strategy = this.options.strategy || "exposeAll";
+    var keys = [];
+    if (strategy === "exposeAll" || isMap) {
+      if (object instanceof Map) {
+        keys = Array.from(object.keys());
+      } else {
+        keys = Object.keys(object);
+      }
+    }
+    if (isMap) {
+      return keys;
+    }
+    if (this.options.ignoreDecorators && this.options.excludeExtraneousValues && target) {
+      var exposedProperties = defaultMetadataStorage.getExposedProperties(target, this.transformationType);
+      var excludedProperties = defaultMetadataStorage.getExcludedProperties(target, this.transformationType);
+      keys = __spreadArray7(__spreadArray7([], exposedProperties, true), excludedProperties, true);
+    }
+    if (!this.options.ignoreDecorators && target) {
+      var exposedProperties = defaultMetadataStorage.getExposedProperties(target, this.transformationType);
+      if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
+        exposedProperties = exposedProperties.map(function(key) {
+          var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
+          if (exposeMetadata && exposeMetadata.options && exposeMetadata.options.name) {
+            return exposeMetadata.options.name;
+          }
+          return key;
+        });
+      }
+      if (this.options.excludeExtraneousValues) {
+        keys = exposedProperties;
+      } else {
+        keys = keys.concat(exposedProperties);
+      }
+      var excludedProperties_1 = defaultMetadataStorage.getExcludedProperties(target, this.transformationType);
+      if (excludedProperties_1.length > 0) {
+        keys = keys.filter(function(key) {
+          return !excludedProperties_1.includes(key);
+        });
+      }
+      if (this.options.version !== void 0) {
+        keys = keys.filter(function(key) {
+          var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
+          if (!exposeMetadata || !exposeMetadata.options)
+            return true;
+          return _this.checkVersion(exposeMetadata.options.since, exposeMetadata.options.until);
+        });
+      }
+      if (this.options.groups && this.options.groups.length) {
+        keys = keys.filter(function(key) {
+          var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
+          if (!exposeMetadata || !exposeMetadata.options)
+            return true;
+          return _this.checkGroups(exposeMetadata.options.groups);
+        });
+      } else {
+        keys = keys.filter(function(key) {
+          var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
+          return !exposeMetadata || !exposeMetadata.options || !exposeMetadata.options.groups || !exposeMetadata.options.groups.length;
+        });
+      }
+    }
+    if (this.options.excludePrefixes && this.options.excludePrefixes.length) {
+      keys = keys.filter(function(key) {
+        return _this.options.excludePrefixes.every(function(prefix2) {
+          return key.substr(0, prefix2.length) !== prefix2;
+        });
+      });
+    }
+    keys = keys.filter(function(key, index, self2) {
+      return self2.indexOf(key) === index;
+    });
+    return keys;
+  };
+  TransformOperationExecutor2.prototype.checkVersion = function(since, until) {
+    var decision = true;
+    if (decision && since)
+      decision = this.options.version >= since;
+    if (decision && until)
+      decision = this.options.version < until;
+    return decision;
+  };
+  TransformOperationExecutor2.prototype.checkGroups = function(groups) {
+    if (!groups)
+      return true;
+    return this.options.groups.some(function(optionGroup) {
+      return groups.includes(optionGroup);
+    });
+  };
+  return TransformOperationExecutor2;
+}();
+
+// node_modules/class-transformer/esm5/constants/default-options.constant.js
+var defaultOptions = {
+  enableCircularCheck: false,
+  enableImplicitConversion: false,
+  excludeExtraneousValues: false,
+  excludePrefixes: void 0,
+  exposeDefaultValues: false,
+  exposeUnsetFields: true,
+  groups: void 0,
+  ignoreDecorators: false,
+  strategy: void 0,
+  targetMaps: void 0,
+  version: void 0
+};
+
+// node_modules/class-transformer/esm5/ClassTransformer.js
+var __assign5 = function() {
+  __assign5 = Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s)
+        if (Object.prototype.hasOwnProperty.call(s, p))
+          t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign5.apply(this, arguments);
+};
+var ClassTransformer = function() {
+  function ClassTransformer2() {
+  }
+  ClassTransformer2.prototype.instanceToPlain = function(object, options) {
+    var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_PLAIN, __assign5(__assign5({}, defaultOptions), options));
+    return executor.transform(void 0, object, void 0, void 0, void 0, void 0);
+  };
+  ClassTransformer2.prototype.classToPlainFromExist = function(object, plainObject, options) {
+    var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_PLAIN, __assign5(__assign5({}, defaultOptions), options));
+    return executor.transform(plainObject, object, void 0, void 0, void 0, void 0);
+  };
+  ClassTransformer2.prototype.plainToInstance = function(cls, plain, options) {
+    var executor = new TransformOperationExecutor(TransformationType.PLAIN_TO_CLASS, __assign5(__assign5({}, defaultOptions), options));
+    return executor.transform(void 0, plain, cls, void 0, void 0, void 0);
+  };
+  ClassTransformer2.prototype.plainToClassFromExist = function(clsObject, plain, options) {
+    var executor = new TransformOperationExecutor(TransformationType.PLAIN_TO_CLASS, __assign5(__assign5({}, defaultOptions), options));
+    return executor.transform(clsObject, plain, void 0, void 0, void 0, void 0);
+  };
+  ClassTransformer2.prototype.instanceToInstance = function(object, options) {
+    var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_CLASS, __assign5(__assign5({}, defaultOptions), options));
+    return executor.transform(void 0, object, void 0, void 0, void 0, void 0);
+  };
+  ClassTransformer2.prototype.classToClassFromExist = function(object, fromObject, options) {
+    var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_CLASS, __assign5(__assign5({}, defaultOptions), options));
+    return executor.transform(fromObject, object, void 0, void 0, void 0, void 0);
+  };
+  ClassTransformer2.prototype.serialize = function(object, options) {
+    return JSON.stringify(this.instanceToPlain(object, options));
+  };
+  ClassTransformer2.prototype.deserialize = function(cls, json, options) {
+    var jsonObject = JSON.parse(json);
+    return this.plainToInstance(cls, jsonObject, options);
+  };
+  ClassTransformer2.prototype.deserializeArray = function(cls, json, options) {
+    var jsonObject = JSON.parse(json);
+    return this.plainToInstance(cls, jsonObject, options);
+  };
+  return ClassTransformer2;
+}();
+
+// node_modules/class-transformer/esm5/decorators/exclude.decorator.js
+function Exclude(options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return function(object, propertyName) {
+    defaultMetadataStorage.addExcludeMetadata({
+      target: object instanceof Function ? object : object.constructor,
+      propertyName,
+      options
+    });
+  };
+}
+
+// node_modules/class-transformer/esm5/decorators/expose.decorator.js
+function Expose(options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return function(object, propertyName) {
+    defaultMetadataStorage.addExposeMetadata({
+      target: object instanceof Function ? object : object.constructor,
+      propertyName,
+      options
+    });
+  };
+}
+
+// node_modules/class-transformer/esm5/decorators/type.decorator.js
+function Type(typeFunction, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return function(target, propertyName) {
+    var reflectedType = Reflect.getMetadata("design:type", target, propertyName);
+    defaultMetadataStorage.addTypeMetadata({
+      target: target.constructor,
+      propertyName,
+      reflectedType,
+      typeFunction,
+      options
+    });
+  };
+}
+
+// node_modules/class-transformer/esm5/index.js
+var classTransformer = new ClassTransformer();
+function instanceToPlain(object, options) {
+  return classTransformer.instanceToPlain(object, options);
+}
+
+// node_modules/reflect-metadata/Reflect.js
+var Reflect2;
+(function(Reflect3) {
+  (function(factory) {
+    var root = typeof global === "object" ? global : typeof self === "object" ? self : typeof this === "object" ? this : Function("return this;")();
+    var exporter = makeExporter(Reflect3);
+    if (typeof root.Reflect === "undefined") {
+      root.Reflect = Reflect3;
+    } else {
+      exporter = makeExporter(root.Reflect, exporter);
+    }
+    factory(exporter);
+    function makeExporter(target, previous) {
+      return function(key, value) {
+        if (typeof target[key] !== "function") {
+          Object.defineProperty(target, key, { configurable: true, writable: true, value });
+        }
+        if (previous)
+          previous(key, value);
+      };
+    }
+  })(function(exporter) {
+    var hasOwn = Object.prototype.hasOwnProperty;
+    var supportsSymbol = typeof Symbol === "function";
+    var toPrimitiveSymbol = supportsSymbol && typeof Symbol.toPrimitive !== "undefined" ? Symbol.toPrimitive : "@@toPrimitive";
+    var iteratorSymbol = supportsSymbol && typeof Symbol.iterator !== "undefined" ? Symbol.iterator : "@@iterator";
+    var supportsCreate = typeof Object.create === "function";
+    var supportsProto = { __proto__: [] } instanceof Array;
+    var downLevel = !supportsCreate && !supportsProto;
+    var HashMap = {
+      create: supportsCreate ? function() {
+        return MakeDictionary(/* @__PURE__ */ Object.create(null));
+      } : supportsProto ? function() {
+        return MakeDictionary({ __proto__: null });
+      } : function() {
+        return MakeDictionary({});
+      },
+      has: downLevel ? function(map, key) {
+        return hasOwn.call(map, key);
+      } : function(map, key) {
+        return key in map;
+      },
+      get: downLevel ? function(map, key) {
+        return hasOwn.call(map, key) ? map[key] : void 0;
+      } : function(map, key) {
+        return map[key];
+      }
+    };
+    var functionPrototype = Object.getPrototypeOf(Function);
+    var usePolyfill = typeof process === "object" && process.env && process.env["REFLECT_METADATA_USE_MAP_POLYFILL"] === "true";
+    var _Map = !usePolyfill && typeof Map === "function" && typeof Map.prototype.entries === "function" ? Map : CreateMapPolyfill();
+    var _Set = !usePolyfill && typeof Set === "function" && typeof Set.prototype.entries === "function" ? Set : CreateSetPolyfill();
+    var _WeakMap = !usePolyfill && typeof WeakMap === "function" ? WeakMap : CreateWeakMapPolyfill();
+    var Metadata = new _WeakMap();
+    function decorate(decorators, target, propertyKey, attributes) {
+      if (!IsUndefined(propertyKey)) {
+        if (!IsArray(decorators))
+          throw new TypeError();
+        if (!IsObject(target))
+          throw new TypeError();
+        if (!IsObject(attributes) && !IsUndefined(attributes) && !IsNull(attributes))
+          throw new TypeError();
+        if (IsNull(attributes))
+          attributes = void 0;
+        propertyKey = ToPropertyKey(propertyKey);
+        return DecorateProperty(decorators, target, propertyKey, attributes);
+      } else {
+        if (!IsArray(decorators))
+          throw new TypeError();
+        if (!IsConstructor(target))
+          throw new TypeError();
+        return DecorateConstructor(decorators, target);
+      }
+    }
+    exporter("decorate", decorate);
+    function metadata2(metadataKey, metadataValue) {
+      function decorator(target, propertyKey) {
+        if (!IsObject(target))
+          throw new TypeError();
+        if (!IsUndefined(propertyKey) && !IsPropertyKey(propertyKey))
+          throw new TypeError();
+        OrdinaryDefineOwnMetadata(metadataKey, metadataValue, target, propertyKey);
+      }
+      return decorator;
+    }
+    exporter("metadata", metadata2);
+    function defineMetadata(metadataKey, metadataValue, target, propertyKey) {
+      if (!IsObject(target))
+        throw new TypeError();
+      if (!IsUndefined(propertyKey))
+        propertyKey = ToPropertyKey(propertyKey);
+      return OrdinaryDefineOwnMetadata(metadataKey, metadataValue, target, propertyKey);
+    }
+    exporter("defineMetadata", defineMetadata);
+    function hasMetadata(metadataKey, target, propertyKey) {
+      if (!IsObject(target))
+        throw new TypeError();
+      if (!IsUndefined(propertyKey))
+        propertyKey = ToPropertyKey(propertyKey);
+      return OrdinaryHasMetadata(metadataKey, target, propertyKey);
+    }
+    exporter("hasMetadata", hasMetadata);
+    function hasOwnMetadata(metadataKey, target, propertyKey) {
+      if (!IsObject(target))
+        throw new TypeError();
+      if (!IsUndefined(propertyKey))
+        propertyKey = ToPropertyKey(propertyKey);
+      return OrdinaryHasOwnMetadata(metadataKey, target, propertyKey);
+    }
+    exporter("hasOwnMetadata", hasOwnMetadata);
+    function getMetadata(metadataKey, target, propertyKey) {
+      if (!IsObject(target))
+        throw new TypeError();
+      if (!IsUndefined(propertyKey))
+        propertyKey = ToPropertyKey(propertyKey);
+      return OrdinaryGetMetadata(metadataKey, target, propertyKey);
+    }
+    exporter("getMetadata", getMetadata);
+    function getOwnMetadata(metadataKey, target, propertyKey) {
+      if (!IsObject(target))
+        throw new TypeError();
+      if (!IsUndefined(propertyKey))
+        propertyKey = ToPropertyKey(propertyKey);
+      return OrdinaryGetOwnMetadata(metadataKey, target, propertyKey);
+    }
+    exporter("getOwnMetadata", getOwnMetadata);
+    function getMetadataKeys(target, propertyKey) {
+      if (!IsObject(target))
+        throw new TypeError();
+      if (!IsUndefined(propertyKey))
+        propertyKey = ToPropertyKey(propertyKey);
+      return OrdinaryMetadataKeys(target, propertyKey);
+    }
+    exporter("getMetadataKeys", getMetadataKeys);
+    function getOwnMetadataKeys(target, propertyKey) {
+      if (!IsObject(target))
+        throw new TypeError();
+      if (!IsUndefined(propertyKey))
+        propertyKey = ToPropertyKey(propertyKey);
+      return OrdinaryOwnMetadataKeys(target, propertyKey);
+    }
+    exporter("getOwnMetadataKeys", getOwnMetadataKeys);
+    function deleteMetadata(metadataKey, target, propertyKey) {
+      if (!IsObject(target))
+        throw new TypeError();
+      if (!IsUndefined(propertyKey))
+        propertyKey = ToPropertyKey(propertyKey);
+      var metadataMap = GetOrCreateMetadataMap(target, propertyKey, false);
+      if (IsUndefined(metadataMap))
+        return false;
+      if (!metadataMap.delete(metadataKey))
+        return false;
+      if (metadataMap.size > 0)
+        return true;
+      var targetMetadata = Metadata.get(target);
+      targetMetadata.delete(propertyKey);
+      if (targetMetadata.size > 0)
+        return true;
+      Metadata.delete(target);
+      return true;
+    }
+    exporter("deleteMetadata", deleteMetadata);
+    function DecorateConstructor(decorators, target) {
+      for (var i = decorators.length - 1; i >= 0; --i) {
+        var decorator = decorators[i];
+        var decorated = decorator(target);
+        if (!IsUndefined(decorated) && !IsNull(decorated)) {
+          if (!IsConstructor(decorated))
+            throw new TypeError();
+          target = decorated;
+        }
+      }
+      return target;
+    }
+    function DecorateProperty(decorators, target, propertyKey, descriptor) {
+      for (var i = decorators.length - 1; i >= 0; --i) {
+        var decorator = decorators[i];
+        var decorated = decorator(target, propertyKey, descriptor);
+        if (!IsUndefined(decorated) && !IsNull(decorated)) {
+          if (!IsObject(decorated))
+            throw new TypeError();
+          descriptor = decorated;
+        }
+      }
+      return descriptor;
+    }
+    function GetOrCreateMetadataMap(O, P, Create) {
+      var targetMetadata = Metadata.get(O);
+      if (IsUndefined(targetMetadata)) {
+        if (!Create)
+          return void 0;
+        targetMetadata = new _Map();
+        Metadata.set(O, targetMetadata);
+      }
+      var metadataMap = targetMetadata.get(P);
+      if (IsUndefined(metadataMap)) {
+        if (!Create)
+          return void 0;
+        metadataMap = new _Map();
+        targetMetadata.set(P, metadataMap);
+      }
+      return metadataMap;
+    }
+    function OrdinaryHasMetadata(MetadataKey, O, P) {
+      var hasOwn2 = OrdinaryHasOwnMetadata(MetadataKey, O, P);
+      if (hasOwn2)
+        return true;
+      var parent = OrdinaryGetPrototypeOf(O);
+      if (!IsNull(parent))
+        return OrdinaryHasMetadata(MetadataKey, parent, P);
+      return false;
+    }
+    function OrdinaryHasOwnMetadata(MetadataKey, O, P) {
+      var metadataMap = GetOrCreateMetadataMap(O, P, false);
+      if (IsUndefined(metadataMap))
+        return false;
+      return ToBoolean(metadataMap.has(MetadataKey));
+    }
+    function OrdinaryGetMetadata(MetadataKey, O, P) {
+      var hasOwn2 = OrdinaryHasOwnMetadata(MetadataKey, O, P);
+      if (hasOwn2)
+        return OrdinaryGetOwnMetadata(MetadataKey, O, P);
+      var parent = OrdinaryGetPrototypeOf(O);
+      if (!IsNull(parent))
+        return OrdinaryGetMetadata(MetadataKey, parent, P);
+      return void 0;
+    }
+    function OrdinaryGetOwnMetadata(MetadataKey, O, P) {
+      var metadataMap = GetOrCreateMetadataMap(O, P, false);
+      if (IsUndefined(metadataMap))
+        return void 0;
+      return metadataMap.get(MetadataKey);
+    }
+    function OrdinaryDefineOwnMetadata(MetadataKey, MetadataValue, O, P) {
+      var metadataMap = GetOrCreateMetadataMap(O, P, true);
+      metadataMap.set(MetadataKey, MetadataValue);
+    }
+    function OrdinaryMetadataKeys(O, P) {
+      var ownKeys = OrdinaryOwnMetadataKeys(O, P);
+      var parent = OrdinaryGetPrototypeOf(O);
+      if (parent === null)
+        return ownKeys;
+      var parentKeys = OrdinaryMetadataKeys(parent, P);
+      if (parentKeys.length <= 0)
+        return ownKeys;
+      if (ownKeys.length <= 0)
+        return parentKeys;
+      var set = new _Set();
+      var keys = [];
+      for (var _i = 0, ownKeys_1 = ownKeys; _i < ownKeys_1.length; _i++) {
+        var key = ownKeys_1[_i];
+        var hasKey = set.has(key);
+        if (!hasKey) {
+          set.add(key);
+          keys.push(key);
+        }
+      }
+      for (var _a = 0, parentKeys_1 = parentKeys; _a < parentKeys_1.length; _a++) {
+        var key = parentKeys_1[_a];
+        var hasKey = set.has(key);
+        if (!hasKey) {
+          set.add(key);
+          keys.push(key);
+        }
+      }
+      return keys;
+    }
+    function OrdinaryOwnMetadataKeys(O, P) {
+      var keys = [];
+      var metadataMap = GetOrCreateMetadataMap(O, P, false);
+      if (IsUndefined(metadataMap))
+        return keys;
+      var keysObj = metadataMap.keys();
+      var iterator = GetIterator(keysObj);
+      var k = 0;
+      while (true) {
+        var next = IteratorStep(iterator);
+        if (!next) {
+          keys.length = k;
+          return keys;
+        }
+        var nextValue = IteratorValue(next);
+        try {
+          keys[k] = nextValue;
+        } catch (e) {
+          try {
+            IteratorClose(iterator);
+          } finally {
+            throw e;
+          }
+        }
+        k++;
+      }
+    }
+    function Type2(x) {
+      if (x === null)
+        return 1;
+      switch (typeof x) {
+        case "undefined":
+          return 0;
+        case "boolean":
+          return 2;
+        case "string":
+          return 3;
+        case "symbol":
+          return 4;
+        case "number":
+          return 5;
+        case "object":
+          return x === null ? 1 : 6;
+        default:
+          return 6;
+      }
+    }
+    function IsUndefined(x) {
+      return x === void 0;
+    }
+    function IsNull(x) {
+      return x === null;
+    }
+    function IsSymbol(x) {
+      return typeof x === "symbol";
+    }
+    function IsObject(x) {
+      return typeof x === "object" ? x !== null : typeof x === "function";
+    }
+    function ToPrimitive(input, PreferredType) {
+      switch (Type2(input)) {
+        case 0:
+          return input;
+        case 1:
+          return input;
+        case 2:
+          return input;
+        case 3:
+          return input;
+        case 4:
+          return input;
+        case 5:
+          return input;
+      }
+      var hint = PreferredType === 3 ? "string" : PreferredType === 5 ? "number" : "default";
+      var exoticToPrim = GetMethod(input, toPrimitiveSymbol);
+      if (exoticToPrim !== void 0) {
+        var result = exoticToPrim.call(input, hint);
+        if (IsObject(result))
+          throw new TypeError();
+        return result;
+      }
+      return OrdinaryToPrimitive(input, hint === "default" ? "number" : hint);
+    }
+    function OrdinaryToPrimitive(O, hint) {
+      if (hint === "string") {
+        var toString_1 = O.toString;
+        if (IsCallable(toString_1)) {
+          var result = toString_1.call(O);
+          if (!IsObject(result))
+            return result;
+        }
+        var valueOf = O.valueOf;
+        if (IsCallable(valueOf)) {
+          var result = valueOf.call(O);
+          if (!IsObject(result))
+            return result;
+        }
+      } else {
+        var valueOf = O.valueOf;
+        if (IsCallable(valueOf)) {
+          var result = valueOf.call(O);
+          if (!IsObject(result))
+            return result;
+        }
+        var toString_2 = O.toString;
+        if (IsCallable(toString_2)) {
+          var result = toString_2.call(O);
+          if (!IsObject(result))
+            return result;
+        }
+      }
+      throw new TypeError();
+    }
+    function ToBoolean(argument) {
+      return !!argument;
+    }
+    function ToString(argument) {
+      return "" + argument;
+    }
+    function ToPropertyKey(argument) {
+      var key = ToPrimitive(argument, 3);
+      if (IsSymbol(key))
+        return key;
+      return ToString(key);
+    }
+    function IsArray(argument) {
+      return Array.isArray ? Array.isArray(argument) : argument instanceof Object ? argument instanceof Array : Object.prototype.toString.call(argument) === "[object Array]";
+    }
+    function IsCallable(argument) {
+      return typeof argument === "function";
+    }
+    function IsConstructor(argument) {
+      return typeof argument === "function";
+    }
+    function IsPropertyKey(argument) {
+      switch (Type2(argument)) {
+        case 3:
+          return true;
+        case 4:
+          return true;
+        default:
+          return false;
+      }
+    }
+    function GetMethod(V, P) {
+      var func = V[P];
+      if (func === void 0 || func === null)
+        return void 0;
+      if (!IsCallable(func))
+        throw new TypeError();
+      return func;
+    }
+    function GetIterator(obj) {
+      var method = GetMethod(obj, iteratorSymbol);
+      if (!IsCallable(method))
+        throw new TypeError();
+      var iterator = method.call(obj);
+      if (!IsObject(iterator))
+        throw new TypeError();
+      return iterator;
+    }
+    function IteratorValue(iterResult) {
+      return iterResult.value;
+    }
+    function IteratorStep(iterator) {
+      var result = iterator.next();
+      return result.done ? false : result;
+    }
+    function IteratorClose(iterator) {
+      var f = iterator["return"];
+      if (f)
+        f.call(iterator);
+    }
+    function OrdinaryGetPrototypeOf(O) {
+      var proto = Object.getPrototypeOf(O);
+      if (typeof O !== "function" || O === functionPrototype)
+        return proto;
+      if (proto !== functionPrototype)
+        return proto;
+      var prototype = O.prototype;
+      var prototypeProto = prototype && Object.getPrototypeOf(prototype);
+      if (prototypeProto == null || prototypeProto === Object.prototype)
+        return proto;
+      var constructor = prototypeProto.constructor;
+      if (typeof constructor !== "function")
+        return proto;
+      if (constructor === O)
+        return proto;
+      return constructor;
+    }
+    function CreateMapPolyfill() {
+      var cacheSentinel = {};
+      var arraySentinel = [];
+      var MapIterator = function() {
+        function MapIterator2(keys, values, selector) {
+          this._index = 0;
+          this._keys = keys;
+          this._values = values;
+          this._selector = selector;
+        }
+        MapIterator2.prototype["@@iterator"] = function() {
+          return this;
+        };
+        MapIterator2.prototype[iteratorSymbol] = function() {
+          return this;
+        };
+        MapIterator2.prototype.next = function() {
+          var index = this._index;
+          if (index >= 0 && index < this._keys.length) {
+            var result = this._selector(this._keys[index], this._values[index]);
+            if (index + 1 >= this._keys.length) {
+              this._index = -1;
+              this._keys = arraySentinel;
+              this._values = arraySentinel;
+            } else {
+              this._index++;
+            }
+            return { value: result, done: false };
+          }
+          return { value: void 0, done: true };
+        };
+        MapIterator2.prototype.throw = function(error) {
+          if (this._index >= 0) {
+            this._index = -1;
+            this._keys = arraySentinel;
+            this._values = arraySentinel;
+          }
+          throw error;
+        };
+        MapIterator2.prototype.return = function(value) {
+          if (this._index >= 0) {
+            this._index = -1;
+            this._keys = arraySentinel;
+            this._values = arraySentinel;
+          }
+          return { value, done: true };
+        };
+        return MapIterator2;
+      }();
+      return function() {
+        function Map2() {
+          this._keys = [];
+          this._values = [];
+          this._cacheKey = cacheSentinel;
+          this._cacheIndex = -2;
+        }
+        Object.defineProperty(Map2.prototype, "size", {
+          get: function() {
+            return this._keys.length;
+          },
+          enumerable: true,
+          configurable: true
+        });
+        Map2.prototype.has = function(key) {
+          return this._find(key, false) >= 0;
+        };
+        Map2.prototype.get = function(key) {
+          var index = this._find(key, false);
+          return index >= 0 ? this._values[index] : void 0;
+        };
+        Map2.prototype.set = function(key, value) {
+          var index = this._find(key, true);
+          this._values[index] = value;
+          return this;
+        };
+        Map2.prototype.delete = function(key) {
+          var index = this._find(key, false);
+          if (index >= 0) {
+            var size = this._keys.length;
+            for (var i = index + 1; i < size; i++) {
+              this._keys[i - 1] = this._keys[i];
+              this._values[i - 1] = this._values[i];
+            }
+            this._keys.length--;
+            this._values.length--;
+            if (key === this._cacheKey) {
+              this._cacheKey = cacheSentinel;
+              this._cacheIndex = -2;
+            }
+            return true;
+          }
+          return false;
+        };
+        Map2.prototype.clear = function() {
+          this._keys.length = 0;
+          this._values.length = 0;
+          this._cacheKey = cacheSentinel;
+          this._cacheIndex = -2;
+        };
+        Map2.prototype.keys = function() {
+          return new MapIterator(this._keys, this._values, getKey);
+        };
+        Map2.prototype.values = function() {
+          return new MapIterator(this._keys, this._values, getValue);
+        };
+        Map2.prototype.entries = function() {
+          return new MapIterator(this._keys, this._values, getEntry);
+        };
+        Map2.prototype["@@iterator"] = function() {
+          return this.entries();
+        };
+        Map2.prototype[iteratorSymbol] = function() {
+          return this.entries();
+        };
+        Map2.prototype._find = function(key, insert) {
+          if (this._cacheKey !== key) {
+            this._cacheIndex = this._keys.indexOf(this._cacheKey = key);
+          }
+          if (this._cacheIndex < 0 && insert) {
+            this._cacheIndex = this._keys.length;
+            this._keys.push(key);
+            this._values.push(void 0);
+          }
+          return this._cacheIndex;
+        };
+        return Map2;
+      }();
+      function getKey(key, _) {
+        return key;
+      }
+      function getValue(_, value) {
+        return value;
+      }
+      function getEntry(key, value) {
+        return [key, value];
+      }
+    }
+    function CreateSetPolyfill() {
+      return function() {
+        function Set2() {
+          this._map = new _Map();
+        }
+        Object.defineProperty(Set2.prototype, "size", {
+          get: function() {
+            return this._map.size;
+          },
+          enumerable: true,
+          configurable: true
+        });
+        Set2.prototype.has = function(value) {
+          return this._map.has(value);
+        };
+        Set2.prototype.add = function(value) {
+          return this._map.set(value, value), this;
+        };
+        Set2.prototype.delete = function(value) {
+          return this._map.delete(value);
+        };
+        Set2.prototype.clear = function() {
+          this._map.clear();
+        };
+        Set2.prototype.keys = function() {
+          return this._map.keys();
+        };
+        Set2.prototype.values = function() {
+          return this._map.values();
+        };
+        Set2.prototype.entries = function() {
+          return this._map.entries();
+        };
+        Set2.prototype["@@iterator"] = function() {
+          return this.keys();
+        };
+        Set2.prototype[iteratorSymbol] = function() {
+          return this.keys();
+        };
+        return Set2;
+      }();
+    }
+    function CreateWeakMapPolyfill() {
+      var UUID_SIZE = 16;
+      var keys = HashMap.create();
+      var rootKey = CreateUniqueKey();
+      return function() {
+        function WeakMap2() {
+          this._key = CreateUniqueKey();
+        }
+        WeakMap2.prototype.has = function(target) {
+          var table = GetOrCreateWeakMapTable(target, false);
+          return table !== void 0 ? HashMap.has(table, this._key) : false;
+        };
+        WeakMap2.prototype.get = function(target) {
+          var table = GetOrCreateWeakMapTable(target, false);
+          return table !== void 0 ? HashMap.get(table, this._key) : void 0;
+        };
+        WeakMap2.prototype.set = function(target, value) {
+          var table = GetOrCreateWeakMapTable(target, true);
+          table[this._key] = value;
+          return this;
+        };
+        WeakMap2.prototype.delete = function(target) {
+          var table = GetOrCreateWeakMapTable(target, false);
+          return table !== void 0 ? delete table[this._key] : false;
+        };
+        WeakMap2.prototype.clear = function() {
+          this._key = CreateUniqueKey();
+        };
+        return WeakMap2;
+      }();
+      function CreateUniqueKey() {
+        var key;
+        do
+          key = "@@WeakMap@@" + CreateUUID();
+        while (HashMap.has(keys, key));
+        keys[key] = true;
+        return key;
+      }
+      function GetOrCreateWeakMapTable(target, create2) {
+        if (!hasOwn.call(target, rootKey)) {
+          if (!create2)
+            return void 0;
+          Object.defineProperty(target, rootKey, { value: HashMap.create() });
+        }
+        return target[rootKey];
+      }
+      function FillRandomBytes(buffer, size) {
+        for (var i = 0; i < size; ++i)
+          buffer[i] = Math.random() * 255 | 0;
+        return buffer;
+      }
+      function GenRandomBytes(size) {
+        if (typeof Uint8Array === "function") {
+          if (typeof crypto !== "undefined")
+            return crypto.getRandomValues(new Uint8Array(size));
+          if (typeof msCrypto !== "undefined")
+            return msCrypto.getRandomValues(new Uint8Array(size));
+          return FillRandomBytes(new Uint8Array(size), size);
+        }
+        return FillRandomBytes(new Array(size), size);
+      }
+      function CreateUUID() {
+        var data = GenRandomBytes(UUID_SIZE);
+        data[6] = data[6] & 79 | 64;
+        data[8] = data[8] & 191 | 128;
+        var result = "";
+        for (var offset = 0; offset < UUID_SIZE; ++offset) {
+          var byte = data[offset];
+          if (offset === 4 || offset === 6 || offset === 8)
+            result += "-";
+          if (byte < 16)
+            result += "0";
+          result += byte.toString(16).toLowerCase();
+        }
+        return result;
+      }
+    }
+    function MakeDictionary(obj) {
+      obj.__ = void 0;
+      delete obj.__;
+      return obj;
+    }
+  });
+})(Reflect2 || (Reflect2 = {}));
+
+// lib/install-tl.js
+var __decorate6 = function(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata6 = function(k, v) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+    return Reflect.metadata(k, v);
+};
 var Version2 = Version;
 var InstallTL = class {
   constructor(version3, bin) {
@@ -65137,17 +66618,17 @@ var InstallTL = class {
     this.bin = bin;
   }
   async run(profile) {
-    const target = path4.join(tmpdir2(), "texlive.profile");
-    await fs4.writeFile(target, Profile.format(profile));
-    const options = ["-no-gui", "-profile", target];
-    if (this.version !== Version2.LATEST) {
-      const repo = historic(this.version);
-      if (this.version < "2018") {
-        repo.protocol = "http";
+    for await (const target of profile.open()) {
+      const options = ["-no-gui", "-profile", target];
+      if (this.version !== Version2.LATEST) {
+        const repo = historic(this.version);
+        if (this.version < "2018") {
+          repo.protocol = "http";
+        }
+        options.push(this.version === "2008" ? "-location" : "-repository", repo.href);
       }
-      options.push(this.version === "2008" ? "-location" : "-repository", repo.href);
+      await exec3.exec(this.bin, options);
     }
-    await exec3.exec(this.bin, options);
     core4.info("Applying patches");
     await patch(this.version, profile.TEXDIR);
   }
@@ -65171,31 +66652,192 @@ var InstallTL = class {
     return new InstallTL(version3, path4.join(dest, executable(version3, os5.platform())));
   }
 };
-var Profile = class {
+var Profile = class Profile2 {
   constructor(version3, prefix2) {
-    this["option_autobackup"] = "0";
-    this["option_desktop_integration"] = "0";
-    this["option_doc"] = "0";
-    this["option_file_assocs"] = "0";
-    this["option_menu_integration"] = "0";
-    this["option_path"] = "0";
-    this["option_src"] = "0";
-    this["option_symlinks"] = "0";
-    this["option_w32_multi_user"] = "0";
+    this.version = version3;
+    this["instopt_adjustpath"] = false;
+    this["tlpdbopt_autobackup"] = false;
+    this["tlpdbopt_install_docfiles"] = false;
+    this["tlpdbopt_install_srcfiles"] = false;
+    this["tlpdbopt_desktop_integration"] = false;
+    this["tlpdbopt_file_assocs"] = false;
+    this["tlpdbopt_w32_multi_user"] = false;
+    this["option_menu_integration"] = false;
     this.TEXDIR = path4.join(prefix2, version3);
     this.TEXMFLOCAL = path4.join(prefix2, "texmf-local");
     this.TEXMFSYSCONFIG = path4.join(this.TEXDIR, "texmf-config");
     this.TEXMFSYSVAR = path4.join(this.TEXDIR, "texmf-var");
     this.selected_scheme = `scheme-${version3 < "2016" ? "minimal" : "infraonly"}`;
-    this.option_adjustrepo = version3 === Version2.LATEST ? "1" : "0";
+    this.instopt_adjustrepo = version3 === Version2.LATEST;
+  }
+  async *open() {
+    const tmpdir3 = await fs4.mkdtemp(path4.join(tmpdir2(), "setup-texlive-"));
+    const target = path4.join(tmpdir3, "texlive.profile");
+    await fs4.writeFile(target, this.toString());
+    try {
+      yield target;
+    } finally {
+      await io.rmRF(tmpdir3);
+    }
+  }
+  toString() {
+    const plain = instanceToPlain(this, {
+      version: Number(this.version),
+      groups: [os5.platform()]
+    });
+    return Object.entries(plain).map(([key, value]) => `${key} ${value}`).join("\n");
+  }
+  get ["option_symlinks"]() {
+    return this.instopt_adjustpath;
+  }
+  get ["option_path"]() {
+    return this.instopt_adjustpath;
+  }
+  get ["option_adjustrepo"]() {
+    return this.instopt_adjustrepo;
+  }
+  get ["option_autobackup"]() {
+    return this.tlpdbopt_autobackup;
+  }
+  get ["option_doc"]() {
+    return this.tlpdbopt_install_docfiles;
+  }
+  get ["option_src"]() {
+    return this.tlpdbopt_install_srcfiles;
+  }
+  get ["option_desktop_integration"]() {
+    return this.tlpdbopt_desktop_integration;
+  }
+  get ["option_file_assocs"]() {
+    return this.tlpdbopt_file_assocs;
+  }
+  get ["option_w32_multi_user"]() {
+    return this.tlpdbopt_w32_multi_user;
   }
 };
-(function(Profile2) {
-  function format(profile) {
-    return ["TEXDIR", "TEXMFLOCAL", "TEXMFSYSCONFIG", "TEXMFSYSVAR", "selected_scheme", "option_adjustrepo", "option_autobackup", "option_desktop_integration", "option_doc", "option_file_assocs", "option_menu_integration", "option_path", "option_src", "option_symlinks", "option_w32_multi_user"].map((key) => `${key} ${profile[key]}`).join("\n");
-  }
-  Profile2.format = format;
-})(Profile || (Profile = {}));
+__decorate6([
+  Expose(),
+  __metadata6("design:type", String)
+], Profile.prototype, "selected_scheme", void 0);
+__decorate6([
+  Expose(),
+  __metadata6("design:type", String)
+], Profile.prototype, "TEXDIR", void 0);
+__decorate6([
+  Expose(),
+  __metadata6("design:type", String)
+], Profile.prototype, "TEXMFLOCAL", void 0);
+__decorate6([
+  Expose(),
+  __metadata6("design:type", String)
+], Profile.prototype, "TEXMFSYSCONFIG", void 0);
+__decorate6([
+  Expose(),
+  __metadata6("design:type", String)
+], Profile.prototype, "TEXMFSYSVAR", void 0);
+__decorate6([
+  Expose({ since: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean)
+], Profile.prototype, "instopt_adjustpath", void 0);
+__decorate6([
+  Expose({ since: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean)
+], Profile.prototype, "instopt_adjustrepo", void 0);
+__decorate6([
+  Expose({ since: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean)
+], Profile.prototype, "tlpdbopt_autobackup", void 0);
+__decorate6([
+  Expose({ since: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean)
+], Profile.prototype, "tlpdbopt_install_docfiles", void 0);
+__decorate6([
+  Expose({ since: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean)
+], Profile.prototype, "tlpdbopt_install_srcfiles", void 0);
+__decorate6([
+  Expose({ since: 2017, groups: ["win32"] }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean)
+], Profile.prototype, "tlpdbopt_desktop_integration", void 0);
+__decorate6([
+  Expose({ since: 2017, groups: ["win32"] }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean)
+], Profile.prototype, "tlpdbopt_file_assocs", void 0);
+__decorate6([
+  Expose({ since: 2017, groups: ["win32"] }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean)
+], Profile.prototype, "tlpdbopt_w32_multi_user", void 0);
+__decorate6([
+  Expose({ since: 2012, until: 2017, groups: ["win32"] }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean)
+], Profile.prototype, "option_menu_integration", void 0);
+__decorate6([
+  Expose({ until: 2009 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean),
+  __metadata6("design:paramtypes", [])
+], Profile.prototype, "option_symlinks", null);
+__decorate6([
+  Expose({ since: 2009, until: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean),
+  __metadata6("design:paramtypes", [])
+], Profile.prototype, "option_path", null);
+__decorate6([
+  Expose({ since: 2011, until: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean),
+  __metadata6("design:paramtypes", [])
+], Profile.prototype, "option_adjustrepo", null);
+__decorate6([
+  Expose({ until: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean),
+  __metadata6("design:paramtypes", [])
+], Profile.prototype, "option_autobackup", null);
+__decorate6([
+  Expose({ until: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean),
+  __metadata6("design:paramtypes", [])
+], Profile.prototype, "option_doc", null);
+__decorate6([
+  Expose({ until: 2017 }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean),
+  __metadata6("design:paramtypes", [])
+], Profile.prototype, "option_src", null);
+__decorate6([
+  Expose({ since: 2009, until: 2017, groups: ["win32"] }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean),
+  __metadata6("design:paramtypes", [])
+], Profile.prototype, "option_desktop_integration", null);
+__decorate6([
+  Expose({ until: 2017, groups: ["win32"] }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean),
+  __metadata6("design:paramtypes", [])
+], Profile.prototype, "option_file_assocs", null);
+__decorate6([
+  Expose({ since: 2009, until: 2017, groups: ["win32"] }),
+  Type(() => Number),
+  __metadata6("design:type", Boolean),
+  __metadata6("design:paramtypes", [])
+], Profile.prototype, "option_w32_multi_user", null);
+Profile = __decorate6([
+  Exclude(),
+  __metadata6("design:paramtypes", [String, String])
+], Profile);
 function executable(version3, platform3) {
   const ext = `${version3 > "2012" ? "-windows" : ""}.bat`;
   return `install-tl${platform3 === "win32" ? ext : ""}`;
@@ -65276,7 +66918,7 @@ async function main() {
       return await InstallTL.acquire(inputs.version);
     });
     await core5.group("Installation profile", async () => {
-      core5.info(Profile.format(profile));
+      core5.info(profile.toString());
     });
     await core5.group("Installing TeX Live", async () => {
       await installtl.run(profile);
@@ -65315,7 +66957,7 @@ async function post() {
 }
 function getCacheKeys(version3, packages) {
   const digest = (s) => {
-    return crypto.createHash("sha256").update(s).digest("hex");
+    return crypto2.createHash("sha256").update(s).digest("hex");
   };
   const baseKey = `setup-texlive-${os6.platform()}-${os6.arch()}-${version3}-`;
   const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
@@ -65409,4 +67051,18 @@ run();
  * Copyright(c) 2015 Douglas Christopher Wilson
  * MIT Licensed
  */
+/*! *****************************************************************************
+Copyright (C) Microsoft. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
 /*! http://mths.be/fromcodepoint v0.1.0 by @mathias */

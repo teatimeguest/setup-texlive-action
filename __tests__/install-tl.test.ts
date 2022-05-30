@@ -2,7 +2,9 @@ import * as os from 'os';
 import * as path from 'path';
 
 import * as exec from '@actions/exec';
+import * as io from '@actions/io';
 import * as tool from '@actions/tool-cache';
+import 'jest-extended';
 
 import { InstallTL, Profile } from '#/install-tl';
 import * as tl from '#/texlive';
@@ -163,94 +165,116 @@ describe('InstallTL', () => {
 
 describe('Profile', () => {
   describe('constructor', () => {
-    it('creates a profile for TeX Live 2008', () => {
+    beforeEach(() => {
       jest.mocked(os.platform).mockReturnValue('linux');
-      expect(new Profile('2008', '/usr/local/texlive')).toMatchObject({
-        TEXDIR: '/usr/local/texlive/2008',
-        TEXMFLOCAL: '/usr/local/texlive/texmf-local',
-        TEXMFSYSCONFIG: '/usr/local/texlive/2008/texmf-config',
-        TEXMFSYSVAR: '/usr/local/texlive/2008/texmf-var',
-        selected_scheme: 'scheme-minimal',
-        option_adjustrepo: '0',
-        option_autobackup: '0',
-        option_desktop_integration: '0',
-        option_doc: '0',
-        option_file_assocs: '0',
-        option_menu_integration: '0',
-        option_path: '0',
-        option_src: '0',
-        option_symlinks: '0',
-        option_w32_multi_user: '0',
-      });
     });
 
-    it('creates a profile for TeX Live 2016', () => {
-      jest.mocked(os.platform).mockReturnValue('linux');
-      expect(new Profile('2016', '/usr/local/texlive')).toMatchObject({
-        TEXDIR: '/usr/local/texlive/2016',
-        TEXMFLOCAL: '/usr/local/texlive/texmf-local',
-        TEXMFSYSCONFIG: '/usr/local/texlive/2016/texmf-config',
-        TEXMFSYSVAR: '/usr/local/texlive/2016/texmf-var',
-        selected_scheme: 'scheme-infraonly',
-        option_adjustrepo: '0',
-        option_autobackup: '0',
-        option_desktop_integration: '0',
-        option_doc: '0',
-        option_file_assocs: '0',
-        option_menu_integration: '0',
-        option_path: '0',
-        option_src: '0',
-        option_symlinks: '0',
-        option_w32_multi_user: '0',
-      });
+    it('uses scheme-infraonly by default', () => {
+      expect(new Profile(Version.LATEST, '')).toHaveProperty(
+        'selected_scheme',
+        'scheme-infraonly',
+      );
     });
 
-    it('creates a profile for TeX Live 2021', () => {
-      jest.mocked(os.platform).mockReturnValue('win32');
-      expect(new Profile(Version.LATEST, 'C:\\texlive')).toMatchObject({
-        TEXDIR: `C:\\texlive\\${Version.LATEST}`,
-        TEXMFLOCAL: 'C:\\texlive\\texmf-local',
-        TEXMFSYSCONFIG: `C:\\texlive\\${Version.LATEST}\\texmf-config`,
-        TEXMFSYSVAR: `C:\\texlive\\${Version.LATEST}\\texmf-var`,
-        selected_scheme: 'scheme-infraonly',
-        option_adjustrepo: '1',
-        option_autobackup: '0',
-        option_desktop_integration: '0',
-        option_doc: '0',
-        option_file_assocs: '0',
-        option_menu_integration: '0',
-        option_path: '0',
-        option_src: '0',
-        option_symlinks: '0',
-        option_w32_multi_user: '0',
-      });
+    it('uses scheme-minimal for versions prior to 2016', () => {
+      expect(new Profile('2008', '')).toHaveProperty(
+        'selected_scheme',
+        'scheme-minimal',
+      );
+    });
+
+    it('sets TEXMF properly', () => {
+      const profile = new Profile(Version.LATEST, '/usr/local/texlive');
+      expect(profile).toHaveProperty(
+        'TEXDIR',
+        `/usr/local/texlive/${Version.LATEST}`,
+      );
+      expect(profile).toHaveProperty(
+        'TEXMFLOCAL',
+        '/usr/local/texlive/texmf-local',
+      );
+      expect(profile).toHaveProperty(
+        'TEXMFSYSCONFIG',
+        `/usr/local/texlive/${Version.LATEST}/texmf-config`,
+      );
+    });
+
+    it('sets instopt_adjustrepo to true for the latest version', () => {
+      expect(new Profile(Version.LATEST, '')).toHaveProperty(
+        'instopt_adjustrepo',
+        true,
+      );
+    });
+
+    it('sets instopt_adjustrepo to false for an older version', () => {
+      expect(new Profile('2018', '')).toHaveProperty(
+        'instopt_adjustrepo',
+        false,
+      );
     });
   });
 
-  describe('format', () => {
-    it('returns a profile string', () => {
+  describe('toString', () => {
+    it('does not emits Windows-only options on Linux', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
-      expect(
-        Profile.format(new Profile(Version.LATEST, '/usr/local/texlive')),
-      ).toBe(
-        [
-          `TEXDIR /usr/local/texlive/${Version.LATEST}`,
-          'TEXMFLOCAL /usr/local/texlive/texmf-local',
-          `TEXMFSYSCONFIG /usr/local/texlive/${Version.LATEST}/texmf-config`,
-          `TEXMFSYSVAR /usr/local/texlive/${Version.LATEST}/texmf-var`,
-          'selected_scheme scheme-infraonly',
-          'option_adjustrepo 1',
-          'option_autobackup 0',
-          'option_desktop_integration 0',
-          'option_doc 0',
-          'option_file_assocs 0',
-          'option_menu_integration 0',
-          'option_path 0',
-          'option_src 0',
-          'option_symlinks 0',
-          'option_w32_multi_user 0',
-        ].join('\n'),
-      );
+      const profile = new Profile(Version.LATEST, '').toString();
+      expect(profile).not.toMatch('desktop_integration');
+      expect(profile).not.toMatch('file_assocs');
+    });
+
+    it('emits Windows-only options on Windows', () => {
+      jest.mocked(os.platform).mockReturnValue('win32');
+      const profile = new Profile(Version.LATEST, '').toString();
+      expect(profile).toMatch(/^tlpdbopt_desktop_integration 0$/mu);
+      expect(profile).toMatch(/^tlpdbopt_w32_multi_user 0$/mu);
+    });
+
+    it('uses old option names for an older version', () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      const profile = new Profile('2010', '').toString();
+      expect(profile).toMatch(/^option_/mu);
+      expect(profile).not.toMatch(/^instopt_/mu);
+      expect(profile).not.toMatch(/^tlpdbopt_/mu);
+    });
+
+    it('converts boolean to number', () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      const profile = new Profile('2015', '').toString();
+      expect(profile).toMatch(/ [01]$/mu);
+      expect(profile).not.toMatch(/ (?:true|false)$/mu);
+    });
+  });
+
+  describe('open', () => {
+    it('yields file path only once', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      const profile = new Profile(Version.LATEST, '');
+      for await (const dest of profile.open()) {
+        expect(dest).pass('');
+      }
+      expect.assertions(1);
+    });
+
+    it('deletes temporary directory', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      const profile = new Profile(Version.LATEST, '');
+      for await (const dest of profile.open()) {
+        expect(dest).pass('');
+      }
+      expect(io.rmRF).toHaveBeenCalled();
+    });
+
+    it('deletes temporary directory even if an exception thrown', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      const profile = new Profile(Version.LATEST, '');
+      await expect(
+        (async () => {
+          for await (const dest of profile.open()) {
+            throw new Error(dest);
+          }
+        })(),
+      ).toReject();
+      expect(io.rmRF).toHaveBeenCalled();
     });
   });
 });
