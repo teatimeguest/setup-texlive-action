@@ -41,7 +41,7 @@
     "jest-extended": "2.0.0",
     "prettier": "2.6.2",
     "ts-essentials": "9.1.2",
-    "ts-jest": "28.0.3",
+    "ts-jest": "28.0.4",
     "ts-transformer-keys": "0.4.3",
     "ttypescript": "1.5.13",
     "typescript": "4.7.2",
