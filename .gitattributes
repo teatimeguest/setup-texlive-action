@@ -1,1 +1,2 @@
-/dist/** linguist-generated=true
+/dist/** linguist-generated=true -diff -merge
+package-lock.json -diff
