@@ -11,8 +11,8 @@
     "strict": true,
     // module
     "baseUrl": "./src",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "es2020",
+    "moduleResolution": "node16",
     "paths": { "#/*": ["*"] },
     "rootDirs": ["./src"],
     // emit

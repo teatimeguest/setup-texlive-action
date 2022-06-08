@@ -1,2 +1,3 @@
 /dist/** linguist-generated=true -diff -merge
+/patches/*.patch -text
 package-lock.json -diff
