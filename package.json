@@ -33,7 +33,7 @@
     "reflect-metadata": "0.1.13"
   },
   "devDependencies": {
-    "@types/jest": "28.1.0",
+    "@types/jest": "28.1.1",
     "@types/node": "17.0.41",
     "@typescript-eslint/eslint-plugin": "5.27.0",
     "@typescript-eslint/parser": "5.27.1",
@@ -43,7 +43,7 @@
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-jest": "26.5.3",
     "eslint-plugin-node": "11.1.0",
-    "jest": "28.1.0",
+    "jest": "28.1.1",
     "jest-extended": "2.0.0",
     "patch-package": "6.4.7",
     "prettier": "2.6.2",
