@@ -5,7 +5,7 @@
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "build": "npm run compile && npm run bundle",
-    "bundle": "esbuild lib/index.js --bundle --platform=node --main-fields=module,main --outdir=dist --log-override:this-is-undefined-in-esm=debug",
+    "bundle": "node esbuild.config.mjs lib/index.js",
     "compile": "ttsc",
     "format": "prettier --write {src,__tests__}/*.ts",
     "format-check": "prettier --check {src,__tests__}/*.ts && ec --exclude=^dist",

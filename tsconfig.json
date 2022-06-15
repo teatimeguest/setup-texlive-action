@@ -16,6 +16,7 @@
     "paths": { "#/*": ["*"] },
     "rootDirs": ["./src"],
     // emit
+    "importHelpers": true,
     "newLine": "lf",
     "outDir": "./lib",
     "removeComments": true,
