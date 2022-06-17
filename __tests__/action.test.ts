@@ -5,7 +5,7 @@ import type { DeepWritable } from 'ts-essentials';
 import { Context } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
 import * as action from '#/action';
-import { Manager } from '#/texlive';
+import { Manager, Version } from '#/texlive';
 import * as util from '#/utility';
 import CacheType = util.CacheType;
 
@@ -32,7 +32,7 @@ beforeEach(() => {
       packages: new Set(),
       prefix: '',
       tlcontrib: false,
-      version: '' as Context['inputs']['version'],
+      version: Version.LATEST,
     },
     outputs: {
       cacheHit: jest.fn(),
@@ -62,7 +62,7 @@ jest.mock('#/texlive', () => {
     pinning: { add: jest.fn() },
     repository: { add: jest.fn() },
   };
-  return { contrib, Manager: tl.Manager };
+  return { contrib, Manager: tl.Manager, Version: tl.Version };
 });
 jest.unmock('#/action');
 
@@ -93,7 +93,10 @@ describe('main', () => {
     async (kind) => {
       jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
       await expect(action.run()).toResolve();
-      expect(core.saveState).toHaveBeenCalledWith('key', expect.any(String));
+      expect(core.saveState).toHaveBeenCalledWith(
+        'key',
+        expect.stringMatching(/^setup-texlive-[^-]+-[^-]+-\d{4}-\w{64}$/u),
+      );
       expect(core.saveState).toHaveBeenCalledWith('texdir', expect.any(String));
     },
   );

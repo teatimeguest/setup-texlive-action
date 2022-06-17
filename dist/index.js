@@ -1,3 +1,4 @@
+"use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -1395,6 +1396,56 @@ var require_summary = __commonJS({
   }
 });
 
+// node_modules/@actions/core/lib/path-utils.js
+var require_path_utils = __commonJS({
+  "node_modules/@actions/core/lib/path-utils.js"(exports) {
+    "use strict";
+    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      Object.defineProperty(o, k2, { enumerable: true, get: function() {
+        return m[k];
+      } });
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports && exports.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
+            __createBinding(result, mod, k);
+      }
+      __setModuleDefault(result, mod);
+      return result;
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.toPlatformPath = exports.toWin32Path = exports.toPosixPath = void 0;
+    var path5 = __importStar(require("path"));
+    function toPosixPath(pth) {
+      return pth.replace(/[\\]/g, "/");
+    }
+    exports.toPosixPath = toPosixPath;
+    function toWin32Path(pth) {
+      return pth.replace(/[/]/g, "\\");
+    }
+    exports.toWin32Path = toWin32Path;
+    function toPlatformPath(pth) {
+      return pth.replace(/[/\\]/g, path5.sep);
+    }
+    exports.toPlatformPath = toPlatformPath;
+  }
+});
+
 // node_modules/@actions/core/lib/core.js
 var require_core = __commonJS({
   "node_modules/@actions/core/lib/core.js"(exports) {
@@ -1602,6 +1653,16 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     var summary_2 = require_summary();
     Object.defineProperty(exports, "markdownSummary", { enumerable: true, get: function() {
       return summary_2.markdownSummary;
+    } });
+    var path_utils_1 = require_path_utils();
+    Object.defineProperty(exports, "toPosixPath", { enumerable: true, get: function() {
+      return path_utils_1.toPosixPath;
+    } });
+    Object.defineProperty(exports, "toWin32Path", { enumerable: true, get: function() {
+      return path_utils_1.toWin32Path;
+    } });
+    Object.defineProperty(exports, "toPlatformPath", { enumerable: true, get: function() {
+      return path_utils_1.toPlatformPath;
     } });
   }
 });
@@ -64715,7 +64776,7 @@ async function main() {
       return await restoreCache2(profile.TEXDIR, ...keys);
     });
     if (cacheType !== "primary") {
-      State.set({ key: keys[1][0], texdir: profile.TEXDIR });
+      State.set({ key: keys[0], texdir: profile.TEXDIR });
     }
   }
   if (cacheType === void 0) {

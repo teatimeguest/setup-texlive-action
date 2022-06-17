@@ -35,7 +35,7 @@ async function main(): Promise<void> {
       return await util.restoreCache(profile.TEXDIR, ...keys);
     });
     if (cacheType !== 'primary') {
-      State.set({ key: keys[1][0], texdir: profile.TEXDIR });
+      State.set({ key: keys[0], texdir: profile.TEXDIR });
     }
   }
 
