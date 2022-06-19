@@ -66047,7 +66047,9 @@ async function main() {
   const tlmgr = new Manager(inputs.version, inputs.prefix);
   await tlmgr.path.add();
   if (cacheType !== void 0) {
-    await tlmgr.update(void 0, { self: true });
+    await core5.group("Updating tlmgr", async () => {
+      await tlmgr.update(void 0, { self: true });
+    });
     await core5.group("Adjusting TEXMF", async () => {
       for (const key of ["TEXMFHOME", "TEXMFCONFIG", "TEXMFVAR"]) {
         const value = env3[`TEXLIVE_INSTALL_${key}`];

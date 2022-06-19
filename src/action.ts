@@ -61,7 +61,9 @@ async function main(): Promise<void> {
   await tlmgr.path.add();
 
   if (cacheType !== undefined) {
-    await tlmgr.update(undefined, { self: true });
+    await core.group('Updating tlmgr', async () => {
+      await tlmgr.update(undefined, { self: true });
+    });
     await core.group('Adjusting TEXMF', async () => {
       for (const key of ['TEXMFHOME', 'TEXMFCONFIG', 'TEXMFVAR'] as const) {
         const value = env[`TEXLIVE_INSTALL_${key}`];
