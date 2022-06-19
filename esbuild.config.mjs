@@ -6,7 +6,6 @@ await esbuild.build({
   platform: 'node',
   mainFields: ['module', 'main'],
   conditions: ['module', 'import', 'node', 'default'],
-  keepNames: true,
   outdir: 'dist',
   logLevel: 'info',
   logOverride: {
