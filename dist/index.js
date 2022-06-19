@@ -17986,12 +17986,12 @@ var require_tr46 = __commonJS({
       TRANSITIONAL: 0,
       NONTRANSITIONAL: 1
     };
-    function normalize(str) {
+    function normalize2(str) {
       return str.split("\0").map(function(s) {
         return s.normalize("NFC");
       }).join("\0");
     }
-    __name(normalize, "normalize");
+    __name(normalize2, "normalize");
     function findStatus(val) {
       var start = 0;
       var end = mappingTable.length - 1;
@@ -18070,7 +18070,7 @@ var require_tr46 = __commonJS({
         processing_option = PROCESSING_OPTIONS.NONTRANSITIONAL;
       }
       var error = false;
-      if (normalize(label) !== label || label[3] === "-" && label[4] === "-" || label[0] === "-" || label[label.length - 1] === "-" || label.indexOf(".") !== -1 || label.search(combiningMarksRegex) === 0) {
+      if (normalize2(label) !== label || label[3] === "-" && label[4] === "-" || label[0] === "-" || label[label.length - 1] === "-" || label.indexOf(".") !== -1 || label.search(combiningMarksRegex) === 0) {
         error = true;
       }
       var len = countSymbols(label);
@@ -18089,7 +18089,7 @@ var require_tr46 = __commonJS({
     __name(validateLabel, "validateLabel");
     function processing(domain_name, useSTD3, processing_option) {
       var result = mapChars(domain_name, useSTD3, processing_option);
-      result.string = normalize(result.string);
+      result.string = normalize2(result.string);
       var labels = result.string.split(".");
       for (var i = 0; i < labels.length; ++i) {
         try {
@@ -65429,9 +65429,9 @@ var Inputs = class {
   get prefix() {
     const input = core3.getInput("prefix");
     if (input !== "") {
-      return input;
+      return path3.normalize(input);
     }
-    return process3.env["TEXLIVE_INSTALL_PREFIX"] ?? defaultPrefix();
+    return path3.normalize(process3.env["TEXLIVE_INSTALL_PREFIX"] ?? defaultPrefix());
   }
   get version() {
     const input = core3.getInput("version");

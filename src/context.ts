@@ -41,9 +41,11 @@ export class Inputs {
   @Cache get prefix(): ThisType<void> & string {
     const input = core.getInput('prefix');
     if (input !== '') {
-      return input;
+      return path.normalize(input);
     }
-    return process.env['TEXLIVE_INSTALL_PREFIX'] ?? defaultPrefix();
+    return path.normalize(
+      process.env['TEXLIVE_INSTALL_PREFIX'] ?? defaultPrefix(),
+    );
   }
 
   @Cache get version(): ThisType<void> & Version {
