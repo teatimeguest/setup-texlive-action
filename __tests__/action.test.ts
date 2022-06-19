@@ -232,12 +232,14 @@ it.each<[CacheType | undefined]>([['secondary'], [undefined]])(
 
 it('saves TEXDIR to cache if cache key and texdir are set', async () => {
   // eslint-disable-next-line jest/unbound-method
-  jest.mocked(State.load).mockImplementationOnce(() => {
-    const state = new State();
-    state.key = '<key>';
-    state.texdir = '<texdir>';
-    return state;
-  });
+  jest.mocked(State.load).mockImplementationOnce(
+    () =>
+      ({
+        key: '<key>',
+        texdir: '<texdir>',
+        filled: () => true,
+      } as State),
+  );
   await expect(action.run()).toResolve();
   expect(util.saveCache).toHaveBeenCalled();
 });
