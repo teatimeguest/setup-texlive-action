@@ -65338,6 +65338,17 @@ var Manager = class {
       }
     };
   }
+  async update(packages = [], options = {}) {
+    const args = ["update"];
+    if (options.self) {
+      if (this.version === "2008") {
+        packages = ["texlive.infra", ...packages];
+      } else {
+        args.push("--self");
+      }
+    }
+    await (0, import_exec.exec)("tlmgr", [...args, ...packages]);
+  }
 };
 __name(Manager, "Manager");
 __decorate([
@@ -65460,17 +65471,17 @@ __decorate([
 ], Inputs.prototype, "cache", null);
 __decorate([
   import_decorator_cache_getter2.cache,
-  __metadata("design:type", Object),
+  __metadata("design:type", Promise),
   __metadata("design:paramtypes", [])
 ], Inputs.prototype, "packages", null);
 __decorate([
   import_decorator_cache_getter2.cache,
-  __metadata("design:type", Object),
+  __metadata("design:type", String),
   __metadata("design:paramtypes", [])
 ], Inputs.prototype, "prefix", null);
 __decorate([
   import_decorator_cache_getter2.cache,
-  __metadata("design:type", Object),
+  __metadata("design:type", String),
   __metadata("design:paramtypes", [])
 ], Inputs.prototype, "version", null);
 __decorate([
@@ -65935,7 +65946,7 @@ async function main() {
   const tlmgr = new Manager(inputs.version, inputs.prefix);
   await tlmgr.path.add();
   if (cacheType !== void 0) {
-    outputs["cache-hit"] = true;
+    await tlmgr.update(void 0, { self: true });
     await core5.group("Adjusting TEXMF", async () => {
       for (const key of ["TEXMFHOME", "TEXMFCONFIG", "TEXMFVAR"]) {
         const value = env3[`TEXLIVE_INSTALL_${key}`];
@@ -65944,6 +65955,7 @@ async function main() {
         }
       }
     });
+    outputs["cache-hit"] = true;
   }
   if (inputs.tlcontrib) {
     await core5.group("Setting up TLContrib", async () => {

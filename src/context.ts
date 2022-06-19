@@ -24,7 +24,7 @@ export class Inputs {
     return input;
   }
 
-  @Cache get packages(): ThisType<void> & Promise<Set<string>> {
+  @Cache get packages(): Promise<Set<string>> {
     return (async () => {
       const list = core.getInput('packages').split(/(?:#.*$|\s+)/mu);
       const file = core.getInput('package-file');
@@ -38,7 +38,7 @@ export class Inputs {
     })();
   }
 
-  @Cache get prefix(): ThisType<void> & string {
+  @Cache get prefix(): string {
     const input = core.getInput('prefix');
     if (input !== '') {
       return path.normalize(input);
@@ -48,7 +48,7 @@ export class Inputs {
     );
   }
 
-  @Cache get version(): ThisType<void> & Version {
+  @Cache get version(): Version {
     const input = core.getInput('version');
     if (Version.isVersion(input)) {
       return input;

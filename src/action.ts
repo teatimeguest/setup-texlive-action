@@ -29,6 +29,7 @@ async function main(): Promise<void> {
   const outputs = new Outputs();
   const env = Env.get(inputs.version);
   const state = new State();
+
   const profile = new Profile(inputs.version, inputs.prefix);
   const packages = await inputs.packages;
   let cacheType = undefined;
@@ -60,7 +61,7 @@ async function main(): Promise<void> {
   await tlmgr.path.add();
 
   if (cacheType !== undefined) {
-    outputs['cache-hit'] = true;
+    await tlmgr.update(undefined, { self: true });
     await core.group('Adjusting TEXMF', async () => {
       for (const key of ['TEXMFHOME', 'TEXMFCONFIG', 'TEXMFVAR'] as const) {
         const value = env[`TEXLIVE_INSTALL_${key}`];
@@ -71,6 +72,7 @@ async function main(): Promise<void> {
         }
       }
     });
+    outputs['cache-hit'] = true;
   }
 
   if (inputs.tlcontrib) {

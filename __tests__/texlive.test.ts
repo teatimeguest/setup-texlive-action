@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import 'jest-extended';
 
 import { DependsTxt, Manager, Version } from '#/texlive';
 import * as util from '#/utility';
@@ -196,6 +197,34 @@ describe('Manager', () => {
       }).rejects.toThrow(
         '`repository` action is not implemented in TeX Live 2011',
       );
+    });
+  });
+
+  describe('update', () => {
+    it('updates packages', async () => {
+      const tlmgr = new Manager(Version.LATEST, '');
+      await expect(tlmgr.update(['foo', 'bar', 'baz'])).toResolve();
+      expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
+        'update',
+        'foo',
+        'bar',
+        'baz',
+      ]);
+    });
+
+    it('updates tlmgr itself', async () => {
+      const tlmgr = new Manager(Version.LATEST, '');
+      await expect(tlmgr.update(undefined, { self: true })).toResolve();
+      expect(exec.exec).toHaveBeenCalledWith('tlmgr', ['update', '--self']);
+    });
+
+    it('updates tlmgr itself by updating texlive.infra', async () => {
+      const tlmgr = new Manager('2008', '');
+      await expect(tlmgr.update(undefined, { self: true })).toResolve();
+      expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
+        'update',
+        'texlive.infra',
+      ]);
     });
   });
 });

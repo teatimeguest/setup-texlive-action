@@ -37,12 +37,9 @@ export interface Texmf {
  * An interface for the `tlmgr` command.
  */
 export class Manager {
-  constructor(
-    private readonly version: Version,
-    private readonly prefix: string,
-  ) {}
+  constructor(private version: Version, private readonly prefix: string) {}
 
-  @Cache get conf(): ThisType<Readonly<this>> & {
+  @Cache get conf(): {
     readonly texmf: {
       (key: keyof Texmf): Promise<string>;
       (key: keyof Texmf, value: string): Promise<void>;
@@ -76,7 +73,7 @@ export class Manager {
     }
   }
 
-  @Cache get path(): ThisType<Readonly<this>> & {
+  @Cache get path(): {
     readonly add: () => Promise<void>;
   } {
     return {
@@ -92,7 +89,7 @@ export class Manager {
     };
   }
 
-  @Cache get pinning(): ThisType<Readonly<this>> & {
+  @Cache get pinning(): {
     readonly add: (
       repo: string,
       ...globs: readonly [string, ...Array<string>]
@@ -110,7 +107,7 @@ export class Manager {
     };
   }
 
-  @Cache get repository(): ThisType<Readonly<this>> & {
+  @Cache get repository(): {
     /**
      * @returns `false` if the repository already exists, otherwise `true`.
      */
@@ -143,6 +140,22 @@ export class Manager {
         return status;
       },
     };
+  }
+
+  async update(
+    packages: ReadonlyArray<string> = [],
+    options: { readonly self?: true } = {},
+  ): Promise<void> {
+    const args = ['update'];
+    if (options.self) {
+      if (this.version === '2008') {
+        // tlmgr for TeX Live 2008 does not have `self` option
+        packages = ['texlive.infra', ...packages];
+      } else {
+        args.push('--self');
+      }
+    }
+    await exec('tlmgr', [...args, ...packages]);
   }
 }
 
