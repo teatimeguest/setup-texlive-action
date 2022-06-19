@@ -114,6 +114,7 @@ overrides:
     rules:
       # @typescript-eslint
       '@typescript-eslint/naming-convention': off
+      '@typescript-eslint/no-empty-function': off
       '@typescript-eslint/no-explicit-any': off
       '@typescript-eslint/no-non-null-assertion': off
       '@typescript-eslint/no-unsafe-assignment': off
@@ -125,6 +126,8 @@ overrides:
       '@typescript-eslint/no-unused-vars':
         - error
         - ignoreRestSiblings: true
+      # @typescript-eslint extension rules
+      '@typescript-eslint/no-shadow': off
       # eslint-plugin-jest
       jest/no-test-return-statement: error
       jest/prefer-expect-resolves: error

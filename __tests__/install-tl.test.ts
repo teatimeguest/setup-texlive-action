@@ -1,19 +1,18 @@
+import * as fs from 'fs/promises';
 import * as os from 'os';
-import * as path from 'path';
 
-import * as exec from '@actions/exec';
-import * as io from '@actions/io';
+import { exec } from '@actions/exec';
+import { rmRF } from '@actions/io';
 import * as tool from '@actions/tool-cache';
 import 'jest-extended';
 
 import { InstallTL, Profile } from '#/install-tl';
-import * as tl from '#/texlive';
-import Version = tl.Version;
+import { Version } from '#/texlive';
 import * as util from '#/utility';
 
 jest.mock('fs/promises', () => ({
   mkdtemp: jest.fn(async (template: string) => template + 'XXXXXX'),
-  readFile: jest.fn(),
+  readFile: jest.fn().mockReturnValue(''),
   stat: jest.fn(), // required for @azure/storage-blob
   writeFile: jest.fn(),
 }));
@@ -22,25 +21,29 @@ jest.mock('os', () => ({
   platform: jest.fn(),
 }));
 jest.mock('path', () => {
-  const actual = jest.requireActual('path');
+  const { posix, win32 } = jest.requireActual('path');
   return {
-    join: jest.fn((...paths: Array<string>) => {
-      return os.platform() === 'win32'
-        ? path.win32.join(...paths)
-        : path.posix.join(...paths);
+    join: jest.fn((...paths) => {
+      return (os.platform() === 'win32' ? win32 : posix).join(...paths);
     }),
-    posix: actual.posix,
-    win32: actual.win32,
+    posix,
   };
 });
 jest.mock('process', () => ({ env: {} }));
+jest.mocked(tool.find).mockReturnValue('');
 jest.mocked(tool.downloadTool).mockResolvedValue('<downloadTool>');
 jest.mocked(util.extract).mockResolvedValue('<extract>');
 jest.mocked(util.tmpdir).mockReturnValue('<tmpdir>');
-jest
-  .mocked(tl.historic)
-  .mockImplementation(jest.requireActual<typeof tl>('#/texlive').historic);
+jest.mock('#/texlive', () => {
+  const { historic, Version } = jest.requireActual('#/texlive');
+  return { historic, Version };
+});
 jest.unmock('#/install-tl');
+jest.spyOn(InstallTL, 'download');
+
+const fail = (): any => {
+  throw new Error();
+};
 
 describe('InstallTL', () => {
   describe('run', () => {
@@ -48,7 +51,7 @@ describe('InstallTL', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
       const installtl = await InstallTL.acquire('2008');
       await installtl.run(new Profile('2008', '/usr/local/texlive'));
-      expect(exec.exec).toHaveBeenCalledWith(expect.stringContaining(''), [
+      expect(exec).toHaveBeenCalledWith(expect.stringContaining(''), [
         '-no-gui',
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),
@@ -61,7 +64,7 @@ describe('InstallTL', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
       const installtl = await InstallTL.acquire('2012');
       await installtl.run(new Profile('2012', '/usr/local/texlive'));
-      expect(exec.exec).toHaveBeenCalledWith(expect.stringContaining(''), [
+      expect(exec).toHaveBeenCalledWith(expect.stringContaining(''), [
         '-no-gui',
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),
@@ -74,7 +77,7 @@ describe('InstallTL', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
       const installtl = await InstallTL.acquire(Version.LATEST);
       await installtl.run(new Profile(Version.LATEST, '/usr/local/texlive'));
-      expect(exec.exec).toHaveBeenCalledWith(expect.stringContaining(''), [
+      expect(exec).toHaveBeenCalledWith(expect.stringContaining(''), [
         '-no-gui',
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),
@@ -83,83 +86,127 @@ describe('InstallTL', () => {
   });
 
   describe('acquire', () => {
-    it('downloads the installer on Linux', async () => {
-      jest.mocked(os.platform).mockReturnValue('linux');
-      await InstallTL.acquire(Version.LATEST);
-      expect(util.restoreToolCache).toHaveBeenCalledWith(
-        'install-tl-unx.tar.gz',
-        Version.LATEST,
-      );
-      expect(tool.downloadTool).toHaveBeenCalledWith(
-        expect.stringContaining(`/${Version.LATEST}/install-tl-unx.tar.gz`),
-      );
-      expect(tool.downloadTool).toHaveBeenCalledTimes(1);
-      expect(util.extract).toHaveBeenCalled();
-      expect(util.saveToolCache).toHaveBeenCalled();
-    });
-
-    it('downloads the installer on Windows', async () => {
-      jest.mocked(os.platform).mockReturnValue('win32');
-      await InstallTL.acquire(Version.LATEST);
-      expect(util.restoreToolCache).toHaveBeenCalledWith(
-        'install-tl.zip',
-        Version.LATEST,
-      );
-      expect(tool.downloadTool).toHaveBeenCalledWith(
-        expect.stringContaining(`/${Version.LATEST}/install-tl.zip`),
-      );
-      expect(tool.downloadTool).toHaveBeenCalledTimes(1);
-      expect(util.extract).toHaveBeenCalled();
-      expect(util.saveToolCache).toHaveBeenCalled();
-    });
-
-    it('downloads the installer on macOS', async () => {
-      jest.mocked(os.platform).mockReturnValue('darwin');
-      await InstallTL.acquire(Version.LATEST);
-      expect(util.restoreToolCache).toHaveBeenCalledWith(
-        'install-tl-unx.tar.gz',
-        Version.LATEST,
-      );
-      expect(tool.downloadTool).toHaveBeenCalledWith(
-        expect.stringContaining(`/${Version.LATEST}/install-tl-unx.tar.gz`),
-      );
-      expect(tool.downloadTool).toHaveBeenCalledTimes(1);
-      expect(util.extract).toHaveBeenCalled();
-      expect(util.saveToolCache).toHaveBeenCalled();
-    });
-
-    it('downloads the installer for TeX Live 2008', async () => {
-      jest.mocked(os.platform).mockReturnValue('linux');
-      await InstallTL.acquire('2008');
-      expect(util.restoreToolCache).toHaveBeenCalledWith(
-        'install-tl-unx.tar.gz',
-        '2008',
-      );
-      expect(tool.downloadTool).toHaveBeenCalledWith(
-        expect.stringContaining('/tlnet/install-tl-unx.tar.gz'),
-      );
-      expect(tool.downloadTool).toHaveBeenCalledTimes(1);
-      expect(util.extract).toHaveBeenCalled();
-      expect(util.saveToolCache).toHaveBeenCalled();
-    });
-
     it.each<[Version, NodeJS.Platform]>([
       ['2007', 'linux'],
       ['2007', 'win32'],
       ['2012', 'darwin'],
     ])('does not support TeX Live %s on %s', async (version, platform) => {
       jest.mocked(os.platform).mockReturnValue(platform);
-      await expect(InstallTL.acquire(version)).rejects.toThrow(
-        /^Installation of TeX Live \d{4} on (?:\w+) is not supported$/u,
+      await expect(InstallTL.acquire(version)).toReject();
+    });
+
+    it('uses cache if available', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      jest.mocked(tool.find).mockReturnValueOnce('<cache>');
+      await InstallTL.acquire(Version.LATEST);
+      expect(InstallTL.download).not.toHaveBeenCalled();
+    });
+
+    it('downloads installer if cache not found', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      await InstallTL.acquire(Version.LATEST);
+      expect(InstallTL.download).toHaveBeenCalled();
+    });
+  });
+
+  describe('restore', () => {
+    it('uses cache if available', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      jest.mocked(tool.find).mockReturnValueOnce('<cache>');
+      await expect(InstallTL.restore(Version.LATEST)).resolves.toBeDefined();
+    });
+
+    it('returns undefined if cache not found', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      await expect(InstallTL.restore(Version.LATEST)).resolves.toBeUndefined();
+    });
+
+    it('does not fail even if tool.find fails', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      jest.mocked(tool.find).mockImplementationOnce(fail);
+      await expect(InstallTL.restore(Version.LATEST)).resolves.toBeUndefined();
+      expect(util.logError).toHaveBeenCalled();
+    });
+  });
+
+  describe('download', () => {
+    it('downloads installer', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      await InstallTL.download(Version.LATEST);
+      expect(tool.downloadTool).toHaveBeenCalled();
+      expect(util.extract).toHaveBeenCalled();
+    });
+
+    it('saves installer to cache', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      await InstallTL.download(Version.LATEST);
+      expect(tool.cacheDir).toHaveBeenCalled();
+    });
+
+    it('does not fail even if tool.cacheDir fails', async () => {
+      jest.mocked(os.platform).mockReturnValue('linux');
+      jest.mocked(tool.cacheDir).mockImplementationOnce(fail);
+      await expect(InstallTL.download(Version.LATEST)).toResolve();
+      expect(util.logError).toHaveBeenCalled();
+    });
+
+    it.each<[Version]>([['2008'], ['2011'], ['2014'], ['2017'], ['2020']])(
+      'applies a patch for install-tl(-windows).bat on Windows (%s)',
+      async (version) => {
+        jest.mocked(os.platform).mockReturnValue('win32');
+        await expect(InstallTL.acquire(version)).toResolve();
+        expect(fs.readFile).toHaveBeenCalledWith(
+          expect.stringMatching(/install-tl(?:-windows)?\.bat/u),
+          'utf8',
+        );
+      },
+    );
+
+    it.each<[NodeJS.Platform, Version]>([
+      ['linux', '2009'],
+      ['linux', '2010'],
+      ['win32', '2009'],
+      ['win32', '2010'],
+    ])(
+      'applies a patch for tlpkg/TeXLive/TLWinGoo.pm on (%s %s)',
+      async (platform, version) => {
+        jest.mocked(os.platform).mockReturnValue(platform);
+        await expect(InstallTL.acquire(version)).toResolve();
+        expect(fs.readFile).toHaveBeenCalledWith(
+          expect.stringContaining('TLWinGoo.pm'),
+          'utf8',
+        );
+      },
+    );
+
+    it('applies a patch for tlpkg/tlperl/lib/Encode/Alias.pm', async () => {
+      jest.mocked(os.platform).mockReturnValue('win32');
+      await expect(InstallTL.acquire('2015')).toResolve();
+      expect(fs.readFile).toHaveBeenCalledWith(
+        expect.stringContaining('Alias.pm'),
+        'utf8',
       );
     });
 
-    it('uses cache instead of downloading', async () => {
-      jest.mocked(os.platform).mockReturnValue('linux');
-      jest.mocked(util.restoreToolCache).mockResolvedValueOnce('<dest>');
-      await InstallTL.acquire(Version.LATEST);
-      expect(tool.downloadTool).not.toHaveBeenCalled();
-    });
+    it.each<[NodeJS.Platform, Version]>([
+      ['win32', '2008'],
+      ['win32', '2011'],
+      ['win32', '2014'],
+      ['win32', '2017'],
+      ['darwin', '2017'],
+      ['darwin', '2018'],
+      ['darwin', '2019'],
+    ])(
+      'applies a patch tlpkg/TeXLive/TLUtils.pm (%s %s)',
+      async (platform, version) => {
+        jest.mocked(os.platform).mockReturnValue(platform);
+        await expect(InstallTL.acquire(version)).toResolve();
+        expect(fs.readFile).toHaveBeenCalledWith(
+          expect.stringContaining('TLUtils.pm'),
+          'utf8',
+        );
+      },
+    );
   });
 });
 
@@ -261,7 +308,7 @@ describe('Profile', () => {
       for await (const dest of profile.open()) {
         expect(dest).pass('');
       }
-      expect(io.rmRF).toHaveBeenCalled();
+      expect(rmRF).toHaveBeenCalled();
     });
 
     it('deletes temporary directory even if an exception thrown', async () => {
@@ -274,116 +321,7 @@ describe('Profile', () => {
           }
         })(),
       ).toReject();
-      expect(io.rmRF).toHaveBeenCalled();
+      expect(rmRF).toHaveBeenCalled();
     });
-  });
-});
-
-describe('executable', () => {
-  it(`returns the filename for TeX Live ${Version.LATEST} on Linux`, async () => {
-    jest.mocked(os.platform).mockReturnValue('linux');
-    const installtl = await InstallTL.acquire(Version.LATEST);
-    await installtl.run(new Profile(Version.LATEST, '/usr/local/texlive'));
-    expect(exec.exec).toHaveBeenCalledWith(
-      expect.stringMatching(/install-tl$/u),
-      expect.anything(),
-    );
-  });
-
-  it('returns the filename for TeX Live 2012 on Windows', async () => {
-    jest.mocked(os.platform).mockReturnValue('win32');
-    const installtl = await InstallTL.acquire('2012');
-    await installtl.run(new Profile('2012', 'C:\\texlive'));
-    expect(exec.exec).toHaveBeenCalledWith(
-      expect.stringMatching(/install-tl\.bat$/u),
-      expect.anything(),
-    );
-  });
-
-  it('returns the filename for TeX Live 2016 on Windows', async () => {
-    jest.mocked(os.platform).mockReturnValue('win32');
-    const installtl = await InstallTL.acquire('2016');
-    await installtl.run(new Profile('2016', 'C:\\texlive'));
-    expect(exec.exec).toHaveBeenCalledWith(
-      expect.stringMatching(/install-tl-windows\.bat$/u),
-      expect.anything(),
-    );
-  });
-});
-
-describe('repository', () => {
-  it('returns the url for the latest TeX Live', async () => {
-    jest.mocked(os.platform).mockReturnValue('linux');
-    await InstallTL.acquire(Version.LATEST);
-    expect(tool.downloadTool).toHaveBeenCalledWith(
-      expect.stringContaining(`/${Version.LATEST}/install-tl-unx.tar.gz`),
-    );
-  });
-
-  it('returns the url for TeX Live 2008', async () => {
-    jest.mocked(os.platform).mockReturnValue('linux');
-    await InstallTL.acquire('2008');
-    expect(tool.downloadTool).toHaveBeenCalledWith(
-      expect.stringContaining('/tlnet/install-tl-unx.tar.gz'),
-    );
-  });
-
-  it('returns the url for TeX Live 2010', async () => {
-    jest.mocked(os.platform).mockReturnValue('linux');
-    await InstallTL.acquire('2010');
-    expect(tool.downloadTool).toHaveBeenCalledWith(
-      expect.stringContaining('/tlnet-final/install-tl-unx.tar.gz'),
-    );
-  });
-
-  it('returns the url for TeX Live 2018', async () => {
-    jest.mocked(os.platform).mockReturnValue('linux');
-    await InstallTL.acquire('2018');
-    expect(tool.downloadTool).toHaveBeenCalledWith(
-      expect.stringContaining('/tlnet-final/install-tl-unx.tar.gz'),
-    );
-  });
-});
-
-describe('patch', () => {
-  it('does not fail even if `install-tl(-windows).bat` does not exist', async () => {
-    jest
-      .mocked(util.updateFile)
-      .mockImplementation(async (filename: string) => {
-        if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
-          const error = new Error('oops');
-          (error as { code?: string }).code = 'ENOENT';
-          throw error;
-        }
-      });
-    jest.mocked(os.platform).mockReturnValue('win32');
-    await expect(InstallTL.acquire(Version.LATEST)).resolves.not.toThrow();
-  });
-
-  it('rethrows an error that is not of Node.js', async () => {
-    jest
-      .mocked(util.updateFile)
-      .mockImplementation(async (filename: string) => {
-        if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
-          const error = new Error('oops');
-          throw error;
-        }
-      });
-    jest.mocked(os.platform).mockReturnValue('win32');
-    await expect(InstallTL.acquire(Version.LATEST)).rejects.toThrow('oops');
-  });
-
-  it('rethrows a Node.js error of which code is not `ENOENT`', async () => {
-    jest
-      .mocked(util.updateFile)
-      .mockImplementation(async (filename: string) => {
-        if (/install-tl(?:-windows)?\.bat$/u.test(filename)) {
-          const error = new Error('oops');
-          (error as NodeJS.ErrnoException).code = 'ENOTDIR';
-          throw error;
-        }
-      });
-    jest.mocked(os.platform).mockReturnValue('win32');
-    await expect(InstallTL.acquire(Version.LATEST)).rejects.toThrow('oops');
   });
 });

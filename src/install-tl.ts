@@ -1,14 +1,13 @@
 import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
-import { types } from 'util';
+import { isNativeError } from 'util/types';
 
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import * as io from '@actions/io';
+import { exec } from '@actions/exec';
+import { rmRF as rm } from '@actions/io';
 import * as tool from '@actions/tool-cache';
-import { Exclude, Expose, instanceToPlain, Type } from 'class-transformer';
-import 'reflect-metadata';
+import { Exclude, Expose, Type, instanceToPlain } from 'class-transformer';
 
 import * as tl from '#/texlive';
 import Version = tl.Version;
@@ -20,95 +19,138 @@ import * as util from '#/utility';
 export class InstallTL {
   private constructor(
     private readonly version: Version,
-    private readonly bin: string,
+    private readonly installtl: string,
   ) {}
 
   async run(profile: Readonly<Profile>): Promise<void> {
-    for await (const target of profile.open()) {
-      const options = ['-no-gui', '-profile', target];
-      if (this.version !== Version.LATEST) {
+    for await (const dest of profile.open()) {
+      const options = ['-no-gui', '-profile', dest];
+      if (!Version.isLatest(this.version)) {
         const repo = tl.historic(this.version);
-        /**
-         * `install-tl` of versions prior to 2017 does not support HTTPS, and
-         * that of version 2017 supports HTTPS but does not work properly.
-         */
+        // `install-tl` of versions prior to 2017 does not support HTTPS, and
+        // that of version 2017 supports HTTPS but does not work properly.
         if (this.version < '2018') {
           repo.protocol = 'http';
         }
         options.push(
-          /**
-           * Only version 2008 uses `-location` instead of `-repository`.
-           */
+          // Only version 2008 uses `-location` instead of `-repository`.
           this.version === '2008' ? '-location' : '-repository',
           repo.href,
         );
       }
-      await exec.exec(this.bin, options);
+      await exec(this.installtl, options);
     }
     core.info('Applying patches');
     await patch(this.version, profile.TEXDIR);
   }
 
   static async acquire(version: Version): Promise<InstallTL> {
-    /**
-     * - There is no `install-tl` for versions prior to 2005, and
-     *   versions 2005--2007 do not seem to be archived.
-     *
-     * - Versions 2008--2012 can be installed on `macos-latest`, but
-     *   do not work properly because the `kpsewhich aborts with "Bad CPU type."
-     */
-    if (version < (os.platform() === 'darwin' ? '2013' : '2008')) {
+    if (version < '2008') {
+      throw new RangeError('Versions prior to 2008 are not supported');
+    } else if (os.platform() === 'darwin' && version < '2013') {
       throw new RangeError(
-        `Installation of TeX Live ${version} on ${os.platform()} is not supported`,
+        'Versions prior to 2013 does not work on 64-bit macOS' +
+          ' since the binaries are 32-bit executable',
       );
     }
+    return (
+      (await InstallTL.restore(version)) ?? (await InstallTL.download(version))
+    );
+  }
 
-    const isWin = os.platform() === 'win32';
-    const target = isWin ? 'install-tl.zip' : 'install-tl-unx.tar.gz';
-    let dest = await util.restoreToolCache(target, version);
+  static async restore(version: Version): Promise<InstallTL | undefined> {
+    let dest = '';
+    try {
+      dest = tool.find(InstallTL.archive(), version);
+    } catch (error) {
+      util.logError('Failed to restore tool cache', error);
+    }
 
-    if (dest === undefined) {
-      const url = new URL(
-        version === Version.LATEST ? `../${target}` : target,
-        tl.historic(version),
+    if (dest === '') {
+      return undefined;
+    } else {
+      core.info('Found in tool cache');
+      return new InstallTL(
+        version,
+        path.join(dest, InstallTL.executable(version)),
       );
-      core.info(`Downloading ${url.href}`);
-      const archive = await tool.downloadTool(url.href);
+    }
+  }
 
-      core.info('Extracting');
-      dest = await util.extract(archive, isWin ? 'zip' : 'tgz');
+  static async download(version: Version): Promise<InstallTL> {
+    const url = InstallTL.url(version).href;
+    core.info(`Downloading ${url}`);
+    const archive = await tool.downloadTool(url);
 
-      core.info('Applying patches');
-      await patch(version, dest);
-      await util.saveToolCache(dest, target, version);
+    core.info(`Extracting from ${archive}`);
+    const dest = await util.extract(
+      archive,
+      os.platform() === 'win32' ? 'zip' : 'tgz',
+    );
+
+    core.info('Applying patches');
+    await patch(version, dest);
+
+    try {
+      core.info('Adding to tool cache');
+      await tool.cacheDir(dest, InstallTL.archive(), version);
+    } catch (error) {
+      util.logError('Failed to add to tool cache', error);
     }
 
     return new InstallTL(
       version,
-      path.join(dest, executable(version, os.platform())),
+      path.join(dest, InstallTL.executable(version)),
     );
+  }
+
+  static executable(
+    version: Version,
+    platform: NodeJS.Platform = os.platform(),
+  ): string {
+    if (platform !== 'win32') {
+      return 'install-tl';
+    } else if (version < '2013') {
+      return 'install-tl.bat';
+    } else {
+      return 'install-tl-windows.bat';
+    }
+  }
+
+  private static archive(): string {
+    return os.platform() === 'win32'
+      ? 'install-tl.zip'
+      : 'install-tl-unx.tar.gz';
+  }
+
+  private static url(version: Version): URL {
+    let target = InstallTL.archive();
+    if (Version.isLatest(version)) {
+      target = path.posix.join('..', target);
+    }
+    return new URL(target, tl.historic(version));
   }
 }
 
 export interface Env {
-  ['TEXLIVE_DOWNLOADER']?: string;
-  ['TL_DOWNLOAD_PROGRAM']?: string;
-  ['TL_DOWNLOAD_ARGS']?: string;
-  ['TEXLIVE_INSTALL_ENV_NOCHECK']?: string;
-  ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']?: string;
-  ['TEXLIVE_INSTALL_NO_DISKCHECK']?: string;
-  ['TEXLIVE_INSTALL_NO_RESUME']?: string;
-  ['TEXLIVE_INSTALL_NO_WELCOME']?: string;
-  ['TEXLIVE_INSTALL_PAPER']?: string;
-  ['TEXLIVE_INSTALL_PREFIX']?: string;
-  ['TEXLIVE_INSTALL_TEXDIR']?: string;
-  ['TEXLIVE_INSTALL_TEXMFCONFIG']?: string;
-  ['TEXLIVE_INSTALL_TEXMFVAR']?: string;
-  ['TEXLIVE_INSTALL_TEXMFHOME']?: string;
-  ['TEXLIVE_INSTALL_TEXMFLOCAL']?: string;
-  ['TEXLIVE_INSTALL_TEXMFSYSCONFIG']?: string;
-  ['TEXLIVE_INSTALL_TEXMFSYSVAR']?: string;
-  ['NOPERLDOC']?: string;
+  readonly ['TEXLIVE_DOWNLOADER']?: string;
+  readonly ['TL_DOWNLOAD_PROGRAM']?: string;
+  readonly ['TL_DOWNLOAD_ARGS']?: string;
+  readonly ['TEXLIVE_INSTALL_ENV_NOCHECK']?: string;
+  readonly ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']?: string;
+  readonly ['TEXLIVE_INSTALL_NO_DISKCHECK']?: string;
+  readonly ['TEXLIVE_INSTALL_NO_RESUME']?: string;
+  readonly ['TEXLIVE_INSTALL_NO_WELCOME']?: string;
+  readonly ['TEXLIVE_INSTALL_PAPER']?: string;
+  readonly ['TEXLIVE_INSTALL_PREFIX']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXDIR']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFCONFIG']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFVAR']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFHOME']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFLOCAL']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFSYSCONFIG']?: string;
+  readonly ['TEXLIVE_INSTALL_TEXMFSYSVAR']?: string;
+  readonly ['NOPERLDOC']?: string;
 }
 
 @Exclude()
@@ -118,13 +160,11 @@ export class Profile {
     this.TEXMFLOCAL = path.join(prefix, 'texmf-local');
     this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
     this.TEXMFSYSVAR = path.join(this.TEXDIR, 'texmf-var');
-    /**
-     * `scheme-infraonly` was first introduced in TeX Live 2016.
-     */
+    // `scheme-infraonly` was first introduced in TeX Live 2016.
     this.selected_scheme = `scheme-${
       version < '2016' ? 'minimal' : 'infraonly'
     }`;
-    this.instopt_adjustrepo = version === Version.LATEST;
+    this.instopt_adjustrepo = Version.isLatest(version);
   }
 
   async *open(this: Readonly<this>): AsyncGenerator<string, void> {
@@ -134,7 +174,7 @@ export class Profile {
     try {
       yield target;
     } finally {
-      await io.rmRF(tmpdir);
+      await rm(tmpdir);
     }
   }
 
@@ -235,84 +275,82 @@ export class Profile {
   }
 }
 
-/**
- * @returns The filename of the installer executable.
- */
-function executable(version: Version, platform: NodeJS.Platform): string {
-  const ext = `${version > '2012' ? '-windows' : ''}.bat`;
-  return `install-tl${platform === 'win32' ? ext : ''}`;
-}
-
-/**
- * Fixes bugs in the installer files and modify them for use in workflows.
- */
-async function patch(version: Version, texdir: string): Promise<void> {
-  /**
-   * Prevents `install-tl(-windows).bat` from being stopped by `pause`.
-   */
-  if (os.platform() === 'win32') {
-    const target = path.join(texdir, executable(version, os.platform()));
-    try {
-      await util.updateFile(target, {
-        search: /\bpause(?: Done)?\b/gmu,
-        replace: '',
-      });
-    } catch (error) {
-      if (!(types.isNativeError(error) && error.code === 'ENOENT')) {
+async function patch(version: Version, base: string): Promise<void> {
+  const fixes = [
+    {
+      // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
+      platform: 'win32',
+      file: InstallTL.executable(version, 'win32'),
+      from: [/\bpause(?: Done)?\b/gmu],
+      to: [''],
+    },
+    {
+      // Fixes a syntax error.
+      versions: { since: '2009', until: '2011' },
+      file: 'tlpkg/TeXLive/TLWinGoo.pm',
+      from: ['/foreach $p qw((.*))/u'],
+      to: ['foreach $$p (qw($1))'],
+    },
+    {
+      // Defines Code Page 65001 as an alias for UTF-8 on Windows.
+      // (see: https://github.com/dankogai/p5-encode/issues/37)
+      platform: 'win32',
+      versions: { since: '2015', until: '2016' },
+      file: 'tlpkg/tlperl/lib/Encode/Alias.pm',
+      from: ['# utf8 is blessed :)'],
+      to: [`define_alias(qr/cp65001/i => '"utf-8-strict"');`],
+    },
+    {
+      // Makes it possible to use `\` as a directory separator on Windows.
+      platform: 'win32',
+      versions: { until: '2020' },
+      file: 'tlpkg/TeXLive/TLUtils.pm',
+      from: ['split (/\\//, $tree)'],
+      to: ['split (/[\\/\\\\]/, $$tree)'],
+    },
+    {
+      // Add support for macOs 11 or later.
+      platform: 'darwin',
+      versions: { since: '2017', until: '2020' },
+      file: 'tlpkg/TeXLive/TLUtils.pm',
+      from: ['$os_major != 10', '$os_minor >= $mactex_darwin'],
+      to: ['$$os_major < 10', '$$os_major >= 11 || $&'],
+    },
+  ];
+  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+  const apply = async (fix: typeof fixes[number]): Promise<void> => {
+    if (
+      (fix.platform === undefined || fix.platform === os.platform()) &&
+      (fix.versions?.since ?? version) <= version &&
+      (fix.versions?.until ?? '9999') > version
+    ) {
+      const target = path.join(base, fix.file);
+      let contents: string;
+      try {
+        contents = await fs.readFile(target, 'utf8');
+      } catch (error) {
+        if (isNativeError(error) && error.code === 'ENOENT') {
+          return;
+        }
         throw error;
       }
-      core.info(`${target} not found`);
+      fix.from.forEach((search, i) => {
+        contents = contents.replace(search, fix.to[i] ?? '');
+      });
+      await fs.writeFile(target, contents);
     }
-  }
+  };
+  await Promise.all(fixes.map(apply));
+}
+
+declare module 'util/types' {
   /**
-   * Fixes a syntax error in `tlpkg/TeXLive/TLWinGoo.pm`.
+   * A type-guard for the error type of Node.js.
+   * Since `NodeJS.ErrnoException` is defined as an interface,
+   * we cannot write `error instanceof NodeJS.ErrnoException`, but
+   * `util.types.isNativeError` is sufficient
+   * because all properties of `NodeJS.ErrnoException` are optional.
    */
-  if (['2009', '2010'].includes(version)) {
-    await util.updateFile(
-      path.join(texdir, 'tlpkg', 'TeXLive', 'TLWinGoo.pm'),
-      {
-        search: /foreach \$p qw\((.*)\)/u,
-        replace: 'foreach $$p (qw($1))',
-      },
-    );
-  }
-  /**
-   * Defines Code Page 65001 as an alias for UTF-8 on Windows.
-   * @see {@link https://github.com/dankogai/p5-encode/issues/37}
-   */
-  if (os.platform() === 'win32' && version === '2015') {
-    await util.updateFile(
-      path.join(texdir, 'tlpkg', 'tlperl', 'lib', 'Encode', 'Alias.pm'),
-      {
-        search: '# utf8 is blessed :)',
-        replace: `$&\n    define_alias(qr/cp65001/i => '"utf-8-strict"');`,
-      },
-    );
-  }
-  /**
-   * Makes it possible to use `\` as a directory separator on Windows.
-   */
-  if (os.platform() === 'win32' && version < '2019') {
-    await util.updateFile(path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'), {
-      search: String.raw`split (/\//, $tree)`,
-      replace: String.raw`split (/[\/\\]/, $tree)`,
-    });
-  }
-  /**
-   * Adds support for macOS 11.x.
-   */
-  if (
-    os.platform() === 'darwin' &&
-    ['2017', '2018', '2019'].includes(version)
-  ) {
-    await util.updateFile(
-      path.join(texdir, 'tlpkg', 'TeXLive', 'TLUtils.pm'),
-      { search: 'if ($os_major != 10)', replace: 'if ($$os_major < 10)' },
-      {
-        search: 'if ($os_minor >= $mactex_darwin)',
-        replace:
-          'if ($$os_major >= 11) { $$CPU = "x86_64"; $$OS = "darwin"; }\n    els$&',
-      },
-    );
-  }
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  function isNativeError(error: unknown): error is NodeJS.ErrnoException;
 }

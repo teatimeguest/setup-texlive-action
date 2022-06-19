@@ -5,6 +5,8 @@ import * as process from 'process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
+import { Exclude, Expose, serialize, deserialize } from 'class-transformer';
+import { cache as Cache } from 'decorator-cache-getter';
 import type { RequiredKeys } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
@@ -12,82 +14,62 @@ import type * as installtl from '#/install-tl';
 import { DependsTxt, Version } from '#/texlive';
 import * as util from '#/utility';
 
-export interface Context {
-  readonly env: Readonly<Env>;
-  readonly inputs: Readonly<Inputs>;
-  readonly outputs: Readonly<Outputs>;
-}
-
-export namespace Context {
-  export async function get(): Promise<Context> {
-    const inputs = await Inputs.get();
-    const outputs = Outputs.get();
-    const env = Env.get(inputs.version);
-    return { env, inputs, outputs };
-  }
-}
-
-export interface Inputs {
-  readonly cache: boolean;
-  readonly packages: ReadonlySet<string>;
-  readonly prefix: string;
-  readonly tlcontrib: boolean;
-  readonly version: Version;
-}
-
-namespace Inputs {
-  export async function get(): Promise<Inputs> {
-    const re = /(?:#.*$|\s+)/mu;
-    const packages = core.getInput('packages').split(re);
-    const packageFile = core.getInput('package-file');
-    if (packageFile !== '') {
-      const contents = await fs.readFile(packageFile, 'utf8');
-      for (const { hard, soft } of DependsTxt.parse(contents).values()) {
-        packages.push(...hard, ...soft);
-      }
-    }
-    const inputs = {
-      cache: core.getBooleanInput('cache'),
-      packages: new Set(packages.sort()),
-      prefix: core.getInput('prefix'),
-      tlcontrib: core.getBooleanInput('tlcontrib'),
-      version: Version.LATEST,
-    };
-    inputs.packages.delete('');
-    if (inputs.cache && !cache.isFeatureAvailable()) {
+export class Inputs {
+  @Cache get cache(): boolean {
+    const input = core.getBooleanInput('cache');
+    if (input && !cache.isFeatureAvailable()) {
       core.warning('Caching is disabled since cache service is not available');
-      inputs.cache = false;
+      return false;
     }
-    if (inputs.prefix === '') {
-      inputs.prefix =
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        process.env['TEXLIVE_INSTALL_PREFIX'] ?? defaultPrefix();
+    return input;
+  }
+
+  @Cache get packages(): ThisType<void> & Promise<Set<string>> {
+    return (async () => {
+      const list = core.getInput('packages').split(/(?:#.*$|\s+)/mu);
+      const file = core.getInput('package-file');
+      if (file !== '') {
+        const contents = await fs.readFile(file, 'utf8');
+        for (const { hard, soft } of DependsTxt.parse(contents).values()) {
+          list.push(...hard, ...soft);
+        }
+      }
+      return new Set(list.filter(Boolean).sort());
+    })();
+  }
+
+  @Cache get prefix(): ThisType<void> & string {
+    const input = core.getInput('prefix');
+    if (input !== '') {
+      return input;
     }
-    const version = core.getInput('version');
-    if (Version.isVersion(version)) {
-      inputs.version = version;
-    } else if (version !== 'latest') {
-      throw new TypeError("version must be specified by year or 'latest'");
+    return process.env['TEXLIVE_INSTALL_PREFIX'] ?? defaultPrefix();
+  }
+
+  @Cache get version(): ThisType<void> & Version {
+    const input = core.getInput('version');
+    if (Version.isVersion(input)) {
+      return input;
     }
-    if (inputs.tlcontrib && inputs.version !== Version.LATEST) {
+    if (input === 'latest') {
+      return Version.LATEST;
+    }
+    throw new TypeError("version must be specified by year or 'latest'");
+  }
+
+  @Cache get tlcontrib(): boolean {
+    const input = core.getBooleanInput('tlcontrib');
+    if (input && !Version.isLatest(this.version)) {
       core.warning('tlcontrib is ignored for an older version');
-      inputs.tlcontrib = false;
+      return false;
     }
-    return inputs;
+    return input;
   }
 }
 
-export interface Outputs {
-  readonly cacheHit: () => void;
-}
-
-namespace Outputs {
-  export function get(): Outputs {
-    return {
-      cacheHit: () => {
-        core.setOutput('cache-hit', true);
-      },
-    };
+export class Outputs {
+  set ['cache-hit'](hit: true) {
+    core.setOutput('cache-hit', hit);
   }
 }
 
@@ -108,7 +90,7 @@ export interface Env {
   readonly ['NOPERLDOC']?: string;
 }
 
-namespace Env {
+export namespace Env {
   export function get(version: Version): Env {
     for (const key of keys<Omit<installtl.Env, keyof Env>>()) {
       if (key in process.env) {
@@ -138,4 +120,34 @@ namespace Env {
 
 function defaultPrefix(): string {
   return path.join(util.tmpdir(), 'setup-texlive');
+}
+
+@Exclude()
+export class State {
+  @Expose() key?: string;
+  @Expose() texdir?: string;
+
+  save(): void {
+    core.saveState('post', serialize(this.validate()));
+  }
+
+  filled(this: Readonly<this>): this is Required<State> {
+    return this.key !== undefined && this.texdir !== undefined;
+  }
+
+  private validate(this: Readonly<this>): this {
+    if ((this.key === undefined) !== (this.texdir === undefined)) {
+      throw new Error(`Unexpected action state: ${serialize(this)}`);
+    }
+    return this;
+  }
+
+  static load(): State | null {
+    const post = core.getState('post');
+    if (post === '') {
+      return null;
+    }
+    const state = deserialize(State, post);
+    return state.validate();
+  }
 }

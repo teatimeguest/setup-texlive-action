@@ -1,33 +1,36 @@
 import * as path from 'path';
 
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
+import { exec, getExecOutput } from '@actions/exec';
 import { cache as Cache } from 'decorator-cache-getter';
-import { DeepWritable } from 'ts-essentials';
+import type { DeepWritable } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
-import * as util from '#/utility';
+import { type Range, determine } from '#/utility';
 
 export namespace Version {
   export function isVersion(version: string): version is Version {
     return keys<Record<Version, unknown>>().includes(version as Version);
   }
 
-  export type Latest = '2022';
-  export const LATEST: Version = '2022';
+  export function isLatest(version: Version): version is typeof LATEST {
+    return version === LATEST;
+  }
+
+  export const LATEST = '2022' as const;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export type Version = util.Range<'1996', Version.Latest> | Version.Latest;
+export type Version = Range<'1996', `=${typeof Version.LATEST}`>;
 
 export interface Texmf {
-  ['TEXDIR']?: string;
-  ['TEXMFCONFIG']?: string;
-  ['TEXMFVAR']?: string;
-  ['TEXMFHOME']?: string;
-  ['TEXMFLOCAL']?: string;
-  ['TEXMFSYSCONFIG']?: string;
-  ['TEXMFSYSVAR']?: string;
+  readonly ['TEXDIR']?: string;
+  readonly ['TEXMFCONFIG']?: string;
+  readonly ['TEXMFVAR']?: string;
+  readonly ['TEXMFHOME']?: string;
+  readonly ['TEXMFLOCAL']?: string;
+  readonly ['TEXMFSYSCONFIG']?: string;
+  readonly ['TEXMFSYSVAR']?: string;
 }
 
 /**
@@ -39,31 +42,29 @@ export class Manager {
     private readonly prefix: string,
   ) {}
 
-  @Cache get conf(): Readonly<{
-    texmf: {
+  @Cache get conf(): ThisType<Readonly<this>> & {
+    readonly texmf: {
       (key: keyof Texmf): Promise<string>;
       (key: keyof Texmf, value: string): Promise<void>;
     };
-  }> {
+  } {
     function texmf(key: keyof Texmf): Promise<string>;
     function texmf(key: keyof Texmf, value: string): Promise<void>;
     async function texmf(
-      this: Readonly<{ version: Version }>,
+      this: { readonly version: Version },
       key: keyof Texmf,
       value?: string,
     ): Promise<string | void> {
       if (value === undefined) {
         return (
-          await exec.getExecOutput('kpsewhich', ['-var-value', key])
+          await getExecOutput('kpsewhich', ['-var-value', key])
         ).stdout.trim();
       }
-      /**
-       * `tlmgr conf` is not implemented before 2010.
-       */
+      // `tlmgr conf` is not implemented prior to 2010.
       if (this.version < '2010') {
         core.exportVariable(key, value);
       } else {
-        await exec.exec('tlmgr', ['conf', 'texmf', key, value]);
+        await exec('tlmgr', ['conf', 'texmf', key, value]);
       }
     }
     return { texmf: texmf.bind({ version: this.version }) };
@@ -71,19 +72,16 @@ export class Manager {
 
   async install(this: void, ...packages: ReadonlyArray<string>): Promise<void> {
     if (packages.length !== 0) {
-      await exec.exec('tlmgr', ['install', ...packages]);
+      await exec('tlmgr', ['install', ...packages]);
     }
   }
 
-  @Cache get path(): Readonly<{ add: () => Promise<void> }> {
+  @Cache get path(): ThisType<Readonly<this>> & {
+    readonly add: () => Promise<void>;
+  } {
     return {
-      /**
-       * Adds the bin directory of TeX Live directly to the PATH.
-       * This method does not invoke `tlmgr path add`
-       * to avoid to create symlinks in the system directory.
-       */
       add: async () => {
-        const binpath = await util.determine(
+        const binpath = await determine(
           path.join(this.prefix, this.version, 'bin', '*'),
         );
         if (binpath === undefined) {
@@ -94,12 +92,12 @@ export class Manager {
     };
   }
 
-  @Cache get pinning(): Readonly<{
-    add: (
+  @Cache get pinning(): ThisType<Readonly<this>> & {
+    readonly add: (
       repo: string,
       ...globs: readonly [string, ...Array<string>]
     ) => Promise<void>;
-  }> {
+  } {
     if (this.version < '2013') {
       throw new Error(
         `\`pinning\` action is not implemented in TeX Live ${this.version}`,
@@ -107,17 +105,17 @@ export class Manager {
     }
     return {
       add: async (repo, ...globs: ReadonlyArray<string>) => {
-        await exec.exec('tlmgr', ['pinning', 'add', repo, ...globs]);
+        await exec('tlmgr', ['pinning', 'add', repo, ...globs]);
       },
     };
   }
 
-  @Cache get repository(): Readonly<{
+  @Cache get repository(): ThisType<Readonly<this>> & {
     /**
      * @returns `false` if the repository already exists, otherwise `true`.
      */
-    add: (repo: string, tag?: string) => Promise<boolean>;
-  }> {
+    readonly add: (repo: string, tag?: string) => Promise<boolean>;
+  } {
     if (this.version < '2012') {
       throw new Error(
         `\`repository\` action is not implemented in TeX Live ${this.version}`,
@@ -125,27 +123,24 @@ export class Manager {
     }
     return {
       add: async (repo, tag?) => {
-        const { exitCode, stderr } = await exec.getExecOutput(
+        const { exitCode, stderr } = await getExecOutput(
           'tlmgr',
           ['repository', 'add', repo, ...(tag === undefined ? [] : [tag])],
           { ignoreReturnCode: true },
         );
-        const success = exitCode === 0;
+        const status = exitCode === 0;
         if (
-          /**
-           * `tlmgr repository add` returns non-zero status code
-           * if the same repository or tag is added again.
-           *
-           * @todo (Need to make sure that the tagged repo is really tlcontrib?)
-           */
-          !success &&
+          // `tlmgr repository add` returns non-zero status code
+          // if the same repository or tag is added again.
+          // (todo:  make sure that the tagged repo is really tlcontrib)
+          !status &&
           !stderr.includes('repository or its tag already defined')
         ) {
           throw new Error(
             `\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`,
           );
         }
-        return success;
+        return status;
       },
     };
   }
@@ -168,8 +163,8 @@ export function historic(version: Version): URL {
 export type DependsTxt = ReadonlyMap<
   string | null,
   {
-    hard: ReadonlySet<string>;
-    soft: ReadonlySet<string>;
+    readonly hard: ReadonlySet<string>;
+    readonly soft: ReadonlySet<string>;
   }
 >;
 

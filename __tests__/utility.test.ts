@@ -1,4 +1,3 @@
-import * as fs from 'fs/promises';
 import * as process from 'process';
 
 import * as cache from '@actions/cache';
@@ -9,11 +8,6 @@ import 'jest-extended';
 
 import * as util from '#/utility';
 
-jest.mock('fs/promises', () => ({
-  readFile: jest.fn(),
-  stat: jest.fn(), // required for @azure/storage-blob
-  writeFile: jest.fn(),
-}));
 jest.mock('os', () => ({
   tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
 }));
@@ -23,25 +17,6 @@ jest.spyOn(glob, 'create').mockResolvedValue({
   glob: async () => ['<globbed>'],
 } as glob.Globber);
 jest.unmock('#/utility');
-
-describe('updateFile', () => {
-  it('updates the contents of the file', async () => {
-    jest
-      .mocked(fs.readFile)
-      .mockResolvedValueOnce(
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
-      );
-    await util.updateFile(
-      '<filename>',
-      { search: /p/gu, replace: 'P' },
-      { search: 'o', replace: 'O' },
-    );
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      '<filename>',
-      'LOrem iPsum dolor sit amet, consectetur adiPiscing elit',
-    );
-  });
-});
 
 describe('extract', () => {
   it('extracts files from a tarball', async () => {
@@ -86,50 +61,6 @@ describe('determine', () => {
       await expect(util.determine('<pattern>')).resolves.toBeUndefined();
     },
   );
-});
-
-describe('saveToolCache', () => {
-  it('saves tool to cache', async () => {
-    await util.saveToolCache('<directory>', '<target>', '<version>');
-    expect(tool.cacheDir).toHaveBeenCalled();
-  });
-
-  it("doesn't itself fail even if storing cache fails", async () => {
-    jest.mocked(tool.cacheDir).mockRejectedValueOnce(new Error(''));
-    await expect(
-      util.saveToolCache('<directory>', '<target>', '<version>'),
-    ).toResolve();
-    expect(core.info).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to add to tool cache: '),
-    );
-  });
-});
-
-describe('restoreToolCache', () => {
-  it('returns undefined if cache not found', async () => {
-    await expect(
-      util.restoreToolCache('<target>', '<version>'),
-    ).resolves.toBeUndefined();
-  });
-
-  it('returns a cache key if cache found', async () => {
-    jest.mocked(tool.find).mockReturnValueOnce('<key>');
-    await expect(util.restoreToolCache('<target>', '<version>')).resolves.toBe(
-      '<key>',
-    );
-  });
-
-  it('returns undefined if cache restoration fails', async () => {
-    jest.mocked(tool.find).mockImplementationOnce(() => {
-      throw new Error('');
-    });
-    await expect(
-      util.restoreToolCache('<target>', '<version>'),
-    ).resolves.toBeUndefined();
-    expect(core.info).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to restore tool cache: '),
-    );
-  });
 });
 
 describe('saveCache', () => {
@@ -177,7 +108,7 @@ describe('restoreCache', () => {
     await expect(
       util.restoreCache('<target>', '<key>', []),
     ).resolves.toBeUndefined();
-    expect(core.info).toHaveBeenCalledWith(
+    expect(core.warning).toHaveBeenCalledWith(
       expect.stringContaining('Failed to restore cache: '),
     );
   });
@@ -191,8 +122,6 @@ describe('tmpdir', () => {
 
   it('returns `os.tmpdir()` if `RUNNER_TEMP` is not set', () => {
     delete process.env['RUNNER_TEMP'];
-    expect(util.tmpdir()).toBe('<tmpdir>');
-    process.env['RUNNER_TEMP'] = '';
     expect(util.tmpdir()).toBe('<tmpdir>');
   });
 });

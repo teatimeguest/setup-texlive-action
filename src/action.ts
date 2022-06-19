@@ -3,18 +3,18 @@ import * as os from 'os';
 
 import * as core from '@actions/core';
 
-import { Context } from '#/context';
+import { Env, Inputs, Outputs, State } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
 import { contrib as tlcontrib, Manager, Version } from '#/texlive';
 import * as util from '#/utility';
 
 export async function run(): Promise<void> {
   try {
-    if (core.getState('post') !== 'true') {
+    const state = State.load();
+    if (state === null) {
       await main();
-      core.saveState('post', true);
-    } else {
-      await post();
+    } else if (state.filled()) {
+      await util.saveCache(state.texdir, state.key);
     }
   } catch (error) {
     if (error instanceof Error && error.stack !== undefined) {
@@ -25,17 +25,22 @@ export async function run(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const { inputs, outputs, env } = await Context.get();
+  const inputs = new Inputs();
+  const outputs = new Outputs();
+  const env = Env.get(inputs.version);
+  const state = new State();
   const profile = new Profile(inputs.version, inputs.prefix);
+  const packages = await inputs.packages;
   let cacheType = undefined;
 
   if (inputs.cache) {
-    const keys = getCacheKeys(inputs.version, inputs.packages);
+    const keys = getCacheKeys(inputs.version, packages);
     cacheType = await core.group('Restoring cache', async () => {
       return await util.restoreCache(profile.TEXDIR, ...keys);
     });
     if (cacheType !== 'primary') {
-      State.set({ key: keys[0], texdir: profile.TEXDIR });
+      state.key = keys[0];
+      state.texdir = profile.TEXDIR;
     }
   }
 
@@ -55,15 +60,16 @@ async function main(): Promise<void> {
   await tlmgr.path.add();
 
   if (cacheType !== undefined) {
-    outputs.cacheHit();
+    outputs['cache-hit'] = true;
     await core.group('Adjusting TEXMF', async () => {
-      /* eslint-disable no-await-in-loop */
       for (const key of ['TEXMFHOME', 'TEXMFCONFIG', 'TEXMFVAR'] as const) {
         const value = env[`TEXLIVE_INSTALL_${key}`];
+        // eslint-disable-next-line no-await-in-loop
         if ((await tlmgr.conf.texmf(key)) !== value) {
+          // eslint-disable-next-line no-await-in-loop
           await tlmgr.conf.texmf(key, value);
         }
-      } /* eslint-enable */
+      }
     });
   }
 
@@ -74,18 +80,13 @@ async function main(): Promise<void> {
     });
   }
 
-  if (cacheType !== 'primary' && inputs.packages.size !== 0) {
+  if (cacheType !== 'primary' && packages.size !== 0) {
     await core.group('Installing packages', async () => {
-      await tlmgr.install(...inputs.packages);
+      await tlmgr.install(...packages);
     });
   }
-}
 
-async function post(): Promise<void> {
-  const { key, texdir } = State.get();
-  if (key !== '' && texdir !== '') {
-    await util.saveCache(texdir, key);
-  }
+  state.save();
 }
 
 function getCacheKeys(
@@ -98,22 +99,4 @@ function getCacheKeys(
   const baseKey = `setup-texlive-${os.platform()}-${os.arch()}-${version}-`;
   const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
   return [primaryKey, [baseKey]];
-}
-
-interface State {
-  readonly key: string;
-  readonly texdir: string;
-}
-
-namespace State {
-  export function get(): State {
-    const key = core.getState('key');
-    const texdir = core.getState('texdir');
-    return { key, texdir };
-  }
-
-  export function set(state: State): void {
-    core.saveState('key', state.key);
-    core.saveState('texdir', state.texdir);
-  }
 }

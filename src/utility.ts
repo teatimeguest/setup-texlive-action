@@ -1,4 +1,3 @@
-import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
 import * as process from 'process';
@@ -8,23 +7,21 @@ import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
-export type ArchiveType = 'tgz' | 'zip';
-
 /**
  * Extracts files from an archive.
  *
  * @returns Path to the directory containing the files.
  */
 export async function extract(
-  filepath: string,
-  kind: ArchiveType,
+  archive: string,
+  kind: 'zip' | 'tgz',
 ): Promise<string> {
   switch (kind) {
     case 'tgz':
-      return await tool.extractTar(filepath, undefined, ['xz', '--strip=1']);
+      return await tool.extractTar(archive, undefined, ['xz', '--strip=1']);
     case 'zip': {
       const subdir = await determine(
-        path.join(await tool.extractZip(filepath), '*'),
+        path.join(await tool.extractZip(archive), '*'),
       );
       if (subdir === undefined) {
         throw new Error('Unable to locate the unzipped directory');
@@ -53,53 +50,14 @@ export async function determine(pattern: string): Promise<string | undefined> {
   return undefined;
 }
 
-export async function saveToolCache(
-  directory: string,
-  target: string,
-  version: string,
-): Promise<void> {
-  try {
-    core.info('Adding to tool cache');
-    await tool.cacheDir(directory, target, version);
-  } catch (error) {
-    core.info(`Failed to add to tool cache: ${error}`);
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(error.stack);
-    }
-  }
-}
-
-export async function restoreToolCache(
-  target: string,
-  version: string,
-): Promise<string | undefined> {
-  try {
-    const dest = tool.find(target, version);
-    if (dest !== '') {
-      core.info('Found in the tool cache');
-      return dest;
-    }
-  } catch (error) {
-    core.info(`Failed to restore tool cache: ${error}`);
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(error.stack);
-    }
-  }
-  return undefined;
-}
-
 export async function saveCache(
   target: string,
   primaryKey: string,
 ): Promise<void> {
   try {
     await cache.saveCache([target], primaryKey);
-    core.info(`Cache saved`);
   } catch (error) {
-    core.warning(`Failed to save to cache: ${error}`);
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(error.stack);
-    }
+    logError('Failed to save to cache', error);
   }
 }
 
@@ -119,55 +77,48 @@ export async function restoreCache(
     }
     core.info('Cache not found');
   } catch (error) {
-    core.info(`Failed to restore cache: ${error}`);
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(error.stack);
-    }
+    logError('Failed to restore cache', error);
   }
   return undefined;
 }
 
 export function tmpdir(): string {
-  const runnerTemp = process.env['RUNNER_TEMP'];
-  return runnerTemp !== undefined && runnerTemp !== ''
-    ? runnerTemp
-    : os.tmpdir();
+  return process.env['RUNNER_TEMP'] ?? os.tmpdir();
 }
 
-/**
- * Updates the contents of a file.
- */
-export async function updateFile(
-  filename: string,
-  ...replacements: ReadonlyArray<
-    Readonly<{ search: string | Readonly<RegExp>; replace: string }>
-  >
-): Promise<void> {
-  const content = await fs.readFile(filename, 'utf8');
-  const updated = replacements.reduce(
-    (str, { search, replace }) => str.replace(search, replace),
-    content,
-  );
-  await fs.writeFile(filename, updated);
+export function logError(msg: string, error: unknown): void {
+  if (error instanceof Error) {
+    core.warning(`${msg}: ${error.message}`);
+    if (error.stack !== undefined) {
+      core.debug(error.stack);
+    }
+  } else {
+    core.warning(`${msg}: ${error}`);
+  }
 }
 
 /**
  * Creates a union type consisting of all string literals from `Begin` to `End`.
  *
  * ```typescript
- * type T = Range<'10', '15'>   // ['10', '11', '12', '13', '14']
- * type U = Range<'foo', 'bar'> // never
+ * type T1 = Range<'10', '15'>    // ['10', '11', '12', '13', '14']
+ * type T1 = Range<'10', '=15'>   // ['10', '11', '12', '13', '14', '15']
+ * type T3 = Range<'foo', 'bar'>  // never
  * ```
  */
-export type Range<Begin extends string, End extends string> = Exclude<
-  keyof Replicate<End, [never]>,
-  keyof Replicate<Begin, [never]>
->;
+export type Range<
+  Begin extends `${number}`,
+  End extends `${'' | '='}${number}`,
+> =
+  | Exclude<
+      keyof Replicate<End extends `=${infer E}` ? E : End, [never]>,
+      keyof Replicate<Begin, [never]>
+    >
+  | (End extends `=${infer E}` ? E : never);
 
-type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
 
 type Init<T> = T extends `${infer L}${Digit}` ? L : never;
-
 type Last<T> = T extends `${Init<T>}${infer N}` ? N : never;
 
 type Replicate<N, T extends Array<unknown>> =
@@ -184,14 +135,3 @@ type Replicate<N, T extends Array<unknown>> =
   : N extends '9' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
   : N extends '10' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
   : [...Replicate<'10', Replicate<Init<N>, T>>, ...Replicate<Last<N>, T>];
-
-declare module 'util/types' {
-  /**
-   * A type-guard for the error type of Node.js.
-   * Since `NodeJS.ErrnoException` is defined as an interface,
-   * we cannot write `error instanceof NodeJS.ErrnoException`, but
-   * `util.types.isNativeError` is sufficient
-   * because all properties of `NodeJS.ErrnoException` are optional.
-   */
-  function isNativeError(error: unknown): error is NodeJS.ErrnoException;
-}

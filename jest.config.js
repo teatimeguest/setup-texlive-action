@@ -12,7 +12,10 @@ module.exports = {
     '^#/(.*)': '<rootDir>/src/$1',
   },
   resetModules: true,
-  setupFilesAfterEnv: ['jest-extended/all'],
+  setupFilesAfterEnv: [
+    '<rootDir>/node_modules/jest-extended/all',
+    '<rootDir>/node_modules/reflect-metadata/Reflect.js',
+  ],
   testEnvironment: 'node',
   testMatch: ['<rootDir>/__tests__/*.test.ts'],
   transform: {
