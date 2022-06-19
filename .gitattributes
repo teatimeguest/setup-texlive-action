@@ -1,5 +1,5 @@
 /.eslintrc linguist-language=yaml
-/.prettierrc linguist-language=toml
+/.prettierrc linguist-language=yaml
 /dist/** linguist-generated=true -diff -merge
 /patches/*.patch -text
 package-lock.json -diff
