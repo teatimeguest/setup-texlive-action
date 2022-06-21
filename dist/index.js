@@ -92,11 +92,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issue = exports.issueCommand = void 0;
-    var os7 = __importStar(require("os"));
+    var os8 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os7.EOL);
+      process.stdout.write(cmd.toString() + os8.EOL);
     }
     exports.issueCommand = issueCommand;
     function issue(name, message = "") {
@@ -180,7 +180,7 @@ var require_file_command = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issueCommand = void 0;
     var fs4 = __importStar(require("fs"));
-    var os7 = __importStar(require("os"));
+    var os8 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, message) {
       const filePath = process.env[`GITHUB_${command}`];
@@ -190,7 +190,7 @@ var require_file_command = __commonJS({
       if (!fs4.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs4.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os7.EOL}`, {
+      fs4.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os8.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -759,12 +759,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info4 = this._prepareRequest(verb, parsedUrl, headers);
+          let info3 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info4, data);
+            response = yield this.requestRaw(info3, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -774,7 +774,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info4, data);
+                return authenticationHandler.handleAuthentication(this, info3, data);
               } else {
                 return response;
               }
@@ -797,8 +797,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info4 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info4, data);
+              info3 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info3, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -819,7 +819,7 @@ var require_lib = __commonJS({
         }
         this._disposed = true;
       }
-      requestRaw(info4, data) {
+      requestRaw(info3, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -831,16 +831,16 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info4, data, callbackForResult);
+            this.requestRawWithCallback(info3, data, callbackForResult);
           });
         });
       }
-      requestRawWithCallback(info4, data, onResult) {
+      requestRawWithCallback(info3, data, onResult) {
         if (typeof data === "string") {
-          if (!info4.options.headers) {
-            info4.options.headers = {};
+          if (!info3.options.headers) {
+            info3.options.headers = {};
           }
-          info4.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info3.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -849,7 +849,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info4.httpModule.request(info4.options, (msg) => {
+        const req = info3.httpModule.request(info3.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -861,7 +861,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info4.options.path}`));
+          handleResult(new Error(`Request timeout: ${info3.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -883,27 +883,27 @@ var require_lib = __commonJS({
         return this._getAgent(parsedUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info4 = {};
-        info4.parsedUrl = requestUrl;
-        const usingSsl = info4.parsedUrl.protocol === "https:";
-        info4.httpModule = usingSsl ? https3 : http3;
+        const info3 = {};
+        info3.parsedUrl = requestUrl;
+        const usingSsl = info3.parsedUrl.protocol === "https:";
+        info3.httpModule = usingSsl ? https3 : http3;
         const defaultPort = usingSsl ? 443 : 80;
-        info4.options = {};
-        info4.options.host = info4.parsedUrl.hostname;
-        info4.options.port = info4.parsedUrl.port ? parseInt(info4.parsedUrl.port) : defaultPort;
-        info4.options.path = (info4.parsedUrl.pathname || "") + (info4.parsedUrl.search || "");
-        info4.options.method = method;
-        info4.options.headers = this._mergeHeaders(headers);
+        info3.options = {};
+        info3.options.host = info3.parsedUrl.hostname;
+        info3.options.port = info3.parsedUrl.port ? parseInt(info3.parsedUrl.port) : defaultPort;
+        info3.options.path = (info3.parsedUrl.pathname || "") + (info3.parsedUrl.search || "");
+        info3.options.method = method;
+        info3.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info4.options.headers["user-agent"] = this.userAgent;
+          info3.options.headers["user-agent"] = this.userAgent;
         }
-        info4.options.agent = this._getAgent(info4.parsedUrl);
+        info3.options.agent = this._getAgent(info3.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info4.options);
+            handler.prepareRequest(info3.options);
           }
         }
-        return info4;
+        return info3;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -1510,7 +1510,7 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os7 = __importStar(require("os"));
+    var os8 = __importStar(require("os"));
     var path5 = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
@@ -1524,7 +1524,7 @@ var require_core = __commonJS({
       const filePath = process.env["GITHUB_ENV"] || "";
       if (filePath) {
         const delimiter2 = "_GitHubActionsFileCommandDelimeter_";
-        const commandValue = `${name}<<${delimiter2}${os7.EOL}${convertedVal}${os7.EOL}${delimiter2}`;
+        const commandValue = `${name}<<${delimiter2}${os8.EOL}${convertedVal}${os8.EOL}${delimiter2}`;
         file_command_1.issueCommand("ENV", commandValue);
       } else {
         command_1.issueCommand("set-env", { name }, convertedVal);
@@ -1574,7 +1574,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.getBooleanInput = getBooleanInput2;
     function setOutput2(name, value) {
-      process.stdout.write(os7.EOL);
+      process.stdout.write(os8.EOL);
       command_1.issueCommand("set-output", { name }, value);
     }
     exports.setOutput = setOutput2;
@@ -1599,18 +1599,18 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       command_1.issueCommand("error", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
     exports.error = error;
-    function warning4(message, properties = {}) {
+    function warning(message, properties = {}) {
       command_1.issueCommand("warning", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
-    exports.warning = warning4;
+    exports.warning = warning;
     function notice(message, properties = {}) {
       command_1.issueCommand("notice", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
     exports.notice = notice;
-    function info4(message) {
-      process.stdout.write(message + os7.EOL);
+    function info3(message) {
+      process.stdout.write(message + os8.EOL);
     }
-    exports.info = info4;
+    exports.info = info3;
     function startGroup(name) {
       command_1.issue("group", name);
     }
@@ -2186,7 +2186,7 @@ var require_toolrunner = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.argStringToArray = exports.ToolRunner = void 0;
-    var os7 = __importStar(require("os"));
+    var os8 = __importStar(require("os"));
     var events = __importStar(require("events"));
     var child = __importStar(require("child_process"));
     var path5 = __importStar(require("path"));
@@ -2241,12 +2241,12 @@ var require_toolrunner = __commonJS({
       _processLineBuffer(data, strBuffer, onLine) {
         try {
           let s = strBuffer + data.toString();
-          let n = s.indexOf(os7.EOL);
+          let n = s.indexOf(os8.EOL);
           while (n > -1) {
             const line = s.substring(0, n);
             onLine(line);
-            s = s.substring(n + os7.EOL.length);
-            n = s.indexOf(os7.EOL);
+            s = s.substring(n + os8.EOL.length);
+            n = s.indexOf(os8.EOL);
           }
           return s;
         } catch (err) {
@@ -2406,7 +2406,7 @@ var require_toolrunner = __commonJS({
             }
             const optionsNonNull = this._cloneExecOptions(this.options);
             if (!optionsNonNull.silent && optionsNonNull.outStream) {
-              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os7.EOL);
+              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os8.EOL);
             }
             const state = new ExecState(optionsNonNull, this.toolPath);
             state.on("debug", (message) => {
@@ -3962,7 +3962,7 @@ var require_internal_pattern = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Pattern = void 0;
-    var os7 = __importStar(require("os"));
+    var os8 = __importStar(require("os"));
     var path5 = __importStar(require("path"));
     var pathHelper = __importStar(require_internal_path_helper());
     var assert_1 = __importDefault(require("assert"));
@@ -4043,7 +4043,7 @@ var require_internal_pattern = __commonJS({
         if (pattern === "." || pattern.startsWith(`.${path5.sep}`)) {
           pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
         } else if (pattern === "~" || pattern.startsWith(`~${path5.sep}`)) {
-          homedir2 = homedir2 || os7.homedir();
+          homedir2 = homedir2 || os8.homedir();
           assert_1.default(homedir2, "Unable to determine HOME directory");
           assert_1.default(pathHelper.hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
           pattern = Pattern.globEscape(homedir2) + pattern.substr(1);
@@ -37530,9 +37530,9 @@ function getRuntimeInfo() {
   return [msRestRuntime];
 }
 function getUserAgentString(telemetryInfo, keySeparator = " ", valueSeparator = "/") {
-  return telemetryInfo.map((info4) => {
-    const value = info4.value ? `${valueSeparator}${info4.value}` : "";
-    return `${info4.key}${value}`;
+  return telemetryInfo.map((info3) => {
+    const value = info3.value ? `${valueSeparator}${info3.value}` : "";
+    return `${info3.key}${value}`;
   }).join(keySeparator);
 }
 function getDefaultUserAgentValue() {
@@ -62383,7 +62383,7 @@ var require_internal_pattern2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Pattern = void 0;
-    var os7 = __importStar(require("os"));
+    var os8 = __importStar(require("os"));
     var path5 = __importStar(require("path"));
     var pathHelper = __importStar(require_internal_path_helper2());
     var assert_1 = __importDefault(require("assert"));
@@ -62464,7 +62464,7 @@ var require_internal_pattern2 = __commonJS({
         if (pattern === "." || pattern.startsWith(`.${path5.sep}`)) {
           pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
         } else if (pattern === "~" || pattern.startsWith(`~${path5.sep}`)) {
-          homedir2 = homedir2 || os7.homedir();
+          homedir2 = homedir2 || os8.homedir();
           assert_1.default(homedir2, "Unable to determine HOME directory");
           assert_1.default(pathHelper.hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
           pattern = Pattern.globEscape(homedir2) + pattern.substr(1);
@@ -63076,12 +63076,12 @@ var require_manifest = __commonJS({
     exports._readLinuxVersionFile = exports._getOsVersion = exports._findMatch = void 0;
     var semver = __importStar(require_semver());
     var core_1 = require_core();
-    var os7 = require("os");
+    var os8 = require("os");
     var cp = require("child_process");
     var fs4 = require("fs");
     function _findMatch(versionSpec, stable, candidates, archFilter) {
       return __awaiter(this, void 0, void 0, function* () {
-        const platFilter = os7.platform();
+        const platFilter = os8.platform();
         let result;
         let match;
         let file;
@@ -63118,7 +63118,7 @@ var require_manifest = __commonJS({
     }
     exports._findMatch = _findMatch;
     function _getOsVersion() {
-      const plat = os7.platform();
+      const plat = os8.platform();
       let version2 = "";
       if (plat === "darwin") {
         version2 = cp.execSync("sw_vers -productVersion").toString();
@@ -63328,7 +63328,7 @@ var require_tool_cache = __commonJS({
     var io = __importStar(require_io());
     var fs4 = __importStar(require("fs"));
     var mm = __importStar(require_manifest());
-    var os7 = __importStar(require("os"));
+    var os8 = __importStar(require("os"));
     var path5 = __importStar(require("path"));
     var httpm = __importStar(require_lib());
     var semver = __importStar(require_semver());
@@ -63607,7 +63607,7 @@ var require_tool_cache = __commonJS({
     function cacheDir2(sourceDir, tool3, version2, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
         version2 = semver.clean(version2) || version2;
-        arch3 = arch3 || os7.arch();
+        arch3 = arch3 || os8.arch();
         core6.debug(`Caching tool ${tool3} ${version2} ${arch3}`);
         core6.debug(`source dir: ${sourceDir}`);
         if (!fs4.statSync(sourceDir).isDirectory()) {
@@ -63626,7 +63626,7 @@ var require_tool_cache = __commonJS({
     function cacheFile(sourceFile, targetFile, tool3, version2, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
         version2 = semver.clean(version2) || version2;
-        arch3 = arch3 || os7.arch();
+        arch3 = arch3 || os8.arch();
         core6.debug(`Caching tool ${tool3} ${version2} ${arch3}`);
         core6.debug(`source file: ${sourceFile}`);
         if (!fs4.statSync(sourceFile).isFile()) {
@@ -63648,7 +63648,7 @@ var require_tool_cache = __commonJS({
       if (!versionSpec) {
         throw new Error("versionSpec parameter is required");
       }
-      arch3 = arch3 || os7.arch();
+      arch3 = arch3 || os8.arch();
       if (!isExplicitVersion(versionSpec)) {
         const localVersions = findAllVersions(toolName, arch3);
         const match = evaluateVersions(localVersions, versionSpec);
@@ -63671,7 +63671,7 @@ var require_tool_cache = __commonJS({
     exports.find = find3;
     function findAllVersions(toolName, arch3) {
       const versions = [];
-      arch3 = arch3 || os7.arch();
+      arch3 = arch3 || os8.arch();
       const toolPath = path5.join(_getCacheDirectory(), toolName);
       if (fs4.existsSync(toolPath)) {
         const children2 = fs4.readdirSync(toolPath);
@@ -63722,7 +63722,7 @@ var require_tool_cache = __commonJS({
       });
     }
     exports.getManifestFromRepo = getManifestFromRepo;
-    function findFromManifest(versionSpec, stable, manifest, archFilter = os7.arch()) {
+    function findFromManifest(versionSpec, stable, manifest, archFilter = os8.arch()) {
       return __awaiter(this, void 0, void 0, function* () {
         const match = yield mm._findMatch(versionSpec, stable, manifest, archFilter);
         return match;
@@ -64532,7 +64532,7 @@ var Reflect2;
 
 // lib/action.js
 var crypto3 = __toESM(require("crypto"));
-var os6 = __toESM(require("os"));
+var os7 = __toESM(require("os"));
 var core5 = __toESM(require_core());
 
 // node_modules/tslib/tslib.es6.js
@@ -64553,11 +64553,11 @@ function __metadata(metadataKey, metadataValue) {
 
 // lib/context.js
 var fs2 = __toESM(require("fs/promises"));
-var os4 = __toESM(require("os"));
+var os5 = __toESM(require("os"));
 var path3 = __toESM(require("path"));
 var process3 = __toESM(require("process"));
 var cache2 = __toESM(require_cache());
-var core3 = __toESM(require_core());
+var core4 = __toESM(require_core());
 
 // node_modules/class-transformer/esm5/enums/transformation-type.enum.js
 var TransformationType;
@@ -65310,9 +65310,33 @@ function deserialize(cls, json, options) {
 // lib/context.js
 var import_decorator_cache_getter2 = __toESM(require_dist());
 
+// lib/log.js
+var core = __toESM(require_core());
+function log2(message, { level = "info", cause } = {}) {
+  const logger3 = core[level === "warn" ? "warning" : level];
+  if (cause === void 0) {
+    logger3(message);
+  } else {
+    logger3(`${message}: Caused by ${cause}`);
+    if (cause instanceof Error && cause.stack !== void 0) {
+      core.debug(cause.stack);
+    }
+  }
+}
+function debug2(message, options) {
+  log2(message, { ...options, level: "debug" });
+}
+function info(message, options) {
+  log2(message, { ...options, level: "info" });
+}
+function warn(message, options) {
+  log2(message, { ...options, level: "warn" });
+}
+
 // lib/texlive.js
+var os4 = __toESM(require("os"));
 var path2 = __toESM(require("path"));
-var core2 = __toESM(require_core());
+var core3 = __toESM(require_core());
 var import_exec = __toESM(require_exec());
 var import_decorator_cache_getter = __toESM(require_dist());
 
@@ -65321,17 +65345,19 @@ var os3 = __toESM(require("os"));
 var path = __toESM(require("path"));
 var process2 = __toESM(require("process"));
 var cache = __toESM(require_cache());
-var core = __toESM(require_core());
+var core2 = __toESM(require_core());
 var glob = __toESM(require_glob2());
 var tool = __toESM(require_tool_cache());
 async function extract(archive, kind) {
   switch (kind) {
-    case "tgz":
+    case "tgz": {
       return await tool.extractTar(archive, void 0, ["xz", "--strip=1"]);
+    }
     case "zip": {
-      const subdir = await determine(path.join(await tool.extractZip(archive), "*"));
+      const pattern = path.join(await tool.extractZip(archive), "*");
+      const subdir = await determine(pattern);
       if (subdir === void 0) {
-        throw new Error("Unable to locate the unzipped directory");
+        throw new Error(`Unable to locate subdirectory matched to ${pattern}`);
       }
       return subdir;
     }
@@ -65343,14 +65369,18 @@ async function determine(pattern) {
   if (matched.length === 1) {
     return matched[0];
   }
-  core.debug(`Found ${matched.length === 0 ? "no" : "multiple"} matches to the pattern ${pattern}${matched.length === 0 ? "" : `: ${matched}`}`);
+  if (matched.length === 0) {
+    debug2(`No matches to pattern \`${pattern}\` found`);
+  } else {
+    debug2(`Multiple matches to pattern \`${pattern}\` found: ${matched}`);
+  }
   return void 0;
 }
 async function saveCache2(target, primaryKey) {
   try {
     await cache.saveCache([target], primaryKey);
   } catch (error) {
-    logError("Failed to save to cache", error);
+    warn("Failed to save to cache", { cause: error });
   }
 }
 async function restoreCache2(target, primaryKey, restoreKeys) {
@@ -65360,38 +65390,43 @@ async function restoreCache2(target, primaryKey, restoreKeys) {
     if (key !== void 0) {
       return key === primaryKey ? "primary" : "secondary";
     }
-    core.info("Cache not found");
+    core2.info("Cache not found");
   } catch (error) {
-    logError("Failed to restore cache", error);
+    warn("Failed to restore cache", { cause: error });
   }
   return void 0;
 }
 function tmpdir2() {
   return process2.env["RUNNER_TEMP"] ?? os3.tmpdir();
 }
-function logError(msg, error) {
-  if (error instanceof Error) {
-    core.warning(`${msg}: ${error.message}`);
-    if (error.stack !== void 0) {
-      core.debug(error.stack);
-    }
-  } else {
-    core.warning(`${msg}: ${error}`);
-  }
-}
 
 // lib/texlive.js
 var Version;
 (function(Version3) {
+  Version3.LATEST = "2022";
   function isVersion(version2) {
-    return ["1996", "2022", "2020", "2021", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"].includes(version2);
+    const versions = ["2022", "2008", "2020", "2021", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"];
+    return versions.includes(version2);
   }
   Version3.isVersion = isVersion;
   function isLatest(version2) {
     return version2 === Version3.LATEST;
   }
   Version3.isLatest = isLatest;
-  Version3.LATEST = "2022";
+  function validate2(version2) {
+    if (isVersion(version2)) {
+      if (os4.platform() === "darwin" && version2 < "2013") {
+        throw new RangeError("Versions prior to 2013 does not work on 64-bit macOS");
+      }
+      return version2;
+    }
+    if (/^199[6-9]|200[0-7]$/u.test(version2)) {
+      throw new RangeError("Versions prior to 2008 are not supported");
+    } else {
+      throw new TypeError(`'${version2}' is not a valid version`);
+    }
+  }
+  Version3.validate = validate2;
 })(Version || (Version = {}));
 var Manager = class {
   constructor(version2, prefix2) {
@@ -65404,7 +65439,7 @@ var Manager = class {
         return (await (0, import_exec.getExecOutput)("kpsewhich", ["-var-value", key])).stdout.trim();
       }
       if (this.version < "2010") {
-        core2.exportVariable(key, value);
+        core3.exportVariable(key, value);
       } else {
         await (0, import_exec.exec)("tlmgr", ["conf", "texmf", key, value]);
       }
@@ -65421,15 +65456,15 @@ var Manager = class {
       add: async () => {
         const binpath = await determine(path2.join(this.prefix, this.version, "bin", "*"));
         if (binpath === void 0) {
-          throw new Error("Unable to locate the bin directory");
+          throw new Error("Unable to locate TeX Live's binary directory");
         }
-        core2.addPath(binpath);
+        core3.addPath(binpath);
       }
     };
   }
   get pinning() {
     if (this.version < "2013") {
-      throw new Error(`\`pinning\` action is not implemented in TeX Live ${this.version}`);
+      throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${this.version}`);
     }
     return {
       add: async (repo, ...globs) => {
@@ -65439,7 +65474,7 @@ var Manager = class {
   }
   get repository() {
     if (this.version < "2012") {
-      throw new Error(`\`repository\` action is not implemented in TeX Live ${this.version}`);
+      throw new RangeError(`\`repository\` action is not implemented in TeX Live ${this.version}`);
     }
     return {
       add: async (repo, tag) => {
@@ -65510,12 +65545,12 @@ var DependsTxt;
   DependsTxt2.parse = parse2;
   function* eachPackage(txt) {
     const [chunk = "", ...rest] = txt.split(/^\s*package(?=\s|$)(.*)$/mu);
-    yield [null, chunk];
+    yield ["", chunk];
     for (let i = 0; i < rest.length; ++i) {
       let name = (rest[i] ?? "").trim();
       if (name === "" || /\s/u.test(name)) {
-        core2.warning("package directive must have exactly one argument");
-        name = null;
+        warn(`\`package\` directive must have exactly one argument, but given ${name.length}: ${name}`);
+        name = "";
       }
       yield [name, rest[++i] ?? ""];
     }
@@ -65526,17 +65561,17 @@ var DependsTxt;
 var State_1;
 var Inputs = class {
   get cache() {
-    const input = core3.getBooleanInput("cache");
+    const input = core4.getBooleanInput("cache");
     if (input && !cache2.isFeatureAvailable()) {
-      core3.warning("Caching is disabled since cache service is not available");
+      warn("Caching is disabled because cache service is not available");
       return false;
     }
     return input;
   }
   get packages() {
     return (async () => {
-      const list = core3.getInput("packages").split(/(?:#.*$|\s+)/mu);
-      const file = core3.getInput("package-file");
+      const list = core4.getInput("packages").split(/(?:#.*$|\s+)/mu);
+      const file = core4.getInput("package-file");
       if (file !== "") {
         const contents = await fs2.readFile(file, "utf8");
         for (const { hard, soft } of DependsTxt.parse(contents).values()) {
@@ -65547,26 +65582,27 @@ var Inputs = class {
     })();
   }
   get prefix() {
-    const input = core3.getInput("prefix");
+    const input = core4.getInput("prefix");
     if (input !== "") {
       return path3.normalize(input);
     }
     return path3.normalize(process3.env["TEXLIVE_INSTALL_PREFIX"] ?? defaultPrefix());
   }
   get version() {
-    const input = core3.getInput("version");
-    if (Version.isVersion(input)) {
-      return input;
-    }
+    const input = core4.getInput("version");
     if (input === "latest") {
       return Version.LATEST;
     }
-    throw new TypeError("version must be specified by year or 'latest'");
+    try {
+      return Version.validate(input);
+    } catch (error) {
+      throw new TypeError(`Version must be specified by year or 'latest': Caused by ${error}`);
+    }
   }
   get tlcontrib() {
-    const input = core3.getBooleanInput("tlcontrib");
+    const input = core4.getBooleanInput("tlcontrib");
     if (input && !Version.isLatest(this.version)) {
-      core3.warning("tlcontrib is ignored for an older version");
+      warn("`tlcontrib` is currently ignored for older versions");
       return false;
     }
     return input;
@@ -65599,7 +65635,7 @@ __decorate([
 ], Inputs.prototype, "tlcontrib", null);
 var Outputs = class {
   set ["cache-hit"](hit) {
-    core3.setOutput("cache-hit", hit);
+    core4.setOutput("cache-hit", hit);
   }
 };
 var Env;
@@ -65607,7 +65643,7 @@ var Env;
   function get(version2) {
     for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFLOCAL", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
       if (key in process3.env) {
-        core3.warning(`${key} is set, but ignored`);
+        warn(`\`${key}\` is set, but ignored`);
         delete process3.env[key];
       }
     }
@@ -65618,7 +65654,7 @@ var Env;
   }
   Env2.get = get;
   function defaults(version2) {
-    const home = os4.homedir();
+    const home = os5.homedir();
     const texdir = path3.join(home, ".local", "texlive", version2);
     return {
       ["TEXLIVE_INSTALL_ENV_NOCHECK"]: "1",
@@ -65631,12 +65667,9 @@ var Env;
   }
   Env2.defaults = defaults;
 })(Env || (Env = {}));
-function defaultPrefix() {
-  return path3.join(tmpdir2(), "setup-texlive");
-}
 var State = State_1 = class State2 {
   save() {
-    core3.saveState("post", serialize(this.validate()));
+    core4.saveState("post", serialize(this.validate()));
   }
   filled() {
     return this.key !== void 0 && this.texdir !== void 0;
@@ -65648,12 +65681,8 @@ var State = State_1 = class State2 {
     return this;
   }
   static load() {
-    const post = core3.getState("post");
-    if (post === "") {
-      return null;
-    }
-    const state = deserialize(State_1, post);
-    return state.validate();
+    const post = core4.getState("post");
+    return post === "" ? null : deserialize(State_1, post).validate();
   }
 };
 __decorate([
@@ -65667,16 +65696,19 @@ __decorate([
 State = State_1 = __decorate([
   Exclude()
 ], State);
+function defaultPrefix() {
+  return path3.join(tmpdir2(), "setup-texlive");
+}
 
 // lib/install-tl.js
 var fs3 = __toESM(require("fs/promises"));
-var os5 = __toESM(require("os"));
+var os6 = __toESM(require("os"));
 var path4 = __toESM(require("path"));
 var import_types3 = require("util/types");
-var core4 = __toESM(require_core());
 var import_exec2 = __toESM(require_exec());
 var import_io = __toESM(require_io());
 var tool2 = __toESM(require_tool_cache());
+var Profile_1;
 var Version2 = Version;
 var InstallTL = class {
   constructor(version2, installtl) {
@@ -65695,49 +65727,41 @@ var InstallTL = class {
       }
       await (0, import_exec2.exec)(this.installtl, options);
     }
-    core4.info("Applying patches");
+    info("Applying patches");
     await patch(this.version, profile.TEXDIR);
   }
-  static async acquire(version2) {
-    if (version2 < "2008") {
-      throw new RangeError("Versions prior to 2008 are not supported");
-    } else if (os5.platform() === "darwin" && version2 < "2013") {
-      throw new RangeError("Versions prior to 2013 does not work on 64-bit macOS since the binaries are 32-bit executable");
-    }
-    return await InstallTL.restore(version2) ?? await InstallTL.download(version2);
-  }
-  static async restore(version2) {
+  static restore(version2) {
     let dest = "";
     try {
       dest = tool2.find(InstallTL.archive(), version2);
     } catch (error) {
-      logError("Failed to restore tool cache", error);
+      info("Failed to restore installer", { cause: error });
     }
     if (dest === "") {
       return void 0;
     } else {
-      core4.info("Found in tool cache");
+      info("Found in tool cache");
       return new InstallTL(version2, path4.join(dest, InstallTL.executable(version2)));
     }
   }
   static async download(version2) {
     const url2 = InstallTL.url(version2).href;
-    core4.info(`Downloading ${url2}`);
+    info(`Downloading ${url2}`);
     const archive = await tool2.downloadTool(url2);
-    core4.info(`Extracting from ${archive}`);
-    const dest = await extract(archive, os5.platform() === "win32" ? "zip" : "tgz");
-    core4.info("Applying patches");
+    info(`Extracting installer from ${archive}`);
+    const dest = await extract(archive, os6.platform() === "win32" ? "zip" : "tgz");
+    info("Applying patches");
     await patch(version2, dest);
     try {
-      core4.info("Adding to tool cache");
+      info("Adding to tool cache");
       await tool2.cacheDir(dest, InstallTL.archive(), version2);
     } catch (error) {
-      logError("Failed to add to tool cache", error);
+      info("Failed to cache installer", { cause: error });
     }
     return new InstallTL(version2, path4.join(dest, InstallTL.executable(version2)));
   }
-  static executable(version2, platform3 = os5.platform()) {
-    if (platform3 !== "win32") {
+  static executable(version2, platform4 = os6.platform()) {
+    if (platform4 !== "win32") {
       return "install-tl";
     } else if (version2 < "2013") {
       return "install-tl.bat";
@@ -65746,7 +65770,7 @@ var InstallTL = class {
     }
   }
   static archive() {
-    return os5.platform() === "win32" ? "install-tl.zip" : "install-tl-unx.tar.gz";
+    return os6.platform() === "win32" ? "install-tl.zip" : "install-tl-unx.tar.gz";
   }
   static url(version2) {
     let target = InstallTL.archive();
@@ -65756,7 +65780,7 @@ var InstallTL = class {
     return new URL(target, historic(version2));
   }
 };
-var Profile = class Profile2 {
+var Profile = Profile_1 = class Profile2 {
   constructor(version2, prefix2) {
     this.version = version2;
     this["instopt_adjustpath"] = false;
@@ -65775,21 +65799,22 @@ var Profile = class Profile2 {
     this.instopt_adjustrepo = Version2.isLatest(version2);
   }
   async *open() {
-    const tmpdir3 = await fs3.mkdtemp(path4.join(tmpdir2(), "setup-texlive-"));
-    const target = path4.join(tmpdir3, "texlive.profile");
+    const tmp = await fs3.mkdtemp(path4.join(tmpdir2(), "setup-texlive-"));
+    const target = path4.join(tmp, "texlive.profile");
     await fs3.writeFile(target, this.toString());
     try {
       yield target;
     } finally {
-      await (0, import_io.rmRF)(tmpdir3);
+      await (0, import_io.rmRF)(tmp);
     }
   }
   toString() {
     const plain = instanceToPlain(this, {
       version: Number(this.version),
-      groups: [os5.platform()]
+      groups: [os6.platform()]
     });
-    return Object.entries(plain).map(([key, value]) => `${key} ${value}`).join("\n");
+    const entries = Object.entries(plain);
+    return entries.map((entry) => entry.join(" ")).join("\n");
   }
   get ["option_symlinks"]() {
     return this.instopt_adjustpath;
@@ -65819,6 +65844,11 @@ var Profile = class Profile2 {
     return this.tlpdbopt_w32_multi_user;
   }
 };
+(() => {
+  for (const key of ["instopt_adjustpath", "instopt_adjustrepo", "tlpdbopt_autobackup", "tlpdbopt_install_docfiles", "tlpdbopt_install_srcfiles", "tlpdbopt_desktop_integration", "tlpdbopt_file_assocs", "tlpdbopt_w32_multi_user", "option_menu_integration", "option_symlinks", "option_path", "option_adjustrepo", "option_autobackup", "option_doc", "option_src", "option_desktop_integration", "option_file_assocs", "option_w32_multi_user"]) {
+    Type(() => Number)(Profile_1.prototype, key);
+  }
+})();
 __decorate([
   Expose(),
   __metadata("design:type", String)
@@ -65841,104 +65871,86 @@ __decorate([
 ], Profile.prototype, "TEXMFSYSVAR", void 0);
 __decorate([
   Expose({ since: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean)
 ], Profile.prototype, "instopt_adjustpath", void 0);
 __decorate([
   Expose({ since: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean)
 ], Profile.prototype, "instopt_adjustrepo", void 0);
 __decorate([
   Expose({ since: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean)
 ], Profile.prototype, "tlpdbopt_autobackup", void 0);
 __decorate([
   Expose({ since: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean)
 ], Profile.prototype, "tlpdbopt_install_docfiles", void 0);
 __decorate([
   Expose({ since: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean)
 ], Profile.prototype, "tlpdbopt_install_srcfiles", void 0);
 __decorate([
   Expose({ since: 2017, groups: ["win32"] }),
-  Type(() => Number),
   __metadata("design:type", Boolean)
 ], Profile.prototype, "tlpdbopt_desktop_integration", void 0);
 __decorate([
   Expose({ since: 2017, groups: ["win32"] }),
-  Type(() => Number),
   __metadata("design:type", Boolean)
 ], Profile.prototype, "tlpdbopt_file_assocs", void 0);
 __decorate([
   Expose({ since: 2017, groups: ["win32"] }),
-  Type(() => Number),
   __metadata("design:type", Boolean)
 ], Profile.prototype, "tlpdbopt_w32_multi_user", void 0);
 __decorate([
   Expose({ since: 2012, until: 2017, groups: ["win32"] }),
-  Type(() => Number),
   __metadata("design:type", Boolean)
 ], Profile.prototype, "option_menu_integration", void 0);
 __decorate([
   Expose({ until: 2009 }),
-  Type(() => Number),
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_symlinks", null);
 __decorate([
   Expose({ since: 2009, until: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_path", null);
 __decorate([
   Expose({ since: 2011, until: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_adjustrepo", null);
 __decorate([
   Expose({ until: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_autobackup", null);
 __decorate([
   Expose({ until: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_doc", null);
 __decorate([
   Expose({ until: 2017 }),
-  Type(() => Number),
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_src", null);
 __decorate([
   Expose({ since: 2009, until: 2017, groups: ["win32"] }),
-  Type(() => Number),
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_desktop_integration", null);
 __decorate([
   Expose({ until: 2017, groups: ["win32"] }),
-  Type(() => Number),
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_file_assocs", null);
 __decorate([
   Expose({ since: 2009, until: 2017, groups: ["win32"] }),
-  Type(() => Number),
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_w32_multi_user", null);
-Profile = __decorate([
+Profile = Profile_1 = __decorate([
   Exclude(),
   __metadata("design:paramtypes", [String, String])
 ], Profile);
@@ -65979,13 +65991,14 @@ async function patch(version2, base) {
     }
   ];
   const apply = async (fix) => {
-    if ((fix.platform === void 0 || fix.platform === os5.platform()) && (fix.versions?.since ?? version2) <= version2 && (fix.versions?.until ?? "9999") > version2) {
+    if ((fix.platform === void 0 || fix.platform === os6.platform()) && (fix.versions?.since ?? version2) <= version2 && (fix.versions?.until ?? "9999") > version2) {
       const target = path4.join(base, fix.file);
       let contents;
       try {
         contents = await fs3.readFile(target, "utf8");
       } catch (error) {
         if ((0, import_types3.isNativeError)(error) && error.code === "ENOENT") {
+          debug2(`${target} not found`);
           return;
         }
         throw error;
@@ -66009,10 +66022,11 @@ async function run() {
       await saveCache2(state.texdir, state.key);
     }
   } catch (error) {
-    if (error instanceof Error && error.stack !== void 0) {
-      core5.debug(`The action failed: ${error.stack}`);
+    if (error instanceof Error) {
+      core5.setFailed(error.stack ?? error);
+    } else {
+      core5.setFailed(`${error}`);
     }
-    core5.setFailed(`${error}`);
   }
 }
 async function main() {
@@ -66035,10 +66049,10 @@ async function main() {
   }
   if (cacheType === void 0) {
     const installtl = await core5.group("Acquiring install-tl", async () => {
-      return await InstallTL.acquire(inputs.version);
+      return InstallTL.restore(inputs.version) ?? await InstallTL.download(inputs.version);
     });
     await core5.group("Installation profile", async () => {
-      core5.info(profile.toString());
+      info(profile.toString());
     });
     await core5.group("Installing TeX Live", async () => {
       await installtl.run(profile);
@@ -66077,7 +66091,7 @@ function getCacheKeys(version2, packages) {
   const digest = (s) => {
     return crypto3.createHash("sha256").update(s).digest("hex");
   };
-  const baseKey = `setup-texlive-${os6.platform()}-${os6.arch()}-${version2}-`;
+  const baseKey = `setup-texlive-${os7.platform()}-${os7.arch()}-${version2}-`;
   const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
   return [primaryKey, [baseKey]];
 }

@@ -5,6 +5,7 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import 'jest-extended';
 
+import * as log from '#/log';
 import { Version } from '#/texlive';
 import { Env, Inputs, Outputs, State } from '#/context';
 
@@ -13,6 +14,7 @@ jest.mock('fs/promises', () => ({
 }));
 jest.mock('os', () => ({
   homedir: jest.fn().mockReturnValue('~'),
+  platform: jest.fn().mockReturnValue('linux'),
 }));
 jest.mock('path', () => jest.requireActual('path/posix'));
 // eslint-disable-next-line node/prefer-global/process
@@ -61,8 +63,8 @@ describe('Inputs', () => {
       process.env['INPUT_CACHE'] = 'true';
       jest.mocked(cache.isFeatureAvailable).mockReturnValueOnce(false);
       expect(new Inputs()).toHaveProperty('cache', false);
-      expect(core.warning).toHaveBeenCalledWith(
-        'Caching is disabled since cache service is not available',
+      expect(log.warn).toHaveBeenCalledWith(
+        'Caching is disabled because cache service is not available',
       );
     });
   });
@@ -142,8 +144,8 @@ describe('Inputs', () => {
       process.env['INPUT_TLCONTRIB'] = 'true';
       process.env['INPUT_VERSION'] = '2010';
       expect(new Inputs()).toHaveProperty('tlcontrib', false);
-      expect(core.warning).toHaveBeenCalledWith(
-        'tlcontrib is ignored for an older version',
+      expect(log.warn).toHaveBeenCalledWith(
+        '`tlcontrib` is currently ignored for older versions',
       );
     });
   });
@@ -161,7 +163,7 @@ describe('Inputs', () => {
     it('fails with invalid input', () => {
       process.env['INPUT_VERSION'] = 'version';
       expect(() => new Inputs().version).toThrow(
-        "version must be specified by year or 'latest'",
+        "Version must be specified by year or 'latest'",
       );
     });
   });
@@ -192,8 +194,8 @@ describe('Env', () => {
       'TEXLIVE_INSTALL_TEXDIR',
     );
     expect(process.env).not.toHaveProperty('TEXLIVE_INSTALL_TEXDIR');
-    expect(core.warning).toHaveBeenCalledWith(
-      'TEXLIVE_INSTALL_TEXDIR is set, but ignored',
+    expect(log.warn).toHaveBeenCalledWith(
+      '`TEXLIVE_INSTALL_TEXDIR` is set, but ignored',
     );
   });
 

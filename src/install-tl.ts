@@ -3,15 +3,17 @@ import * as os from 'os';
 import * as path from 'path';
 import { isNativeError } from 'util/types';
 
-import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 import { rmRF as rm } from '@actions/io';
 import * as tool from '@actions/tool-cache';
 import { Exclude, Expose, Type, instanceToPlain } from 'class-transformer';
+import type { PickProperties } from 'ts-essentials';
+import { keys } from 'ts-transformer-keys';
 
+import * as log from '#/log';
 import * as tl from '#/texlive';
 import Version = tl.Version;
-import * as util from '#/utility';
+import { extract, tmpdir } from '#/utility';
 
 /**
  * A class for downloading and running the installer of TeX Live.
@@ -40,36 +42,21 @@ export class InstallTL {
       }
       await exec(this.installtl, options);
     }
-    core.info('Applying patches');
+    log.info('Applying patches');
     await patch(this.version, profile.TEXDIR);
   }
 
-  static async acquire(version: Version): Promise<InstallTL> {
-    if (version < '2008') {
-      throw new RangeError('Versions prior to 2008 are not supported');
-    } else if (os.platform() === 'darwin' && version < '2013') {
-      throw new RangeError(
-        'Versions prior to 2013 does not work on 64-bit macOS' +
-          ' since the binaries are 32-bit executable',
-      );
-    }
-    return (
-      (await InstallTL.restore(version)) ?? (await InstallTL.download(version))
-    );
-  }
-
-  static async restore(version: Version): Promise<InstallTL | undefined> {
+  static restore(version: Version): InstallTL | undefined {
     let dest = '';
     try {
       dest = tool.find(InstallTL.archive(), version);
     } catch (error) {
-      util.logError('Failed to restore tool cache', error);
+      log.info('Failed to restore installer', { cause: error });
     }
-
     if (dest === '') {
       return undefined;
     } else {
-      core.info('Found in tool cache');
+      log.info('Found in tool cache');
       return new InstallTL(
         version,
         path.join(dest, InstallTL.executable(version)),
@@ -79,23 +66,23 @@ export class InstallTL {
 
   static async download(version: Version): Promise<InstallTL> {
     const url = InstallTL.url(version).href;
-    core.info(`Downloading ${url}`);
+    log.info(`Downloading ${url}`);
     const archive = await tool.downloadTool(url);
 
-    core.info(`Extracting from ${archive}`);
-    const dest = await util.extract(
+    log.info(`Extracting installer from ${archive}`);
+    const dest = await extract(
       archive,
       os.platform() === 'win32' ? 'zip' : 'tgz',
     );
 
-    core.info('Applying patches');
+    log.info('Applying patches');
     await patch(version, dest);
 
     try {
-      core.info('Adding to tool cache');
+      log.info('Adding to tool cache');
       await tool.cacheDir(dest, InstallTL.archive(), version);
     } catch (error) {
-      util.logError('Failed to add to tool cache', error);
+      log.info('Failed to cache installer', { cause: error });
     }
 
     return new InstallTL(
@@ -168,13 +155,13 @@ export class Profile {
   }
 
   async *open(this: Readonly<this>): AsyncGenerator<string, void> {
-    const tmpdir = await fs.mkdtemp(path.join(util.tmpdir(), 'setup-texlive-'));
-    const target = path.join(tmpdir, 'texlive.profile');
+    const tmp = await fs.mkdtemp(path.join(tmpdir(), 'setup-texlive-'));
+    const target = path.join(tmp, 'texlive.profile');
     await fs.writeFile(target, this.toString());
     try {
       yield target;
     } finally {
-      await rm(tmpdir);
+      await rm(tmp);
     }
   }
 
@@ -183,9 +170,8 @@ export class Profile {
       version: Number(this.version),
       groups: [os.platform()],
     });
-    return Object.entries(plain)
-      .map(([key, value]) => `${key} ${value}`)
-      .join('\n');
+    const entries = Object.entries(plain);
+    return entries.map((entry) => entry.join(' ')).join('\n');
   }
 
   @Expose() readonly ['selected_scheme']: string;
@@ -196,82 +182,70 @@ export class Profile {
   @Expose() readonly ['TEXMFSYSVAR']: string;
 
   @Expose({ since: 2017 })
-  @Type(() => Number)
   readonly ['instopt_adjustpath']: boolean = false;
   @Expose({ since: 2017 })
-  @Type(() => Number)
   readonly ['instopt_adjustrepo']: boolean;
   @Expose({ since: 2017 })
-  @Type(() => Number)
   readonly ['tlpdbopt_autobackup']: boolean = false;
   @Expose({ since: 2017 })
-  @Type(() => Number)
   readonly ['tlpdbopt_install_docfiles']: boolean = false;
   @Expose({ since: 2017 })
-  @Type(() => Number)
   readonly ['tlpdbopt_install_srcfiles']: boolean = false;
 
   // Options for Windows
   @Expose({ since: 2017, groups: ['win32'] })
-  @Type(() => Number)
   readonly ['tlpdbopt_desktop_integration']: boolean = false;
   @Expose({ since: 2017, groups: ['win32'] })
-  @Type(() => Number)
   readonly ['tlpdbopt_file_assocs']: boolean = false;
   @Expose({ since: 2017, groups: ['win32'] })
-  @Type(() => Number)
   readonly ['tlpdbopt_w32_multi_user']: boolean = false;
 
   // Deleted option
   @Expose({ since: 2012, until: 2017, groups: ['win32'] })
-  @Type(() => Number)
   readonly ['option_menu_integration']: boolean = false;
 
   // Old option names
   @Expose({ until: 2009 })
-  @Type(() => Number)
   get ['option_symlinks'](): boolean {
     return this.instopt_adjustpath;
   }
   @Expose({ since: 2009, until: 2017 })
-  @Type(() => Number)
   get ['option_path'](): boolean {
     return this.instopt_adjustpath;
   }
   @Expose({ since: 2011, until: 2017 })
-  @Type(() => Number)
   get ['option_adjustrepo'](): boolean {
     return this.instopt_adjustrepo;
   }
   @Expose({ until: 2017 })
-  @Type(() => Number)
   get ['option_autobackup'](): boolean {
     return this.tlpdbopt_autobackup;
   }
   @Expose({ until: 2017 })
-  @Type(() => Number)
   get ['option_doc'](): boolean {
     return this.tlpdbopt_install_docfiles;
   }
   @Expose({ until: 2017 })
-  @Type(() => Number)
   get ['option_src'](): boolean {
     return this.tlpdbopt_install_srcfiles;
   }
   @Expose({ since: 2009, until: 2017, groups: ['win32'] })
-  @Type(() => Number)
   get ['option_desktop_integration'](): boolean {
     return this.tlpdbopt_desktop_integration;
   }
   @Expose({ until: 2017, groups: ['win32'] })
-  @Type(() => Number)
   get ['option_file_assocs'](): boolean {
     return this.tlpdbopt_file_assocs;
   }
   @Expose({ since: 2009, until: 2017, groups: ['win32'] })
-  @Type(() => Number)
   get ['option_w32_multi_user'](): boolean {
     return this.tlpdbopt_w32_multi_user;
+  }
+
+  static {
+    for (const key of keys<PickProperties<Profile, boolean>>()) {
+      Type(() => Number)(Profile.prototype, key);
+    }
   }
 }
 
@@ -330,6 +304,7 @@ async function patch(version: Version, base: string): Promise<void> {
         contents = await fs.readFile(target, 'utf8');
       } catch (error) {
         if (isNativeError(error) && error.code === 'ENOENT') {
+          log.debug(`${target} not found`);
           return;
         }
         throw error;

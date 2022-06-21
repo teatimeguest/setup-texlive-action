@@ -11,6 +11,7 @@ import type { RequiredKeys } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import type * as installtl from '#/install-tl';
+import * as log from '#/log';
 import { DependsTxt, Version } from '#/texlive';
 import * as util from '#/utility';
 
@@ -18,7 +19,7 @@ export class Inputs {
   @Cache get cache(): boolean {
     const input = core.getBooleanInput('cache');
     if (input && !cache.isFeatureAvailable()) {
-      core.warning('Caching is disabled since cache service is not available');
+      log.warn('Caching is disabled because cache service is not available');
       return false;
     }
     return input;
@@ -50,19 +51,22 @@ export class Inputs {
 
   @Cache get version(): Version {
     const input = core.getInput('version');
-    if (Version.isVersion(input)) {
-      return input;
-    }
     if (input === 'latest') {
       return Version.LATEST;
     }
-    throw new TypeError("version must be specified by year or 'latest'");
+    try {
+      return Version.validate(input);
+    } catch (error) {
+      throw new TypeError(
+        `Version must be specified by year or 'latest': Caused by ${error}`,
+      );
+    }
   }
 
   @Cache get tlcontrib(): boolean {
     const input = core.getBooleanInput('tlcontrib');
     if (input && !Version.isLatest(this.version)) {
-      core.warning('tlcontrib is ignored for an older version');
+      log.warn('`tlcontrib` is currently ignored for older versions');
       return false;
     }
     return input;
@@ -96,7 +100,7 @@ export namespace Env {
   export function get(version: Version): Env {
     for (const key of keys<Omit<installtl.Env, keyof Env>>()) {
       if (key in process.env) {
-        core.warning(`${key} is set, but ignored`);
+        log.warn(`\`${key}\` is set, but ignored`);
         delete process.env[key];
       }
     }
@@ -118,10 +122,6 @@ export namespace Env {
       ['TEXLIVE_INSTALL_TEXMFHOME']: path.join(home, 'texmf'),
     };
   }
-}
-
-function defaultPrefix(): string {
-  return path.join(util.tmpdir(), 'setup-texlive');
 }
 
 @Exclude()
@@ -146,10 +146,10 @@ export class State {
 
   static load(): State | null {
     const post = core.getState('post');
-    if (post === '') {
-      return null;
-    }
-    const state = deserialize(State, post);
-    return state.validate();
+    return post === '' ? null : deserialize(State, post).validate();
   }
+}
+
+function defaultPrefix(): string {
+  return path.join(util.tmpdir(), 'setup-texlive');
 }

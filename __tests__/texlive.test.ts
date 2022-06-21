@@ -2,8 +2,13 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import 'jest-extended';
 
+import * as log from '#/log';
 import { DependsTxt, Manager, Version } from '#/texlive';
 import * as util from '#/utility';
+
+jest.mock('os', () => ({
+  platform: jest.fn().mockReturnValue('linux'),
+}));
 
 jest.mocked(core.group).mockImplementation(async (name, fn) => await fn());
 jest.mocked(exec.getExecOutput).mockResolvedValue({
@@ -15,8 +20,8 @@ jest.unmock('#/texlive');
 
 describe('Version', () => {
   test.each([
-    ['1995', false],
-    ['1996', true],
+    ['1996', false],
+    ['2007', false],
     ['2008', true],
     ['2015', true],
     ['2022', true],
@@ -86,7 +91,7 @@ describe('Manager', () => {
     it('fails as the bin directory cannot be located', async () => {
       jest.mocked(util.determine).mockResolvedValueOnce(undefined);
       await expect(tlmgr.path.add()).rejects.toThrow(
-        'Unable to locate the bin directory',
+        "Unable to locate TeX Live's binary directory",
       );
     });
   });
@@ -244,16 +249,16 @@ describe('DependsTxt.parse', () => {
         ' waldo',
       ].join('\n'),
     );
-    expect(manifest.get(null)).toHaveProperty(
+    expect(manifest.get('')).toHaveProperty(
       'hard',
       new Set(['foo', 'bar', 'baz', 'qux']),
     );
-    expect(manifest.get(null)).toHaveProperty('soft', new Set(['quux']));
+    expect(manifest.get('')).toHaveProperty('soft', new Set(['quux']));
     expect(manifest.get('corge')).toHaveProperty('hard', new Set());
     expect(manifest.get('corge')).toHaveProperty('soft', new Set());
     expect(manifest.get('grault')).toHaveProperty('hard', new Set(['waldo']));
     expect(manifest.get('grault')).toHaveProperty('soft', new Set(['garply']));
-    expect([...manifest.keys()]).toStrictEqual([null, 'corge', 'grault']);
+    expect([...manifest.keys()]).toStrictEqual(['', 'corge', 'grault']);
   });
 
   it('tolerates some syntax errors', () => {
@@ -268,12 +273,9 @@ describe('DependsTxt.parse', () => {
         'soft',            // no argument, with immediate EOF
       ].join('\n'),
     );
-    expect(manifest.get(null)).toHaveProperty('hard', new Set());
-    expect(manifest.get(null)).toHaveProperty('soft', new Set());
-    expect([...manifest.keys()]).toStrictEqual([null]);
-    expect(core.warning).toHaveBeenNthCalledWith(
-      2,
-      'package directive must have exactly one argument',
-    );
+    expect(manifest.get('')).toHaveProperty('hard', new Set());
+    expect(manifest.get('')).toHaveProperty('soft', new Set());
+    expect([...manifest.keys()]).toStrictEqual(['']);
+    expect(log.warn).toHaveBeenCalledTimes(3);
   });
 });

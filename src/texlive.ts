@@ -1,3 +1,4 @@
+import * as os from 'os';
 import * as path from 'path';
 
 import * as core from '@actions/core';
@@ -6,22 +7,40 @@ import { cache as Cache } from 'decorator-cache-getter';
 import type { DeepWritable } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
+import * as log from '#/log';
 import { type Range, determine } from '#/utility';
 
+export type Version = Range<'2008', `=${typeof Version.LATEST}`>;
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace Version {
+  export const LATEST = '2022' as const;
+
   export function isVersion(version: string): version is Version {
-    return keys<Record<Version, unknown>>().includes(version as Version);
+    const versions: ReadonlyArray<string> = keys<Record<Version, unknown>>();
+    return versions.includes(version);
   }
 
   export function isLatest(version: Version): version is typeof LATEST {
     return version === LATEST;
   }
 
-  export const LATEST = '2022' as const;
+  export function validate(version: string): Version {
+    if (isVersion(version)) {
+      if (os.platform() === 'darwin' && version < '2013') {
+        throw new RangeError(
+          'Versions prior to 2013 does not work on 64-bit macOS',
+        );
+      }
+      return version;
+    }
+    if (/^199[6-9]|200[0-7]$/u.test(version)) {
+      throw new RangeError('Versions prior to 2008 are not supported');
+    } else {
+      throw new TypeError(`'${version}' is not a valid version`);
+    }
+  }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export type Version = Range<'1996', `=${typeof Version.LATEST}`>;
 
 export interface Texmf {
   readonly ['TEXDIR']?: string;
@@ -37,7 +56,10 @@ export interface Texmf {
  * An interface for the `tlmgr` command.
  */
 export class Manager {
-  constructor(private version: Version, private readonly prefix: string) {}
+  constructor(
+    private readonly version: Version,
+    private readonly prefix: string,
+  ) {}
 
   @Cache get conf(): {
     readonly texmf: {
@@ -82,7 +104,7 @@ export class Manager {
           path.join(this.prefix, this.version, 'bin', '*'),
         );
         if (binpath === undefined) {
-          throw new Error('Unable to locate the bin directory');
+          throw new Error("Unable to locate TeX Live's binary directory");
         }
         core.addPath(binpath);
       },
@@ -96,7 +118,7 @@ export class Manager {
     ) => Promise<void>;
   } {
     if (this.version < '2013') {
-      throw new Error(
+      throw new RangeError(
         `\`pinning\` action is not implemented in TeX Live ${this.version}`,
       );
     }
@@ -114,7 +136,7 @@ export class Manager {
     readonly add: (repo: string, tag?: string) => Promise<boolean>;
   } {
     if (this.version < '2012') {
-      throw new Error(
+      throw new RangeError(
         `\`repository\` action is not implemented in TeX Live ${this.version}`,
       );
     }
@@ -174,7 +196,7 @@ export function historic(version: Version): URL {
  * Type for DEPENDS.txt.
  */
 export type DependsTxt = ReadonlyMap<
-  string | null,
+  string,
   {
     readonly hard: ReadonlySet<string>;
     readonly soft: ReadonlySet<string>;
@@ -201,14 +223,17 @@ export namespace DependsTxt {
   }
 
   // eslint-disable-next-line no-inner-declarations
-  function* eachPackage(txt: string): Generator<[string | null, string], void> {
+  function* eachPackage(txt: string): Generator<[string, string], void> {
     const [chunk = '', ...rest] = txt.split(/^\s*package(?=\s|$)(.*)$/mu);
-    yield [null, chunk];
+    yield ['', chunk];
     for (let i = 0; i < rest.length; ++i) {
-      let name: string | null = (rest[i] ?? '').trim();
+      let name = (rest[i] ?? '').trim();
       if (name === '' || /\s/u.test(name)) {
-        core.warning('package directive must have exactly one argument');
-        name = null;
+        log.warn(
+          '`package` directive must have exactly one argument, ' +
+            `but given ${name.length}: ${name}`,
+        );
+        name = '';
       }
       yield [name, rest[++i] ?? ''];
     }

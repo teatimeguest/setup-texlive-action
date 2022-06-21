@@ -7,6 +7,8 @@ import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
+import * as log from '#/log';
+
 /**
  * Extracts files from an archive.
  *
@@ -17,14 +19,14 @@ export async function extract(
   kind: 'zip' | 'tgz',
 ): Promise<string> {
   switch (kind) {
-    case 'tgz':
+    case 'tgz': {
       return await tool.extractTar(archive, undefined, ['xz', '--strip=1']);
+    }
     case 'zip': {
-      const subdir = await determine(
-        path.join(await tool.extractZip(archive), '*'),
-      );
+      const pattern = path.join(await tool.extractZip(archive), '*');
+      const subdir = await determine(pattern);
       if (subdir === undefined) {
-        throw new Error('Unable to locate the unzipped directory');
+        throw new Error(`Unable to locate subdirectory matched to ${pattern}`);
       }
       return subdir;
     }
@@ -40,13 +42,11 @@ export async function determine(pattern: string): Promise<string | undefined> {
   if (matched.length === 1) {
     return matched[0];
   }
-  core.debug(
-    `Found ${
-      matched.length === 0 ? 'no' : 'multiple'
-    } matches to the pattern ${pattern}${
-      matched.length === 0 ? '' : `: ${matched}`
-    }`,
-  );
+  if (matched.length === 0) {
+    log.debug(`No matches to pattern \`${pattern}\` found`);
+  } else {
+    log.debug(`Multiple matches to pattern \`${pattern}\` found: ${matched}`);
+  }
   return undefined;
 }
 
@@ -57,7 +57,7 @@ export async function saveCache(
   try {
     await cache.saveCache([target], primaryKey);
   } catch (error) {
-    logError('Failed to save to cache', error);
+    log.warn('Failed to save to cache', { cause: error });
   }
 }
 
@@ -77,24 +77,13 @@ export async function restoreCache(
     }
     core.info('Cache not found');
   } catch (error) {
-    logError('Failed to restore cache', error);
+    log.warn('Failed to restore cache', { cause: error });
   }
   return undefined;
 }
 
 export function tmpdir(): string {
   return process.env['RUNNER_TEMP'] ?? os.tmpdir();
-}
-
-export function logError(msg: string, error: unknown): void {
-  if (error instanceof Error) {
-    core.warning(`${msg}: ${error.message}`);
-    if (error.stack !== undefined) {
-      core.debug(error.stack);
-    }
-  } else {
-    core.warning(`${msg}: ${error}`);
-  }
 }
 
 /**

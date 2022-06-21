@@ -1,11 +1,11 @@
 import * as process from 'process';
 
 import * as cache from '@actions/cache';
-import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 import 'jest-extended';
 
+import * as log from '#/log';
 import * as util from '#/utility';
 
 jest.mock('os', () => ({
@@ -42,7 +42,7 @@ describe('extract', () => {
     } as glob.Globber);
     jest.mocked(tool.extractZip).mockResolvedValueOnce('<extractZip>');
     await expect(util.extract('<zipfile>', 'zip')).rejects.toThrow(
-      'Unable to locate the unzipped directory',
+      'Unable to locate subdirectory',
     );
   });
 });
@@ -72,8 +72,9 @@ describe('saveCache', () => {
   it("doesn't itself fail even if cache.saveCache fails", async () => {
     jest.mocked(cache.saveCache).mockRejectedValueOnce(new Error(''));
     await expect(util.saveCache('<target>', '<key>')).resolves.not.toThrow();
-    expect(core.warning).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to save to cache: '),
+    expect(log.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to save to cache'),
+      expect.any(Object),
     );
   });
 });
@@ -108,8 +109,9 @@ describe('restoreCache', () => {
     await expect(
       util.restoreCache('<target>', '<key>', []),
     ).resolves.toBeUndefined();
-    expect(core.warning).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to restore cache: '),
+    expect(log.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to restore cache'),
+      expect.any(Object),
     );
   });
 });

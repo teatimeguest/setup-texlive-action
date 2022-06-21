@@ -5,6 +5,7 @@ import * as core from '@actions/core';
 
 import { Env, Inputs, Outputs, State } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
+import * as log from '#/log';
 import { contrib as tlcontrib, Manager, Version } from '#/texlive';
 import * as util from '#/utility';
 
@@ -17,10 +18,11 @@ export async function run(): Promise<void> {
       await util.saveCache(state.texdir, state.key);
     }
   } catch (error) {
-    if (error instanceof Error && error.stack !== undefined) {
-      core.debug(`The action failed: ${error.stack}`);
+    if (error instanceof Error) {
+      core.setFailed(error.stack ?? error);
+    } else {
+      core.setFailed(`${error}`);
     }
-    core.setFailed(`${error}`);
   }
 }
 
@@ -47,10 +49,13 @@ async function main(): Promise<void> {
 
   if (cacheType === undefined) {
     const installtl = await core.group('Acquiring install-tl', async () => {
-      return await InstallTL.acquire(inputs.version);
+      return (
+        InstallTL.restore(inputs.version) ??
+        (await InstallTL.download(inputs.version))
+      );
     });
     await core.group('Installation profile', async () => {
-      core.info(profile.toString());
+      log.info(profile.toString());
     });
     await core.group('Installing TeX Live', async () => {
       await installtl.run(profile);

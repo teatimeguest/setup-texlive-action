@@ -62,7 +62,7 @@ beforeEach(() => {
   jest.mocked(Outputs).mockReturnValue(ctx.outputs);
   jest.spyOn(ctx.outputs, 'cache-hit', 'set');
   jest // eslint-disable-next-line jest/unbound-method
-    .mocked(InstallTL.acquire)
+    .mocked(InstallTL.download)
     .mockResolvedValue(new (InstallTL as unknown as new () => InstallTL)());
   jest.mocked(Profile).mockReturnValue({ TEXDIR: '' } as Profile);
 });
