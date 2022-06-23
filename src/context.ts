@@ -5,7 +5,7 @@ import * as process from 'process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import { Exclude, Expose, serialize, deserialize } from 'class-transformer';
+import { Exclude, Expose, deserialize, serialize } from 'class-transformer';
 import { cache as Cache } from 'decorator-cache-getter';
 import type { RequiredKeys } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
@@ -13,7 +13,7 @@ import { keys } from 'ts-transformer-keys';
 import type * as installtl from '#/install-tl';
 import * as log from '#/log';
 import { DependsTxt, Version } from '#/texlive';
-import * as util from '#/utility';
+import { tmpdir } from '#/utility';
 
 export class Inputs {
   @Cache get cache(): boolean {
@@ -151,5 +151,5 @@ export class State {
 }
 
 function defaultPrefix(): string {
-  return path.join(util.tmpdir(), 'setup-texlive');
+  return path.join(tmpdir(), 'setup-texlive');
 }

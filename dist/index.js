@@ -65402,17 +65402,17 @@ function tmpdir2() {
 
 // lib/texlive.js
 var Version;
-(function(Version3) {
-  Version3.LATEST = "2022";
+(function(Version2) {
+  Version2.LATEST = "2022";
   function isVersion(version2) {
     const versions = ["2022", "2008", "2020", "2021", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"];
     return versions.includes(version2);
   }
-  Version3.isVersion = isVersion;
+  Version2.isVersion = isVersion;
   function isLatest(version2) {
-    return version2 === Version3.LATEST;
+    return version2 === Version2.LATEST;
   }
-  Version3.isLatest = isLatest;
+  Version2.isLatest = isLatest;
   function validate2(version2) {
     if (isVersion(version2)) {
       if (os4.platform() === "darwin" && version2 < "2013") {
@@ -65426,7 +65426,7 @@ var Version;
       throw new TypeError(`'${version2}' is not a valid version`);
     }
   }
-  Version3.validate = validate2;
+  Version2.validate = validate2;
 })(Version || (Version = {}));
 var Manager = class {
   constructor(version2, prefix2) {
@@ -65709,7 +65709,6 @@ var import_exec2 = __toESM(require_exec());
 var import_io = __toESM(require_io());
 var tool2 = __toESM(require_tool_cache());
 var Profile_1;
-var Version2 = Version;
 var InstallTL = class {
   constructor(version2, installtl) {
     this.version = version2;
@@ -65718,7 +65717,7 @@ var InstallTL = class {
   async run(profile) {
     for await (const dest of profile.open()) {
       const options = ["-no-gui", "-profile", dest];
-      if (!Version2.isLatest(this.version)) {
+      if (!Version.isLatest(this.version)) {
         const repo = historic(this.version);
         if (this.version < "2018") {
           repo.protocol = "http";
@@ -65774,7 +65773,7 @@ var InstallTL = class {
   }
   static url(version2) {
     let target = InstallTL.archive();
-    if (Version2.isLatest(version2)) {
+    if (Version.isLatest(version2)) {
       target = path4.posix.join("..", target);
     }
     return new URL(target, historic(version2));
@@ -65796,7 +65795,7 @@ var Profile = Profile_1 = class Profile2 {
     this.TEXMFSYSCONFIG = path4.join(this.TEXDIR, "texmf-config");
     this.TEXMFSYSVAR = path4.join(this.TEXDIR, "texmf-var");
     this.selected_scheme = `scheme-${version2 < "2016" ? "minimal" : "infraonly"}`;
-    this.instopt_adjustrepo = Version2.isLatest(version2);
+    this.instopt_adjustrepo = Version.isLatest(version2);
   }
   async *open() {
     const tmp = await fs3.mkdtemp(path4.join(tmpdir2(), "setup-texlive-"));

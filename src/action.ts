@@ -6,8 +6,8 @@ import * as core from '@actions/core';
 import { Env, Inputs, Outputs, State } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
 import * as log from '#/log';
-import { contrib as tlcontrib, Manager, Version } from '#/texlive';
-import * as util from '#/utility';
+import { Manager, Version, contrib as tlcontrib } from '#/texlive';
+import { restoreCache, saveCache } from '#/utility';
 
 export async function run(): Promise<void> {
   try {
@@ -15,7 +15,7 @@ export async function run(): Promise<void> {
     if (state === null) {
       await main();
     } else if (state.filled()) {
-      await util.saveCache(state.texdir, state.key);
+      await saveCache(state.texdir, state.key);
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -39,7 +39,7 @@ async function main(): Promise<void> {
   if (inputs.cache) {
     const keys = getCacheKeys(inputs.version, packages);
     cacheType = await core.group('Restoring cache', async () => {
-      return await util.restoreCache(profile.TEXDIR, ...keys);
+      return await restoreCache(profile.TEXDIR, ...keys);
     });
     if (cacheType !== 'primary') {
       state.key = keys[0];

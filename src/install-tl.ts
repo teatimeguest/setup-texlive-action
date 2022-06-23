@@ -11,8 +11,7 @@ import type { PickProperties } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
-import * as tl from '#/texlive';
-import Version = tl.Version;
+import { Version, historic } from '#/texlive';
 import { extract, tmpdir } from '#/utility';
 
 /**
@@ -28,7 +27,7 @@ export class InstallTL {
     for await (const dest of profile.open()) {
       const options = ['-no-gui', '-profile', dest];
       if (!Version.isLatest(this.version)) {
-        const repo = tl.historic(this.version);
+        const repo = historic(this.version);
         // `install-tl` of versions prior to 2017 does not support HTTPS, and
         // that of version 2017 supports HTTPS but does not work properly.
         if (this.version < '2018') {
@@ -115,7 +114,7 @@ export class InstallTL {
     if (Version.isLatest(version)) {
       target = path.posix.join('..', target);
     }
-    return new URL(target, tl.historic(version));
+    return new URL(target, historic(version));
   }
 }
 
