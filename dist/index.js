@@ -61838,15 +61838,16 @@ var require_cache = __commonJS({
           checkKey(key);
         }
         const compressionMethod = yield utils.getCompressionMethod();
-        const cacheEntry = yield cacheHttpClient.getCacheEntry(keys, paths, {
-          compressionMethod
-        });
-        if (!(cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.archiveLocation)) {
-          return void 0;
-        }
-        const archivePath = path5.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
-        core6.debug(`Archive Path: ${archivePath}`);
+        let archivePath = "";
         try {
+          const cacheEntry = yield cacheHttpClient.getCacheEntry(keys, paths, {
+            compressionMethod
+          });
+          if (!(cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.archiveLocation)) {
+            return void 0;
+          }
+          archivePath = path5.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
+          core6.debug(`Archive Path: ${archivePath}`);
           yield cacheHttpClient.downloadCache(cacheEntry.archiveLocation, archivePath, options);
           if (core6.isDebug()) {
             yield tar_1.listTar(archivePath, compressionMethod);
@@ -61855,6 +61856,14 @@ var require_cache = __commonJS({
           core6.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
           yield tar_1.extractTar(archivePath, compressionMethod);
           core6.info("Cache restored successfully");
+          return cacheEntry.cacheKey;
+        } catch (error) {
+          const typedError = error;
+          if (typedError.name === ValidationError.name) {
+            throw error;
+          } else {
+            core6.warning(`Failed to restore: ${error.message}`);
+          }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
@@ -61862,7 +61871,7 @@ var require_cache = __commonJS({
             core6.debug(`Failed to delete archive: ${error}`);
           }
         }
-        return cacheEntry.cacheKey;
+        return void 0;
       });
     }
     exports.restoreCache = restoreCache3;
@@ -61872,7 +61881,7 @@ var require_cache = __commonJS({
         checkPaths(paths);
         checkKey(key);
         const compressionMethod = yield utils.getCompressionMethod();
-        let cacheId = null;
+        let cacheId = -1;
         const cachePaths = yield utils.resolvePaths(paths);
         core6.debug("Cache Paths:");
         core6.debug(`${JSON.stringify(cachePaths)}`);
@@ -61907,6 +61916,15 @@ var require_cache = __commonJS({
           }
           core6.debug(`Saving Cache (ID: ${cacheId})`);
           yield cacheHttpClient.saveCache(cacheId, archivePath, options);
+        } catch (error) {
+          const typedError = error;
+          if (typedError.name === ValidationError.name) {
+            throw error;
+          } else if (typedError.name === ReserveCacheError.name) {
+            core6.info(`Failed to save: ${typedError.message}`);
+          } else {
+            core6.warning(`Failed to save: ${typedError.message}`);
+          }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
