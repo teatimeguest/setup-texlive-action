@@ -36,7 +36,7 @@
     "@types/jest": "28.1.4",
     "@types/node": "18.0.3",
     "@typescript-eslint/eslint-plugin": "5.30.5",
-    "@typescript-eslint/parser": "5.30.0",
+    "@typescript-eslint/parser": "5.30.5",
     "editorconfig-checker": "4.0.2",
     "esbuild": "0.14.48",
     "eslint": "8.19.0",
