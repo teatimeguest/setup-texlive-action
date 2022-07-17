@@ -65507,12 +65507,18 @@ var Manager = class {
   }
   async update(packages = [], options = {}) {
     const args = ["update"];
-    if (options.self) {
+    if (options.all ?? false) {
+      args.push("--all");
+    }
+    if (options.self ?? false) {
       if (this.version === "2008") {
         packages = ["texlive.infra", ...packages];
       } else {
         args.push("--self");
       }
+    }
+    if ((options.reinstallForciblyRemoved ?? false) && this.version >= "2009") {
+      args.push("--reinstall-forcibly-removed");
     }
     await (0, import_exec.exec)("tlmgr", [...args, ...packages]);
   }
@@ -65606,6 +65612,22 @@ var Inputs = class {
     }
     return path3.normalize(process3.env["TEXLIVE_INSTALL_PREFIX"] ?? defaultPrefix());
   }
+  get tlcontrib() {
+    const input = core3.getBooleanInput("tlcontrib");
+    if (input && !Version.isLatest(this.version)) {
+      warn("`tlcontrib` is currently ignored for older versions");
+      return false;
+    }
+    return input;
+  }
+  get updateAllPackages() {
+    const input = core3.getBooleanInput("update-all-packages");
+    if (input && !Version.isLatest(this.version)) {
+      warn("`update-all-packages` is ignored for older versions");
+      return false;
+    }
+    return input;
+  }
   get version() {
     const input = core3.getInput("version");
     if (input === "latest") {
@@ -65616,14 +65638,6 @@ var Inputs = class {
     } catch (error) {
       throw new TypeError(`Version must be specified by year or 'latest': Caused by ${error}`);
     }
-  }
-  get tlcontrib() {
-    const input = core3.getBooleanInput("tlcontrib");
-    if (input && !Version.isLatest(this.version)) {
-      warn("`tlcontrib` is currently ignored for older versions");
-      return false;
-    }
-    return input;
   }
 };
 __decorate([
@@ -65643,14 +65657,19 @@ __decorate([
 ], Inputs.prototype, "prefix", null);
 __decorate([
   import_decorator_cache_getter2.cache,
-  __metadata("design:type", String),
+  __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
-], Inputs.prototype, "version", null);
+], Inputs.prototype, "tlcontrib", null);
 __decorate([
   import_decorator_cache_getter2.cache,
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
-], Inputs.prototype, "tlcontrib", null);
+], Inputs.prototype, "updateAllPackages", null);
+__decorate([
+  import_decorator_cache_getter2.cache,
+  __metadata("design:type", String),
+  __metadata("design:paramtypes", [])
+], Inputs.prototype, "version", null);
 var Outputs = class {
   set ["cache-hit"](hit) {
     core3.setOutput("cache-hit", hit);
@@ -66084,6 +66103,14 @@ async function main() {
     await core4.group("Updating tlmgr", async () => {
       await tlmgr.update(void 0, { self: true });
     });
+    if (inputs.updateAllPackages) {
+      await core4.group("Updating packages", async () => {
+        await tlmgr.update(void 0, {
+          all: true,
+          reinstallForciblyRemoved: true
+        });
+      });
+    }
     await core4.group("Adjusting TEXMF", async () => {
       for (const key of ["TEXMFHOME", "TEXMFCONFIG", "TEXMFVAR"]) {
         const value = env3[`TEXLIVE_INSTALL_${key}`];

@@ -28,6 +28,7 @@ beforeEach(() => {
     ['INPUT_PACKAGE-FILE']: '',
     ['INPUT_PREFIX']: '',
     ['INPUT_TLCONTRIB']: 'false',
+    ['INPUT_UPDATE-ALL-PACKAGES']: 'false',
     ['INPUT_VERSION']: 'latest',
   };
 });
@@ -147,6 +148,24 @@ describe('Inputs', () => {
       expect(log.warn).toHaveBeenCalledWith(
         '`tlcontrib` is currently ignored for older versions',
       );
+    });
+  });
+
+  describe('updateAllPackages', () => {
+    it('defaults to false', () => {
+      expect(new Inputs()).toHaveProperty('updateAllPackages', false);
+    });
+
+    it('is set to true if true is set as input', () => {
+      process.env['INPUT_UPDATE-ALL-PACKAGES'] = 'true';
+      expect(new Inputs()).toHaveProperty('updateAllPackages', true);
+    });
+
+    it('is set to false if an older version is specified', () => {
+      process.env['INPUT_UPDATE-ALL-PACKAGES'] = 'true';
+      process.env['INPUT_VERSION'] = '2016';
+      expect(new Inputs()).toHaveProperty('updateAllPackages', false);
+      expect(log.warn).toHaveBeenCalled();
     });
   });
 

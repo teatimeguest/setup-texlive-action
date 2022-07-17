@@ -103,6 +103,7 @@ All inputs are optional.
 |`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-environment-variables]. The default is <code>[$RUNNER_TEMP][actions-environment-variables]/setup-texlive</code>.|
 |`tlcontrib`|Bool|Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored if an older version is specified for `version`. The default is `false`.|
+|`update-all-packages`|Bool|Update all TeX packages when restoring cache. The default is `false` and the action updates only `tlmgr`.|
 |`version`|String|TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.|
 
 ## Outputs
