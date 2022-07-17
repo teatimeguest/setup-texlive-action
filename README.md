@@ -89,7 +89,8 @@ because its hash will be used as part of the cache key.
 
 > **Note**.
 > If you have problems due to a defective installation stored in cache,
-> you can delete it via the [GitHub REST API][cache-api].
+> you can delete it via the [GitHub REST API][cache-api] using the cache key.
+> The cache key will be found in the workflow log.
 
 ## Inputs
 

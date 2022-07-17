@@ -131,6 +131,9 @@ export class State {
 
   save(): void {
     core.saveState('post', serialize(this.validate()));
+    if (this.filled()) {
+      log.info(`Cache key: ${this.key})`);
+    }
   }
 
   filled(this: Readonly<this>): this is Required<State> {

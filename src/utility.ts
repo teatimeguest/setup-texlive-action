@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as process from 'process';
 
 import * as cache from '@actions/cache';
-import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
@@ -56,6 +55,7 @@ export async function saveCache(
 ): Promise<void> {
   try {
     await cache.saveCache([target], primaryKey);
+    log.info(`${target} saved with cache key ${primaryKey}`);
   } catch (error) {
     log.warn('Failed to save to cache', { cause: error });
   }
@@ -75,7 +75,7 @@ export async function restoreCache(
     if (key !== undefined) {
       return key === primaryKey ? 'primary' : 'secondary';
     }
-    core.info('Cache not found');
+    log.info('Cache not found');
   } catch (error) {
     log.warn('Failed to restore cache', { cause: error });
   }

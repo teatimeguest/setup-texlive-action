@@ -759,12 +759,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info3 = this._prepareRequest(verb, parsedUrl, headers);
+          let info2 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info3, data);
+            response = yield this.requestRaw(info2, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -774,7 +774,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info3, data);
+                return authenticationHandler.handleAuthentication(this, info2, data);
               } else {
                 return response;
               }
@@ -797,8 +797,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info3 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info3, data);
+              info2 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info2, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -819,7 +819,7 @@ var require_lib = __commonJS({
         }
         this._disposed = true;
       }
-      requestRaw(info3, data) {
+      requestRaw(info2, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -831,16 +831,16 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info3, data, callbackForResult);
+            this.requestRawWithCallback(info2, data, callbackForResult);
           });
         });
       }
-      requestRawWithCallback(info3, data, onResult) {
+      requestRawWithCallback(info2, data, onResult) {
         if (typeof data === "string") {
-          if (!info3.options.headers) {
-            info3.options.headers = {};
+          if (!info2.options.headers) {
+            info2.options.headers = {};
           }
-          info3.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info2.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -849,7 +849,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info3.httpModule.request(info3.options, (msg) => {
+        const req = info2.httpModule.request(info2.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -861,7 +861,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info3.options.path}`));
+          handleResult(new Error(`Request timeout: ${info2.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -883,27 +883,27 @@ var require_lib = __commonJS({
         return this._getAgent(parsedUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info3 = {};
-        info3.parsedUrl = requestUrl;
-        const usingSsl = info3.parsedUrl.protocol === "https:";
-        info3.httpModule = usingSsl ? https3 : http3;
+        const info2 = {};
+        info2.parsedUrl = requestUrl;
+        const usingSsl = info2.parsedUrl.protocol === "https:";
+        info2.httpModule = usingSsl ? https3 : http3;
         const defaultPort = usingSsl ? 443 : 80;
-        info3.options = {};
-        info3.options.host = info3.parsedUrl.hostname;
-        info3.options.port = info3.parsedUrl.port ? parseInt(info3.parsedUrl.port) : defaultPort;
-        info3.options.path = (info3.parsedUrl.pathname || "") + (info3.parsedUrl.search || "");
-        info3.options.method = method;
-        info3.options.headers = this._mergeHeaders(headers);
+        info2.options = {};
+        info2.options.host = info2.parsedUrl.hostname;
+        info2.options.port = info2.parsedUrl.port ? parseInt(info2.parsedUrl.port) : defaultPort;
+        info2.options.path = (info2.parsedUrl.pathname || "") + (info2.parsedUrl.search || "");
+        info2.options.method = method;
+        info2.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info3.options.headers["user-agent"] = this.userAgent;
+          info2.options.headers["user-agent"] = this.userAgent;
         }
-        info3.options.agent = this._getAgent(info3.parsedUrl);
+        info2.options.agent = this._getAgent(info2.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info3.options);
+            handler.prepareRequest(info2.options);
           }
         }
-        return info3;
+        return info2;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -1607,10 +1607,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       command_1.issueCommand("notice", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
     exports.notice = notice;
-    function info3(message) {
+    function info2(message) {
       process.stdout.write(message + os8.EOL);
     }
-    exports.info = info3;
+    exports.info = info2;
     function startGroup(name) {
       command_1.issue("group", name);
     }
@@ -2751,7 +2751,7 @@ var require_internal_glob_options_helper = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getOptions = void 0;
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     function getOptions(copy) {
       const result = {
         followSymbolicLinks: true,
@@ -2761,15 +2761,15 @@ var require_internal_glob_options_helper = __commonJS({
       if (copy) {
         if (typeof copy.followSymbolicLinks === "boolean") {
           result.followSymbolicLinks = copy.followSymbolicLinks;
-          core6.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+          core5.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
         }
         if (typeof copy.implicitDescendants === "boolean") {
           result.implicitDescendants = copy.implicitDescendants;
-          core6.debug(`implicitDescendants '${result.implicitDescendants}'`);
+          core5.debug(`implicitDescendants '${result.implicitDescendants}'`);
         }
         if (typeof copy.omitBrokenSymbolicLinks === "boolean") {
           result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
-          core6.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+          core5.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
         }
       }
       return result;
@@ -4247,7 +4247,7 @@ var require_internal_globber = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DefaultGlobber = void 0;
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var fs4 = __importStar(require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper());
     var path5 = __importStar(require("path"));
@@ -4300,7 +4300,7 @@ var require_internal_globber = __commonJS({
           }
           const stack = [];
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
-            core6.debug(`Search path '${searchPath}'`);
+            core5.debug(`Search path '${searchPath}'`);
             try {
               yield __await2(fs4.promises.lstat(searchPath));
             } catch (err) {
@@ -4366,7 +4366,7 @@ var require_internal_globber = __commonJS({
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
-                  core6.debug(`Broken symlink '${item.path}'`);
+                  core5.debug(`Broken symlink '${item.path}'`);
                   return void 0;
                 }
                 throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
@@ -4382,7 +4382,7 @@ var require_internal_globber = __commonJS({
               traversalChain.pop();
             }
             if (traversalChain.some((x) => x === realPath)) {
-              core6.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+              core5.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
               return void 0;
             }
             traversalChain.push(realPath);
@@ -5806,7 +5806,7 @@ var require_cacheUtils = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var exec3 = __importStar(require_exec());
     var glob2 = __importStar(require_glob());
     var io = __importStar(require_io());
@@ -5856,7 +5856,7 @@ var require_cacheUtils = __commonJS({
           for (var _c = __asyncValues2(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done; ) {
             const file = _d.value;
             const relativeFile = path5.relative(workspace, file).replace(new RegExp(`\\${path5.sep}`, "g"), "/");
-            core6.debug(`Matched: ${relativeFile}`);
+            core5.debug(`Matched: ${relativeFile}`);
             paths.push(`${relativeFile}`);
           }
         } catch (e_1_1) {
@@ -5882,7 +5882,7 @@ var require_cacheUtils = __commonJS({
     exports.unlinkFile = unlinkFile;
     function getVersion(app) {
       return __awaiter(this, void 0, void 0, function* () {
-        core6.debug(`Checking ${app} --version`);
+        core5.debug(`Checking ${app} --version`);
         let versionOutput = "";
         try {
           yield exec3.exec(`${app} --version`, [], {
@@ -5894,10 +5894,10 @@ var require_cacheUtils = __commonJS({
             }
           });
         } catch (err) {
-          core6.debug(err.message);
+          core5.debug(err.message);
         }
         versionOutput = versionOutput.trim();
-        core6.debug(versionOutput);
+        core5.debug(versionOutput);
         return versionOutput;
       });
     }
@@ -37530,9 +37530,9 @@ function getRuntimeInfo() {
   return [msRestRuntime];
 }
 function getUserAgentString(telemetryInfo, keySeparator = " ", valueSeparator = "/") {
-  return telemetryInfo.map((info3) => {
-    const value = info3.value ? `${valueSeparator}${info3.value}` : "";
-    return `${info3.key}${value}`;
+  return telemetryInfo.map((info2) => {
+    const value = info2.value ? `${valueSeparator}${info2.value}` : "";
+    return `${info2.key}${value}`;
   }).join(keySeparator);
 }
 function getDefaultUserAgentValue() {
@@ -60998,7 +60998,7 @@ var require_requestUtils = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var http_client_1 = require_lib();
     var constants_1 = require_constants();
     function isSuccessStatusCode(statusCode) {
@@ -61059,9 +61059,9 @@ var require_requestUtils = __commonJS({
             isRetryable = isRetryableStatusCode(statusCode);
             errorMessage = `Cache service responded with ${statusCode}`;
           }
-          core6.debug(`${name} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
+          core5.debug(`${name} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
           if (!isRetryable) {
-            core6.debug(`${name} - Error is not retryable`);
+            core5.debug(`${name} - Error is not retryable`);
             break;
           }
           yield sleep(delay3);
@@ -61141,7 +61141,7 @@ var require_downloadUtils = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var http_client_1 = require_lib();
     var storage_blob_1 = (init_src10(), __toCommonJS(src_exports));
     var buffer = __importStar(require("buffer"));
@@ -61172,7 +61172,7 @@ var require_downloadUtils = __commonJS({
         this.segmentIndex = this.segmentIndex + 1;
         this.segmentSize = segmentSize;
         this.receivedBytes = 0;
-        core6.debug(`Downloading segment at offset ${this.segmentOffset} with length ${this.segmentSize}...`);
+        core5.debug(`Downloading segment at offset ${this.segmentOffset} with length ${this.segmentSize}...`);
       }
       setReceivedBytes(receivedBytes) {
         this.receivedBytes = receivedBytes;
@@ -61191,7 +61191,7 @@ var require_downloadUtils = __commonJS({
         const percentage = (100 * (transferredBytes / this.contentLength)).toFixed(1);
         const elapsedTime = Date.now() - this.startTime;
         const downloadSpeed = (transferredBytes / (1024 * 1024) / (elapsedTime / 1e3)).toFixed(1);
-        core6.info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
+        core5.info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
         if (this.isDone()) {
           this.displayedComplete = true;
         }
@@ -61228,7 +61228,7 @@ var require_downloadUtils = __commonJS({
         }));
         downloadResponse.message.socket.setTimeout(constants_1.SocketTimeout, () => {
           downloadResponse.message.destroy();
-          core6.debug(`Aborting download, socket timed out after ${constants_1.SocketTimeout} ms`);
+          core5.debug(`Aborting download, socket timed out after ${constants_1.SocketTimeout} ms`);
         });
         yield pipeResponseToStream(downloadResponse, writeStream);
         const contentLengthHeader = downloadResponse.message.headers["content-length"];
@@ -61239,7 +61239,7 @@ var require_downloadUtils = __commonJS({
             throw new Error(`Incomplete download. Expected file size: ${expectedLength}, actual file size: ${actualLength}`);
           }
         } else {
-          core6.debug("Unable to validate download, no Content-Length header");
+          core5.debug("Unable to validate download, no Content-Length header");
         }
       });
     }
@@ -61255,7 +61255,7 @@ var require_downloadUtils = __commonJS({
         const properties = yield client.getProperties();
         const contentLength2 = (_a = properties.contentLength) !== null && _a !== void 0 ? _a : -1;
         if (contentLength2 < 0) {
-          core6.debug("Unable to determine content length, downloading file with http-client...");
+          core5.debug("Unable to determine content length, downloading file with http-client...");
           yield downloadCacheHttpClient(archiveLocation, archivePath);
         } else {
           const maxSegmentSize = Math.min(2147483647, buffer.constants.MAX_LENGTH);
@@ -61301,7 +61301,7 @@ var require_options = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     function getUploadOptions(copy) {
       const result = {
         uploadConcurrency: 4,
@@ -61315,8 +61315,8 @@ var require_options = __commonJS({
           result.uploadChunkSize = copy.uploadChunkSize;
         }
       }
-      core6.debug(`Upload concurrency: ${result.uploadConcurrency}`);
-      core6.debug(`Upload chunk size: ${result.uploadChunkSize}`);
+      core5.debug(`Upload concurrency: ${result.uploadConcurrency}`);
+      core5.debug(`Upload chunk size: ${result.uploadChunkSize}`);
       return result;
     }
     exports.getUploadOptions = getUploadOptions;
@@ -61337,9 +61337,9 @@ var require_options = __commonJS({
           result.timeoutInMs = copy.timeoutInMs;
         }
       }
-      core6.debug(`Use Azure SDK: ${result.useAzureSdk}`);
-      core6.debug(`Download concurrency: ${result.downloadConcurrency}`);
-      core6.debug(`Request timeout (ms): ${result.timeoutInMs}`);
+      core5.debug(`Use Azure SDK: ${result.useAzureSdk}`);
+      core5.debug(`Download concurrency: ${result.downloadConcurrency}`);
+      core5.debug(`Request timeout (ms): ${result.timeoutInMs}`);
       return result;
     }
     exports.getDownloadOptions = getDownloadOptions;
@@ -61390,7 +61390,7 @@ var require_cacheHttpClient = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
     var crypto4 = __importStar(require("crypto"));
@@ -61408,7 +61408,7 @@ var require_cacheHttpClient = __commonJS({
         throw new Error("Cache Service Url not found, unable to restore cache.");
       }
       const url2 = `${baseUrl}_apis/artifactcache/${resource}`;
-      core6.debug(`Resource Url: ${url2}`);
+      core5.debug(`Resource Url: ${url2}`);
       return url2;
     }
     function createAcceptHeader(type3, apiVersion) {
@@ -61452,9 +61452,9 @@ var require_cacheHttpClient = __commonJS({
         if (!cacheDownloadUrl) {
           throw new Error("Cache not found.");
         }
-        core6.setSecret(cacheDownloadUrl);
-        core6.debug(`Cache Result:`);
-        core6.debug(JSON.stringify(cacheResult));
+        core5.setSecret(cacheDownloadUrl);
+        core5.debug(`Cache Result:`);
+        core5.debug(JSON.stringify(cacheResult));
         return cacheResult;
       });
     }
@@ -61492,7 +61492,7 @@ var require_cacheHttpClient = __commonJS({
     }
     function uploadChunk(httpClient, resourceUrl, openStream, start, end) {
       return __awaiter(this, void 0, void 0, function* () {
-        core6.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
+        core5.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
         const additionalHeaders = {
           "Content-Type": "application/octet-stream",
           "Content-Range": getContentRange(start, end)
@@ -61514,7 +61514,7 @@ var require_cacheHttpClient = __commonJS({
         const concurrency = utils.assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
         const maxChunkSize = utils.assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
         const parallelUploads = [...new Array(concurrency).keys()];
-        core6.debug("Awaiting all uploads");
+        core5.debug("Awaiting all uploads");
         let offset = 0;
         try {
           yield Promise.all(parallelUploads.map(() => __awaiter(this, void 0, void 0, function* () {
@@ -61550,16 +61550,16 @@ var require_cacheHttpClient = __commonJS({
     function saveCache3(cacheId, archivePath, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        core6.debug("Upload cache");
+        core5.debug("Upload cache");
         yield uploadFile(httpClient, cacheId, archivePath, options);
-        core6.debug("Commiting cache");
+        core5.debug("Commiting cache");
         const cacheSize = utils.getArchiveFileSizeInBytes(archivePath);
-        core6.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
+        core5.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
         const commitCacheResponse = yield commitCache(httpClient, cacheId, cacheSize);
         if (!requestUtils_1.isSuccessStatusCode(commitCacheResponse.statusCode)) {
           throw new Error(`Cache service responded with ${commitCacheResponse.statusCode} during commit cache.`);
         }
-        core6.info("Cache saved successfully");
+        core5.info("Cache saved successfully");
       });
     }
     exports.saveCache = saveCache3;
@@ -61785,7 +61785,7 @@ var require_cache = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var path5 = __importStar(require("path"));
     var utils = __importStar(require_cacheUtils());
     var cacheHttpClient = __importStar(require_cacheHttpClient());
@@ -61829,8 +61829,8 @@ var require_cache = __commonJS({
         checkPaths(paths);
         restoreKeys = restoreKeys || [];
         const keys = [primaryKey, ...restoreKeys];
-        core6.debug("Resolved Keys:");
-        core6.debug(JSON.stringify(keys));
+        core5.debug("Resolved Keys:");
+        core5.debug(JSON.stringify(keys));
         if (keys.length > 10) {
           throw new ValidationError(`Key Validation Error: Keys are limited to a maximum of 10.`);
         }
@@ -61847,28 +61847,28 @@ var require_cache = __commonJS({
             return void 0;
           }
           archivePath = path5.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
-          core6.debug(`Archive Path: ${archivePath}`);
+          core5.debug(`Archive Path: ${archivePath}`);
           yield cacheHttpClient.downloadCache(cacheEntry.archiveLocation, archivePath, options);
-          if (core6.isDebug()) {
+          if (core5.isDebug()) {
             yield tar_1.listTar(archivePath, compressionMethod);
           }
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core6.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+          core5.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
           yield tar_1.extractTar(archivePath, compressionMethod);
-          core6.info("Cache restored successfully");
+          core5.info("Cache restored successfully");
           return cacheEntry.cacheKey;
         } catch (error) {
           const typedError = error;
           if (typedError.name === ValidationError.name) {
             throw error;
           } else {
-            core6.warning(`Failed to restore: ${error.message}`);
+            core5.warning(`Failed to restore: ${error.message}`);
           }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
           } catch (error) {
-            core6.debug(`Failed to delete archive: ${error}`);
+            core5.debug(`Failed to delete archive: ${error}`);
           }
         }
         return void 0;
@@ -61883,26 +61883,26 @@ var require_cache = __commonJS({
         const compressionMethod = yield utils.getCompressionMethod();
         let cacheId = -1;
         const cachePaths = yield utils.resolvePaths(paths);
-        core6.debug("Cache Paths:");
-        core6.debug(`${JSON.stringify(cachePaths)}`);
+        core5.debug("Cache Paths:");
+        core5.debug(`${JSON.stringify(cachePaths)}`);
         if (cachePaths.length === 0) {
           throw new Error(`Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.`);
         }
         const archiveFolder = yield utils.createTempDirectory();
         const archivePath = path5.join(archiveFolder, utils.getCacheFileName(compressionMethod));
-        core6.debug(`Archive Path: ${archivePath}`);
+        core5.debug(`Archive Path: ${archivePath}`);
         try {
           yield tar_1.createTar(archiveFolder, cachePaths, compressionMethod);
-          if (core6.isDebug()) {
+          if (core5.isDebug()) {
             yield tar_1.listTar(archivePath, compressionMethod);
           }
           const fileSizeLimit = 10 * 1024 * 1024 * 1024;
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core6.debug(`File Size: ${archiveFileSize}`);
+          core5.debug(`File Size: ${archiveFileSize}`);
           if (archiveFileSize > fileSizeLimit && !utils.isGhes()) {
             throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
           }
-          core6.debug("Reserving Cache");
+          core5.debug("Reserving Cache");
           const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, paths, {
             compressionMethod,
             cacheSize: archiveFileSize
@@ -61914,22 +61914,22 @@ var require_cache = __commonJS({
           } else {
             throw new ReserveCacheError(`Unable to reserve cache with key ${key}, another job may be creating this cache. More details: ${(_e = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _e === void 0 ? void 0 : _e.message}`);
           }
-          core6.debug(`Saving Cache (ID: ${cacheId})`);
+          core5.debug(`Saving Cache (ID: ${cacheId})`);
           yield cacheHttpClient.saveCache(cacheId, archivePath, options);
         } catch (error) {
           const typedError = error;
           if (typedError.name === ValidationError.name) {
             throw error;
           } else if (typedError.name === ReserveCacheError.name) {
-            core6.info(`Failed to save: ${typedError.message}`);
+            core5.info(`Failed to save: ${typedError.message}`);
           } else {
-            core6.warning(`Failed to save: ${typedError.message}`);
+            core5.warning(`Failed to save: ${typedError.message}`);
           }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
           } catch (error) {
-            core6.debug(`Failed to delete archive: ${error}`);
+            core5.debug(`Failed to delete archive: ${error}`);
           }
         }
         return cacheId;
@@ -61997,7 +61997,7 @@ var require_internal_glob_options_helper2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getOptions = void 0;
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     function getOptions(copy) {
       const result = {
         followSymbolicLinks: true,
@@ -62008,19 +62008,19 @@ var require_internal_glob_options_helper2 = __commonJS({
       if (copy) {
         if (typeof copy.followSymbolicLinks === "boolean") {
           result.followSymbolicLinks = copy.followSymbolicLinks;
-          core6.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+          core5.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
         }
         if (typeof copy.implicitDescendants === "boolean") {
           result.implicitDescendants = copy.implicitDescendants;
-          core6.debug(`implicitDescendants '${result.implicitDescendants}'`);
+          core5.debug(`implicitDescendants '${result.implicitDescendants}'`);
         }
         if (typeof copy.matchDirectories === "boolean") {
           result.matchDirectories = copy.matchDirectories;
-          core6.debug(`matchDirectories '${result.matchDirectories}'`);
+          core5.debug(`matchDirectories '${result.matchDirectories}'`);
         }
         if (typeof copy.omitBrokenSymbolicLinks === "boolean") {
           result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
-          core6.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+          core5.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
         }
       }
       return result;
@@ -62686,7 +62686,7 @@ var require_internal_globber2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DefaultGlobber = void 0;
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var fs4 = __importStar(require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper2());
     var path5 = __importStar(require("path"));
@@ -62739,7 +62739,7 @@ var require_internal_globber2 = __commonJS({
           }
           const stack = [];
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
-            core6.debug(`Search path '${searchPath}'`);
+            core5.debug(`Search path '${searchPath}'`);
             try {
               yield __await2(fs4.promises.lstat(searchPath));
             } catch (err) {
@@ -62805,7 +62805,7 @@ var require_internal_globber2 = __commonJS({
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
-                  core6.debug(`Broken symlink '${item.path}'`);
+                  core5.debug(`Broken symlink '${item.path}'`);
                   return void 0;
                 }
                 throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
@@ -62821,7 +62821,7 @@ var require_internal_globber2 = __commonJS({
               traversalChain.pop();
             }
             if (traversalChain.some((x) => x === realPath)) {
-              core6.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+              core5.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
               return void 0;
             }
             traversalChain.push(realPath);
@@ -62916,7 +62916,7 @@ var require_internal_hash_files = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.hashFiles = void 0;
     var crypto4 = __importStar(require("crypto"));
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var fs4 = __importStar(require("fs"));
     var stream = __importStar(require("stream"));
     var util3 = __importStar(require("util"));
@@ -62925,7 +62925,7 @@ var require_internal_hash_files = __commonJS({
       var e_1, _a;
       var _b;
       return __awaiter(this, void 0, void 0, function* () {
-        const writeDelegate = verbose ? core6.info : core6.debug;
+        const writeDelegate = verbose ? core5.info : core5.debug;
         let hasMatch = false;
         const githubWorkspace = (_b = process.env["GITHUB_WORKSPACE"]) !== null && _b !== void 0 ? _b : process.cwd();
         const result = crypto4.createHash("sha256");
@@ -63232,7 +63232,7 @@ var require_retry_helper = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.RetryHelper = void 0;
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var RetryHelper = class {
       constructor(maxAttempts, minSeconds, maxSeconds) {
         if (maxAttempts < 1) {
@@ -63255,10 +63255,10 @@ var require_retry_helper = __commonJS({
               if (isRetryable && !isRetryable(err)) {
                 throw err;
               }
-              core6.info(err.message);
+              core5.info(err.message);
             }
             const seconds = this.getSleepAmount();
-            core6.info(`Waiting ${seconds} seconds before trying again`);
+            core5.info(`Waiting ${seconds} seconds before trying again`);
             yield this.sleep(seconds);
             attempt++;
           }
@@ -63342,7 +63342,7 @@ var require_tool_cache = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.evaluateVersions = exports.isExplicitVersion = exports.findFromManifest = exports.getManifestFromRepo = exports.findAllVersions = exports.find = exports.cacheFile = exports.cacheDir = exports.extractZip = exports.extractXar = exports.extractTar = exports.extract7z = exports.downloadTool = exports.HTTPError = void 0;
-    var core6 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var io = __importStar(require_io());
     var fs4 = __importStar(require("fs"));
     var mm = __importStar(require_manifest());
@@ -63371,8 +63371,8 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         dest = dest || path5.join(_getTempDirectory(), v4_1.default());
         yield io.mkdirP(path5.dirname(dest));
-        core6.debug(`Downloading ${url2}`);
-        core6.debug(`Destination ${dest}`);
+        core5.debug(`Downloading ${url2}`);
+        core5.debug(`Destination ${dest}`);
         const maxAttempts = 3;
         const minSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MIN_SECONDS", 10);
         const maxSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MAX_SECONDS", 20);
@@ -63399,7 +63399,7 @@ var require_tool_cache = __commonJS({
           allowRetries: false
         });
         if (auth) {
-          core6.debug("set auth");
+          core5.debug("set auth");
           if (headers === void 0) {
             headers = {};
           }
@@ -63408,7 +63408,7 @@ var require_tool_cache = __commonJS({
         const response = yield http3.get(url2, headers);
         if (response.message.statusCode !== 200) {
           const err = new HTTPError(response.message.statusCode);
-          core6.debug(`Failed to download from "${url2}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
+          core5.debug(`Failed to download from "${url2}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
           throw err;
         }
         const pipeline = util3.promisify(stream.pipeline);
@@ -63417,16 +63417,16 @@ var require_tool_cache = __commonJS({
         let succeeded = false;
         try {
           yield pipeline(readStream, fs4.createWriteStream(dest));
-          core6.debug("download complete");
+          core5.debug("download complete");
           succeeded = true;
           return dest;
         } finally {
           if (!succeeded) {
-            core6.debug("download failed");
+            core5.debug("download failed");
             try {
               yield io.rmRF(dest);
             } catch (err) {
-              core6.debug(`Failed to delete '${dest}'. ${err.message}`);
+              core5.debug(`Failed to delete '${dest}'. ${err.message}`);
             }
           }
         }
@@ -63441,7 +63441,7 @@ var require_tool_cache = __commonJS({
         process.chdir(dest);
         if (_7zPath) {
           try {
-            const logLevel = core6.isDebug() ? "-bb1" : "-bb0";
+            const logLevel = core5.isDebug() ? "-bb1" : "-bb0";
             const args = [
               "x",
               logLevel,
@@ -63491,7 +63491,7 @@ var require_tool_cache = __commonJS({
           throw new Error("parameter 'file' is required");
         }
         dest = yield _createExtractFolder(dest);
-        core6.debug("Checking tar --version");
+        core5.debug("Checking tar --version");
         let versionOutput = "";
         yield exec_1.exec("tar --version", [], {
           ignoreReturnCode: true,
@@ -63501,7 +63501,7 @@ var require_tool_cache = __commonJS({
             stderr: (data) => versionOutput += data.toString()
           }
         });
-        core6.debug(versionOutput.trim());
+        core5.debug(versionOutput.trim());
         const isGnuTar = versionOutput.toUpperCase().includes("GNU TAR");
         let args;
         if (flags instanceof Array) {
@@ -63509,7 +63509,7 @@ var require_tool_cache = __commonJS({
         } else {
           args = [flags];
         }
-        if (core6.isDebug() && !flags.includes("v")) {
+        if (core5.isDebug() && !flags.includes("v")) {
           args.push("-v");
         }
         let destArg = dest;
@@ -63541,7 +63541,7 @@ var require_tool_cache = __commonJS({
           args = [flags];
         }
         args.push("-x", "-C", dest, "-f", file);
-        if (core6.isDebug()) {
+        if (core5.isDebug()) {
           args.push("-v");
         }
         const xarPath = yield io.which("xar", true);
@@ -63586,7 +63586,7 @@ var require_tool_cache = __commonJS({
             "-Command",
             pwshCommand
           ];
-          core6.debug(`Using pwsh at path: ${pwshPath}`);
+          core5.debug(`Using pwsh at path: ${pwshPath}`);
           yield exec_1.exec(`"${pwshPath}"`, args);
         } else {
           const powershellCommand = [
@@ -63606,7 +63606,7 @@ var require_tool_cache = __commonJS({
             powershellCommand
           ];
           const powershellPath = yield io.which("powershell", true);
-          core6.debug(`Using powershell at path: ${powershellPath}`);
+          core5.debug(`Using powershell at path: ${powershellPath}`);
           yield exec_1.exec(`"${powershellPath}"`, args);
         }
       });
@@ -63615,7 +63615,7 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         const unzipPath = yield io.which("unzip", true);
         const args = [file];
-        if (!core6.isDebug()) {
+        if (!core5.isDebug()) {
           args.unshift("-q");
         }
         args.unshift("-o");
@@ -63626,8 +63626,8 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         version2 = semver.clean(version2) || version2;
         arch3 = arch3 || os8.arch();
-        core6.debug(`Caching tool ${tool3} ${version2} ${arch3}`);
-        core6.debug(`source dir: ${sourceDir}`);
+        core5.debug(`Caching tool ${tool3} ${version2} ${arch3}`);
+        core5.debug(`source dir: ${sourceDir}`);
         if (!fs4.statSync(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
@@ -63645,14 +63645,14 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         version2 = semver.clean(version2) || version2;
         arch3 = arch3 || os8.arch();
-        core6.debug(`Caching tool ${tool3} ${version2} ${arch3}`);
-        core6.debug(`source file: ${sourceFile}`);
+        core5.debug(`Caching tool ${tool3} ${version2} ${arch3}`);
+        core5.debug(`source file: ${sourceFile}`);
         if (!fs4.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
         const destFolder = yield _createToolPath(tool3, version2, arch3);
         const destPath = path5.join(destFolder, targetFile);
-        core6.debug(`destination file ${destPath}`);
+        core5.debug(`destination file ${destPath}`);
         yield io.cp(sourceFile, destPath);
         _completeToolPath(tool3, version2, arch3);
         return destFolder;
@@ -63676,12 +63676,12 @@ var require_tool_cache = __commonJS({
       if (versionSpec) {
         versionSpec = semver.clean(versionSpec) || "";
         const cachePath = path5.join(_getCacheDirectory(), toolName, versionSpec, arch3);
-        core6.debug(`checking cache: ${cachePath}`);
+        core5.debug(`checking cache: ${cachePath}`);
         if (fs4.existsSync(cachePath) && fs4.existsSync(`${cachePath}.complete`)) {
-          core6.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch3}`);
+          core5.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch3}`);
           toolPath = cachePath;
         } else {
-          core6.debug("not found");
+          core5.debug("not found");
         }
       }
       return toolPath;
@@ -63712,7 +63712,7 @@ var require_tool_cache = __commonJS({
         const http3 = new httpm.HttpClient("tool-cache");
         const headers = {};
         if (auth) {
-          core6.debug("set auth");
+          core5.debug("set auth");
           headers.authorization = auth;
         }
         const response = yield http3.getJson(treeUrl, headers);
@@ -63733,7 +63733,7 @@ var require_tool_cache = __commonJS({
           try {
             releases = JSON.parse(versionsRaw);
           } catch (_a) {
-            core6.debug("Invalid json");
+            core5.debug("Invalid json");
           }
         }
         return releases;
@@ -63759,7 +63759,7 @@ var require_tool_cache = __commonJS({
     function _createToolPath(tool3, version2, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
         const folderPath = path5.join(_getCacheDirectory(), tool3, semver.clean(version2) || version2, arch3 || "");
-        core6.debug(`destination ${folderPath}`);
+        core5.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
         yield io.rmRF(folderPath);
         yield io.rmRF(markerPath);
@@ -63771,19 +63771,19 @@ var require_tool_cache = __commonJS({
       const folderPath = path5.join(_getCacheDirectory(), tool3, semver.clean(version2) || version2, arch3 || "");
       const markerPath = `${folderPath}.complete`;
       fs4.writeFileSync(markerPath, "");
-      core6.debug("finished caching tool");
+      core5.debug("finished caching tool");
     }
     function isExplicitVersion(versionSpec) {
       const c = semver.clean(versionSpec) || "";
-      core6.debug(`isExplicit: ${c}`);
+      core5.debug(`isExplicit: ${c}`);
       const valid = semver.valid(c) != null;
-      core6.debug(`explicit? ${valid}`);
+      core5.debug(`explicit? ${valid}`);
       return valid;
     }
     exports.isExplicitVersion = isExplicitVersion;
     function evaluateVersions(versions, versionSpec) {
       let version2 = "";
-      core6.debug(`evaluating ${versions.length} versions`);
+      core5.debug(`evaluating ${versions.length} versions`);
       versions = versions.sort((a, b) => {
         if (semver.gt(a, b)) {
           return 1;
@@ -63799,9 +63799,9 @@ var require_tool_cache = __commonJS({
         }
       }
       if (version2) {
-        core6.debug(`matched: ${version2}`);
+        core5.debug(`matched: ${version2}`);
       } else {
-        core6.debug("match not found");
+        core5.debug("match not found");
       }
       return version2;
     }
@@ -64551,7 +64551,7 @@ var Reflect2;
 // lib/action.js
 var crypto3 = __toESM(require("crypto"));
 var os7 = __toESM(require("os"));
-var core5 = __toESM(require_core());
+var core4 = __toESM(require_core());
 
 // node_modules/tslib/tslib.es6.js
 function __decorate(decorators, target, key, desc) {
@@ -64575,7 +64575,7 @@ var os5 = __toESM(require("os"));
 var path3 = __toESM(require("path"));
 var process3 = __toESM(require("process"));
 var cache2 = __toESM(require_cache());
-var core4 = __toESM(require_core());
+var core3 = __toESM(require_core());
 
 // node_modules/class-transformer/esm5/enums/transformation-type.enum.js
 var TransformationType;
@@ -65354,7 +65354,7 @@ function warn(message, options) {
 // lib/texlive.js
 var os4 = __toESM(require("os"));
 var path2 = __toESM(require("path"));
-var core3 = __toESM(require_core());
+var core2 = __toESM(require_core());
 var import_exec = __toESM(require_exec());
 var import_decorator_cache_getter = __toESM(require_dist());
 
@@ -65363,7 +65363,6 @@ var os3 = __toESM(require("os"));
 var path = __toESM(require("path"));
 var process2 = __toESM(require("process"));
 var cache = __toESM(require_cache());
-var core2 = __toESM(require_core());
 var glob = __toESM(require_glob2());
 var tool = __toESM(require_tool_cache());
 async function extract(archive, kind) {
@@ -65397,6 +65396,7 @@ async function determine(pattern) {
 async function saveCache2(target, primaryKey) {
   try {
     await cache.saveCache([target], primaryKey);
+    info(`${target} saved with cache key ${primaryKey}`);
   } catch (error) {
     warn("Failed to save to cache", { cause: error });
   }
@@ -65408,7 +65408,7 @@ async function restoreCache2(target, primaryKey, restoreKeys) {
     if (key !== void 0) {
       return key === primaryKey ? "primary" : "secondary";
     }
-    core2.info("Cache not found");
+    info("Cache not found");
   } catch (error) {
     warn("Failed to restore cache", { cause: error });
   }
@@ -65457,7 +65457,7 @@ var Manager = class {
         return (await (0, import_exec.getExecOutput)("kpsewhich", ["-var-value", key])).stdout.trim();
       }
       if (this.version < "2010") {
-        core3.exportVariable(key, value);
+        core2.exportVariable(key, value);
       } else {
         await (0, import_exec.exec)("tlmgr", ["conf", "texmf", key, value]);
       }
@@ -65476,7 +65476,7 @@ var Manager = class {
         if (binpath === void 0) {
           throw new Error("Unable to locate TeX Live's binary directory");
         }
-        core3.addPath(binpath);
+        core2.addPath(binpath);
       }
     };
   }
@@ -65579,7 +65579,7 @@ var DependsTxt;
 var State_1;
 var Inputs = class {
   get cache() {
-    const input = core4.getBooleanInput("cache");
+    const input = core3.getBooleanInput("cache");
     if (input && !cache2.isFeatureAvailable()) {
       warn("Caching is disabled because cache service is not available");
       return false;
@@ -65588,8 +65588,8 @@ var Inputs = class {
   }
   get packages() {
     return (async () => {
-      const list = core4.getInput("packages").split(/(?:#.*$|\s+)/mu);
-      const file = core4.getInput("package-file");
+      const list = core3.getInput("packages").split(/(?:#.*$|\s+)/mu);
+      const file = core3.getInput("package-file");
       if (file !== "") {
         const contents = await fs2.readFile(file, "utf8");
         for (const { hard, soft } of DependsTxt.parse(contents).values()) {
@@ -65600,14 +65600,14 @@ var Inputs = class {
     })();
   }
   get prefix() {
-    const input = core4.getInput("prefix");
+    const input = core3.getInput("prefix");
     if (input !== "") {
       return path3.normalize(input);
     }
     return path3.normalize(process3.env["TEXLIVE_INSTALL_PREFIX"] ?? defaultPrefix());
   }
   get version() {
-    const input = core4.getInput("version");
+    const input = core3.getInput("version");
     if (input === "latest") {
       return Version.LATEST;
     }
@@ -65618,7 +65618,7 @@ var Inputs = class {
     }
   }
   get tlcontrib() {
-    const input = core4.getBooleanInput("tlcontrib");
+    const input = core3.getBooleanInput("tlcontrib");
     if (input && !Version.isLatest(this.version)) {
       warn("`tlcontrib` is currently ignored for older versions");
       return false;
@@ -65653,7 +65653,7 @@ __decorate([
 ], Inputs.prototype, "tlcontrib", null);
 var Outputs = class {
   set ["cache-hit"](hit) {
-    core4.setOutput("cache-hit", hit);
+    core3.setOutput("cache-hit", hit);
   }
 };
 var Env;
@@ -65687,7 +65687,10 @@ var Env;
 })(Env || (Env = {}));
 var State = State_1 = class State2 {
   save() {
-    core4.saveState("post", serialize(this.validate()));
+    core3.saveState("post", serialize(this.validate()));
+    if (this.filled()) {
+      info(`Cache key: ${this.key})`);
+    }
   }
   filled() {
     return this.key !== void 0 && this.texdir !== void 0;
@@ -65699,7 +65702,7 @@ var State = State_1 = class State2 {
     return this;
   }
   static load() {
-    const post = core4.getState("post");
+    const post = core3.getState("post");
     return post === "" ? null : deserialize(State_1, post).validate();
   }
 };
@@ -66040,9 +66043,9 @@ async function run() {
     }
   } catch (error) {
     if (error instanceof Error) {
-      core5.setFailed(error.stack ?? error);
+      core4.setFailed(error.stack ?? error);
     } else {
-      core5.setFailed(`${error}`);
+      core4.setFailed(`${error}`);
     }
   }
 }
@@ -66056,7 +66059,7 @@ async function main() {
   let cacheType = void 0;
   if (inputs.cache) {
     const keys = getCacheKeys(inputs.version, packages);
-    cacheType = await core5.group("Restoring cache", async () => {
+    cacheType = await core4.group("Restoring cache", async () => {
       return await restoreCache2(profile.TEXDIR, ...keys);
     });
     if (cacheType !== "primary") {
@@ -66065,23 +66068,23 @@ async function main() {
     }
   }
   if (cacheType === void 0) {
-    const installtl = await core5.group("Acquiring install-tl", async () => {
+    const installtl = await core4.group("Acquiring install-tl", async () => {
       return InstallTL.restore(inputs.version) ?? await InstallTL.download(inputs.version);
     });
-    await core5.group("Installation profile", async () => {
+    await core4.group("Installation profile", async () => {
       info(profile.toString());
     });
-    await core5.group("Installing TeX Live", async () => {
+    await core4.group("Installing TeX Live", async () => {
       await installtl.run(profile);
     });
   }
   const tlmgr = new Manager(inputs.version, inputs.prefix);
   await tlmgr.path.add();
   if (cacheType !== void 0) {
-    await core5.group("Updating tlmgr", async () => {
+    await core4.group("Updating tlmgr", async () => {
       await tlmgr.update(void 0, { self: true });
     });
-    await core5.group("Adjusting TEXMF", async () => {
+    await core4.group("Adjusting TEXMF", async () => {
       for (const key of ["TEXMFHOME", "TEXMFCONFIG", "TEXMFVAR"]) {
         const value = env3[`TEXLIVE_INSTALL_${key}`];
         if (await tlmgr.conf.texmf(key) !== value) {
@@ -66092,13 +66095,13 @@ async function main() {
     outputs["cache-hit"] = true;
   }
   if (inputs.tlcontrib) {
-    await core5.group("Setting up TLContrib", async () => {
+    await core4.group("Setting up TLContrib", async () => {
       await tlmgr.repository.add(contrib().href, "tlcontrib");
       await tlmgr.pinning.add("tlcontrib", "*");
     });
   }
   if (cacheType !== "primary" && packages.size !== 0) {
-    await core5.group("Installing packages", async () => {
+    await core4.group("Installing packages", async () => {
       await tlmgr.install(...packages);
     });
   }
