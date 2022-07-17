@@ -166,16 +166,27 @@ export class Manager {
 
   async update(
     packages: ReadonlyArray<string> = [],
-    options: { readonly self?: true } = {},
+    options: {
+      readonly all?: boolean;
+      readonly self?: boolean;
+      readonly reinstallForciblyRemoved?: boolean;
+    } = {},
   ): Promise<void> {
     const args = ['update'];
-    if (options.self) {
+    if (options.all ?? false) {
+      args.push('--all');
+    }
+    if (options.self ?? false) {
       if (this.version === '2008') {
         // tlmgr for TeX Live 2008 does not have `self` option
         packages = ['texlive.infra', ...packages];
       } else {
         args.push('--self');
       }
+    }
+    // `--reinstall-forcibly-removed` was first implemented in TeX Live 2009.
+    if ((options.reinstallForciblyRemoved ?? false) && this.version >= '2009') {
+      args.push('--reinstall-forcibly-removed');
     }
     await exec('tlmgr', [...args, ...packages]);
   }

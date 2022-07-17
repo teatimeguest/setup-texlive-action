@@ -231,6 +231,26 @@ describe('Manager', () => {
         'texlive.infra',
       ]);
     });
+
+    it('updates all packages', async () => {
+      const tlmgr = new Manager(Version.LATEST, '');
+      await expect(tlmgr.update(undefined, { all: true })).toResolve();
+      expect(exec.exec).toHaveBeenCalledWith('tlmgr', ['update', '--all']);
+    });
+
+    it('updates packages with `--reinstall-forcibly-removed`', async () => {
+      const tlmgr = new Manager(Version.LATEST, '');
+      await expect(
+        tlmgr.update(['foo', 'bar', 'baz'], { reinstallForciblyRemoved: true }),
+      ).toResolve();
+      expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
+        'update',
+        '--reinstall-forcibly-removed',
+        'foo',
+        'bar',
+        'baz',
+      ]);
+    });
   });
 });
 

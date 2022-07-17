@@ -49,6 +49,24 @@ export class Inputs {
     );
   }
 
+  @Cache get tlcontrib(): boolean {
+    const input = core.getBooleanInput('tlcontrib');
+    if (input && !Version.isLatest(this.version)) {
+      log.warn('`tlcontrib` is currently ignored for older versions');
+      return false;
+    }
+    return input;
+  }
+
+  @Cache get updateAllPackages(): boolean {
+    const input = core.getBooleanInput('update-all-packages');
+    if (input && !Version.isLatest(this.version)) {
+      log.warn('`update-all-packages` is ignored for older versions');
+      return false;
+    }
+    return input;
+  }
+
   @Cache get version(): Version {
     const input = core.getInput('version');
     if (input === 'latest') {
@@ -61,15 +79,6 @@ export class Inputs {
         `Version must be specified by year or 'latest': Caused by ${error}`,
       );
     }
-  }
-
-  @Cache get tlcontrib(): boolean {
-    const input = core.getBooleanInput('tlcontrib');
-    if (input && !Version.isLatest(this.version)) {
-      log.warn('`tlcontrib` is currently ignored for older versions');
-      return false;
-    }
-    return input;
   }
 }
 

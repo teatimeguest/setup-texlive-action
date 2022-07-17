@@ -28,6 +28,7 @@ jest.mock('#/texlive', () => {
     path: { add: jest.fn() },
     pinning: { add: jest.fn() },
     repository: { add: jest.fn() },
+    update: jest.fn(),
   };
   return { contrib, Manager: tl.Manager, Version: tl.Version };
 });
@@ -43,6 +44,7 @@ beforeEach(() => {
       packages: Promise.resolve(new Set()),
       prefix: '',
       tlcontrib: false,
+      updateAllPackages: false,
       version: Version.LATEST,
     },
     outputs: {
@@ -149,6 +151,41 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
       jest.mocked(util.restoreCache),
     );
     expect(Manager.prototype.path.add).toHaveBeenCalled();
+  },
+);
+
+it.each([[true], [false]])(
+  'does not update any TeX packages for new installation',
+  async (input) => {
+    ctx.inputs.updateAllPackages = input;
+    await expect(action.run()).toResolve();
+    expect(Manager.prototype.update).not.toHaveBeenCalled();
+  },
+);
+
+it.each<[CacheType]>([['primary'], ['secondary']])(
+  'updates `tlmgr` when restoring cache (case %s)',
+  async (kind) => {
+    jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
+    await expect(action.run()).toResolve();
+    expect(Manager.prototype.update).toHaveBeenCalledOnce();
+    expect(Manager.prototype.update).toHaveBeenCalledWith(undefined, {
+      self: true,
+    });
+  },
+);
+
+it.each<[CacheType]>([['primary'], ['secondary']])(
+  'updates all packages if `update-all-packages` is true (case %s)',
+  async (kind) => {
+    jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
+    (ctx.inputs.updateAllPackages = true),
+      await expect(action.run()).toResolve();
+    expect(Manager.prototype.update).toHaveBeenCalledTimes(2);
+    expect(Manager.prototype.update).toHaveBeenCalledWith(undefined, {
+      all: true,
+      reinstallForciblyRemoved: true,
+    });
   },
 );
 

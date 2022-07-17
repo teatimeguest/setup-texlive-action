@@ -34,6 +34,12 @@ inputs:
       This input will be ignored if an older version is specified for `version`.
     default: false
     required: false
+  update-all-packages:
+    description: >-
+      Update all TeX packages when restoring cache.
+      The default is `false` and the action updates only `tlmgr`.
+    default: false
+    required: false
   version:
     description: >-
       TeX Live version to install.
