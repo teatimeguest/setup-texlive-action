@@ -9,7 +9,7 @@
 This action provides the following functionality:
 
 * Installing and setting up a specific version of [TeX Live][texlive];
-* Optionally caching and restoring `TEXDIR` to improve workflow execution time;
+* Caching and restoring `TEXDIR` by default to improve workflow execution time;
 * Optionally configuring a package repository and installing additional TeX packages.
 
 Linux, Windows, and macOS are supported.
@@ -26,10 +26,9 @@ Linux, Windows, and macOS are supported.
   run: tlmgr --version
 ```
 
-The action will install TeX Live with
-`scheme-infraonly` for versions `2016` and later, and
-`scheme-minimal` for other versions.
-If you want to install additional packages, you can use the `packages` input:
+By default,
+the action will only set up `tlmgr` and will not install any packages.
+If you want to install additional packages, you can use `packages` input:
 
 ```yaml
 - name: Setup TeX Live
@@ -41,11 +40,15 @@ If you want to install additional packages, you can use the `packages` input:
       hyperref
 ```
 
-You can also specify packages by file using [`package-file`][inputs] input.
+If you don't know exactly all the packages you need,
+it is recommended to install `scheme-basic`, which contains
+fundamental packages such as `latex` and `amsmath`.
+
+You can also specify packages by file using [`package-file`](#inputs) input.
 
 ### Historic versions
 
-You can use an older version of TeX Live by specifying the `version`:
+You can use an older version of TeX Live by specifying `version`:
 
 ```yaml
 - name: Setup TeX Live 2008
@@ -61,7 +64,7 @@ configuring the package repository appropriately.
 Supported versions are `2008` to `2022` for Linux and Windows, and
 `2013` to `2022` for macOS.
 
-> **Remark.**
+> **Note**.
 > Versions `2008` to `2012` can be installed on `macos-latest` but
 > do not work
 > because the `kpsewhich` for those versions is a 32-bit executable and
@@ -72,7 +75,7 @@ Supported versions are `2008` to `2022` for Linux and Windows, and
 By default,
 the action will save `TEXDIR` to cache using [`@actions/cache`][actions-cache]
 after the workflow job completes.
-If you want to disable caching, you can use the `cache` input:
+If you want to disable caching, you can use `cache` input:
 
 ```yaml
 - name: Setup TeX Live
@@ -83,6 +86,10 @@ If you want to disable caching, you can use the `cache` input:
 
 The `packages` input will affect which cache will be restored
 because its hash will be used as part of the cache key.
+
+> **Note**.
+> If you have problems due to a defective installation stored in cache,
+> you can delete it via the [GitHub REST API][cache-api].
 
 ## Inputs
 
@@ -140,15 +147,16 @@ See the [releases page][releases].
   with [`zauguin/install-texlive`][install-texlive] action
   (see [`.github/tl_packages`][tl_packages]).
 
+[#226]: https://github.com/teatimeguest/setup-texlive-action/issues/226
 [actions-cache]: https://github.com/actions/toolkit/tree/main/packages/cache
 [actions-environment-variables]: https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+[cache-api]: https://docs.github.com/en/rest/actions/cache
 [ci-badge]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml
 [codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
 [codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
 [depends-txt]: https://tug.org/texlive/pkgcontrib.html#deps
 [historic]: https://tug.org/historic/
-[inputs]: https://github.com/teatimeguest/setup-texlive-action#inputs
 [install-texlive]: https://github.com/zauguin/install-texlive
 [install-tl-environment-variables]: https://tug.org/texlive/doc/install-tl.html#ENVIRONMENT-VARIABLES
 [latex3]: https://github.com/latex3/latex3
