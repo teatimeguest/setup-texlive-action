@@ -2,7 +2,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import * as core from '@actions/core';
-import { exec, getExecOutput } from '@actions/exec';
+import { exec, getExecOutput as popen } from '@actions/exec';
 import { cache as Cache } from 'decorator-cache-getter';
 import type { DeepWritable } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
@@ -52,125 +52,37 @@ export interface Texmf {
   readonly ['TEXMFSYSVAR']?: string;
 }
 
-/**
- * An interface for the `tlmgr` command.
- */
-export class Manager {
+export class Tlmgr {
   constructor(
     private readonly version: Version,
     private readonly prefix: string,
   ) {}
 
-  @Cache get conf(): {
-    readonly texmf: {
-      (key: keyof Texmf): Promise<string>;
-      (key: keyof Texmf, value: string): Promise<void>;
-    };
-  } {
-    function texmf(key: keyof Texmf): Promise<string>;
-    function texmf(key: keyof Texmf, value: string): Promise<void>;
-    async function texmf(
-      this: { readonly version: Version },
-      key: keyof Texmf,
-      value?: string,
-    ): Promise<string | void> {
-      if (value === undefined) {
-        return (
-          await getExecOutput('kpsewhich', ['-var-value', key])
-        ).stdout.trim();
-      }
-      // `tlmgr conf` is not implemented prior to 2010.
-      if (this.version < '2010') {
-        core.exportVariable(key, value);
-      } else {
-        await exec('tlmgr', ['conf', 'texmf', key, value]);
-      }
-    }
-    return { texmf: texmf.bind({ version: this.version }) };
+  @Cache get conf(): Tlmgr.Conf {
+    return new Tlmgr.Conf(this.version);
   }
 
   async install(this: void, ...packages: ReadonlyArray<string>): Promise<void> {
     if (packages.length !== 0) {
-      await exec('tlmgr', ['install', ...packages]);
+      Tlmgr.check((await popen('tlmgr', ['install', ...packages])).stderr);
     }
   }
 
-  @Cache get path(): {
-    readonly add: () => Promise<void>;
-  } {
-    return {
-      add: async () => {
-        const binpath = await determine(
-          path.join(this.prefix, this.version, 'bin', '*'),
-        );
-        if (binpath === undefined) {
-          throw new Error("Unable to locate TeX Live's binary directory");
-        }
-        core.addPath(binpath);
-      },
-    };
+  @Cache get path(): Tlmgr.Path {
+    return new Tlmgr.Path(this.version, this.prefix);
   }
 
-  @Cache get pinning(): {
-    readonly add: (
-      repo: string,
-      ...globs: readonly [string, ...Array<string>]
-    ) => Promise<void>;
-  } {
-    if (this.version < '2013') {
-      throw new RangeError(
-        `\`pinning\` action is not implemented in TeX Live ${this.version}`,
-      );
-    }
-    return {
-      add: async (repo, ...globs: ReadonlyArray<string>) => {
-        await exec('tlmgr', ['pinning', 'add', repo, ...globs]);
-      },
-    };
+  @Cache get pinning(): Tlmgr.Pinning {
+    return new Tlmgr.Pinning(this.version);
   }
 
-  @Cache get repository(): {
-    /**
-     * @returns `false` if the repository already exists, otherwise `true`.
-     */
-    readonly add: (repo: string, tag?: string) => Promise<boolean>;
-  } {
-    if (this.version < '2012') {
-      throw new RangeError(
-        `\`repository\` action is not implemented in TeX Live ${this.version}`,
-      );
-    }
-    return {
-      add: async (repo, tag?) => {
-        const { exitCode, stderr } = await getExecOutput(
-          'tlmgr',
-          ['repository', 'add', repo, ...(tag === undefined ? [] : [tag])],
-          { ignoreReturnCode: true },
-        );
-        const status = exitCode === 0;
-        if (
-          // `tlmgr repository add` returns non-zero status code
-          // if the same repository or tag is added again.
-          // (todo:  make sure that the tagged repo is really tlcontrib)
-          !status &&
-          !stderr.includes('repository or its tag already defined')
-        ) {
-          throw new Error(
-            `\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`,
-          );
-        }
-        return status;
-      },
-    };
+  @Cache get repository(): Tlmgr.Repository {
+    return new Tlmgr.Repository(this.version);
   }
 
   async update(
     packages: ReadonlyArray<string> = [],
-    options: {
-      readonly all?: boolean;
-      readonly self?: boolean;
-      readonly reinstallForciblyRemoved?: boolean;
-    } = {},
+    options: Readonly<Tlmgr.UpdateOptions> = {},
   ): Promise<void> {
     const args = ['update'];
     if (options.all ?? false) {
@@ -189,6 +101,114 @@ export class Manager {
       args.push('--reinstall-forcibly-removed');
     }
     await exec('tlmgr', [...args, ...packages]);
+  }
+}
+
+export namespace Tlmgr {
+  export class Conf {
+    constructor(private readonly version: Version) {}
+
+    texmf(key: keyof Texmf): Promise<string>;
+    texmf(key: keyof Texmf, value: string): Promise<void>;
+    async texmf(key: keyof Texmf, value?: string): Promise<string | void> {
+      if (value === undefined) {
+        return (await popen('kpsewhich', ['-var-value', key])).stdout.trim();
+      }
+      // `tlmgr conf` is not implemented prior to 2010.
+      if (this.version < '2010') {
+        core.exportVariable(key, value);
+      } else {
+        await exec('tlmgr', ['conf', 'texmf', key, value]);
+      }
+    }
+  }
+
+  export class Path {
+    readonly #pattern: string;
+    constructor(version: Version, prefix: string) {
+      this.#pattern = path.join(prefix, version, 'bin', '*');
+    }
+
+    async add(): Promise<void> {
+      const dir = await determine(this.#pattern);
+      if (dir === undefined) {
+        throw new Error("Unable to locate TeX Live's binary directory");
+      }
+      core.addPath(dir);
+    }
+  }
+
+  export class Pinning {
+    constructor(version: Version) {
+      if (version < '2013') {
+        throw new RangeError(
+          `\`pinning\` action is not implemented in TeX Live ${version}`,
+        );
+      }
+    }
+
+    async add(
+      this: void,
+      repo: string,
+      ...globs: readonly [string, ...Array<string>]
+    ): Promise<void> {
+      await exec('tlmgr', ['pinning', 'add', repo, ...globs]);
+    }
+  }
+
+  export class Repository {
+    constructor(version: Version) {
+      if (version < '2012') {
+        throw new RangeError(
+          `\`repository\` action is not implemented in TeX Live ${version}`,
+        );
+      }
+    }
+
+    /**
+     * @returns `false` if the repository already exists, otherwise `true`.
+     */
+    async add(this: void, repo: string, tag?: string): Promise<boolean> {
+      const args = ['repository', 'add', repo];
+      if (tag !== undefined) {
+        args.push(tag);
+      }
+      const { exitCode, stderr } = await popen('tlmgr', args, {
+        ignoreReturnCode: true,
+      });
+      const status = exitCode === 0;
+      if (
+        // `tlmgr repository add` returns non-zero status code
+        // if the same repository or tag is added again.
+        // (todo:  make sure that the tagged repo is really tlcontrib)
+        !status &&
+        !stderr.includes('repository or its tag already defined')
+      ) {
+        throw new Error(
+          `\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`,
+        );
+      }
+      return status;
+    }
+  }
+
+  export interface UpdateOptions {
+    all?: boolean;
+    self?: boolean;
+    reinstallForciblyRemoved?: boolean;
+  }
+
+  export function check(stderr: string): void {
+    // tlpkg/TeXLive/TLUtils.pm
+    const result = /: checksums differ for (.*):$/mu.exec(stderr);
+    if (result !== null) {
+      const pkg = path.basename(result[1] ?? '', '.tar.xz');
+      throw new Error(
+        `The checksum of package ${pkg} did not match. ` +
+          'The CTAN mirror may be in the process of synchronization, ' +
+          'please rerun the job after some time.',
+      );
+    }
   }
 }
 

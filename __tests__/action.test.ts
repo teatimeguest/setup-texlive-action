@@ -5,7 +5,7 @@ import type { DeepWritable } from 'ts-essentials';
 import * as action from '#/action';
 import { Env, Inputs, Outputs, State } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
-import { Manager, Version } from '#/texlive';
+import { Tlmgr, Version } from '#/texlive';
 import * as util from '#/utility';
 import CacheType = util.CacheType;
 
@@ -22,12 +22,12 @@ jest.mocked(core.setFailed).mockImplementation((error) => {
 jest.mock('#/texlive', () => {
   const { contrib, Version } = jest.requireActual('#/texlive');
   const mocks = jest.createMockFromModule<any>('#/texlive');
-  mocks.Manager.prototype = {
-    conf: { texmf: jest.fn().mockResolvedValue('') },
+  mocks.Tlmgr.prototype = {
+    conf: new mocks.Tlmgr.Conf(),
     install: jest.fn(),
-    path: { add: jest.fn() },
-    pinning: { add: jest.fn() },
-    repository: { add: jest.fn() },
+    path: new mocks.Tlmgr.Path(),
+    pinning: new mocks.Tlmgr.Pinning(),
+    repository: new mocks.Tlmgr.Repository(),
     update: jest.fn(),
   };
   return { ...mocks, contrib, Version };
@@ -136,7 +136,7 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
 
 it('adds TeX Live to path after installation', async () => {
   await expect(action.run()).toResolve();
-  expect(Manager.prototype.path.add).toHaveBeenCalledAfter(
+  expect(Tlmgr.Path.prototype.add).toHaveBeenCalledAfter(
     // eslint-disable-next-line jest/unbound-method
     jest.mocked(InstallTL.prototype.run),
   );
@@ -147,10 +147,10 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
   async (kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     await expect(action.run()).toResolve();
-    expect(Manager.prototype.path.add).not.toHaveBeenCalledBefore(
+    expect(Tlmgr.Path.prototype.add).not.toHaveBeenCalledBefore(
       jest.mocked(util.restoreCache),
     );
-    expect(Manager.prototype.path.add).toHaveBeenCalled();
+    expect(Tlmgr.Path.prototype.add).toHaveBeenCalled();
   },
 );
 
@@ -159,7 +159,7 @@ it.each([[true], [false]])(
   async (input) => {
     ctx.inputs.updateAllPackages = input;
     await expect(action.run()).toResolve();
-    expect(Manager.prototype.update).not.toHaveBeenCalled();
+    expect(Tlmgr.prototype.update).not.toHaveBeenCalled();
   },
 );
 
@@ -168,8 +168,8 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
   async (kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     await expect(action.run()).toResolve();
-    expect(Manager.prototype.update).toHaveBeenCalledOnce();
-    expect(Manager.prototype.update).toHaveBeenCalledWith(undefined, {
+    expect(Tlmgr.prototype.update).toHaveBeenCalledOnce();
+    expect(Tlmgr.prototype.update).toHaveBeenCalledWith(undefined, {
       self: true,
     });
   },
@@ -181,8 +181,8 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     ctx.inputs.updateAllPackages = true;
     await expect(action.run()).toResolve();
-    expect(Manager.prototype.update).toHaveBeenCalledTimes(2);
-    expect(Manager.prototype.update).toHaveBeenCalledWith(undefined, {
+    expect(Tlmgr.prototype.update).toHaveBeenCalledTimes(2);
+    expect(Tlmgr.prototype.update).toHaveBeenCalledWith(undefined, {
       all: true,
       reinstallForciblyRemoved: true,
     });
@@ -200,12 +200,12 @@ it.each<[CacheType, Version]>([
   ctx.inputs.updateAllPackages = true;
   ctx.inputs.version = version;
   await expect(action.run()).toResolve();
-  expect(Manager.prototype.update).not.toHaveBeenCalled();
+  expect(Tlmgr.prototype.update).not.toHaveBeenCalled();
 });
 
 it('does nothing about TEXMF for new installation', async () => {
   await expect(action.run()).toResolve();
-  expect(Manager.prototype.conf.texmf).not.toHaveBeenCalled();
+  expect(Tlmgr.Conf.prototype.texmf).not.toHaveBeenCalled();
 });
 
 it.each<[CacheType | undefined]>([['primary'], ['secondary'], [undefined]])(
@@ -213,8 +213,9 @@ it.each<[CacheType | undefined]>([['primary'], ['secondary'], [undefined]])(
   async (kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     await expect(action.run()).toResolve();
-    expect(Manager.prototype.conf.texmf).not.toHaveBeenCalledBefore(
-      jest.mocked(Manager.prototype.path.add),
+    expect(Tlmgr.Conf.prototype.texmf).not.toHaveBeenCalledBefore(
+      // eslint-disable-next-line jest/unbound-method
+      jest.mocked(Tlmgr.Path.prototype.add),
     );
   },
 );
@@ -224,7 +225,8 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
   async (kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     ctx.env.TEXLIVE_INSTALL_TEXMFHOME = '<new>';
-    const tlmgr = jest.mocked<any>(Manager.prototype.conf.texmf);
+    // eslint-disable-next-line jest/unbound-method
+    const tlmgr = jest.mocked<any>(Tlmgr.Conf.prototype.texmf);
     tlmgr.mockResolvedValue('<old>');
     await expect(action.run()).toResolve();
     expect(tlmgr).toHaveBeenCalledWith('TEXMFHOME', '<new>');
@@ -237,7 +239,8 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
   async (kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     ctx.env.TEXLIVE_INSTALL_TEXMFHOME = '<old>';
-    const tlmgr = jest.mocked<any>(Manager.prototype.conf.texmf);
+    // eslint-disable-next-line jest/unbound-method
+    const tlmgr = jest.mocked<any>(Tlmgr.Conf.prototype.texmf);
     tlmgr.mockResolvedValue('<old>');
     await expect(action.run()).toResolve();
     expect(tlmgr).not.toHaveBeenCalledWith('TEXMFHOME', expect.anything());
@@ -247,14 +250,19 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
 
 it('does not setup tlcontrib by default', async () => {
   await expect(action.run()).toResolve();
-  expect(Manager.prototype.repository.add).not.toHaveBeenCalled();
-  expect(Manager.prototype.pinning.add).not.toHaveBeenCalled();
+  expect(Tlmgr.Repository.prototype.add).not.toHaveBeenCalled();
+  expect(Tlmgr.Pinning.prototype.add).not.toHaveBeenCalled();
 });
 
 it('sets up tlcontrib if input tlcontrib is true', async () => {
   ctx.inputs.tlcontrib = true;
   await expect(action.run()).toResolve();
-  const { path, pinning, repository } = Manager.prototype;
+  const {
+    Path: { prototype: path },
+    Pinning: { prototype: pinning },
+    Repository: { prototype: repository },
+  } = Tlmgr;
+  // eslint-disable-next-line jest/unbound-method
   expect(repository.add).not.toHaveBeenCalledBefore(jest.mocked(path.add));
   expect(repository.add).toHaveBeenCalledWith(expect.anything(), 'tlcontrib');
   expect(pinning.add).not.toHaveBeenCalledBefore(jest.mocked(repository.add));
@@ -263,7 +271,7 @@ it('sets up tlcontrib if input tlcontrib is true', async () => {
 
 it('does not install any packages by default', async () => {
   await expect(action.run()).toResolve();
-  expect(Manager.prototype.install).not.toHaveBeenCalled();
+  expect(Tlmgr.prototype.install).not.toHaveBeenCalled();
 });
 
 it('does not install new packages if full cache found', async () => {
@@ -277,7 +285,7 @@ it.each<[CacheType | undefined]>([['secondary'], [undefined]])(
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     ctx.inputs.packages = Promise.resolve(new Set(['foo', 'bar', 'baz']));
     await expect(action.run()).toResolve();
-    expect(Manager.prototype.install).toHaveBeenCalled();
+    expect(Tlmgr.prototype.install).toHaveBeenCalled();
   },
 );
 

@@ -6,7 +6,7 @@ import * as core from '@actions/core';
 import { Env, Inputs, Outputs, State } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
 import * as log from '#/log';
-import { Manager, Version, contrib as tlcontrib } from '#/texlive';
+import { Tlmgr, Version, contrib as tlcontrib } from '#/texlive';
 import { restoreCache, saveCache } from '#/utility';
 
 export async function run(): Promise<void> {
@@ -62,7 +62,7 @@ async function main(): Promise<void> {
     });
   }
 
-  const tlmgr = new Manager(inputs.version, inputs.prefix);
+  const tlmgr = new Tlmgr(inputs.version, inputs.prefix);
   await tlmgr.path.add();
 
   if (cacheType !== undefined) {
