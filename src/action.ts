@@ -66,16 +66,18 @@ async function main(): Promise<void> {
   await tlmgr.path.add();
 
   if (cacheType !== undefined) {
-    await core.group('Updating tlmgr', async () => {
-      await tlmgr.update(undefined, { self: true });
-    });
-    if (inputs.updateAllPackages) {
-      await core.group('Updating packages', async () => {
-        await tlmgr.update(undefined, {
-          all: true,
-          reinstallForciblyRemoved: true,
-        });
+    if (Version.isLatest(inputs.version)) {
+      await core.group('Updating tlmgr', async () => {
+        await tlmgr.update(undefined, { self: true });
       });
+      if (inputs.updateAllPackages) {
+        await core.group('Updating packages', async () => {
+          await tlmgr.update(undefined, {
+            all: true,
+            reinstallForciblyRemoved: true,
+          });
+        });
+      }
     }
     await core.group('Adjusting TEXMF', async () => {
       for (const key of ['TEXMFHOME', 'TEXMFCONFIG', 'TEXMFVAR'] as const) {

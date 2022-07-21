@@ -20,9 +20,9 @@ jest.mocked(core.setFailed).mockImplementation((error) => {
 });
 
 jest.mock('#/texlive', () => {
-  const contrib = jest.requireActual('#/texlive').contrib;
-  const tl = jest.createMockFromModule<any>('#/texlive');
-  tl.Manager.prototype = {
+  const { contrib, Version } = jest.requireActual('#/texlive');
+  const mocks = jest.createMockFromModule<any>('#/texlive');
+  mocks.Manager.prototype = {
     conf: { texmf: jest.fn().mockResolvedValue('') },
     install: jest.fn(),
     path: { add: jest.fn() },
@@ -30,7 +30,7 @@ jest.mock('#/texlive', () => {
     repository: { add: jest.fn() },
     update: jest.fn(),
   };
-  return { contrib, Manager: tl.Manager, Version: tl.Version };
+  return { ...mocks, contrib, Version };
 });
 let ctx: DeepWritable<{
   inputs: Inputs;
@@ -179,8 +179,8 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
   'updates all packages if `update-all-packages` is true (case %s)',
   async (kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
-    (ctx.inputs.updateAllPackages = true),
-      await expect(action.run()).toResolve();
+    ctx.inputs.updateAllPackages = true;
+    await expect(action.run()).toResolve();
     expect(Manager.prototype.update).toHaveBeenCalledTimes(2);
     expect(Manager.prototype.update).toHaveBeenCalledWith(undefined, {
       all: true,
@@ -188,6 +188,20 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
     });
   },
 );
+
+it.each<[CacheType, Version]>([
+  ['primary', '2008'],
+  ['secondary', '2011'],
+  ['primary', '2014'],
+  ['secondary', '2017'],
+  ['primary', '2020'],
+])('does not update any packages for older versions', async (kind, version) => {
+  jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
+  ctx.inputs.updateAllPackages = true;
+  ctx.inputs.version = version;
+  await expect(action.run()).toResolve();
+  expect(Manager.prototype.update).not.toHaveBeenCalled();
+});
 
 it('does nothing about TEXMF for new installation', async () => {
   await expect(action.run()).toResolve();
