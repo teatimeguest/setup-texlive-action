@@ -11,3 +11,5 @@ updates:
       interval: weekly
       day: friday
       time: '05:00'
+    allow:
+      - dependency-type: production
