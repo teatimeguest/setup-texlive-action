@@ -1667,6 +1667,140 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
   }
 });
 
+// node_modules/tslib/tslib.es6.js
+function __rest(s, e) {
+  var t = {};
+  for (var p in s)
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+  if (s != null && typeof Object.getOwnPropertySymbols === "function")
+    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+        t[p[i]] = s[p[i]];
+    }
+  return t;
+}
+function __decorate(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+function __metadata(metadataKey, metadataValue) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+    return Reflect.metadata(metadataKey, metadataValue);
+}
+function __values2(o) {
+  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+  if (m)
+    return m.call(o);
+  if (o && typeof o.length === "number")
+    return {
+      next: function() {
+        if (o && i >= o.length)
+          o = void 0;
+        return { value: o && o[i++], done: !o };
+      }
+    };
+  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+function __await(v) {
+  return this instanceof __await ? (this.v = v, this) : new __await(v);
+}
+function __asyncGenerator(thisArg, _arguments, generator) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var g = generator.apply(thisArg, _arguments || []), i, q = [];
+  return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i;
+  function verb(n) {
+    if (g[n])
+      i[n] = function(v) {
+        return new Promise(function(a, b) {
+          q.push([n, v, a, b]) > 1 || resume(n, v);
+        });
+      };
+  }
+  function resume(n, v) {
+    try {
+      step(g[n](v));
+    } catch (e) {
+      settle(q[0][3], e);
+    }
+  }
+  function step(r) {
+    r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+  }
+  function fulfill(value) {
+    resume("next", value);
+  }
+  function reject(value) {
+    resume("throw", value);
+  }
+  function settle(f, v) {
+    if (f(v), q.shift(), q.length)
+      resume(q[0][0], q[0][1]);
+  }
+}
+function __asyncDelegator(o) {
+  var i, p;
+  return i = {}, verb("next"), verb("throw", function(e) {
+    throw e;
+  }), verb("return"), i[Symbol.iterator] = function() {
+    return this;
+  }, i;
+  function verb(n, f) {
+    i[n] = o[n] ? function(v) {
+      return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v;
+    } : f;
+  }
+}
+function __asyncValues(o) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var m = o[Symbol.asyncIterator], i;
+  return m ? m.call(o) : (o = typeof __values2 === "function" ? __values2(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i);
+  function verb(n) {
+    i[n] = o[n] && function(v) {
+      return new Promise(function(resolve, reject) {
+        v = o[n](v), settle(resolve, reject, v.done, v.value);
+      });
+    };
+  }
+  function settle(resolve, reject, d, v) {
+    Promise.resolve(v).then(function(v2) {
+      resolve({ value: v2, done: d });
+    }, reject);
+  }
+}
+function __classPrivateFieldGet(receiver, state, kind, f) {
+  if (kind === "a" && !f)
+    throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+}
+function __classPrivateFieldSet(receiver, state, value, kind, f) {
+  if (kind === "m")
+    throw new TypeError("Private method is not writable");
+  if (kind === "a" && !f)
+    throw new TypeError("Private accessor was defined without a setter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+}
+var init_tslib_es6 = __esm({
+  "node_modules/tslib/tslib.es6.js"() {
+  }
+});
+
 // node_modules/@actions/io/lib/io-util.js
 var require_io_util = __commonJS({
   "node_modules/@actions/io/lib/io-util.js"(exports) {
@@ -1909,7 +2043,7 @@ var require_io = __commonJS({
     var path5 = __importStar(require("path"));
     var util_1 = require("util");
     var ioUtil = __importStar(require_io_util());
-    var exec3 = util_1.promisify(childProcess.exec);
+    var exec2 = util_1.promisify(childProcess.exec);
     var execFile = util_1.promisify(childProcess.execFile);
     function cp(source, dest, options = {}) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -1968,11 +2102,11 @@ var require_io = __commonJS({
           try {
             const cmdPath = ioUtil.getCmdPath();
             if (yield ioUtil.isDirectory(inputPath, true)) {
-              yield exec3(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
+              yield exec2(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
                 env: { inputPath }
               });
             } else {
-              yield exec3(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
+              yield exec2(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
                 env: { inputPath }
               });
             }
@@ -2668,7 +2802,7 @@ var require_exec = __commonJS({
     exports.getExecOutput = exports.exec = void 0;
     var string_decoder_1 = require("string_decoder");
     var tr = __importStar(require_toolrunner());
-    function exec3(commandLine, args, options) {
+    function exec2(commandLine, args, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
@@ -2680,8 +2814,8 @@ var require_exec = __commonJS({
         return runner.exec();
       });
     }
-    exports.exec = exec3;
-    function getExecOutput2(commandLine, args, options) {
+    exports.exec = exec2;
+    function getExecOutput(commandLine, args, options) {
       var _a, _b;
       return __awaiter(this, void 0, void 0, function* () {
         let stdout = "";
@@ -2703,7 +2837,7 @@ var require_exec = __commonJS({
           }
         };
         const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec3(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        const exitCode = yield exec2(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
         stdout += stdoutDecoder.end();
         stderr += stderrDecoder.end();
         return {
@@ -2713,7 +2847,7 @@ var require_exec = __commonJS({
         };
       });
     }
-    exports.getExecOutput = getExecOutput2;
+    exports.getExecOutput = getExecOutput;
   }
 });
 
@@ -3883,8 +4017,8 @@ var require_internal_path = __commonJS({
             let remaining = itemPath;
             let dir = pathHelper.dirname(remaining);
             while (dir !== remaining) {
-              const basename = path5.basename(remaining);
-              this.segments.unshift(basename);
+              const basename2 = path5.basename(remaining);
+              this.segments.unshift(basename2);
               remaining = dir;
               dir = pathHelper.dirname(remaining);
             }
@@ -5807,7 +5941,7 @@ var require_cacheUtils = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var core5 = __importStar(require_core());
-    var exec3 = __importStar(require_exec());
+    var exec2 = __importStar(require_exec());
     var glob2 = __importStar(require_glob());
     var io = __importStar(require_io());
     var fs4 = __importStar(require("fs"));
@@ -5885,7 +6019,7 @@ var require_cacheUtils = __commonJS({
         core5.debug(`Checking ${app} --version`);
         let versionOutput = "";
         try {
-          yield exec3.exec(`${app} --version`, [], {
+          yield exec2.exec(`${app} --version`, [], {
             ignoreReturnCode: true,
             silent: true,
             listeners: {
@@ -30974,24 +31108,6 @@ var init_httpPipelineLogLevel = __esm({
   }
 });
 
-// node_modules/@azure/core-http/node_modules/tslib/tslib.es6.js
-function __rest(s, e) {
-  var t = {};
-  for (var p in s)
-    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-      t[p] = s[p];
-  if (s != null && typeof Object.getOwnPropertySymbols === "function")
-    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-        t[p[i]] = s[p[i]];
-    }
-  return t;
-}
-var init_tslib_es6 = __esm({
-  "node_modules/@azure/core-http/node_modules/tslib/tslib.es6.js"() {
-  }
-});
-
 // node_modules/@azure/core-http/dist-esm/src/operationOptions.js
 function operationOptionsToRequestOptionsBase(opts) {
   const { requestOptions, tracingOptions } = opts, additionalOptions = __rest(opts, ["requestOptions", "tracingOptions"]);
@@ -40124,98 +40240,6 @@ var init_coreHttp = __esm({
     init_url();
     init_delay();
     init_src3();
-  }
-});
-
-// node_modules/@azure/storage-blob/node_modules/tslib/tslib.es6.js
-function __values2(o) {
-  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-  if (m)
-    return m.call(o);
-  if (o && typeof o.length === "number")
-    return {
-      next: function() {
-        if (o && i >= o.length)
-          o = void 0;
-        return { value: o && o[i++], done: !o };
-      }
-    };
-  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-}
-function __await(v) {
-  return this instanceof __await ? (this.v = v, this) : new __await(v);
-}
-function __asyncGenerator(thisArg, _arguments, generator) {
-  if (!Symbol.asyncIterator)
-    throw new TypeError("Symbol.asyncIterator is not defined.");
-  var g = generator.apply(thisArg, _arguments || []), i, q = [];
-  return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-    return this;
-  }, i;
-  function verb(n) {
-    if (g[n])
-      i[n] = function(v) {
-        return new Promise(function(a, b) {
-          q.push([n, v, a, b]) > 1 || resume(n, v);
-        });
-      };
-  }
-  function resume(n, v) {
-    try {
-      step(g[n](v));
-    } catch (e) {
-      settle(q[0][3], e);
-    }
-  }
-  function step(r) {
-    r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
-  }
-  function fulfill(value) {
-    resume("next", value);
-  }
-  function reject(value) {
-    resume("throw", value);
-  }
-  function settle(f, v) {
-    if (f(v), q.shift(), q.length)
-      resume(q[0][0], q[0][1]);
-  }
-}
-function __asyncDelegator(o) {
-  var i, p;
-  return i = {}, verb("next"), verb("throw", function(e) {
-    throw e;
-  }), verb("return"), i[Symbol.iterator] = function() {
-    return this;
-  }, i;
-  function verb(n, f) {
-    i[n] = o[n] ? function(v) {
-      return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v;
-    } : f;
-  }
-}
-function __asyncValues(o) {
-  if (!Symbol.asyncIterator)
-    throw new TypeError("Symbol.asyncIterator is not defined.");
-  var m = o[Symbol.asyncIterator], i;
-  return m ? m.call(o) : (o = typeof __values2 === "function" ? __values2(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-    return this;
-  }, i);
-  function verb(n) {
-    i[n] = o[n] && function(v) {
-      return new Promise(function(resolve, reject) {
-        v = o[n](v), settle(resolve, reject, v.done, v.value);
-      });
-    };
-  }
-  function settle(resolve, reject, d, v) {
-    Promise.resolve(v).then(function(v2) {
-      resolve({ value: v2, done: d });
-    }, reject);
-  }
-}
-var init_tslib_es62 = __esm({
-  "node_modules/@azure/storage-blob/node_modules/tslib/tslib.es6.js"() {
   }
 });
 
@@ -56313,7 +56337,7 @@ var init_utils_common2 = __esm({
 var AvroReader;
 var init_AvroReader = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-internal-avro/src/AvroReader.js"() {
-    init_tslib_es62();
+    init_tslib_es6();
     init_src6();
     init_AvroConstants();
     init_AvroParser();
@@ -57493,7 +57517,7 @@ var init_utils_node = __esm({
 var BlobClient, AppendBlobClient, BlockBlobClient, PageBlobClient;
 var init_Clients = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/Clients.js"() {
-    init_tslib_es62();
+    init_tslib_es6();
     init_coreHttp();
     init_src4();
     init_BlobDownloadResponse();
@@ -59484,7 +59508,7 @@ var init_BlobBatchClient = __esm({
 var ContainerClient;
 var init_ContainerClient = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/ContainerClient.js"() {
-    init_tslib_es62();
+    init_tslib_es6();
     init_coreHttp();
     init_src4();
     init_AnonymousCredential();
@@ -60479,7 +60503,7 @@ var init_AccountSASSignatureValues = __esm({
 var BlobServiceClient;
 var init_BlobServiceClient = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/BlobServiceClient.js"() {
-    init_tslib_es62();
+    init_tslib_es6();
     init_coreHttp();
     init_src4();
     init_operations();
@@ -62322,8 +62346,8 @@ var require_internal_path2 = __commonJS({
             let remaining = itemPath;
             let dir = pathHelper.dirname(remaining);
             while (dir !== remaining) {
-              const basename = path5.basename(remaining);
-              this.segments.unshift(basename);
+              const basename2 = path5.basename(remaining);
+              this.segments.unshift(basename2);
               remaining = dir;
               dir = pathHelper.dirname(remaining);
             }
@@ -64553,23 +64577,8 @@ var crypto3 = __toESM(require("crypto"));
 var os7 = __toESM(require("os"));
 var core4 = __toESM(require_core());
 
-// node_modules/tslib/tslib.es6.js
-function __decorate(decorators, target, key, desc) {
-  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-    r = Reflect.decorate(decorators, target, key, desc);
-  else
-    for (var i = decorators.length - 1; i >= 0; i--)
-      if (d = decorators[i])
-        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-  return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-function __metadata(metadataKey, metadataValue) {
-  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
-    return Reflect.metadata(metadataKey, metadataValue);
-}
-
 // lib/context.js
+init_tslib_es6();
 var fs2 = __toESM(require("fs/promises"));
 var os5 = __toESM(require("os"));
 var path3 = __toESM(require("path"));
@@ -65352,6 +65361,7 @@ function warn(message, options) {
 }
 
 // lib/texlive.js
+init_tslib_es6();
 var os4 = __toESM(require("os"));
 var path2 = __toESM(require("path"));
 var core2 = __toESM(require_core());
@@ -65446,64 +65456,27 @@ var Version;
   }
   Version2.validate = validate2;
 })(Version || (Version = {}));
-var Manager = class {
+var Tlmgr = class {
   constructor(version2, prefix2) {
     this.version = version2;
     this.prefix = prefix2;
   }
   get conf() {
-    async function texmf(key, value) {
-      if (value === void 0) {
-        return (await (0, import_exec.getExecOutput)("kpsewhich", ["-var-value", key])).stdout.trim();
-      }
-      if (this.version < "2010") {
-        core2.exportVariable(key, value);
-      } else {
-        await (0, import_exec.exec)("tlmgr", ["conf", "texmf", key, value]);
-      }
-    }
-    return { texmf: texmf.bind({ version: this.version }) };
+    return new Tlmgr.Conf(this.version);
   }
   async install(...packages) {
     if (packages.length !== 0) {
-      await (0, import_exec.exec)("tlmgr", ["install", ...packages]);
+      Tlmgr.check((await (0, import_exec.getExecOutput)("tlmgr", ["install", ...packages])).stderr);
     }
   }
   get path() {
-    return {
-      add: async () => {
-        const binpath = await determine(path2.join(this.prefix, this.version, "bin", "*"));
-        if (binpath === void 0) {
-          throw new Error("Unable to locate TeX Live's binary directory");
-        }
-        core2.addPath(binpath);
-      }
-    };
+    return new Tlmgr.Path(this.version, this.prefix);
   }
   get pinning() {
-    if (this.version < "2013") {
-      throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${this.version}`);
-    }
-    return {
-      add: async (repo, ...globs) => {
-        await (0, import_exec.exec)("tlmgr", ["pinning", "add", repo, ...globs]);
-      }
-    };
+    return new Tlmgr.Pinning(this.version);
   }
   get repository() {
-    if (this.version < "2012") {
-      throw new RangeError(`\`repository\` action is not implemented in TeX Live ${this.version}`);
-    }
-    return {
-      add: async (repo, tag) => {
-        const { exitCode, stderr } = await (0, import_exec.getExecOutput)("tlmgr", ["repository", "add", repo, ...tag === void 0 ? [] : [tag]], { ignoreReturnCode: true });
-        const status = exitCode === 0;
-        if (!status && !stderr.includes("repository or its tag already defined")) {
-          throw new Error(`\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`);
-        }
-        return status;
-      }
-    };
+    return new Tlmgr.Repository(this.version);
   }
   async update(packages = [], options = {}) {
     const args = ["update"];
@@ -65525,24 +65498,99 @@ var Manager = class {
 };
 __decorate([
   import_decorator_cache_getter.cache,
-  __metadata("design:type", Object),
+  __metadata("design:type", Tlmgr.Conf),
   __metadata("design:paramtypes", [])
-], Manager.prototype, "conf", null);
+], Tlmgr.prototype, "conf", null);
 __decorate([
   import_decorator_cache_getter.cache,
-  __metadata("design:type", Object),
+  __metadata("design:type", Tlmgr.Path),
   __metadata("design:paramtypes", [])
-], Manager.prototype, "path", null);
+], Tlmgr.prototype, "path", null);
 __decorate([
   import_decorator_cache_getter.cache,
-  __metadata("design:type", Object),
+  __metadata("design:type", Tlmgr.Pinning),
   __metadata("design:paramtypes", [])
-], Manager.prototype, "pinning", null);
+], Tlmgr.prototype, "pinning", null);
 __decorate([
   import_decorator_cache_getter.cache,
-  __metadata("design:type", Object),
+  __metadata("design:type", Tlmgr.Repository),
   __metadata("design:paramtypes", [])
-], Manager.prototype, "repository", null);
+], Tlmgr.prototype, "repository", null);
+(function(Tlmgr2) {
+  var _Path_pattern;
+  class Conf {
+    constructor(version2) {
+      this.version = version2;
+    }
+    async texmf(key, value) {
+      if (value === void 0) {
+        return (await (0, import_exec.getExecOutput)("kpsewhich", ["-var-value", key])).stdout.trim();
+      }
+      if (this.version < "2010") {
+        core2.exportVariable(key, value);
+      } else {
+        await (0, import_exec.exec)("tlmgr", ["conf", "texmf", key, value]);
+      }
+    }
+  }
+  Tlmgr2.Conf = Conf;
+  class Path {
+    constructor(version2, prefix2) {
+      _Path_pattern.set(this, void 0);
+      __classPrivateFieldSet(this, _Path_pattern, path2.join(prefix2, version2, "bin", "*"), "f");
+    }
+    async add() {
+      const dir = await determine(__classPrivateFieldGet(this, _Path_pattern, "f"));
+      if (dir === void 0) {
+        throw new Error("Unable to locate TeX Live's binary directory");
+      }
+      core2.addPath(dir);
+    }
+  }
+  _Path_pattern = /* @__PURE__ */ new WeakMap();
+  Tlmgr2.Path = Path;
+  class Pinning {
+    constructor(version2) {
+      if (version2 < "2013") {
+        throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${version2}`);
+      }
+    }
+    async add(repo, ...globs) {
+      await (0, import_exec.exec)("tlmgr", ["pinning", "add", repo, ...globs]);
+    }
+  }
+  Tlmgr2.Pinning = Pinning;
+  class Repository {
+    constructor(version2) {
+      if (version2 < "2012") {
+        throw new RangeError(`\`repository\` action is not implemented in TeX Live ${version2}`);
+      }
+    }
+    async add(repo, tag) {
+      const args = ["repository", "add", repo];
+      if (tag !== void 0) {
+        args.push(tag);
+      }
+      const { exitCode, stderr } = await (0, import_exec.getExecOutput)("tlmgr", args, {
+        ignoreReturnCode: true
+      });
+      const status = exitCode === 0;
+      if (!status && !stderr.includes("repository or its tag already defined")) {
+        throw new Error(`\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`);
+      }
+      return status;
+    }
+  }
+  Tlmgr2.Repository = Repository;
+  function check(stderr) {
+    const result = /: checksums differ for (.*):$/mu.exec(stderr);
+    if (result !== null) {
+      const pkg = path2.basename(result[1] ?? "", ".tar.xz");
+      throw new Error(`The checksum of package ${pkg} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
+    }
+  }
+  Tlmgr2.check = check;
+})(Tlmgr || (Tlmgr = {}));
 function contrib() {
   return new URL("https://mirror.ctan.org/systems/texlive/tlcontrib/");
 }
@@ -65741,6 +65789,7 @@ function defaultPrefix() {
 }
 
 // lib/install-tl.js
+init_tslib_es6();
 var fs3 = __toESM(require("fs/promises"));
 var os6 = __toESM(require("os"));
 var path4 = __toESM(require("path"));
@@ -65764,9 +65813,8 @@ var InstallTL = class {
         }
         options.push(this.version === "2008" ? "-location" : "-repository", repo.href);
       }
-      await (0, import_exec2.exec)(this.installtl, options);
+      Tlmgr.check((await (0, import_exec2.getExecOutput)(this.installtl, options)).stderr);
     }
-    info("Applying patches");
     await patch(this.version, profile.TEXDIR);
   }
   static restore(version2) {
@@ -65789,7 +65837,6 @@ var InstallTL = class {
     const archive = await tool2.downloadTool(url2);
     info(`Extracting installer from ${archive}`);
     const dest = await extract(archive, os6.platform() === "win32" ? "zip" : "tgz");
-    info("Applying patches");
     await patch(version2, dest);
     try {
       info("Adding to tool cache");
@@ -66048,6 +66095,7 @@ async function patch(version2, base) {
       await fs3.writeFile(target, contents);
     }
   };
+  info("Applying patches");
   await Promise.all(fixes.map(apply));
 }
 
@@ -66097,7 +66145,7 @@ async function main() {
       await installtl.run(profile);
     });
   }
-  const tlmgr = new Manager(inputs.version, inputs.prefix);
+  const tlmgr = new Tlmgr(inputs.version, inputs.prefix);
   await tlmgr.path.add();
   if (cacheType !== void 0) {
     if (Version.isLatest(inputs.version)) {
@@ -66232,19 +66280,5 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 
 See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
-***************************************************************************** */
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
 /*! http://mths.be/fromcodepoint v0.1.0 by @mathias */

@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as os from 'os';
 
-import { exec } from '@actions/exec';
+import { getExecOutput } from '@actions/exec';
 import { rmRF } from '@actions/io';
 import * as tool from '@actions/tool-cache';
 import 'jest-extended';
@@ -31,13 +31,18 @@ jest.mock('path', () => {
   };
 });
 jest.mock('process', () => ({ env: {} }));
+jest.mocked(getExecOutput).mockResolvedValue({
+  exitCode: 0,
+  stdout: '',
+  stderr: '',
+});
 jest.mocked(tool.find).mockReturnValue('');
 jest.mocked(tool.downloadTool).mockResolvedValue('<downloadTool>');
 jest.mocked(util.extract).mockResolvedValue('<extract>');
 jest.mocked(util.tmpdir).mockReturnValue('<tmpdir>');
 jest.mock('#/texlive', () => {
-  const { historic, Version } = jest.requireActual('#/texlive');
-  return { historic, Version };
+  const { Tlmgr, Version, historic } = jest.requireActual('#/texlive');
+  return { Tlmgr, Version, historic };
 });
 jest.unmock('#/install-tl');
 jest.spyOn(InstallTL, 'download');
@@ -52,7 +57,7 @@ describe('InstallTL', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
       const installtl = new (InstallTL as any)('2008', '');
       await installtl.run(new Profile('2008', '/usr/local/texlive'));
-      expect(exec).toHaveBeenCalledWith(expect.stringContaining(''), [
+      expect(getExecOutput).toHaveBeenCalledWith(expect.stringContaining(''), [
         '-no-gui',
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),
@@ -65,7 +70,7 @@ describe('InstallTL', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
       const installtl = new (InstallTL as any)('2012', '');
       await installtl.run(new Profile('2012', '/usr/local/texlive'));
-      expect(exec).toHaveBeenCalledWith(expect.stringContaining(''), [
+      expect(getExecOutput).toHaveBeenCalledWith(expect.stringContaining(''), [
         '-no-gui',
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),
@@ -78,7 +83,7 @@ describe('InstallTL', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
       const installtl = new (InstallTL as any)(Version.LATEST, '');
       await installtl.run(new Profile(Version.LATEST, '/usr/local/texlive'));
-      expect(exec).toHaveBeenCalledWith(expect.stringContaining(''), [
+      expect(getExecOutput).toHaveBeenCalledWith(expect.stringContaining(''), [
         '-no-gui',
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),

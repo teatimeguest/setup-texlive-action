@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { isNativeError } from 'util/types';
 
-import { exec } from '@actions/exec';
+import { getExecOutput as popen } from '@actions/exec';
 import { rmRF as rm } from '@actions/io';
 import * as tool from '@actions/tool-cache';
 import { Exclude, Expose, Type, instanceToPlain } from 'class-transformer';
@@ -11,7 +11,7 @@ import type { PickProperties } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
-import { Version, historic } from '#/texlive';
+import { Tlmgr, Version, historic } from '#/texlive';
 import { extract, tmpdir } from '#/utility';
 
 /**
@@ -39,9 +39,8 @@ export class InstallTL {
           repo.href,
         );
       }
-      await exec(this.installtl, options);
+      Tlmgr.check((await popen(this.installtl, options)).stderr);
     }
-    log.info('Applying patches');
     await patch(this.version, profile.TEXDIR);
   }
 
@@ -73,8 +72,6 @@ export class InstallTL {
       archive,
       os.platform() === 'win32' ? 'zip' : 'tgz',
     );
-
-    log.info('Applying patches');
     await patch(version, dest);
 
     try {
@@ -314,6 +311,7 @@ async function patch(version: Version, base: string): Promise<void> {
       await fs.writeFile(target, contents);
     }
   };
+  log.info('Applying patches');
   await Promise.all(fixes.map(apply));
 }
 
