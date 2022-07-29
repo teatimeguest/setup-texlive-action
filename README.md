@@ -65,8 +65,7 @@ Supported versions are `2008` to `2022` for Linux and Windows, and
 `2013` to `2022` for macOS.
 
 > **Note**.
-> Versions `2008` to `2012` can be installed on `macos-latest` but
-> do not work
+> Versions `2008`–`2012` do not work on `macos-latest`
 > because the `kpsewhich` for those versions is a 32-bit executable and
 > crashes with "Bad CPU type in executable."
 
@@ -88,8 +87,8 @@ The `packages` input will affect which cache will be restored
 because its hash will be used as part of the cache key.
 
 > **Note**.
-> If you have problems due to a defective installation stored in cache,
-> you can delete it via the [GitHub REST API][cache-api] using the cache key.
+> If you have problems due to a corrupt cache entry, you can delete it
+> from the [CLI][gh-actions-cache] or [REST API][cache-api].
 > The cache key will be found in the workflow log.
 
 ## Inputs
@@ -103,7 +102,7 @@ All inputs are optional.
 |`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections can also be specified.|
 |`prefix`|String|TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-environment-variables]. The default is <code>[$RUNNER_TEMP][actions-environment-variables]/setup-texlive</code>.|
 |`tlcontrib`|Bool|Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored if an older version is specified for `version`. The default is `false`.|
-|`update-all-packages`|Bool|Update all TeX packages when restoring cache. The default is `false` and the action updates only `tlmgr`.|
+|`update-all-packages`|Bool|Update all TeX packages when restoring cache. The default is `false`, and the action updates only `tlmgr`.|
 |`version`|String|TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.|
 
 ## Outputs
@@ -149,7 +148,6 @@ See the [releases page][releases].
   with [`zauguin/install-texlive`][install-texlive] action
   (see [`.github/tl_packages`][tl_packages]).
 
-[#226]: https://github.com/teatimeguest/setup-texlive-action/issues/226
 [actions-cache]: https://github.com/actions/toolkit/tree/main/packages/cache
 [actions-environment-variables]: https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
 [cache-api]: https://docs.github.com/en/rest/actions/cache
@@ -158,6 +156,7 @@ See the [releases page][releases].
 [codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
 [codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
 [depends-txt]: https://tug.org/texlive/pkgcontrib.html#deps
+[gh-actions-cache]: https://github.com/actions/gh-actions-cache#readme
 [historic]: https://tug.org/historic/
 [install-texlive]: https://github.com/zauguin/install-texlive
 [install-tl-environment-variables]: https://tug.org/texlive/doc/install-tl.html#ENVIRONMENT-VARIABLES
