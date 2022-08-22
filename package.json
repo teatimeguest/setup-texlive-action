@@ -1,7 +1,7 @@
 {
   "name": "setup-texlive-action",
   "private": true,
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "build": "npm run compile && npm run bundle",
