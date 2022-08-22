@@ -23,7 +23,10 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target, mod));
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // node_modules/@actions/core/lib/utils.js
@@ -195,6 +198,339 @@ var require_file_command = __commonJS({
       });
     }
     exports.issueCommand = issueCommand;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/rng.js
+function rng() {
+  if (poolPtr > rnds8Pool.length - 16) {
+    import_crypto.default.randomFillSync(rnds8Pool);
+    poolPtr = 0;
+  }
+  return rnds8Pool.slice(poolPtr, poolPtr += 16);
+}
+var import_crypto, rnds8Pool, poolPtr;
+var init_rng = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/rng.js"() {
+    import_crypto = __toESM(require("crypto"));
+    rnds8Pool = new Uint8Array(256);
+    poolPtr = rnds8Pool.length;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/regex.js
+var regex_default;
+var init_regex = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/regex.js"() {
+    regex_default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/validate.js
+function validate(uuid) {
+  return typeof uuid === "string" && regex_default.test(uuid);
+}
+var validate_default;
+var init_validate = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/validate.js"() {
+    init_regex();
+    validate_default = validate;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/stringify.js
+function stringify(arr, offset = 0) {
+  const uuid = (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
+  if (!validate_default(uuid)) {
+    throw TypeError("Stringified UUID is invalid");
+  }
+  return uuid;
+}
+var byteToHex, stringify_default;
+var init_stringify = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/stringify.js"() {
+    init_validate();
+    byteToHex = [];
+    for (let i = 0; i < 256; ++i) {
+      byteToHex.push((i + 256).toString(16).substr(1));
+    }
+    stringify_default = stringify;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/v1.js
+function v1(options, buf, offset) {
+  let i = buf && offset || 0;
+  const b = buf || new Array(16);
+  options = options || {};
+  let node = options.node || _nodeId;
+  let clockseq = options.clockseq !== void 0 ? options.clockseq : _clockseq;
+  if (node == null || clockseq == null) {
+    const seedBytes = options.random || (options.rng || rng)();
+    if (node == null) {
+      node = _nodeId = [seedBytes[0] | 1, seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]];
+    }
+    if (clockseq == null) {
+      clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
+    }
+  }
+  let msecs = options.msecs !== void 0 ? options.msecs : Date.now();
+  let nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs + 1;
+  const dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 1e4;
+  if (dt < 0 && options.clockseq === void 0) {
+    clockseq = clockseq + 1 & 16383;
+  }
+  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === void 0) {
+    nsecs = 0;
+  }
+  if (nsecs >= 1e4) {
+    throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
+  }
+  _lastMSecs = msecs;
+  _lastNSecs = nsecs;
+  _clockseq = clockseq;
+  msecs += 122192928e5;
+  const tl = ((msecs & 268435455) * 1e4 + nsecs) % 4294967296;
+  b[i++] = tl >>> 24 & 255;
+  b[i++] = tl >>> 16 & 255;
+  b[i++] = tl >>> 8 & 255;
+  b[i++] = tl & 255;
+  const tmh = msecs / 4294967296 * 1e4 & 268435455;
+  b[i++] = tmh >>> 8 & 255;
+  b[i++] = tmh & 255;
+  b[i++] = tmh >>> 24 & 15 | 16;
+  b[i++] = tmh >>> 16 & 255;
+  b[i++] = clockseq >>> 8 | 128;
+  b[i++] = clockseq & 255;
+  for (let n = 0; n < 6; ++n) {
+    b[i + n] = node[n];
+  }
+  return buf || stringify_default(b);
+}
+var _nodeId, _clockseq, _lastMSecs, _lastNSecs, v1_default;
+var init_v1 = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/v1.js"() {
+    init_rng();
+    init_stringify();
+    _lastMSecs = 0;
+    _lastNSecs = 0;
+    v1_default = v1;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/parse.js
+function parse(uuid) {
+  if (!validate_default(uuid)) {
+    throw TypeError("Invalid UUID");
+  }
+  let v;
+  const arr = new Uint8Array(16);
+  arr[0] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
+  arr[1] = v >>> 16 & 255;
+  arr[2] = v >>> 8 & 255;
+  arr[3] = v & 255;
+  arr[4] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
+  arr[5] = v & 255;
+  arr[6] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
+  arr[7] = v & 255;
+  arr[8] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
+  arr[9] = v & 255;
+  arr[10] = (v = parseInt(uuid.slice(24, 36), 16)) / 1099511627776 & 255;
+  arr[11] = v / 4294967296 & 255;
+  arr[12] = v >>> 24 & 255;
+  arr[13] = v >>> 16 & 255;
+  arr[14] = v >>> 8 & 255;
+  arr[15] = v & 255;
+  return arr;
+}
+var parse_default;
+var init_parse = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/parse.js"() {
+    init_validate();
+    parse_default = parse;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/v35.js
+function stringToBytes(str) {
+  str = unescape(encodeURIComponent(str));
+  const bytes = [];
+  for (let i = 0; i < str.length; ++i) {
+    bytes.push(str.charCodeAt(i));
+  }
+  return bytes;
+}
+function v35_default(name, version3, hashfunc) {
+  function generateUUID(value, namespace, buf, offset) {
+    if (typeof value === "string") {
+      value = stringToBytes(value);
+    }
+    if (typeof namespace === "string") {
+      namespace = parse_default(namespace);
+    }
+    if (namespace.length !== 16) {
+      throw TypeError("Namespace must be array-like (16 iterable integer values, 0-255)");
+    }
+    let bytes = new Uint8Array(16 + value.length);
+    bytes.set(namespace);
+    bytes.set(value, namespace.length);
+    bytes = hashfunc(bytes);
+    bytes[6] = bytes[6] & 15 | version3;
+    bytes[8] = bytes[8] & 63 | 128;
+    if (buf) {
+      offset = offset || 0;
+      for (let i = 0; i < 16; ++i) {
+        buf[offset + i] = bytes[i];
+      }
+      return buf;
+    }
+    return stringify_default(bytes);
+  }
+  try {
+    generateUUID.name = name;
+  } catch (err) {
+  }
+  generateUUID.DNS = DNS;
+  generateUUID.URL = URL2;
+  return generateUUID;
+}
+var DNS, URL2;
+var init_v35 = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/v35.js"() {
+    init_stringify();
+    init_parse();
+    DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+    URL2 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/md5.js
+function md5(bytes) {
+  if (Array.isArray(bytes)) {
+    bytes = Buffer.from(bytes);
+  } else if (typeof bytes === "string") {
+    bytes = Buffer.from(bytes, "utf8");
+  }
+  return import_crypto2.default.createHash("md5").update(bytes).digest();
+}
+var import_crypto2, md5_default;
+var init_md5 = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/md5.js"() {
+    import_crypto2 = __toESM(require("crypto"));
+    md5_default = md5;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/v3.js
+var v3, v3_default;
+var init_v3 = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/v3.js"() {
+    init_v35();
+    init_md5();
+    v3 = v35_default("v3", 48, md5_default);
+    v3_default = v3;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/v4.js
+function v4(options, buf, offset) {
+  options = options || {};
+  const rnds = options.random || (options.rng || rng)();
+  rnds[6] = rnds[6] & 15 | 64;
+  rnds[8] = rnds[8] & 63 | 128;
+  if (buf) {
+    offset = offset || 0;
+    for (let i = 0; i < 16; ++i) {
+      buf[offset + i] = rnds[i];
+    }
+    return buf;
+  }
+  return stringify_default(rnds);
+}
+var v4_default;
+var init_v4 = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/v4.js"() {
+    init_rng();
+    init_stringify();
+    v4_default = v4;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/sha1.js
+function sha1(bytes) {
+  if (Array.isArray(bytes)) {
+    bytes = Buffer.from(bytes);
+  } else if (typeof bytes === "string") {
+    bytes = Buffer.from(bytes, "utf8");
+  }
+  return import_crypto3.default.createHash("sha1").update(bytes).digest();
+}
+var import_crypto3, sha1_default;
+var init_sha1 = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/sha1.js"() {
+    import_crypto3 = __toESM(require("crypto"));
+    sha1_default = sha1;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/v5.js
+var v5, v5_default;
+var init_v5 = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/v5.js"() {
+    init_v35();
+    init_sha1();
+    v5 = v35_default("v5", 80, sha1_default);
+    v5_default = v5;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/nil.js
+var nil_default;
+var init_nil = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/nil.js"() {
+    nil_default = "00000000-0000-0000-0000-000000000000";
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/version.js
+function version(uuid) {
+  if (!validate_default(uuid)) {
+    throw TypeError("Invalid UUID");
+  }
+  return parseInt(uuid.substr(14, 1), 16);
+}
+var version_default;
+var init_version = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/version.js"() {
+    init_validate();
+    version_default = version;
+  }
+});
+
+// node_modules/@actions/core/node_modules/uuid/dist/esm-node/index.js
+var esm_node_exports = {};
+__export(esm_node_exports, {
+  NIL: () => nil_default,
+  parse: () => parse_default,
+  stringify: () => stringify_default,
+  v1: () => v1_default,
+  v3: () => v3_default,
+  v4: () => v4_default,
+  v5: () => v5_default,
+  validate: () => validate_default,
+  version: () => version_default
+});
+var init_esm_node = __esm({
+  "node_modules/@actions/core/node_modules/uuid/dist/esm-node/index.js"() {
+    init_v1();
+    init_v3();
+    init_v4();
+    init_v5();
+    init_nil();
+    init_version();
+    init_validate();
+    init_stringify();
+    init_parse();
   }
 });
 
@@ -377,7 +713,10 @@ var require_tunnel = __commonJS({
         connectReq.removeAllListeners();
         socket.removeAllListeners();
         if (res.statusCode !== 200) {
-          debug3("tunneling socket could not be established, statusCode=%d", res.statusCode);
+          debug3(
+            "tunneling socket could not be established, statusCode=%d",
+            res.statusCode
+          );
           socket.destroy();
           var error = new Error("tunneling socket could not be established, statusCode=" + res.statusCode);
           error.code = "ECONNRESET";
@@ -400,7 +739,11 @@ var require_tunnel = __commonJS({
       }
       function onError(cause) {
         connectReq.removeAllListeners();
-        debug3("tunneling socket could not be established, cause=%s\n", cause.message, cause.stack);
+        debug3(
+          "tunneling socket could not be established, cause=%s\n",
+          cause.message,
+          cause.stack
+        );
         var error = new Error("tunneling socket could not be established, cause=" + cause.message);
         error.code = "ECONNRESET";
         options.request.emit("error", error);
@@ -1512,6 +1855,7 @@ var require_core = __commonJS({
     var utils_1 = require_utils();
     var os8 = __importStar(require("os"));
     var path5 = __importStar(require("path"));
+    var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -1523,7 +1867,13 @@ var require_core = __commonJS({
       process.env[name] = convertedVal;
       const filePath = process.env["GITHUB_ENV"] || "";
       if (filePath) {
-        const delimiter2 = "_GitHubActionsFileCommandDelimeter_";
+        const delimiter2 = `ghadelimiter_${uuid_1.v4()}`;
+        if (name.includes(delimiter2)) {
+          throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter2}"`);
+        }
+        if (convertedVal.includes(delimiter2)) {
+          throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter2}"`);
+        }
         const commandValue = `${name}<<${delimiter2}${os8.EOL}${convertedVal}${os8.EOL}${delimiter2}`;
         file_command_1.issueCommand("ENV", commandValue);
       } else {
@@ -3573,9 +3923,9 @@ var require_minimatch = __commonJS({
         throw new TypeError("pattern is too long");
       }
     };
-    Minimatch.prototype.parse = parse2;
+    Minimatch.prototype.parse = parse3;
     var SUBPARSE = {};
-    function parse2(pattern, isSub) {
+    function parse3(pattern, isSub) {
       assertValidPattern(pattern);
       var options = this.options;
       if (pattern === "**") {
@@ -3892,7 +4242,10 @@ var require_minimatch = __commonJS({
     };
     Minimatch.prototype.matchOne = function(file, pattern, partial) {
       var options = this.options;
-      this.debug("matchOne", { "this": this, file, pattern });
+      this.debug(
+        "matchOne",
+        { "this": this, file, pattern }
+      );
       this.debug("matchOne", file.length, pattern.length);
       for (var fi = 0, pi = 0, fl = file.length, pl = pattern.length; fi < fl && pi < pl; fi++, pi++) {
         this.debug("matchOne loop");
@@ -4453,7 +4806,9 @@ var require_internal_globber = __commonJS({
             if (!match && !partialMatch) {
               continue;
             }
-            const stats = yield __await2(DefaultGlobber.stat(item, options, traversalChain));
+            const stats = yield __await2(
+              DefaultGlobber.stat(item, options, traversalChain)
+            );
             if (!stats) {
               continue;
             }
@@ -4687,74 +5042,74 @@ var require_semver = __commonJS({
       }
     }
     var i;
-    exports.parse = parse2;
-    function parse2(version2, options) {
+    exports.parse = parse3;
+    function parse3(version3, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version2 instanceof SemVer) {
-        return version2;
+      if (version3 instanceof SemVer) {
+        return version3;
       }
-      if (typeof version2 !== "string") {
+      if (typeof version3 !== "string") {
         return null;
       }
-      if (version2.length > MAX_LENGTH) {
+      if (version3.length > MAX_LENGTH) {
         return null;
       }
       var r = options.loose ? re2[t.LOOSE] : re2[t.FULL];
-      if (!r.test(version2)) {
+      if (!r.test(version3)) {
         return null;
       }
       try {
-        return new SemVer(version2, options);
+        return new SemVer(version3, options);
       } catch (er) {
         return null;
       }
     }
     exports.valid = valid;
-    function valid(version2, options) {
-      var v = parse2(version2, options);
+    function valid(version3, options) {
+      var v = parse3(version3, options);
       return v ? v.version : null;
     }
     exports.clean = clean;
-    function clean(version2, options) {
-      var s = parse2(version2.trim().replace(/^[=v]+/, ""), options);
+    function clean(version3, options) {
+      var s = parse3(version3.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     }
     exports.SemVer = SemVer;
-    function SemVer(version2, options) {
+    function SemVer(version3, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version2 instanceof SemVer) {
-        if (version2.loose === options.loose) {
-          return version2;
+      if (version3 instanceof SemVer) {
+        if (version3.loose === options.loose) {
+          return version3;
         } else {
-          version2 = version2.version;
+          version3 = version3.version;
         }
-      } else if (typeof version2 !== "string") {
-        throw new TypeError("Invalid Version: " + version2);
+      } else if (typeof version3 !== "string") {
+        throw new TypeError("Invalid Version: " + version3);
       }
-      if (version2.length > MAX_LENGTH) {
+      if (version3.length > MAX_LENGTH) {
         throw new TypeError("version is longer than " + MAX_LENGTH + " characters");
       }
       if (!(this instanceof SemVer)) {
-        return new SemVer(version2, options);
+        return new SemVer(version3, options);
       }
-      debug3("SemVer", version2, options);
+      debug3("SemVer", version3, options);
       this.options = options;
       this.loose = !!options.loose;
-      var m = version2.trim().match(options.loose ? re2[t.LOOSE] : re2[t.FULL]);
+      var m = version3.trim().match(options.loose ? re2[t.LOOSE] : re2[t.FULL]);
       if (!m) {
-        throw new TypeError("Invalid Version: " + version2);
+        throw new TypeError("Invalid Version: " + version3);
       }
-      this.raw = version2;
+      this.raw = version3;
       this.major = +m[1];
       this.minor = +m[2];
       this.patch = +m[3];
@@ -4937,32 +5292,32 @@ var require_semver = __commonJS({
       return this;
     };
     exports.inc = inc;
-    function inc(version2, release3, loose, identifier) {
+    function inc(version3, release3, loose, identifier) {
       if (typeof loose === "string") {
         identifier = loose;
         loose = void 0;
       }
       try {
-        return new SemVer(version2, loose).inc(release3, identifier).version;
+        return new SemVer(version3, loose).inc(release3, identifier).version;
       } catch (er) {
         return null;
       }
     }
     exports.diff = diff;
-    function diff(version1, version2) {
-      if (eq(version1, version2)) {
+    function diff(version1, version22) {
+      if (eq(version1, version22)) {
         return null;
       } else {
-        var v1 = parse2(version1);
-        var v2 = parse2(version2);
+        var v12 = parse3(version1);
+        var v2 = parse3(version22);
         var prefix2 = "";
-        if (v1.prerelease.length || v2.prerelease.length) {
+        if (v12.prerelease.length || v2.prerelease.length) {
           prefix2 = "pre";
           var defaultResult = "prerelease";
         }
-        for (var key in v1) {
+        for (var key in v12) {
           if (key === "major" || key === "minor" || key === "patch") {
-            if (v1[key] !== v2[key]) {
+            if (v12[key] !== v2[key]) {
               return prefix2 + key;
             }
           }
@@ -5133,19 +5488,19 @@ var require_semver = __commonJS({
     Comparator.prototype.toString = function() {
       return this.value;
     };
-    Comparator.prototype.test = function(version2) {
-      debug3("Comparator.test", version2, this.options.loose);
-      if (this.semver === ANY || version2 === ANY) {
+    Comparator.prototype.test = function(version3) {
+      debug3("Comparator.test", version3, this.options.loose);
+      if (this.semver === ANY || version3 === ANY) {
         return true;
       }
-      if (typeof version2 === "string") {
+      if (typeof version3 === "string") {
         try {
-          version2 = new SemVer(version2, this.options);
+          version3 = new SemVer(version3, this.options);
         } catch (er) {
           return false;
         }
       }
-      return cmp(version2, this.operator, this.semver, this.options);
+      return cmp(version3, this.operator, this.semver, this.options);
     };
     Comparator.prototype.intersects = function(comp26, options) {
       if (!(comp26 instanceof Comparator)) {
@@ -5456,31 +5811,31 @@ var require_semver = __commonJS({
       }
       return (from + " " + to).trim();
     }
-    Range.prototype.test = function(version2) {
-      if (!version2) {
+    Range.prototype.test = function(version3) {
+      if (!version3) {
         return false;
       }
-      if (typeof version2 === "string") {
+      if (typeof version3 === "string") {
         try {
-          version2 = new SemVer(version2, this.options);
+          version3 = new SemVer(version3, this.options);
         } catch (er) {
           return false;
         }
       }
       for (var i2 = 0; i2 < this.set.length; i2++) {
-        if (testSet(this.set[i2], version2, this.options)) {
+        if (testSet(this.set[i2], version3, this.options)) {
           return true;
         }
       }
       return false;
     };
-    function testSet(set, version2, options) {
+    function testSet(set, version3, options) {
       for (var i2 = 0; i2 < set.length; i2++) {
-        if (!set[i2].test(version2)) {
+        if (!set[i2].test(version3)) {
           return false;
         }
       }
-      if (version2.prerelease.length && !options.includePrerelease) {
+      if (version3.prerelease.length && !options.includePrerelease) {
         for (i2 = 0; i2 < set.length; i2++) {
           debug3(set[i2].semver);
           if (set[i2].semver === ANY) {
@@ -5488,7 +5843,7 @@ var require_semver = __commonJS({
           }
           if (set[i2].semver.prerelease.length > 0) {
             var allowed = set[i2].semver;
-            if (allowed.major === version2.major && allowed.minor === version2.minor && allowed.patch === version2.patch) {
+            if (allowed.major === version3.major && allowed.minor === version3.minor && allowed.patch === version3.patch) {
               return true;
             }
           }
@@ -5498,13 +5853,13 @@ var require_semver = __commonJS({
       return true;
     }
     exports.satisfies = satisfies;
-    function satisfies(version2, range2, options) {
+    function satisfies(version3, range2, options) {
       try {
         range2 = new Range(range2, options);
       } catch (er) {
         return false;
       }
-      return range2.test(version2);
+      return range2.test(version3);
     }
     exports.maxSatisfying = maxSatisfying;
     function maxSatisfying(versions, range2, options) {
@@ -5596,16 +5951,16 @@ var require_semver = __commonJS({
       }
     }
     exports.ltr = ltr;
-    function ltr(version2, range2, options) {
-      return outside(version2, range2, "<", options);
+    function ltr(version3, range2, options) {
+      return outside(version3, range2, "<", options);
     }
     exports.gtr = gtr;
-    function gtr(version2, range2, options) {
-      return outside(version2, range2, ">", options);
+    function gtr(version3, range2, options) {
+      return outside(version3, range2, ">", options);
     }
     exports.outside = outside;
-    function outside(version2, range2, hilo, options) {
-      version2 = new SemVer(version2, options);
+    function outside(version3, range2, hilo, options) {
+      version3 = new SemVer(version3, options);
       range2 = new Range(range2, options);
       var gtfn, ltefn, ltfn, comp26, ecomp;
       switch (hilo) {
@@ -5626,7 +5981,7 @@ var require_semver = __commonJS({
         default:
           throw new TypeError('Must provide a hilo val of "<" or ">"');
       }
-      if (satisfies(version2, range2, options)) {
+      if (satisfies(version3, range2, options)) {
         return false;
       }
       for (var i2 = 0; i2 < range2.set.length; ++i2) {
@@ -5648,17 +6003,17 @@ var require_semver = __commonJS({
         if (high.operator === comp26 || high.operator === ecomp) {
           return false;
         }
-        if ((!low.operator || low.operator === comp26) && ltefn(version2, low.semver)) {
+        if ((!low.operator || low.operator === comp26) && ltefn(version3, low.semver)) {
           return false;
-        } else if (low.operator === ecomp && ltfn(version2, low.semver)) {
+        } else if (low.operator === ecomp && ltfn(version3, low.semver)) {
           return false;
         }
       }
       return true;
     }
     exports.prerelease = prerelease;
-    function prerelease(version2, options) {
-      var parsed = parse2(version2, options);
+    function prerelease(version3, options) {
+      var parsed = parse3(version3, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     }
     exports.intersects = intersects;
@@ -5668,23 +6023,23 @@ var require_semver = __commonJS({
       return r1.intersects(r2);
     }
     exports.coerce = coerce;
-    function coerce(version2, options) {
-      if (version2 instanceof SemVer) {
-        return version2;
+    function coerce(version3, options) {
+      if (version3 instanceof SemVer) {
+        return version3;
       }
-      if (typeof version2 === "number") {
-        version2 = String(version2);
+      if (typeof version3 === "number") {
+        version3 = String(version3);
       }
-      if (typeof version2 !== "string") {
+      if (typeof version3 !== "string") {
         return null;
       }
       options = options || {};
       var match = null;
       if (!options.rtl) {
-        match = version2.match(re2[t.COERCE]);
+        match = version3.match(re2[t.COERCE]);
       } else {
         var next;
-        while ((next = re2[t.COERCERTL].exec(version2)) && (!match || match.index + match[0].length !== version2.length)) {
+        while ((next = re2[t.COERCERTL].exec(version3)) && (!match || match.index + match[0].length !== version3.length)) {
           if (!match || next.index + next[0].length !== match.index + match[0].length) {
             match = next;
           }
@@ -5695,7 +6050,7 @@ var require_semver = __commonJS({
       if (match === null) {
         return null;
       }
-      return parse2(match[2] + "." + (match[3] || "0") + "." + (match[4] || "0"), options);
+      return parse3(match[2] + "." + (match[3] || "0") + "." + (match[4] || "0"), options);
     }
   }
 });
@@ -5703,9 +6058,9 @@ var require_semver = __commonJS({
 // node_modules/uuid/lib/rng.js
 var require_rng = __commonJS({
   "node_modules/uuid/lib/rng.js"(exports, module2) {
-    var crypto4 = require("crypto");
+    var crypto7 = require("crypto");
     module2.exports = function nodeRNG() {
-      return crypto4.randomBytes(16);
+      return crypto7.randomBytes(16);
     };
   }
 });
@@ -5713,14 +6068,14 @@ var require_rng = __commonJS({
 // node_modules/uuid/lib/bytesToUuid.js
 var require_bytesToUuid = __commonJS({
   "node_modules/uuid/lib/bytesToUuid.js"(exports, module2) {
-    var byteToHex2 = [];
+    var byteToHex3 = [];
     for (i = 0; i < 256; ++i) {
-      byteToHex2[i] = (i + 256).toString(16).substr(1);
+      byteToHex3[i] = (i + 256).toString(16).substr(1);
     }
     var i;
     function bytesToUuid(buf, offset) {
       var i2 = offset || 0;
-      var bth = byteToHex2;
+      var bth = byteToHex3;
       return [
         bth[buf[i2++]],
         bth[buf[i2++]],
@@ -5751,22 +6106,22 @@ var require_bytesToUuid = __commonJS({
 // node_modules/uuid/v1.js
 var require_v1 = __commonJS({
   "node_modules/uuid/v1.js"(exports, module2) {
-    var rng2 = require_rng();
+    var rng3 = require_rng();
     var bytesToUuid = require_bytesToUuid();
-    var _nodeId;
-    var _clockseq;
-    var _lastMSecs = 0;
-    var _lastNSecs = 0;
-    function v1(options, buf, offset) {
+    var _nodeId2;
+    var _clockseq2;
+    var _lastMSecs2 = 0;
+    var _lastNSecs2 = 0;
+    function v12(options, buf, offset) {
       var i = buf && offset || 0;
       var b = buf || [];
       options = options || {};
-      var node = options.node || _nodeId;
-      var clockseq = options.clockseq !== void 0 ? options.clockseq : _clockseq;
+      var node = options.node || _nodeId2;
+      var clockseq = options.clockseq !== void 0 ? options.clockseq : _clockseq2;
       if (node == null || clockseq == null) {
-        var seedBytes = rng2();
+        var seedBytes = rng3();
         if (node == null) {
-          node = _nodeId = [
+          node = _nodeId2 = [
             seedBytes[0] | 1,
             seedBytes[1],
             seedBytes[2],
@@ -5776,24 +6131,24 @@ var require_v1 = __commonJS({
           ];
         }
         if (clockseq == null) {
-          clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
+          clockseq = _clockseq2 = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
         }
       }
       var msecs = options.msecs !== void 0 ? options.msecs : new Date().getTime();
-      var nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs + 1;
-      var dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 1e4;
+      var nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs2 + 1;
+      var dt = msecs - _lastMSecs2 + (nsecs - _lastNSecs2) / 1e4;
       if (dt < 0 && options.clockseq === void 0) {
         clockseq = clockseq + 1 & 16383;
       }
-      if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === void 0) {
+      if ((dt < 0 || msecs > _lastMSecs2) && options.nsecs === void 0) {
         nsecs = 0;
       }
       if (nsecs >= 1e4) {
         throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
       }
-      _lastMSecs = msecs;
-      _lastNSecs = nsecs;
-      _clockseq = clockseq;
+      _lastMSecs2 = msecs;
+      _lastNSecs2 = nsecs;
+      _clockseq2 = clockseq;
       msecs += 122192928e5;
       var tl = ((msecs & 268435455) * 1e4 + nsecs) % 4294967296;
       b[i++] = tl >>> 24 & 255;
@@ -5812,23 +6167,23 @@ var require_v1 = __commonJS({
       }
       return buf ? buf : bytesToUuid(b);
     }
-    module2.exports = v1;
+    module2.exports = v12;
   }
 });
 
 // node_modules/uuid/v4.js
 var require_v4 = __commonJS({
   "node_modules/uuid/v4.js"(exports, module2) {
-    var rng2 = require_rng();
+    var rng3 = require_rng();
     var bytesToUuid = require_bytesToUuid();
-    function v42(options, buf, offset) {
+    function v43(options, buf, offset) {
       var i = buf && offset || 0;
       if (typeof options == "string") {
         buf = options === "binary" ? new Array(16) : null;
         options = null;
       }
       options = options || {};
-      var rnds = options.random || (options.rng || rng2)();
+      var rnds = options.random || (options.rng || rng3)();
       rnds[6] = rnds[6] & 15 | 64;
       rnds[8] = rnds[8] & 63 | 128;
       if (buf) {
@@ -5838,18 +6193,18 @@ var require_v4 = __commonJS({
       }
       return buf || bytesToUuid(rnds);
     }
-    module2.exports = v42;
+    module2.exports = v43;
   }
 });
 
 // node_modules/uuid/index.js
 var require_uuid = __commonJS({
   "node_modules/uuid/index.js"(exports, module2) {
-    var v1 = require_v1();
-    var v42 = require_v4();
-    var uuid = v42;
-    uuid.v1 = v1;
-    uuid.v4 = v42;
+    var v12 = require_v1();
+    var v43 = require_v4();
+    var uuid = v43;
+    uuid.v1 = v12;
+    uuid.v4 = v43;
     module2.exports = uuid;
   }
 });
@@ -5991,7 +6346,11 @@ var require_cacheUtils = __commonJS({
             const file = _d.value;
             const relativeFile = path5.relative(workspace, file).replace(new RegExp(`\\${path5.sep}`, "g"), "/");
             core5.debug(`Matched: ${relativeFile}`);
-            paths.push(`${relativeFile}`);
+            if (relativeFile === "") {
+              paths.push(".");
+            } else {
+              paths.push(`${relativeFile}`);
+            }
           }
         } catch (e_1_1) {
           e_1 = { error: e_1_1 };
@@ -6041,10 +6400,10 @@ var require_cacheUtils = __commonJS({
           return constants_1.CompressionMethod.Gzip;
         }
         const versionOutput = yield getVersion("zstd");
-        const version2 = semver.clean(versionOutput);
+        const version3 = semver.clean(versionOutput);
         if (!versionOutput.toLowerCase().includes("zstd command line interface")) {
           return constants_1.CompressionMethod.Gzip;
-        } else if (!version2 || semver.lt(version2, "v1.3.2")) {
+        } else if (!version3 || semver.lt(version3, "v1.3.2")) {
           return constants_1.CompressionMethod.ZstdWithoutLong;
         } else {
           return constants_1.CompressionMethod.Zstd;
@@ -6195,7 +6554,7 @@ var Constants;
 var init_constants = __esm({
   "node_modules/@azure/core-http/dist-esm/src/util/constants.js"() {
     Constants = {
-      coreHttpVersion: "2.2.5",
+      coreHttpVersion: "2.2.6",
       HTTP: "http:",
       HTTPS: "https:",
       HTTP_PROXY: "HTTP_PROXY",
@@ -6237,66 +6596,66 @@ var init_serializer_common = __esm({
 });
 
 // node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/rng.js
-function rng() {
-  if (poolPtr > rnds8Pool.length - 16) {
-    import_crypto.default.randomFillSync(rnds8Pool);
-    poolPtr = 0;
+function rng2() {
+  if (poolPtr2 > rnds8Pool2.length - 16) {
+    import_crypto4.default.randomFillSync(rnds8Pool2);
+    poolPtr2 = 0;
   }
-  return rnds8Pool.slice(poolPtr, poolPtr += 16);
+  return rnds8Pool2.slice(poolPtr2, poolPtr2 += 16);
 }
-var import_crypto, rnds8Pool, poolPtr;
-var init_rng = __esm({
+var import_crypto4, rnds8Pool2, poolPtr2;
+var init_rng2 = __esm({
   "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/rng.js"() {
-    import_crypto = __toESM(require("crypto"));
-    rnds8Pool = new Uint8Array(256);
-    poolPtr = rnds8Pool.length;
+    import_crypto4 = __toESM(require("crypto"));
+    rnds8Pool2 = new Uint8Array(256);
+    poolPtr2 = rnds8Pool2.length;
   }
 });
 
 // node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/regex.js
-var regex_default;
-var init_regex = __esm({
+var regex_default2;
+var init_regex2 = __esm({
   "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/regex.js"() {
-    regex_default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+    regex_default2 = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
   }
 });
 
 // node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/validate.js
-function validate(uuid) {
-  return typeof uuid === "string" && regex_default.test(uuid);
+function validate2(uuid) {
+  return typeof uuid === "string" && regex_default2.test(uuid);
 }
-var validate_default;
-var init_validate = __esm({
+var validate_default2;
+var init_validate2 = __esm({
   "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/validate.js"() {
-    init_regex();
-    validate_default = validate;
+    init_regex2();
+    validate_default2 = validate2;
   }
 });
 
 // node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/stringify.js
-function stringify(arr, offset = 0) {
-  const uuid = (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
-  if (!validate_default(uuid)) {
+function stringify2(arr, offset = 0) {
+  const uuid = (byteToHex2[arr[offset + 0]] + byteToHex2[arr[offset + 1]] + byteToHex2[arr[offset + 2]] + byteToHex2[arr[offset + 3]] + "-" + byteToHex2[arr[offset + 4]] + byteToHex2[arr[offset + 5]] + "-" + byteToHex2[arr[offset + 6]] + byteToHex2[arr[offset + 7]] + "-" + byteToHex2[arr[offset + 8]] + byteToHex2[arr[offset + 9]] + "-" + byteToHex2[arr[offset + 10]] + byteToHex2[arr[offset + 11]] + byteToHex2[arr[offset + 12]] + byteToHex2[arr[offset + 13]] + byteToHex2[arr[offset + 14]] + byteToHex2[arr[offset + 15]]).toLowerCase();
+  if (!validate_default2(uuid)) {
     throw TypeError("Stringified UUID is invalid");
   }
   return uuid;
 }
-var byteToHex, stringify_default;
-var init_stringify = __esm({
+var byteToHex2, stringify_default2;
+var init_stringify2 = __esm({
   "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/stringify.js"() {
-    init_validate();
-    byteToHex = [];
+    init_validate2();
+    byteToHex2 = [];
     for (let i = 0; i < 256; ++i) {
-      byteToHex.push((i + 256).toString(16).substr(1));
+      byteToHex2.push((i + 256).toString(16).substr(1));
     }
-    stringify_default = stringify;
+    stringify_default2 = stringify2;
   }
 });
 
 // node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v4.js
-function v4(options, buf, offset) {
+function v42(options, buf, offset) {
   options = options || {};
-  const rnds = options.random || (options.rng || rng)();
+  const rnds = options.random || (options.rng || rng2)();
   rnds[6] = rnds[6] & 15 | 64;
   rnds[8] = rnds[8] & 63 | 128;
   if (buf) {
@@ -6306,21 +6665,21 @@ function v4(options, buf, offset) {
     }
     return buf;
   }
-  return stringify_default(rnds);
+  return stringify_default2(rnds);
 }
-var v4_default;
-var init_v4 = __esm({
+var v4_default2;
+var init_v42 = __esm({
   "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v4.js"() {
-    init_rng();
-    init_stringify();
-    v4_default = v4;
+    init_rng2();
+    init_stringify2();
+    v4_default2 = v42;
   }
 });
 
 // node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/index.js
-var init_esm_node = __esm({
+var init_esm_node2 = __esm({
   "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/index.js"() {
-    init_v4();
+    init_v42();
   }
 });
 
@@ -6329,7 +6688,7 @@ function isValidUuid(uuid) {
   return validUuidRegex.test(uuid);
 }
 function generateUuid() {
-  return v4_default();
+  return v4_default2();
 }
 function prepareXMLRootList(obj, elementName, xmlNamespaceKey, xmlNamespace) {
   if (!Array.isArray(obj)) {
@@ -6366,7 +6725,7 @@ var validUuidRegex, isNode, validateISODuration;
 var init_utils = __esm({
   "node_modules/@azure/core-http/dist-esm/src/util/utils.js"() {
     init_serializer_common();
-    init_esm_node();
+    init_esm_node2();
     validUuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/i;
     isNode = typeof process !== "undefined" && !!process.version && !!process.versions && !!process.versions.node;
     validateISODuration = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/;
@@ -6940,7 +7299,6 @@ var init_serializer = __esm({
         if (object == void 0) {
           payload = object;
         } else {
-          this.validateConstraints(mapper, object, objectName);
           if (mapperType.match(/^any$/i) !== null) {
             payload = object;
           } else if (mapperType.match(/^(Number|String|Boolean|Object|Stream|Uuid)$/i) !== null) {
@@ -7322,7 +7680,6 @@ var require_rules = __commonJS({
       "express.aero",
       "federation.aero",
       "flight.aero",
-      "freight.aero",
       "fuel.aero",
       "gliding.aero",
       "government.aero",
@@ -7404,15 +7761,19 @@ var require_rules = __commonJS({
       "it.ao",
       "aq",
       "ar",
+      "bet.ar",
       "com.ar",
+      "coop.ar",
       "edu.ar",
       "gob.ar",
       "gov.ar",
       "int.ar",
       "mil.ar",
       "musica.ar",
+      "mutual.ar",
       "net.ar",
       "org.ar",
+      "senasa.ar",
       "tur.ar",
       "arpa",
       "e164.arpa",
@@ -7429,6 +7790,7 @@ var require_rules = __commonJS({
       "co.at",
       "gv.at",
       "or.at",
+      "sth.ac.at",
       "au",
       "com.au",
       "net.au",
@@ -7462,7 +7824,6 @@ var require_rules = __commonJS({
       "tas.gov.au",
       "vic.gov.au",
       "wa.gov.au",
-      "education.tas.edu.au",
       "schools.nsw.edu.au",
       "aw",
       "com.aw",
@@ -7621,6 +7982,7 @@ var require_rules = __commonJS({
       "am.br",
       "anani.br",
       "aparecida.br",
+      "app.br",
       "arq.br",
       "art.br",
       "ato.br",
@@ -7628,6 +7990,7 @@ var require_rules = __commonJS({
       "barueri.br",
       "belem.br",
       "bhz.br",
+      "bib.br",
       "bio.br",
       "blog.br",
       "bmd.br",
@@ -7642,14 +8005,19 @@ var require_rules = __commonJS({
       "com.br",
       "contagem.br",
       "coop.br",
+      "coz.br",
       "cri.br",
       "cuiaba.br",
       "curitiba.br",
       "def.br",
+      "des.br",
+      "det.br",
+      "dev.br",
       "ecn.br",
       "eco.br",
       "edu.br",
       "emp.br",
+      "enf.br",
       "eng.br",
       "esp.br",
       "etc.br",
@@ -7665,6 +8033,7 @@ var require_rules = __commonJS({
       "foz.br",
       "fst.br",
       "g12.br",
+      "geo.br",
       "ggf.br",
       "goiania.br",
       "gov.br",
@@ -7707,6 +8076,7 @@ var require_rules = __commonJS({
       "jus.br",
       "leg.br",
       "lel.br",
+      "log.br",
       "londrina.br",
       "macapa.br",
       "maceio.br",
@@ -7739,6 +8109,7 @@ var require_rules = __commonJS({
       "radio.br",
       "rec.br",
       "recife.br",
+      "rep.br",
       "ribeirao.br",
       "rio.br",
       "riobranco.br",
@@ -7749,6 +8120,7 @@ var require_rules = __commonJS({
       "santoandre.br",
       "saobernardo.br",
       "saogonca.br",
+      "seg.br",
       "sjc.br",
       "slg.br",
       "slz.br",
@@ -7756,6 +8128,7 @@ var require_rules = __commonJS({
       "srv.br",
       "taxi.br",
       "tc.br",
+      "tec.br",
       "teo.br",
       "the.br",
       "tmp.br",
@@ -7837,7 +8210,6 @@ var require_rules = __commonJS({
       "*.ck",
       "!www.ck",
       "cl",
-      "aprendemas.cl",
       "co.cl",
       "gob.cl",
       "gov.cl",
@@ -7924,6 +8296,11 @@ var require_rules = __commonJS({
       "gov.cu",
       "inf.cu",
       "cv",
+      "com.cv",
+      "edu.cv",
+      "int.cv",
+      "nome.cv",
+      "org.cv",
       "cw",
       "com.cw",
       "edu.cw",
@@ -7938,10 +8315,9 @@ var require_rules = __commonJS({
       "ekloges.cy",
       "gov.cy",
       "ltd.cy",
-      "name.cy",
+      "mil.cy",
       "net.cy",
       "org.cy",
-      "parliament.cy",
       "press.cy",
       "pro.cy",
       "tm.cy",
@@ -7967,14 +8343,16 @@ var require_rules = __commonJS({
       "sld.do",
       "web.do",
       "dz",
+      "art.dz",
+      "asso.dz",
       "com.dz",
+      "edu.dz",
+      "gov.dz",
       "org.dz",
       "net.dz",
-      "gov.dz",
-      "edu.dz",
-      "asso.dz",
       "pol.dz",
-      "art.dz",
+      "soc.dz",
+      "tm.dz",
       "ec",
       "com.ec",
       "info.ec",
@@ -8041,6 +8419,10 @@ var require_rules = __commonJS({
       "org.fj",
       "pro.fj",
       "*.fk",
+      "com.fm",
+      "edu.fm",
+      "net.fm",
+      "org.fm",
       "fm",
       "fo",
       "fr",
@@ -8067,6 +8449,8 @@ var require_rules = __commonJS({
       "veterinaire.fr",
       "ga",
       "gb",
+      "edu.gd",
+      "gov.gd",
       "gd",
       "ge",
       "com.ge",
@@ -8161,7 +8545,7 @@ var require_rules = __commonJS({
       "\u654E\u80B2.hk",
       "\u653F\u5E9C.hk",
       "\u500B\u4EBA.hk",
-      "\u4E2A\u4EBA.hk",
+      "\u4E2A\uFFFD\uFFFD.hk",
       "\u7B87\u4EBA.hk",
       "\u7DB2\u7EDC.hk",
       "\u7F51\u7EDC.hk",
@@ -10618,11 +11002,10 @@ var require_rules = __commonJS({
       "net.kw",
       "org.kw",
       "ky",
-      "edu.ky",
-      "gov.ky",
       "com.ky",
-      "org.ky",
+      "edu.ky",
       "net.ky",
+      "org.ky",
       "kz",
       "org.kz",
       "edu.kz",
@@ -11372,13 +11755,14 @@ var require_rules = __commonJS({
       "edu.mx",
       "net.mx",
       "my",
+      "biz.my",
       "com.my",
-      "net.my",
-      "org.my",
-      "gov.my",
       "edu.my",
+      "gov.my",
       "mil.my",
       "name.my",
+      "net.my",
+      "org.my",
       "mz",
       "ac.mz",
       "adv.mz",
@@ -12714,15 +13098,16 @@ var require_rules = __commonJS({
       "com.ss",
       "edu.ss",
       "gov.ss",
+      "me.ss",
       "net.ss",
       "org.ss",
+      "sch.ss",
       "st",
       "co.st",
       "com.st",
       "consulado.st",
       "edu.st",
       "embaixada.st",
-      "gov.st",
       "mil.st",
       "net.st",
       "org.st",
@@ -12796,21 +13181,14 @@ var require_rules = __commonJS({
       "fin.tn",
       "gov.tn",
       "ind.tn",
+      "info.tn",
       "intl.tn",
+      "mincom.tn",
       "nat.tn",
       "net.tn",
       "org.tn",
-      "info.tn",
       "perso.tn",
       "tourism.tn",
-      "edunet.tn",
-      "rnrt.tn",
-      "rns.tn",
-      "rnu.tn",
-      "mincom.tn",
-      "agrinet.tn",
-      "defense.tn",
-      "turen.tn",
       "to",
       "com.to",
       "gov.to",
@@ -12909,7 +13287,6 @@ var require_rules = __commonJS({
       "dn.ua",
       "dnepropetrovsk.ua",
       "dnipropetrovsk.ua",
-      "dominic.ua",
       "donetsk.ua",
       "dp.ua",
       "if.ua",
@@ -13087,7 +13464,6 @@ var require_rules = __commonJS({
       "k12.or.us",
       "k12.pa.us",
       "k12.pr.us",
-      "k12.ri.us",
       "k12.sc.us",
       "k12.tn.us",
       "k12.tx.us",
@@ -13239,6 +13615,7 @@ var require_rules = __commonJS({
       "edu.vc",
       "ve",
       "arts.ve",
+      "bib.ve",
       "co.ve",
       "com.ve",
       "e12.ve",
@@ -13250,7 +13627,9 @@ var require_rules = __commonJS({
       "int.ve",
       "mil.ve",
       "net.ve",
+      "nom.ve",
       "org.ve",
+      "rar.ve",
       "rec.ve",
       "store.ve",
       "tec.ve",
@@ -13292,6 +13671,7 @@ var require_rules = __commonJS({
       "\u0570\u0561\u0575",
       "\u09AC\u09BE\u0982\u09B2\u09BE",
       "\u0431\u0433",
+      "\u0627\u0644\u0628\u062D\u0631\u064A\u0646",
       "\u0431\u0435\u043B",
       "\u4E2D\u56FD",
       "\u4E2D\u570B",
@@ -13330,6 +13710,7 @@ var require_rules = __commonJS({
       "\u0627\u0644\u0627\u0631\u062F\u0646",
       "\uD55C\uAD6D",
       "\u049B\u0430\u0437",
+      "\u0EA5\u0EB2\u0EA7",
       "\u0DBD\u0D82\u0D9A\u0DCF",
       "\u0B87\u0BB2\u0B99\u0BCD\u0B95\u0BC8",
       "\u0627\u0644\u0645\u063A\u0631\u0628",
@@ -13374,7 +13755,13 @@ var require_rules = __commonJS({
       "\u0443\u043A\u0440",
       "\u0627\u0644\u064A\u0645\u0646",
       "xxx",
-      "*.ye",
+      "ye",
+      "com.ye",
+      "edu.ye",
+      "gov.ye",
+      "net.ye",
+      "mil.ye",
+      "org.ye",
       "ac.za",
       "agric.za",
       "alt.za",
@@ -13432,13 +13819,11 @@ var require_rules = __commonJS({
       "adult",
       "aeg",
       "aetna",
-      "afamilycompany",
       "afl",
       "africa",
       "agakhan",
       "agency",
       "aig",
-      "aigo",
       "airbus",
       "airforce",
       "airtel",
@@ -13554,7 +13939,6 @@ var require_rules = __commonJS({
       "broker",
       "brother",
       "brussels",
-      "budapest",
       "bugatti",
       "build",
       "builders",
@@ -13584,7 +13968,6 @@ var require_rules = __commonJS({
       "cars",
       "casa",
       "case",
-      "caseih",
       "cash",
       "casino",
       "catering",
@@ -13593,7 +13976,6 @@ var require_rules = __commonJS({
       "cbn",
       "cbre",
       "cbs",
-      "ceb",
       "center",
       "ceo",
       "cern",
@@ -13660,7 +14042,6 @@ var require_rules = __commonJS({
       "crs",
       "cruise",
       "cruises",
-      "csc",
       "cuisinella",
       "cymru",
       "cyou",
@@ -13708,7 +14089,6 @@ var require_rules = __commonJS({
       "drive",
       "dtv",
       "dubai",
-      "duck",
       "dunlop",
       "dupont",
       "durban",
@@ -13731,7 +14111,6 @@ var require_rules = __commonJS({
       "erni",
       "esq",
       "estate",
-      "esurance",
       "etisalat",
       "eurovision",
       "eus",
@@ -13794,7 +14173,6 @@ var require_rules = __commonJS({
       "frontier",
       "ftr",
       "fujitsu",
-      "fujixerox",
       "fun",
       "fund",
       "furniture",
@@ -13820,7 +14198,6 @@ var require_rules = __commonJS({
       "gifts",
       "gives",
       "giving",
-      "glade",
       "glass",
       "gle",
       "global",
@@ -13912,7 +14289,6 @@ var require_rules = __commonJS({
       "institute",
       "insurance",
       "insure",
-      "intel",
       "international",
       "intuit",
       "investments",
@@ -13923,11 +14299,9 @@ var require_rules = __commonJS({
       "istanbul",
       "itau",
       "itv",
-      "iveco",
       "jaguar",
       "java",
       "jcb",
-      "jcp",
       "jeep",
       "jetzt",
       "jewelry",
@@ -13949,6 +14323,7 @@ var require_rules = __commonJS({
       "kerryproperties",
       "kfh",
       "kia",
+      "kids",
       "kim",
       "kinder",
       "kindle",
@@ -14000,7 +14375,6 @@ var require_rules = __commonJS({
       "lipsy",
       "live",
       "living",
-      "lixil",
       "llc",
       "llp",
       "loan",
@@ -14018,7 +14392,6 @@ var require_rules = __commonJS({
       "ltd",
       "ltda",
       "lundbeck",
-      "lupin",
       "luxe",
       "luxury",
       "macys",
@@ -14048,7 +14421,6 @@ var require_rules = __commonJS({
       "men",
       "menu",
       "merckmsd",
-      "metlife",
       "miami",
       "microsoft",
       "mini",
@@ -14076,11 +14448,10 @@ var require_rules = __commonJS({
       "msd",
       "mtn",
       "mtr",
+      "music",
       "mutual",
       "nab",
-      "nadex",
       "nagoya",
-      "nationwide",
       "natura",
       "navy",
       "nba",
@@ -14090,7 +14461,6 @@ var require_rules = __commonJS({
       "network",
       "neustar",
       "new",
-      "newholland",
       "news",
       "next",
       "nextdirect",
@@ -14116,7 +14486,6 @@ var require_rules = __commonJS({
       "nyc",
       "obi",
       "observer",
-      "off",
       "office",
       "okinawa",
       "olayan",
@@ -14128,7 +14497,6 @@ var require_rules = __commonJS({
       "ong",
       "onl",
       "online",
-      "onyourside",
       "ooo",
       "open",
       "oracle",
@@ -14197,10 +14565,8 @@ var require_rules = __commonJS({
       "qpon",
       "quebec",
       "quest",
-      "qvc",
       "racing",
       "radio",
-      "raid",
       "read",
       "realestate",
       "realtor",
@@ -14228,11 +14594,9 @@ var require_rules = __commonJS({
       "rich",
       "richardli",
       "ricoh",
-      "rightathome",
       "ril",
       "rio",
       "rip",
-      "rmit",
       "rocher",
       "rocks",
       "rodeo",
@@ -14271,8 +14635,6 @@ var require_rules = __commonJS({
       "schule",
       "schwarz",
       "science",
-      "scjohnson",
-      "scor",
       "scot",
       "search",
       "seat",
@@ -14300,7 +14662,6 @@ var require_rules = __commonJS({
       "shouji",
       "show",
       "showtime",
-      "shriram",
       "silk",
       "sina",
       "singles",
@@ -14327,7 +14688,6 @@ var require_rules = __commonJS({
       "space",
       "sport",
       "spot",
-      "spreadbetting",
       "srl",
       "stada",
       "staples",
@@ -14351,10 +14711,8 @@ var require_rules = __commonJS({
       "surgery",
       "suzuki",
       "swatch",
-      "swiftcover",
       "swiss",
       "sydney",
-      "symantec",
       "systems",
       "tab",
       "taipei",
@@ -14461,7 +14819,6 @@ var require_rules = __commonJS({
       "webcam",
       "weber",
       "website",
-      "wed",
       "wedding",
       "weibo",
       "weir",
@@ -14493,7 +14850,6 @@ var require_rules = __commonJS({
       "\u6148\u5584",
       "\u96C6\u56E2",
       "\u5728\u7EBF",
-      "\u5927\u4F17\u6C7D\u8F66",
       "\u70B9\u770B",
       "\u0E04\u0E2D\u0E21",
       "\u516B\u5366",
@@ -14525,7 +14881,6 @@ var require_rules = __commonJS({
       "\u0434\u0435\u0442\u0438",
       "\u30DD\u30A4\u30F3\u30C8",
       "\u65B0\u95FB",
-      "\u5DE5\u884C",
       "\u5BB6\u96FB",
       "\u0643\u0648\u0645",
       "\u4E2D\u6587\u7F51",
@@ -14545,7 +14900,6 @@ var require_rules = __commonJS({
       "\u8BFA\u57FA\u4E9A",
       "\u98DF\u54C1",
       "\u98DE\u5229\u6D66",
-      "\u624B\u8868",
       "\u624B\u673A",
       "\u0627\u0631\u0627\u0645\u0643\u0648",
       "\u0627\u0644\u0639\u0644\u064A\u0627\u0646",
@@ -14564,7 +14918,6 @@ var require_rules = __commonJS({
       "\u5065\u5EB7",
       "\u62DB\u8058",
       "\u0440\u0443\u0441",
-      "\u73E0\u5B9D",
       "\u5927\u62FF",
       "\u307F\u3093\u306A",
       "\u30B0\u30FC\u30B0\u30EB",
@@ -14603,13 +14956,24 @@ var require_rules = __commonJS({
       "cc.ua",
       "inf.ua",
       "ltd.ua",
+      "611.to",
+      "graphox.us",
+      "*.devcdnaccesso.com",
       "adobeaemcloud.com",
-      "adobeaemcloud.net",
       "*.dev.adobeaemcloud.com",
+      "hlx.live",
+      "adobeaemcloud.net",
+      "hlx.page",
+      "hlx3.page",
       "beep.pl",
+      "airkitapps.com",
+      "airkitapps-au.com",
+      "airkitapps.eu",
+      "aivencloud.com",
       "barsy.ca",
       "*.compute.estate",
       "*.alces.network",
+      "kasserver.com",
       "altervista.org",
       "alwaysdata.net",
       "cloudfront.net",
@@ -14639,6 +15003,7 @@ var require_rules = __commonJS({
       "us-west-2.elasticbeanstalk.com",
       "*.elb.amazonaws.com",
       "*.elb.amazonaws.com.cn",
+      "awsglobalaccelerator.com",
       "s3.amazonaws.com",
       "s3-ap-northeast-1.amazonaws.com",
       "s3-ap-northeast-2.amazonaws.com",
@@ -14693,10 +15058,13 @@ var require_rules = __commonJS({
       "s3-website.eu-west-2.amazonaws.com",
       "s3-website.eu-west-3.amazonaws.com",
       "s3-website.us-east-2.amazonaws.com",
-      "amsw.nl",
       "t3l3p0rt.net",
       "tele.amune.org",
       "apigee.io",
+      "siiites.com",
+      "appspacehosted.com",
+      "appspaceusercontent.com",
+      "appudo.net",
       "on-aptible.com",
       "user.aseinet.ne.jp",
       "gv.vc",
@@ -14707,17 +15075,39 @@ var require_rules = __commonJS({
       "potager.org",
       "sweetpepper.org",
       "myasustor.com",
+      "cdn.prod.atlassian-dev.net",
+      "translated.page",
       "myfritz.net",
+      "onavstack.net",
       "*.awdev.ca",
       "*.advisor.ws",
+      "ecommerce-shop.pl",
       "b-data.io",
       "backplaneapp.io",
       "balena-devices.com",
+      "rs.ba",
+      "*.banzai.cloud",
       "app.banzaicloud.io",
+      "*.backyards.banzaicloud.io",
+      "base.ec",
+      "official.ec",
+      "buyshop.jp",
+      "fashionstore.jp",
+      "handcrafted.jp",
+      "kawaiishop.jp",
+      "supersale.jp",
+      "theshop.jp",
+      "shopselect.net",
+      "base.shop",
+      "*.beget.app",
       "betainabox.com",
       "bnr.la",
+      "bitbucket.io",
       "blackbaudcdn.net",
+      "of.je",
+      "bluebite.io",
       "boomla.net",
+      "boutir.com",
       "boxfuse.io",
       "square7.ch",
       "bplaced.com",
@@ -14725,55 +15115,67 @@ var require_rules = __commonJS({
       "square7.de",
       "bplaced.net",
       "square7.net",
+      "shop.brendly.rs",
       "browsersafetymark.io",
       "uk0.bigv.io",
       "dh.bytemark.co.uk",
       "vm.bytemark.co.uk",
+      "cafjs.com",
       "mycd.eu",
+      "drr.ac",
+      "uwu.ai",
       "carrd.co",
       "crd.co",
-      "uwu.ai",
+      "ju.mp",
       "ae.org",
-      "ar.com",
       "br.com",
       "cn.com",
       "com.de",
       "com.se",
       "de.com",
       "eu.com",
-      "gb.com",
       "gb.net",
-      "hu.com",
       "hu.net",
       "jp.net",
       "jpn.com",
-      "kr.com",
       "mex.com",
-      "no.com",
-      "qc.com",
       "ru.com",
       "sa.com",
       "se.net",
       "uk.com",
       "uk.net",
       "us.com",
-      "uy.com",
       "za.bz",
       "za.com",
+      "ar.com",
+      "hu.com",
+      "kr.com",
+      "no.com",
+      "qc.com",
+      "uy.com",
       "africa.com",
       "gr.com",
       "in.net",
+      "web.in",
       "us.org",
       "co.com",
+      "aus.basketball",
+      "nz.basketball",
+      "radio.am",
+      "radio.fm",
       "c.la",
       "certmgr.org",
-      "xenapponazure.com",
+      "cx.ua",
       "discourse.group",
       "discourse.team",
-      "virtueeldomein.nl",
       "cleverapps.io",
+      "clerk.app",
+      "clerkstage.app",
       "*.lcl.dev",
+      "*.lclstage.dev",
       "*.stg.dev",
+      "*.stgstage.dev",
+      "clickrising.net",
       "c66.me",
       "cloud66.ws",
       "cloud66.zone",
@@ -14784,7 +15186,8 @@ var require_rules = __commonJS({
       "cloudaccess.net",
       "cloudcontrolled.com",
       "cloudcontrolapp.com",
-      "cloudera.site",
+      "*.cloudera.site",
+      "pages.dev",
       "trycloudflare.com",
       "workers.dev",
       "wnext.app",
@@ -14807,8 +15210,8 @@ var require_rules = __commonJS({
       "cloudns.pro",
       "cloudns.pw",
       "cloudns.us",
-      "cloudeity.net",
       "cnpy.gdn",
+      "codeberg.page",
       "co.nl",
       "co.no",
       "webhosting.be",
@@ -14831,12 +15234,16 @@ var require_rules = __commonJS({
       "realm.cz",
       "*.cryptonomic.net",
       "cupcake.is",
+      "curv.dev",
       "*.customer-oci.com",
       "*.oci.customer-oci.com",
       "*.ocp.customer-oci.com",
       "*.ocs.customer-oci.com",
       "cyon.link",
       "cyon.site",
+      "fnwk.site",
+      "folionetwork.site",
+      "platform0.app",
       "daplie.me",
       "localhost.daplie.me",
       "dattolocal.com",
@@ -14850,21 +15257,37 @@ var require_rules = __commonJS({
       "firm.dk",
       "reg.dk",
       "store.dk",
+      "dyndns.dappnode.io",
       "*.dapps.earth",
       "*.bzz.dapps.earth",
       "builtwithdark.com",
+      "demo.datadetect.com",
+      "instance.datadetect.com",
       "edgestack.me",
+      "ddns5.com",
       "debian.net",
+      "deno.dev",
+      "deno-staging.dev",
       "dedyn.io",
+      "deta.app",
+      "deta.dev",
+      "*.rss.my.id",
+      "*.diher.solutions",
+      "discordsays.com",
+      "discordsez.com",
+      "jozi.biz",
       "dnshome.de",
       "online.th",
       "shop.th",
       "drayddns.com",
+      "shoparena.pl",
       "dreamhosters.com",
       "mydrobo.com",
       "drud.io",
       "drud.us",
       "duckdns.org",
+      "bip.sh",
+      "bitbridge.net",
       "dy.fi",
       "tunk.org",
       "dyndns-at-home.com",
@@ -15157,6 +15580,8 @@ var require_rules = __commonJS({
       "ddnss.org",
       "definima.net",
       "definima.io",
+      "ondigitalocean.app",
+      "*.digitaloceanspaces.com",
       "bci.dnstrace.pro",
       "ddnsfree.com",
       "ddnsgeek.com",
@@ -15177,12 +15602,18 @@ var require_rules = __commonJS({
       "blogsite.xyz",
       "dynv6.net",
       "e4.cz",
+      "eero.online",
+      "eero-stage.online",
+      "elementor.cloud",
+      "elementor.cool",
       "en-root.fr",
       "mytuleap.com",
+      "tuleap-partners.com",
+      "encr.app",
+      "encoreapi.com",
       "onred.one",
       "staging.onred.one",
-      "enonic.io",
-      "customer.enonic.io",
+      "eu.encoway.cloud",
       "eu.org",
       "al.eu.org",
       "asso.eu.org",
@@ -15239,6 +15670,7 @@ var require_rules = __commonJS({
       "tr.eu.org",
       "uk.eu.org",
       "us.eu.org",
+      "eurodir.ru",
       "eu-1.evennode.com",
       "eu-2.evennode.com",
       "eu-3.evennode.com",
@@ -15252,6 +15684,7 @@ var require_rules = __commonJS({
       "twmail.org",
       "mymailer.com.tw",
       "url.tw",
+      "onfabrica.com",
       "apps.fbsbx.com",
       "ru.net",
       "adygeya.ru",
@@ -15327,6 +15760,7 @@ var require_rules = __commonJS({
       "vologda.su",
       "channelsdvr.net",
       "u.channelsdvr.net",
+      "edgecompute.app",
       "fastly-terrarium.com",
       "fastlylb.net",
       "map.fastlylb.net",
@@ -15337,15 +15771,21 @@ var require_rules = __commonJS({
       "a.ssl.fastly.net",
       "b.ssl.fastly.net",
       "global.ssl.fastly.net",
-      "fastpanel.direct",
       "fastvps-server.com",
-      "fhapp.xyz",
+      "fastvps.host",
+      "myfast.host",
+      "fastvps.site",
+      "myfast.space",
       "fedorainfracloud.org",
       "fedorapeople.org",
       "cloud.fedoraproject.org",
       "app.os.fedoraproject.org",
       "app.os.stg.fedoraproject.org",
+      "conn.uk",
+      "copro.uk",
+      "hosp.uk",
       "mydobiss.com",
+      "fh-muenster.io",
       "filegear.me",
       "filegear-au.me",
       "filegear-de.me",
@@ -15354,8 +15794,20 @@ var require_rules = __commonJS({
       "filegear-jp.me",
       "filegear-sg.me",
       "firebaseapp.com",
-      "flynnhub.com",
+      "fireweb.app",
+      "flap.id",
+      "onflashdrive.app",
+      "fldrv.com",
+      "fly.dev",
+      "edgeapp.net",
+      "shw.io",
       "flynnhosting.net",
+      "forgeblocks.com",
+      "id.forgerock.io",
+      "framer.app",
+      "framercanvas.com",
+      "*.frusky.de",
+      "ravpage.co.il",
       "0e.vc",
       "freebox-os.com",
       "freeboxos.com",
@@ -15364,6 +15816,8 @@ var require_rules = __commonJS({
       "freebox-os.fr",
       "freeboxos.fr",
       "freedesktop.org",
+      "freemyip.com",
+      "wien.funkfeuer.at",
       "*.futurecms.at",
       "*.ex.futurecms.at",
       "*.in.futurecms.at",
@@ -15372,21 +15826,146 @@ var require_rules = __commonJS({
       "*.ex.ortsinfo.at",
       "*.kunden.ortsinfo.at",
       "*.statics.cloud",
+      "independent-commission.uk",
+      "independent-inquest.uk",
+      "independent-inquiry.uk",
+      "independent-panel.uk",
+      "independent-review.uk",
+      "public-inquiry.uk",
+      "royal-commission.uk",
+      "campaign.gov.uk",
       "service.gov.uk",
+      "api.gov.uk",
       "gehirn.ne.jp",
       "usercontent.jp",
       "gentapps.com",
+      "gentlentapis.com",
       "lab.ms",
-      "github.io",
+      "cdn-edges.net",
+      "ghost.io",
+      "gsj.bz",
       "githubusercontent.com",
+      "githubpreview.dev",
+      "github.io",
       "gitlab.io",
+      "gitapp.si",
+      "gitpage.si",
       "glitch.me",
+      "nog.community",
+      "co.ro",
+      "shop.ro",
       "lolipop.io",
+      "angry.jp",
+      "babyblue.jp",
+      "babymilk.jp",
+      "backdrop.jp",
+      "bambina.jp",
+      "bitter.jp",
+      "blush.jp",
+      "boo.jp",
+      "boy.jp",
+      "boyfriend.jp",
+      "but.jp",
+      "candypop.jp",
+      "capoo.jp",
+      "catfood.jp",
+      "cheap.jp",
+      "chicappa.jp",
+      "chillout.jp",
+      "chips.jp",
+      "chowder.jp",
+      "chu.jp",
+      "ciao.jp",
+      "cocotte.jp",
+      "coolblog.jp",
+      "cranky.jp",
+      "cutegirl.jp",
+      "daa.jp",
+      "deca.jp",
+      "deci.jp",
+      "digick.jp",
+      "egoism.jp",
+      "fakefur.jp",
+      "fem.jp",
+      "flier.jp",
+      "floppy.jp",
+      "fool.jp",
+      "frenchkiss.jp",
+      "girlfriend.jp",
+      "girly.jp",
+      "gloomy.jp",
+      "gonna.jp",
+      "greater.jp",
+      "hacca.jp",
+      "heavy.jp",
+      "her.jp",
+      "hiho.jp",
+      "hippy.jp",
+      "holy.jp",
+      "hungry.jp",
+      "icurus.jp",
+      "itigo.jp",
+      "jellybean.jp",
+      "kikirara.jp",
+      "kill.jp",
+      "kilo.jp",
+      "kuron.jp",
+      "littlestar.jp",
+      "lolipopmc.jp",
+      "lolitapunk.jp",
+      "lomo.jp",
+      "lovepop.jp",
+      "lovesick.jp",
+      "main.jp",
+      "mods.jp",
+      "mond.jp",
+      "mongolian.jp",
+      "moo.jp",
+      "namaste.jp",
+      "nikita.jp",
+      "nobushi.jp",
+      "noor.jp",
+      "oops.jp",
+      "parallel.jp",
+      "parasite.jp",
+      "pecori.jp",
+      "peewee.jp",
+      "penne.jp",
+      "pepper.jp",
+      "perma.jp",
+      "pigboat.jp",
+      "pinoko.jp",
+      "punyu.jp",
+      "pupu.jp",
+      "pussycat.jp",
+      "pya.jp",
+      "raindrop.jp",
+      "readymade.jp",
+      "sadist.jp",
+      "schoolbus.jp",
+      "secret.jp",
+      "staba.jp",
+      "stripper.jp",
+      "sub.jp",
+      "sunnyday.jp",
+      "thick.jp",
+      "tonkotsu.jp",
+      "under.jp",
+      "upper.jp",
+      "velvet.jp",
+      "verse.jp",
+      "versus.jp",
+      "vivian.jp",
+      "watson.jp",
+      "weblike.jp",
+      "whitesnow.jp",
+      "zombie.jp",
+      "heteml.net",
       "cloudapps.digital",
       "london.cloudapps.digital",
+      "pymnt.uk",
       "homeoffice.gov.uk",
       "ro.im",
-      "shop.ro",
       "goip.de",
       "run.app",
       "a.run.app",
@@ -15394,6 +15973,18 @@ var require_rules = __commonJS({
       "*.0emm.com",
       "appspot.com",
       "*.r.appspot.com",
+      "codespot.com",
+      "googleapis.com",
+      "googlecode.com",
+      "pagespeedmobilizer.com",
+      "publishproxy.com",
+      "withgoogle.com",
+      "withyoutube.com",
+      "*.gateway.dev",
+      "cloud.goog",
+      "translate.goog",
+      "*.usercontent.goog",
+      "cloudfunctions.net",
       "blogspot.ae",
       "blogspot.al",
       "blogspot.am",
@@ -15468,16 +16059,11 @@ var require_rules = __commonJS({
       "blogspot.tw",
       "blogspot.ug",
       "blogspot.vn",
-      "cloudfunctions.net",
-      "cloud.goog",
-      "codespot.com",
-      "googleapis.com",
-      "googlecode.com",
-      "pagespeedmobilizer.com",
-      "publishproxy.com",
-      "withgoogle.com",
-      "withyoutube.com",
+      "goupile.fr",
+      "gov.nl",
       "awsmppl.com",
+      "g\xFCnstigbestellen.de",
+      "g\xFCnstigliefern.de",
       "fin.ci",
       "free.hr",
       "caa.li",
@@ -15488,30 +16074,42 @@ var require_rules = __commonJS({
       "hashbang.sh",
       "hasura.app",
       "hasura-app.io",
+      "pages.it.hs-heilbronn.de",
       "hepforge.org",
       "herokuapp.com",
       "herokussl.com",
+      "ravendb.cloud",
       "myravendb.com",
       "ravendb.community",
       "ravendb.me",
       "development.run",
       "ravendb.run",
-      "bpl.biz",
+      "homesklep.pl",
+      "secaas.hk",
+      "hoplix.shop",
       "orx.biz",
-      "ng.city",
       "biz.gl",
-      "ng.ink",
       "col.ng",
       "firm.ng",
       "gen.ng",
       "ltd.ng",
       "ngo.ng",
-      "ng.school",
+      "edu.scot",
       "sch.so",
+      "hostyhosting.io",
       "h\xE4kkinen.fi",
       "*.moonscale.io",
       "moonscale.net",
       "iki.fi",
+      "ibxos.it",
+      "iliadboxos.it",
+      "impertrixcdn.com",
+      "impertrix.com",
+      "smushcdn.com",
+      "wphostedmail.com",
+      "wpmucdn.com",
+      "tempurl.host",
+      "wpmudev.host",
       "dyn-berlin.de",
       "in-berlin.de",
       "in-brb.de",
@@ -15553,28 +16151,124 @@ var require_rules = __commonJS({
       "sp.leg.br",
       "to.leg.br",
       "pixolino.com",
+      "na4u.ru",
+      "iopsys.se",
       "ipifony.net",
+      "iservschule.de",
       "mein-iserv.de",
+      "schulplattform.de",
+      "schulserver.de",
       "test-iserv.de",
       "iserv.dev",
       "iobb.net",
+      "mel.cloudlets.com.au",
+      "cloud.interhostsolutions.be",
+      "users.scale.virtualcloud.com.br",
+      "mycloud.by",
+      "alp1.ae.flow.ch",
+      "appengine.flow.ch",
+      "es-1.axarnet.cloud",
+      "diadem.cloud",
+      "vip.jelastic.cloud",
+      "jele.cloud",
+      "it1.eur.aruba.jenv-aruba.cloud",
+      "it1.jenv-aruba.cloud",
+      "keliweb.cloud",
+      "cs.keliweb.cloud",
+      "oxa.cloud",
+      "tn.oxa.cloud",
+      "uk.oxa.cloud",
+      "primetel.cloud",
+      "uk.primetel.cloud",
+      "ca.reclaim.cloud",
+      "uk.reclaim.cloud",
+      "us.reclaim.cloud",
+      "ch.trendhosting.cloud",
+      "de.trendhosting.cloud",
+      "jele.club",
+      "amscompute.com",
+      "clicketcloud.com",
+      "dopaas.com",
+      "hidora.com",
+      "paas.hosted-by-previder.com",
+      "rag-cloud.hosteur.com",
+      "rag-cloud-ch.hosteur.com",
+      "jcloud.ik-server.com",
+      "jcloud-ver-jpc.ik-server.com",
+      "demo.jelastic.com",
+      "kilatiron.com",
+      "paas.massivegrid.com",
+      "jed.wafaicloud.com",
+      "lon.wafaicloud.com",
+      "ryd.wafaicloud.com",
+      "j.scaleforce.com.cy",
+      "jelastic.dogado.eu",
+      "fi.cloudplatform.fi",
+      "demo.datacenter.fi",
+      "paas.datacenter.fi",
+      "jele.host",
+      "mircloud.host",
+      "paas.beebyte.io",
+      "sekd1.beebyteapp.io",
+      "jele.io",
+      "cloud-fr1.unispace.io",
+      "jc.neen.it",
+      "cloud.jelastic.open.tim.it",
+      "jcloud.kz",
+      "upaas.kazteleport.kz",
+      "cloudjiffy.net",
+      "fra1-de.cloudjiffy.net",
+      "west1-us.cloudjiffy.net",
+      "jls-sto1.elastx.net",
+      "jls-sto2.elastx.net",
+      "jls-sto3.elastx.net",
+      "faststacks.net",
+      "fr-1.paas.massivegrid.net",
+      "lon-1.paas.massivegrid.net",
+      "lon-2.paas.massivegrid.net",
+      "ny-1.paas.massivegrid.net",
+      "ny-2.paas.massivegrid.net",
+      "sg-1.paas.massivegrid.net",
+      "jelastic.saveincloud.net",
+      "nordeste-idc.saveincloud.net",
+      "j.scaleforce.net",
+      "jelastic.tsukaeru.net",
+      "sdscloud.pl",
+      "unicloud.pl",
+      "mircloud.ru",
+      "jelastic.regruhosting.ru",
+      "enscaled.sg",
+      "jele.site",
+      "jelastic.team",
+      "orangecloud.tn",
+      "j.layershift.co.uk",
+      "phx.enscaled.us",
+      "mircloud.us",
       "myjino.ru",
       "*.hosting.myjino.ru",
       "*.landing.myjino.ru",
       "*.spectrum.myjino.ru",
       "*.vps.myjino.ru",
+      "jotelulu.cloud",
       "*.triton.zone",
       "*.cns.joyent.com",
       "js.org",
       "kaas.gg",
       "khplay.nl",
+      "ktistory.com",
+      "kapsi.fi",
       "keymachine.de",
       "kinghost.net",
       "uni5.net",
       "knightpoint.systems",
+      "koobin.events",
       "oya.to",
+      "kuleuven.cloud",
+      "ezproxy.kuleuven.be",
       "co.krd",
       "edu.krd",
+      "krellian.net",
+      "webthings.io",
       "git-repos.de",
       "lcube-server.de",
       "svn-repos.de",
@@ -15590,24 +16284,28 @@ var require_rules = __commonJS({
       "co.place",
       "co.technology",
       "app.lmpm.com",
-      "linkitools.space",
       "linkyard.cloud",
       "linkyard-cloud.ch",
       "members.linode.com",
-      "nodebalancer.linode.com",
+      "*.nodebalancer.linode.com",
+      "*.linodeobjects.com",
+      "ip.linodeusercontent.com",
       "we.bs",
+      "*.user.localcert.dev",
+      "localzone.xyz",
       "loginline.app",
       "loginline.dev",
       "loginline.io",
       "loginline.services",
       "loginline.site",
+      "servers.run",
+      "lohmus.me",
       "krasnik.pl",
       "leczna.pl",
       "lubartow.pl",
       "lublin.pl",
       "poniatowa.pl",
       "swidnik.pl",
-      "uklugs.org",
       "glug.org.uk",
       "lug.org.uk",
       "lugs.org.uk",
@@ -15630,6 +16328,7 @@ var require_rules = __commonJS({
       "barsy.org",
       "barsy.pro",
       "barsy.pub",
+      "barsy.ro",
       "barsy.shop",
       "barsy.site",
       "barsy.support",
@@ -15638,45 +16337,89 @@ var require_rules = __commonJS({
       "mayfirst.info",
       "mayfirst.org",
       "hb.cldmail.ru",
+      "cn.vu",
+      "mazeplay.com",
+      "mcpe.me",
+      "mcdir.me",
+      "mcdir.ru",
+      "mcpre.ru",
+      "vps.mcdir.ru",
+      "mediatech.by",
+      "mediatech.dev",
+      "hra.health",
       "miniserver.com",
       "memset.net",
-      "cloud.metacentrum.cz",
+      "messerli.app",
+      "*.cloud.metacentrum.cz",
       "custom.metacentrum.cz",
       "flt.cloud.muni.cz",
       "usr.cloud.muni.cz",
       "meteorapp.com",
       "eu.meteorapp.com",
       "co.pl",
-      "azurecontainer.io",
+      "*.azurecontainer.io",
       "azurewebsites.net",
       "azure-mobile.net",
       "cloudapp.net",
+      "azurestaticapps.net",
+      "1.azurestaticapps.net",
+      "centralus.azurestaticapps.net",
+      "eastasia.azurestaticapps.net",
+      "eastus2.azurestaticapps.net",
+      "westeurope.azurestaticapps.net",
+      "westus2.azurestaticapps.net",
+      "csx.cc",
+      "mintere.site",
+      "forte.id",
       "mozilla-iot.org",
       "bmoattachments.org",
       "net.ru",
       "org.ru",
       "pp.ru",
+      "hostedpi.com",
+      "customer.mythic-beasts.com",
+      "caracal.mythic-beasts.com",
+      "fentiger.mythic-beasts.com",
+      "lynx.mythic-beasts.com",
+      "ocelot.mythic-beasts.com",
+      "oncilla.mythic-beasts.com",
+      "onza.mythic-beasts.com",
+      "sphinx.mythic-beasts.com",
+      "vs.mythic-beasts.com",
+      "x.mythic-beasts.com",
+      "yali.mythic-beasts.com",
+      "cust.retrosnub.co.uk",
       "ui.nabu.casa",
       "pony.club",
       "of.fashion",
-      "on.fashion",
-      "of.football",
       "in.london",
       "of.london",
+      "from.marketing",
+      "with.marketing",
       "for.men",
+      "repair.men",
       "and.mom",
       "for.mom",
       "for.one",
+      "under.one",
       "for.sale",
-      "of.work",
+      "that.win",
+      "from.work",
       "to.work",
-      "nctu.me",
-      "bitballoon.com",
-      "netlify.com",
+      "cloud.nospamproxy.com",
+      "netlify.app",
       "4u.com",
       "ngrok.io",
       "nh-serv.co.uk",
       "nfshost.com",
+      "*.developer.app",
+      "noop.app",
+      "*.northflank.app",
+      "*.build.run",
+      "*.code.run",
+      "*.database.run",
+      "*.migration.run",
+      "noticeable.news",
       "dnsking.ch",
       "mypi.co",
       "n4t.co",
@@ -15790,75 +16533,39 @@ var require_rules = __commonJS({
       "webhop.me",
       "zapto.org",
       "stage.nodeart.io",
-      "nodum.co",
-      "nodum.io",
       "pcloud.host",
       "nyc.mn",
-      "nom.ae",
-      "nom.af",
-      "nom.ai",
-      "nom.al",
-      "nym.by",
-      "nom.bz",
-      "nym.bz",
-      "nom.cl",
-      "nym.ec",
-      "nom.gd",
-      "nom.ge",
-      "nom.gl",
-      "nym.gr",
-      "nom.gt",
-      "nym.gy",
-      "nym.hk",
-      "nom.hn",
-      "nym.ie",
-      "nom.im",
-      "nom.ke",
-      "nym.kz",
-      "nym.la",
-      "nym.lc",
-      "nom.li",
-      "nym.li",
-      "nym.lt",
-      "nym.lu",
-      "nom.lv",
-      "nym.me",
-      "nom.mk",
-      "nym.mn",
-      "nym.mx",
-      "nom.nu",
-      "nym.nz",
-      "nym.pe",
-      "nym.pt",
-      "nom.pw",
-      "nom.qa",
-      "nym.ro",
-      "nom.rs",
-      "nom.si",
-      "nym.sk",
-      "nom.st",
-      "nym.su",
-      "nym.sx",
-      "nom.tj",
-      "nym.tw",
-      "nom.ug",
-      "nom.uy",
-      "nom.vc",
-      "nom.vg",
       "static.observableusercontent.com",
       "cya.gg",
+      "omg.lol",
       "cloudycluster.net",
+      "omniwe.site",
+      "service.one",
       "nid.io",
+      "opensocial.site",
       "opencraft.hosting",
+      "orsites.com",
       "operaunite.com",
+      "tech.orange",
+      "authgear-staging.com",
+      "authgearapps.com",
       "skygearapp.com",
       "outsystemscloud.com",
+      "*.webpaas.ovh.net",
+      "*.hosting.ovh.net",
       "ownprovider.com",
       "own.pm",
+      "*.owo.codes",
       "ox.rs",
       "oy.lc",
       "pgfog.com",
       "pagefrontapp.com",
+      "pagexl.com",
+      "*.paywhirl.com",
+      "bar0.net",
+      "bar1.net",
+      "bar2.net",
+      "rdv.to",
       "art.pl",
       "gliwice.pl",
       "krakow.pl",
@@ -15869,11 +16576,28 @@ var require_rules = __commonJS({
       "gotpantheon.com",
       "mypep.link",
       "perspecta.cloud",
+      "lk3.ru",
       "on-web.fr",
-      "*.platform.sh",
+      "bc.platform.sh",
+      "ent.platform.sh",
+      "eu.platform.sh",
+      "us.platform.sh",
       "*.platformsh.site",
+      "*.tst.site",
+      "platter-app.com",
+      "platter-app.dev",
+      "platterp.us",
+      "pdns.page",
+      "plesk.page",
+      "pleskns.com",
       "dyn53.io",
+      "onporter.run",
       "co.bn",
+      "postman-echo.com",
+      "pstmn.io",
+      "mock.pstmn.io",
+      "httpbin.org",
+      "prequalifyme.today",
       "xen.prgmr.com",
       "priv.at",
       "prvcy.page",
@@ -15882,8 +16606,13 @@ var require_rules = __commonJS({
       "chirurgiens-dentistes-en-france.fr",
       "byen.site",
       "pubtls.org",
+      "pythonanywhere.com",
+      "eu.pythonanywhere.com",
+      "qoto.io",
       "qualifioapp.com",
       "qbuser.com",
+      "cloudsite.builders",
+      "instances.spawn.cc",
       "instantcloud.cn",
       "ras.ru",
       "qa2.com",
@@ -15897,6 +16626,7 @@ var require_rules = __commonJS({
       "vaporcloud.io",
       "rackmaze.com",
       "rackmaze.net",
+      "g.vbrplsbx.io",
       "*.on-k3s.io",
       "*.on-rancher.cloud",
       "*.on-rio.io",
@@ -15905,19 +16635,61 @@ var require_rules = __commonJS({
       "app.render.com",
       "onrender.com",
       "repl.co",
+      "id.repl.co",
       "repl.run",
       "resindevice.io",
       "devices.resinstaging.io",
       "hzc.io",
       "wellbeingzone.eu",
-      "ptplus.fit",
       "wellbeingzone.co.uk",
+      "adimo.co.uk",
+      "itcouldbewor.se",
       "git-pages.rit.edu",
+      "rocky.page",
+      "\u0431\u0438\u0437.\u0440\u0443\u0441",
+      "\u043A\u043E\u043C.\u0440\u0443\u0441",
+      "\u043A\u0440\u044B\u043C.\u0440\u0443\u0441",
+      "\u043C\u0438\u0440.\u0440\u0443\u0441",
+      "\u043C\u0441\u043A.\u0440\u0443\u0441",
+      "\u043E\u0440\u0433.\u0440\u0443\u0441",
+      "\u0441\u0430\u043C\u0430\u0440\u0430.\u0440\u0443\u0441",
+      "\u0441\u043E\u0447\u0438.\u0440\u0443\u0441",
+      "\u0441\u043F\u0431.\u0440\u0443\u0441",
+      "\u044F.\u0440\u0443\u0441",
+      "*.builder.code.com",
+      "*.dev-builder.code.com",
+      "*.stg-builder.code.com",
       "sandcats.io",
       "logoip.de",
       "logoip.com",
+      "fr-par-1.baremetal.scw.cloud",
+      "fr-par-2.baremetal.scw.cloud",
+      "nl-ams-1.baremetal.scw.cloud",
+      "fnc.fr-par.scw.cloud",
+      "functions.fnc.fr-par.scw.cloud",
+      "k8s.fr-par.scw.cloud",
+      "nodes.k8s.fr-par.scw.cloud",
+      "s3.fr-par.scw.cloud",
+      "s3-website.fr-par.scw.cloud",
+      "whm.fr-par.scw.cloud",
+      "priv.instances.scw.cloud",
+      "pub.instances.scw.cloud",
+      "k8s.scw.cloud",
+      "k8s.nl-ams.scw.cloud",
+      "nodes.k8s.nl-ams.scw.cloud",
+      "s3.nl-ams.scw.cloud",
+      "s3-website.nl-ams.scw.cloud",
+      "whm.nl-ams.scw.cloud",
+      "k8s.pl-waw.scw.cloud",
+      "nodes.k8s.pl-waw.scw.cloud",
+      "s3.pl-waw.scw.cloud",
+      "s3-website.pl-waw.scw.cloud",
+      "scalebook.scw.cloud",
+      "smartlabeling.scw.cloud",
+      "dedibox.fr",
       "schokokeks.net",
       "gov.scot",
+      "service.gov.scot",
       "scrysec.com",
       "firewall-gateway.com",
       "firewall-gateway.de",
@@ -15929,13 +16701,21 @@ var require_rules = __commonJS({
       "my-firewall.org",
       "myfirewall.org",
       "spdns.org",
+      "seidat.net",
+      "sellfy.store",
       "senseering.net",
+      "minisite.ms",
+      "magnet.page",
       "biz.ua",
       "co.ua",
       "pp.ua",
+      "shiftcrypto.dev",
+      "shiftcrypto.io",
       "shiftedit.io",
       "myshopblocks.com",
+      "myshopify.com",
       "shopitsite.com",
+      "shopware.store",
       "mo-siemens.io",
       "1kapp.com",
       "appchizi.com",
@@ -15946,60 +16726,110 @@ var require_rules = __commonJS({
       "bounty-full.com",
       "alpha.bounty-full.com",
       "beta.bounty-full.com",
+      "small-web.org",
+      "vp4.me",
+      "try-snowplow.com",
+      "srht.site",
       "stackhero-network.com",
+      "musician.io",
+      "novecore.site",
       "static.land",
       "dev.static.land",
       "sites.static.land",
+      "storebase.store",
+      "vps-host.net",
+      "atl.jelastic.vps-host.net",
+      "njs.jelastic.vps-host.net",
+      "ric.jelastic.vps-host.net",
+      "playstation-cloud.com",
       "apps.lair.io",
       "*.stolos.io",
       "spacekit.io",
       "customer.speedpartner.de",
+      "myspreadshop.at",
+      "myspreadshop.com.au",
+      "myspreadshop.be",
+      "myspreadshop.ca",
+      "myspreadshop.ch",
+      "myspreadshop.com",
+      "myspreadshop.de",
+      "myspreadshop.dk",
+      "myspreadshop.es",
+      "myspreadshop.fi",
+      "myspreadshop.fr",
+      "myspreadshop.ie",
+      "myspreadshop.it",
+      "myspreadshop.net",
+      "myspreadshop.nl",
+      "myspreadshop.no",
+      "myspreadshop.pl",
+      "myspreadshop.se",
+      "myspreadshop.co.uk",
       "api.stdlib.com",
       "storj.farm",
       "utwente.io",
       "soc.srcf.net",
       "user.srcf.net",
       "temp-dns.com",
-      "applicationcloud.io",
-      "scapp.io",
+      "supabase.co",
+      "supabase.in",
+      "supabase.net",
+      "su.paba.se",
       "*.s5y.io",
       "*.sensiosite.cloud",
       "syncloud.it",
-      "diskstation.me",
       "dscloud.biz",
-      "dscloud.me",
-      "dscloud.mobi",
+      "direct.quickconnect.cn",
       "dsmynas.com",
-      "dsmynas.net",
-      "dsmynas.org",
       "familyds.com",
-      "familyds.net",
-      "familyds.org",
+      "diskstation.me",
+      "dscloud.me",
       "i234.me",
       "myds.me",
       "synology.me",
+      "dscloud.mobi",
+      "dsmynas.net",
+      "familyds.net",
+      "dsmynas.org",
+      "familyds.org",
       "vpnplus.to",
       "direct.quickconnect.to",
+      "tabitorder.co.il",
       "taifun-dns.de",
+      "beta.tailscale.net",
+      "ts.net",
       "gda.pl",
       "gdansk.pl",
       "gdynia.pl",
       "med.pl",
       "sopot.pl",
-      "edugit.org",
+      "site.tb-hosting.com",
+      "edugit.io",
+      "s3.teckids.org",
       "telebit.app",
       "telebit.io",
       "*.telebit.xyz",
       "gwiddle.co.uk",
+      "*.firenet.ch",
+      "*.svc.firenet.ch",
+      "reservd.com",
       "thingdustdata.com",
       "cust.dev.thingdust.io",
       "cust.disrec.thingdust.io",
       "cust.prod.thingdust.io",
       "cust.testing.thingdust.io",
+      "reservd.dev.thingdust.io",
+      "reservd.disrec.thingdust.io",
+      "reservd.testing.thingdust.io",
+      "tickets.io",
       "arvo.network",
       "azimuth.network",
+      "tlon.network",
+      "torproject.net",
+      "pages.torproject.net",
       "bloxcms.com",
       "townnews-staging.com",
+      "tbits.me",
       "12hp.at",
       "2ix.at",
       "4lima.at",
@@ -16022,6 +16852,7 @@ var require_rules = __commonJS({
       "*.transurl.be",
       "*.transurl.eu",
       "*.transurl.nl",
+      "site.transip.me",
       "tuxfamily.org",
       "dd-dns.de",
       "diskstation.eu",
@@ -16036,34 +16867,103 @@ var require_rules = __commonJS({
       "syno-ds.de",
       "synology-diskstation.de",
       "synology-ds.de",
+      "typedream.app",
+      "pro.typeform.com",
       "uber.space",
       "*.uberspace.de",
       "hk.com",
       "hk.org",
       "ltd.hk",
       "inc.hk",
+      "name.pm",
+      "sch.tf",
+      "biz.wf",
+      "sch.wf",
+      "org.yt",
       "virtualuser.de",
       "virtual-user.de",
+      "upli.io",
       "urown.cloud",
       "dnsupdate.info",
       "lib.de.us",
       "2038.io",
+      "vercel.app",
+      "vercel.dev",
+      "now.sh",
       "router.management",
       "v-info.info",
       "voorloper.cloud",
+      "neko.am",
+      "nyaa.am",
+      "be.ax",
+      "cat.ax",
+      "es.ax",
+      "eu.ax",
+      "gg.ax",
+      "mc.ax",
+      "us.ax",
+      "xy.ax",
+      "nl.ci",
+      "xx.gl",
+      "app.gp",
+      "blog.gt",
+      "de.gt",
+      "to.gt",
+      "be.gy",
+      "cc.hn",
+      "blog.kg",
+      "io.kg",
+      "jp.kg",
+      "tv.kg",
+      "uk.kg",
+      "us.kg",
+      "de.ls",
+      "at.md",
+      "de.md",
+      "jp.md",
+      "to.md",
+      "indie.porn",
+      "vxl.sh",
+      "ch.tc",
+      "me.tc",
+      "we.tc",
+      "nyan.to",
+      "at.vg",
+      "blog.vu",
+      "dev.vu",
+      "me.vu",
       "v.ua",
+      "*.vultrobjects.com",
       "wafflecell.com",
       "*.webhare.dev",
+      "reserve-online.net",
+      "reserve-online.com",
+      "bookonline.app",
+      "hotelwithflight.com",
       "wedeploy.io",
       "wedeploy.me",
       "wedeploy.sh",
       "remotewd.com",
+      "pages.wiardweb.com",
       "wmflabs.org",
+      "toolforge.org",
+      "wmcloud.org",
+      "panel.gg",
+      "daemon.panel.gg",
+      "messwithdns.com",
+      "woltlab-demo.com",
       "myforum.community",
       "community-pro.de",
       "diskussionsbereich.de",
       "community-pro.net",
       "meinforum.net",
+      "affinitylottery.org.uk",
+      "raffleentry.org.uk",
+      "weeklylottery.org.uk",
+      "wpenginepowered.com",
+      "js.wpenginepowered.com",
+      "wixsite.com",
+      "editorx.io",
       "half.host",
       "xnbay.com",
       "u2.xnbay.com",
@@ -16083,11 +16983,11 @@ var require_rules = __commonJS({
       "ybo.review",
       "ybo.science",
       "ybo.trade",
+      "ynh.fr",
       "nohost.me",
       "noho.st",
       "za.net",
       "za.org",
-      "now.sh",
       "bss.design",
       "basicserver.io",
       "virtualserver.io",
@@ -16298,7 +17198,9 @@ var require_store = __commonJS({
         throw new Error("removeAllCookies is not implemented");
       }
       getAllCookies(cb) {
-        throw new Error("getAllCookies is not implemented (therefore jar cannot be serialized)");
+        throw new Error(
+          "getAllCookies is not implemented (therefore jar cannot be serialized)"
+        );
       }
     };
     exports.Store = Store;
@@ -16785,7 +17687,7 @@ var require_cookie = __commonJS({
       c.value = cookieValue;
       return c;
     }
-    function parse2(str, options) {
+    function parse3(str, options) {
       if (!options || typeof options !== "object") {
         options = {};
       }
@@ -17165,7 +18067,7 @@ var require_cookie = __commonJS({
       }
     };
     Cookie.cookiesCreated = 0;
-    Cookie.parse = parse2;
+    Cookie.parse = parse3;
     Cookie.fromJSON = fromJSON;
     Cookie.serializableProperties = Object.keys(cookieDefaults);
     Cookie.sameSiteLevel = {
@@ -17231,7 +18133,9 @@ var require_cookie = __commonJS({
             return cb(options.ignoreError ? null : err);
           }
         } else if (!(cookie instanceof Cookie)) {
-          err = new Error("First argument to setCookie must be a Cookie object or string");
+          err = new Error(
+            "First argument to setCookie must be a Cookie object or string"
+          );
           return cb(options.ignoreError ? null : err);
         }
         const now = options.now || new Date();
@@ -17244,7 +18148,9 @@ var require_cookie = __commonJS({
         }
         if (cookie.domain) {
           if (!domainMatch(host, cookie.cdomain(), false)) {
-            err = new Error(`Cookie not in this host's domain. Cookie:${cookie.cdomain()} Request:${host}`);
+            err = new Error(
+              `Cookie not in this host's domain. Cookie:${cookie.cdomain()} Request:${host}`
+            );
             return cb(options.ignoreError ? null : err);
           }
           if (cookie.hostOnly == null) {
@@ -17264,7 +18170,9 @@ var require_cookie = __commonJS({
         }
         if (cookie.sameSite !== "none" && sameSiteContext) {
           if (sameSiteContext === "none") {
-            err = new Error("Cookie is SameSite but this is a cross-origin request");
+            err = new Error(
+              "Cookie is SameSite but this is a cross-origin request"
+            );
             return cb(options.ignoreError ? null : err);
           }
         }
@@ -17281,7 +18189,9 @@ var require_cookie = __commonJS({
             errorMsg = "Cookie has __Host prefix but either Secure or HostOnly attribute is not set or Path is not '/'";
           }
           if (errorFound) {
-            return cb(options.ignoreError || ignoreErrorForPrefixSecurity ? null : new Error(errorMsg));
+            return cb(
+              options.ignoreError || ignoreErrorForPrefixSecurity ? null : new Error(errorMsg)
+            );
           }
         }
         const store = this.store;
@@ -17377,20 +18287,25 @@ var require_cookie = __commonJS({
           }
           return true;
         }
-        store.findCookies(host, allPaths ? null : path5, this.allowSpecialUseDomain, (err, cookies) => {
-          if (err) {
-            return cb(err);
+        store.findCookies(
+          host,
+          allPaths ? null : path5,
+          this.allowSpecialUseDomain,
+          (err, cookies) => {
+            if (err) {
+              return cb(err);
+            }
+            cookies = cookies.filter(matchingCookie);
+            if (options.sort !== false) {
+              cookies = cookies.sort(cookieCompare);
+            }
+            const now2 = new Date();
+            for (const cookie of cookies) {
+              cookie.lastAccessed = now2;
+            }
+            cb(null, cookies);
           }
-          cookies = cookies.filter(matchingCookie);
-          if (options.sort !== false) {
-            cookies = cookies.sort(cookieCompare);
-          }
-          const now2 = new Date();
-          for (const cookie of cookies) {
-            cookie.lastAccessed = now2;
-          }
-          cb(null, cookies);
-        });
+        );
       }
       getCookieString(...args) {
         const cb = args.pop();
@@ -17398,7 +18313,10 @@ var require_cookie = __commonJS({
           if (err) {
             cb(err);
           } else {
-            cb(null, cookies.sort(cookieCompare).map((c) => c.cookieString()).join("; "));
+            cb(
+              null,
+              cookies.sort(cookieCompare).map((c) => c.cookieString()).join("; ")
+            );
           }
         };
         args.push(next);
@@ -17410,9 +18328,12 @@ var require_cookie = __commonJS({
           if (err) {
             cb(err);
           } else {
-            cb(null, cookies.map((c) => {
-              return c.toString();
-            }));
+            cb(
+              null,
+              cookies.map((c) => {
+                return c.toString();
+              })
+            );
           }
         };
         args.push(next);
@@ -17430,7 +18351,11 @@ var require_cookie = __commonJS({
           cookies: []
         };
         if (!(this.store.getAllCookies && typeof this.store.getAllCookies === "function")) {
-          return cb(new Error("store does not support getAllCookies and cannot be serialized"));
+          return cb(
+            new Error(
+              "store does not support getAllCookies and cannot be serialized"
+            )
+          );
         }
         this.store.getAllCookies((err, cookies) => {
           if (err) {
@@ -17490,7 +18415,9 @@ var require_cookie = __commonJS({
           return this._cloneSync();
         }
         if (!newStore.synchronous) {
-          throw new Error("CookieJar clone destination store is not synchronous; use async API instead.");
+          throw new Error(
+            "CookieJar clone destination store is not synchronous; use async API instead."
+          );
         }
         return this._cloneSync(newStore);
       }
@@ -17518,7 +18445,12 @@ var require_cookie = __commonJS({
             }
           }
           cookies.forEach((cookie) => {
-            store.removeCookie(cookie.domain, cookie.path, cookie.key, removeCookieCb);
+            store.removeCookie(
+              cookie.domain,
+              cookie.path,
+              cookie.key,
+              removeCookieCb
+            );
           });
         });
       }
@@ -17548,7 +18480,9 @@ var require_cookie = __commonJS({
         const serialized = typeof strOrObj === "string" ? JSON.parse(strOrObj) : strOrObj;
         const jar = new CookieJar2(store, serialized.rejectPublicSuffixes);
         if (!jar.store.synchronous) {
-          throw new Error("CookieJar store is not synchronous; use async API instead.");
+          throw new Error(
+            "CookieJar store is not synchronous; use async API instead."
+          );
         }
         jar._importCookiesSync(serialized);
         return jar;
@@ -17571,7 +18505,9 @@ var require_cookie = __commonJS({
     function syncWrap(method) {
       return function(...args) {
         if (!this.store.synchronous) {
-          throw new Error("CookieJar store is not synchronous; use async API instead.");
+          throw new Error(
+            "CookieJar store is not synchronous; use async API instead."
+          );
         }
         let syncErr, syncResult;
         this[method](...args, (err, result) => {
@@ -17591,7 +18527,7 @@ var require_cookie = __commonJS({
     exports.MemoryCookieStore = MemoryCookieStore;
     exports.parseDate = parseDate;
     exports.formatDate = formatDate;
-    exports.parse = parse2;
+    exports.parse = parse3;
     exports.fromJSON = fromJSON;
     exports.domainMatch = domainMatch;
     exports.defaultPath = defaultPath;
@@ -17714,9 +18650,16 @@ var init_AbortController = __esm({
 });
 
 // node_modules/@azure/abort-controller/dist-esm/src/index.js
+var src_exports = {};
+__export(src_exports, {
+  AbortController: () => AbortController,
+  AbortError: () => AbortError,
+  AbortSignal: () => AbortSignal
+});
 var init_src = __esm({
   "node_modules/@azure/abort-controller/dist-esm/src/index.js"() {
     init_AbortController();
+    init_AbortSignal();
   }
 });
 
@@ -29574,8 +30517,8 @@ var require_URL = __commonJS({
     var utils = require_utils2();
     var Impl = require_URL_impl();
     var impl = utils.implSymbol;
-    function URL3(url2) {
-      if (!this || this[impl] || !(this instanceof URL3)) {
+    function URL4(url2) {
+      if (!this || this[impl] || !(this instanceof URL4)) {
         throw new TypeError("Failed to construct 'URL': Please use the 'new' operator, this DOM object constructor cannot be called as a function.");
       }
       if (arguments.length < 1) {
@@ -29591,7 +30534,7 @@ var require_URL = __commonJS({
       }
       module2.exports.setup(this, args);
     }
-    URL3.prototype.toJSON = function toJSON() {
+    URL4.prototype.toJSON = function toJSON() {
       if (!this || !module2.exports.is(this)) {
         throw new TypeError("Illegal invocation");
       }
@@ -29601,7 +30544,7 @@ var require_URL = __commonJS({
       }
       return this[impl].toJSON.apply(this[impl], args);
     };
-    Object.defineProperty(URL3.prototype, "href", {
+    Object.defineProperty(URL4.prototype, "href", {
       get() {
         return this[impl].href;
       },
@@ -29612,20 +30555,20 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    URL3.prototype.toString = function() {
+    URL4.prototype.toString = function() {
       if (!this || !module2.exports.is(this)) {
         throw new TypeError("Illegal invocation");
       }
       return this.href;
     };
-    Object.defineProperty(URL3.prototype, "origin", {
+    Object.defineProperty(URL4.prototype, "origin", {
       get() {
         return this[impl].origin;
       },
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL3.prototype, "protocol", {
+    Object.defineProperty(URL4.prototype, "protocol", {
       get() {
         return this[impl].protocol;
       },
@@ -29636,7 +30579,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL3.prototype, "username", {
+    Object.defineProperty(URL4.prototype, "username", {
       get() {
         return this[impl].username;
       },
@@ -29647,7 +30590,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL3.prototype, "password", {
+    Object.defineProperty(URL4.prototype, "password", {
       get() {
         return this[impl].password;
       },
@@ -29658,7 +30601,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL3.prototype, "host", {
+    Object.defineProperty(URL4.prototype, "host", {
       get() {
         return this[impl].host;
       },
@@ -29669,7 +30612,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL3.prototype, "hostname", {
+    Object.defineProperty(URL4.prototype, "hostname", {
       get() {
         return this[impl].hostname;
       },
@@ -29680,7 +30623,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL3.prototype, "port", {
+    Object.defineProperty(URL4.prototype, "port", {
       get() {
         return this[impl].port;
       },
@@ -29691,7 +30634,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL3.prototype, "pathname", {
+    Object.defineProperty(URL4.prototype, "pathname", {
       get() {
         return this[impl].pathname;
       },
@@ -29702,7 +30645,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL3.prototype, "search", {
+    Object.defineProperty(URL4.prototype, "search", {
       get() {
         return this[impl].search;
       },
@@ -29713,7 +30656,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL3.prototype, "hash", {
+    Object.defineProperty(URL4.prototype, "hash", {
       get() {
         return this[impl].hash;
       },
@@ -29729,7 +30672,7 @@ var require_URL = __commonJS({
         return !!obj && obj[impl] instanceof Impl.implementation;
       },
       create(constructorArgs, privateData) {
-        let obj = Object.create(URL3.prototype);
+        let obj = Object.create(URL4.prototype);
         this.setup(obj, constructorArgs, privateData);
         return obj;
       },
@@ -29740,10 +30683,10 @@ var require_URL = __commonJS({
         obj[impl] = new Impl.implementation(constructorArgs, privateData);
         obj[impl][utils.wrapperSymbol] = obj;
       },
-      interface: URL3,
+      interface: URL4,
       expose: {
-        Window: { URL: URL3 },
-        Worker: { URL: URL3 }
+        Window: { URL: URL4 },
+        Worker: { URL: URL4 }
       }
     };
   }
@@ -30067,7 +31010,7 @@ function createHeadersLenient(obj) {
 }
 function parseURL(urlStr) {
   if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.exec(urlStr)) {
-    urlStr = new URL2(urlStr).toString();
+    urlStr = new URL3(urlStr).toString();
   }
   return parse_url(urlStr);
 }
@@ -30308,7 +31251,7 @@ function fetch(url2, opts) {
     writeToStream(req, request);
   });
 }
-var import_stream, import_http, import_url3, import_whatwg_url, import_https, import_zlib, Readable, BUFFER, TYPE, Blob2, convert, INTERNALS, PassThrough, invalidTokenRegex, invalidHeaderCharRegex, MAP, Headers, INTERNAL, HeadersIteratorPrototype, INTERNALS$1, STATUS_CODES, Response, INTERNALS$2, URL2, parse_url, format_url, streamDestructionSupported, Request, URL$1, PassThrough$1, isDomainOrSubdomain, lib_default;
+var import_stream, import_http, import_url3, import_whatwg_url, import_https, import_zlib, Readable, BUFFER, TYPE, Blob2, convert, INTERNALS, PassThrough, invalidTokenRegex, invalidHeaderCharRegex, MAP, Headers, INTERNAL, HeadersIteratorPrototype, INTERNALS$1, STATUS_CODES, Response, INTERNALS$2, URL3, parse_url, format_url, streamDestructionSupported, Request, URL$1, PassThrough$1, isDomainOrSubdomain, lib_default;
 var init_lib = __esm({
   "node_modules/node-fetch/lib/index.mjs"() {
     import_stream = __toESM(require("stream"), 1);
@@ -30441,11 +31384,14 @@ var init_lib = __esm({
       blob() {
         let ct = this.headers && this.headers.get("content-type") || "";
         return consumeBody.call(this).then(function(buf) {
-          return Object.assign(new Blob2([], {
-            type: ct.toLowerCase()
-          }), {
-            [BUFFER]: buf
-          });
+          return Object.assign(
+            new Blob2([], {
+              type: ct.toLowerCase()
+            }),
+            {
+              [BUFFER]: buf
+            }
+          );
         });
       },
       json() {
@@ -30721,7 +31667,7 @@ var init_lib = __esm({
       configurable: true
     });
     INTERNALS$2 = Symbol("Request internals");
-    URL2 = import_url3.default.URL || import_whatwg_url.default.URL;
+    URL3 = import_url3.default.URL || import_whatwg_url.default.URL;
     parse_url = import_url3.default.parse;
     format_url = import_url3.default.format;
     streamDestructionSupported = "destroy" in import_stream.default.Readable.prototype;
@@ -31317,7 +32263,7 @@ var require_XMLDOMImplementation = __commonJS({
       module2.exports = XMLDOMImplementation = function() {
         function XMLDOMImplementation2() {
         }
-        XMLDOMImplementation2.prototype.hasFeature = function(feature, version2) {
+        XMLDOMImplementation2.prototype.hasFeature = function(feature, version3) {
           return true;
         };
         XMLDOMImplementation2.prototype.createDocumentType = function(qualifiedName, publicId, systemId) {
@@ -31329,7 +32275,7 @@ var require_XMLDOMImplementation = __commonJS({
         XMLDOMImplementation2.prototype.createHTMLDocument = function(title) {
           throw new Error("This DOM method is not implemented.");
         };
-        XMLDOMImplementation2.prototype.getFeature = function(feature, version2) {
+        XMLDOMImplementation2.prototype.getFeature = function(feature, version3) {
           throw new Error("This DOM method is not implemented.");
         };
         return XMLDOMImplementation2;
@@ -32067,17 +33013,17 @@ var require_XMLDeclaration = __commonJS({
       NodeType = require_NodeType();
       module2.exports = XMLDeclaration = function(superClass) {
         extend2(XMLDeclaration2, superClass);
-        function XMLDeclaration2(parent, version2, encoding, standalone) {
+        function XMLDeclaration2(parent, version3, encoding, standalone) {
           var ref;
           XMLDeclaration2.__super__.constructor.call(this, parent);
-          if (isObject2(version2)) {
-            ref = version2, version2 = ref.version, encoding = ref.encoding, standalone = ref.standalone;
+          if (isObject2(version3)) {
+            ref = version3, version3 = ref.version, encoding = ref.encoding, standalone = ref.standalone;
           }
-          if (!version2) {
-            version2 = "1.0";
+          if (!version3) {
+            version3 = "1.0";
           }
           this.type = NodeType.Declaration;
-          this.version = this.stringify.xmlVersion(version2);
+          this.version = this.stringify.xmlVersion(version3);
           if (encoding != null) {
             this.encoding = this.stringify.xmlEncoding(encoding);
           }
@@ -33143,10 +34089,10 @@ var require_XMLNode = __commonJS({
           Array.prototype.push.apply(this.parent.children, removed);
           return this;
         };
-        XMLNode2.prototype.declaration = function(version2, encoding, standalone) {
+        XMLNode2.prototype.declaration = function(version3, encoding, standalone) {
           var doc, xmldec;
           doc = this.document();
-          xmldec = new XMLDeclaration(doc, version2, encoding, standalone);
+          xmldec = new XMLDeclaration(doc, version3, encoding, standalone);
           if (doc.children.length === 0) {
             doc.children.unshift(xmldec);
           } else if (doc.children[0].type === NodeType.Declaration) {
@@ -33270,8 +34216,8 @@ var require_XMLNode = __commonJS({
         XMLNode2.prototype.doc = function() {
           return this.document();
         };
-        XMLNode2.prototype.dec = function(version2, encoding, standalone) {
-          return this.declaration(version2, encoding, standalone);
+        XMLNode2.prototype.dec = function(version3, encoding, standalone) {
+          return this.declaration(version3, encoding, standalone);
         };
         XMLNode2.prototype.e = function(name, attributes, text) {
           return this.element(name, attributes, text);
@@ -33318,7 +34264,7 @@ var require_XMLNode = __commonJS({
         XMLNode2.prototype.normalize = function() {
           throw new Error("This DOM method is not implemented." + this.debugInfo());
         };
-        XMLNode2.prototype.isSupported = function(feature, version2) {
+        XMLNode2.prototype.isSupported = function(feature, version3) {
           return true;
         };
         XMLNode2.prototype.hasAttributes = function() {
@@ -33374,7 +34320,7 @@ var require_XMLNode = __commonJS({
           }
           return true;
         };
-        XMLNode2.prototype.getFeature = function(feature, version2) {
+        XMLNode2.prototype.getFeature = function(feature, version3) {
           throw new Error("This DOM method is not implemented." + this.debugInfo());
         };
         XMLNode2.prototype.setUserData = function(key, data, handler) {
@@ -34579,13 +35525,13 @@ var require_XMLDocumentCB = __commonJS({
           }
           return this;
         };
-        XMLDocumentCB2.prototype.declaration = function(version2, encoding, standalone) {
+        XMLDocumentCB2.prototype.declaration = function(version3, encoding, standalone) {
           var node;
           this.openCurrent();
           if (this.documentStarted) {
             throw new Error("declaration() must be the first node.");
           }
-          node = new XMLDeclaration(this, version2, encoding, standalone);
+          node = new XMLDeclaration(this, version3, encoding, standalone);
           this.onData(this.writer.declaration(node, this.writerOptions, this.currentLevel + 1), this.currentLevel + 1);
           return this;
         };
@@ -34757,8 +35703,8 @@ var require_XMLDocumentCB = __commonJS({
         XMLDocumentCB2.prototype.ins = function(target, value) {
           return this.instruction(target, value);
         };
-        XMLDocumentCB2.prototype.dec = function(version2, encoding, standalone) {
-          return this.declaration(version2, encoding, standalone);
+        XMLDocumentCB2.prototype.dec = function(version3, encoding, standalone) {
+          return this.declaration(version3, encoding, standalone);
         };
         XMLDocumentCB2.prototype.dtd = function(root, pubID, sysID) {
           return this.doctype(root, pubID, sysID);
@@ -35818,9 +36764,15 @@ var require_sax = __commonJS({
           var local = qn.local;
           if (prefix2 === "xmlns") {
             if (local === "xml" && parser.attribValue !== XML_NAMESPACE) {
-              strictFail(parser, "xml: prefix must be bound to " + XML_NAMESPACE + "\nActual: " + parser.attribValue);
+              strictFail(
+                parser,
+                "xml: prefix must be bound to " + XML_NAMESPACE + "\nActual: " + parser.attribValue
+              );
             } else if (local === "xmlns" && parser.attribValue !== XMLNS_NAMESPACE) {
-              strictFail(parser, "xmlns: prefix must be bound to " + XMLNS_NAMESPACE + "\nActual: " + parser.attribValue);
+              strictFail(
+                parser,
+                "xmlns: prefix must be bound to " + XMLNS_NAMESPACE + "\nActual: " + parser.attribValue
+              );
             } else {
               var tag = parser.tag;
               var parent = parser.tags[parser.tags.length - 1] || parser;
@@ -36014,7 +36966,10 @@ var require_sax = __commonJS({
           throw this.error;
         }
         if (parser.closed) {
-          return error(parser, "Cannot write after close. Assign an onready handler.");
+          return error(
+            parser,
+            "Cannot write after close. Assign an onready handler."
+          );
         }
         if (chunk === null) {
           return end(parser);
@@ -36133,7 +37088,10 @@ var require_sax = __commonJS({
               } else if ((parser.sgmlDecl + c).toUpperCase() === DOCTYPE) {
                 parser.state = S.DOCTYPE;
                 if (parser.doctype || parser.sawRoot) {
-                  strictFail(parser, "Inappropriately located doctype declaration");
+                  strictFail(
+                    parser,
+                    "Inappropriately located doctype declaration"
+                  );
                 }
                 parser.doctype = "";
                 parser.sgmlDecl = "";
@@ -37145,7 +38103,7 @@ function deserializeResponseBody(jsonContentTypes, xmlContentTypes, response, op
     includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
     xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
   };
-  return parse(jsonContentTypes, xmlContentTypes, response, updatedOptions).then((parsedResponse) => {
+  return parse2(jsonContentTypes, xmlContentTypes, response, updatedOptions).then((parsedResponse) => {
     if (!shouldDeserializeResponse(parsedResponse)) {
       return parsedResponse;
     }
@@ -37236,7 +38194,7 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
   }
   return { error, shouldReturnResponse: false };
 }
-function parse(jsonContentTypes, xmlContentTypes, operationResponse, opts) {
+function parse2(jsonContentTypes, xmlContentTypes, operationResponse, opts) {
   var _a;
   const errorHandler = (err) => {
     const msg = `Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`;
@@ -37756,7 +38714,11 @@ function createTokenCycler(credential, scopes, tokenCyclerOptions) {
     var _a;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
-      refreshWorker = beginRefresh(tryGetAccessToken, options.retryIntervalInMs, (_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : Date.now()).then((_token) => {
+      refreshWorker = beginRefresh(
+        tryGetAccessToken,
+        options.retryIntervalInMs,
+        (_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : Date.now()
+      ).then((_token) => {
         refreshWorker = null;
         token = _token;
         return token;
@@ -38298,7 +39260,7 @@ var init_platform = __esm({
 
 // node_modules/@opentelemetry/api/build/esm/version.js
 var VERSION;
-var init_version = __esm({
+var init_version2 = __esm({
   "node_modules/@opentelemetry/api/build/esm/version.js"() {
     VERSION = "1.1.0";
   }
@@ -38371,7 +39333,7 @@ function _makeCompatibilityCheck(ownVersion) {
 var re, isCompatible;
 var init_semver = __esm({
   "node_modules/@opentelemetry/api/build/esm/internal/semver.js"() {
-    init_version();
+    init_version2();
     re = /^(\d+)\.(\d+)\.(\d+)(-(.+))?$/;
     isCompatible = _makeCompatibilityCheck(VERSION);
   }
@@ -38419,7 +39381,7 @@ var major, GLOBAL_OPENTELEMETRY_API_KEY, _global;
 var init_global_utils = __esm({
   "node_modules/@opentelemetry/api/build/esm/internal/global-utils.js"() {
     init_platform();
-    init_version();
+    init_version2();
     init_semver();
     major = VERSION.split(".")[0];
     GLOBAL_OPENTELEMETRY_API_KEY = Symbol.for("opentelemetry.js.api." + major);
@@ -39075,10 +40037,10 @@ var init_ProxyTracer = __esm({
     init_NoopTracer();
     NOOP_TRACER = new NoopTracer();
     ProxyTracer = function() {
-      function ProxyTracer2(_provider, name, version2, options) {
+      function ProxyTracer2(_provider, name, version3, options) {
         this._provider = _provider;
         this.name = name;
-        this.version = version2;
+        this.version = version3;
         this.options = options;
       }
       ProxyTracer2.prototype.startSpan = function(name, options, context4) {
@@ -39130,9 +40092,9 @@ var init_ProxyTracerProvider = __esm({
     ProxyTracerProvider = function() {
       function ProxyTracerProvider2() {
       }
-      ProxyTracerProvider2.prototype.getTracer = function(name, version2, options) {
+      ProxyTracerProvider2.prototype.getTracer = function(name, version3, options) {
         var _a;
-        return (_a = this.getDelegateTracer(name, version2, options)) !== null && _a !== void 0 ? _a : new ProxyTracer(this, name, version2, options);
+        return (_a = this.getDelegateTracer(name, version3, options)) !== null && _a !== void 0 ? _a : new ProxyTracer(this, name, version3, options);
       };
       ProxyTracerProvider2.prototype.getDelegate = function() {
         var _a;
@@ -39141,9 +40103,9 @@ var init_ProxyTracerProvider = __esm({
       ProxyTracerProvider2.prototype.setDelegate = function(delegate) {
         this._delegate = delegate;
       };
-      ProxyTracerProvider2.prototype.getDelegateTracer = function(name, version2, options) {
+      ProxyTracerProvider2.prototype.getDelegateTracer = function(name, version3, options) {
         var _a;
-        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version2, options);
+        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version3, options);
       };
       return ProxyTracerProvider2;
     }();
@@ -39376,8 +40338,8 @@ var init_trace = __esm({
       TraceAPI2.prototype.getTracerProvider = function() {
         return getGlobal(API_NAME3) || this._proxyTracerProvider;
       };
-      TraceAPI2.prototype.getTracer = function(name, version2) {
-        return this.getTracerProvider().getTracer(name, version2);
+      TraceAPI2.prototype.getTracer = function(name, version3) {
+        return this.getTracerProvider().getTracer(name, version3);
       };
       TraceAPI2.prototype.disable = function() {
         unregisterGlobal(API_NAME3, DiagAPI.instance());
@@ -39530,8 +40492,8 @@ function setSpan2(context4, span) {
 function isSpanContextValid2(context4) {
   return trace.isSpanContextValid(context4);
 }
-function getTracer(name, version2) {
-  return trace.getTracer(name || "azure/core-tracing", version2);
+function getTracer(name, version3) {
+  return trace.getTracer(name || "azure/core-tracing", version3);
 }
 var SpanKind2, context3, SpanStatusCode2;
 var init_interfaces = __esm({
@@ -48617,7 +49579,7 @@ var init_mappers = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/models/parameters.js
-var contentType, blobServiceProperties, accept, url, restype, comp, timeoutInSeconds, version, requestId, accept1, comp1, comp2, prefix, marker, maxPageSize, include, keyInfo, comp3, restype1, body, comp4, contentLength, multipartContentType, comp5, where, restype2, metadata, access, defaultEncryptionScope, preventEncryptionScopeOverride, leaseId, ifModifiedSince, ifUnmodifiedSince, comp6, comp7, containerAcl, comp8, deletedContainerName, deletedContainerVersion, comp9, sourceContainerName, sourceLeaseId, comp10, action, duration, proposedLeaseId, action1, leaseId1, action2, action3, breakPeriod, action4, proposedLeaseId1, include1, delimiter, snapshot, versionId, range, rangeGetContentMD5, rangeGetContentCRC64, encryptionKey, encryptionKeySha256, encryptionAlgorithm, ifMatch, ifNoneMatch, ifTags, deleteSnapshots, blobDeleteType, comp11, expiryOptions, expiresOn, blobCacheControl, blobContentType, blobContentMD5, blobContentEncoding, blobContentLanguage, blobContentDisposition, comp12, immutabilityPolicyExpiry, immutabilityPolicyMode, comp13, legalHold, encryptionScope, comp14, tier, rehydratePriority, sourceIfModifiedSince, sourceIfUnmodifiedSince, sourceIfMatch, sourceIfNoneMatch, sourceIfTags, copySource, blobTagsString, sealBlob, legalHold1, xMsRequiresSync, sourceContentMD5, copySourceAuthorization, copySourceTags, comp15, copyActionAbortConstant, copyId, comp16, tier1, queryRequest, comp17, comp18, tags, transactionalContentMD5, transactionalContentCrc64, blobType, blobContentLength, blobSequenceNumber, contentType1, body1, accept2, comp19, pageWrite, ifSequenceNumberLessThanOrEqualTo, ifSequenceNumberLessThan, ifSequenceNumberEqualTo, pageWrite1, sourceUrl, sourceRange, sourceContentCrc64, range1, comp20, prevsnapshot, prevSnapshotUrl, sequenceNumberAction, comp21, blobType1, comp22, maxSize, appendPosition, sourceRange1, comp23, blobType2, copySourceBlobProperties, comp24, blockId, blocks, comp25, listType;
+var contentType, blobServiceProperties, accept, url, restype, comp, timeoutInSeconds, version2, requestId, accept1, comp1, comp2, prefix, marker, maxPageSize, include, keyInfo, comp3, restype1, body, comp4, contentLength, multipartContentType, comp5, where, restype2, metadata, access, defaultEncryptionScope, preventEncryptionScopeOverride, leaseId, ifModifiedSince, ifUnmodifiedSince, comp6, comp7, containerAcl, comp8, deletedContainerName, deletedContainerVersion, comp9, sourceContainerName, sourceLeaseId, comp10, action, duration, proposedLeaseId, action1, leaseId1, action2, action3, breakPeriod, action4, proposedLeaseId1, include1, delimiter, snapshot, versionId, range, rangeGetContentMD5, rangeGetContentCRC64, encryptionKey, encryptionKeySha256, encryptionAlgorithm, ifMatch, ifNoneMatch, ifTags, deleteSnapshots, blobDeleteType, comp11, expiryOptions, expiresOn, blobCacheControl, blobContentType, blobContentMD5, blobContentEncoding, blobContentLanguage, blobContentDisposition, comp12, immutabilityPolicyExpiry, immutabilityPolicyMode, comp13, legalHold, encryptionScope, comp14, tier, rehydratePriority, sourceIfModifiedSince, sourceIfUnmodifiedSince, sourceIfMatch, sourceIfNoneMatch, sourceIfTags, copySource, blobTagsString, sealBlob, legalHold1, xMsRequiresSync, sourceContentMD5, copySourceAuthorization, copySourceTags, comp15, copyActionAbortConstant, copyId, comp16, tier1, queryRequest, comp17, comp18, tags, transactionalContentMD5, transactionalContentCrc64, blobType, blobContentLength, blobSequenceNumber, contentType1, body1, accept2, comp19, pageWrite, ifSequenceNumberLessThanOrEqualTo, ifSequenceNumberLessThan, ifSequenceNumberEqualTo, pageWrite1, sourceUrl, sourceRange, sourceContentCrc64, range1, comp20, prevsnapshot, prevSnapshotUrl, sequenceNumberAction, comp21, blobType1, comp22, maxSize, appendPosition, sourceRange1, comp23, blobType2, copySourceBlobProperties, comp24, blockId, blocks, comp25, listType;
 var init_parameters = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/models/parameters.js"() {
     init_coreHttp();
@@ -48695,10 +49657,10 @@ var init_parameters = __esm({
         }
       }
     };
-    version = {
+    version2 = {
       parameterPath: "version",
       mapper: {
-        defaultValue: "2021-06-08",
+        defaultValue: "2021-08-06",
         isConstant: true,
         serializedName: "x-ms-version",
         type: {
@@ -50311,7 +51273,7 @@ var init_service = __esm({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId
       ],
       isXML: true,
@@ -50339,7 +51301,7 @@ var init_service = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -50366,7 +51328,7 @@ var init_service = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -50396,7 +51358,7 @@ var init_service = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -50426,7 +51388,7 @@ var init_service = __esm({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId
       ],
       isXML: true,
@@ -50448,7 +51410,7 @@ var init_service = __esm({
       },
       queryParameters: [comp, restype1],
       urlParameters: [url],
-      headerParameters: [version, accept1],
+      headerParameters: [version2, accept1],
       isXML: true,
       serializer: xmlSerializer
     };
@@ -50474,7 +51436,7 @@ var init_service = __esm({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         contentLength,
         multipartContentType
@@ -50506,7 +51468,7 @@ var init_service = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -50661,7 +51623,7 @@ var init_container = __esm({
       queryParameters: [timeoutInSeconds, restype2],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -50687,7 +51649,7 @@ var init_container = __esm({
       queryParameters: [timeoutInSeconds, restype2],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId
@@ -50710,7 +51672,7 @@ var init_container = __esm({
       queryParameters: [timeoutInSeconds, restype2],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -50739,7 +51701,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -50780,7 +51742,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId
@@ -50810,7 +51772,7 @@ var init_container = __esm({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         access,
         leaseId,
@@ -50841,7 +51803,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         deletedContainerName,
@@ -50869,7 +51831,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         sourceContainerName,
@@ -50904,7 +51866,7 @@ var init_container = __esm({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         contentLength,
         multipartContentType
@@ -50937,7 +51899,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -50963,7 +51925,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -50994,7 +51956,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -51024,7 +51986,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -51054,7 +52016,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -51084,7 +52046,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -51120,7 +52082,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -51152,7 +52114,7 @@ var init_container = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -51173,7 +52135,7 @@ var init_container = __esm({
       },
       queryParameters: [comp, restype1],
       urlParameters: [url],
-      headerParameters: [version, accept1],
+      headerParameters: [version2, accept1],
       isXML: true,
       serializer: xmlSerializer2
     };
@@ -51377,7 +52339,7 @@ var init_blob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -51415,7 +52377,7 @@ var init_blob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -51451,7 +52413,7 @@ var init_blob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -51480,7 +52442,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp8],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -51502,7 +52464,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp11],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         expiryOptions,
@@ -51526,7 +52488,7 @@ var init_blob = __esm({
       queryParameters: [comp, timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -51560,7 +52522,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp12],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifUnmodifiedSince,
@@ -51585,7 +52547,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp12],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -51607,7 +52569,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp13],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         legalHold
@@ -51630,7 +52592,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp6],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -51663,7 +52625,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -51693,7 +52655,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -51722,7 +52684,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -51751,7 +52713,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -51781,7 +52743,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -51810,7 +52772,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds, comp14],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -51843,7 +52805,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -51885,7 +52847,7 @@ var init_blob = __esm({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -51933,7 +52895,7 @@ var init_blob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -51965,7 +52927,7 @@ var init_blob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -51990,7 +52952,7 @@ var init_blob = __esm({
       },
       queryParameters: [comp, restype1],
       urlParameters: [url],
-      headerParameters: [version, accept1],
+      headerParameters: [version2, accept1],
       isXML: true,
       serializer: xmlSerializer3
     };
@@ -52027,7 +52989,7 @@ var init_blob = __esm({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         leaseId,
         ifModifiedSince,
@@ -52065,7 +53027,7 @@ var init_blob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -52096,7 +53058,7 @@ var init_blob = __esm({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         leaseId,
         ifTags,
@@ -52206,7 +53168,7 @@ var init_pageBlob = __esm({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -52255,7 +53217,7 @@ var init_pageBlob = __esm({
       queryParameters: [timeoutInSeconds, comp19],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         contentLength,
         leaseId,
@@ -52296,7 +53258,7 @@ var init_pageBlob = __esm({
       queryParameters: [timeoutInSeconds, comp19],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -52334,7 +53296,7 @@ var init_pageBlob = __esm({
       queryParameters: [timeoutInSeconds, comp19],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -52388,7 +53350,7 @@ var init_pageBlob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -52425,7 +53387,7 @@ var init_pageBlob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -52455,7 +53417,7 @@ var init_pageBlob = __esm({
       queryParameters: [comp, timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -52488,7 +53450,7 @@ var init_pageBlob = __esm({
       queryParameters: [comp, timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -52518,7 +53480,7 @@ var init_pageBlob = __esm({
       queryParameters: [timeoutInSeconds, comp21],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -52592,7 +53554,7 @@ var init_appendBlob = __esm({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -52638,7 +53600,7 @@ var init_appendBlob = __esm({
       queryParameters: [timeoutInSeconds, comp22],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         contentLength,
         leaseId,
@@ -52676,7 +53638,7 @@ var init_appendBlob = __esm({
       queryParameters: [timeoutInSeconds, comp22],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -52721,7 +53683,7 @@ var init_appendBlob = __esm({
       queryParameters: [timeoutInSeconds, comp23],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -52815,7 +53777,7 @@ var init_blockBlob = __esm({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         contentLength,
         metadata,
@@ -52863,7 +53825,7 @@ var init_blockBlob = __esm({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -52922,7 +53884,7 @@ var init_blockBlob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         contentLength,
         leaseId,
@@ -52957,7 +53919,7 @@ var init_blockBlob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -52997,7 +53959,7 @@ var init_blockBlob = __esm({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         metadata,
         leaseId,
@@ -53050,7 +54012,7 @@ var init_blockBlob = __esm({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -53087,8 +54049,8 @@ var init_log3 = __esm({
 var SDK_VERSION, SERVICE_VERSION, BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES, BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES, BLOCK_BLOB_MAX_BLOCKS, DEFAULT_BLOCK_BUFFER_SIZE_BYTES, DEFAULT_BLOB_DOWNLOAD_BLOCK_BYTES, DEFAULT_MAX_DOWNLOAD_RETRY_REQUESTS, StorageOAuthScopes, URLConstants, HTTPURLConnection, HeaderConstants, ETagNone, ETagAny, SIZE_1_MB, BATCH_MAX_REQUEST, BATCH_MAX_PAYLOAD_IN_BYTES, HTTP_LINE_ENDING, HTTP_VERSION_1_1, EncryptionAlgorithmAES25, DevelopmentConnectionString, StorageBlobLoggingAllowedHeaderNames, StorageBlobLoggingAllowedQueryParameters, BlobUsesCustomerSpecifiedEncryptionMsg, BlobDoesNotUseCustomerSpecifiedEncryption;
 var init_constants2 = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/constants.js"() {
-    SDK_VERSION = "12.10.0";
-    SERVICE_VERSION = "2021-06-08";
+    SDK_VERSION = "12.11.0";
+    SERVICE_VERSION = "2021-08-06";
     BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES = 256 * 1024 * 1024;
     BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES = 4e3 * 1024 * 1024;
     BLOCK_BLOB_MAX_BLOCKS = 5e4;
@@ -54360,7 +55322,11 @@ function createTokenCycler2(credential, scopes, tokenCyclerOptions) {
     var _a;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
-      refreshWorker = beginRefresh2(tryGetAccessToken, options.retryIntervalInMs, (_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : Date.now()).then((_token) => {
+      refreshWorker = beginRefresh2(
+        tryGetAccessToken,
+        options.retryIntervalInMs,
+        (_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : Date.now()
+      ).then((_token) => {
         refreshWorker = null;
         token = _token;
         return token;
@@ -54619,10 +55585,10 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/credentials/StorageSharedKeyCredential.js
-var import_crypto2, StorageSharedKeyCredential;
+var import_crypto5, StorageSharedKeyCredential;
 var init_StorageSharedKeyCredential = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/credentials/StorageSharedKeyCredential.js"() {
-    import_crypto2 = require("crypto");
+    import_crypto5 = require("crypto");
     init_StorageSharedKeyCredentialPolicy();
     init_Credential();
     StorageSharedKeyCredential = class extends Credential {
@@ -54635,7 +55601,7 @@ var init_StorageSharedKeyCredential = __esm({
         return new StorageSharedKeyCredentialPolicy(nextPolicy, options, this);
       }
       computeHMACSHA256(stringToSign) {
-        return (0, import_crypto2.createHmac)("sha256", this.accountKey).update(stringToSign, "utf8").digest("base64");
+        return (0, import_crypto5.createHmac)("sha256", this.accountKey).update(stringToSign, "utf8").digest("base64");
       }
     };
   }
@@ -54647,7 +55613,7 @@ var init_storageClientContext = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/storageClientContext.js"() {
     init_coreHttp();
     packageName = "azure-storage-blob";
-    packageVersion = "12.10.0";
+    packageVersion = "12.11.0";
     StorageClientContext = class extends ServiceClient {
       constructor(url2, options) {
         if (url2 === void 0) {
@@ -54664,7 +55630,7 @@ var init_storageClientContext = __esm({
         this.requestContentType = "application/json; charset=utf-8";
         this.baseUri = options.endpoint || "{url}";
         this.url = url2;
-        this.version = options.version || "2021-06-08";
+        this.version = options.version || "2021-08-06";
       }
     };
   }
@@ -55019,10 +55985,10 @@ var init_ContainerSASPermissions = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/credentials/UserDelegationKeyCredential.js
-var import_crypto3, UserDelegationKeyCredential;
+var import_crypto6, UserDelegationKeyCredential;
 var init_UserDelegationKeyCredential = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/credentials/UserDelegationKeyCredential.js"() {
-    import_crypto3 = require("crypto");
+    import_crypto6 = require("crypto");
     UserDelegationKeyCredential = class {
       constructor(accountName, userDelegationKey) {
         this.accountName = accountName;
@@ -55030,7 +55996,7 @@ var init_UserDelegationKeyCredential = __esm({
         this.key = Buffer.from(userDelegationKey.value, "base64");
       }
       computeHMACSHA256(stringToSign) {
-        return (0, import_crypto3.createHmac)("sha256", this.key).update(stringToSign, "utf8").digest("base64");
+        return (0, import_crypto6.createHmac)("sha256", this.key).update(stringToSign, "utf8").digest("base64");
       }
     };
   }
@@ -55056,8 +56022,8 @@ var init_SASQueryParameters = __esm({
       SASProtocol2["HttpsAndHttp"] = "https,http";
     })(SASProtocol || (SASProtocol = {}));
     SASQueryParameters = class {
-      constructor(version2, signature, permissionsOrOptions, services, resourceTypes, protocol, startsOn, expiresOn2, ipRange, identifier, resource, cacheControl, contentDisposition, contentEncoding, contentLanguage, contentType2, userDelegationKey, preauthorizedAgentObjectId, correlationId, encryptionScope2) {
-        this.version = version2;
+      constructor(version3, signature, permissionsOrOptions, services, resourceTypes, protocol, startsOn, expiresOn2, ipRange, identifier, resource, cacheControl, contentDisposition, contentEncoding, contentLanguage, contentType2, userDelegationKey, preauthorizedAgentObjectId, correlationId, encryptionScope2) {
+        this.version = version3;
         this.signature = signature;
         if (permissionsOrOptions !== void 0 && typeof permissionsOrOptions !== "string") {
           this.permissions = permissionsOrOptions.permissions;
@@ -55248,7 +56214,7 @@ var init_SASQueryParameters = __esm({
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/sas/BlobSASSignatureValues.js
 function generateBlobSASQueryParameters(blobSASSignatureValues, sharedKeyCredentialOrUserDelegationKey, accountName) {
-  const version2 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
+  const version3 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
   const sharedKeyCredential = sharedKeyCredentialOrUserDelegationKey instanceof StorageSharedKeyCredential ? sharedKeyCredentialOrUserDelegationKey : void 0;
   let userDelegationKeyCredential;
   if (sharedKeyCredential === void 0 && accountName !== void 0) {
@@ -55257,25 +56223,25 @@ function generateBlobSASQueryParameters(blobSASSignatureValues, sharedKeyCredent
   if (sharedKeyCredential === void 0 && userDelegationKeyCredential === void 0) {
     throw TypeError("Invalid sharedKeyCredential, userDelegationKey or accountName.");
   }
-  if (version2 >= "2020-12-06") {
+  if (version3 >= "2020-12-06") {
     if (sharedKeyCredential !== void 0) {
       return generateBlobSASQueryParameters20201206(blobSASSignatureValues, sharedKeyCredential);
     } else {
       return generateBlobSASQueryParametersUDK20201206(blobSASSignatureValues, userDelegationKeyCredential);
     }
   }
-  if (version2 >= "2018-11-09") {
+  if (version3 >= "2018-11-09") {
     if (sharedKeyCredential !== void 0) {
       return generateBlobSASQueryParameters20181109(blobSASSignatureValues, sharedKeyCredential);
     } else {
-      if (version2 >= "2020-02-10") {
+      if (version3 >= "2020-02-10") {
         return generateBlobSASQueryParametersUDK20200210(blobSASSignatureValues, userDelegationKeyCredential);
       } else {
         return generateBlobSASQueryParametersUDK20181109(blobSASSignatureValues, userDelegationKeyCredential);
       }
     }
   }
-  if (version2 >= "2015-04-05") {
+  if (version3 >= "2015-04-05") {
     if (sharedKeyCredential !== void 0) {
       return generateBlobSASQueryParameters20150405(blobSASSignatureValues, sharedKeyCredential);
     } else {
@@ -55570,44 +56536,44 @@ function getCanonicalName(accountName, containerName, blobName) {
   return elements.join("");
 }
 function SASSignatureValuesSanityCheckAndAutofill(blobSASSignatureValues) {
-  const version2 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
-  if (blobSASSignatureValues.snapshotTime && version2 < "2018-11-09") {
+  const version3 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
+  if (blobSASSignatureValues.snapshotTime && version3 < "2018-11-09") {
     throw RangeError("'version' must be >= '2018-11-09' when providing 'snapshotTime'.");
   }
   if (blobSASSignatureValues.blobName === void 0 && blobSASSignatureValues.snapshotTime) {
     throw RangeError("Must provide 'blobName' when providing 'snapshotTime'.");
   }
-  if (blobSASSignatureValues.versionId && version2 < "2019-10-10") {
+  if (blobSASSignatureValues.versionId && version3 < "2019-10-10") {
     throw RangeError("'version' must be >= '2019-10-10' when providing 'versionId'.");
   }
   if (blobSASSignatureValues.blobName === void 0 && blobSASSignatureValues.versionId) {
     throw RangeError("Must provide 'blobName' when providing 'versionId'.");
   }
-  if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.setImmutabilityPolicy && version2 < "2020-08-04") {
+  if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.setImmutabilityPolicy && version3 < "2020-08-04") {
     throw RangeError("'version' must be >= '2020-08-04' when provided 'i' permission.");
   }
-  if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.deleteVersion && version2 < "2019-10-10") {
+  if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.deleteVersion && version3 < "2019-10-10") {
     throw RangeError("'version' must be >= '2019-10-10' when providing 'x' permission.");
   }
-  if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.permanentDelete && version2 < "2019-10-10") {
+  if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.permanentDelete && version3 < "2019-10-10") {
     throw RangeError("'version' must be >= '2019-10-10' when providing 'y' permission.");
   }
-  if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.tag && version2 < "2019-12-12") {
+  if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.tag && version3 < "2019-12-12") {
     throw RangeError("'version' must be >= '2019-12-12' when providing 't' permission.");
   }
-  if (version2 < "2020-02-10" && blobSASSignatureValues.permissions && (blobSASSignatureValues.permissions.move || blobSASSignatureValues.permissions.execute)) {
+  if (version3 < "2020-02-10" && blobSASSignatureValues.permissions && (blobSASSignatureValues.permissions.move || blobSASSignatureValues.permissions.execute)) {
     throw RangeError("'version' must be >= '2020-02-10' when providing the 'm' or 'e' permission.");
   }
-  if (version2 < "2021-04-10" && blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.filterByTags) {
+  if (version3 < "2021-04-10" && blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.filterByTags) {
     throw RangeError("'version' must be >= '2021-04-10' when providing the 'f' permission.");
   }
-  if (version2 < "2020-02-10" && (blobSASSignatureValues.preauthorizedAgentObjectId || blobSASSignatureValues.correlationId)) {
+  if (version3 < "2020-02-10" && (blobSASSignatureValues.preauthorizedAgentObjectId || blobSASSignatureValues.correlationId)) {
     throw RangeError("'version' must be >= '2020-02-10' when providing 'preauthorizedAgentObjectId' or 'correlationId'.");
   }
-  if (blobSASSignatureValues.encryptionScope && version2 < "2020-12-06") {
+  if (blobSASSignatureValues.encryptionScope && version3 < "2020-12-06") {
     throw RangeError("'version' must be >= '2020-12-06' when provided 'encryptionScope' in SAS.");
   }
-  blobSASSignatureValues.version = version2;
+  blobSASSignatureValues.version = version3;
   return blobSASSignatureValues;
 }
 var init_BlobSASSignatureValues = __esm({
@@ -56872,23 +57838,17 @@ var init_poller = __esm({
         }
       }
       async pollOnce(options = {}) {
-        try {
-          if (!this.isDone()) {
+        if (!this.isDone()) {
+          try {
             this.operation = await this.operation.update({
               abortSignal: options.abortSignal,
               fireProgress: this.fireProgress.bind(this)
             });
-            if (this.isDone() && this.resolve) {
-              this.resolve(this.operation.state.result);
-            }
+          } catch (e) {
+            this.operation.state.error = e;
           }
-        } catch (e) {
-          this.operation.state.error = e;
-          if (this.reject) {
-            this.reject(e);
-          }
-          throw e;
         }
+        this.processUpdatedState();
       }
       fireProgress(state) {
         for (const callback of this.pollProgressCallbacks) {
@@ -56897,9 +57857,6 @@ var init_poller = __esm({
       }
       async cancelOnce(options = {}) {
         this.operation = await this.operation.cancel(options);
-        if (this.reject) {
-          this.reject(new PollerCancelledError("Poller cancelled"));
-        }
       }
       poll(options = {}) {
         if (!this.pollOncePromise) {
@@ -56911,10 +57868,26 @@ var init_poller = __esm({
         }
         return this.pollOncePromise;
       }
+      processUpdatedState() {
+        if (this.operation.state.error) {
+          this.stopped = true;
+          this.reject(this.operation.state.error);
+          throw this.operation.state.error;
+        }
+        if (this.operation.state.isCancelled) {
+          this.stopped = true;
+          const error = new PollerCancelledError("Poller cancelled");
+          this.reject(error);
+          throw error;
+        } else if (this.isDone() && this.resolve) {
+          this.resolve(this.operation.state.result);
+        }
+      }
       async pollUntilDone() {
         if (this.stopped) {
           this.startPolling().catch(this.reject);
         }
+        this.processUpdatedState();
         return this.promise;
       }
       onProgress(callback) {
@@ -56939,9 +57912,6 @@ var init_poller = __esm({
         return this.stopped;
       }
       cancelOperation(options = {}) {
-        if (!this.stopped) {
-          this.stopped = true;
-        }
         if (!this.cancelPromise) {
           this.cancelPromise = this.cancelOnce(options);
         } else if (options.abortSignal) {
@@ -58610,20 +59580,26 @@ var init_Clients = __esm({
           const blockIDPrefix = generateUuid();
           let transferProgress = 0;
           const blockList = [];
-          const scheduler = new BufferScheduler(stream, bufferSize, maxConcurrency, async (body2, length) => {
-            const blockID = generateBlockID(blockIDPrefix, blockNum);
-            blockList.push(blockID);
-            blockNum++;
-            await this.stageBlock(blockID, body2, length, {
-              conditions: options.conditions,
-              encryptionScope: options.encryptionScope,
-              tracingOptions: updatedOptions.tracingOptions
-            });
-            transferProgress += length;
-            if (options.onProgress) {
-              options.onProgress({ loadedBytes: transferProgress });
-            }
-          }, Math.ceil(maxConcurrency / 4 * 3));
+          const scheduler = new BufferScheduler(
+            stream,
+            bufferSize,
+            maxConcurrency,
+            async (body2, length) => {
+              const blockID = generateBlockID(blockIDPrefix, blockNum);
+              blockList.push(blockID);
+              blockNum++;
+              await this.stageBlock(blockID, body2, length, {
+                conditions: options.conditions,
+                encryptionScope: options.encryptionScope,
+                tracingOptions: updatedOptions.tracingOptions
+              });
+              transferProgress += length;
+              if (options.onProgress) {
+                options.onProgress({ loadedBytes: transferProgress });
+              }
+            },
+            Math.ceil(maxConcurrency / 4 * 3)
+          );
           await scheduler.do();
           return await this.commitBlockList(blockList, Object.assign(Object.assign({}, options), { tracingOptions: Object.assign(Object.assign({}, options.tracingOptions), convertTracingToRequestOptionsBase(updatedOptions)) }));
         } catch (e) {
@@ -60433,30 +61409,30 @@ var init_AccountSASServices = __esm({
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/sas/AccountSASSignatureValues.js
 function generateAccountSASQueryParameters(accountSASSignatureValues, sharedKeyCredential) {
-  const version2 = accountSASSignatureValues.version ? accountSASSignatureValues.version : SERVICE_VERSION;
-  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.setImmutabilityPolicy && version2 < "2020-08-04") {
+  const version3 = accountSASSignatureValues.version ? accountSASSignatureValues.version : SERVICE_VERSION;
+  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.setImmutabilityPolicy && version3 < "2020-08-04") {
     throw RangeError("'version' must be >= '2020-08-04' when provided 'i' permission.");
   }
-  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.deleteVersion && version2 < "2019-10-10") {
+  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.deleteVersion && version3 < "2019-10-10") {
     throw RangeError("'version' must be >= '2019-10-10' when provided 'x' permission.");
   }
-  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.permanentDelete && version2 < "2019-10-10") {
+  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.permanentDelete && version3 < "2019-10-10") {
     throw RangeError("'version' must be >= '2019-10-10' when provided 'y' permission.");
   }
-  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.tag && version2 < "2019-12-12") {
+  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.tag && version3 < "2019-12-12") {
     throw RangeError("'version' must be >= '2019-12-12' when provided 't' permission.");
   }
-  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.filter && version2 < "2019-12-12") {
+  if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.filter && version3 < "2019-12-12") {
     throw RangeError("'version' must be >= '2019-12-12' when provided 'f' permission.");
   }
-  if (accountSASSignatureValues.encryptionScope && version2 < "2020-12-06") {
+  if (accountSASSignatureValues.encryptionScope && version3 < "2020-12-06") {
     throw RangeError("'version' must be >= '2020-12-06' when provided 'encryptionScope' in SAS.");
   }
   const parsedPermissions = AccountSASPermissions.parse(accountSASSignatureValues.permissions.toString());
   const parsedServices = AccountSASServices.parse(accountSASSignatureValues.services).toString();
   const parsedResourceTypes = AccountSASResourceTypes.parse(accountSASSignatureValues.resourceTypes).toString();
   let stringToSign;
-  if (version2 >= "2020-12-06") {
+  if (version3 >= "2020-12-06") {
     stringToSign = [
       sharedKeyCredential.accountName,
       parsedPermissions,
@@ -60466,7 +61442,7 @@ function generateAccountSASQueryParameters(accountSASSignatureValues, sharedKeyC
       truncatedISO8061Date(accountSASSignatureValues.expiresOn, false),
       accountSASSignatureValues.ipRange ? ipRangeToString(accountSASSignatureValues.ipRange) : "",
       accountSASSignatureValues.protocol ? accountSASSignatureValues.protocol : "",
-      version2,
+      version3,
       accountSASSignatureValues.encryptionScope ? accountSASSignatureValues.encryptionScope : "",
       ""
     ].join("\n");
@@ -60480,12 +61456,12 @@ function generateAccountSASQueryParameters(accountSASSignatureValues, sharedKeyC
       truncatedISO8061Date(accountSASSignatureValues.expiresOn, false),
       accountSASSignatureValues.ipRange ? ipRangeToString(accountSASSignatureValues.ipRange) : "",
       accountSASSignatureValues.protocol ? accountSASSignatureValues.protocol : "",
-      version2,
+      version3,
       ""
     ].join("\n");
   }
   const signature = sharedKeyCredential.computeHMACSHA256(stringToSign);
-  return new SASQueryParameters(version2, signature, parsedPermissions.toString(), parsedServices, parsedResourceTypes, accountSASSignatureValues.protocol, accountSASSignatureValues.startsOn, accountSASSignatureValues.expiresOn, accountSASSignatureValues.ipRange, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, accountSASSignatureValues.encryptionScope);
+  return new SASQueryParameters(version3, signature, parsedPermissions.toString(), parsedServices, parsedResourceTypes, accountSASSignatureValues.protocol, accountSASSignatureValues.startsOn, accountSASSignatureValues.expiresOn, accountSASSignatureValues.ipRange, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, accountSASSignatureValues.encryptionScope);
 }
 var init_AccountSASSignatureValues = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/sas/AccountSASSignatureValues.js"() {
@@ -60899,8 +61875,8 @@ var init_generatedModels = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/index.js
-var src_exports = {};
-__export(src_exports, {
+var src_exports2 = {};
+__export(src_exports2, {
   AccountSASPermissions: () => AccountSASPermissions,
   AccountSASResourceTypes: () => AccountSASResourceTypes,
   AccountSASServices: () => AccountSASServices,
@@ -61097,18 +62073,25 @@ var require_requestUtils = __commonJS({
     exports.retry = retry3;
     function retryTypedResponse(name, method, maxAttempts = constants_1.DefaultRetryAttempts, delay3 = constants_1.DefaultRetryDelay) {
       return __awaiter(this, void 0, void 0, function* () {
-        return yield retry3(name, method, (response) => response.statusCode, maxAttempts, delay3, (error) => {
-          if (error instanceof http_client_1.HttpClientError) {
-            return {
-              statusCode: error.statusCode,
-              result: null,
-              headers: {},
-              error
-            };
-          } else {
-            return void 0;
+        return yield retry3(
+          name,
+          method,
+          (response) => response.statusCode,
+          maxAttempts,
+          delay3,
+          (error) => {
+            if (error instanceof http_client_1.HttpClientError) {
+              return {
+                statusCode: error.statusCode,
+                result: null,
+                headers: {},
+                error
+              };
+            } else {
+              return void 0;
+            }
           }
-        });
+        );
       });
     }
     exports.retryTypedResponse = retryTypedResponse;
@@ -61167,7 +62150,7 @@ var require_downloadUtils = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     var core5 = __importStar(require_core());
     var http_client_1 = require_lib();
-    var storage_blob_1 = (init_src10(), __toCommonJS(src_exports));
+    var storage_blob_1 = (init_src10(), __toCommonJS(src_exports2));
     var buffer = __importStar(require("buffer"));
     var fs4 = __importStar(require("fs"));
     var stream = __importStar(require("stream"));
@@ -61175,6 +62158,7 @@ var require_downloadUtils = __commonJS({
     var utils = __importStar(require_cacheUtils());
     var constants_1 = require_constants();
     var requestUtils_1 = require_requestUtils();
+    var abort_controller_1 = (init_src(), __toCommonJS(src_exports));
     function pipeResponseToStream(response, output) {
       return __awaiter(this, void 0, void 0, function* () {
         const pipeline = util3.promisify(stream.pipeline);
@@ -61287,15 +62271,23 @@ var require_downloadUtils = __commonJS({
           const fd = fs4.openSync(archivePath, "w");
           try {
             downloadProgress.startDisplayTimer();
+            const controller = new abort_controller_1.AbortController();
+            const abortSignal2 = controller.signal;
             while (!downloadProgress.isDone()) {
               const segmentStart = downloadProgress.segmentOffset + downloadProgress.segmentSize;
               const segmentSize = Math.min(maxSegmentSize, contentLength2 - segmentStart);
               downloadProgress.nextSegment(segmentSize);
-              const result = yield client.downloadToBuffer(segmentStart, segmentSize, {
+              const result = yield promiseWithTimeout(options.segmentTimeoutInMs || 36e5, client.downloadToBuffer(segmentStart, segmentSize, {
+                abortSignal: abortSignal2,
                 concurrency: options.downloadConcurrency,
                 onProgress: downloadProgress.onProgress()
-              });
-              fs4.writeFileSync(fd, result);
+              }));
+              if (result === "timeout") {
+                controller.abort();
+                throw new Error("Aborting cache download as the download time exceeded the timeout.");
+              } else if (Buffer.isBuffer(result)) {
+                fs4.writeFileSync(fd, result);
+              }
             }
           } finally {
             downloadProgress.stopDisplayTimer();
@@ -61305,6 +62297,16 @@ var require_downloadUtils = __commonJS({
       });
     }
     exports.downloadCacheStorageSDK = downloadCacheStorageSDK;
+    var promiseWithTimeout = (timeoutMs, promise) => __awaiter(void 0, void 0, void 0, function* () {
+      let timeoutHandle;
+      const timeoutPromise = new Promise((resolve) => {
+        timeoutHandle = setTimeout(() => resolve("timeout"), timeoutMs);
+      });
+      return Promise.race([promise, timeoutPromise]).then((result) => {
+        clearTimeout(timeoutHandle);
+        return result;
+      });
+    });
   }
 });
 
@@ -61348,7 +62350,8 @@ var require_options = __commonJS({
       const result = {
         useAzureSdk: true,
         downloadConcurrency: 8,
-        timeoutInMs: 3e4
+        timeoutInMs: 3e4,
+        segmentTimeoutInMs: 36e5
       };
       if (copy) {
         if (typeof copy.useAzureSdk === "boolean") {
@@ -61360,10 +62363,19 @@ var require_options = __commonJS({
         if (typeof copy.timeoutInMs === "number") {
           result.timeoutInMs = copy.timeoutInMs;
         }
+        if (typeof copy.segmentTimeoutInMs === "number") {
+          result.segmentTimeoutInMs = copy.segmentTimeoutInMs;
+        }
+      }
+      const segmentDownloadTimeoutMins = process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"];
+      if (segmentDownloadTimeoutMins && !isNaN(Number(segmentDownloadTimeoutMins)) && isFinite(Number(segmentDownloadTimeoutMins))) {
+        result.segmentTimeoutInMs = Number(segmentDownloadTimeoutMins) * 60 * 1e3;
       }
       core5.debug(`Use Azure SDK: ${result.useAzureSdk}`);
       core5.debug(`Download concurrency: ${result.downloadConcurrency}`);
       core5.debug(`Request timeout (ms): ${result.timeoutInMs}`);
+      core5.debug(`Cache segment download timeout mins env var: ${process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"]}`);
+      core5.debug(`Segment download timeout (ms): ${result.segmentTimeoutInMs}`);
       return result;
     }
     exports.getDownloadOptions = getDownloadOptions;
@@ -61417,7 +62429,7 @@ var require_cacheHttpClient = __commonJS({
     var core5 = __importStar(require_core());
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
-    var crypto4 = __importStar(require("crypto"));
+    var crypto7 = __importStar(require("crypto"));
     var fs4 = __importStar(require("fs"));
     var url_1 = require("url");
     var utils = __importStar(require_cacheUtils());
@@ -61454,14 +62466,14 @@ var require_cacheHttpClient = __commonJS({
     function getCacheVersion(paths, compressionMethod) {
       const components = paths.concat(!compressionMethod || compressionMethod === constants_1.CompressionMethod.Gzip ? [] : [compressionMethod]);
       components.push(versionSalt);
-      return crypto4.createHash("sha256").update(components.join("|")).digest("hex");
+      return crypto7.createHash("sha256").update(components.join("|")).digest("hex");
     }
     exports.getCacheVersion = getCacheVersion;
     function getCacheEntry(keys, paths, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version2 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
-        const resource = `cache?keys=${encodeURIComponent(keys.join(","))}&version=${version2}`;
+        const version3 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
+        const resource = `cache?keys=${encodeURIComponent(keys.join(","))}&version=${version3}`;
         const response = yield requestUtils_1.retryTypedResponse("getCacheEntry", () => __awaiter(this, void 0, void 0, function* () {
           return httpClient.getJson(getCacheApiUrl(resource));
         }));
@@ -61498,10 +62510,10 @@ var require_cacheHttpClient = __commonJS({
     function reserveCache(key, paths, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version2 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
+        const version3 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
         const reserveCacheRequest = {
           key,
-          version: version2,
+          version: version3,
           cacheSize: options === null || options === void 0 ? void 0 : options.cacheSize
         };
         const response = yield requestUtils_1.retryTypedResponse("reserveCache", () => __awaiter(this, void 0, void 0, function* () {
@@ -61640,6 +62652,7 @@ var require_tar = __commonJS({
     var path5 = __importStar(require("path"));
     var utils = __importStar(require_cacheUtils());
     var constants_1 = require_constants();
+    var IS_WINDOWS = process.platform === "win32";
     function getTarPath(args, compressionMethod) {
       return __awaiter(this, void 0, void 0, function* () {
         switch (process.platform) {
@@ -61681,22 +62694,37 @@ var require_tar = __commonJS({
       var _a;
       return (_a = process.env["GITHUB_WORKSPACE"]) !== null && _a !== void 0 ? _a : process.cwd();
     }
+    function getCompressionProgram(compressionMethod) {
+      switch (compressionMethod) {
+        case constants_1.CompressionMethod.Zstd:
+          return [
+            "--use-compress-program",
+            IS_WINDOWS ? "zstd -d --long=30" : "unzstd --long=30"
+          ];
+        case constants_1.CompressionMethod.ZstdWithoutLong:
+          return ["--use-compress-program", IS_WINDOWS ? "zstd -d" : "unzstd"];
+        default:
+          return ["-z"];
+      }
+    }
+    function listTar(archivePath, compressionMethod) {
+      return __awaiter(this, void 0, void 0, function* () {
+        const args = [
+          ...getCompressionProgram(compressionMethod),
+          "-tf",
+          archivePath.replace(new RegExp(`\\${path5.sep}`, "g"), "/"),
+          "-P"
+        ];
+        yield execTar(args, compressionMethod);
+      });
+    }
+    exports.listTar = listTar;
     function extractTar2(archivePath, compressionMethod) {
       return __awaiter(this, void 0, void 0, function* () {
         const workingDirectory = getWorkingDirectory();
         yield io.mkdirP(workingDirectory);
-        function getCompressionProgram() {
-          switch (compressionMethod) {
-            case constants_1.CompressionMethod.Zstd:
-              return ["--use-compress-program", "zstd -d --long=30"];
-            case constants_1.CompressionMethod.ZstdWithoutLong:
-              return ["--use-compress-program", "zstd -d"];
-            default:
-              return ["-z"];
-          }
-        }
         const args = [
-          ...getCompressionProgram(),
+          ...getCompressionProgram(compressionMethod),
           "-xf",
           archivePath.replace(new RegExp(`\\${path5.sep}`, "g"), "/"),
           "-P",
@@ -61713,19 +62741,22 @@ var require_tar = __commonJS({
         const cacheFileName = utils.getCacheFileName(compressionMethod);
         fs_1.writeFileSync(path5.join(archiveFolder, manifestFilename), sourceDirectories.join("\n"));
         const workingDirectory = getWorkingDirectory();
-        function getCompressionProgram() {
+        function getCompressionProgram2() {
           switch (compressionMethod) {
             case constants_1.CompressionMethod.Zstd:
-              return ["--use-compress-program", "zstd -T0 --long=30"];
+              return [
+                "--use-compress-program",
+                IS_WINDOWS ? "zstd -T0 --long=30" : "zstdmt --long=30"
+              ];
             case constants_1.CompressionMethod.ZstdWithoutLong:
-              return ["--use-compress-program", "zstd -T0"];
+              return ["--use-compress-program", IS_WINDOWS ? "zstd -T0" : "zstdmt"];
             default:
               return ["-z"];
           }
         }
         const args = [
           "--posix",
-          ...getCompressionProgram(),
+          ...getCompressionProgram2(),
           "-cf",
           cacheFileName.replace(new RegExp(`\\${path5.sep}`, "g"), "/"),
           "--exclude",
@@ -61740,28 +62771,6 @@ var require_tar = __commonJS({
       });
     }
     exports.createTar = createTar;
-    function listTar(archivePath, compressionMethod) {
-      return __awaiter(this, void 0, void 0, function* () {
-        function getCompressionProgram() {
-          switch (compressionMethod) {
-            case constants_1.CompressionMethod.Zstd:
-              return ["--use-compress-program", "zstd -d --long=30"];
-            case constants_1.CompressionMethod.ZstdWithoutLong:
-              return ["--use-compress-program", "zstd -d"];
-            default:
-              return ["-z"];
-          }
-        }
-        const args = [
-          ...getCompressionProgram(),
-          "-tf",
-          archivePath.replace(new RegExp(`\\${path5.sep}`, "g"), "/"),
-          "-P"
-        ];
-        yield execTar(args, compressionMethod);
-      });
-    }
-    exports.listTar = listTar;
   }
 });
 
@@ -62782,7 +63791,9 @@ var require_internal_globber2 = __commonJS({
             if (!match && !partialMatch) {
               continue;
             }
-            const stats = yield __await2(DefaultGlobber.stat(item, options, traversalChain));
+            const stats = yield __await2(
+              DefaultGlobber.stat(item, options, traversalChain)
+            );
             if (!stats) {
               continue;
             }
@@ -62939,7 +63950,7 @@ var require_internal_hash_files = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.hashFiles = void 0;
-    var crypto4 = __importStar(require("crypto"));
+    var crypto7 = __importStar(require("crypto"));
     var core5 = __importStar(require_core());
     var fs4 = __importStar(require("fs"));
     var stream = __importStar(require("stream"));
@@ -62952,7 +63963,7 @@ var require_internal_hash_files = __commonJS({
         const writeDelegate = verbose ? core5.info : core5.debug;
         let hasMatch = false;
         const githubWorkspace = (_b = process.env["GITHUB_WORKSPACE"]) !== null && _b !== void 0 ? _b : process.cwd();
-        const result = crypto4.createHash("sha256");
+        const result = crypto7.createHash("sha256");
         let count = 0;
         try {
           for (var _c = __asyncValues2(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done; ) {
@@ -62966,7 +63977,7 @@ var require_internal_hash_files = __commonJS({
               writeDelegate(`Skip directory '${file}'.`);
               continue;
             }
-            const hash = crypto4.createHash("sha256");
+            const hash = crypto7.createHash("sha256");
             const pipeline = util3.promisify(stream.pipeline);
             yield pipeline(fs4.createReadStream(file), hash);
             result.write(hash.digest());
@@ -63128,9 +64139,9 @@ var require_manifest = __commonJS({
         let match;
         let file;
         for (const candidate of candidates) {
-          const version2 = candidate.version;
-          core_1.debug(`check ${version2} satisfies ${versionSpec}`);
-          if (semver.satisfies(version2, versionSpec) && (!stable || candidate.stable === stable)) {
+          const version3 = candidate.version;
+          core_1.debug(`check ${version3} satisfies ${versionSpec}`);
+          if (semver.satisfies(version3, versionSpec) && (!stable || candidate.stable === stable)) {
             file = candidate.files.find((item) => {
               core_1.debug(`${item.arch}===${archFilter} && ${item.platform}===${platFilter}`);
               let chk = item.arch === archFilter && item.platform === platFilter;
@@ -63161,9 +64172,9 @@ var require_manifest = __commonJS({
     exports._findMatch = _findMatch;
     function _getOsVersion() {
       const plat = os8.platform();
-      let version2 = "";
+      let version3 = "";
       if (plat === "darwin") {
-        version2 = cp.execSync("sw_vers -productVersion").toString();
+        version3 = cp.execSync("sw_vers -productVersion").toString();
       } else if (plat === "linux") {
         const lsbContents = module2.exports._readLinuxVersionFile();
         if (lsbContents) {
@@ -63171,13 +64182,13 @@ var require_manifest = __commonJS({
           for (const line of lines) {
             const parts = line.split("=");
             if (parts.length === 2 && (parts[0].trim() === "VERSION_ID" || parts[0].trim() === "DISTRIB_RELEASE")) {
-              version2 = parts[1].trim().replace(/^"/, "").replace(/"$/, "");
+              version3 = parts[1].trim().replace(/^"/, "").replace(/"$/, "");
               break;
             }
           }
         }
       }
-      return version2;
+      return version3;
     }
     exports._getOsVersion = _getOsVersion;
     function _readLinuxVersionFile() {
@@ -63646,39 +64657,39 @@ var require_tool_cache = __commonJS({
         yield exec_1.exec(`"${unzipPath}"`, args, { cwd: dest });
       });
     }
-    function cacheDir2(sourceDir, tool3, version2, arch3) {
+    function cacheDir2(sourceDir, tool3, version3, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
-        version2 = semver.clean(version2) || version2;
+        version3 = semver.clean(version3) || version3;
         arch3 = arch3 || os8.arch();
-        core5.debug(`Caching tool ${tool3} ${version2} ${arch3}`);
+        core5.debug(`Caching tool ${tool3} ${version3} ${arch3}`);
         core5.debug(`source dir: ${sourceDir}`);
         if (!fs4.statSync(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
-        const destPath = yield _createToolPath(tool3, version2, arch3);
+        const destPath = yield _createToolPath(tool3, version3, arch3);
         for (const itemName of fs4.readdirSync(sourceDir)) {
           const s = path5.join(sourceDir, itemName);
           yield io.cp(s, destPath, { recursive: true });
         }
-        _completeToolPath(tool3, version2, arch3);
+        _completeToolPath(tool3, version3, arch3);
         return destPath;
       });
     }
     exports.cacheDir = cacheDir2;
-    function cacheFile(sourceFile, targetFile, tool3, version2, arch3) {
+    function cacheFile(sourceFile, targetFile, tool3, version3, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
-        version2 = semver.clean(version2) || version2;
+        version3 = semver.clean(version3) || version3;
         arch3 = arch3 || os8.arch();
-        core5.debug(`Caching tool ${tool3} ${version2} ${arch3}`);
+        core5.debug(`Caching tool ${tool3} ${version3} ${arch3}`);
         core5.debug(`source file: ${sourceFile}`);
         if (!fs4.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
-        const destFolder = yield _createToolPath(tool3, version2, arch3);
+        const destFolder = yield _createToolPath(tool3, version3, arch3);
         const destPath = path5.join(destFolder, targetFile);
         core5.debug(`destination file ${destPath}`);
         yield io.cp(sourceFile, destPath);
-        _completeToolPath(tool3, version2, arch3);
+        _completeToolPath(tool3, version3, arch3);
         return destFolder;
       });
     }
@@ -63780,9 +64791,9 @@ var require_tool_cache = __commonJS({
         return dest;
       });
     }
-    function _createToolPath(tool3, version2, arch3) {
+    function _createToolPath(tool3, version3, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
-        const folderPath = path5.join(_getCacheDirectory(), tool3, semver.clean(version2) || version2, arch3 || "");
+        const folderPath = path5.join(_getCacheDirectory(), tool3, semver.clean(version3) || version3, arch3 || "");
         core5.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
         yield io.rmRF(folderPath);
@@ -63791,8 +64802,8 @@ var require_tool_cache = __commonJS({
         return folderPath;
       });
     }
-    function _completeToolPath(tool3, version2, arch3) {
-      const folderPath = path5.join(_getCacheDirectory(), tool3, semver.clean(version2) || version2, arch3 || "");
+    function _completeToolPath(tool3, version3, arch3) {
+      const folderPath = path5.join(_getCacheDirectory(), tool3, semver.clean(version3) || version3, arch3 || "");
       const markerPath = `${folderPath}.complete`;
       fs4.writeFileSync(markerPath, "");
       core5.debug("finished caching tool");
@@ -63806,7 +64817,7 @@ var require_tool_cache = __commonJS({
     }
     exports.isExplicitVersion = isExplicitVersion;
     function evaluateVersions(versions, versionSpec) {
-      let version2 = "";
+      let version3 = "";
       core5.debug(`evaluating ${versions.length} versions`);
       versions = versions.sort((a, b) => {
         if (semver.gt(a, b)) {
@@ -63818,16 +64829,16 @@ var require_tool_cache = __commonJS({
         const potential = versions[i];
         const satisfied = semver.satisfies(potential, versionSpec);
         if (satisfied) {
-          version2 = potential;
+          version3 = potential;
           break;
         }
       }
-      if (version2) {
-        core5.debug(`matched: ${version2}`);
+      if (version3) {
+        core5.debug(`matched: ${version3}`);
       } else {
         core5.debug("match not found");
       }
-      return version2;
+      return version3;
     }
     exports.evaluateVersions = evaluateVersions;
     function _getCacheDirectory() {
@@ -64573,7 +65584,7 @@ var Reflect2;
 })(Reflect2 || (Reflect2 = {}));
 
 // lib/action.js
-var crypto3 = __toESM(require("crypto"));
+var crypto6 = __toESM(require("crypto"));
 var os7 = __toESM(require("os"));
 var core4 = __toESM(require_core());
 
@@ -65432,33 +66443,33 @@ function tmpdir2() {
 var Version;
 (function(Version2) {
   Version2.LATEST = "2022";
-  function isVersion(version2) {
+  function isVersion(version3) {
     const versions = ["2022", "2008", "2020", "2021", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"];
-    return versions.includes(version2);
+    return versions.includes(version3);
   }
   Version2.isVersion = isVersion;
-  function isLatest(version2) {
-    return version2 === Version2.LATEST;
+  function isLatest(version3) {
+    return version3 === Version2.LATEST;
   }
   Version2.isLatest = isLatest;
-  function validate2(version2) {
-    if (isVersion(version2)) {
-      if (os4.platform() === "darwin" && version2 < "2013") {
+  function validate3(version3) {
+    if (isVersion(version3)) {
+      if (os4.platform() === "darwin" && version3 < "2013") {
         throw new RangeError("Versions prior to 2013 does not work on 64-bit macOS");
       }
-      return version2;
+      return version3;
     }
-    if (/^199[6-9]|200[0-7]$/u.test(version2)) {
+    if (/^199[6-9]|200[0-7]$/u.test(version3)) {
       throw new RangeError("Versions prior to 2008 are not supported");
     } else {
-      throw new TypeError(`'${version2}' is not a valid version`);
+      throw new TypeError(`'${version3}' is not a valid version`);
     }
   }
-  Version2.validate = validate2;
+  Version2.validate = validate3;
 })(Version || (Version = {}));
 var Tlmgr = class {
-  constructor(version2, prefix2) {
-    this.version = version2;
+  constructor(version3, prefix2) {
+    this.version = version3;
     this.prefix = prefix2;
   }
   get conf() {
@@ -65519,8 +66530,8 @@ __decorate([
 (function(Tlmgr2) {
   var _Path_pattern;
   class Conf {
-    constructor(version2) {
-      this.version = version2;
+    constructor(version3) {
+      this.version = version3;
     }
     async texmf(key, value) {
       if (value === void 0) {
@@ -65535,9 +66546,9 @@ __decorate([
   }
   Tlmgr2.Conf = Conf;
   class Path {
-    constructor(version2, prefix2) {
+    constructor(version3, prefix2) {
       _Path_pattern.set(this, void 0);
-      __classPrivateFieldSet(this, _Path_pattern, path2.join(prefix2, version2, "bin", "*"), "f");
+      __classPrivateFieldSet(this, _Path_pattern, path2.join(prefix2, version3, "bin", "*"), "f");
     }
     async add() {
       const dir = await determine(__classPrivateFieldGet(this, _Path_pattern, "f"));
@@ -65550,9 +66561,9 @@ __decorate([
   _Path_pattern = /* @__PURE__ */ new WeakMap();
   Tlmgr2.Path = Path;
   class Pinning {
-    constructor(version2) {
-      if (version2 < "2013") {
-        throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${version2}`);
+    constructor(version3) {
+      if (version3 < "2013") {
+        throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${version3}`);
       }
     }
     async add(repo, ...globs) {
@@ -65561,9 +66572,9 @@ __decorate([
   }
   Tlmgr2.Pinning = Pinning;
   class Repository {
-    constructor(version2) {
-      if (version2 < "2012") {
-        throw new RangeError(`\`repository\` action is not implemented in TeX Live ${version2}`);
+    constructor(version3) {
+      if (version3 < "2012") {
+        throw new RangeError(`\`repository\` action is not implemented in TeX Live ${version3}`);
       }
     }
     async add(repo, tag) {
@@ -65594,12 +66605,12 @@ __decorate([
 function contrib() {
   return new URL("https://mirror.ctan.org/systems/texlive/tlcontrib/");
 }
-function historic(version2) {
-  return new URL(version2 < "2010" ? "tlnet/" : "tlnet-final/", `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version2}/`);
+function historic(version3) {
+  return new URL(version3 < "2010" ? "tlnet/" : "tlnet-final/", `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version3}/`);
 }
 var DependsTxt;
 (function(DependsTxt2) {
-  function parse2(txt) {
+  function parse3(txt) {
     const manifest = /* @__PURE__ */ new Map();
     const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
     for (const [name, chunk] of eachPackage(txt.replace(/\s*#.*$/gmu, ""))) {
@@ -65614,7 +66625,7 @@ var DependsTxt;
     }
     return manifest;
   }
-  DependsTxt2.parse = parse2;
+  DependsTxt2.parse = parse3;
   function* eachPackage(txt) {
     const [chunk = "", ...rest] = txt.split(/^\s*package(?=\s|$)(.*)$/mu);
     yield ["", chunk];
@@ -65725,22 +66736,22 @@ var Outputs = class {
 };
 var Env;
 (function(Env2) {
-  function get(version2) {
+  function get(version3) {
     for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFLOCAL", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
       if (key in process3.env) {
         warn(`\`${key}\` is set, but ignored`);
         delete process3.env[key];
       }
     }
-    for (const [key, value] of Object.entries(defaults(version2))) {
+    for (const [key, value] of Object.entries(defaults(version3))) {
       process3.env[key] ??= value;
     }
     return process3.env;
   }
   Env2.get = get;
-  function defaults(version2) {
+  function defaults(version3) {
     const home = os5.homedir();
-    const texdir = path3.join(home, ".local", "texlive", version2);
+    const texdir = path3.join(home, ".local", "texlive", version3);
     return {
       ["TEXLIVE_INSTALL_ENV_NOCHECK"]: "1",
       ["TEXLIVE_INSTALL_NO_WELCOME"]: "1",
@@ -65799,8 +66810,8 @@ var import_io = __toESM(require_io());
 var tool2 = __toESM(require_tool_cache());
 var Profile_1;
 var InstallTL = class {
-  constructor(version2, installtl) {
-    this.version = version2;
+  constructor(version3, installtl) {
+    this.version = version3;
     this.installtl = installtl;
   }
   async run(profile) {
@@ -65817,10 +66828,10 @@ var InstallTL = class {
     }
     await patch(this.version, profile.TEXDIR);
   }
-  static restore(version2) {
+  static restore(version3) {
     let dest = "";
     try {
-      dest = tool2.find(InstallTL.archive(), version2);
+      dest = tool2.find(InstallTL.archive(), version3);
     } catch (error) {
       info("Failed to restore installer", { cause: error });
     }
@@ -65828,28 +66839,28 @@ var InstallTL = class {
       return void 0;
     } else {
       info("Found in tool cache");
-      return new InstallTL(version2, path4.join(dest, InstallTL.executable(version2)));
+      return new InstallTL(version3, path4.join(dest, InstallTL.executable(version3)));
     }
   }
-  static async download(version2) {
-    const url2 = InstallTL.url(version2).href;
+  static async download(version3) {
+    const url2 = InstallTL.url(version3).href;
     info(`Downloading ${url2}`);
     const archive = await tool2.downloadTool(url2);
     info(`Extracting installer from ${archive}`);
     const dest = await extract(archive, os6.platform() === "win32" ? "zip" : "tgz");
-    await patch(version2, dest);
+    await patch(version3, dest);
     try {
       info("Adding to tool cache");
-      await tool2.cacheDir(dest, InstallTL.archive(), version2);
+      await tool2.cacheDir(dest, InstallTL.archive(), version3);
     } catch (error) {
       info("Failed to cache installer", { cause: error });
     }
-    return new InstallTL(version2, path4.join(dest, InstallTL.executable(version2)));
+    return new InstallTL(version3, path4.join(dest, InstallTL.executable(version3)));
   }
-  static executable(version2, platform4 = os6.platform()) {
+  static executable(version3, platform4 = os6.platform()) {
     if (platform4 !== "win32") {
       return "install-tl";
-    } else if (version2 < "2013") {
+    } else if (version3 < "2013") {
       return "install-tl.bat";
     } else {
       return "install-tl-windows.bat";
@@ -65858,17 +66869,17 @@ var InstallTL = class {
   static archive() {
     return os6.platform() === "win32" ? "install-tl.zip" : "install-tl-unx.tar.gz";
   }
-  static url(version2) {
+  static url(version3) {
     let target = InstallTL.archive();
-    if (Version.isLatest(version2)) {
+    if (Version.isLatest(version3)) {
       target = path4.posix.join("..", target);
     }
-    return new URL(target, historic(version2));
+    return new URL(target, historic(version3));
   }
 };
 var Profile = Profile_1 = class Profile2 {
-  constructor(version2, prefix2) {
-    this.version = version2;
+  constructor(version3, prefix2) {
+    this.version = version3;
     this["instopt_adjustpath"] = false;
     this["tlpdbopt_autobackup"] = false;
     this["tlpdbopt_install_docfiles"] = false;
@@ -65877,12 +66888,12 @@ var Profile = Profile_1 = class Profile2 {
     this["tlpdbopt_file_assocs"] = false;
     this["tlpdbopt_w32_multi_user"] = false;
     this["option_menu_integration"] = false;
-    this.TEXDIR = path4.join(prefix2, version2);
+    this.TEXDIR = path4.join(prefix2, version3);
     this.TEXMFLOCAL = path4.join(prefix2, "texmf-local");
     this.TEXMFSYSCONFIG = path4.join(this.TEXDIR, "texmf-config");
     this.TEXMFSYSVAR = path4.join(this.TEXDIR, "texmf-var");
-    this.selected_scheme = `scheme-${version2 < "2016" ? "minimal" : "infraonly"}`;
-    this.instopt_adjustrepo = Version.isLatest(version2);
+    this.selected_scheme = `scheme-${version3 < "2016" ? "minimal" : "infraonly"}`;
+    this.instopt_adjustrepo = Version.isLatest(version3);
   }
   async *open() {
     const tmp = await fs3.mkdtemp(path4.join(tmpdir2(), "setup-texlive-"));
@@ -66040,11 +67051,11 @@ Profile = Profile_1 = __decorate([
   Exclude(),
   __metadata("design:paramtypes", [String, String])
 ], Profile);
-async function patch(version2, base) {
+async function patch(version3, base) {
   const fixes = [
     {
       platform: "win32",
-      file: InstallTL.executable(version2, "win32"),
+      file: InstallTL.executable(version3, "win32"),
       from: [/\bpause(?: Done)?\b/gmu],
       to: [""]
     },
@@ -66077,7 +67088,7 @@ async function patch(version2, base) {
     }
   ];
   const apply = async (fix) => {
-    if ((fix.platform === void 0 || fix.platform === os6.platform()) && (fix.versions?.since ?? version2) <= version2 && (fix.versions?.until ?? "9999") > version2) {
+    if ((fix.platform === void 0 || fix.platform === os6.platform()) && (fix.versions?.since ?? version3) <= version3 && (fix.versions?.until ?? "9999") > version3) {
       const target = path4.join(base, fix.file);
       let contents;
       try {
@@ -66184,11 +67195,11 @@ async function main() {
   }
   state.save();
 }
-function getCacheKeys(version2, packages) {
+function getCacheKeys(version3, packages) {
   const digest = (s) => {
-    return crypto3.createHash("sha256").update(s).digest("hex");
+    return crypto6.createHash("sha256").update(s).digest("hex");
   };
-  const baseKey = `setup-texlive-${os7.platform()}-${os7.arch()}-${version2}-`;
+  const baseKey = `setup-texlive-${os7.platform()}-${os7.arch()}-${version3}-`;
   const primaryKey = `${baseKey}${digest(JSON.stringify([...packages]))}`;
   return [primaryKey, [baseKey]];
 }

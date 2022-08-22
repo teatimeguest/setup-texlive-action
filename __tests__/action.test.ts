@@ -138,7 +138,7 @@ it('adds TeX Live to path after installation', async () => {
   await expect(action.run()).toResolve();
   expect(Tlmgr.Path.prototype.add).toHaveBeenCalledAfter(
     // eslint-disable-next-line jest/unbound-method
-    jest.mocked(InstallTL.prototype.run),
+    jest.mocked<(...args: Array<any>) => unknown>(InstallTL.prototype.run),
   );
 });
 
@@ -148,7 +148,7 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     await expect(action.run()).toResolve();
     expect(Tlmgr.Path.prototype.add).not.toHaveBeenCalledBefore(
-      jest.mocked(util.restoreCache),
+      jest.mocked<(...args: Array<any>) => unknown>(util.restoreCache),
     );
     expect(Tlmgr.Path.prototype.add).toHaveBeenCalled();
   },
@@ -265,7 +265,9 @@ it('sets up tlcontrib if input tlcontrib is true', async () => {
   // eslint-disable-next-line jest/unbound-method
   expect(repository.add).not.toHaveBeenCalledBefore(jest.mocked(path.add));
   expect(repository.add).toHaveBeenCalledWith(expect.anything(), 'tlcontrib');
-  expect(pinning.add).not.toHaveBeenCalledBefore(jest.mocked(repository.add));
+  expect(pinning.add).not.toHaveBeenCalledBefore(
+    jest.mocked<(...args: Array<any>) => unknown>(repository.add),
+  );
   expect(pinning.add).toHaveBeenCalledWith('tlcontrib', '*');
 });
 
