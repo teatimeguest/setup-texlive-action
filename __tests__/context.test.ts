@@ -5,17 +5,18 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import 'jest-extended';
 
+import { Env, Inputs, Outputs, State } from '#/context';
 import * as log from '#/log';
 import { Version } from '#/texlive';
-import { Env, Inputs, Outputs, State } from '#/context';
 
-jest.mock('fs/promises', () => ({
-  readFile: jest.fn(),
-}));
-jest.mock('os', () => ({
-  homedir: jest.fn().mockReturnValue('~'),
-  platform: jest.fn().mockReturnValue('linux'),
-}));
+jest.mock('fs/promises', () => ({ readFile: jest.fn() }));
+jest.mock(
+  'os',
+  () => ({
+    homedir: jest.fn().mockReturnValue('~'),
+    platform: jest.fn().mockReturnValue('linux'),
+  }),
+);
 jest.mock('path', () => jest.requireActual('path/posix'));
 // eslint-disable-next-line node/prefer-global/process
 jest.mock('process', () => globalThis.process);
@@ -34,8 +35,9 @@ beforeEach(() => {
 });
 
 jest.mocked(cache.isFeatureAvailable).mockReturnValue(true);
-const { getInput, getBooleanInput, getState } =
-  jest.requireActual<typeof core>('@actions/core');
+const { getInput, getBooleanInput, getState } = jest.requireActual<typeof core>(
+  '@actions/core',
+);
 jest.mocked(core.getInput).mockImplementation(getInput);
 jest.mocked(core.getBooleanInput).mockImplementation(getBooleanInput);
 jest.mocked(core.getState).mockImplementation(getState);
@@ -44,9 +46,10 @@ jest.mock('#/texlive', () => {
   const actual = jest.requireActual('#/texlive');
   return { DependsTxt: actual.DependsTxt, Version: actual.Version };
 });
-jest.mock('#/utility', () => ({
-  tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
-}));
+jest.mock(
+  '#/utility',
+  () => ({ tmpdir: jest.fn().mockReturnValue('<tmpdir>') }),
+);
 jest.unmock('#/context');
 
 describe('Inputs', () => {
@@ -201,8 +204,10 @@ describe('Env', () => {
       ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1',
       ['TEXLIVE_INSTALL_NO_WELCOME']: '1',
       ['TEXLIVE_INSTALL_PREFIX']: '<tmpdir>/setup-texlive',
-      ['TEXLIVE_INSTALL_TEXMFCONFIG']: `~/.local/texlive/${Version.LATEST}/texmf-config`,
-      ['TEXLIVE_INSTALL_TEXMFVAR']: `~/.local/texlive/${Version.LATEST}/texmf-var`,
+      ['TEXLIVE_INSTALL_TEXMFCONFIG']:
+        `~/.local/texlive/${Version.LATEST}/texmf-config`,
+      ['TEXLIVE_INSTALL_TEXMFVAR']:
+        `~/.local/texlive/${Version.LATEST}/texmf-var`,
       ['TEXLIVE_INSTALL_TEXMFHOME']: '~/texmf',
     });
   });
@@ -273,14 +278,18 @@ describe('State', () => {
         state.key = '<key>';
         state.texdir = '<texdir>';
         state.save();
-      }).not.toThrow();
+      })
+        .not
+        .toThrow();
       expect(core.saveState).toHaveBeenCalled();
     });
 
     it('saves empty state', () => {
       expect(() => {
         new State().save();
-      }).not.toThrow();
+      })
+        .not
+        .toThrow();
       expect(core.saveState).toHaveBeenCalled();
     });
 
@@ -289,7 +298,8 @@ describe('State', () => {
         const state = new State();
         state.key = '<key>';
         state.save();
-      }).toThrow('Unexpected action state');
+      })
+        .toThrow('Unexpected action state');
     });
 
     it('throws an exception if key is not set', () => {
@@ -297,7 +307,8 @@ describe('State', () => {
         const state = new State();
         state.texdir = '<texdir>';
         state.save();
-      }).toThrow('Unexpected action state');
+      })
+        .toThrow('Unexpected action state');
     });
   });
 });

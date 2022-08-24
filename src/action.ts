@@ -50,8 +50,8 @@ async function main(): Promise<void> {
   if (cacheType === undefined) {
     const installtl = await core.group('Acquiring install-tl', async () => {
       return (
-        InstallTL.restore(inputs.version) ??
-        (await InstallTL.download(inputs.version))
+        InstallTL.restore(inputs.version)
+          ?? (await InstallTL.download(inputs.version))
       );
     });
     await core.group('Installation profile', async () => {

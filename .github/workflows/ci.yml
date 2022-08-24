@@ -1,43 +1,38 @@
 name: CI
-
 on:
   push:
     branches: main
-
+  workflow_call:
+permissions:
+  contents: read
 jobs:
   ci:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        script: [build, format-check, lint, test]
+      fail-fast: false
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: 16
-
+          cache: npm
+          node-version-file: .nvmrc
       - run: npm ci
-      - run: npm run lint
-      - run: npm run format-check
-      - run: npm run build
-      - run: npm run test
-
-      - name: Upload coverage
+      - run: npm run ${{ matrix.script }}
+      - if: github.event_name == 'push' && matrix.script == 'test'
         uses: codecov/codecov-action@v3
-
   test:
+    if: github.event_name == 'push'
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: Install TeX Live
         uses: ./
         with:
           cache: false
-
       - run: tlmgr --version

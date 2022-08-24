@@ -100,9 +100,9 @@ export type Range<
   End extends `${'' | '='}${number}`,
 > =
   | Exclude<
-      keyof Replicate<End extends `=${infer E}` ? E : End, [never]>,
-      keyof Replicate<Begin, [never]>
-    >
+    keyof Replicate<End extends `=${infer E}` ? E : End, [never]>,
+    keyof Replicate<Begin, [never]>
+  >
   | (End extends `=${infer E}` ? E : never);
 
 type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
@@ -110,9 +110,7 @@ type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
 type Init<T> = T extends `${infer L}${Digit}` ? L : never;
 type Last<T> = T extends `${Init<T>}${infer N}` ? N : never;
 
-type Replicate<N, T extends Array<unknown>> =
-  // prettier-ignore
-  | N extends '0' ? []
+type Replicate<N, T extends Array<unknown>> = N extends '0' ? []
   : N extends '1' ? [...T]
   : N extends '2' ? [...T, ...T]
   : N extends '3' ? [...T, ...T, ...T]
@@ -122,5 +120,6 @@ type Replicate<N, T extends Array<unknown>> =
   : N extends '7' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T]
   : N extends '8' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
   : N extends '9' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
-  : N extends '10' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
+  : N extends '10'
+    ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
   : [...Replicate<'10', Replicate<Init<N>, T>>, ...Replicate<Last<N>, T>];

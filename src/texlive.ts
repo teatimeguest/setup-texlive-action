@@ -12,7 +12,6 @@ import { type Range, determine } from '#/utility';
 
 export type Version = Range<'2008', `=${typeof Version.LATEST}`>;
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace Version {
   export const LATEST = '2022' as const;
 
@@ -58,7 +57,8 @@ export class Tlmgr {
     private readonly prefix: string,
   ) {}
 
-  @Cache get conf(): Tlmgr.Conf {
+  @Cache
+  get conf(): Tlmgr.Conf {
     return new Tlmgr.Conf(this.version);
   }
 
@@ -68,15 +68,18 @@ export class Tlmgr {
     }
   }
 
-  @Cache get path(): Tlmgr.Path {
+  @Cache
+  get path(): Tlmgr.Path {
     return new Tlmgr.Path(this.version, this.prefix);
   }
 
-  @Cache get pinning(): Tlmgr.Pinning {
+  @Cache
+  get pinning(): Tlmgr.Pinning {
     return new Tlmgr.Pinning(this.version);
   }
 
-  @Cache get repository(): Tlmgr.Repository {
+  @Cache
+  get repository(): Tlmgr.Repository {
     return new Tlmgr.Repository(this.version);
   }
 
@@ -181,8 +184,8 @@ export namespace Tlmgr {
         // `tlmgr repository add` returns non-zero status code
         // if the same repository or tag is added again.
         // (todo:  make sure that the tagged repo is really tlcontrib)
-        !status &&
-        !stderr.includes('repository or its tag already defined')
+        !status
+        && !stderr.includes('repository or its tag already defined')
       ) {
         throw new Error(
           `\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`,
@@ -204,9 +207,9 @@ export namespace Tlmgr {
     if (result !== null) {
       const pkg = path.basename(result[1] ?? '', '.tar.xz');
       throw new Error(
-        `The checksum of package ${pkg} did not match. ` +
-          'The CTAN mirror may be in the process of synchronization, ' +
-          'please rerun the job after some time.',
+        `The checksum of package ${pkg} did not match. `
+          + 'The CTAN mirror may be in the process of synchronization, '
+          + 'please rerun the job after some time.',
       );
     }
   }
@@ -234,7 +237,6 @@ export type DependsTxt = ReadonlyMap<
   }
 >;
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace DependsTxt {
   export function parse(txt: string): DependsTxt {
     const manifest: DeepWritable<DependsTxt> = new Map();
@@ -261,8 +263,8 @@ export namespace DependsTxt {
       let name = (rest[i] ?? '').trim();
       if (name === '' || /\s/u.test(name)) {
         log.warn(
-          '`package` directive must have exactly one argument, ' +
-            `but given ${name.length}: ${name}`,
+          '`package` directive must have exactly one argument, '
+            + `but given ${name.length}: ${name}`,
         );
         name = '';
       }

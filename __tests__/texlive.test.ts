@@ -6,9 +6,7 @@ import * as log from '#/log';
 import { DependsTxt, Tlmgr, Version } from '#/texlive';
 import * as util from '#/utility';
 
-jest.mock('os', () => ({
-  platform: jest.fn().mockReturnValue('linux'),
-}));
+jest.mock('os', () => ({ platform: jest.fn().mockReturnValue('linux') }));
 
 jest.mocked(core.group).mockImplementation(async (name, fn) => await fn());
 jest.mocked(exec.getExecOutput).mockResolvedValue({
@@ -86,8 +84,8 @@ describe('Tlmgr', () => {
         exitCode: 0,
         stdout: '',
         stderr:
-          'TeXLive::TLUtils::check_file_and_remove: checksums differ for /tmp/path/to/foo.tar.xz:\n' +
-          'TeXLive::TLUtils::check_file_and_remove: ...',
+          'TeXLive::TLUtils::check_file_and_remove: checksums differ for /tmp/path/to/foo.tar.xz:\n'
+          + 'TeXLive::TLUtils::check_file_and_remove: ...',
       });
       await expect(tlmgr.install('foo', 'bar', 'baz')).rejects.toThrow(
         'The checksum of package foo did not match.',
@@ -140,9 +138,11 @@ describe('Tlmgr', () => {
       const tlmgr = new Tlmgr('2012', '/usr/local/texlive');
       await expect(async () => {
         await tlmgr.pinning.add('<repository>', '*');
-      }).rejects.toThrow(
-        '`pinning` action is not implemented in TeX Live 2012',
-      );
+      })
+        .rejects
+        .toThrow(
+          '`pinning` action is not implemented in TeX Live 2012',
+        );
     });
   });
 
@@ -188,7 +188,8 @@ describe('Tlmgr', () => {
         stderr: [
           'tlmgr: repository or its tag already defined, no action: <repository>',
           'tlmgr: An error has occurred. See above messages. Exiting.',
-        ].join('\n'),
+        ]
+          .join('\n'),
       });
       const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
       await expect(tlmgr.repository.add('<repository>', '<tag>')).resolves.toBe(
@@ -203,21 +204,26 @@ describe('Tlmgr', () => {
         stderr: [
           'tlmgr: neither https?/ftp/ssh/scp/file URI nor absolute path, no action: <repository>',
           'tlmgr: An error has occurred. See above messages. Exiting.',
-        ].join('\n'),
+        ]
+          .join('\n'),
       });
       const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
       await expect(
         tlmgr.repository.add('<repository>', '<tag>'),
-      ).rejects.toThrow(/^`tlmgr` failed with exit code 2: /u);
+      )
+        .rejects
+        .toThrow(/^`tlmgr` failed with exit code 2: /u);
     });
 
     it('fails since the `repository` action is not implemented', async () => {
       const tlmgr = new Tlmgr('2011', '/usr/local/texlive');
       await expect(async () => {
         await tlmgr.repository.add('<repository>', '<tag>');
-      }).rejects.toThrow(
-        '`repository` action is not implemented in TeX Live 2011',
-      );
+      })
+        .rejects
+        .toThrow(
+          '`repository` action is not implemented in TeX Live 2011',
+        );
     });
   });
 
@@ -258,7 +264,8 @@ describe('Tlmgr', () => {
       const tlmgr = new Tlmgr(Version.LATEST, '');
       await expect(
         tlmgr.update(['foo', 'bar', 'baz'], { reinstallForciblyRemoved: true }),
-      ).toResolve();
+      )
+        .toResolve();
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'update',
         '--reinstall-forcibly-removed',
@@ -283,7 +290,8 @@ describe('DependsTxt.parse', () => {
         '  package  grault  ',
         'soft garply#',
         ' waldo',
-      ].join('\n'),
+      ]
+        .join('\n'),
     );
     expect(manifest.get('')).toHaveProperty(
       'hard',
@@ -299,15 +307,15 @@ describe('DependsTxt.parse', () => {
 
   it('tolerates some syntax errors', () => {
     const manifest = DependsTxt.parse(
-      // prettier-ignore
       [
-        'package',         // no argument
-        'package#',        // no argument
-        'hard',            // no argument
-        'soft#',           // no argument, immediately followed by a comment
+        'package', // no argument
+        'package#', // no argument
+        'hard', // no argument
+        'soft#', // no argument, immediately followed by a comment
         'package foo bar', // multiple arguments
-        'soft',            // no argument, with immediate EOF
-      ].join('\n'),
+        'soft', // no argument, with immediate EOF
+      ]
+        .join('\n'),
     );
     expect(manifest.get('')).toHaveProperty('hard', new Set());
     expect(manifest.get('')).toHaveProperty('soft', new Set());

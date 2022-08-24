@@ -17,10 +17,10 @@ jest.mock('fs/promises', () => ({
   stat: jest.fn(), // required for @azure/storage-blob
   writeFile: jest.fn(),
 }));
-jest.mock('os', () => ({
-  homedir: jest.fn().mockReturnValue('~'),
-  platform: jest.fn(),
-}));
+jest.mock(
+  'os',
+  () => ({ homedir: jest.fn().mockReturnValue('~'), platform: jest.fn() }),
+);
 jest.mock('path', () => {
   const { posix, win32 } = jest.requireActual('path');
   return {
@@ -144,12 +144,10 @@ describe('InstallTL', () => {
       },
     );
 
-    it.each<[NodeJS.Platform, Version]>([
-      ['linux', '2009'],
-      ['linux', '2010'],
-      ['win32', '2009'],
-      ['win32', '2010'],
-    ])(
+    it.each<[NodeJS.Platform, Version]>([['linux', '2009'], ['linux', '2010'], [
+      'win32',
+      '2009',
+    ], ['win32', '2010']])(
       'applies a patch for tlpkg/TeXLive/TLWinGoo.pm on (%s %s)',
       async (platform, version) => {
         jest.mocked(os.platform).mockReturnValue(platform);
@@ -302,7 +300,8 @@ describe('Profile', () => {
             throw new Error(dest);
           }
         })(),
-      ).toReject();
+      )
+        .toReject();
       expect(rmRF).toHaveBeenCalled();
     });
   });

@@ -15,7 +15,7 @@ index ec13e5d..6b308c6 100644
 -    if (outputBaseName && extName)
 -        outputBaseName = `${outputBaseName}${extName}`;
 +    let outputExtName = extName;
-+    if (tsInstance.getEmitModuleKind(compilerOptions) > tsInstance.ModuleKind.ES2015 &&
++    if (tsInstance.getEmitModuleKind(compilerOptions) >= tsInstance.ModuleKind.ES2015 &&
 +        resolvedExtName !== undefined &&
 +        tsInstance.extensionIsTS(resolvedExtName)) {
 +        outputExtName = tsInstance.getOutputExtension(resolvedFileName, compilerOptions);

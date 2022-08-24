@@ -1,0 +1,33 @@
+{
+  "lineWidth": 80,
+  "incremental": false,
+  "typescript": {
+    "quoteStyle": "preferSingle",
+    "useBraces": "always",
+    "singleBodyPosition": "nextLine",
+    "arrayExpression.preferSingleLine": true,
+    "arrayPattern.preferSingleLine": true,
+    "computed.preferSingleLine": true,
+    "exportDeclaration.preferSingleLine": true,
+    "importDeclaration.preferSingleLine": true,
+    "objectExpression.preferSingleLine": true,
+    "objectPattern.preferSingleLine": true,
+    "parameters.preferSingleLine": true,
+    "variableStatement.preferSingleLine": true,
+    "arrowFunction.useParentheses": "force",
+    "binaryExpression.linePerExpression": true,
+    "memberExpression.linePerExpression": true,
+    "commentLine.forceSpaceAfterSlashes": true,
+    "typeAssertion.spaceBeforeExpression": false,
+    "module.sortImportDeclarations": "caseSensitive",
+    "module.sortExportDeclarations": "caseSensitive",
+    "exportDeclaration.sortNamedExports": "caseSensitive",
+    "importDeclaration.sortNamedImports": "caseSensitive"
+  },
+  "includes": [
+    "./{src,__tests__}/**/*.ts"
+  ],
+  "plugins": [
+    "https://plugins.dprint.dev/typescript-0.71.2.wasm"
+  ]
+}

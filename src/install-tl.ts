@@ -170,12 +170,17 @@ export class Profile {
     return entries.map((entry) => entry.join(' ')).join('\n');
   }
 
-  @Expose() readonly ['selected_scheme']: string;
+  @Expose()
+  readonly ['selected_scheme']: string;
 
-  @Expose() readonly ['TEXDIR']: string;
-  @Expose() readonly ['TEXMFLOCAL']: string;
-  @Expose() readonly ['TEXMFSYSCONFIG']: string;
-  @Expose() readonly ['TEXMFSYSVAR']: string;
+  @Expose()
+  readonly ['TEXDIR']: string;
+  @Expose()
+  readonly ['TEXMFLOCAL']: string;
+  @Expose()
+  readonly ['TEXMFSYSCONFIG']: string;
+  @Expose()
+  readonly ['TEXMFSYSVAR']: string;
 
   @Expose({ since: 2017 })
   readonly ['instopt_adjustpath']: boolean = false;
@@ -246,53 +251,47 @@ export class Profile {
 }
 
 async function patch(version: Version, base: string): Promise<void> {
-  const fixes = [
-    {
-      // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
-      platform: 'win32',
-      file: InstallTL.executable(version, 'win32'),
-      from: [/\bpause(?: Done)?\b/gmu],
-      to: [''],
-    },
-    {
-      // Fixes a syntax error.
-      versions: { since: '2009', until: '2011' },
-      file: 'tlpkg/TeXLive/TLWinGoo.pm',
-      from: ['/foreach $p qw((.*))/u'],
-      to: ['foreach $$p (qw($1))'],
-    },
-    {
-      // Defines Code Page 65001 as an alias for UTF-8 on Windows.
-      // (see: https://github.com/dankogai/p5-encode/issues/37)
-      platform: 'win32',
-      versions: { since: '2015', until: '2016' },
-      file: 'tlpkg/tlperl/lib/Encode/Alias.pm',
-      from: ['# utf8 is blessed :)'],
-      to: [`define_alias(qr/cp65001/i => '"utf-8-strict"');`],
-    },
-    {
-      // Makes it possible to use `\` as a directory separator on Windows.
-      platform: 'win32',
-      versions: { until: '2020' },
-      file: 'tlpkg/TeXLive/TLUtils.pm',
-      from: ['split (/\\//, $tree)'],
-      to: ['split (/[\\/\\\\]/, $$tree)'],
-    },
-    {
-      // Add support for macOs 11 or later.
-      platform: 'darwin',
-      versions: { since: '2017', until: '2020' },
-      file: 'tlpkg/TeXLive/TLUtils.pm',
-      from: ['$os_major != 10', '$os_minor >= $mactex_darwin'],
-      to: ['$$os_major < 10', '$$os_major >= 11 || $&'],
-    },
-  ];
+  const fixes = [{
+    // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
+    platform: 'win32',
+    file: InstallTL.executable(version, 'win32'),
+    from: [/\bpause(?: Done)?\b/gmu],
+    to: [''],
+  }, {
+    // Fixes a syntax error.
+    versions: { since: '2009', until: '2011' },
+    file: 'tlpkg/TeXLive/TLWinGoo.pm',
+    from: ['/foreach $p qw((.*))/u'],
+    to: ['foreach $$p (qw($1))'],
+  }, {
+    // Defines Code Page 65001 as an alias for UTF-8 on Windows.
+    // (see: https://github.com/dankogai/p5-encode/issues/37)
+    platform: 'win32',
+    versions: { since: '2015', until: '2016' },
+    file: 'tlpkg/tlperl/lib/Encode/Alias.pm',
+    from: ['# utf8 is blessed :)'],
+    to: [`define_alias(qr/cp65001/i => '"utf-8-strict"');`],
+  }, {
+    // Makes it possible to use `\` as a directory separator on Windows.
+    platform: 'win32',
+    versions: { until: '2020' },
+    file: 'tlpkg/TeXLive/TLUtils.pm',
+    from: ['split (/\\//, $tree)'],
+    to: ['split (/[\\/\\\\]/, $$tree)'],
+  }, {
+    // Add support for macOs 11 or later.
+    platform: 'darwin',
+    versions: { since: '2017', until: '2020' },
+    file: 'tlpkg/TeXLive/TLUtils.pm',
+    from: ['$os_major != 10', '$os_minor >= $mactex_darwin'],
+    to: ['$$os_major < 10', '$$os_major >= 11 || $&'],
+  }];
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
   const apply = async (fix: typeof fixes[number]): Promise<void> => {
     if (
-      (fix.platform === undefined || fix.platform === os.platform()) &&
-      (fix.versions?.since ?? version) <= version &&
-      (fix.versions?.until ?? '9999') > version
+      (fix.platform === undefined || fix.platform === os.platform())
+      && (fix.versions?.since ?? version) <= version
+      && (fix.versions?.until ?? '9999') > version
     ) {
       const target = path.join(base, fix.file);
       let contents: string;

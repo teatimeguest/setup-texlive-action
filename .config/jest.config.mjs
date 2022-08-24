@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   automock: true,
   clearMocks: true,
   globals: {
@@ -12,6 +12,7 @@ module.exports = {
     '^#/(.*)': '<rootDir>/src/$1',
   },
   resetModules: true,
+  rootDir: process.cwd(),
   setupFilesAfterEnv: [
     '<rootDir>/node_modules/jest-extended/all',
     '<rootDir>/node_modules/reflect-metadata/Reflect.js',

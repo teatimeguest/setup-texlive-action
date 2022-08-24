@@ -16,7 +16,8 @@ import { DependsTxt, Version } from '#/texlive';
 import { tmpdir } from '#/utility';
 
 export class Inputs {
-  @Cache get cache(): boolean {
+  @Cache
+  get cache(): boolean {
     const input = core.getBooleanInput('cache');
     if (input && !cache.isFeatureAvailable()) {
       log.warn('Caching is disabled because cache service is not available');
@@ -25,7 +26,8 @@ export class Inputs {
     return input;
   }
 
-  @Cache get packages(): Promise<Set<string>> {
+  @Cache
+  get packages(): Promise<Set<string>> {
     return (async () => {
       const list = core.getInput('packages').split(/(?:#.*$|\s+)/mu);
       const file = core.getInput('package-file');
@@ -39,7 +41,8 @@ export class Inputs {
     })();
   }
 
-  @Cache get prefix(): string {
+  @Cache
+  get prefix(): string {
     const input = core.getInput('prefix');
     if (input !== '') {
       return path.normalize(input);
@@ -49,7 +52,8 @@ export class Inputs {
     );
   }
 
-  @Cache get tlcontrib(): boolean {
+  @Cache
+  get tlcontrib(): boolean {
     const input = core.getBooleanInput('tlcontrib');
     if (input && !Version.isLatest(this.version)) {
       log.warn('`tlcontrib` is currently ignored for older versions');
@@ -58,7 +62,8 @@ export class Inputs {
     return input;
   }
 
-  @Cache get updateAllPackages(): boolean {
+  @Cache
+  get updateAllPackages(): boolean {
     const input = core.getBooleanInput('update-all-packages');
     if (input && !Version.isLatest(this.version)) {
       log.warn('`update-all-packages` is ignored for older versions');
@@ -67,7 +72,8 @@ export class Inputs {
     return input;
   }
 
-  @Cache get version(): Version {
+  @Cache
+  get version(): Version {
     const input = core.getInput('version');
     if (input === 'latest') {
       return Version.LATEST;
@@ -135,8 +141,10 @@ export namespace Env {
 
 @Exclude()
 export class State {
-  @Expose() key?: string;
-  @Expose() texdir?: string;
+  @Expose()
+  key?: string;
+  @Expose()
+  texdir?: string;
 
   save(): void {
     core.saveState('post', serialize(this.validate()));

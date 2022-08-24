@@ -20,13 +20,13 @@
     "newLine": "lf",
     "outDir": "./lib",
     "removeComments": true,
-    "sourceMap": true,
     // interop constraints
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     // language and environment
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es2021",
+    "target": "esnext",
     // ttypescript
     "plugins": [
       { "transform": "ts-transformer-keys/transformer" },

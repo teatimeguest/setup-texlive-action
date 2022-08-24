@@ -9,10 +9,13 @@ import { Tlmgr, Version } from '#/texlive';
 import * as util from '#/utility';
 import CacheType = util.CacheType;
 
-jest.mock('os', () => ({
-  arch: jest.fn().mockReturnValue('<arch>'),
-  platform: jest.fn().mockReturnValue('<platform>'),
-}));
+jest.mock(
+  'os',
+  () => ({
+    arch: jest.fn().mockReturnValue('<arch>'),
+    platform: jest.fn().mockReturnValue('<platform>'),
+  }),
+);
 
 jest.mocked(core.group).mockImplementation(async (name, fn) => await fn());
 jest.mocked(core.setFailed).mockImplementation((error) => {
@@ -47,9 +50,7 @@ beforeEach(() => {
       updateAllPackages: false,
       version: Version.LATEST,
     },
-    outputs: {
-      set ['cache-hit'](hit: true) {},
-    },
+    outputs: { set ['cache-hit'](hit: true) {} },
     env: {
       ['TEXLIVE_INSTALL_ENV_NOCHECK']: '',
       ['TEXLIVE_INSTALL_NO_WELCOME']: '',
@@ -65,7 +66,7 @@ beforeEach(() => {
   jest.spyOn(ctx.outputs, 'cache-hit', 'set');
   jest // eslint-disable-next-line jest/unbound-method
     .mocked(InstallTL.download)
-    .mockResolvedValue(new (InstallTL as unknown as new () => InstallTL)());
+    .mockResolvedValue(new (InstallTL as unknown as new() => InstallTL)());
   jest.mocked(Profile).mockReturnValue({ TEXDIR: '' } as Profile);
 });
 // eslint-disable-next-line jest/unbound-method
@@ -294,12 +295,7 @@ it.each<[CacheType | undefined]>([['secondary'], [undefined]])(
 it('saves TEXDIR to cache if cache key and texdir are set', async () => {
   // eslint-disable-next-line jest/unbound-method
   jest.mocked(State.load).mockImplementationOnce(
-    () =>
-      ({
-        key: '<key>',
-        texdir: '<texdir>',
-        filled: () => true,
-      } as State),
+    () => ({ key: '<key>', texdir: '<texdir>', filled: () => true } as State),
   );
   await expect(action.run()).toResolve();
   expect(util.saveCache).toHaveBeenCalled();

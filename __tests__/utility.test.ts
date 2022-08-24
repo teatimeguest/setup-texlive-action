@@ -8,14 +8,12 @@ import 'jest-extended';
 import * as log from '#/log';
 import * as util from '#/utility';
 
-jest.mock('os', () => ({
-  tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
-}));
+jest.mock('os', () => ({ tmpdir: jest.fn().mockReturnValue('<tmpdir>') }));
 jest.mock('path', () => jest.requireActual('path').posix);
 jest.mock('process', () => ({ env: {} }));
-jest.spyOn(glob, 'create').mockResolvedValue({
-  glob: async () => ['<globbed>'],
-} as glob.Globber);
+jest.spyOn(glob, 'create').mockResolvedValue(
+  { glob: async () => ['<globbed>'] } as glob.Globber,
+);
 jest.unmock('#/utility');
 
 describe('extract', () => {
@@ -37,9 +35,9 @@ describe('extract', () => {
   });
 
   it('throws an exception if the directory cannot be located', async () => {
-    jest.mocked(glob.create).mockResolvedValueOnce({
-      glob: async (): Promise<Array<string>> => [],
-    } as glob.Globber);
+    jest.mocked(glob.create).mockResolvedValueOnce(
+      { glob: async (): Promise<Array<string>> => [] } as glob.Globber,
+    );
     jest.mocked(tool.extractZip).mockResolvedValueOnce('<extractZip>');
     await expect(util.extract('<zipfile>', 'zip')).rejects.toThrow(
       'Unable to locate subdirectory',
@@ -55,9 +53,9 @@ describe('determine', () => {
   it.each<[Array<string>]>([[[]], [['<some>', '<other>']]])(
     'returns `undefined` if the matched path is not unique',
     async (matched) => {
-      jest.mocked(glob.create).mockResolvedValueOnce({
-        glob: async () => matched,
-      } as glob.Globber);
+      jest.mocked(glob.create).mockResolvedValueOnce(
+        { glob: async () => matched } as glob.Globber,
+      );
       await expect(util.determine('<pattern>')).resolves.toBeUndefined();
     },
   );
@@ -83,7 +81,9 @@ describe('restoreCache', () => {
   it('returns undefined if cache not found', async () => {
     await expect(
       util.restoreCache('<target>', '<key>', []),
-    ).resolves.toBeUndefined();
+    )
+      .resolves
+      .toBeUndefined();
   });
 
   it("returns 'primary' if primary cache restored", async () => {
@@ -101,14 +101,18 @@ describe('restoreCache', () => {
       .mockImplementationOnce(async (target, key, keys) => keys?.[0]);
     await expect(
       util.restoreCache('<target>', '<key>', ['<other key>']),
-    ).resolves.toBe('secondary');
+    )
+      .resolves
+      .toBe('secondary');
   });
 
   it('returns undefined if cache.restoreCache fails', async () => {
     jest.mocked(cache.restoreCache).mockRejectedValueOnce(new Error(''));
     await expect(
       util.restoreCache('<target>', '<key>', []),
-    ).resolves.toBeUndefined();
+    )
+      .resolves
+      .toBeUndefined();
     expect(log.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to restore cache'),
       expect.any(Object),
