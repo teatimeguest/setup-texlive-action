@@ -293,16 +293,4 @@ async function patch(version: Version, base: string): Promise<void> {
   await Promise.all(fixes.map(apply));
 }
 
-declare module 'util/types' {
-  /**
-   * A type-guard for the error type of Node.js.
-   * Since `NodeJS.ErrnoException` is defined as an interface,
-   * we cannot write `error instanceof NodeJS.ErrnoException`, but
-   * `util.types.isNativeError` is sufficient
-   * because all properties of `NodeJS.ErrnoException` are optional.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  function isNativeError(error: unknown): error is NodeJS.ErrnoException;
-}
-
 /* eslint @typescript-eslint/naming-convention: off */

@@ -66,7 +66,7 @@ export class Inputs {
   get updateAllPackages(): boolean {
     const input = core.getBooleanInput('update-all-packages');
     if (input && !Version.isLatest(this.version)) {
-      log.warn('`update-all-packages` is ignored for older versions');
+      log.info('`update-all-packages` is ignored for older versions');
       return false;
     }
     return input;
@@ -156,7 +156,7 @@ export class State extends Serializable {
   save(): void {
     core.saveState('post', JSON.stringify(this.validate()));
     if (this.filled()) {
-      log.info(`Cache key: ${this.key})`);
+      log.info(`${this.texdir} will be saved to cache with key: ${this.key})`);
     }
   }
 

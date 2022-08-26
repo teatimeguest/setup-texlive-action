@@ -6,6 +6,6 @@
     "module": "commonjs",
     "rootDirs": ["./src", "./__tests__"]
   },
-  "include": ["./__tests__/*.ts"],
-  "exclude": ["./src/index.ts"]
+  "files": ["./src/types.d.ts"],
+  "include": ["./__tests__/*.ts"]
 }

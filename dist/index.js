@@ -63707,14 +63707,14 @@ var require_cache = __commonJS({
       }
     };
     exports.ValidationError = ValidationError;
-    var ReserveCacheError = class extends Error {
+    var ReserveCacheError2 = class extends Error {
       constructor(message) {
         super(message);
         this.name = "ReserveCacheError";
-        Object.setPrototypeOf(this, ReserveCacheError.prototype);
+        Object.setPrototypeOf(this, ReserveCacheError2.prototype);
       }
     };
-    exports.ReserveCacheError = ReserveCacheError;
+    exports.ReserveCacheError = ReserveCacheError2;
     function checkPaths(paths) {
       if (!paths || paths.length === 0) {
         throw new ValidationError(`Path Validation Error: At least one directory or file path is required`);
@@ -63821,7 +63821,7 @@ var require_cache = __commonJS({
           } else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) {
             throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
           } else {
-            throw new ReserveCacheError(`Unable to reserve cache with key ${key}, another job may be creating this cache. More details: ${(_e = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _e === void 0 ? void 0 : _e.message}`);
+            throw new ReserveCacheError2(`Unable to reserve cache with key ${key}, another job may be creating this cache. More details: ${(_e = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _e === void 0 ? void 0 : _e.message}`);
           }
           core5.debug(`Saving Cache (ID: ${cacheId})`);
           yield cacheHttpClient.saveCache(cacheId, archivePath, options);
@@ -63829,7 +63829,7 @@ var require_cache = __commonJS({
           const typedError = error2;
           if (typedError.name === ValidationError.name) {
             throw error2;
-          } else if (typedError.name === ReserveCacheError.name) {
+          } else if (typedError.name === ReserveCacheError2.name) {
             core5.info(`Failed to save: ${typedError.message}`);
           } else {
             core5.warning(`Failed to save: ${typedError.message}`);
@@ -66462,6 +66462,7 @@ var Reflect2;
 // lib/action.js
 var crypto6 = __toESM(require("crypto"));
 var os7 = __toESM(require("os"));
+var import_types5 = require("util/types");
 var core4 = __toESM(require_core());
 
 // lib/context.js
@@ -67222,6 +67223,7 @@ function deserialize(cls, json, options) {
 var import_decorator_cache_getter2 = __toESM(require_dist());
 
 // lib/log.js
+var import_types3 = require("util/types");
 var core = __toESM(require_core());
 function log2(message, { level = "info", cause } = {}) {
   const logger3 = core[level === "warn" ? "warning" : level];
@@ -67229,7 +67231,7 @@ function log2(message, { level = "info", cause } = {}) {
     logger3(message);
   } else {
     logger3(`${message}: Caused by ${cause}`);
-    if (cause instanceof Error && cause.stack !== void 0) {
+    if ((0, import_types3.isNativeError)(cause)) {
       core.debug(cause.stack);
     }
   }
@@ -67301,9 +67303,13 @@ async function determine(pattern) {
 async function saveCache2(target, primaryKey) {
   try {
     await cache.saveCache([target], primaryKey);
-    info(`${target} saved with cache key ${primaryKey}`);
+    info(`${target} saved with cache key: ${primaryKey}`);
   } catch (error2) {
-    warn("Failed to save to cache", { cause: error2 });
+    if (error2 instanceof cache.ReserveCacheError) {
+      info(error2.message);
+    } else {
+      warn("Failed to save to cache", { cause: error2 });
+    }
   }
 }
 async function restoreCache2(target, primaryKey, restoreKeys) {
@@ -67311,9 +67317,11 @@ async function restoreCache2(target, primaryKey, restoreKeys) {
   try {
     key = await cache.restoreCache([target], primaryKey, restoreKeys);
     if (key !== void 0) {
+      info(`${target} restored from cache key: ${key}`);
       return key === primaryKey ? "primary" : "secondary";
+    } else {
+      info("Cache not found");
     }
-    info("Cache not found");
   } catch (error2) {
     warn("Failed to restore cache", { cause: error2 });
   }
@@ -67569,7 +67577,7 @@ var Inputs = class {
   get updateAllPackages() {
     const input = core3.getBooleanInput("update-all-packages");
     if (input && !Version.isLatest(this.version)) {
-      warn("`update-all-packages` is ignored for older versions");
+      info("`update-all-packages` is ignored for older versions");
       return false;
     }
     return input;
@@ -67667,7 +67675,7 @@ var State = State_1 = class State2 extends Serializable {
   save() {
     core3.saveState("post", JSON.stringify(this.validate()));
     if (this.filled()) {
-      info(`Cache key: ${this.key})`);
+      info(`${this.texdir} will be saved to cache with key: ${this.key})`);
     }
   }
   filled() {
@@ -67701,7 +67709,7 @@ init_tslib_es6();
 var fs3 = __toESM(require("fs/promises"));
 var os6 = __toESM(require("os"));
 var path4 = __toESM(require("path"));
-var import_types3 = require("util/types");
+var import_types4 = require("util/types");
 var import_exec2 = __toESM(require_exec());
 var import_io = __toESM(require_io());
 var tool2 = __toESM(require_tool_cache());
@@ -67993,7 +68001,7 @@ async function patch(version3, base2) {
       try {
         contents = await fs3.readFile(target, "utf8");
       } catch (error2) {
-        if ((0, import_types3.isNativeError)(error2) && error2.code === "ENOENT") {
+        if ((0, import_types4.isNativeError)(error2) && error2.code === "ENOENT") {
           debug2(`${target} not found`);
           return;
         }
@@ -68015,12 +68023,17 @@ async function run() {
     const state = State.load();
     if (state === null) {
       await main();
-    } else if (state.filled()) {
-      await saveCache2(state.texdir, state.key);
+    } else {
+      if (state.filled()) {
+        await saveCache2(state.texdir, state.key);
+      } else {
+        info("Nothing to do");
+      }
     }
   } catch (error2) {
-    if (error2 instanceof Error) {
-      core4.setFailed(error2.stack ?? error2);
+    if ((0, import_types5.isNativeError)(error2)) {
+      debug2(error2.stack);
+      core4.setFailed(error2.message);
     } else {
       core4.setFailed(`${error2}`);
     }

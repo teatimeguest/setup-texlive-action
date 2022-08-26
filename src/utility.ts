@@ -71,9 +71,13 @@ export async function saveCache(
 ): Promise<void> {
   try {
     await cache.saveCache([target], primaryKey);
-    log.info(`${target} saved with cache key ${primaryKey}`);
+    log.info(`${target} saved with cache key: ${primaryKey}`);
   } catch (error) {
-    log.warn('Failed to save to cache', { cause: error });
+    if (error instanceof cache.ReserveCacheError) {
+      log.info(error.message);
+    } else {
+      log.warn('Failed to save to cache', { cause: error });
+    }
   }
 }
 
@@ -89,9 +93,11 @@ export async function restoreCache(
   try {
     key = await cache.restoreCache([target], primaryKey, restoreKeys);
     if (key !== undefined) {
+      log.info(`${target} restored from cache key: ${key}`);
       return key === primaryKey ? 'primary' : 'secondary';
+    } else {
+      log.info('Cache not found');
     }
-    log.info('Cache not found');
   } catch (error) {
     log.warn('Failed to restore cache', { cause: error });
   }

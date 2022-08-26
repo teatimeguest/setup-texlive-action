@@ -171,7 +171,7 @@ describe('Inputs', () => {
       process.env['INPUT_UPDATE-ALL-PACKAGES'] = 'true';
       process.env['INPUT_VERSION'] = '2016';
       expect(new Inputs()).toHaveProperty('updateAllPackages', false);
-      expect(log.warn).toHaveBeenCalled();
+      expect(log.info).toHaveBeenCalled();
     });
   });
 

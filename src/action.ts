@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import * as os from 'os';
+import { isNativeError } from 'util/types';
 
 import * as core from '@actions/core';
 
@@ -14,12 +15,17 @@ export async function run(): Promise<void> {
     const state = State.load();
     if (state === null) {
       await main();
-    } else if (state.filled()) {
-      await saveCache(state.texdir, state.key);
+    } else {
+      if (state.filled()) {
+        await saveCache(state.texdir, state.key);
+      } else {
+        log.info('Nothing to do');
+      }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(error.stack ?? error);
+    if (isNativeError(error)) {
+      log.debug(error.stack);
+      core.setFailed(error.message);
     } else {
       core.setFailed(`${error}`);
     }
