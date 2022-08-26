@@ -88,7 +88,7 @@ because its hash will be used as part of the cache key.
 
 > **Note**.
 > If you have problems due to a corrupt cache entry, you can delete it
-> from the [CLI][gh-actions-cache] or [REST API][cache-api].
+> from the [GitHub CLI][gh-actions-cache] or [REST API][cache-api].
 > The cache key will be found in the workflow log.
 
 ## Inputs
@@ -135,6 +135,10 @@ are supported:
 
 If `prefix` and `TEXLIVE_INSTALL_PREFIX` are both specified,
 `prefix` will be used.
+
+## Permissions
+
+This action does not use `GITHUB_TOKEN` and does not require any permissions.
 
 ## Changelog
 
