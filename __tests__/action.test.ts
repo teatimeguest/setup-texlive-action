@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import 'jest-extended';
+import { mock } from 'jest-mock-extended';
 import type { DeepWritable } from 'ts-essentials';
 
 import * as action from '#/action';
@@ -50,20 +51,13 @@ beforeEach(() => {
       updateAllPackages: false,
       version: Version.LATEST,
     },
-    outputs: { set ['cache-hit'](hit: true) {} },
-    env: {
-      ['TEXLIVE_INSTALL_ENV_NOCHECK']: '',
-      ['TEXLIVE_INSTALL_NO_WELCOME']: '',
-      ['TEXLIVE_INSTALL_PREFIX']: '',
-      ['TEXLIVE_INSTALL_TEXMFCONFIG']: '',
-      ['TEXLIVE_INSTALL_TEXMFVAR']: '',
-      ['TEXLIVE_INSTALL_TEXMFHOME']: '',
-    },
+    outputs: mock<Outputs>(),
+    env: mock<Env>(),
   };
+  ctx.outputs['cache-hit'] = false;
   jest.mocked(Env.get).mockReturnValue(ctx.env);
   jest.mocked(Inputs).mockReturnValue(ctx.inputs);
   jest.mocked(Outputs).mockReturnValue(ctx.outputs);
-  jest.spyOn(ctx.outputs, 'cache-hit', 'set');
   jest // eslint-disable-next-line jest/unbound-method
     .mocked(InstallTL.download)
     .mockResolvedValue(new (InstallTL as unknown as new() => InstallTL)());
@@ -121,17 +115,13 @@ it('does not save data if full cache found', async () => {
   expect(mock.instances[0]).not.toHaveProperty('texdir');
 });
 
-it('does not set cache-hit if cache not found', async () => {
-  await expect(action.run()).toResolve();
-  expect(jest.spyOn(ctx.outputs, 'cache-hit', 'set')).not.toHaveBeenCalled();
-});
-
-it.each<[CacheType]>([['primary'], ['secondary']])(
-  'sets cache-hit to true if full cache found (case %s)',
-  async (kind) => {
+it.each([[false, undefined], [true, 'primary'], [true, 'secondary']] as const)(
+  'sets cache-hit to %s if cache is %s',
+  async (value, kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     await expect(action.run()).toResolve();
-    expect(jest.spyOn(ctx.outputs, 'cache-hit', 'set')).toHaveBeenCalled();
+    expect(ctx.outputs.emit).toHaveBeenCalledOnce();
+    expect(ctx.outputs['cache-hit']).toBe(value);
   },
 );
 

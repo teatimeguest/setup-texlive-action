@@ -26,6 +26,7 @@ export default {
     '<rootDir>/node_modules/class-transformer/',
     '<rootDir>/node_modules/decorator-cache-getter/',
     '<rootDir>/node_modules/jest-extended/',
+    '<rootDir>/node_modules/jest-mock-extended/',
   ],
   verbose: false,
 };

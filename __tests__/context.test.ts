@@ -24,13 +24,13 @@ beforeEach(() => {
   // eslint-disable-next-line node/prefer-global/process
   globalThis.process.env = {
     // default values defined in action.yml
-    ['INPUT_CACHE']: 'true',
-    ['INPUT_PACKAGES']: '',
-    ['INPUT_PACKAGE-FILE']: '',
-    ['INPUT_PREFIX']: '',
-    ['INPUT_TLCONTRIB']: 'false',
-    ['INPUT_UPDATE-ALL-PACKAGES']: 'false',
-    ['INPUT_VERSION']: 'latest',
+    INPUT_CACHE: 'true',
+    INPUT_PACKAGES: '',
+    'INPUT_PACKAGE-FILE': '',
+    INPUT_PREFIX: '',
+    INPUT_TLCONTRIB: 'false',
+    'INPUT_UPDATE-ALL-PACKAGES': 'false',
+    INPUT_VERSION: 'latest',
   };
 });
 
@@ -48,7 +48,10 @@ jest.mock('#/texlive', () => {
 });
 jest.mock(
   '#/utility',
-  () => ({ tmpdir: jest.fn().mockReturnValue('<tmpdir>') }),
+  () => ({
+    Serializable: jest.requireActual('#/utility').Serializable,
+    tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
+  }),
 );
 jest.unmock('#/context');
 
@@ -192,9 +195,12 @@ describe('Inputs', () => {
 });
 
 describe('Outputs#cache-hit', () => {
-  it('sets cache-hit to true', () => {
-    new Outputs()['cache-hit'] = true;
-    expect(core.setOutput).toHaveBeenCalledWith('cache-hit', true);
+  it.each([true, false])('sets cache-hit to %s', (value) => {
+    const outputs = new Outputs();
+    outputs['cache-hit'] = value;
+    outputs.emit();
+    expect(core.setOutput).toHaveBeenCalledTimes(1);
+    expect(core.setOutput).toHaveBeenCalledWith('cache-hit', value);
   });
 });
 
@@ -203,7 +209,6 @@ describe('Env', () => {
     expect(Env.get(Version.LATEST)).toMatchObject({
       ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1',
       ['TEXLIVE_INSTALL_NO_WELCOME']: '1',
-      ['TEXLIVE_INSTALL_PREFIX']: '<tmpdir>/setup-texlive',
       ['TEXLIVE_INSTALL_TEXMFCONFIG']:
         `~/.local/texlive/${Version.LATEST}/texmf-config`,
       ['TEXLIVE_INSTALL_TEXMFVAR']:

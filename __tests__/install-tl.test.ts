@@ -38,8 +38,14 @@ jest.mocked(getExecOutput).mockResolvedValue({
 });
 jest.mocked(tool.find).mockReturnValue('');
 jest.mocked(tool.downloadTool).mockResolvedValue('<downloadTool>');
-jest.mocked(util.extract).mockResolvedValue('<extract>');
-jest.mocked(util.tmpdir).mockReturnValue('<tmpdir>');
+jest.mock(
+  '#/utility',
+  () => ({
+    Serializable: jest.requireActual('#/utility').Serializable,
+    extract: jest.fn().mockResolvedValue('<extract>'),
+    tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
+  }),
+);
 jest.mock('#/texlive', () => {
   const { Tlmgr, Version, historic } = jest.requireActual('#/texlive');
   return { Tlmgr, Version, historic };

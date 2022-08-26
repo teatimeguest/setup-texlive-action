@@ -106,6 +106,7 @@ async function main(): Promise<void> {
   }
 
   state.save();
+  outputs.emit();
 }
 
 function getCacheKeys(

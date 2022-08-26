@@ -67214,9 +67214,6 @@ var classTransformer = new ClassTransformer();
 function instanceToPlain(object, options) {
   return classTransformer.instanceToPlain(object, options);
 }
-function serialize(object, options) {
-  return classTransformer.serialize(object, options);
-}
 function deserialize(cls, json, options) {
   return classTransformer.deserialize(cls, json, options);
 }
@@ -67262,6 +67259,17 @@ var process2 = __toESM(require("process"));
 var cache = __toESM(require_cache());
 var glob = __toESM(require_glob2());
 var tool = __toESM(require_tool_cache());
+var Serializable = class {
+  toPlain(options) {
+    return instanceToPlain(this, options);
+  }
+  toJSON() {
+    return this.toPlain();
+  }
+  toString() {
+    return JSON.stringify(this);
+  }
+};
 async function extract(archive, kind) {
   switch (kind) {
     case "tgz": {
@@ -67548,7 +67556,7 @@ var Inputs = class {
     if (input !== "") {
       return path3.normalize(input);
     }
-    return path3.normalize(process3.env["TEXLIVE_INSTALL_PREFIX"] ?? defaultPrefix());
+    return path3.normalize(process3.env["TEXLIVE_INSTALL_PREFIX"] ?? path3.join(tmpdir2(), "setup-texlive"));
   }
   get tlcontrib() {
     const input = core3.getBooleanInput("tlcontrib");
@@ -67608,11 +67616,24 @@ __decorate([
   __metadata("design:type", String),
   __metadata("design:paramtypes", [])
 ], Inputs.prototype, "version", null);
-var Outputs = class {
-  set ["cache-hit"](hit) {
-    core3.setOutput("cache-hit", hit);
+var Outputs = class Outputs2 extends Serializable {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "cache-hit", false);
+  }
+  emit() {
+    for (const [key, value] of Object.entries(this.toJSON())) {
+      core3.setOutput(key, value);
+    }
   }
 };
+__decorate([
+  Expose(),
+  __metadata("design:type", Boolean)
+], Outputs.prototype, "cache-hit", void 0);
+Outputs = __decorate([
+  Exclude()
+], Outputs);
 var Env;
 (function(Env2) {
   function get(version3) {
@@ -67622,33 +67643,29 @@ var Env;
         delete process3.env[key];
       }
     }
-    for (const [key, value] of Object.entries(defaults(version3))) {
+    const home = os5.homedir();
+    const texdir = path3.join(home, ".local", "texlive", version3);
+    for (const [key, value] of Object.entries({
+      TEXLIVE_INSTALL_ENV_NOCHECK: "1",
+      TEXLIVE_INSTALL_NO_WELCOME: "1",
+      TEXLIVE_INSTALL_TEXMFCONFIG: path3.join(texdir, "texmf-config"),
+      TEXLIVE_INSTALL_TEXMFVAR: path3.join(texdir, "texmf-var"),
+      TEXLIVE_INSTALL_TEXMFHOME: path3.join(home, "texmf")
+    })) {
       process3.env[key] ??= value;
     }
     return process3.env;
   }
   Env2.get = get;
-  function defaults(version3) {
-    const home = os5.homedir();
-    const texdir = path3.join(home, ".local", "texlive", version3);
-    return {
-      ["TEXLIVE_INSTALL_ENV_NOCHECK"]: "1",
-      ["TEXLIVE_INSTALL_NO_WELCOME"]: "1",
-      ["TEXLIVE_INSTALL_PREFIX"]: defaultPrefix(),
-      ["TEXLIVE_INSTALL_TEXMFCONFIG"]: path3.join(texdir, "texmf-config"),
-      ["TEXLIVE_INSTALL_TEXMFVAR"]: path3.join(texdir, "texmf-var"),
-      ["TEXLIVE_INSTALL_TEXMFHOME"]: path3.join(home, "texmf")
-    };
-  }
-  Env2.defaults = defaults;
 })(Env || (Env = {}));
-var State = State_1 = class State2 {
+var State = State_1 = class State2 extends Serializable {
   constructor() {
+    super(...arguments);
     __publicField(this, "key");
     __publicField(this, "texdir");
   }
   save() {
-    core3.saveState("post", serialize(this.validate()));
+    core3.saveState("post", JSON.stringify(this.validate()));
     if (this.filled()) {
       info(`Cache key: ${this.key})`);
     }
@@ -67658,7 +67675,7 @@ var State = State_1 = class State2 {
   }
   validate() {
     if (this.key === void 0 !== (this.texdir === void 0)) {
-      throw new Error(`Unexpected action state: ${serialize(this)}`);
+      throw new Error(`Unexpected action state: ${this}`);
     }
     return this;
   }
@@ -67678,9 +67695,6 @@ __decorate([
 State = State_1 = __decorate([
   Exclude()
 ], State);
-function defaultPrefix() {
-  return path3.join(tmpdir2(), "setup-texlive");
-}
 
 // lib/install-tl.js
 init_tslib_es6();
@@ -67691,7 +67705,6 @@ var import_types3 = require("util/types");
 var import_exec2 = __toESM(require_exec());
 var import_io = __toESM(require_io());
 var tool2 = __toESM(require_tool_cache());
-var Profile_1;
 var InstallTL = class {
   constructor(version3, installtl) {
     __publicField(this, "version");
@@ -67763,8 +67776,9 @@ var InstallTL = class {
   }
 };
 var _a;
-var Profile = Profile_1 = (_a = class {
+var Profile = (_a = class extends Serializable {
   constructor(version3, prefix2) {
+    super();
     __publicField(this, "version");
     __publicField(this, "selected_scheme");
     __publicField(this, "TEXDIR");
@@ -67799,43 +67813,42 @@ var Profile = Profile_1 = (_a = class {
     }
   }
   toString() {
-    const plain = instanceToPlain(this, {
+    const plain = this.toPlain({
       version: Number(this.version),
       groups: [os6.platform()]
     });
-    const entries = Object.entries(plain);
-    return entries.map((entry) => entry.join(" ")).join("\n");
+    return Object.entries(plain).map((entry) => entry.join(" ")).join("\n");
   }
-  get ["option_symlinks"]() {
+  get option_symlinks() {
     return this.instopt_adjustpath;
   }
-  get ["option_path"]() {
+  get option_path() {
     return this.instopt_adjustpath;
   }
-  get ["option_adjustrepo"]() {
+  get option_adjustrepo() {
     return this.instopt_adjustrepo;
   }
-  get ["option_autobackup"]() {
+  get option_autobackup() {
     return this.tlpdbopt_autobackup;
   }
-  get ["option_doc"]() {
+  get option_doc() {
     return this.tlpdbopt_install_docfiles;
   }
-  get ["option_src"]() {
+  get option_src() {
     return this.tlpdbopt_install_srcfiles;
   }
-  get ["option_desktop_integration"]() {
+  get option_desktop_integration() {
     return this.tlpdbopt_desktop_integration;
   }
-  get ["option_file_assocs"]() {
+  get option_file_assocs() {
     return this.tlpdbopt_file_assocs;
   }
-  get ["option_w32_multi_user"]() {
+  get option_w32_multi_user() {
     return this.tlpdbopt_w32_multi_user;
   }
 }, (() => {
   for (const key of ["instopt_adjustpath", "instopt_adjustrepo", "tlpdbopt_autobackup", "tlpdbopt_install_docfiles", "tlpdbopt_install_srcfiles", "tlpdbopt_desktop_integration", "tlpdbopt_file_assocs", "tlpdbopt_w32_multi_user", "option_menu_integration", "option_symlinks", "option_path", "option_adjustrepo", "option_autobackup", "option_doc", "option_src", "option_desktop_integration", "option_file_assocs", "option_w32_multi_user"]) {
-    Type(() => Number)(Profile_1.prototype, key);
+    Type(() => Number)(_a.prototype, key);
   }
 })(), _a);
 __decorate([
@@ -67939,7 +67952,7 @@ __decorate([
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_w32_multi_user", null);
-Profile = Profile_1 = __decorate([
+Profile = __decorate([
   Exclude(),
   __metadata("design:paramtypes", [String, String])
 ], Profile);
@@ -68080,6 +68093,7 @@ async function main() {
     });
   }
   state.save();
+  outputs.emit();
 }
 function getCacheKeys(version3, packages) {
   const digest = (s) => {

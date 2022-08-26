@@ -9,6 +9,7 @@ extends:
 parserOptions:
   project: ./tsconfig.tests.json
 rules:
+  '@typescript-eslint/no-inferrable-types': off
   '@typescript-eslint/require-await': off
   '@typescript-eslint/restrict-template-expressions': off
   node/no-missing-import: off

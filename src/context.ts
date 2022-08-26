@@ -5,15 +5,14 @@ import * as process from 'process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import { Exclude, Expose, deserialize, serialize } from 'class-transformer';
+import { Exclude, Expose, deserialize } from 'class-transformer';
 import { cache as Cache } from 'decorator-cache-getter';
-import type { RequiredKeys } from 'ts-essentials';
+import type { PickProperties } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
-import type * as installtl from '#/install-tl';
 import * as log from '#/log';
 import { DependsTxt, Version } from '#/texlive';
-import { tmpdir } from '#/utility';
+import { Serializable, tmpdir } from '#/utility';
 
 export class Inputs {
   @Cache
@@ -48,7 +47,8 @@ export class Inputs {
       return path.normalize(input);
     }
     return path.normalize(
-      process.env['TEXLIVE_INSTALL_PREFIX'] ?? defaultPrefix(),
+      process.env['TEXLIVE_INSTALL_PREFIX']
+        ?? path.join(tmpdir(), 'setup-texlive'),
     );
   }
 
@@ -88,66 +88,73 @@ export class Inputs {
   }
 }
 
-export class Outputs {
-  set ['cache-hit'](hit: true) {
-    core.setOutput('cache-hit', hit);
+@Exclude()
+export class Outputs extends Serializable {
+  @Expose()
+  'cache-hit': boolean = false;
+
+  emit(): void {
+    for (const [key, value] of Object.entries(this.toJSON())) {
+      core.setOutput(key, value);
+    }
   }
 }
 
 export interface Env {
-  readonly ['TEXLIVE_DOWNLOADER']?: string;
-  readonly ['TL_DOWNLOAD_PROGRAM']?: string;
-  readonly ['TL_DOWNLOAD_ARGS']?: string;
-  readonly ['TEXLIVE_INSTALL_ENV_NOCHECK']: string;
-  readonly ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']?: string;
-  readonly ['TEXLIVE_INSTALL_NO_DISKCHECK']?: string;
-  readonly ['TEXLIVE_INSTALL_NO_RESUME']?: string;
-  readonly ['TEXLIVE_INSTALL_NO_WELCOME']: string;
-  readonly ['TEXLIVE_INSTALL_PAPER']?: string;
-  readonly ['TEXLIVE_INSTALL_PREFIX']: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFCONFIG']: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFVAR']: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFHOME']: string;
-  readonly ['NOPERLDOC']?: string;
+  readonly TEXLIVE_DOWNLOADER?: string;
+  readonly TL_DOWNLOAD_PROGRAM?: string;
+  readonly TL_DOWNLOAD_ARGS?: string;
+  readonly TEXLIVE_INSTALL_ENV_NOCHECK: string;
+  readonly TEXLIVE_INSTALL_NO_CONTEXT_CACHE?: string;
+  readonly TEXLIVE_INSTALL_NO_DISKCHECK?: string;
+  readonly TEXLIVE_INSTALL_NO_RESUME?: string;
+  readonly TEXLIVE_INSTALL_NO_WELCOME: string;
+  readonly TEXLIVE_INSTALL_PAPER?: string;
+  readonly TEXLIVE_INSTALL_PREFIX?: string;
+  readonly TEXLIVE_INSTALL_TEXDIR: never;
+  readonly TEXLIVE_INSTALL_TEXMFCONFIG: string;
+  readonly TEXLIVE_INSTALL_TEXMFVAR: string;
+  readonly TEXLIVE_INSTALL_TEXMFHOME: string;
+  readonly TEXLIVE_INSTALL_TEXMFLOCAL: never;
+  readonly TEXLIVE_INSTALL_TEXMFSYSCONFIG: never;
+  readonly TEXLIVE_INSTALL_TEXMFSYSVAR: never;
+  readonly NOPERLDOC?: string;
 }
 
 export namespace Env {
   export function get(version: Version): Env {
-    for (const key of keys<Omit<installtl.Env, keyof Env>>()) {
+    for (const key of keys<PickProperties<Env, never>>() as Array<keyof Env>) {
       if (key in process.env) {
         log.warn(`\`${key}\` is set, but ignored`);
         delete process.env[key];
       }
     }
-    for (const [key, value] of Object.entries(defaults(version))) {
+    const home = os.homedir();
+    const texdir = path.join(home, '.local', 'texlive', version);
+    for (
+      const [key, value] of Object.entries({
+        TEXLIVE_INSTALL_ENV_NOCHECK: '1',
+        TEXLIVE_INSTALL_NO_WELCOME: '1',
+        TEXLIVE_INSTALL_TEXMFCONFIG: path.join(texdir, 'texmf-config'),
+        TEXLIVE_INSTALL_TEXMFVAR: path.join(texdir, 'texmf-var'),
+        TEXLIVE_INSTALL_TEXMFHOME: path.join(home, 'texmf'),
+      })
+    ) {
       process.env[key] ??= value;
     }
     return process.env as unknown as Env;
   }
-
-  export function defaults(version: Version): Pick<Env, RequiredKeys<Env>> {
-    const home = os.homedir();
-    const texdir = path.join(home, '.local', 'texlive', version);
-    return {
-      ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1',
-      ['TEXLIVE_INSTALL_NO_WELCOME']: '1',
-      ['TEXLIVE_INSTALL_PREFIX']: defaultPrefix(),
-      ['TEXLIVE_INSTALL_TEXMFCONFIG']: path.join(texdir, 'texmf-config'),
-      ['TEXLIVE_INSTALL_TEXMFVAR']: path.join(texdir, 'texmf-var'),
-      ['TEXLIVE_INSTALL_TEXMFHOME']: path.join(home, 'texmf'),
-    };
-  }
 }
 
 @Exclude()
-export class State {
+export class State extends Serializable {
   @Expose()
   key?: string;
   @Expose()
   texdir?: string;
 
   save(): void {
-    core.saveState('post', serialize(this.validate()));
+    core.saveState('post', JSON.stringify(this.validate()));
     if (this.filled()) {
       log.info(`Cache key: ${this.key})`);
     }
@@ -159,7 +166,7 @@ export class State {
 
   private validate(this: Readonly<this>): this {
     if ((this.key === undefined) !== (this.texdir === undefined)) {
-      throw new Error(`Unexpected action state: ${serialize(this)}`);
+      throw new Error(`Unexpected action state: ${this}`);
     }
     return this;
   }
@@ -170,6 +177,4 @@ export class State {
   }
 }
 
-function defaultPrefix(): string {
-  return path.join(tmpdir(), 'setup-texlive');
-}
+/* eslint @typescript-eslint/naming-convention: off */

@@ -6,13 +6,13 @@ import { isNativeError } from 'util/types';
 import { getExecOutput as popen } from '@actions/exec';
 import { rmRF as rm } from '@actions/io';
 import * as tool from '@actions/tool-cache';
-import { Exclude, Expose, Type, instanceToPlain } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import type { PickProperties } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
 import { Tlmgr, Version, historic } from '#/texlive';
-import { extract, tmpdir } from '#/utility';
+import { Serializable, extract, tmpdir } from '#/utility';
 
 /**
  * A class for downloading and running the installer of TeX Live.
@@ -115,30 +115,10 @@ export class InstallTL {
   }
 }
 
-export interface Env {
-  readonly ['TEXLIVE_DOWNLOADER']?: string;
-  readonly ['TL_DOWNLOAD_PROGRAM']?: string;
-  readonly ['TL_DOWNLOAD_ARGS']?: string;
-  readonly ['TEXLIVE_INSTALL_ENV_NOCHECK']?: string;
-  readonly ['TEXLIVE_INSTALL_NO_CONTEXT_CACHE']?: string;
-  readonly ['TEXLIVE_INSTALL_NO_DISKCHECK']?: string;
-  readonly ['TEXLIVE_INSTALL_NO_RESUME']?: string;
-  readonly ['TEXLIVE_INSTALL_NO_WELCOME']?: string;
-  readonly ['TEXLIVE_INSTALL_PAPER']?: string;
-  readonly ['TEXLIVE_INSTALL_PREFIX']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXDIR']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFCONFIG']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFVAR']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFHOME']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFLOCAL']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFSYSCONFIG']?: string;
-  readonly ['TEXLIVE_INSTALL_TEXMFSYSVAR']?: string;
-  readonly ['NOPERLDOC']?: string;
-}
-
 @Exclude()
-export class Profile {
+export class Profile extends Serializable {
   constructor(readonly version: Version, prefix: string) {
+    super();
     this.TEXDIR = path.join(prefix, version);
     this.TEXMFLOCAL = path.join(prefix, 'texmf-local');
     this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
@@ -161,91 +141,90 @@ export class Profile {
     }
   }
 
-  toString(this: Readonly<this>): string {
-    const plain = instanceToPlain(this, {
+  override toString(): string {
+    const plain = this.toPlain({
       version: Number(this.version),
       groups: [os.platform()],
     });
-    const entries = Object.entries(plain);
-    return entries.map((entry) => entry.join(' ')).join('\n');
+    return Object.entries(plain).map((entry) => entry.join(' ')).join('\n');
   }
 
   @Expose()
-  readonly ['selected_scheme']: string;
+  readonly selected_scheme: string;
 
   @Expose()
-  readonly ['TEXDIR']: string;
+  readonly TEXDIR: string;
   @Expose()
-  readonly ['TEXMFLOCAL']: string;
+  readonly TEXMFLOCAL: string;
   @Expose()
-  readonly ['TEXMFSYSCONFIG']: string;
+  readonly TEXMFSYSCONFIG: string;
   @Expose()
-  readonly ['TEXMFSYSVAR']: string;
+  readonly TEXMFSYSVAR: string;
 
   @Expose({ since: 2017 })
-  readonly ['instopt_adjustpath']: boolean = false;
+  readonly instopt_adjustpath: boolean = false;
   @Expose({ since: 2017 })
-  readonly ['instopt_adjustrepo']: boolean;
+  readonly instopt_adjustrepo: boolean;
   @Expose({ since: 2017 })
-  readonly ['tlpdbopt_autobackup']: boolean = false;
+  readonly tlpdbopt_autobackup: boolean = false;
   @Expose({ since: 2017 })
-  readonly ['tlpdbopt_install_docfiles']: boolean = false;
+  readonly tlpdbopt_install_docfiles: boolean = false;
   @Expose({ since: 2017 })
-  readonly ['tlpdbopt_install_srcfiles']: boolean = false;
+  readonly tlpdbopt_install_srcfiles: boolean = false;
 
   // Options for Windows
   @Expose({ since: 2017, groups: ['win32'] })
-  readonly ['tlpdbopt_desktop_integration']: boolean = false;
+  readonly tlpdbopt_desktop_integration: boolean = false;
   @Expose({ since: 2017, groups: ['win32'] })
-  readonly ['tlpdbopt_file_assocs']: boolean = false;
+  readonly tlpdbopt_file_assocs: boolean = false;
   @Expose({ since: 2017, groups: ['win32'] })
-  readonly ['tlpdbopt_w32_multi_user']: boolean = false;
+  readonly tlpdbopt_w32_multi_user: boolean = false;
 
   // Deleted option
   @Expose({ since: 2012, until: 2017, groups: ['win32'] })
-  readonly ['option_menu_integration']: boolean = false;
+  readonly option_menu_integration: boolean = false;
 
   // Old option names
   @Expose({ until: 2009 })
-  get ['option_symlinks'](): boolean {
+  get option_symlinks(): boolean {
     return this.instopt_adjustpath;
   }
   @Expose({ since: 2009, until: 2017 })
-  get ['option_path'](): boolean {
+  get option_path(): boolean {
     return this.instopt_adjustpath;
   }
   @Expose({ since: 2011, until: 2017 })
-  get ['option_adjustrepo'](): boolean {
+  get option_adjustrepo(): boolean {
     return this.instopt_adjustrepo;
   }
   @Expose({ until: 2017 })
-  get ['option_autobackup'](): boolean {
+  get option_autobackup(): boolean {
     return this.tlpdbopt_autobackup;
   }
   @Expose({ until: 2017 })
-  get ['option_doc'](): boolean {
+  get option_doc(): boolean {
     return this.tlpdbopt_install_docfiles;
   }
   @Expose({ until: 2017 })
-  get ['option_src'](): boolean {
+  get option_src(): boolean {
     return this.tlpdbopt_install_srcfiles;
   }
   @Expose({ since: 2009, until: 2017, groups: ['win32'] })
-  get ['option_desktop_integration'](): boolean {
+  get option_desktop_integration(): boolean {
     return this.tlpdbopt_desktop_integration;
   }
   @Expose({ until: 2017, groups: ['win32'] })
-  get ['option_file_assocs'](): boolean {
+  get option_file_assocs(): boolean {
     return this.tlpdbopt_file_assocs;
   }
   @Expose({ since: 2009, until: 2017, groups: ['win32'] })
-  get ['option_w32_multi_user'](): boolean {
+  get option_w32_multi_user(): boolean {
     return this.tlpdbopt_w32_multi_user;
   }
 
   static {
     for (const key of keys<PickProperties<Profile, boolean>>()) {
-      Type(() => Number)(Profile.prototype, key);
+      Type(() => Number)(this.prototype, key);
     }
   }
 }
@@ -325,3 +304,5 @@ declare module 'util/types' {
   // eslint-disable-next-line @typescript-eslint/no-shadow
   function isNativeError(error: unknown): error is NodeJS.ErrnoException;
 }
+
+/* eslint @typescript-eslint/naming-convention: off */

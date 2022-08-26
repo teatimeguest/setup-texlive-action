@@ -5,8 +5,24 @@ import * as process from 'process';
 import * as cache from '@actions/cache';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
+import { type ClassTransformOptions, instanceToPlain } from 'class-transformer';
 
 import * as log from '#/log';
+
+export abstract class Serializable {
+  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+  toPlain(options?: ClassTransformOptions): object {
+    return instanceToPlain(this, options);
+  }
+
+  toJSON(): object {
+    return this.toPlain();
+  }
+
+  toString(): string {
+    return JSON.stringify(this);
+  }
+}
 
 /**
  * Extracts files from an archive.
