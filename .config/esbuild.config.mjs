@@ -8,6 +8,13 @@ await esbuild.build({
   mainFields: ['module', 'main'],
   conditions: ['module', 'import', 'node', 'default'],
   outdir: 'dist',
+  plugins: [{
+    name: 'resolvePath',
+    setup: ({ onResolve, resolve }) => onResolve(
+      { filter: /^#\// },
+      ({ path, ...options }) => resolve(path.replace('#', '.'), options),
+    ),
+  }],
   logLevel: 'info',
   logOverride: {
     ['this-is-undefined-in-esm']: 'debug',

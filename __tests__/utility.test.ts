@@ -56,7 +56,7 @@ describe('determine', () => {
       jest.mocked(glob.create).mockResolvedValueOnce(
         { glob: async () => matched } as glob.Globber,
       );
-      await expect(util.determine('<pattern>')).resolves.toBeUndefined();
+      await expect(util.determine('<pattern>')).rejects.toThrow('');
     },
   );
 });

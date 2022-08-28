@@ -30,7 +30,6 @@
     // ttypescript
     "plugins": [
       { "transform": "ts-transformer-keys/transformer" },
-      { "transform": "typescript-transform-paths", "useRootDirs": true }
     ]
   },
   "include": ["./src/*.ts"]

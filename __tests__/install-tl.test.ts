@@ -47,8 +47,8 @@ jest.mock(
   }),
 );
 jest.mock('#/texlive', () => {
-  const { Tlmgr, Version, historic } = jest.requireActual('#/texlive');
-  return { Tlmgr, Version, historic };
+  const { Version, tlnet, tlpkg } = jest.requireActual('#/texlive');
+  return { Version, tlnet, tlpkg };
 });
 jest.unmock('#/install-tl');
 jest.spyOn(InstallTL, 'download');
@@ -57,14 +57,21 @@ const fail = (): any => {
   throw new Error();
 };
 
+const texmf = {
+  TEXDIR: 'TEXDIR',
+  TEXMFLOCAL: 'TEXMFLOCAL',
+  TEXMFHOME: 'TEXMFHOME',
+  TEXMFCONFIG: 'TEXMFCONFIG',
+  TEXMFVAR: 'TEXMFVAR',
+};
+
 describe('InstallTL', () => {
   describe('run', () => {
     it('installs TeX Live 2008', async () => {
       jest.mocked(os.platform).mockReturnValue('linux');
       const installtl = new (InstallTL as any)('2008', '');
-      await installtl.run(new Profile('2008', '/usr/local/texlive'));
+      await installtl.run(new Profile('2008', texmf));
       expect(getExecOutput).toHaveBeenCalledWith(expect.stringContaining(''), [
-        '-no-gui',
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),
         '-location',
@@ -75,9 +82,8 @@ describe('InstallTL', () => {
     it('installs TeX Live 2012', async () => {
       jest.mocked(os.platform).mockReturnValue('linux');
       const installtl = new (InstallTL as any)('2012', '');
-      await installtl.run(new Profile('2012', '/usr/local/texlive'));
+      await installtl.run(new Profile('2012', texmf));
       expect(getExecOutput).toHaveBeenCalledWith(expect.stringContaining(''), [
-        '-no-gui',
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),
         '-repository',
@@ -88,9 +94,8 @@ describe('InstallTL', () => {
     it(`installs TeX Live ${Version.LATEST}`, async () => {
       jest.mocked(os.platform).mockReturnValue('linux');
       const installtl = new (InstallTL as any)(Version.LATEST, '');
-      await installtl.run(new Profile(Version.LATEST, '/usr/local/texlive'));
+      await installtl.run(new Profile(Version.LATEST, texmf));
       expect(getExecOutput).toHaveBeenCalledWith(expect.stringContaining(''), [
-        '-no-gui',
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),
       ]);
@@ -203,44 +208,28 @@ describe('Profile', () => {
     });
 
     it('uses scheme-infraonly by default', () => {
-      expect(new Profile(Version.LATEST, '')).toHaveProperty(
+      expect(new Profile(Version.LATEST, texmf)).toHaveProperty(
         'selected_scheme',
         'scheme-infraonly',
       );
     });
 
     it('uses scheme-minimal for versions prior to 2016', () => {
-      expect(new Profile('2008', '')).toHaveProperty(
+      expect(new Profile('2008', texmf)).toHaveProperty(
         'selected_scheme',
         'scheme-minimal',
       );
     });
 
-    it('sets TEXMF properly', () => {
-      const profile = new Profile(Version.LATEST, '/usr/local/texlive');
-      expect(profile).toHaveProperty(
-        'TEXDIR',
-        `/usr/local/texlive/${Version.LATEST}`,
-      );
-      expect(profile).toHaveProperty(
-        'TEXMFLOCAL',
-        '/usr/local/texlive/texmf-local',
-      );
-      expect(profile).toHaveProperty(
-        'TEXMFSYSCONFIG',
-        `/usr/local/texlive/${Version.LATEST}/texmf-config`,
-      );
-    });
-
     it('sets instopt_adjustrepo to true for the latest version', () => {
-      expect(new Profile(Version.LATEST, '')).toHaveProperty(
+      expect(new Profile(Version.LATEST, texmf)).toHaveProperty(
         'instopt_adjustrepo',
         true,
       );
     });
 
     it('sets instopt_adjustrepo to false for an older version', () => {
-      expect(new Profile('2018', '')).toHaveProperty(
+      expect(new Profile('2018', texmf)).toHaveProperty(
         'instopt_adjustrepo',
         false,
       );
@@ -250,21 +239,21 @@ describe('Profile', () => {
   describe('toString', () => {
     it('does not emits Windows-only options on Linux', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
-      const profile = new Profile(Version.LATEST, '').toString();
+      const profile = new Profile(Version.LATEST, texmf).toString();
       expect(profile).not.toMatch('desktop_integration');
       expect(profile).not.toMatch('file_assocs');
     });
 
     it('emits Windows-only options on Windows', () => {
       jest.mocked(os.platform).mockReturnValue('win32');
-      const profile = new Profile(Version.LATEST, '').toString();
+      const profile = new Profile(Version.LATEST, texmf).toString();
       expect(profile).toMatch(/^tlpdbopt_desktop_integration 0$/mu);
       expect(profile).toMatch(/^tlpdbopt_w32_multi_user 0$/mu);
     });
 
     it('uses old option names for an older version', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
-      const profile = new Profile('2010', '').toString();
+      const profile = new Profile('2010', texmf).toString();
       expect(profile).toMatch(/^option_/mu);
       expect(profile).not.toMatch(/^instopt_/mu);
       expect(profile).not.toMatch(/^tlpdbopt_/mu);
@@ -272,7 +261,7 @@ describe('Profile', () => {
 
     it('converts boolean to number', () => {
       jest.mocked(os.platform).mockReturnValue('linux');
-      const profile = new Profile('2015', '').toString();
+      const profile = new Profile('2015', texmf).toString();
       expect(profile).toMatch(/ [01]$/mu);
       expect(profile).not.toMatch(/ (?:true|false)$/mu);
     });
@@ -281,7 +270,7 @@ describe('Profile', () => {
   describe('open', () => {
     it('yields file path only once', async () => {
       jest.mocked(os.platform).mockReturnValue('linux');
-      const profile = new Profile(Version.LATEST, '');
+      const profile = new Profile(Version.LATEST, texmf);
       for await (const dest of profile.open()) {
         expect(dest).pass('');
       }
@@ -290,7 +279,7 @@ describe('Profile', () => {
 
     it('deletes temporary directory', async () => {
       jest.mocked(os.platform).mockReturnValue('linux');
-      const profile = new Profile(Version.LATEST, '');
+      const profile = new Profile(Version.LATEST, texmf);
       for await (const dest of profile.open()) {
         expect(dest).pass('');
       }
@@ -299,7 +288,7 @@ describe('Profile', () => {
 
     it('deletes temporary directory even if an exception thrown', async () => {
       jest.mocked(os.platform).mockReturnValue('linux');
-      const profile = new Profile(Version.LATEST, '');
+      const profile = new Profile(Version.LATEST, texmf);
       await expect(
         (async () => {
           for await (const dest of profile.open()) {

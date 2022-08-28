@@ -38,14 +38,14 @@ describe('Tlmgr', () => {
         stdout: '/usr/local/texlive/2021/texmf-config\n',
         stderr: '',
       });
-      const tlmgr = new Tlmgr('2021', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2021', '');
       await expect(tlmgr.conf.texmf('TEXMFCONFIG')).resolves.toBe(
         '/usr/local/texlive/2021/texmf-config',
       );
     });
 
     it('sets the value to the given key with `tlmgr`', async () => {
-      const tlmgr = new Tlmgr('2021', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2021', '');
       await tlmgr.conf.texmf('TEXMFVAR', '~/.local/texlive/2021/texmf-var');
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'conf',
@@ -56,14 +56,14 @@ describe('Tlmgr', () => {
     });
 
     it('sets the value to the given key by environment variable', async () => {
-      const tlmgr = new Tlmgr('2008', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2008', '/usr/local/texlive/2008');
       await tlmgr.conf.texmf('TEXMFHOME', '~/.texmf');
       expect(core.exportVariable).toHaveBeenCalledWith('TEXMFHOME', '~/.texmf');
     });
   });
 
   describe('install', () => {
-    const tlmgr = new Tlmgr(Version.LATEST, '/usr/local/texlive');
+    const tlmgr = new Tlmgr(Version.LATEST, '');
 
     it('does not invoke `tlmgr install` if the argument is empty', async () => {
       await tlmgr.install();
@@ -94,16 +94,21 @@ describe('Tlmgr', () => {
   });
 
   describe('path.add', () => {
-    const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
+    const tlmgr = new Tlmgr('2019', '/usr/local/texlive/2019');
 
     it('adds the bin directory to the PATH', async () => {
       jest.mocked(util.determine).mockResolvedValueOnce('<path>');
       await tlmgr.path.add();
+      expect(util.determine).toHaveBeenCalledWith(
+        '/usr/local/texlive/2019/bin/*',
+      );
       expect(core.addPath).toHaveBeenCalledWith('<path>');
     });
 
     it('fails as the bin directory cannot be located', async () => {
-      jest.mocked(util.determine).mockResolvedValueOnce(undefined);
+      jest.mocked(util.determine).mockImplementationOnce(() => {
+        throw new Error();
+      });
       await expect(tlmgr.path.add()).rejects.toThrow(
         "Unable to locate TeX Live's binary directory",
       );
@@ -112,7 +117,7 @@ describe('Tlmgr', () => {
 
   describe('pinning.add', () => {
     it('pins a repository with a glob', async () => {
-      const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2019', '');
       await tlmgr.pinning.add('<repository>', '*');
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'pinning',
@@ -123,7 +128,7 @@ describe('Tlmgr', () => {
     });
 
     it('pins a repository with globs', async () => {
-      const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2019', '');
       await tlmgr.pinning.add('<repository>', '<glob1>', '<glob2>');
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'pinning',
@@ -135,7 +140,7 @@ describe('Tlmgr', () => {
     });
 
     it('fails since the `pinning` action is not implemented', async () => {
-      const tlmgr = new Tlmgr('2012', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2012', '');
       await expect(async () => {
         await tlmgr.pinning.add('<repository>', '*');
       })
@@ -148,7 +153,7 @@ describe('Tlmgr', () => {
 
   describe('repository.add', () => {
     it('adds a repository with a tag', async () => {
-      const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2019', '');
       await expect(tlmgr.repository.add('<repository>', '<tag>')).resolves.toBe(
         true,
       );
@@ -160,7 +165,7 @@ describe('Tlmgr', () => {
     });
 
     it('adds a repository with the empty tag', async () => {
-      const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2019', '');
       await expect(tlmgr.repository.add('<repository>', '')).resolves.toBe(
         true,
       );
@@ -172,7 +177,7 @@ describe('Tlmgr', () => {
     });
 
     it('adds a repository with no tags', async () => {
-      const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2019', '');
       await expect(tlmgr.repository.add('<repository>')).resolves.toBe(true);
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         'tlmgr',
@@ -191,7 +196,7 @@ describe('Tlmgr', () => {
         ]
           .join('\n'),
       });
-      const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2019', '');
       await expect(tlmgr.repository.add('<repository>', '<tag>')).resolves.toBe(
         false,
       );
@@ -207,7 +212,7 @@ describe('Tlmgr', () => {
         ]
           .join('\n'),
       });
-      const tlmgr = new Tlmgr('2019', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2019', '');
       await expect(
         tlmgr.repository.add('<repository>', '<tag>'),
       )
@@ -216,7 +221,7 @@ describe('Tlmgr', () => {
     });
 
     it('fails since the `repository` action is not implemented', async () => {
-      const tlmgr = new Tlmgr('2011', '/usr/local/texlive');
+      const tlmgr = new Tlmgr('2011', '');
       await expect(async () => {
         await tlmgr.repository.add('<repository>', '<tag>');
       })
@@ -279,7 +284,7 @@ describe('Tlmgr', () => {
 
 describe('DependsTxt.parse', () => {
   it('parses DEPENDS.txt', () => {
-    const manifest = DependsTxt.parse(
+    const manifest = new DependsTxt(
       [
         'foo bar  baz',
         'hard\tqux ',
@@ -302,11 +307,11 @@ describe('DependsTxt.parse', () => {
     expect(manifest.get('corge')).toHaveProperty('soft', new Set());
     expect(manifest.get('grault')).toHaveProperty('hard', new Set(['waldo']));
     expect(manifest.get('grault')).toHaveProperty('soft', new Set(['garply']));
-    expect([...manifest.keys()]).toStrictEqual(['', 'corge', 'grault']);
+    expect([...manifest]).toHaveLength(3);
   });
 
   it('tolerates some syntax errors', () => {
-    const manifest = DependsTxt.parse(
+    const manifest = new DependsTxt(
       [
         'package', // no argument
         'package#', // no argument
@@ -319,7 +324,7 @@ describe('DependsTxt.parse', () => {
     );
     expect(manifest.get('')).toHaveProperty('hard', new Set());
     expect(manifest.get('')).toHaveProperty('soft', new Set());
-    expect([...manifest.keys()]).toStrictEqual(['']);
+    expect([...manifest]).toHaveLength(1);
     expect(log.warn).toHaveBeenCalledTimes(3);
   });
 });

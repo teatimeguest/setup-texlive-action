@@ -1,4 +1,8 @@
 declare global {
+  interface ErrorConstructor {
+    new(message: string, options: { readonly cause: unknown }): Error;
+  }
+
   namespace NodeJS {
     interface ErrnoException {
       stack: string;

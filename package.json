@@ -9,14 +9,13 @@
     "format": "dprint -c .config/dprint.json fmt",
     "format-check": "dprint -c .config/dprint.json check && ec --exclude=^dist",
     "lint": "eslint -c .config/eslintrc.yml --ext .ts __tests__ src",
-    "postinstall": "patch-package --patch-dir .config/patches",
     "test": "jest -c .config/jest.config.mjs --coverage",
     "type-check": "ttsc --noEmit",
     "version": "bash scripts/bump-version.sh"
   },
   "author": "@teatimeguest",
   "license": "MIT",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "engines": {
     "node": ">=16"
   },
@@ -33,27 +32,24 @@
     "tslib": "2.4.0"
   },
   "devDependencies": {
-    "@types/jest": "28.1.8",
-    "@types/node": "18.7.13",
-    "@typescript-eslint/eslint-plugin": "5.33.1",
-    "@typescript-eslint/parser": "5.33.1",
-    "dprint": "0.30.3",
+    "@types/jest": "29.0.2",
+    "@types/node": "18.7.18",
+    "@typescript-eslint/eslint-plugin": "5.37.0",
+    "@typescript-eslint/parser": "5.37.0",
+    "dprint": "0.32.1",
     "editorconfig-checker": "4.0.2",
-    "esbuild": "0.15.5",
-    "eslint": "8.22.0",
+    "esbuild": "0.15.7",
+    "eslint": "8.23.1",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-jest": "26.8.7",
+    "eslint-plugin-jest": "27.0.4",
     "eslint-plugin-node": "11.1.0",
-    "jest": "28.1.3",
-    "jest-extended": "3.0.2",
-    "jest-mock-extended": "2.0.7",
-    "patch-package": "6.4.7",
+    "jest": "29.0.3",
+    "jest-extended": "3.1.0",
     "ts-essentials": "9.3.0",
-    "ts-jest": "28.0.8",
+    "ts-jest": "29.0.1",
     "ts-transformer-keys": "0.4.3",
     "ttypescript": "1.5.13",
-    "typescript": "4.7.4",
-    "typescript-transform-paths": "3.3.1"
+    "typescript": "4.8.3"
   }
 }

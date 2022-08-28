@@ -1,12 +1,11 @@
 import * as core from '@actions/core';
 import 'jest-extended';
-import { mock } from 'jest-mock-extended';
 import type { DeepWritable } from 'ts-essentials';
 
 import * as action from '#/action';
-import { Env, Inputs, Outputs, State } from '#/context';
-import { InstallTL, Profile } from '#/install-tl';
-import { Tlmgr, Version } from '#/texlive';
+import { Inputs, Outputs, State } from '#/context';
+import { InstallTL } from '#/install-tl';
+import { type Texmf, Tlmgr, Version } from '#/texlive';
 import * as util from '#/utility';
 import CacheType = util.CacheType;
 
@@ -24,7 +23,7 @@ jest.mocked(core.setFailed).mockImplementation((error) => {
 });
 
 jest.mock('#/texlive', () => {
-  const { contrib, Version } = jest.requireActual('#/texlive');
+  const { Version, tlnet } = jest.requireActual('#/texlive');
   const mocks = jest.createMockFromModule<any>('#/texlive');
   mocks.Tlmgr.prototype = {
     conf: new mocks.Tlmgr.Conf(),
@@ -34,35 +33,31 @@ jest.mock('#/texlive', () => {
     repository: new mocks.Tlmgr.Repository(),
     update: jest.fn(),
   };
-  return { ...mocks, contrib, Version };
+  return { ...mocks, Version, tlnet };
 });
 let ctx: DeepWritable<{
   inputs: Inputs;
   outputs: Outputs;
-  env: Env;
 }>;
 beforeEach(() => {
   ctx = {
     inputs: {
       cache: true,
       packages: Promise.resolve(new Set()),
-      prefix: '',
+      texmf: { TEXDIR: '' } as Texmf,
       tlcontrib: false,
       updateAllPackages: false,
       version: Version.LATEST,
     },
-    outputs: mock<Outputs>(),
-    env: mock<Env>(),
+    outputs: { emit: jest.fn() } as unknown as Outputs,
   };
   ctx.outputs['cache-hit'] = false;
-  jest.mocked(Env.get).mockReturnValue(ctx.env);
   jest.mocked(Inputs).mockReturnValue(ctx.inputs);
   jest.mocked(Outputs).mockReturnValue(ctx.outputs);
-  jest // eslint-disable-next-line jest/unbound-method
-    .mocked(InstallTL.download)
-    .mockResolvedValue(new (InstallTL as unknown as new() => InstallTL)());
-  jest.mocked(Profile).mockReturnValue({ TEXDIR: '' } as Profile);
 });
+jest // eslint-disable-next-line jest/unbound-method
+  .mocked(InstallTL.acquire)
+  .mockResolvedValue(new (InstallTL as unknown as new() => InstallTL)());
 // eslint-disable-next-line jest/unbound-method
 jest.mocked(State.load).mockReturnValue(null);
 
@@ -215,7 +210,7 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
   'adjusts old settings if they are not appropriate (case %s)',
   async (kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
-    ctx.env.TEXLIVE_INSTALL_TEXMFHOME = '<new>';
+    ctx.inputs.texmf.TEXMFHOME = '<new>';
     // eslint-disable-next-line jest/unbound-method
     const tlmgr = jest.mocked<any>(Tlmgr.Conf.prototype.texmf);
     tlmgr.mockResolvedValue('<old>');
@@ -229,7 +224,7 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
   'does not modify old settings if not necessary (case %s)',
   async (kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
-    ctx.env.TEXLIVE_INSTALL_TEXMFHOME = '<old>';
+    ctx.inputs.texmf.TEXMFHOME = '<old>';
     // eslint-disable-next-line jest/unbound-method
     const tlmgr = jest.mocked<any>(Tlmgr.Conf.prototype.texmf);
     tlmgr.mockResolvedValue('<old>');

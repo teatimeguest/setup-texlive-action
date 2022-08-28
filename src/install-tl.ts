@@ -1,17 +1,17 @@
-import * as fs from 'fs/promises';
-import * as os from 'os';
+import { mkdtemp, readFile, writeFile } from 'fs/promises';
+import { platform } from 'os';
 import * as path from 'path';
 import { isNativeError } from 'util/types';
 
-import { getExecOutput as popen } from '@actions/exec';
-import { rmRF as rm } from '@actions/io';
-import * as tool from '@actions/tool-cache';
+import { getExecOutput as spawn } from '@actions/exec';
+import { rmRF } from '@actions/io';
+import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
 import { Exclude, Expose, Type } from 'class-transformer';
-import type { PickProperties } from 'ts-essentials';
+import type { MarkOptional, PickProperties } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
-import { Tlmgr, Version, historic } from '#/texlive';
+import { type Texmf, Version, tlnet, tlpkg } from '#/texlive';
 import { Serializable, extract, tmpdir } from '#/utility';
 
 /**
@@ -23,11 +23,11 @@ export class InstallTL {
     private readonly installtl: string,
   ) {}
 
-  async run(profile: Readonly<Profile>): Promise<void> {
+  async run(profile: Profile): Promise<void> {
     for await (const dest of profile.open()) {
-      const options = ['-no-gui', '-profile', dest];
+      const options = ['-profile', dest];
       if (!Version.isLatest(this.version)) {
-        const repo = historic(this.version);
+        const repo = tlnet.historic(this.version);
         // `install-tl` of versions prior to 2017 does not support HTTPS, and
         // that of version 2017 supports HTTPS but does not work properly.
         if (this.version < '2018') {
@@ -39,7 +39,8 @@ export class InstallTL {
           repo.href,
         );
       }
-      Tlmgr.check((await popen(this.installtl, options)).stderr);
+      const { stderr } = await spawn(this.installtl, options);
+      tlpkg.check(stderr);
     }
     await patch(this.version, profile.TEXDIR);
   }
@@ -47,51 +48,46 @@ export class InstallTL {
   static restore(version: Version): InstallTL | undefined {
     let dest = '';
     try {
-      dest = tool.find(InstallTL.archive(), version);
-    } catch (error) {
-      log.info('Failed to restore installer', { cause: error });
+      dest = findTool(this.executable(version), version);
+    } catch (cause) {
+      log.info('Failed to restore installer', { cause });
     }
     if (dest === '') {
       return undefined;
     } else {
       log.info('Found in tool cache');
-      return new InstallTL(
-        version,
-        path.join(dest, InstallTL.executable(version)),
-      );
+      return new this(version, path.join(dest, this.executable(version)));
     }
   }
 
   static async download(version: Version): Promise<InstallTL> {
-    const url = InstallTL.url(version).href;
+    const url = this.url(version).href;
     log.info(`Downloading ${url}`);
-    const archive = await tool.downloadTool(url);
+    const archive = await downloadTool(url);
 
     log.info(`Extracting installer from ${archive}`);
     const dest = await extract(
       archive,
-      os.platform() === 'win32' ? 'zip' : 'tgz',
+      platform() === 'win32' ? 'zip' : 'tgz',
     );
     await patch(version, dest);
 
     try {
       log.info('Adding to tool cache');
-      await tool.cacheDir(dest, InstallTL.archive(), version);
-    } catch (error) {
-      log.info('Failed to cache installer', { cause: error });
+      await cacheDir(dest, this.executable(version), version);
+    } catch (cause) {
+      log.info('Failed to cache installer', { cause });
     }
 
-    return new InstallTL(
-      version,
-      path.join(dest, InstallTL.executable(version)),
-    );
+    return new this(version, path.join(dest, this.executable(version)));
   }
 
-  static executable(
-    version: Version,
-    platform: NodeJS.Platform = os.platform(),
-  ): string {
-    if (platform !== 'win32') {
+  static async acquire(version: Version): Promise<InstallTL> {
+    return this.restore(version) ?? await this.download(version);
+  }
+
+  static executable(version: Version): string {
+    if (platform() !== 'win32') {
       return 'install-tl';
     } else if (version < '2013') {
       return 'install-tl.bat';
@@ -100,51 +96,53 @@ export class InstallTL {
     }
   }
 
-  private static archive(): string {
-    return os.platform() === 'win32'
+  private static url(version: Version): URL {
+    const archive = platform() === 'win32'
       ? 'install-tl.zip'
       : 'install-tl-unx.tar.gz';
-  }
-
-  private static url(version: Version): URL {
-    let target = InstallTL.archive();
-    if (Version.isLatest(version)) {
-      target = path.posix.join('..', target);
-    }
-    return new URL(target, historic(version));
+    return new URL(
+      Version.isLatest(version) ? path.posix.join('..', archive) : archive,
+      tlnet.historic(version),
+    );
   }
 }
 
 @Exclude()
-export class Profile extends Serializable {
-  constructor(readonly version: Version, prefix: string) {
+export class Profile extends Serializable implements Texmf.SystemTrees {
+  constructor(
+    readonly version: Version,
+    { TEXDIR, TEXMFLOCAL, TEXMFSYSCONFIG, TEXMFSYSVAR }: MarkOptional<
+      Texmf.SystemTrees,
+      'TEXMFSYSCONFIG' | 'TEXMFSYSVAR'
+    >,
+  ) {
     super();
-    this.TEXDIR = path.join(prefix, version);
-    this.TEXMFLOCAL = path.join(prefix, 'texmf-local');
-    this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
-    this.TEXMFSYSVAR = path.join(this.TEXDIR, 'texmf-var');
     // `scheme-infraonly` was first introduced in TeX Live 2016.
     this.selected_scheme = `scheme-${
       version < '2016' ? 'minimal' : 'infraonly'
     }`;
-    this.instopt_adjustrepo = Version.isLatest(version);
+    this.TEXDIR = TEXDIR;
+    this.TEXMFLOCAL = TEXMFLOCAL;
+    this.TEXMFSYSCONFIG = TEXMFSYSCONFIG ?? path.join(TEXDIR, 'texmf-config');
+    this.TEXMFSYSVAR = TEXMFSYSVAR ?? path.join(TEXDIR, 'texmf-var');
+    this.instopt_adjustrepo = Version.isLatest(this.version);
   }
 
   async *open(this: Readonly<this>): AsyncGenerator<string, void> {
-    const tmp = await fs.mkdtemp(path.join(tmpdir(), 'setup-texlive-'));
+    const tmp = await mkdtemp(path.join(tmpdir(), 'setup-texlive-'));
     const target = path.join(tmp, 'texlive.profile');
-    await fs.writeFile(target, this.toString());
+    await writeFile(target, this.toString());
     try {
       yield target;
     } finally {
-      await rm(tmp);
+      await rmRF(tmp);
     }
   }
 
   override toString(): string {
     const plain = this.toPlain({
       version: Number(this.version),
-      groups: [os.platform()],
+      groups: [platform()],
     });
     return Object.entries(plain).map((entry) => entry.join(' ')).join('\n');
   }
@@ -180,7 +178,7 @@ export class Profile extends Serializable {
   @Expose({ since: 2017, groups: ['win32'] })
   readonly tlpdbopt_w32_multi_user: boolean = false;
 
-  // Deleted option
+  // Removed option
   @Expose({ since: 2012, until: 2017, groups: ['win32'] })
   readonly option_menu_integration: boolean = false;
 
@@ -230,10 +228,17 @@ export class Profile extends Serializable {
 }
 
 async function patch(version: Version, base: string): Promise<void> {
-  const fixes = [{
+  interface Patch {
+    readonly platforms?: NodeJS.Platform;
+    readonly versions?: { readonly since?: Version; readonly until?: Version };
+    readonly file: string;
+    readonly from: ReadonlyArray<string | Readonly<RegExp>>;
+    readonly to: ReadonlyArray<string>;
+  }
+  const patches: ReadonlyArray<Patch> = [{
     // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
-    platform: 'win32',
-    file: InstallTL.executable(version, 'win32'),
+    platforms: 'win32',
+    file: InstallTL.executable(version),
     from: [/\bpause(?: Done)?\b/gmu],
     to: [''],
   }, {
@@ -245,37 +250,40 @@ async function patch(version: Version, base: string): Promise<void> {
   }, {
     // Defines Code Page 65001 as an alias for UTF-8 on Windows.
     // (see: https://github.com/dankogai/p5-encode/issues/37)
-    platform: 'win32',
+    platforms: 'win32',
     versions: { since: '2015', until: '2016' },
     file: 'tlpkg/tlperl/lib/Encode/Alias.pm',
     from: ['# utf8 is blessed :)'],
     to: [`define_alias(qr/cp65001/i => '"utf-8-strict"');`],
   }, {
     // Makes it possible to use `\` as a directory separator on Windows.
-    platform: 'win32',
+    platforms: 'win32',
     versions: { until: '2020' },
     file: 'tlpkg/TeXLive/TLUtils.pm',
     from: ['split (/\\//, $tree)'],
     to: ['split (/[\\/\\\\]/, $$tree)'],
   }, {
-    // Add support for macOs 11 or later.
-    platform: 'darwin',
+    // Adds support for macOS 11 or later.
+    platforms: 'darwin',
     versions: { since: '2017', until: '2020' },
     file: 'tlpkg/TeXLive/TLUtils.pm',
     from: ['$os_major != 10', '$os_minor >= $mactex_darwin'],
     to: ['$$os_major < 10', '$$os_major >= 11 || $&'],
-  }];
-  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-  const apply = async (fix: typeof fixes[number]): Promise<void> => {
-    if (
-      (fix.platform === undefined || fix.platform === os.platform())
-      && (fix.versions?.since ?? version) <= version
-      && (fix.versions?.until ?? '9999') > version
-    ) {
-      const target = path.join(base, fix.file);
-      let contents: string;
+  }] as const;
+  const apply = async (
+    { platforms = platform(), versions = {}, file, from, to }: Patch,
+  ): Promise<void> => {
+    const { since = version, until = '9999' as Version } = versions;
+    if (platforms === platform() && since <= version && version < until) {
+      const target = path.join(base, file);
       try {
-        contents = await fs.readFile(target, 'utf8');
+        await writeFile(
+          target,
+          from.reduce<string>(
+            (contents, search, i) => contents.replace(search, to[i] ?? ''),
+            await readFile(target, 'utf8'),
+          ),
+        );
       } catch (error) {
         if (isNativeError(error) && error.code === 'ENOENT') {
           log.debug(`${target} not found`);
@@ -283,14 +291,10 @@ async function patch(version: Version, base: string): Promise<void> {
         }
         throw error;
       }
-      fix.from.forEach((search, i) => {
-        contents = contents.replace(search, fix.to[i] ?? '');
-      });
-      await fs.writeFile(target, contents);
     }
   };
   log.info('Applying patches');
-  await Promise.all(fixes.map(apply));
+  await Promise.all(patches.map(apply));
 }
 
 /* eslint @typescript-eslint/naming-convention: off */

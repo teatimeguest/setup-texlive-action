@@ -28,6 +28,6 @@
     "./{src,__tests__}/**/*.ts"
   ],
   "plugins": [
-    "https://plugins.dprint.dev/typescript-0.71.2.wasm"
+    "https://plugins.dprint.dev/typescript-0.73.1.wasm"
   ]
 }

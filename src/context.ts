@@ -1,5 +1,4 @@
-import * as fs from 'fs/promises';
-import * as os from 'os';
+import { homedir } from 'os';
 import * as path from 'path';
 import * as process from 'process';
 
@@ -7,11 +6,10 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import { Exclude, Expose, deserialize } from 'class-transformer';
 import { cache as Cache } from 'decorator-cache-getter';
-import type { PickProperties } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
-import { DependsTxt, Version } from '#/texlive';
+import { DependsTxt, type Texmf, Version } from '#/texlive';
 import { Serializable, tmpdir } from '#/utility';
 
 export class Inputs {
@@ -28,28 +26,40 @@ export class Inputs {
   @Cache
   get packages(): Promise<Set<string>> {
     return (async () => {
-      const list = core.getInput('packages').split(/(?:#.*$|\s+)/mu);
-      const file = core.getInput('package-file');
-      if (file !== '') {
-        const contents = await fs.readFile(file, 'utf8');
-        for (const { hard, soft } of DependsTxt.parse(contents).values()) {
-          list.push(...hard, ...soft);
+      type Entry = [string, DependsTxt.Dependencies];
+      async function* dependsTxt(): AsyncGenerator<Entry, void, void> {
+        const inline = core.getInput('packages');
+        if (inline !== '') {
+          yield* new DependsTxt(inline);
+        }
+        const file = core.getInput('package-file');
+        if (file !== '') {
+          yield* await DependsTxt.fromFile(file);
         }
       }
-      return new Set(list.filter(Boolean).sort());
+      const list = [];
+      for await (const [, { hard, soft }] of dependsTxt()) {
+        list.push(...hard, ...soft);
+      }
+      return new Set(list.sort());
     })();
   }
 
   @Cache
-  get prefix(): string {
+  get texmf(): Omit<Texmf, 'TEXMFSYSCONFIG' | 'TEXMFSYSVAR'> {
+    const env = new Env(this.version);
     const input = core.getInput('prefix');
-    if (input !== '') {
-      return path.normalize(input);
-    }
-    return path.normalize(
-      process.env['TEXLIVE_INSTALL_PREFIX']
-        ?? path.join(tmpdir(), 'setup-texlive'),
+    const prefix = path.normalize(
+      input !== '' ? input : env.TEXLIVE_INSTALL_PREFIX,
     );
+    const TEXDIR = path.join(prefix, this.version);
+    return {
+      TEXDIR,
+      TEXMFLOCAL: path.join(prefix, 'texmf-local'),
+      TEXMFHOME: env.TEXLIVE_INSTALL_TEXMFHOME,
+      TEXMFCONFIG: env.TEXLIVE_INSTALL_TEXMFCONFIG,
+      TEXMFVAR: env.TEXLIVE_INSTALL_TEXMFVAR,
+    };
   }
 
   @Cache
@@ -78,13 +88,8 @@ export class Inputs {
     if (input === 'latest') {
       return Version.LATEST;
     }
-    try {
-      return Version.validate(input);
-    } catch (error) {
-      throw new TypeError(
-        `Version must be specified by year or 'latest': Caused by ${error}`,
-      );
-    }
+    Version.validate(input);
+    return input;
   }
 }
 
@@ -110,39 +115,39 @@ export interface Env {
   readonly TEXLIVE_INSTALL_NO_RESUME?: string;
   readonly TEXLIVE_INSTALL_NO_WELCOME: string;
   readonly TEXLIVE_INSTALL_PAPER?: string;
-  readonly TEXLIVE_INSTALL_PREFIX?: string;
-  readonly TEXLIVE_INSTALL_TEXDIR: never;
+  readonly TEXLIVE_INSTALL_PREFIX: string;
   readonly TEXLIVE_INSTALL_TEXMFCONFIG: string;
   readonly TEXLIVE_INSTALL_TEXMFVAR: string;
   readonly TEXLIVE_INSTALL_TEXMFHOME: string;
-  readonly TEXLIVE_INSTALL_TEXMFLOCAL: never;
-  readonly TEXLIVE_INSTALL_TEXMFSYSCONFIG: never;
-  readonly TEXLIVE_INSTALL_TEXMFSYSVAR: never;
   readonly NOPERLDOC?: string;
 }
 
-export namespace Env {
-  export function get(version: Version): Env {
-    for (const key of keys<PickProperties<Env, never>>() as Array<keyof Env>) {
+export class Env {
+  constructor(version: Version) {
+    type Keys = `TEXLIVE_INSTALL_${keyof Texmf.SystemTrees}`;
+    for (const key of keys<Record<Keys, unknown>>()) {
       if (key in process.env) {
         log.warn(`\`${key}\` is set, but ignored`);
         delete process.env[key];
       }
     }
-    const home = os.homedir();
-    const texdir = path.join(home, '.local', 'texlive', version);
-    for (
-      const [key, value] of Object.entries({
-        TEXLIVE_INSTALL_ENV_NOCHECK: '1',
-        TEXLIVE_INSTALL_NO_WELCOME: '1',
-        TEXLIVE_INSTALL_TEXMFCONFIG: path.join(texdir, 'texmf-config'),
-        TEXLIVE_INSTALL_TEXMFVAR: path.join(texdir, 'texmf-var'),
-        TEXLIVE_INSTALL_TEXMFHOME: path.join(home, 'texmf'),
-      })
-    ) {
+    for (const [key, value] of Object.entries(Env.defaults(version))) {
       process.env[key] ??= value;
     }
+    // eslint-disable-next-line no-constructor-return
     return process.env as unknown as Env;
+  }
+
+  static defaults(version: Version): Env {
+    const TEXUSERDIR = path.join(homedir(), '.local', 'texlive', version);
+    return {
+      TEXLIVE_INSTALL_ENV_NOCHECK: '1',
+      TEXLIVE_INSTALL_NO_WELCOME: '1',
+      TEXLIVE_INSTALL_PREFIX: path.join(tmpdir(), 'setup-texlive'),
+      TEXLIVE_INSTALL_TEXMFHOME: path.join(homedir(), 'texmf'),
+      TEXLIVE_INSTALL_TEXMFCONFIG: path.join(TEXUSERDIR, 'texmf-config'),
+      TEXLIVE_INSTALL_TEXMFVAR: path.join(TEXUSERDIR, 'texmf-var'),
+    };
   }
 }
 

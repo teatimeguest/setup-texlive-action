@@ -3,8 +3,8 @@ import * as path from 'path';
 import * as process from 'process';
 
 import * as cache from '@actions/cache';
-import * as glob from '@actions/glob';
-import * as tool from '@actions/tool-cache';
+import { create as createGlobber } from '@actions/glob';
+import { extractTar, extractZip } from '@actions/tool-cache';
 import { type ClassTransformOptions, instanceToPlain } from 'class-transformer';
 
 import * as log from '#/log';
@@ -34,35 +34,33 @@ export async function extract(
   kind: 'zip' | 'tgz',
 ): Promise<string> {
   switch (kind) {
-    case 'tgz': {
-      return await tool.extractTar(archive, undefined, ['xz', '--strip=1']);
-    }
-    case 'zip': {
-      const pattern = path.join(await tool.extractZip(archive), '*');
-      const subdir = await determine(pattern);
-      if (subdir === undefined) {
-        throw new Error(`Unable to locate subdirectory matched to ${pattern}`);
+    case 'tgz':
+      return await extractTar(archive, undefined, ['xz', '--strip=1']);
+    case 'zip':
+      try {
+        return await determine(path.join(await extractZip(archive), '*'));
+      } catch (cause) {
+        throw new Error('Unable to locate subdirectory', { cause });
       }
-      return subdir;
-    }
   }
 }
 
 /**
  * @returns The unique path that matches the given glob pattern.
  */
-export async function determine(pattern: string): Promise<string | undefined> {
-  const globber = await glob.create(pattern, { implicitDescendants: false });
+export async function determine(pattern: string): Promise<string> {
+  const globber = await createGlobber(pattern, { implicitDescendants: false });
   const matched = await globber.glob();
   if (matched.length === 1) {
-    return matched[0];
+    return matched[0] ?? '';
   }
-  if (matched.length === 0) {
-    log.debug(`No matches to pattern \`${pattern}\` found`);
-  } else {
-    log.debug(`Multiple matches to pattern \`${pattern}\` found: ${matched}`);
-  }
-  return undefined;
+  throw new Error(
+    matched.length === 0
+      ? `No matches to pattern \`${pattern}\` found`
+      : `Multiple matches to pattern \`${pattern}\` found: ${
+        matched.join('; ')
+      }`,
+  );
 }
 
 export async function saveCache(

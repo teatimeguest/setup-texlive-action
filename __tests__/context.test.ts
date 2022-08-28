@@ -115,25 +115,33 @@ describe('Inputs', () => {
     });
   });
 
-  describe('prefix', () => {
-    it('is set to the default prefix', () => {
-      expect(new Inputs()).toHaveProperty('prefix', '<tmpdir>/setup-texlive');
+  describe('texmf', () => {
+    it('has the default values', () => {
+      const texmf = new Inputs().texmf;
+      expect(texmf.TEXDIR).toBe(`<tmpdir>/setup-texlive/${Version.LATEST}`);
+      expect(texmf.TEXMFLOCAL).toBe('<tmpdir>/setup-texlive/texmf-local');
     });
 
-    it('is set to the specified prefix', () => {
+    it('uses prefix', () => {
       process.env['INPUT_PREFIX'] = '<prefix>';
-      expect(new Inputs()).toHaveProperty('prefix', '<prefix>');
+      const texmf = new Inputs().texmf;
+      expect(texmf.TEXDIR).toBe(`<prefix>/${Version.LATEST}`);
+      expect(texmf.TEXMFLOCAL).toBe('<prefix>/texmf-local');
     });
 
     it('uses TEXLIVE_INSTALL_PREFIX if set', () => {
       process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
-      expect(new Inputs()).toHaveProperty('prefix', '<PREFIX>');
+      const texmf = new Inputs().texmf;
+      expect(texmf.TEXDIR).toBe(`<PREFIX>/${Version.LATEST}`);
+      expect(texmf.TEXMFLOCAL).toBe('<PREFIX>/texmf-local');
     });
 
     it('uses prefix if prefix and TEXLIVE_INSTALL_PREFIX are both set', () => {
       process.env['INPUT_PREFIX'] = '<prefix>';
       process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
-      expect(new Inputs()).toHaveProperty('prefix', '<prefix>');
+      const texmf = new Inputs().texmf;
+      expect(texmf.TEXDIR).toBe(`<prefix>/${Version.LATEST}`);
+      expect(texmf.TEXMFLOCAL).toBe('<prefix>/texmf-local');
     });
   });
 
@@ -187,9 +195,7 @@ describe('Inputs', () => {
 
     it('fails with invalid input', () => {
       process.env['INPUT_VERSION'] = 'version';
-      expect(() => new Inputs().version).toThrow(
-        "Version must be specified by year or 'latest'",
-      );
+      expect(() => new Inputs().version).toThrow('');
     });
   });
 });
@@ -206,20 +212,19 @@ describe('Outputs#cache-hit', () => {
 
 describe('Env', () => {
   it('has some default values', () => {
-    expect(Env.get(Version.LATEST)).toMatchObject({
-      ['TEXLIVE_INSTALL_ENV_NOCHECK']: '1',
-      ['TEXLIVE_INSTALL_NO_WELCOME']: '1',
-      ['TEXLIVE_INSTALL_TEXMFCONFIG']:
+    expect(new Env(Version.LATEST)).toMatchObject({
+      TEXLIVE_INSTALL_ENV_NOCHECK: '1',
+      TEXLIVE_INSTALL_NO_WELCOME: '1',
+      TEXLIVE_INSTALL_TEXMFCONFIG:
         `~/.local/texlive/${Version.LATEST}/texmf-config`,
-      ['TEXLIVE_INSTALL_TEXMFVAR']:
-        `~/.local/texlive/${Version.LATEST}/texmf-var`,
-      ['TEXLIVE_INSTALL_TEXMFHOME']: '~/texmf',
+      TEXLIVE_INSTALL_TEXMFVAR: `~/.local/texlive/${Version.LATEST}/texmf-var`,
+      TEXLIVE_INSTALL_TEXMFHOME: '~/texmf',
     });
   });
 
   it('ignores some environment variables', () => {
     process.env['TEXLIVE_INSTALL_TEXDIR'] = '<texdir>';
-    expect(Env.get(Version.LATEST)).not.toHaveProperty(
+    expect(new Env(Version.LATEST)).not.toHaveProperty(
       'TEXLIVE_INSTALL_TEXDIR',
     );
     expect(process.env).not.toHaveProperty('TEXLIVE_INSTALL_TEXDIR');
@@ -231,7 +236,7 @@ describe('Env', () => {
   it('favors user settings over default values', () => {
     process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
     process.env['NOPERLDOC'] = 'true';
-    expect(Env.get(Version.LATEST)).toMatchObject({
+    expect(new Env(Version.LATEST)).toMatchObject({
       ['TEXLIVE_INSTALL_PREFIX']: '<PREFIX>',
       ['NOPERLDOC']: 'true',
     });

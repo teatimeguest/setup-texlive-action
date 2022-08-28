@@ -1,10 +1,10 @@
-import * as os from 'os';
+import { readFile } from 'fs/promises';
+import { platform } from 'os';
 import * as path from 'path';
 
-import * as core from '@actions/core';
-import { exec, getExecOutput as popen } from '@actions/exec';
+import { addPath, exportVariable } from '@actions/core';
+import { exec, getExecOutput as spawn } from '@actions/exec';
 import { cache as Cache } from 'decorator-cache-getter';
-import type { DeepWritable } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
@@ -24,37 +24,44 @@ export namespace Version {
     return version === LATEST;
   }
 
-  export function validate(version: string): Version {
+  export function validate(version: string): asserts version is Version {
     if (isVersion(version)) {
-      if (os.platform() === 'darwin' && version < '2013') {
+      if (platform() === 'darwin' && version < '2013') {
         throw new RangeError(
           'Versions prior to 2013 does not work on 64-bit macOS',
         );
       }
-      return version;
-    }
-    if (/^199[6-9]|200[0-7]$/u.test(version)) {
-      throw new RangeError('Versions prior to 2008 are not supported');
     } else {
-      throw new TypeError(`'${version}' is not a valid version`);
+      if (/^199[6-9]|200[0-7]$/u.test(version)) {
+        throw new RangeError('Versions prior to 2008 are not supported');
+      } else {
+        throw new TypeError(`'${version}' is not a valid version`);
+      }
     }
   }
 }
 
-export interface Texmf {
-  readonly ['TEXDIR']?: string;
-  readonly ['TEXMFCONFIG']?: string;
-  readonly ['TEXMFVAR']?: string;
-  readonly ['TEXMFHOME']?: string;
-  readonly ['TEXMFLOCAL']?: string;
-  readonly ['TEXMFSYSCONFIG']?: string;
-  readonly ['TEXMFSYSVAR']?: string;
+export interface Texmf extends Texmf.SystemTrees, Texmf.UserTrees {}
+
+export namespace Texmf {
+  export interface SystemTrees {
+    readonly TEXDIR: string;
+    readonly TEXMFLOCAL: string;
+    readonly TEXMFSYSCONFIG: string;
+    readonly TEXMFSYSVAR: string;
+  }
+
+  export interface UserTrees {
+    readonly TEXMFCONFIG: string;
+    readonly TEXMFVAR: string;
+    readonly TEXMFHOME: string;
+  }
 }
 
 export class Tlmgr {
   constructor(
     private readonly version: Version,
-    private readonly prefix: string,
+    private readonly TEXDIR: string,
   ) {}
 
   @Cache
@@ -64,13 +71,14 @@ export class Tlmgr {
 
   async install(this: void, ...packages: ReadonlyArray<string>): Promise<void> {
     if (packages.length !== 0) {
-      Tlmgr.check((await popen('tlmgr', ['install', ...packages])).stderr);
+      const { stderr } = await spawn('tlmgr', ['install', ...packages]);
+      tlpkg.check(stderr);
     }
   }
 
   @Cache
   get path(): Tlmgr.Path {
-    return new Tlmgr.Path(this.version, this.prefix);
+    return new Tlmgr.Path(this.TEXDIR);
   }
 
   @Cache
@@ -115,11 +123,11 @@ export namespace Tlmgr {
     texmf(key: keyof Texmf, value: string): Promise<void>;
     async texmf(key: keyof Texmf, value?: string): Promise<string | void> {
       if (value === undefined) {
-        return (await popen('kpsewhich', ['-var-value', key])).stdout.trim();
+        return (await spawn('kpsewhich', ['-var-value', key])).stdout.trim();
       }
       // `tlmgr conf` is not implemented prior to 2010.
       if (this.version < '2010') {
-        core.exportVariable(key, value);
+        exportVariable(key, value);
       } else {
         await exec('tlmgr', ['conf', 'texmf', key, value]);
       }
@@ -127,17 +135,18 @@ export namespace Tlmgr {
   }
 
   export class Path {
-    readonly #pattern: string;
-    constructor(version: Version, prefix: string) {
-      this.#pattern = path.join(prefix, version, 'bin', '*');
-    }
+    constructor(private readonly TEXDIR: string) {}
 
     async add(): Promise<void> {
-      const dir = await determine(this.#pattern);
-      if (dir === undefined) {
-        throw new Error("Unable to locate TeX Live's binary directory");
+      let dir: string;
+      try {
+        dir = await determine(path.join(this.TEXDIR, 'bin', '*'));
+      } catch (cause) {
+        throw new Error("Unable to locate TeX Live's binary directory", {
+          cause,
+        });
       }
-      core.addPath(dir);
+      addPath(dir);
     }
   }
 
@@ -176,7 +185,7 @@ export namespace Tlmgr {
       if (tag !== undefined) {
         args.push(tag);
       }
-      const { exitCode, stderr } = await popen('tlmgr', args, {
+      const { exitCode, stderr } = await spawn('tlmgr', args, {
         ignoreReturnCode: true,
       });
       const status = exitCode === 0;
@@ -200,7 +209,9 @@ export namespace Tlmgr {
     self?: boolean;
     reinstallForciblyRemoved?: boolean;
   }
+}
 
+export namespace tlpkg {
   export function check(stderr: string): void {
     // tlpkg/TeXLive/TLUtils.pm
     const result = /: checksums differ for (.*):$/mu.exec(stderr);
@@ -215,49 +226,46 @@ export namespace Tlmgr {
   }
 }
 
-export function contrib(): URL {
-  return new URL('https://mirror.ctan.org/systems/texlive/tlcontrib/');
-}
+export namespace tlnet {
+  export function contrib(): URL {
+    return new URL('https://mirror.ctan.org/systems/texlive/tlcontrib/');
+  }
 
-export function historic(version: Version): URL {
-  return new URL(
-    version < '2010' ? 'tlnet/' : 'tlnet-final/',
-    `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`,
-  );
+  export function historic(version: Version): URL {
+    return new URL(
+      version < '2010' ? 'tlnet/' : 'tlnet-final/',
+      `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`,
+    );
+  }
 }
 
 /**
  * Type for DEPENDS.txt.
  */
-export type DependsTxt = ReadonlyMap<
-  string,
-  {
-    readonly hard: ReadonlySet<string>;
-    readonly soft: ReadonlySet<string>;
-  }
->;
+export class DependsTxt {
+  private readonly dependencies = new Map<string, DependsTxt.Dependencies>();
 
-export namespace DependsTxt {
-  export function parse(txt: string): DependsTxt {
-    const manifest: DeepWritable<DependsTxt> = new Map();
-    const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
-    for (const [name, chunk] of eachPackage(txt.replace(/\s*#.*$/gmu, ''))) {
-      if (!manifest.has(name)) {
-        manifest.set(name, { hard: new Set(), soft: new Set() });
-      }
-      type Kind = keyof NonNullable<ReturnType<DependsTxt['get']>>;
-      for (const [, kind = 'hard', args = ''] of chunk.matchAll(hardOrSoft)) {
-        for (const dependency of args.split(/\s+/u).filter((s) => s !== '')) {
-          manifest.get(name)?.[kind as Kind].add(dependency);
-        }
+  constructor(txt: string) {
+    for (const [name, chunk] of DependsTxt.eachPackage(txt)) {
+      const deps = new DependsTxt.Dependencies(chunk);
+      if (this.dependencies.get(name)?.merge(deps) === undefined) {
+        this.dependencies.set(name, deps);
       }
     }
-    return manifest;
   }
 
-  // eslint-disable-next-line no-inner-declarations
-  function* eachPackage(txt: string): Generator<[string, string], void> {
-    const [chunk = '', ...rest] = txt.split(/^\s*package(?=\s|$)(.*)$/mu);
+  get(name: string): DependsTxt.Dependencies | undefined {
+    return this.dependencies.get(name);
+  }
+
+  [Symbol.iterator](): Iterator<[string, DependsTxt.Dependencies], void, void> {
+    return this.dependencies.entries();
+  }
+
+  private static *eachPackage(txt: string): Generator<[string, string], void> {
+    const [chunk = '', ...rest] = txt
+      .replaceAll(/\s*#.*$/gmu, '')
+      .split(/^\s*package(?=\s|$)(.*)$/mu);
     yield ['', chunk];
     for (let i = 0; i < rest.length; ++i) {
       let name = (rest[i] ?? '').trim();
@@ -271,4 +279,32 @@ export namespace DependsTxt {
       yield [name, rest[++i] ?? ''];
     }
   }
+
+  static async fromFile(file: string): Promise<DependsTxt> {
+    return new this(await readFile(file, 'utf8'));
+  }
 }
+
+export namespace DependsTxt {
+  export class Dependencies {
+    readonly hard = new Set<string>();
+    readonly soft = new Set<string>();
+
+    constructor(txt: string) {
+      const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
+      for (const [, directive, args = ''] of txt.matchAll(hardOrSoft)) {
+        for (const dep of args.split(/\s+/u).filter(Boolean)) {
+          (directive === 'soft' ? this.soft : this.hard).add(dep);
+        }
+      }
+    }
+
+    merge(other: Readonly<this>): this {
+      other.hard.forEach((dep) => this.hard.add(dep));
+      other.soft.forEach((dep) => this.soft.add(dep));
+      return this;
+    }
+  }
+}
+
+/* eslint @typescript-eslint/naming-convention: off */
