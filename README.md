@@ -8,15 +8,28 @@
 
 This action provides the following functionality:
 
-* Installing and setting up a specific version of [TeX Live][texlive];
-* Caching and restoring `TEXDIR` by default to improve workflow execution time;
-* Optionally configuring a package repository and installing additional TeX packages.
+- Installing and setting up a specific version of [TeX Live][texlive];
+- Caching and restoring [`TEXDIR`][texdir] by default to improve workflow execution time;
+- Optionally configuring a package repository and installing additional TeX packages.
 
 Linux, Windows, and macOS are supported.
 
+## Table of Contents
+
+- [Usage](#usage)
+  - [Basic Usage](#basic-usage)
+  - [Historic Versions](#historic-versions)
+  - [Caching](#caching)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Environment Variables](#environment-variables)
+- [Permissions](#permissions)
+- [Changelog](#changelog)
+- [License](#license)
+
 ## Usage
 
-### Basic usage
+### Basic Usage
 
 ```yaml
 - name: Setup TeX Live
@@ -46,7 +59,7 @@ fundamental packages such as `latex` and `amsmath`.
 
 You can also specify packages by file using [`package-file`](#inputs) input.
 
-### Historic versions
+### Historic Versions
 
 You can use an older version of TeX Live by specifying `version`:
 
@@ -67,7 +80,7 @@ Supported versions are `2008` to `2022` for Linux and Windows, and
 > **Note**.
 > Versions `2008`–`2012` do not work on `macos-latest`
 > because the `kpsewhich` for those versions is a 32-bit executable and
-> crashes with "Bad CPU type in executable."
+> crashes with _"Bad CPU type in executable."_
 
 ### Caching
 
@@ -97,13 +110,13 @@ All inputs are optional.
 
 |Name|Type|Description|
 |---|---|---|
-|`cache`|Bool|Enable caching for [`TEXDIR`][texdir]. The default is `true`.|
+|`cache`|Bool|<p>Enable caching for [`TEXDIR`][texdir].</p>**Default:** `true`|
 |`package-file`|String|File containing TeX package names to be installed. The file format is whitespace-delimited, and everything after a `#` is treated as a comment[^1]. [`DEPENDS.txt`][depends-txt] format is also acceptable.|
 |`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections can also be specified.|
-|`prefix`|String|TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-environment-variables]. The default is <code>[$RUNNER_TEMP][actions-environment-variables]/setup-texlive</code>.|
-|`tlcontrib`|Bool|Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored if an older version is specified for `version`. The default is `false`.|
-|`update-all-packages`|Bool|Update all TeX packages when restoring cache. The default is `false`, and the action updates only `tlmgr`.|
-|`version`|String|TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.|
+|`prefix`|String|<p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-environment-variables].</p>**Default:** <code>[$RUNNER_TEMP][actions-environment-variables]/setup-texlive</code>|
+|`tlcontrib`|Bool|<p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p>**Default:** `false`|
+|`update-all-packages`|Bool|<p>Update all TeX packages when restoring cache. The default is `false`, and the action updates only `tlmgr`.</p>**Default:** `false`|
+|`version`|String|<p>TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.</p>**Default:** `latest`|
 
 ## Outputs
 
@@ -111,7 +124,7 @@ All inputs are optional.
 |---|---|---|
 |`cache-hit`|Bool|A boolean value to indicate if a cache was hit.|
 
-## Environment variables
+## Environment Variables
 
 The following [official environment variables][install-tl-environment-variables]
 are supported:
@@ -133,8 +146,7 @@ are supported:
 |`TEXLIVE_INSTALL_TEXMFVAR`|`~/.local/texlive/<version>/texmf-var`|
 |`NOPERLDOC`||
 
-If `prefix` and `TEXLIVE_INSTALL_PREFIX` are both specified,
-`prefix` will be used.
+If `prefix` and `TEXLIVE_INSTALL_PREFIX` are both set, `prefix` will be used.
 
 ## Permissions
 
