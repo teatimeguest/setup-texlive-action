@@ -68004,7 +68004,7 @@ async function patch(version3, base2) {
   }, {
     versions: { since: "2009", until: "2011" },
     file: "tlpkg/TeXLive/TLWinGoo.pm",
-    from: ["/foreach $p qw((.*))/u"],
+    from: [/foreach \$p qw\((.*)\)/u],
     to: ["foreach $$p (qw($1))"]
   }, {
     platforms: "win32",

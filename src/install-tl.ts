@@ -245,7 +245,7 @@ async function patch(version: Version, base: string): Promise<void> {
     // Fixes a syntax error.
     versions: { since: '2009', until: '2011' },
     file: 'tlpkg/TeXLive/TLWinGoo.pm',
-    from: ['/foreach $p qw((.*))/u'],
+    from: [/foreach \$p qw\((.*)\)/u],
     to: ['foreach $$p (qw($1))'],
   }, {
     // Defines Code Page 65001 as an alias for UTF-8 on Windows.
