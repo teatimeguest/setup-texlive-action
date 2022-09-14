@@ -58,8 +58,6 @@ beforeEach(() => {
 jest // eslint-disable-next-line jest/unbound-method
   .mocked(InstallTL.acquire)
   .mockResolvedValue(new (InstallTL as unknown as new() => InstallTL)());
-// eslint-disable-next-line jest/unbound-method
-jest.mocked(State.load).mockReturnValue(null);
 
 jest.unmock('#/action');
 
@@ -100,13 +98,13 @@ it.each<[CacheType | undefined]>([['secondary'], [undefined]])(
   },
 );
 
-it('does not save data if full cache found', async () => {
+it('does not save TEXDIR if full cache found', async () => {
   jest.mocked(util.restoreCache).mockResolvedValueOnce('primary');
   await expect(action.run()).toResolve();
   expect(State.prototype.save).toHaveBeenCalled();
   const mock = jest.mocked(State).mock;
   expect(mock.instances).toHaveLength(1);
-  expect(mock.instances[0]).not.toHaveProperty('key');
+  expect(mock.instances[0]).toHaveProperty('key');
   expect(mock.instances[0]).not.toHaveProperty('texdir');
 });
 
@@ -278,9 +276,8 @@ it.each<[CacheType | undefined]>([['secondary'], [undefined]])(
 );
 
 it('saves TEXDIR to cache if cache key and texdir are set', async () => {
-  // eslint-disable-next-line jest/unbound-method
-  jest.mocked(State.load).mockImplementationOnce(
-    () => ({ key: '<key>', texdir: '<texdir>', filled: () => true } as State),
+  jest.mocked(State).mockReturnValueOnce(
+    { key: '<key>', texdir: '<texdir>', post: true } as unknown as State,
   );
   await expect(action.run()).toResolve();
   expect(util.saveCache).toHaveBeenCalled();

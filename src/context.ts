@@ -4,7 +4,7 @@ import * as process from 'process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import { Exclude, Expose, deserialize } from 'class-transformer';
+import { Exclude, Expose, plainToClassFromExist } from 'class-transformer';
 import { cache as Cache } from 'decorator-cache-getter';
 import { keys } from 'ts-transformer-keys';
 
@@ -153,32 +153,25 @@ export class Env {
 
 @Exclude()
 export class State extends Serializable {
+  static readonly NAME = 'post';
+
+  readonly post: boolean = false;
   @Expose()
   key?: string;
   @Expose()
   texdir?: string;
 
+  constructor() {
+    super();
+    const state = core.getState(State.NAME);
+    if (state !== '') {
+      plainToClassFromExist(this, JSON.parse(state));
+      this.post = true;
+    }
+  }
+
   save(): void {
-    core.saveState('post', JSON.stringify(this.validate()));
-    if (this.filled()) {
-      log.info(`${this.texdir} will be saved to cache with key: ${this.key})`);
-    }
-  }
-
-  filled(this: Readonly<this>): this is Required<State> {
-    return this.key !== undefined && this.texdir !== undefined;
-  }
-
-  private validate(this: Readonly<this>): this {
-    if ((this.key === undefined) !== (this.texdir === undefined)) {
-      throw new Error(`Unexpected action state: ${this}`);
-    }
-    return this;
-  }
-
-  static load(): State | null {
-    const post = core.getState('post');
-    return post === '' ? null : deserialize(State, post).validate();
+    core.saveState(State.NAME, JSON.stringify(this));
   }
 }
 

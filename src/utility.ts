@@ -91,7 +91,7 @@ export async function restoreCache(
   try {
     key = await cache.restoreCache([target], primaryKey, restoreKeys);
     if (key !== undefined) {
-      log.info(`${target} restored from cache key: ${key}`);
+      log.info(`${target} restored from cache with key: ${key}`);
       return key === primaryKey ? 'primary' : 'secondary';
     } else {
       log.info('Cache not found');

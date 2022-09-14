@@ -244,40 +244,19 @@ describe('Env', () => {
 });
 
 describe('State', () => {
-  describe('load', () => {
-    it('returns null if post not set', () => {
-      expect(State.load()).toBeNull();
+  describe('constructor', () => {
+    it.each([[false, ''], [true, '{}'], [true, '{ "key": "key" }'], [
+      true,
+      '{ "key": "key", "texdir": "texdir" }',
+    ]])('sets post to %s (%p)', (value, state) => {
+      process.env[`STATE_${State.NAME}`] = state;
+      expect(new State()).toHaveProperty('post', value);
     });
 
-    it('returns state if set', () => {
-      const state = new State();
-      state.key = '<key>';
-      state.texdir = '<texdir>';
-      process.env['STATE_post'] = JSON.stringify(state);
-      expect(State.load()).toStrictEqual(state);
-    });
-
-    it('returns empty state if set', () => {
-      process.env['STATE_post'] = '{}';
-      const state = State.load();
-      expect(state?.key).toBeUndefined();
-      expect(state?.texdir).toBeUndefined();
-    });
-
-    it('throws an exception if texdir is not set', () => {
-      const state = new State();
-      state.key = '<key>';
-      process.env['STATE_post'] = JSON.stringify(state);
-      // eslint-disable-next-line jest/unbound-method
-      expect(State.load).toThrow('Unexpected action state');
-    });
-
-    it('throws an exception if key is not set', () => {
-      const state = new State();
-      state.texdir = '<texdir>';
-      process.env['STATE_post'] = JSON.stringify(state);
-      // eslint-disable-next-line jest/unbound-method
-      expect(State.load).toThrow('Unexpected action state');
+    it('gets state', () => {
+      const state = { key: '<key>', texdir: '<texdir>' };
+      process.env[`STATE_${State.NAME}`] = JSON.stringify(state);
+      expect(new State()).toMatchObject(state);
     });
   });
 
@@ -301,24 +280,6 @@ describe('State', () => {
         .not
         .toThrow();
       expect(core.saveState).toHaveBeenCalled();
-    });
-
-    it('throws an exception if texdir is not set', () => {
-      expect(() => {
-        const state = new State();
-        state.key = '<key>';
-        state.save();
-      })
-        .toThrow('Unexpected action state');
-    });
-
-    it('throws an exception if key is not set', () => {
-      expect(() => {
-        const state = new State();
-        state.texdir = '<texdir>';
-        state.save();
-      })
-        .toThrow('Unexpected action state');
     });
   });
 });

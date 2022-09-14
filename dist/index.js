@@ -1540,7 +1540,7 @@ var require_oidc_utils = __commonJS({
         return runtimeUrl;
       }
       static getCall(id_token_url) {
-        var _a2;
+        var _a3;
         return __awaiter(this, void 0, void 0, function* () {
           const httpclient = OidcClient.createHttpClient();
           const res = yield httpclient.getJson(id_token_url).catch((error2) => {
@@ -1550,7 +1550,7 @@ var require_oidc_utils = __commonJS({
  
         Error Message: ${error2.result.message}`);
           });
-          const id_token = (_a2 = res.result) === null || _a2 === void 0 ? void 0 : _a2.value;
+          const id_token = (_a3 = res.result) === null || _a3 === void 0 ? void 0 : _a3.value;
           if (!id_token) {
             throw new Error("Response json body do not have ID Token field");
           }
@@ -1632,7 +1632,7 @@ var require_summary = __commonJS({
           }
           try {
             yield access2(pathFromEnv, fs_1.constants.R_OK | fs_1.constants.W_OK);
-          } catch (_a2) {
+          } catch (_a3) {
             throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`);
           }
           this._filePath = pathFromEnv;
@@ -2199,12 +2199,12 @@ var require_io_util = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var _a2;
+    var _a3;
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rename = exports.readlink = exports.readdir = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
     var fs2 = __importStar(require("fs"));
     var path5 = __importStar(require("path"));
-    _a2 = fs2.promises, exports.chmod = _a2.chmod, exports.copyFile = _a2.copyFile, exports.lstat = _a2.lstat, exports.mkdir = _a2.mkdir, exports.readdir = _a2.readdir, exports.readlink = _a2.readlink, exports.rename = _a2.rename, exports.rmdir = _a2.rmdir, exports.stat = _a2.stat, exports.symlink = _a2.symlink, exports.unlink = _a2.unlink;
+    _a3 = fs2.promises, exports.chmod = _a3.chmod, exports.copyFile = _a3.copyFile, exports.lstat = _a3.lstat, exports.mkdir = _a3.mkdir, exports.readdir = _a3.readdir, exports.readlink = _a3.readlink, exports.rename = _a3.rename, exports.rmdir = _a3.rmdir, exports.stat = _a3.stat, exports.symlink = _a3.symlink, exports.unlink = _a3.unlink;
     exports.IS_WINDOWS = process.platform === "win32";
     function exists(fsPath) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -2309,8 +2309,8 @@ var require_io_util = __commonJS({
       return (stats.mode & 1) > 0 || (stats.mode & 8) > 0 && stats.gid === process.getgid() || (stats.mode & 64) > 0 && stats.uid === process.getuid();
     }
     function getCmdPath() {
-      var _a3;
-      return (_a3 = process.env["COMSPEC"]) !== null && _a3 !== void 0 ? _a3 : `cmd.exe`;
+      var _a4;
+      return (_a4 = process.env["COMSPEC"]) !== null && _a4 !== void 0 ? _a4 : `cmd.exe`;
     }
     exports.getCmdPath = getCmdPath;
   }
@@ -3155,13 +3155,13 @@ var require_exec = __commonJS({
     }
     exports.exec = exec2;
     function getExecOutput(commandLine, args, options) {
-      var _a2, _b;
+      var _a3, _b;
       return __awaiter(this, void 0, void 0, function* () {
         let stdout = "";
         let stderr = "";
         const stdoutDecoder = new string_decoder_1.StringDecoder("utf8");
         const stderrDecoder = new string_decoder_1.StringDecoder("utf8");
-        const originalStdoutListener = (_a2 = options === null || options === void 0 ? void 0 : options.listeners) === null || _a2 === void 0 ? void 0 : _a2.stdout;
+        const originalStdoutListener = (_a3 = options === null || options === void 0 ? void 0 : options.listeners) === null || _a3 === void 0 ? void 0 : _a3.stdout;
         const originalStdErrListener = (_b = options === null || options === void 0 ? void 0 : options.listeners) === null || _b === void 0 ? void 0 : _b.stderr;
         const stdErrListener = (data) => {
           stderr += stderrDecoder.write(data);
@@ -3600,11 +3600,11 @@ var require_brace_expansion = __commonJS({
         return str.split(",");
       var pre = m.pre;
       var body2 = m.body;
-      var post = m.post;
+      var post2 = m.post;
       var p = pre.split(",");
       p[p.length - 1] += "{" + body2 + "}";
-      var postParts = parseCommaParts(post);
-      if (post.length) {
+      var postParts = parseCommaParts(post2);
+      if (post2.length) {
         p[p.length - 1] += postParts.shift();
         p.push.apply(p, postParts);
       }
@@ -3655,15 +3655,15 @@ var require_brace_expansion = __commonJS({
         if (n.length === 1) {
           n = expand(n[0], false).map(embrace);
           if (n.length === 1) {
-            var post = m.post.length ? expand(m.post, false) : [""];
-            return post.map(function(p) {
+            var post2 = m.post.length ? expand(m.post, false) : [""];
+            return post2.map(function(p) {
               return m.pre + n[0] + p;
             });
           }
         }
       }
       var pre = m.pre;
-      var post = m.post.length ? expand(m.post, false) : [""];
+      var post2 = m.post.length ? expand(m.post, false) : [""];
       var N;
       if (isSequence) {
         var x = numeric(n[0]);
@@ -3705,8 +3705,8 @@ var require_brace_expansion = __commonJS({
         });
       }
       for (var j = 0; j < N.length; j++) {
-        for (var k = 0; k < post.length; k++) {
-          var expansion = pre + N[j] + post[k];
+        for (var k = 0; k < post2.length; k++) {
+          var expansion = pre + N[j] + post2[k];
           if (!isTop || isSequence || expansion)
             expansions.push(expansion);
         }
@@ -4742,7 +4742,7 @@ var require_internal_globber = __commonJS({
         return this.searchPaths.slice();
       }
       glob() {
-        var e_1, _a2;
+        var e_1, _a3;
         return __awaiter(this, void 0, void 0, function* () {
           const result = [];
           try {
@@ -4754,8 +4754,8 @@ var require_internal_globber = __commonJS({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield _a2.call(_b);
+              if (_c && !_c.done && (_a3 = _b.return))
+                yield _a3.call(_b);
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -6322,7 +6322,7 @@ var require_cacheUtils = __commonJS({
     }
     exports.getArchiveFileSizeInBytes = getArchiveFileSizeInBytes;
     function resolvePaths(patterns) {
-      var e_1, _a2;
+      var e_1, _a3;
       var _b;
       return __awaiter(this, void 0, void 0, function* () {
         const paths = [];
@@ -6345,8 +6345,8 @@ var require_cacheUtils = __commonJS({
           e_1 = { error: e_1_1 };
         } finally {
           try {
-            if (_d && !_d.done && (_a2 = _c.return))
-              yield _a2.call(_c);
+            if (_d && !_d.done && (_a3 = _c.return))
+              yield _a3.call(_c);
           } finally {
             if (e_1)
               throw e_1.error;
@@ -7044,7 +7044,7 @@ function isSpecialXmlProperty(propertyName, options) {
   return [XML_ATTRKEY, options.xmlCharKey].includes(propertyName);
 }
 function deserializeCompositeType(serializer4, mapper, responseBody, objectName, options) {
-  var _a2;
+  var _a3;
   if (getPolymorphicDiscriminatorRecursively(serializer4, mapper)) {
     mapper = getPolymorphicMapper(serializer4, mapper, responseBody, "serializedName");
   }
@@ -7077,7 +7077,7 @@ function deserializeCompositeType(serializer4, mapper, responseBody, objectName,
         const propertyName = xmlElementName || xmlName || serializedName;
         if (propertyMapper.xmlIsWrapped) {
           const wrapped = responseBody[xmlName];
-          const elementList = (_a2 = wrapped === null || wrapped === void 0 ? void 0 : wrapped[xmlElementName]) !== null && _a2 !== void 0 ? _a2 : [];
+          const elementList = (_a3 = wrapped === null || wrapped === void 0 ? void 0 : wrapped[xmlElementName]) !== null && _a3 !== void 0 ? _a3 : [];
           instance[key] = serializer4.deserialize(propertyMapper, elementList, propertyObjectName, options);
         } else {
           const property = responseBody[propertyName];
@@ -7258,9 +7258,9 @@ var init_serializer = __esm({
         }
       }
       serialize(mapper, object, objectName, options = {}) {
-        var _a2, _b, _c;
+        var _a3, _b, _c;
         const updatedOptions = {
-          rootName: (_a2 = options.rootName) !== null && _a2 !== void 0 ? _a2 : "",
+          rootName: (_a3 = options.rootName) !== null && _a3 !== void 0 ? _a3 : "",
           includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
           xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
         };
@@ -7312,9 +7312,9 @@ var init_serializer = __esm({
         return payload;
       }
       deserialize(mapper, responseBody, objectName, options = {}) {
-        var _a2, _b, _c;
+        var _a3, _b, _c;
         const updatedOptions = {
-          rootName: (_a2 = options.rootName) !== null && _a2 !== void 0 ? _a2 : "",
+          rootName: (_a3 = options.rootName) !== null && _a3 !== void 0 ? _a3 : "",
           includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
           xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
         };
@@ -32693,7 +32693,7 @@ var init_nodeFetchHttpClient = __esm({
         this.cookieJar = new tough.CookieJar(void 0, { looseMode: true });
       }
       async sendRequest(httpRequest) {
-        var _a2;
+        var _a3;
         if (!httpRequest && typeof httpRequest !== "object") {
           throw new Error("'httpRequest' (WebResourceLike) cannot be null or undefined and must be of type object.");
         }
@@ -32766,7 +32766,7 @@ var init_nodeFetchHttpClient = __esm({
         try {
           const response = await this.fetch(httpRequest.url, requestInit);
           const headers = parseHeaders(response.headers);
-          const streaming = ((_a2 = httpRequest.streamResponseStatusCodes) === null || _a2 === void 0 ? void 0 : _a2.has(response.status)) || httpRequest.streamResponseBody;
+          const streaming = ((_a3 = httpRequest.streamResponseStatusCodes) === null || _a3 === void 0 ? void 0 : _a3.has(response.status)) || httpRequest.streamResponseBody;
           operationResponse = {
             headers,
             request: httpRequest,
@@ -32809,8 +32809,8 @@ var init_nodeFetchHttpClient = __esm({
               downloadStreamDone = isStreamComplete(operationResponse.readableStreamBody, abortController);
             }
             Promise.all([uploadStreamDone, downloadStreamDone]).then(() => {
-              var _a3;
-              (_a3 = httpRequest.abortSignal) === null || _a3 === void 0 ? void 0 : _a3.removeEventListener("abort", abortListener);
+              var _a4;
+              (_a4 = httpRequest.abortSignal) === null || _a4 === void 0 ? void 0 : _a4.removeEventListener("abort", abortListener);
               return;
             }).catch((e) => {
               logger.warning("Error when cleaning up abortListener on httpRequest", e);
@@ -32819,12 +32819,12 @@ var init_nodeFetchHttpClient = __esm({
         }
       }
       getOrCreateAgent(httpRequest) {
-        var _a2;
+        var _a3;
         const isHttps = isUrlHttps(httpRequest.url);
         if (httpRequest.proxySettings) {
           const { host, port, username, password } = httpRequest.proxySettings;
           const key = `${host}:${port}:${username}:${password}`;
-          const proxyAgents = (_a2 = this.proxyAgentMap.get(key)) !== null && _a2 !== void 0 ? _a2 : {};
+          const proxyAgents = (_a3 = this.proxyAgentMap.get(key)) !== null && _a3 !== void 0 ? _a3 : {};
           let agent = getCachedAgent(isHttps, proxyAgents);
           if (agent) {
             return agent;
@@ -38845,16 +38845,16 @@ var require_xml2js = __commonJS({
 
 // node_modules/@azure/core-http/dist-esm/src/util/xml.js
 function stringifyXML(obj, opts = {}) {
-  var _a2;
+  var _a3;
   xml2jsBuilderSettings.rootName = opts.rootName;
-  xml2jsBuilderSettings.charkey = (_a2 = opts.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+  xml2jsBuilderSettings.charkey = (_a3 = opts.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
   const builder = new xml2js.Builder(xml2jsBuilderSettings);
   return builder.buildObject(obj);
 }
 function parseXML(str, opts = {}) {
-  var _a2;
+  var _a3;
   xml2jsParserSettings.explicitRoot = !!opts.includeRoot;
-  xml2jsParserSettings.charkey = (_a2 = opts.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+  xml2jsParserSettings.charkey = (_a3 = opts.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
   const xmlParser = new xml2js.Parser(xml2jsParserSettings);
   return new Promise((resolve, reject) => {
     if (!str) {
@@ -38960,9 +38960,9 @@ function shouldDeserializeResponse(parsedResponse) {
   return result;
 }
 function deserializeResponseBody(jsonContentTypes, xmlContentTypes, response, options = {}) {
-  var _a2, _b, _c;
+  var _a3, _b, _c;
   const updatedOptions = {
-    rootName: (_a2 = options.rootName) !== null && _a2 !== void 0 ? _a2 : "",
+    rootName: (_a3 = options.rootName) !== null && _a3 !== void 0 ? _a3 : "",
     includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
     xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
   };
@@ -39008,7 +39008,7 @@ function isOperationSpecEmpty(operationSpec) {
   return expectedStatusCodes.length === 0 || expectedStatusCodes.length === 1 && expectedStatusCodes[0] === "default";
 }
 function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
-  var _a2;
+  var _a3;
   const isSuccessByStatus = 200 <= parsedResponse.status && parsedResponse.status < 300;
   const isExpectedStatusCode = isOperationSpecEmpty(operationSpec) ? isSuccessByStatus : !!responseSpec;
   if (isExpectedStatusCode) {
@@ -39021,7 +39021,7 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
     }
   }
   const errorResponseSpec = responseSpec !== null && responseSpec !== void 0 ? responseSpec : operationSpec.responses.default;
-  const streaming = ((_a2 = parsedResponse.request.streamResponseStatusCodes) === null || _a2 === void 0 ? void 0 : _a2.has(parsedResponse.status)) || parsedResponse.request.streamResponseBody;
+  const streaming = ((_a3 = parsedResponse.request.streamResponseStatusCodes) === null || _a3 === void 0 ? void 0 : _a3.has(parsedResponse.status)) || parsedResponse.request.streamResponseBody;
   const initialErrorMessage = streaming ? `Unexpected status code: ${parsedResponse.status}` : parsedResponse.bodyAsText;
   const error2 = new RestError(initialErrorMessage, void 0, parsedResponse.status, parsedResponse.request, parsedResponse);
   if (!errorResponseSpec) {
@@ -39058,14 +39058,14 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
   return { error: error2, shouldReturnResponse: false };
 }
 function parse2(jsonContentTypes, xmlContentTypes, operationResponse, opts) {
-  var _a2;
+  var _a3;
   const errorHandler = (err) => {
     const msg = `Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`;
     const errCode = err.code || RestError.PARSE_ERROR;
     const e = new RestError(msg, errCode, operationResponse.status, operationResponse.request, operationResponse);
     return Promise.reject(e);
   };
-  const streaming = ((_a2 = operationResponse.request.streamResponseStatusCodes) === null || _a2 === void 0 ? void 0 : _a2.has(operationResponse.status)) || operationResponse.request.streamResponseBody;
+  const streaming = ((_a3 = operationResponse.request.streamResponseStatusCodes) === null || _a3 === void 0 ? void 0 : _a3.has(operationResponse.status)) || operationResponse.request.streamResponseBody;
   if (!streaming && operationResponse.bodyAsText) {
     const text = operationResponse.bodyAsText;
     const contentType2 = operationResponse.headers.get("Content-Type") || "";
@@ -39096,11 +39096,11 @@ var init_deserializationPolicy = __esm({
     defaultXmlContentTypes = ["application/xml", "application/atom+xml"];
     DeserializationPolicy = class extends BaseRequestPolicy {
       constructor(nextPolicy, requestPolicyOptions, deserializationContentTypes, parsingOptions = {}) {
-        var _a2;
+        var _a3;
         super(nextPolicy, requestPolicyOptions);
         this.jsonContentTypes = deserializationContentTypes && deserializationContentTypes.json || defaultJsonContentTypes;
         this.xmlContentTypes = deserializationContentTypes && deserializationContentTypes.xml || defaultXmlContentTypes;
-        this.xmlCharKey = (_a2 = parsingOptions.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+        this.xmlCharKey = (_a3 = parsingOptions.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
       }
       async sendRequest(request) {
         return this._nextPolicy.sendRequest(request).then((response) => deserializeResponseBody(this.jsonContentTypes, this.xmlContentTypes, response, {
@@ -39546,7 +39546,7 @@ async function beginRefresh(getAccessToken, retryIntervalInMs, timeoutInMs) {
     if (Date.now() < timeoutInMs) {
       try {
         return await getAccessToken();
-      } catch (_a2) {
+      } catch (_a3) {
         return null;
       }
     } else {
@@ -39573,21 +39573,21 @@ function createTokenCycler(credential, scopes, tokenCyclerOptions) {
       return refreshWorker !== null;
     },
     get shouldRefresh() {
-      var _a2;
-      return !cycler.isRefreshing && ((_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : 0) - options.refreshWindowInMs < Date.now();
+      var _a3;
+      return !cycler.isRefreshing && ((_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : 0) - options.refreshWindowInMs < Date.now();
     },
     get mustRefresh() {
       return token === null || token.expiresOnTimestamp - options.forcedRefreshWindowInMs < Date.now();
     }
   };
   function refresh(getTokenOptions) {
-    var _a2;
+    var _a3;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
       refreshWorker = beginRefresh(
         tryGetAccessToken,
         options.retryIntervalInMs,
-        (_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : Date.now()
+        (_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : Date.now()
       ).then((_token) => {
         refreshWorker = null;
         token = _token;
@@ -39825,8 +39825,8 @@ var init_proxyPolicy = __esm({
         this.customNoProxyList = customNoProxyList;
       }
       sendRequest(request) {
-        var _a2;
-        if (!request.proxySettings && !isBypassed(request.url, (_a2 = this.customNoProxyList) !== null && _a2 !== void 0 ? _a2 : globalNoProxyList, this.customNoProxyList ? void 0 : globalBypassedMap)) {
+        var _a3;
+        if (!request.proxySettings && !isBypassed(request.url, (_a3 = this.customNoProxyList) !== null && _a3 !== void 0 ? _a3 : globalNoProxyList, this.customNoProxyList ? void 0 : globalBypassedMap)) {
           request.proxySettings = this.proxySettings;
         }
         return this._nextPolicy.sendRequest(request);
@@ -40056,7 +40056,7 @@ var init_throttlingRetryPolicy = __esm({
         }
       }
       async _defaultResponseHandler(httpRequest, httpResponse) {
-        var _a2;
+        var _a3;
         const retryAfterHeader = httpResponse.headers.get(Constants.HeaderConstants.RETRY_AFTER);
         if (retryAfterHeader) {
           const delayInMs = ThrottlingRetryPolicy.parseRetryAfterHeader(retryAfterHeader);
@@ -40066,7 +40066,7 @@ var init_throttlingRetryPolicy = __esm({
               abortSignal: httpRequest.abortSignal,
               abortErrorMsg: StandardAbortMessage2
             });
-            if ((_a2 = httpRequest.abortSignal) === null || _a2 === void 0 ? void 0 : _a2.aborted) {
+            if ((_a3 = httpRequest.abortSignal) === null || _a3 === void 0 ? void 0 : _a3.aborted) {
               throw new AbortError(StandardAbortMessage2);
             }
             if (this.numberOfRetries < DEFAULT_CLIENT_MAX_RETRY_COUNT) {
@@ -40211,11 +40211,11 @@ var init_semver = __esm({
 
 // node_modules/@opentelemetry/api/build/esm/internal/global-utils.js
 function registerGlobal(type3, instance, diag3, allowOverride) {
-  var _a2;
+  var _a3;
   if (allowOverride === void 0) {
     allowOverride = false;
   }
-  var api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a2 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a2 !== void 0 ? _a2 : {
+  var api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a3 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a3 !== void 0 ? _a3 : {
     version: VERSION
   };
   if (!allowOverride && api[type3]) {
@@ -40233,8 +40233,8 @@ function registerGlobal(type3, instance, diag3, allowOverride) {
   return true;
 }
 function getGlobal(type3) {
-  var _a2, _b;
-  var globalVersion = (_a2 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a2 === void 0 ? void 0 : _a2.version;
+  var _a3, _b;
+  var globalVersion = (_a3 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a3 === void 0 ? void 0 : _a3.version;
   if (!globalVersion || !isCompatible(globalVersion)) {
     return;
   }
@@ -40387,13 +40387,13 @@ var init_diag = __esm({
         }
         var self2 = this;
         self2.setLogger = function(logger3, logLevel) {
-          var _a2, _b;
+          var _a3, _b;
           if (logLevel === void 0) {
             logLevel = DiagLogLevel.INFO;
           }
           if (logger3 === self2) {
             var err = new Error("Cannot use diag as the logger for itself. Please use a DiagLogger implementation like ConsoleDiagLogger or a custom implementation");
-            self2.error((_a2 = err.stack) !== null && _a2 !== void 0 ? _a2 : err.message);
+            self2.error((_a3 = err.stack) !== null && _a3 !== void 0 ? _a3 : err.message);
             return false;
           }
           var oldLogger = getGlobal("diag");
@@ -40444,8 +40444,8 @@ var init_baggage_impl = __esm({
         return Object.assign({}, entry);
       };
       BaggageImpl2.prototype.getAllEntries = function() {
-        return Array.from(this._entries.entries()).map(function(_a2) {
-          var k = _a2[0], v = _a2[1];
+        return Array.from(this._entries.entries()).map(function(_a3) {
+          var k = _a3[0], v = _a3[1];
           return [k, v];
         });
       };
@@ -40465,8 +40465,8 @@ var init_baggage_impl = __esm({
           keys[_i] = arguments[_i];
         }
         var newBaggage = new BaggageImpl2(this._entries);
-        for (var _a2 = 0, keys_1 = keys; _a2 < keys_1.length; _a2++) {
-          var key = keys_1[_a2];
+        for (var _a3 = 0, keys_1 = keys; _a3 < keys_1.length; _a3++) {
+          var key = keys_1[_a3];
           newBaggage._entries.delete(key);
         }
         return newBaggage;
@@ -40708,12 +40708,12 @@ var init_context2 = __esm({
         return this._getContextManager().active();
       };
       ContextAPI2.prototype.with = function(context4, fn, thisArg) {
-        var _a2;
+        var _a3;
         var args = [];
         for (var _i = 3; _i < arguments.length; _i++) {
           args[_i - 3] = arguments[_i];
         }
-        return (_a2 = this._getContextManager()).with.apply(_a2, __spreadArray2([context4, fn, thisArg], args));
+        return (_a3 = this._getContextManager()).with.apply(_a3, __spreadArray2([context4, fn, thisArg], args));
       };
       ContextAPI2.prototype.bind = function(context4, target) {
         return this._getContextManager().bind(context4, target);
@@ -40815,8 +40815,8 @@ function setSpanContext(context4, spanContext) {
   return setSpan(context4, new NonRecordingSpan(spanContext));
 }
 function getSpanContext(context4) {
-  var _a2;
-  return (_a2 = getSpan(context4)) === null || _a2 === void 0 ? void 0 : _a2.spanContext();
+  var _a3;
+  return (_a3 = getSpan(context4)) === null || _a3 === void 0 ? void 0 : _a3.spanContext();
 }
 var SPAN_KEY;
 var init_context_utils = __esm({
@@ -40967,19 +40967,19 @@ var init_ProxyTracerProvider = __esm({
       function ProxyTracerProvider2() {
       }
       ProxyTracerProvider2.prototype.getTracer = function(name, version3, options) {
-        var _a2;
-        return (_a2 = this.getDelegateTracer(name, version3, options)) !== null && _a2 !== void 0 ? _a2 : new ProxyTracer(this, name, version3, options);
+        var _a3;
+        return (_a3 = this.getDelegateTracer(name, version3, options)) !== null && _a3 !== void 0 ? _a3 : new ProxyTracer(this, name, version3, options);
       };
       ProxyTracerProvider2.prototype.getDelegate = function() {
-        var _a2;
-        return (_a2 = this._delegate) !== null && _a2 !== void 0 ? _a2 : NOOP_TRACER_PROVIDER;
+        var _a3;
+        return (_a3 = this._delegate) !== null && _a3 !== void 0 ? _a3 : NOOP_TRACER_PROVIDER;
       };
       ProxyTracerProvider2.prototype.setDelegate = function(delegate) {
         this._delegate = delegate;
       };
       ProxyTracerProvider2.prototype.getDelegateTracer = function(name, version3, options) {
-        var _a2;
-        return (_a2 = this._delegate) === null || _a2 === void 0 ? void 0 : _a2.getTracer(name, version3, options);
+        var _a3;
+        return (_a3 = this._delegate) === null || _a3 === void 0 ? void 0 : _a3.getTracer(name, version3, options);
       };
       return ProxyTracerProvider2;
     }();
@@ -41392,11 +41392,11 @@ var init_interfaces = __esm({
 
 // node_modules/@azure/core-tracing/dist-esm/src/createSpan.js
 function isTracingDisabled() {
-  var _a2;
+  var _a3;
   if (typeof process === "undefined") {
     return false;
   }
-  const azureTracingDisabledValue = (_a2 = process.env.AZURE_TRACING_DISABLED) === null || _a2 === void 0 ? void 0 : _a2.toLowerCase();
+  const azureTracingDisabledValue = (_a3 = process.env.AZURE_TRACING_DISABLED) === null || _a3 === void 0 ? void 0 : _a3.toLowerCase();
   if (azureTracingDisabledValue === "false" || azureTracingDisabledValue === "0") {
     return false;
   }
@@ -41510,7 +41510,7 @@ var init_tracingPolicy = __esm({
         }
       }
       tryCreateSpan(request) {
-        var _a2;
+        var _a3;
         try {
           const { span } = createSpan(`HTTP ${request.method}`, {
             tracingOptions: {
@@ -41522,7 +41522,7 @@ var init_tracingPolicy = __esm({
             span.end();
             return void 0;
           }
-          const namespaceFromContext = (_a2 = request.tracingContext) === null || _a2 === void 0 ? void 0 : _a2.getValue(Symbol.for("az.namespace"));
+          const namespaceFromContext = (_a3 = request.tracingContext) === null || _a3 === void 0 ? void 0 : _a3.getValue(Symbol.for("az.namespace"));
           if (typeof namespaceFromContext === "string") {
             span.setAttribute("az.namespace", namespaceFromContext);
           }
@@ -41584,8 +41584,8 @@ var init_tracingPolicy = __esm({
 
 // node_modules/@azure/core-http/dist-esm/src/serviceClient.js
 function serializeRequestBody(serviceClient, httpRequest, operationArguments, operationSpec) {
-  var _a2, _b, _c, _d, _e, _f;
-  const serializerOptions = (_b = (_a2 = operationArguments.options) === null || _a2 === void 0 ? void 0 : _a2.serializerOptions) !== null && _b !== void 0 ? _b : {};
+  var _a3, _b, _c, _d, _e, _f;
+  const serializerOptions = (_b = (_a3 = operationArguments.options) === null || _a3 === void 0 ? void 0 : _a3.serializerOptions) !== null && _b !== void 0 ? _b : {};
   const updatedOptions = {
     rootName: (_c = serializerOptions.rootName) !== null && _c !== void 0 ? _c : "",
     includeRoot: (_d = serializerOptions.includeRoot) !== null && _d !== void 0 ? _d : false,
@@ -41688,12 +41688,12 @@ function getOperationArgumentValueFromParameter(serviceClient, operationArgument
   return getOperationArgumentValueFromParameterPath(serviceClient, operationArguments, parameter.parameterPath, parameter.mapper, serializer4);
 }
 function getOperationArgumentValueFromParameterPath(serviceClient, operationArguments, parameterPath, parameterMapper, serializer4) {
-  var _a2;
+  var _a3;
   let value;
   if (typeof parameterPath === "string") {
     parameterPath = [parameterPath];
   }
-  const serializerOptions = (_a2 = operationArguments.options) === null || _a2 === void 0 ? void 0 : _a2.serializerOptions;
+  const serializerOptions = (_a3 = operationArguments.options) === null || _a3 === void 0 ? void 0 : _a3.serializerOptions;
   if (Array.isArray(parameterPath)) {
     if (parameterPath.length > 0) {
       if (parameterMapper.isConstant) {
@@ -41903,12 +41903,12 @@ var init_serviceClient = __esm({
         return httpPipeline.sendRequest(httpRequest);
       }
       async sendOperationRequest(operationArguments, operationSpec, callback) {
-        var _a2;
+        var _a3;
         if (typeof operationArguments.options === "function") {
           callback = operationArguments.options;
           operationArguments.options = void 0;
         }
-        const serializerOptions = (_a2 = operationArguments.options) === null || _a2 === void 0 ? void 0 : _a2.serializerOptions;
+        const serializerOptions = (_a3 = operationArguments.options) === null || _a3 === void 0 ? void 0 : _a3.serializerOptions;
         const httpRequest = new WebResource();
         let result;
         try {
@@ -55496,9 +55496,9 @@ function ConvertInternalResponseOfListBlobFlat(internalResponse) {
   } });
 }
 function ConvertInternalResponseOfListBlobHierarchy(internalResponse) {
-  var _a2;
+  var _a3;
   return Object.assign(Object.assign({}, internalResponse), { segment: {
-    blobPrefixes: (_a2 = internalResponse.segment.blobPrefixes) === null || _a2 === void 0 ? void 0 : _a2.map((blobPrefixInternal) => {
+    blobPrefixes: (_a3 = internalResponse.segment.blobPrefixes) === null || _a3 === void 0 ? void 0 : _a3.map((blobPrefixInternal) => {
       const blobPrefix = {
         name: BlobNameToString(blobPrefixInternal.name)
       };
@@ -56159,7 +56159,7 @@ async function beginRefresh2(getAccessToken, retryIntervalInMs, timeoutInMs) {
     if (Date.now() < timeoutInMs) {
       try {
         return await getAccessToken();
-      } catch (_a2) {
+      } catch (_a3) {
         return null;
       }
     } else {
@@ -56186,21 +56186,21 @@ function createTokenCycler2(credential, scopes, tokenCyclerOptions) {
       return refreshWorker !== null;
     },
     get shouldRefresh() {
-      var _a2;
-      return !cycler.isRefreshing && ((_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : 0) - options.refreshWindowInMs < Date.now();
+      var _a3;
+      return !cycler.isRefreshing && ((_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : 0) - options.refreshWindowInMs < Date.now();
     },
     get mustRefresh() {
       return token === null || token.expiresOnTimestamp - options.forcedRefreshWindowInMs < Date.now();
     }
   };
   function refresh(getTokenOptions) {
-    var _a2;
+    var _a3;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
       refreshWorker = beginRefresh2(
         tryGetAccessToken,
         options.retryIntervalInMs,
-        (_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : Date.now()
+        (_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : Date.now()
       ).then((_token) => {
         refreshWorker = null;
         token = _token;
@@ -56313,7 +56313,7 @@ function isPipelineLike(pipeline) {
   return Array.isArray(castPipeline.factories) && typeof castPipeline.options === "object" && typeof castPipeline.toServiceClientOptions === "function";
 }
 function newPipeline(credential, pipelineOptions = {}) {
-  var _a2;
+  var _a3;
   if (credential === void 0) {
     credential = new AnonymousCredential();
   }
@@ -56336,7 +56336,7 @@ function newPipeline(credential, pipelineOptions = {}) {
     factories.push(proxyPolicy(pipelineOptions.proxyOptions));
     factories.push(disableResponseDecompressionPolicy());
   }
-  factories.push(isTokenCredential(credential) ? attachCredential(storageBearerTokenChallengeAuthenticationPolicy(credential, (_a2 = pipelineOptions.audience) !== null && _a2 !== void 0 ? _a2 : StorageOAuthScopes), credential) : credential);
+  factories.push(isTokenCredential(credential) ? attachCredential(storageBearerTokenChallengeAuthenticationPolicy(credential, (_a3 = pipelineOptions.audience) !== null && _a3 !== void 0 ? _a3 : StorageOAuthScopes), credential) : credential);
   return new Pipeline(factories, pipelineOptions);
 }
 var Pipeline;
@@ -56544,9 +56544,9 @@ var init_StorageClient = __esm({
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/tracing.js
 function convertTracingToRequestOptionsBase(options) {
-  var _a2, _b;
+  var _a3, _b;
   return {
-    spanOptions: (_a2 = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _a2 === void 0 ? void 0 : _a2.spanOptions,
+    spanOptions: (_a3 = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _a3 === void 0 ? void 0 : _a3.spanOptions,
     tracingContext: (_b = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _b === void 0 ? void 0 : _b.tracingContext
   };
 }
@@ -57511,9 +57511,9 @@ var init_BlobLeaseClient = __esm({
         return this._url;
       }
       async acquireLease(duration2, options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a3, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-acquireLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -57529,9 +57529,9 @@ var init_BlobLeaseClient = __esm({
         }
       }
       async changeLease(proposedLeaseId2, options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a3, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-changeLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -57549,9 +57549,9 @@ var init_BlobLeaseClient = __esm({
         }
       }
       async releaseLease(options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a3, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-releaseLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -57567,9 +57567,9 @@ var init_BlobLeaseClient = __esm({
         }
       }
       async renewLease(options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a3, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-renewLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -57585,9 +57585,9 @@ var init_BlobLeaseClient = __esm({
         }
       }
       async breakLease(breakPeriod2, options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a3, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-breakLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -58306,8 +58306,8 @@ var init_AvroReadableFromStream = __esm({
         return this._position;
       }
       async read(size, options = {}) {
-        var _a2;
-        if ((_a2 = options.abortSignal) === null || _a2 === void 0 ? void 0 : _a2.aborted) {
+        var _a3;
+        if ((_a3 = options.abortSignal) === null || _a3 === void 0 ? void 0 : _a3.aborted) {
           throw ABORT_ERROR;
         }
         if (size < 0) {
@@ -59451,13 +59451,13 @@ var init_Clients = __esm({
         return new PageBlobClient(this.url, this.pipeline);
       }
       async download(offset = 0, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         options.conditions = options.conditions || {};
         ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
         const { span, updatedOptions } = createSpan2("BlobClient-download", options);
         try {
-          const res = await this.blobContext.download(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          const res = await this.blobContext.download(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
             onDownloadProgress: isNode ? void 0 : options.onProgress
           }, range: offset === 0 && !count ? void 0 : rangeToString({ offset, count }), rangeGetContentMD5: options.rangeGetContentMD5, rangeGetContentCRC64: options.rangeGetContentCrc64, snapshot: options.snapshot, cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedRes = Object.assign(Object.assign({}, res), { _response: res._response, objectReplicationDestinationPolicyId: res.objectReplicationPolicyId, objectReplicationSourceProperties: parseObjectReplicationRecord(res.objectReplicationRules) });
@@ -59474,7 +59474,7 @@ var init_Clients = __esm({
             throw new RangeError(`File download response doesn't contain valid etag header`);
           }
           return new BlobDownloadResponse(wrappedRes, async (start) => {
-            var _a3;
+            var _a4;
             const updatedDownloadOptions = {
               leaseAccessConditions: options.conditions,
               modifiedAccessConditions: {
@@ -59482,7 +59482,7 @@ var init_Clients = __esm({
                 ifModifiedSince: options.conditions.ifModifiedSince,
                 ifNoneMatch: options.conditions.ifNoneMatch,
                 ifUnmodifiedSince: options.conditions.ifUnmodifiedSince,
-                ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions
+                ifTags: (_a4 = options.conditions) === null || _a4 === void 0 ? void 0 : _a4.tagConditions
               },
               range: rangeToString({
                 count: offset + res.contentLength - start,
@@ -59535,12 +59535,12 @@ var init_Clients = __esm({
         }
       }
       async getProperties(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-getProperties", options);
         try {
           options.conditions = options.conditions || {};
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          const res = await this.blobContext.getProperties(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const res = await this.blobContext.getProperties(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           return Object.assign(Object.assign({}, res), { _response: res._response, objectReplicationDestinationPolicyId: res.objectReplicationPolicyId, objectReplicationSourceProperties: parseObjectReplicationRecord(res.objectReplicationRules) });
         } catch (e) {
           span.setStatus({
@@ -59553,11 +59553,11 @@ var init_Clients = __esm({
         }
       }
       async delete(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-delete", options);
         options.conditions = options.conditions || {};
         try {
-          return await this.blobContext.delete(Object.assign({ abortSignal: options.abortSignal, deleteSnapshots: options.deleteSnapshots, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.delete(Object.assign({ abortSignal: options.abortSignal, deleteSnapshots: options.deleteSnapshots, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59569,13 +59569,13 @@ var init_Clients = __esm({
         }
       }
       async deleteIfExists(options = {}) {
-        var _a2, _b;
+        var _a3, _b;
         const { span, updatedOptions } = createSpan2("BlobClient-deleteIfExists", options);
         try {
           const res = await this.delete(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "BlobNotFound") {
+          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "BlobNotFound") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when deleting a blob or snapshot only if it exists."
@@ -59606,12 +59606,12 @@ var init_Clients = __esm({
         }
       }
       async setHTTPHeaders(blobHTTPHeaders, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-setHTTPHeaders", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.setHttpHeaders(Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setHttpHeaders(Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59623,12 +59623,12 @@ var init_Clients = __esm({
         }
       }
       async setMetadata(metadata2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-setMetadata", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.setMetadata(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: metadata2, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setMetadata(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: metadata2, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59640,10 +59640,10 @@ var init_Clients = __esm({
         }
       }
       async setTags(tags2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-setTags", options);
         try {
-          return await this.blobContext.setTags(Object.assign(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)), { tags: toBlobTags(tags2) }));
+          return await this.blobContext.setTags(Object.assign(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)), { tags: toBlobTags(tags2) }));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59655,10 +59655,10 @@ var init_Clients = __esm({
         }
       }
       async getTags(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-getTags", options);
         try {
-          const response = await this.blobContext.getTags(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const response = await this.blobContext.getTags(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, tags: toTags({ blobTagSet: response.blobTagSet }) || {} });
           return wrappedResponse;
         } catch (e) {
@@ -59675,12 +59675,12 @@ var init_Clients = __esm({
         return new BlobLeaseClient(this, proposeLeaseId);
       }
       async createSnapshot(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-createSnapshot", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.createSnapshot(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.createSnapshot(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59723,12 +59723,12 @@ var init_Clients = __esm({
         }
       }
       async syncCopyFromURL(copySource2, options = {}) {
-        var _a2, _b, _c;
+        var _a3, _b, _c;
         const { span, updatedOptions } = createSpan2("BlobClient-syncCopyFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
-          return await this.blobContext.copyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, metadata: options.metadata, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.blobContext.copyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, metadata: options.metadata, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -59745,10 +59745,10 @@ var init_Clients = __esm({
         }
       }
       async setAccessTier(tier2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-setAccessTier", options);
         try {
-          return await this.blobContext.setTier(toAccessTier(tier2), Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), rehydratePriority: options.rehydratePriority }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setTier(toAccessTier(tier2), Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), rehydratePriority: options.rehydratePriority }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59894,12 +59894,12 @@ var init_Clients = __esm({
         }
       }
       async startCopyFromURL(copySource2, options = {}) {
-        var _a2, _b, _c;
+        var _a3, _b, _c;
         const { span, updatedOptions } = createSpan2("BlobClient-startCopyFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
-          return await this.blobContext.startCopyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.blobContext.startCopyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -60014,12 +60014,12 @@ var init_Clients = __esm({
         return new AppendBlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
       async create(options = {}) {
-        var _a2, _b, _c;
+        var _a3, _b, _c;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-create", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.create(0, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.appendBlobContext.create(0, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60031,14 +60031,14 @@ var init_Clients = __esm({
         }
       }
       async createIfNotExists(options = {}) {
-        var _a2, _b;
+        var _a3, _b;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-createIfNotExists", options);
         const conditions = { ifNoneMatch: ETagAny };
         try {
           const res = await this.create(Object.assign(Object.assign({}, updatedOptions), { conditions }));
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "BlobAlreadyExists") {
+          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "BlobAlreadyExists") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when creating a blob only if it does not already exist."
@@ -60055,11 +60055,11 @@ var init_Clients = __esm({
         }
       }
       async seal(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-seal", options);
         options.conditions = options.conditions || {};
         try {
-          return await this.appendBlobContext.seal(Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.appendBlobContext.seal(Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60071,12 +60071,12 @@ var init_Clients = __esm({
         }
       }
       async appendBlock(body2, contentLength2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-appendBlock", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.appendBlock(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          return await this.appendBlobContext.appendBlock(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, transactionalContentMD5: options.transactionalContentMD5, transactionalContentCrc64: options.transactionalContentCrc64, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
@@ -60090,13 +60090,13 @@ var init_Clients = __esm({
         }
       }
       async appendBlockFromURL(sourceURL, sourceOffset, count, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-appendBlockFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.appendBlockFromUrl(sourceURL, 0, Object.assign({ abortSignal: options.abortSignal, sourceRange: rangeToString({ offset: sourceOffset, count }), sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, appendPositionAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.appendBlobContext.appendBlockFromUrl(sourceURL, 0, Object.assign({ abortSignal: options.abortSignal, sourceRange: rangeToString({ offset: sourceOffset, count }), sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, appendPositionAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -60160,7 +60160,7 @@ var init_Clients = __esm({
         return new BlockBlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
       async query(query, options = {}) {
-        var _a2;
+        var _a3;
         ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
         const { span, updatedOptions } = createSpan2("BlockBlobClient-query", options);
         try {
@@ -60173,7 +60173,7 @@ var init_Clients = __esm({
             expression: query,
             inputSerialization: toQuerySerialization(options.inputTextConfiguration),
             outputSerialization: toQuerySerialization(options.outputTextConfiguration)
-          }, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
+          }, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           return new BlobQueryResponse(response, {
             abortSignal: options.abortSignal,
             onProgress: options.onProgress,
@@ -60190,12 +60190,12 @@ var init_Clients = __esm({
         }
       }
       async upload(body2, contentLength2, options = {}) {
-        var _a2, _b, _c;
+        var _a3, _b, _c;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-upload", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blockBlobContext.upload(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          return await this.blockBlobContext.upload(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
@@ -60209,13 +60209,13 @@ var init_Clients = __esm({
         }
       }
       async syncUploadFromURL(sourceURL, options = {}) {
-        var _a2, _b, _c, _d, _e;
+        var _a3, _b, _c, _d, _e;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-syncUploadFromURL", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
           return await this.blockBlobContext.putBlobFromUrl(0, sourceURL, Object.assign(Object.assign(Object.assign({}, options), { blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: options.conditions.tagConditions }), sourceModifiedAccessConditions: {
-            sourceIfMatch: (_a2 = options.sourceConditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch,
+            sourceIfMatch: (_a3 = options.sourceConditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch,
             sourceIfModifiedSince: (_b = options.sourceConditions) === null || _b === void 0 ? void 0 : _b.ifModifiedSince,
             sourceIfNoneMatch: (_c = options.sourceConditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch,
             sourceIfUnmodifiedSince: (_d = options.sourceConditions) === null || _d === void 0 ? void 0 : _d.ifUnmodifiedSince,
@@ -60264,12 +60264,12 @@ var init_Clients = __esm({
         }
       }
       async commitBlockList(blocks2, options = {}) {
-        var _a2, _b, _c;
+        var _a3, _b, _c;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-commitBlockList", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blockBlobContext.commitBlockList({ latest: blocks2 }, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blockBlobContext.commitBlockList({ latest: blocks2 }, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60281,10 +60281,10 @@ var init_Clients = __esm({
         }
       }
       async getBlockList(listType2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlockBlobClient-getBlockList", options);
         try {
-          const res = await this.blockBlobContext.getBlockList(listType2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const res = await this.blockBlobContext.getBlockList(listType2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
           if (!res.committedBlocks) {
             res.committedBlocks = [];
           }
@@ -60534,12 +60534,12 @@ var init_Clients = __esm({
         return new PageBlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
       async create(size, options = {}) {
-        var _a2, _b, _c;
+        var _a3, _b, _c;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-create", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.create(0, size, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, blobSequenceNumber: options.blobSequenceNumber, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.create(0, size, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, blobSequenceNumber: options.blobSequenceNumber, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60551,14 +60551,14 @@ var init_Clients = __esm({
         }
       }
       async createIfNotExists(size, options = {}) {
-        var _a2, _b;
+        var _a3, _b;
         const { span, updatedOptions } = createSpan2("PageBlobClient-createIfNotExists", options);
         try {
           const conditions = { ifNoneMatch: ETagAny };
           const res = await this.create(size, Object.assign(Object.assign({}, options), { conditions, tracingOptions: updatedOptions.tracingOptions }));
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "BlobAlreadyExists") {
+          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "BlobAlreadyExists") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when creating a blob only if it does not already exist."
@@ -60575,12 +60575,12 @@ var init_Clients = __esm({
         }
       }
       async uploadPages(body2, offset, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-uploadPages", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.uploadPages(count, body2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          return await this.pageBlobContext.uploadPages(count, body2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, transactionalContentMD5: options.transactionalContentMD5, transactionalContentCrc64: options.transactionalContentCrc64, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
@@ -60594,13 +60594,13 @@ var init_Clients = __esm({
         }
       }
       async uploadPagesFromURL(sourceURL, sourceOffset, destOffset, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-uploadPagesFromURL", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.uploadPagesFromURL(sourceURL, rangeToString({ offset: sourceOffset, count }), 0, rangeToString({ offset: destOffset, count }), Object.assign({ abortSignal: options.abortSignal, sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, sequenceNumberAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.pageBlobContext.uploadPagesFromURL(sourceURL, rangeToString({ offset: sourceOffset, count }), 0, rangeToString({ offset: destOffset, count }), Object.assign({ abortSignal: options.abortSignal, sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, sequenceNumberAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -60617,11 +60617,11 @@ var init_Clients = __esm({
         }
       }
       async clearPages(offset = 0, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-clearPages", options);
         try {
-          return await this.pageBlobContext.clearPages(0, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.clearPages(0, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60633,11 +60633,11 @@ var init_Clients = __esm({
         }
       }
       async getPageRanges(offset = 0, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRanges", options);
         try {
-          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60649,10 +60649,10 @@ var init_Clients = __esm({
         }
       }
       async listPageRangesSegment(offset = 0, count, marker2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesSegment", options);
         try {
-          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), range: rangeToString({ offset, count }), marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), range: rangeToString({ offset, count }), marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60677,7 +60677,7 @@ var init_Clients = __esm({
       }
       listPageRangeItems(offset = 0, count, options = {}) {
         return __asyncGenerator(this, arguments, function* listPageRangeItems_1() {
-          var e_1, _a2;
+          var e_1, _a3;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listPageRangeItemSegments(offset, count, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -60688,8 +60688,8 @@ var init_Clients = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a3 = _b.return))
+                yield __await(_a3.call(_b));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -60713,11 +60713,11 @@ var init_Clients = __esm({
         };
       }
       async getPageRangesDiff(offset, count, prevSnapshot, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesDiff", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), prevsnapshot: prevSnapshot, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), prevsnapshot: prevSnapshot, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60729,10 +60729,10 @@ var init_Clients = __esm({
         }
       }
       async listPageRangesDiffSegment(offset, count, prevSnapshotOrUrl, marker2, options) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesDiffSegment", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal, leaseAccessConditions: options === null || options === void 0 ? void 0 : options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.conditions), { ifTags: (_a2 = options === null || options === void 0 ? void 0 : options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), prevsnapshot: prevSnapshotOrUrl, range: rangeToString({
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal, leaseAccessConditions: options === null || options === void 0 ? void 0 : options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.conditions), { ifTags: (_a3 = options === null || options === void 0 ? void 0 : options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), prevsnapshot: prevSnapshotOrUrl, range: rangeToString({
             offset,
             count
           }), marker: marker2, maxPageSize: options === null || options === void 0 ? void 0 : options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
@@ -60760,7 +60760,7 @@ var init_Clients = __esm({
       }
       listPageRangeDiffItems(offset, count, prevSnapshotOrUrl, options) {
         return __asyncGenerator(this, arguments, function* listPageRangeDiffItems_1() {
-          var e_2, _a2;
+          var e_2, _a3;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listPageRangeDiffItemSegments(offset, count, prevSnapshotOrUrl, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -60771,8 +60771,8 @@ var init_Clients = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a3 = _b.return))
+                yield __await(_a3.call(_b));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -60796,11 +60796,11 @@ var init_Clients = __esm({
         };
       }
       async getPageRangesDiffForManagedDisks(offset, count, prevSnapshotUrl2, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-GetPageRangesDiffForManagedDisks", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), prevSnapshotUrl: prevSnapshotUrl2, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), prevSnapshotUrl: prevSnapshotUrl2, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60812,11 +60812,11 @@ var init_Clients = __esm({
         }
       }
       async resize(size, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-resize", options);
         try {
-          return await this.pageBlobContext.resize(size, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.resize(size, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60828,11 +60828,11 @@ var init_Clients = __esm({
         }
       }
       async updateSequenceNumber(sequenceNumberAction2, sequenceNumber, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-updateSequenceNumber", options);
         try {
-          return await this.pageBlobContext.updateSequenceNumber(sequenceNumberAction2, Object.assign({ abortSignal: options.abortSignal, blobSequenceNumber: sequenceNumber, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.updateSequenceNumber(sequenceNumberAction2, Object.assign({ abortSignal: options.abortSignal, blobSequenceNumber: sequenceNumber, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60844,10 +60844,10 @@ var init_Clients = __esm({
         }
       }
       async startCopyIncremental(copySource2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("PageBlobClient-startCopyIncremental", options);
         try {
-          return await this.pageBlobContext.copyIncremental(copySource2, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.copyIncremental(copySource2, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -61432,13 +61432,13 @@ var init_ContainerClient = __esm({
         }
       }
       async createIfNotExists(options = {}) {
-        var _a2, _b;
+        var _a3, _b;
         const { span, updatedOptions } = createSpan2("ContainerClient-createIfNotExists", options);
         try {
           const res = await this.create(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "ContainerAlreadyExists") {
+          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "ContainerAlreadyExists") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when creating a container only if it does not already exist."
@@ -61526,13 +61526,13 @@ var init_ContainerClient = __esm({
         }
       }
       async deleteIfExists(options = {}) {
-        var _a2, _b;
+        var _a3, _b;
         const { span, updatedOptions } = createSpan2("ContainerClient-deleteIfExists", options);
         try {
           const res = await this.delete(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "ContainerNotFound") {
+          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "ContainerNotFound") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when deleting a container only if it exists."
@@ -61706,7 +61706,7 @@ var init_ContainerClient = __esm({
         }
       }
       async listBlobHierarchySegment(delimiter3, marker2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("ContainerClient-listBlobHierarchySegment", options);
         try {
           const response = await this.containerContext.listBlobHierarchySegment(delimiter3, Object.assign(Object.assign({ marker: marker2 }, options), convertTracingToRequestOptionsBase(updatedOptions)));
@@ -61721,7 +61721,7 @@ var init_ContainerClient = __esm({
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: Object.assign(Object.assign({}, response._response), { parsedBody: ConvertInternalResponseOfListBlobHierarchy(response._response.parsedBody) }), segment: Object.assign(Object.assign({}, response.segment), { blobItems: response.segment.blobItems.map((blobItemInteral) => {
             const blobItem = Object.assign(Object.assign({}, blobItemInteral), { name: BlobNameToString(blobItemInteral.name), tags: toTags(blobItemInteral.blobTags), objectReplicationSourceProperties: parseObjectReplicationRecord(blobItemInteral.objectReplicationMetadata) });
             return blobItem;
-          }), blobPrefixes: (_a2 = response.segment.blobPrefixes) === null || _a2 === void 0 ? void 0 : _a2.map((blobPrefixInternal) => {
+          }), blobPrefixes: (_a3 = response.segment.blobPrefixes) === null || _a3 === void 0 ? void 0 : _a3.map((blobPrefixInternal) => {
             const blobPrefix = {
               name: BlobNameToString(blobPrefixInternal.name)
             };
@@ -61752,7 +61752,7 @@ var init_ContainerClient = __esm({
       }
       listItems(options = {}) {
         return __asyncGenerator(this, arguments, function* listItems_1() {
-          var e_1, _a2;
+          var e_1, _a3;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listSegments(marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -61763,8 +61763,8 @@ var init_ContainerClient = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a3 = _b.return))
+                yield __await(_a3.call(_b));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -61835,7 +61835,7 @@ var init_ContainerClient = __esm({
       }
       listItemsByHierarchy(delimiter3, options = {}) {
         return __asyncGenerator(this, arguments, function* listItemsByHierarchy_1() {
-          var e_2, _a2;
+          var e_2, _a3;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listHierarchySegments(delimiter3, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -61854,8 +61854,8 @@ var init_ContainerClient = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a3 = _b.return))
+                yield __await(_a3.call(_b));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -61920,9 +61920,9 @@ var init_ContainerClient = __esm({
         try {
           const response = await this.containerContext.filterBlobs(Object.assign({ abortSignal: options.abortSignal, where: tagFilterSqlExpression, marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, blobs: response.blobs.map((blob) => {
-            var _a2;
+            var _a3;
             let tagValue = "";
-            if (((_a2 = blob.tags) === null || _a2 === void 0 ? void 0 : _a2.blobTagSet.length) === 1) {
+            if (((_a3 = blob.tags) === null || _a3 === void 0 ? void 0 : _a3.blobTagSet.length) === 1) {
               tagValue = blob.tags.blobTagSet[0].value;
             }
             return Object.assign(Object.assign({}, blob), { tags: toTags(blob.tags), tagValue });
@@ -61953,7 +61953,7 @@ var init_ContainerClient = __esm({
       }
       findBlobsByTagsItems(tagFilterSqlExpression, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsItems_1() {
-          var e_3, _a2;
+          var e_3, _a3;
           let marker2;
           try {
             for (var _b = __asyncValues(this.findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -61964,8 +61964,8 @@ var init_ContainerClient = __esm({
             e_3 = { error: e_3_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a3 = _b.return))
+                yield __await(_a3.call(_b));
             } finally {
               if (e_3)
                 throw e_3.error;
@@ -62463,12 +62463,12 @@ var init_BlobServiceClient = __esm({
         }
       }
       async renameContainer(sourceContainerName2, destinationContainerName, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobServiceClient-renameContainer", options);
         try {
           const containerClient = this.getContainerClient(destinationContainerName);
           const containerContext = new Container(containerClient["storageClientContext"]);
-          const containerRenameResponse = await containerContext.rename(sourceContainerName2, Object.assign(Object.assign({}, updatedOptions), { sourceLeaseId: (_a2 = options.sourceCondition) === null || _a2 === void 0 ? void 0 : _a2.leaseId }));
+          const containerRenameResponse = await containerContext.rename(sourceContainerName2, Object.assign(Object.assign({}, updatedOptions), { sourceLeaseId: (_a3 = options.sourceCondition) === null || _a3 === void 0 ? void 0 : _a3.leaseId }));
           return { containerClient, containerRenameResponse };
         } catch (e) {
           span.setStatus({
@@ -62555,9 +62555,9 @@ var init_BlobServiceClient = __esm({
         try {
           const response = await this.serviceContext.filterBlobs(Object.assign({ abortSignal: options.abortSignal, where: tagFilterSqlExpression, marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, blobs: response.blobs.map((blob) => {
-            var _a2;
+            var _a3;
             let tagValue = "";
-            if (((_a2 = blob.tags) === null || _a2 === void 0 ? void 0 : _a2.blobTagSet.length) === 1) {
+            if (((_a3 = blob.tags) === null || _a3 === void 0 ? void 0 : _a3.blobTagSet.length) === 1) {
               tagValue = blob.tags.blobTagSet[0].value;
             }
             return Object.assign(Object.assign({}, blob), { tags: toTags(blob.tags), tagValue });
@@ -62588,7 +62588,7 @@ var init_BlobServiceClient = __esm({
       }
       findBlobsByTagsItems(tagFilterSqlExpression, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsItems_1() {
-          var e_1, _a2;
+          var e_1, _a3;
           let marker2;
           try {
             for (var _b = __asyncValues(this.findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -62599,8 +62599,8 @@ var init_BlobServiceClient = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a3 = _b.return))
+                yield __await(_a3.call(_b));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -62638,7 +62638,7 @@ var init_BlobServiceClient = __esm({
       }
       listItems(options = {}) {
         return __asyncGenerator(this, arguments, function* listItems_1() {
-          var e_2, _a2;
+          var e_2, _a3;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listSegments(marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -62649,8 +62649,8 @@ var init_BlobServiceClient = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a3 = _b.return))
+                yield __await(_a3.call(_b));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -63128,7 +63128,7 @@ var require_downloadUtils = __commonJS({
     }
     exports.downloadCacheHttpClient = downloadCacheHttpClient;
     function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
-      var _a2;
+      var _a3;
       return __awaiter(this, void 0, void 0, function* () {
         const client = new storage_blob_1.BlockBlobClient(archiveLocation, void 0, {
           retryOptions: {
@@ -63136,7 +63136,7 @@ var require_downloadUtils = __commonJS({
           }
         });
         const properties = yield client.getProperties();
-        const contentLength2 = (_a2 = properties.contentLength) !== null && _a2 !== void 0 ? _a2 : -1;
+        const contentLength2 = (_a3 = properties.contentLength) !== null && _a3 !== void 0 ? _a3 : -1;
         if (contentLength2 < 0) {
           core3.debug("Unable to determine content length, downloading file with http-client...");
           yield downloadCacheHttpClient(archiveLocation, archivePath);
@@ -63566,8 +63566,8 @@ var require_tar = __commonJS({
       });
     }
     function getWorkingDirectory() {
-      var _a2;
-      return (_a2 = process.env["GITHUB_WORKSPACE"]) !== null && _a2 !== void 0 ? _a2 : process.cwd();
+      var _a3;
+      return (_a3 = process.env["GITHUB_WORKSPACE"]) !== null && _a3 !== void 0 ? _a3 : process.cwd();
     }
     function getCompressionProgram(compressionMethod) {
       switch (compressionMethod) {
@@ -63784,7 +63784,7 @@ var require_cache = __commonJS({
     }
     exports.restoreCache = restoreCache3;
     function saveCache3(paths, key, options) {
-      var _a2, _b, _c, _d, _e;
+      var _a3, _b, _c, _d, _e;
       return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(key);
@@ -63815,7 +63815,7 @@ var require_cache = __commonJS({
             compressionMethod,
             cacheSize: archiveFileSize
           });
-          if ((_a2 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a2 === void 0 ? void 0 : _a2.cacheId) {
+          if ((_a3 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a3 === void 0 ? void 0 : _a3.cacheId) {
             cacheId = (_b = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _b === void 0 ? void 0 : _b.cacheId;
           } else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) {
             throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
@@ -64613,7 +64613,7 @@ var require_internal_globber2 = __commonJS({
         return this.searchPaths.slice();
       }
       glob() {
-        var e_1, _a2;
+        var e_1, _a3;
         return __awaiter(this, void 0, void 0, function* () {
           const result = [];
           try {
@@ -64625,8 +64625,8 @@ var require_internal_globber2 = __commonJS({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield _a2.call(_b);
+              if (_c && !_c.done && (_a3 = _b.return))
+                yield _a3.call(_b);
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -64832,7 +64832,7 @@ var require_internal_hash_files = __commonJS({
     var util3 = __importStar(require("util"));
     var path5 = __importStar(require("path"));
     function hashFiles(globber, verbose = false) {
-      var e_1, _a2;
+      var e_1, _a3;
       var _b;
       return __awaiter(this, void 0, void 0, function* () {
         const writeDelegate = verbose ? core3.info : core3.debug;
@@ -64865,8 +64865,8 @@ var require_internal_hash_files = __commonJS({
           e_1 = { error: e_1_1 };
         } finally {
           try {
-            if (_d && !_d.done && (_a2 = _c.return))
-              yield _a2.call(_c);
+            if (_d && !_d.done && (_a3 = _c.return))
+              yield _a3.call(_c);
           } finally {
             if (e_1)
               throw e_1.error;
@@ -65642,7 +65642,7 @@ var require_tool_cache = __commonJS({
           versionsRaw = versionsRaw.replace(/^\uFEFF/, "");
           try {
             releases = JSON.parse(versionsRaw);
-          } catch (_a2) {
+          } catch (_a3) {
             core3.debug("Invalid json");
           }
         }
@@ -65993,8 +65993,8 @@ var Reflect2;
           keys.push(key);
         }
       }
-      for (var _a2 = 0, parentKeys_1 = parentKeys; _a2 < parentKeys_1.length; _a2++) {
-        var key = parentKeys_1[_a2];
+      for (var _a3 = 0, parentKeys_1 = parentKeys; _a3 < parentKeys_1.length; _a3++) {
+        var key = parentKeys_1[_a3];
         var hasKey = set.has(key);
         if (!hasKey) {
           set.add(key);
@@ -66609,8 +66609,8 @@ var MetadataStorage = function() {
       });
     }
     var metadataFromAncestors = [];
-    for (var _i = 0, _a2 = this.getAncestors(target); _i < _a2.length; _i++) {
-      var ancestor = _a2[_i];
+    for (var _i = 0, _a3 = this.getAncestors(target); _i < _a3.length; _i++) {
+      var ancestor = _a3[_i];
       var ancestorMetadataMap = metadatas.get(ancestor);
       if (ancestorMetadataMap) {
         var metadataFromAncestor = Array.from(ancestorMetadataMap.values()).filter(function(meta) {
@@ -66629,8 +66629,8 @@ var MetadataStorage = function() {
         return metadataFromTarget;
       }
     }
-    for (var _i = 0, _a2 = this.getAncestors(target); _i < _a2.length; _i++) {
-      var ancestor = _a2[_i];
+    for (var _i = 0, _a3 = this.getAncestors(target); _i < _a3.length; _i++) {
+      var ancestor = _a3[_i];
       var ancestorMetadataMap = metadatas.get(ancestor);
       if (ancestorMetadataMap) {
         var ancestorResult = ancestorMetadataMap.get(propertyName);
@@ -66648,8 +66648,8 @@ var MetadataStorage = function() {
       metadataFromTarget = metadataFromTargetMap.get(propertyName);
     }
     var metadataFromAncestorsTarget = [];
-    for (var _i = 0, _a2 = this.getAncestors(target); _i < _a2.length; _i++) {
-      var ancestor = _a2[_i];
+    for (var _i = 0, _a3 = this.getAncestors(target); _i < _a3.length; _i++) {
+      var ancestor = _a3[_i];
       var ancestorMetadataMap = metadatas.get(ancestor);
       if (ancestorMetadataMap) {
         if (ancestorMetadataMap.has(propertyName)) {
@@ -67213,8 +67213,8 @@ var classTransformer = new ClassTransformer();
 function instanceToPlain(object, options) {
   return classTransformer.instanceToPlain(object, options);
 }
-function deserialize(cls, json, options) {
-  return classTransformer.deserialize(cls, json, options);
+function plainToClassFromExist(clsObject, plain, options) {
+  return classTransformer.plainToClassFromExist(clsObject, plain, options);
 }
 
 // lib/context.js
@@ -67308,7 +67308,7 @@ async function restoreCache2(target, primaryKey, restoreKeys) {
   try {
     key = await cache.restoreCache([target], primaryKey, restoreKeys);
     if (key !== void 0) {
-      info(`${target} restored from cache key: ${key}`);
+      info(`${target} restored from cache with key: ${key}`);
       return key === primaryKey ? "primary" : "secondary";
     } else {
       info("Cache not found");
@@ -67699,32 +67699,23 @@ var Env = class {
     };
   }
 };
-var State = State_1 = class State2 extends Serializable {
+var _a;
+var State = State_1 = (_a = class extends Serializable {
   constructor() {
-    super(...arguments);
+    super();
+    __publicField(this, "post", false);
     __publicField(this, "key");
     __publicField(this, "texdir");
+    const state = core2.getState(State_1.NAME);
+    if (state !== "") {
+      plainToClassFromExist(this, JSON.parse(state));
+      this.post = true;
+    }
   }
   save() {
-    core2.saveState("post", JSON.stringify(this.validate()));
-    if (this.filled()) {
-      info(`${this.texdir} will be saved to cache with key: ${this.key})`);
-    }
+    core2.saveState(State_1.NAME, JSON.stringify(this));
   }
-  filled() {
-    return this.key !== void 0 && this.texdir !== void 0;
-  }
-  validate() {
-    if (this.key === void 0 !== (this.texdir === void 0)) {
-      throw new Error(`Unexpected action state: ${this}`);
-    }
-    return this;
-  }
-  static load() {
-    const post = core2.getState("post");
-    return post === "" ? null : deserialize(State_1, post).validate();
-  }
-};
+}, __publicField(_a, "NAME", "post"), _a);
 __decorate([
   Expose(),
   __metadata("design:type", String)
@@ -67734,7 +67725,8 @@ __decorate([
   __metadata("design:type", String)
 ], State.prototype, "texdir", void 0);
 State = State_1 = __decorate([
-  Exclude()
+  Exclude(),
+  __metadata("design:paramtypes", [])
 ], State);
 
 // lib/install-tl.js
@@ -67814,8 +67806,8 @@ var InstallTL = class {
     return new URL(Version.isLatest(version3) ? path4.posix.join("..", archive) : archive, tlnet.historic(version3));
   }
 };
-var _a;
-var Profile = (_a = class extends Serializable {
+var _a2;
+var Profile = (_a2 = class extends Serializable {
   constructor(version3, { TEXDIR, TEXMFLOCAL, TEXMFSYSCONFIG, TEXMFSYSVAR }) {
     super();
     __publicField(this, "version");
@@ -67887,9 +67879,9 @@ var Profile = (_a = class extends Serializable {
   }
 }, (() => {
   for (const key of ["instopt_adjustpath", "instopt_adjustrepo", "tlpdbopt_autobackup", "tlpdbopt_install_docfiles", "tlpdbopt_install_srcfiles", "tlpdbopt_desktop_integration", "tlpdbopt_file_assocs", "tlpdbopt_w32_multi_user", "option_menu_integration", "option_symlinks", "option_path", "option_adjustrepo", "option_autobackup", "option_doc", "option_src", "option_desktop_integration", "option_file_assocs", "option_w32_multi_user"]) {
-    Type(() => Number)(_a.prototype, key);
+    Type(() => Number)(_a2.prototype, key);
   }
-})(), _a);
+})(), _a2);
 __decorate([
   Expose(),
   __metadata("design:type", String)
@@ -68047,15 +68039,11 @@ async function patch(version3, base2) {
 // lib/action.js
 async function run() {
   try {
-    const state = State.load();
-    if (state === null) {
-      await main();
+    const state = new State();
+    if (!state.post) {
+      await main(state);
     } else {
-      if (state.filled()) {
-        await saveCache2(state.texdir, state.key);
-      } else {
-        info("Nothing to do");
-      }
+      await post(state);
     }
   } catch (error2) {
     if ((0, import_types5.isNativeError)(error2)) {
@@ -68066,21 +68054,19 @@ async function run() {
     }
   }
 }
-async function main() {
-  const inputs = new Inputs();
-  const outputs = new Outputs();
-  const state = new State();
+async function main(state, inputs = new Inputs(), outputs = new Outputs()) {
   const packages = await inputs.packages;
   let cacheType = void 0;
   if (inputs.cache) {
     const [primary, secondary] = getCacheKeys(inputs.version, packages);
-    cacheType = await (0, import_core2.group)("Restoring cache", async () => {
-      return await restoreCache2(inputs.texmf.TEXDIR, primary, secondary);
+    state.key = primary;
+    await (0, import_core2.group)("Restoring cache", async () => {
+      cacheType = await restoreCache2(inputs.texmf.TEXDIR, primary, secondary);
+      if (cacheType !== "primary") {
+        state.texdir = inputs.texmf.TEXDIR;
+        info(`After the job completes, ${state.texdir} will be cached with key: ${state.key}`);
+      }
     });
-    if (cacheType !== "primary") {
-      state.key = primary;
-      state.texdir = inputs.texmf.TEXDIR;
-    }
   }
   if (cacheType === void 0) {
     const installtl = await (0, import_core2.group)("Acquiring install-tl", async () => {
@@ -68133,6 +68119,17 @@ async function main() {
   }
   state.save();
   outputs.emit();
+}
+async function post({ key, texdir }) {
+  if (key !== void 0) {
+    if (texdir !== void 0) {
+      await saveCache2(texdir, key);
+    } else {
+      info(`Cache hit occurred on the primary key ${key}, not saving cache`);
+    }
+  } else {
+    info("Nothing to do");
+  }
 }
 function getCacheKeys(version3, packages) {
   const baseKey = `setup-texlive-${(0, import_os5.platform)()}-${(0, import_os5.arch)()}-${version3}-`;

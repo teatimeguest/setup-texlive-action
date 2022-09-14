@@ -9,19 +9,15 @@ import { Inputs, Outputs, State } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
 import * as log from '#/log';
 import { type Texmf, Tlmgr, Version, tlnet } from '#/texlive';
-import { restoreCache, saveCache } from '#/utility';
+import { CacheType, restoreCache, saveCache } from '#/utility';
 
 export async function run(): Promise<void> {
   try {
-    const state = State.load();
-    if (state === null) {
-      await main();
+    const state = new State();
+    if (!state.post) {
+      await main(state);
     } else {
-      if (state.filled()) {
-        await saveCache(state.texdir, state.key);
-      } else {
-        log.info('Nothing to do');
-      }
+      await post(state);
     }
   } catch (error) {
     if (isNativeError(error)) {
@@ -33,23 +29,28 @@ export async function run(): Promise<void> {
   }
 }
 
-async function main(): Promise<void> {
-  const inputs = new Inputs();
-  const outputs = new Outputs();
-  const state = new State();
-
+export async function main(
+  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+  state: State,
+  inputs: Inputs = new Inputs(),
+  outputs: Outputs = new Outputs(),
+): Promise<void> {
   const packages = await inputs.packages;
-  let cacheType = undefined;
+  let cacheType = undefined as CacheType | undefined;
 
   if (inputs.cache) {
     const [primary, secondary] = getCacheKeys(inputs.version, packages);
-    cacheType = await group('Restoring cache', async () => {
-      return await restoreCache(inputs.texmf.TEXDIR, primary, secondary);
+    state.key = primary;
+    await group('Restoring cache', async () => {
+      cacheType = await restoreCache(inputs.texmf.TEXDIR, primary, secondary);
+      if (cacheType !== 'primary') {
+        state.texdir = inputs.texmf.TEXDIR;
+        log.info(
+          'After the job completes, '
+            + `${state.texdir} will be cached with key: ${state.key}`,
+        );
+      }
     });
-    if (cacheType !== 'primary') {
-      state.key = primary;
-      state.texdir = inputs.texmf.TEXDIR;
-    }
   }
 
   if (cacheType === undefined) {
@@ -110,6 +111,20 @@ async function main(): Promise<void> {
 
   state.save();
   outputs.emit();
+}
+
+export async function post({ key, texdir }: Readonly<State>): Promise<void> {
+  if (key !== undefined) {
+    if (texdir !== undefined) {
+      await saveCache(texdir, key);
+    } else {
+      log.info(
+        `Cache hit occurred on the primary key ${key}, not saving cache`,
+      );
+    }
+  } else {
+    log.info('Nothing to do');
+  }
 }
 
 function getCacheKeys(
