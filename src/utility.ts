@@ -1,6 +1,6 @@
-import * as os from 'os';
-import * as path from 'path';
-import * as process from 'process';
+import os from 'node:os';
+import path from 'node:path';
+import process from 'node:process';
 
 import * as cache from '@actions/cache';
 import { create as createGlobber } from '@actions/glob';
@@ -87,7 +87,7 @@ export async function restoreCache(
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
   restoreKeys: Array<string>,
 ): Promise<CacheType | undefined> {
-  let key: string | undefined = undefined;
+  let key: string | undefined;
   try {
     key = await cache.restoreCache([target], primaryKey, restoreKeys);
     if (key !== undefined) {

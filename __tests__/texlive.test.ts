@@ -6,7 +6,7 @@ import * as log from '#/log';
 import { DependsTxt, Tlmgr, Version } from '#/texlive';
 import * as util from '#/utility';
 
-jest.mock('os', () => ({ platform: jest.fn().mockReturnValue('linux') }));
+jest.mock('node:os', () => ({ platform: jest.fn().mockReturnValue('linux') }));
 
 jest.mocked(core.group).mockImplementation(async (name, fn) => await fn());
 jest.mocked(exec.getExecOutput).mockResolvedValue({

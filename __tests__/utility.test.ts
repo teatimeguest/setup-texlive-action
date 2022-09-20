@@ -1,4 +1,4 @@
-import * as process from 'process';
+import process from 'node:process';
 
 import * as cache from '@actions/cache';
 import * as glob from '@actions/glob';
@@ -8,9 +8,9 @@ import 'jest-extended';
 import * as log from '#/log';
 import * as util from '#/utility';
 
-jest.mock('os', () => ({ tmpdir: jest.fn().mockReturnValue('<tmpdir>') }));
-jest.mock('path', () => jest.requireActual('path').posix);
-jest.mock('process', () => ({ env: {} }));
+jest.mock('node:os', () => ({ tmpdir: jest.fn().mockReturnValue('<tmpdir>') }));
+jest.mock('node:path', () => jest.requireActual('path').posix);
+jest.mock('node:process', () => ({ env: {} }));
 jest.spyOn(glob, 'create').mockResolvedValue(
   { glob: async () => ['<globbed>'] } as glob.Globber,
 );

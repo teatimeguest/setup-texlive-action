@@ -1,7 +1,7 @@
-import { mkdtemp, readFile, writeFile } from 'fs/promises';
-import { platform } from 'os';
-import * as path from 'path';
-import { isNativeError } from 'util/types';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { platform } from 'node:os';
+import path from 'node:path';
+import { isNativeError } from 'node:util/types';
 
 import { getExecOutput as spawn } from '@actions/exec';
 import { rmRF } from '@actions/io';
@@ -86,7 +86,7 @@ export class InstallTL {
     return this.restore(version) ?? await this.download(version);
   }
 
-  static executable(version: Version): string {
+  static executable(this: void, version: Version): string {
     if (platform() !== 'win32') {
       return 'install-tl';
     } else if (version < '2013') {
@@ -96,7 +96,7 @@ export class InstallTL {
     }
   }
 
-  private static url(version: Version): URL {
+  private static url(this: void, version: Version): URL {
     const archive = platform() === 'win32'
       ? 'install-tl.zip'
       : 'install-tl-unx.tar.gz';
@@ -128,7 +128,7 @@ export class Profile extends Serializable implements Texmf.SystemTrees {
     this.instopt_adjustrepo = Version.isLatest(this.version);
   }
 
-  async *open(this: Readonly<this>): AsyncGenerator<string, void> {
+  async *open(): AsyncGenerator<string, void> {
     const tmp = await mkdtemp(path.join(tmpdir(), 'setup-texlive-'));
     const target = path.join(tmp, 'texlive.profile');
     await writeFile(target, this.toString());
@@ -270,6 +270,7 @@ async function patch(version: Version, base: string): Promise<void> {
     from: ['$os_major != 10', '$os_minor >= $mactex_darwin'],
     to: ['$$os_major < 10', '$$os_major >= 11 || $&'],
   }] as const;
+
   const apply = async (
     { platforms = platform(), versions = {}, file, from, to }: Patch,
   ): Promise<void> => {
@@ -294,7 +295,5 @@ async function patch(version: Version, base: string): Promise<void> {
     }
   };
   log.info('Applying patches');
-  await Promise.all(patches.map(apply));
+  await Promise.all(patches.map((p) => apply(p)));
 }
-
-/* eslint @typescript-eslint/naming-convention: off */

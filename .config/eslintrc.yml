@@ -1,10 +1,10 @@
 root: true
 extends:
   - eslint:recommended
-  - plugin:node/recommended
   - plugin:@typescript-eslint/eslint-recommended
   - plugin:@typescript-eslint/recommended
   - plugin:@typescript-eslint/recommended-requiring-type-checking
+  - plugin:node/recommended
   - prettier
 parserOptions:
   project: ./tsconfig.tests.json
@@ -21,6 +21,7 @@ overrides:
     extends:
       - plugin:import/recommended
       - plugin:import/typescript
+      - plugin:unicorn/all
     settings:
       import/internal-regex: ^#/
     rules:
@@ -66,7 +67,26 @@ overrides:
       '@typescript-eslint/explicit-member-accessibility':
         - error
         - accessibility: no-public
-      '@typescript-eslint/naming-convention': error
+      '@typescript-eslint/naming-convention':
+        - error
+        - selector: default
+          format: [camelCase]
+        - selector: [
+            accessor, classProperty, objectLiteralProperty,
+            parameter, parameterProperty, typeParameter,
+          ]
+          format: null
+          filter: '^(?:NOPERLDOC|TEX|TL_|instopt_|option_|tlpdbopt_|selected_scheme)'
+        - selector: variable
+          modifiers: [const]
+          format: [camelCase, UPPER_CASE]
+        - selector: memberLike
+          modifiers: [readonly]
+          format: [camelCase, UPPER_CASE]
+        - selector: accessor
+          format: [camelCase, UPPER_CASE]
+        - selector: typeLike
+          format: [PascalCase]
       '@typescript-eslint/no-confusing-void-expression': error
       '@typescript-eslint/no-implied-eval': error
       '@typescript-eslint/no-invalid-this': error
@@ -90,7 +110,6 @@ overrides:
           treatMethodsAsReadonly: true
       '@typescript-eslint/prefer-regexp-exec': error
       '@typescript-eslint/prefer-return-this-type': error
-      '@typescript-eslint/promise-function-async': error
       '@typescript-eslint/require-array-sort-compare':
         - error
         - ignoreStringArrays: true
@@ -108,9 +127,9 @@ overrides:
       import/no-commonjs: error
       import/no-default-export: error
       import/no-duplicates: error
-      # import/no-namespace:
-      #   - error
-      #   - ignore: [fs/promises, os, path, process, "*#/*"]
+      import/no-namespace:
+        - error
+        - ignore: ["*#/*", "@actions/*"]
       import/no-import-module-exports: error
       import/no-relative-packages: error
       import/no-unresolved: off
@@ -124,6 +143,11 @@ overrides:
         - error
         - never
       node/prefer-global/url: error
+      unicorn/catch-error-name: off
+      unicorn/no-array-for-each: off
+      unicorn/no-array-reduce: off
+      unicorn/prefer-ternary: off
+      unicorn/prevent-abbreviations: off
   - files: "./__tests__/*.ts"
     extends:
       - plugin:jest/recommended

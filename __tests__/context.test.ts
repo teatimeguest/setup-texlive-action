@@ -1,5 +1,5 @@
-import * as fs from 'fs/promises';
-import * as process from 'process';
+import fs from 'node:fs/promises';
+import process from 'node:process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
@@ -9,19 +9,17 @@ import { Env, Inputs, Outputs, State } from '#/context';
 import * as log from '#/log';
 import { Version } from '#/texlive';
 
-jest.mock('fs/promises', () => ({ readFile: jest.fn() }));
+jest.mock('node:fs/promises', () => ({ readFile: jest.fn() }));
 jest.mock(
-  'os',
+  'node:os',
   () => ({
     homedir: jest.fn().mockReturnValue('~'),
     platform: jest.fn().mockReturnValue('linux'),
   }),
 );
-jest.mock('path', () => jest.requireActual('path/posix'));
-// eslint-disable-next-line node/prefer-global/process
-jest.mock('process', () => globalThis.process);
+jest.mock('node:path', () => jest.requireActual('path/posix'));
+jest.mock('node:process', () => globalThis.process);
 beforeEach(() => {
-  // eslint-disable-next-line node/prefer-global/process
   globalThis.process.env = {
     // default values defined in action.yml
     INPUT_CACHE: 'true',
@@ -200,10 +198,10 @@ describe('Inputs', () => {
   });
 });
 
-describe('Outputs#cache-hit', () => {
+describe('Outputs#cacheHit', () => {
   it.each([true, false])('sets cache-hit to %s', (value) => {
     const outputs = new Outputs();
-    outputs['cache-hit'] = value;
+    outputs.cacheHit = value;
     outputs.emit();
     expect(core.setOutput).toHaveBeenCalledTimes(1);
     expect(core.setOutput).toHaveBeenCalledWith('cache-hit', value);

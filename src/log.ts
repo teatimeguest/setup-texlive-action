@@ -1,4 +1,4 @@
-import { isNativeError } from 'util/types';
+import { isNativeError } from 'node:util/types';
 
 import * as core from '@actions/core';
 

@@ -1,5 +1,5 @@
-import * as fs from 'fs/promises';
-import * as os from 'os';
+import fs from 'node:fs/promises';
+import os from 'node:os';
 
 import { getExecOutput } from '@actions/exec';
 import { rmRF } from '@actions/io';
@@ -11,17 +11,17 @@ import * as log from '#/log';
 import { Version } from '#/texlive';
 import * as util from '#/utility';
 
-jest.mock('fs/promises', () => ({
+jest.mock('node:fs/promises', () => ({
   mkdtemp: jest.fn(async (template: string) => template + 'XXXXXX'),
   readFile: jest.fn().mockReturnValue(''),
   stat: jest.fn(), // required for @azure/storage-blob
   writeFile: jest.fn(),
 }));
 jest.mock(
-  'os',
+  'node:os',
   () => ({ homedir: jest.fn().mockReturnValue('~'), platform: jest.fn() }),
 );
-jest.mock('path', () => {
+jest.mock('node:path', () => {
   const { posix, win32 } = jest.requireActual('path');
   return {
     join: jest.fn((...paths) => {
@@ -30,7 +30,7 @@ jest.mock('path', () => {
     posix,
   };
 });
-jest.mock('process', () => ({ env: {} }));
+jest.mock('node:process', () => ({ env: {} }));
 jest.mocked(getExecOutput).mockResolvedValue({
   exitCode: 0,
   stdout: '',

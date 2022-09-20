@@ -1,9 +1,15 @@
-import { homedir } from 'os';
-import * as path from 'path';
-import * as process from 'process';
+import { homedir } from 'node:os';
+import path from 'node:path';
+import process from 'node:process';
 
 import * as cache from '@actions/cache';
-import * as core from '@actions/core';
+import {
+  getBooleanInput,
+  getInput,
+  getState,
+  saveState,
+  setOutput,
+} from '@actions/core';
 import { Exclude, Expose, plainToClassFromExist } from 'class-transformer';
 import { cache as Cache } from 'decorator-cache-getter';
 import { keys } from 'ts-transformer-keys';
@@ -15,7 +21,7 @@ import { Serializable, tmpdir } from '#/utility';
 export class Inputs {
   @Cache
   get cache(): boolean {
-    const input = core.getBooleanInput('cache');
+    const input = getBooleanInput('cache');
     if (input && !cache.isFeatureAvailable()) {
       log.warn('Caching is disabled because cache service is not available');
       return false;
@@ -28,11 +34,11 @@ export class Inputs {
     return (async () => {
       type Entry = [string, DependsTxt.Dependencies];
       async function* dependsTxt(): AsyncGenerator<Entry, void, void> {
-        const inline = core.getInput('packages');
+        const inline = getInput('packages');
         if (inline !== '') {
           yield* new DependsTxt(inline);
         }
-        const file = core.getInput('package-file');
+        const file = getInput('package-file');
         if (file !== '') {
           yield* await DependsTxt.fromFile(file);
         }
@@ -48,7 +54,7 @@ export class Inputs {
   @Cache
   get texmf(): Omit<Texmf, 'TEXMFSYSCONFIG' | 'TEXMFSYSVAR'> {
     const env = new Env(this.version);
-    const input = core.getInput('prefix');
+    const input = getInput('prefix');
     const prefix = path.normalize(
       input !== '' ? input : env.TEXLIVE_INSTALL_PREFIX,
     );
@@ -64,7 +70,7 @@ export class Inputs {
 
   @Cache
   get tlcontrib(): boolean {
-    const input = core.getBooleanInput('tlcontrib');
+    const input = getBooleanInput('tlcontrib');
     if (input && !Version.isLatest(this.version)) {
       log.warn('`tlcontrib` is currently ignored for older versions');
       return false;
@@ -74,7 +80,7 @@ export class Inputs {
 
   @Cache
   get updateAllPackages(): boolean {
-    const input = core.getBooleanInput('update-all-packages');
+    const input = getBooleanInput('update-all-packages');
     if (input && !Version.isLatest(this.version)) {
       log.info('`update-all-packages` is ignored for older versions');
       return false;
@@ -84,7 +90,7 @@ export class Inputs {
 
   @Cache
   get version(): Version {
-    const input = core.getInput('version');
+    const input = getInput('version');
     if (input === 'latest') {
       return Version.LATEST;
     }
@@ -95,12 +101,12 @@ export class Inputs {
 
 @Exclude()
 export class Outputs extends Serializable {
-  @Expose()
-  'cache-hit': boolean = false;
+  @Expose({ name: 'cache-hit' })
+  cacheHit: boolean = false;
 
   emit(): void {
     for (const [key, value] of Object.entries(this.toJSON())) {
-      core.setOutput(key, value);
+      setOutput(key, value);
     }
   }
 }
@@ -163,7 +169,7 @@ export class State extends Serializable {
 
   constructor() {
     super();
-    const state = core.getState(State.NAME);
+    const state = getState(State.NAME);
     if (state !== '') {
       plainToClassFromExist(this, JSON.parse(state));
       this.post = true;
@@ -171,8 +177,6 @@ export class State extends Serializable {
   }
 
   save(): void {
-    core.saveState(State.NAME, JSON.stringify(this));
+    saveState(State.NAME, JSON.stringify(this));
   }
 }
-
-/* eslint @typescript-eslint/naming-convention: off */

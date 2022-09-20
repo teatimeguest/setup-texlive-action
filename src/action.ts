@@ -1,6 +1,6 @@
-import { createHash } from 'crypto';
-import { arch, platform } from 'os';
-import { isNativeError } from 'util/types';
+import { createHash } from 'node:crypto';
+import { arch, platform } from 'node:os';
+import { isNativeError } from 'node:util/types';
 
 import { group, setFailed } from '@actions/core';
 import { keys } from 'ts-transformer-keys';
@@ -93,7 +93,7 @@ export async function main(
         /* eslint-enable */
       }
     });
-    outputs['cache-hit'] = true;
+    outputs.cacheHit = true;
   }
 
   if (inputs.tlcontrib) {
@@ -103,7 +103,7 @@ export async function main(
     });
   }
 
-  if (cacheType !== 'primary' && packages.size !== 0) {
+  if (cacheType !== 'primary' && packages.size > 0) {
     await group('Installing packages', async () => {
       await tlmgr.install(...packages);
     });

@@ -1,6 +1,6 @@
-import { readFile } from 'fs/promises';
-import { platform } from 'os';
-import * as path from 'path';
+import { readFile } from 'node:fs/promises';
+import { platform } from 'node:os';
+import path from 'node:path';
 
 import { addPath, exportVariable } from '@actions/core';
 import { exec, getExecOutput as spawn } from '@actions/exec';
@@ -70,7 +70,7 @@ export class Tlmgr {
   }
 
   async install(this: void, ...packages: ReadonlyArray<string>): Promise<void> {
-    if (packages.length !== 0) {
+    if (packages.length > 0) {
       const { stderr } = await spawn('tlmgr', ['install', ...packages]);
       tlpkg.check(stderr);
     }
@@ -123,7 +123,8 @@ export namespace Tlmgr {
     texmf(key: keyof Texmf, value: string): Promise<void>;
     async texmf(key: keyof Texmf, value?: string): Promise<string | void> {
       if (value === undefined) {
-        return (await spawn('kpsewhich', ['-var-value', key])).stdout.trim();
+        const { stdout } = await spawn('kpsewhich', ['-var-value', key]);
+        return stdout.trim();
       }
       // `tlmgr conf` is not implemented prior to 2010.
       if (this.version < '2010') {
@@ -306,5 +307,3 @@ export namespace DependsTxt {
     }
   }
 }
-
-/* eslint @typescript-eslint/naming-convention: off */

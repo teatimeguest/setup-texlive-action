@@ -10,7 +10,7 @@ import * as util from '#/utility';
 import CacheType = util.CacheType;
 
 jest.mock(
-  'os',
+  'node:os',
   () => ({
     arch: jest.fn().mockReturnValue('<arch>'),
     platform: jest.fn().mockReturnValue('<platform>'),
@@ -49,9 +49,8 @@ beforeEach(() => {
       updateAllPackages: false,
       version: Version.LATEST,
     },
-    outputs: { emit: jest.fn() } as unknown as Outputs,
+    outputs: { emit: jest.fn(), cacheHit: false } as unknown as Outputs,
   };
-  ctx.outputs['cache-hit'] = false;
   jest.mocked(Inputs).mockReturnValue(ctx.inputs);
   jest.mocked(Outputs).mockReturnValue(ctx.outputs);
 });
@@ -114,7 +113,7 @@ it.each([[false, undefined], [true, 'primary'], [true, 'secondary']] as const)(
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     await expect(action.run()).toResolve();
     expect(ctx.outputs.emit).toHaveBeenCalledOnce();
-    expect(ctx.outputs['cache-hit']).toBe(value);
+    expect(ctx.outputs.cacheHit).toBe(value);
   },
 );
 
