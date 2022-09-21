@@ -31,7 +31,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - name: Install TeX Live
+      - name: Setup TeX Live
         uses: ./
         with:
           cache: false
