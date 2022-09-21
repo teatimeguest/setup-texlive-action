@@ -1,5 +1,3 @@
-import * as core from '@actions/core';
-import 'jest-extended';
 import type { DeepWritable } from 'ts-essentials';
 
 import * as action from '#/action';
@@ -9,32 +7,8 @@ import { type Texmf, Tlmgr, Version } from '#/texlive';
 import * as util from '#/utility';
 import CacheType = util.CacheType;
 
-jest.mock(
-  'node:os',
-  () => ({
-    arch: jest.fn().mockReturnValue('<arch>'),
-    platform: jest.fn().mockReturnValue('<platform>'),
-  }),
-);
+const v = (spec: unknown) => new Version(`${spec}`);
 
-jest.mocked(core.group).mockImplementation(async (name, fn) => await fn());
-jest.mocked(core.setFailed).mockImplementation((error) => {
-  throw new Error(`${error}`);
-});
-
-jest.mock('#/texlive', () => {
-  const { Version, tlnet } = jest.requireActual('#/texlive');
-  const mocks = jest.createMockFromModule<any>('#/texlive');
-  mocks.Tlmgr.prototype = {
-    conf: new mocks.Tlmgr.Conf(),
-    install: jest.fn(),
-    path: new mocks.Tlmgr.Path(),
-    pinning: new mocks.Tlmgr.Pinning(),
-    repository: new mocks.Tlmgr.Repository(),
-    update: jest.fn(),
-  };
-  return { ...mocks, Version, tlnet };
-});
 let ctx: DeepWritable<{
   inputs: Inputs;
   outputs: Outputs;
@@ -43,20 +17,17 @@ beforeEach(() => {
   ctx = {
     inputs: {
       cache: true,
-      packages: Promise.resolve(new Set()),
+      packages: new Set(),
       texmf: { TEXDIR: '' } as Texmf,
       tlcontrib: false,
       updateAllPackages: false,
-      version: Version.LATEST,
+      version: v`latest`,
     },
     outputs: { emit: jest.fn(), cacheHit: false } as unknown as Outputs,
   };
-  jest.mocked(Inputs).mockReturnValue(ctx.inputs);
+  jest.mocked(Inputs.load).mockResolvedValue(ctx.inputs as unknown as Inputs);
   jest.mocked(Outputs).mockReturnValue(ctx.outputs);
 });
-jest // eslint-disable-next-line jest/unbound-method
-  .mocked(InstallTL.acquire)
-  .mockResolvedValue(new (InstallTL as unknown as new() => InstallTL)());
 
 jest.unmock('#/action');
 
@@ -120,8 +91,7 @@ it.each([[false, undefined], [true, 'primary'], [true, 'secondary']] as const)(
 it('adds TeX Live to path after installation', async () => {
   await expect(action.run()).toResolve();
   expect(Tlmgr.Path.prototype.add).toHaveBeenCalledAfter(
-    // eslint-disable-next-line jest/unbound-method
-    jest.mocked<(...args: Array<any>) => unknown>(InstallTL.prototype.run),
+    jest.mocked<(x: any) => unknown>(InstallTL.prototype.run),
   );
 });
 
@@ -173,11 +143,11 @@ it.each<[CacheType]>([['primary'], ['secondary']])(
 );
 
 it.each<[CacheType, Version]>([
-  ['primary', '2008'],
-  ['secondary', '2011'],
-  ['primary', '2014'],
-  ['secondary', '2017'],
-  ['primary', '2020'],
+  ['primary', v`2008`],
+  ['secondary', v`2011`],
+  ['primary', v`2014`],
+  ['secondary', v`2017`],
+  ['primary', v`2020`],
 ])('does not update any packages for older versions', async (kind, version) => {
   jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
   ctx.inputs.updateAllPackages = true;
@@ -197,7 +167,6 @@ it.each<[CacheType | undefined]>([['primary'], ['secondary'], [undefined]])(
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
     await expect(action.run()).toResolve();
     expect(Tlmgr.Conf.prototype.texmf).not.toHaveBeenCalledBefore(
-      // eslint-disable-next-line jest/unbound-method
       jest.mocked(Tlmgr.Path.prototype.add),
     );
   },
@@ -245,11 +214,10 @@ it('sets up tlcontrib if input tlcontrib is true', async () => {
     Pinning: { prototype: pinning },
     Repository: { prototype: repository },
   } = Tlmgr;
-  // eslint-disable-next-line jest/unbound-method
   expect(repository.add).not.toHaveBeenCalledBefore(jest.mocked(path.add));
   expect(repository.add).toHaveBeenCalledWith(expect.anything(), 'tlcontrib');
   expect(pinning.add).not.toHaveBeenCalledBefore(
-    jest.mocked<(...args: Array<any>) => unknown>(repository.add),
+    jest.mocked<(x: any) => unknown>(repository.add),
   );
   expect(pinning.add).toHaveBeenCalledWith('tlcontrib', '*');
 });
@@ -268,7 +236,7 @@ it.each<[CacheType | undefined]>([['secondary'], [undefined]])(
   'installs specified packages if full cache not found (case %s)',
   async (kind) => {
     jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
-    ctx.inputs.packages = Promise.resolve(new Set(['foo', 'bar', 'baz']));
+    ctx.inputs.packages = new Set(['foo', 'bar', 'baz']);
     await expect(action.run()).toResolve();
     expect(Tlmgr.prototype.install).toHaveBeenCalled();
   },

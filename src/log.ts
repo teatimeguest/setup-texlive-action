@@ -51,3 +51,5 @@ export function error(
 ): void {
   log(message, { ...options, level: 'error' });
 }
+
+export { group } from '@actions/core';

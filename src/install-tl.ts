@@ -1,18 +1,17 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import path from 'node:path';
 import { isNativeError } from 'node:util/types';
 
 import { getExecOutput as spawn } from '@actions/exec';
-import { rmRF } from '@actions/io';
 import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
-import { Exclude, Expose, Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import type { MarkOptional, PickProperties } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
 import { type Texmf, Version, tlnet, tlpkg } from '#/texlive';
-import { Serializable, extract, tmpdir } from '#/utility';
+import { Serializable, extract, mkdtemp } from '#/utility';
 
 /**
  * A class for downloading and running the installer of TeX Live.
@@ -20,26 +19,30 @@ import { Serializable, extract, tmpdir } from '#/utility';
 export class InstallTL {
   private constructor(
     private readonly version: Version,
-    private readonly installtl: string,
+    private readonly directory: string,
   ) {}
 
   async run(profile: Profile): Promise<void> {
+    const installtl = path.join(
+      this.directory,
+      InstallTL.executable(this.version),
+    );
     for await (const dest of profile.open()) {
       const options = ['-profile', dest];
-      if (!Version.isLatest(this.version)) {
+      if (!this.version.isLatest()) {
         const repo = tlnet.historic(this.version);
         // `install-tl` of versions prior to 2017 does not support HTTPS, and
         // that of version 2017 supports HTTPS but does not work properly.
-        if (this.version < '2018') {
+        if (this.version.number < 2018) {
           repo.protocol = 'http';
         }
         options.push(
           // Only version 2008 uses `-location` instead of `-repository`.
-          this.version === '2008' ? '-location' : '-repository',
+          this.version.number === 2008 ? '-location' : '-repository',
           repo.href,
         );
       }
-      const { stderr } = await spawn(this.installtl, options);
+      const { stderr } = await spawn(installtl, options);
       tlpkg.check(stderr);
     }
     await patch(this.version, profile.TEXDIR);
@@ -48,7 +51,7 @@ export class InstallTL {
   static restore(version: Version): InstallTL | undefined {
     let dest = '';
     try {
-      dest = findTool(this.executable(version), version);
+      dest = findTool(this.executable(version), version.toString());
     } catch (cause) {
       log.info('Failed to restore installer', { cause });
     }
@@ -56,12 +59,12 @@ export class InstallTL {
       return undefined;
     } else {
       log.info('Found in tool cache');
-      return new this(version, path.join(dest, this.executable(version)));
+      return new this(version, dest);
     }
   }
 
   static async download(version: Version): Promise<InstallTL> {
-    const url = this.url(version).href;
+    const { href: url } = this.url(version);
     log.info(`Downloading ${url}`);
     const archive = await downloadTool(url);
 
@@ -74,22 +77,22 @@ export class InstallTL {
 
     try {
       log.info('Adding to tool cache');
-      await cacheDir(dest, this.executable(version), version);
+      await cacheDir(dest, this.executable(version), version.toString());
     } catch (cause) {
       log.info('Failed to cache installer', { cause });
     }
 
-    return new this(version, path.join(dest, this.executable(version)));
+    return new this(version, dest);
   }
 
   static async acquire(version: Version): Promise<InstallTL> {
     return this.restore(version) ?? await this.download(version);
   }
 
-  static executable(this: void, version: Version): string {
+  static executable(this: void, { number: version }: Version): string {
     if (platform() !== 'win32') {
       return 'install-tl';
-    } else if (version < '2013') {
+    } else if (version < 2013) {
       return 'install-tl.bat';
     } else {
       return 'install-tl-windows.bat';
@@ -97,51 +100,42 @@ export class InstallTL {
   }
 
   private static url(this: void, version: Version): URL {
-    const archive = platform() === 'win32'
-      ? 'install-tl.zip'
-      : 'install-tl-unx.tar.gz';
     return new URL(
-      Version.isLatest(version) ? path.posix.join('..', archive) : archive,
-      tlnet.historic(version),
+      platform() === 'win32' ? 'install-tl.zip' : 'install-tl-unx.tar.gz',
+      version.isLatest() ? tlnet.CTAN : tlnet.historic(version),
     );
   }
 }
 
-@Exclude()
 export class Profile extends Serializable implements Texmf.SystemTrees {
   constructor(
     readonly version: Version,
-    { TEXDIR, TEXMFLOCAL, TEXMFSYSCONFIG, TEXMFSYSVAR }: MarkOptional<
-      Texmf.SystemTrees,
-      'TEXMFSYSCONFIG' | 'TEXMFSYSVAR'
-    >,
+    texmf: MarkOptional<Texmf.SystemTrees, 'TEXMFSYSCONFIG' | 'TEXMFSYSVAR'>,
   ) {
     super();
     // `scheme-infraonly` was first introduced in TeX Live 2016.
     this.selected_scheme = `scheme-${
-      version < '2016' ? 'minimal' : 'infraonly'
+      version.number < 2016 ? 'minimal' : 'infraonly'
     }`;
+    const { TEXDIR, TEXMFLOCAL, TEXMFSYSCONFIG, TEXMFSYSVAR } = texmf;
     this.TEXDIR = TEXDIR;
     this.TEXMFLOCAL = TEXMFLOCAL;
     this.TEXMFSYSCONFIG = TEXMFSYSCONFIG ?? path.join(TEXDIR, 'texmf-config');
     this.TEXMFSYSVAR = TEXMFSYSVAR ?? path.join(TEXDIR, 'texmf-var');
-    this.instopt_adjustrepo = Version.isLatest(this.version);
+    this.instopt_adjustrepo = this.version.isLatest();
   }
 
-  async *open(): AsyncGenerator<string, void> {
-    const tmp = await mkdtemp(path.join(tmpdir(), 'setup-texlive-'));
-    const target = path.join(tmp, 'texlive.profile');
-    await writeFile(target, this.toString());
-    try {
+  async *open(): AsyncGenerator<string, void, void> {
+    for await (const tmp of mkdtemp()) {
+      const target = path.join(tmp, 'texlive.profile');
+      await writeFile(target, this.toString());
       yield target;
-    } finally {
-      await rmRF(tmp);
     }
   }
 
   override toString(): string {
     const plain = this.toPlain({
-      version: Number(this.version),
+      version: this.version.number,
       groups: [platform()],
     });
     return Object.entries(plain).map((entry) => entry.join(' ')).join('\n');
@@ -230,7 +224,7 @@ export class Profile extends Serializable implements Texmf.SystemTrees {
 async function patch(version: Version, base: string): Promise<void> {
   interface Patch {
     readonly platforms?: NodeJS.Platform;
-    readonly versions?: { readonly since?: Version; readonly until?: Version };
+    readonly versions?: { readonly since?: number; readonly until?: number };
     readonly file: string;
     readonly from: ReadonlyArray<string | Readonly<RegExp>>;
     readonly to: ReadonlyArray<string>;
@@ -243,7 +237,7 @@ async function patch(version: Version, base: string): Promise<void> {
     to: [''],
   }, {
     // Fixes a syntax error.
-    versions: { since: '2009', until: '2011' },
+    versions: { since: 2009, until: 2011 },
     file: 'tlpkg/TeXLive/TLWinGoo.pm',
     from: [/foreach \$p qw\((.*)\)/u],
     to: ['foreach $$p (qw($1))'],
@@ -251,21 +245,21 @@ async function patch(version: Version, base: string): Promise<void> {
     // Defines Code Page 65001 as an alias for UTF-8 on Windows.
     // (see: https://github.com/dankogai/p5-encode/issues/37)
     platforms: 'win32',
-    versions: { since: '2015', until: '2016' },
+    versions: { since: 2015, until: 2016 },
     file: 'tlpkg/tlperl/lib/Encode/Alias.pm',
     from: ['# utf8 is blessed :)'],
     to: [`define_alias(qr/cp65001/i => '"utf-8-strict"');`],
   }, {
     // Makes it possible to use `\` as a directory separator on Windows.
     platforms: 'win32',
-    versions: { until: '2020' },
+    versions: { until: 2020 },
     file: 'tlpkg/TeXLive/TLUtils.pm',
     from: ['split (/\\//, $tree)'],
     to: ['split (/[\\/\\\\]/, $$tree)'],
   }, {
     // Adds support for macOS 11 or later.
     platforms: 'darwin',
-    versions: { since: '2017', until: '2020' },
+    versions: { since: 2017, until: 2020 },
     file: 'tlpkg/TeXLive/TLUtils.pm',
     from: ['$os_major != 10', '$os_minor >= $mactex_darwin'],
     to: ['$$os_major < 10', '$$os_major >= 11 || $&'],
@@ -274,8 +268,12 @@ async function patch(version: Version, base: string): Promise<void> {
   const apply = async (
     { platforms = platform(), versions = {}, file, from, to }: Patch,
   ): Promise<void> => {
-    const { since = version, until = '9999' as Version } = versions;
-    if (platforms === platform() && since <= version && version < until) {
+    const { since = 0, until = 9999 } = versions;
+    if (
+      platforms === platform()
+      && since <= version.number
+      && version.number < until
+    ) {
       const target = path.join(base, file);
       try {
         await writeFile(

@@ -5,8 +5,6 @@
     "quoteStyle": "preferSingle",
     "useBraces": "always",
     "singleBodyPosition": "nextLine",
-    "arrayExpression.preferSingleLine": true,
-    "arrayPattern.preferSingleLine": true,
     "computed.preferSingleLine": true,
     "exportDeclaration.preferSingleLine": true,
     "importDeclaration.preferSingleLine": true,

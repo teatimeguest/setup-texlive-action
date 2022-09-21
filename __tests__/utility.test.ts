@@ -3,17 +3,11 @@ import process from 'node:process';
 import * as cache from '@actions/cache';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
-import 'jest-extended';
 
 import * as log from '#/log';
 import * as util from '#/utility';
 
-jest.mock('node:os', () => ({ tmpdir: jest.fn().mockReturnValue('<tmpdir>') }));
 jest.mock('node:path', () => jest.requireActual('path').posix);
-jest.mock('node:process', () => ({ env: {} }));
-jest.spyOn(glob, 'create').mockResolvedValue(
-  { glob: async () => ['<globbed>'] } as glob.Globber,
-);
 jest.unmock('#/utility');
 
 describe('extract', () => {
@@ -30,7 +24,7 @@ describe('extract', () => {
 
   it('extracts files from a zipfile', async () => {
     jest.spyOn(tool, 'extractZip').mockResolvedValueOnce('<extractZip>');
-    await expect(util.extract('<zipfile>', 'zip')).resolves.toBe('<globbed>');
+    await expect(util.extract('<zipfile>', 'zip')).resolves.toBe('<glob>');
     expect(tool.extractZip).toHaveBeenCalledWith('<zipfile>');
   });
 
@@ -47,7 +41,7 @@ describe('extract', () => {
 
 describe('determine', () => {
   it('returns a unique path that matches the given pattern', async () => {
-    await expect(util.determine('<pattern>')).resolves.toBe('<globbed>');
+    await expect(util.determine('<pattern>')).resolves.toBe('<glob>');
   });
 
   it.each<[Array<string>]>([[[]], [['<some>', '<other>']]])(

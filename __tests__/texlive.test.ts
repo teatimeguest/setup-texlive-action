@@ -1,32 +1,103 @@
+import { platform } from 'node:os';
+
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import 'jest-extended';
+import { HttpClient } from '@actions/http-client';
 
 import * as log from '#/log';
 import { DependsTxt, Tlmgr, Version } from '#/texlive';
 import * as util from '#/utility';
 
-jest.mock('node:os', () => ({ platform: jest.fn().mockReturnValue('linux') }));
+const v = (spec: unknown) => new Version(`${spec}`);
 
-jest.mocked(core.group).mockImplementation(async (name, fn) => await fn());
-jest.mocked(exec.getExecOutput).mockResolvedValue({
-  exitCode: 0,
-  stdout: '',
-  stderr: '',
-});
 jest.unmock('#/texlive');
 
 describe('Version', () => {
-  test.each([
-    ['1996', false],
-    ['2007', false],
-    ['2008', true],
-    ['2015', true],
-    ['2022', true],
-    ['2023', false],
-    ['latest', false],
-  ])('isVersion(%o)', (version, result) => {
-    expect(Version.isVersion(version)).toBe(result);
+  describe('constructor', () => {
+    it.each(['2008', '2013', '2021', 'latest'])('accepts %p', (spec) => {
+      expect(() => new Version(spec)).not.toThrow();
+    });
+
+    it.each(['2007', '2099', '', 'version'])('rejects %p', (spec) => {
+      expect(() => new Version(spec)).toThrow('');
+    });
+
+    it.each(['2008', '2010', '2012'])('rejects %p on macOS', (spec) => {
+      jest.mocked(platform).mockReturnValueOnce('darwin');
+      expect(() => new Version(spec)).toThrow('does not work on 64-bit macOS');
+    });
+  });
+
+  describe('number', () => {
+    it.each([
+      ['2008', 2008],
+      ['2013', 2013],
+      ['2018', 2018],
+      ['latest', Number.parseInt(Version.LATEST)],
+    ])('returns the version number for %p', (spec, n) => {
+      expect(new Version(spec)).toHaveProperty('number', n);
+    });
+  });
+
+  describe('isLatest', () => {
+    it.each([
+      [false, '2008'],
+      [false, '2020'],
+      [true, 'latest'],
+      [true, Version.LATEST],
+    ])('returns %p for %p', (bool, spec) => {
+      expect(new Version(spec).isLatest()).toBe(bool);
+    });
+  });
+
+  describe('checkLatest', () => {
+    const latest = Version.LATEST;
+
+    afterEach(() => {
+      (Version as any).latest = latest;
+    });
+
+    it('checks the latest version', async () => {
+      const res = {
+        result: { version: { number: '2050' } },
+        statusCode: 200,
+      } as unknown as ReturnType<typeof HttpClient.prototype.getJson>;
+      // eslint-disable-next-line jest/unbound-method
+      jest.mocked(HttpClient.prototype.getJson).mockResolvedValueOnce(res);
+      await expect(Version.checkLatest()).resolves.toBe('2050');
+      expect(Version.LATEST).toBe('2050');
+    });
+  });
+
+  describe('resolve', () => {
+    const { checkLatest } = Version; // eslint-disable-line jest/unbound-method
+
+    beforeEach(() => {
+      Version.checkLatest = jest.fn().mockResolvedValue('2050');
+    });
+
+    afterEach(() => {
+      Version.checkLatest = checkLatest;
+    });
+
+    it.each(['2019', 'latest'])('does not call checkLatest', async (spec) => {
+      jest.spyOn(globalThis.Date, 'now').mockReturnValueOnce(Date.UTC(2020, 1));
+      await expect(Version.resolve(spec)).toResolve();
+      expect(Version.checkLatest).not.toHaveBeenCalled();
+    });
+
+    it.each(['2012', '2021', 'latest'])('calls checkLatest', async (spec) => {
+      jest.spyOn(globalThis.Date, 'now').mockReturnValueOnce(Date.UTC(2050, 1));
+      await expect(Version.resolve(spec)).toResolve();
+      expect(Version.checkLatest).toHaveBeenCalled();
+    });
+
+    it('does not fail even if checkLatest fails', async () => {
+      jest.spyOn(globalThis.Date, 'now').mockReturnValueOnce(Date.UTC(2050, 1));
+      jest.mocked(Version.checkLatest).mockRejectedValueOnce(new Error());
+      await expect(Version.resolve('latest')).toResolve();
+      expect(Version.checkLatest).toHaveBeenCalled();
+    });
   });
 });
 
@@ -38,14 +109,14 @@ describe('Tlmgr', () => {
         stdout: '/usr/local/texlive/2021/texmf-config\n',
         stderr: '',
       });
-      const tlmgr = new Tlmgr('2021', '');
+      const tlmgr = new Tlmgr(v`2021`, '');
       await expect(tlmgr.conf.texmf('TEXMFCONFIG')).resolves.toBe(
         '/usr/local/texlive/2021/texmf-config',
       );
     });
 
     it('sets the value to the given key with `tlmgr`', async () => {
-      const tlmgr = new Tlmgr('2021', '');
+      const tlmgr = new Tlmgr(v`2021`, '');
       await tlmgr.conf.texmf('TEXMFVAR', '~/.local/texlive/2021/texmf-var');
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'conf',
@@ -56,14 +127,14 @@ describe('Tlmgr', () => {
     });
 
     it('sets the value to the given key by environment variable', async () => {
-      const tlmgr = new Tlmgr('2008', '/usr/local/texlive/2008');
+      const tlmgr = new Tlmgr(v`2008`, '/usr/local/texlive/2008');
       await tlmgr.conf.texmf('TEXMFHOME', '~/.texmf');
       expect(core.exportVariable).toHaveBeenCalledWith('TEXMFHOME', '~/.texmf');
     });
   });
 
   describe('install', () => {
-    const tlmgr = new Tlmgr(Version.LATEST, '');
+    const tlmgr = new Tlmgr(v`latest`, '');
 
     it('does not invoke `tlmgr install` if the argument is empty', async () => {
       await tlmgr.install();
@@ -94,7 +165,7 @@ describe('Tlmgr', () => {
   });
 
   describe('path.add', () => {
-    const tlmgr = new Tlmgr('2019', '/usr/local/texlive/2019');
+    const tlmgr = new Tlmgr(v`2019`, '/usr/local/texlive/2019');
 
     it('adds the bin directory to the PATH', async () => {
       jest.mocked(util.determine).mockResolvedValueOnce('<path>');
@@ -117,7 +188,7 @@ describe('Tlmgr', () => {
 
   describe('pinning.add', () => {
     it('pins a repository with a glob', async () => {
-      const tlmgr = new Tlmgr('2019', '');
+      const tlmgr = new Tlmgr(v`2019`, '');
       await tlmgr.pinning.add('<repository>', '*');
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'pinning',
@@ -128,7 +199,7 @@ describe('Tlmgr', () => {
     });
 
     it('pins a repository with globs', async () => {
-      const tlmgr = new Tlmgr('2019', '');
+      const tlmgr = new Tlmgr(v`2019`, '');
       await tlmgr.pinning.add('<repository>', '<glob1>', '<glob2>');
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'pinning',
@@ -140,7 +211,7 @@ describe('Tlmgr', () => {
     });
 
     it('fails since the `pinning` action is not implemented', async () => {
-      const tlmgr = new Tlmgr('2012', '');
+      const tlmgr = new Tlmgr(v`2012`, '');
       await expect(async () => {
         await tlmgr.pinning.add('<repository>', '*');
       })
@@ -153,10 +224,8 @@ describe('Tlmgr', () => {
 
   describe('repository.add', () => {
     it('adds a repository with a tag', async () => {
-      const tlmgr = new Tlmgr('2019', '');
-      await expect(tlmgr.repository.add('<repository>', '<tag>')).resolves.toBe(
-        true,
-      );
+      const tlmgr = new Tlmgr(v`2019`, '');
+      await expect(tlmgr.repository.add('<repository>', '<tag>')).toResolve();
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         'tlmgr',
         ['repository', 'add', '<repository>', '<tag>'],
@@ -165,10 +234,8 @@ describe('Tlmgr', () => {
     });
 
     it('adds a repository with the empty tag', async () => {
-      const tlmgr = new Tlmgr('2019', '');
-      await expect(tlmgr.repository.add('<repository>', '')).resolves.toBe(
-        true,
-      );
+      const tlmgr = new Tlmgr(v`2019`, '');
+      await expect(tlmgr.repository.add('<repository>', '')).toResolve();
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         'tlmgr',
         ['repository', 'add', '<repository>', ''],
@@ -177,8 +244,8 @@ describe('Tlmgr', () => {
     });
 
     it('adds a repository with no tags', async () => {
-      const tlmgr = new Tlmgr('2019', '');
-      await expect(tlmgr.repository.add('<repository>')).resolves.toBe(true);
+      const tlmgr = new Tlmgr(v`2019`, '');
+      await expect(tlmgr.repository.add('<repository>')).toResolve();
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         'tlmgr',
         ['repository', 'add', '<repository>'],
@@ -196,10 +263,8 @@ describe('Tlmgr', () => {
         ]
           .join('\n'),
       });
-      const tlmgr = new Tlmgr('2019', '');
-      await expect(tlmgr.repository.add('<repository>', '<tag>')).resolves.toBe(
-        false,
-      );
+      const tlmgr = new Tlmgr(v`2019`, '');
+      await expect(tlmgr.repository.add('<repository>', '<tag>')).toResolve();
     });
 
     it('fails with non-zero status code', async () => {
@@ -212,16 +277,16 @@ describe('Tlmgr', () => {
         ]
           .join('\n'),
       });
-      const tlmgr = new Tlmgr('2019', '');
+      const tlmgr = new Tlmgr(v`2019`, '');
       await expect(
         tlmgr.repository.add('<repository>', '<tag>'),
       )
         .rejects
-        .toThrow(/^`tlmgr` failed with exit code 2: /u);
+        .toThrow('tlmgr exited with 2');
     });
 
     it('fails since the `repository` action is not implemented', async () => {
-      const tlmgr = new Tlmgr('2011', '');
+      const tlmgr = new Tlmgr(v`2011`, '');
       await expect(async () => {
         await tlmgr.repository.add('<repository>', '<tag>');
       })
@@ -234,7 +299,7 @@ describe('Tlmgr', () => {
 
   describe('update', () => {
     it('updates packages', async () => {
-      const tlmgr = new Tlmgr(Version.LATEST, '');
+      const tlmgr = new Tlmgr(v`latest`, '');
       await expect(tlmgr.update(['foo', 'bar', 'baz'])).toResolve();
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'update',
@@ -245,13 +310,13 @@ describe('Tlmgr', () => {
     });
 
     it('updates tlmgr itself', async () => {
-      const tlmgr = new Tlmgr(Version.LATEST, '');
+      const tlmgr = new Tlmgr(v`latest`, '');
       await expect(tlmgr.update(undefined, { self: true })).toResolve();
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', ['update', '--self']);
     });
 
     it('updates tlmgr itself by updating texlive.infra', async () => {
-      const tlmgr = new Tlmgr('2008', '');
+      const tlmgr = new Tlmgr(v`2008`, '');
       await expect(tlmgr.update(undefined, { self: true })).toResolve();
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', [
         'update',
@@ -260,13 +325,13 @@ describe('Tlmgr', () => {
     });
 
     it('updates all packages', async () => {
-      const tlmgr = new Tlmgr(Version.LATEST, '');
+      const tlmgr = new Tlmgr(v`latest`, '');
       await expect(tlmgr.update(undefined, { all: true })).toResolve();
       expect(exec.exec).toHaveBeenCalledWith('tlmgr', ['update', '--all']);
     });
 
     it('updates packages with `--reinstall-forcibly-removed`', async () => {
-      const tlmgr = new Tlmgr(Version.LATEST, '');
+      const tlmgr = new Tlmgr(v`latest`, '');
       await expect(
         tlmgr.update(['foo', 'bar', 'baz'], { reinstallForciblyRemoved: true }),
       )
@@ -295,6 +360,8 @@ describe('DependsTxt.parse', () => {
         '  package  grault  ',
         'soft garply#',
         ' waldo',
+        'package\tcorge',
+        '  \tbaz',
       ]
         .join('\n'),
     );
@@ -303,8 +370,8 @@ describe('DependsTxt.parse', () => {
       new Set(['foo', 'bar', 'baz', 'qux']),
     );
     expect(manifest.get('')).toHaveProperty('soft', new Set(['quux']));
-    expect(manifest.get('corge')).toHaveProperty('hard', new Set());
-    expect(manifest.get('corge')).toHaveProperty('soft', new Set());
+    expect(manifest.get('corge')).toHaveProperty('hard', new Set(['baz']));
+    expect(manifest.get('corge')).not.toHaveProperty('soft');
     expect(manifest.get('grault')).toHaveProperty('hard', new Set(['waldo']));
     expect(manifest.get('grault')).toHaveProperty('soft', new Set(['garply']));
     expect([...manifest]).toHaveLength(3);
@@ -322,8 +389,8 @@ describe('DependsTxt.parse', () => {
       ]
         .join('\n'),
     );
-    expect(manifest.get('')).toHaveProperty('hard', new Set());
-    expect(manifest.get('')).toHaveProperty('soft', new Set());
+    expect(manifest.get('')).not.toHaveProperty('hard');
+    expect(manifest.get('')).not.toHaveProperty('soft');
     expect([...manifest]).toHaveLength(1);
     expect(log.warn).toHaveBeenCalledTimes(3);
   });

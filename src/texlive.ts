@@ -1,43 +1,87 @@
-import { readFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import path from 'node:path';
 
 import { addPath, exportVariable } from '@actions/core';
 import { exec, getExecOutput as spawn } from '@actions/exec';
+import { HttpClient, HttpCodes } from '@actions/http-client';
 import { cache as Cache } from 'decorator-cache-getter';
-import { keys } from 'ts-transformer-keys';
+import type { Writable } from 'ts-essentials';
 
 import * as log from '#/log';
-import { type Range, determine } from '#/utility';
+import { determine } from '#/utility';
 
-export type Version = Range<'2008', `=${typeof Version.LATEST}`>;
-
-export namespace Version {
-  export const LATEST = '2022' as const;
-
-  export function isVersion(version: string): version is Version {
-    const versions: ReadonlyArray<string> = keys<Record<Version, unknown>>();
-    return versions.includes(version);
-  }
-
-  export function isLatest(version: Version): version is typeof LATEST {
-    return version === LATEST;
-  }
-
-  export function validate(version: string): asserts version is Version {
-    if (isVersion(version)) {
-      if (platform() === 'darwin' && version < '2013') {
+export class Version {
+  constructor(private readonly spec: string) {
+    if (/^199[6-9]|200[0-7]$/u.test(spec)) {
+      throw new RangeError('Versions prior to 2008 are not supported');
+    } else if (/^20\d\d$/u.test(spec) && spec <= Version.LATEST) {
+      if (platform() === 'darwin' && spec < '2013') {
         throw new RangeError(
           'Versions prior to 2013 does not work on 64-bit macOS',
         );
       }
-    } else {
-      if (/^199[6-9]|200[0-7]$/u.test(version)) {
-        throw new RangeError('Versions prior to 2008 are not supported');
-      } else {
-        throw new TypeError(`'${version}' is not a valid version`);
+    } else if (spec !== 'latest') {
+      throw new TypeError(`'${spec}' is not a valid version spec`);
+    }
+  }
+
+  @Cache
+  get number(): number {
+    return Number.parseInt(this.toString());
+  }
+
+  isLatest(): boolean {
+    return this.spec === 'latest' || this.toString() === Version.LATEST;
+  }
+
+  toString(): string {
+    return this.spec === 'latest' ? Version.LATEST : this.spec;
+  }
+
+  toJSON(): string {
+    return this.toString();
+  }
+
+  [Symbol.toPrimitive](hint: string): number | string {
+    return hint === 'number' ? this.number : this.toString();
+  }
+
+  private static latest: string = '2022';
+
+  static get LATEST(): string {
+    return this.latest;
+  }
+
+  static async checkLatest(this: void): Promise<string> {
+    interface Json {
+      version?: { number?: string };
+    }
+    const endpoint = 'https://ctan.org/json/2.0/pkg/texlive';
+    const http = new HttpClient();
+    const { result, statusCode } = await http.getJson<Json>(endpoint);
+    if (statusCode === HttpCodes.NotFound) {
+      throw new Error(`${endpoint} returned ${HttpCodes.NotFound}`);
+    }
+    const latest = result?.version?.number ?? '';
+    if (!/^20\d\d$/u.test(latest)) {
+      throw new TypeError(`Invalid response: ${JSON.stringify(result)}`);
+    }
+    return Version.latest = latest;
+  }
+
+  static async resolve(this: void, spec: string): Promise<Version> {
+    if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 4, 1)) {
+      try {
+        log.info('Checking for the latest version of TeX Live');
+        log.info(`Latest version: ${await Version.checkLatest()}`);
+      } catch (cause) {
+        log.info('Failed to check for the latest version', { cause });
+        log.info(
+          `Instead ${Version.LATEST} will be used as the latest version`,
+        );
       }
     }
+    return new Version(spec);
   }
 }
 
@@ -100,7 +144,7 @@ export class Tlmgr {
       args.push('--all');
     }
     if (options.self ?? false) {
-      if (this.version === '2008') {
+      if (this.version.number === 2008) {
         // tlmgr for TeX Live 2008 does not have `self` option
         packages = ['texlive.infra', ...packages];
       } else {
@@ -108,7 +152,9 @@ export class Tlmgr {
       }
     }
     // `--reinstall-forcibly-removed` was first implemented in TeX Live 2009.
-    if ((options.reinstallForciblyRemoved ?? false) && this.version >= '2009') {
+    if (
+      (options.reinstallForciblyRemoved ?? false) && this.version.number >= 2009
+    ) {
       args.push('--reinstall-forcibly-removed');
     }
     await exec('tlmgr', [...args, ...packages]);
@@ -127,7 +173,7 @@ export namespace Tlmgr {
         return stdout.trim();
       }
       // `tlmgr conf` is not implemented prior to 2010.
-      if (this.version < '2010') {
+      if (this.version.number < 2010) {
         exportVariable(key, value);
       } else {
         await exec('tlmgr', ['conf', 'texmf', key, value]);
@@ -152,8 +198,8 @@ export namespace Tlmgr {
   }
 
   export class Pinning {
-    constructor(version: Version) {
-      if (version < '2013') {
+    constructor({ number: version }: Version) {
+      if (version < 2013) {
         throw new RangeError(
           `\`pinning\` action is not implemented in TeX Live ${version}`,
         );
@@ -170,8 +216,8 @@ export namespace Tlmgr {
   }
 
   export class Repository {
-    constructor(version: Version) {
-      if (version < '2012') {
+    constructor({ number: version }: Version) {
+      if (version < 2012) {
         throw new RangeError(
           `\`repository\` action is not implemented in TeX Live ${version}`,
         );
@@ -181,7 +227,7 @@ export namespace Tlmgr {
     /**
      * @returns `false` if the repository already exists, otherwise `true`.
      */
-    async add(this: void, repo: string, tag?: string): Promise<boolean> {
+    async add(this: void, repo: string, tag?: string): Promise<void> {
       const args = ['repository', 'add', repo];
       if (tag !== undefined) {
         args.push(tag);
@@ -189,19 +235,15 @@ export namespace Tlmgr {
       const { exitCode, stderr } = await spawn('tlmgr', args, {
         ignoreReturnCode: true,
       });
-      const status = exitCode === 0;
       if (
         // `tlmgr repository add` returns non-zero status code
         // if the same repository or tag is added again.
         // (todo:  make sure that the tagged repo is really tlcontrib)
-        !status
+        exitCode !== 0
         && !stderr.includes('repository or its tag already defined')
       ) {
-        throw new Error(
-          `\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`,
-        );
+        throw new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
       }
-      return status;
     }
   }
 
@@ -228,13 +270,15 @@ export namespace tlpkg {
 }
 
 export namespace tlnet {
-  export function contrib(): URL {
-    return new URL('https://mirror.ctan.org/systems/texlive/tlcontrib/');
-  }
+  export const CTAN = new URL('https://mirror.ctan.org/systems/texlive/tlnet/');
 
-  export function historic(version: Version): URL {
+  export const CONTRIB = new URL(
+    'https://mirror.ctan.org/systems/texlive/tlcontrib/',
+  );
+
+  export function historic({ number: version }: Version): URL {
     return new URL(
-      version < '2010' ? 'tlnet/' : 'tlnet-final/',
+      version < 2010 ? 'tlnet/' : 'tlnet-final/',
       `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`,
     );
   }
@@ -244,66 +288,69 @@ export namespace tlnet {
  * Type for DEPENDS.txt.
  */
 export class DependsTxt {
-  private readonly dependencies = new Map<string, DependsTxt.Dependencies>();
+  private readonly bundle = new Map<
+    DependsTxt.Entry[0],
+    Writable<DependsTxt.Entry[1]>
+  >();
 
   constructor(txt: string) {
-    for (const [name, chunk] of DependsTxt.eachPackage(txt)) {
-      const deps = new DependsTxt.Dependencies(chunk);
-      if (this.dependencies.get(name)?.merge(deps) === undefined) {
-        this.dependencies.set(name, deps);
+    txt = txt.replaceAll(/\s*#.*$/gmu, ''); // remove comments
+    for (const [name, deps] of DependsTxt.unbundle(txt)) {
+      let module = this.bundle.get(name);
+      if (module === undefined) {
+        module = {};
+        this.bundle.set(name, module);
+      }
+      for (const [type, dep] of deps) {
+        (module[type] ??= new Set()).add(dep);
       }
     }
   }
 
-  get(name: string): DependsTxt.Dependencies | undefined {
-    return this.dependencies.get(name);
+  get(name: string): DependsTxt.Entry[1] | undefined {
+    return this.bundle.get(name);
   }
 
-  [Symbol.iterator](): Iterator<[string, DependsTxt.Dependencies], void, void> {
-    return this.dependencies.entries();
+  [Symbol.iterator](): Iterator<DependsTxt.Entry, void, void> {
+    return this.bundle.entries();
   }
 
-  private static *eachPackage(txt: string): Generator<[string, string], void> {
-    const [chunk = '', ...rest] = txt
-      .replaceAll(/\s*#.*$/gmu, '')
-      .split(/^\s*package(?=\s|$)(.*)$/mu);
-    yield ['', chunk];
-    for (let i = 0; i < rest.length; ++i) {
-      let name = (rest[i] ?? '').trim();
+  private static *unbundle(
+    txt: string,
+  ): Iterable<[string, ReturnType<typeof this.parse>]> {
+    const [globals, ...rest] = txt.split(/^\s*package(?=\s|$)(.*)$/mu);
+    yield ['', this.parse(globals)];
+    const iter: Iterable<string> & Iterator<string, undefined> = rest.values();
+    for (let name of iter) {
+      name = name.trim();
       if (name === '' || /\s/u.test(name)) {
         log.warn(
-          '`package` directive must have exactly one argument, '
-            + `but given ${name.length}: ${name}`,
+          '`package` directive must have exactly one argument, but given: '
+            + name,
         );
         name = '';
       }
-      yield [name, rest[++i] ?? ''];
+      yield [name, this.parse(iter.next().value)];
     }
   }
 
-  static async fromFile(file: string): Promise<DependsTxt> {
-    return new this(await readFile(file, 'utf8'));
+  private static *parse(
+    this: void,
+    txt?: string,
+  ): Iterable<[DependsTxt.DependencyType, string]> {
+    const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
+    for (const [, type = 'hard', deps] of txt?.matchAll(hardOrSoft) ?? []) {
+      for (const dep of deps?.split(/\s+/u).filter(Boolean) ?? []) {
+        yield [type as DependsTxt.DependencyType, dep];
+      }
+    }
   }
 }
 
 export namespace DependsTxt {
-  export class Dependencies {
-    readonly hard = new Set<string>();
-    readonly soft = new Set<string>();
-
-    constructor(txt: string) {
-      const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
-      for (const [, directive, args = ''] of txt.matchAll(hardOrSoft)) {
-        for (const dep of args.split(/\s+/u).filter(Boolean)) {
-          (directive === 'soft' ? this.soft : this.hard).add(dep);
-        }
-      }
-    }
-
-    merge(other: Readonly<this>): this {
-      other.hard.forEach((dep) => this.hard.add(dep));
-      other.soft.forEach((dep) => this.soft.add(dep));
-      return this;
-    }
-  }
+  export type DependencyType = 'hard' | 'soft';
+  export type Entry = [
+    string,
+    { readonly [T in DependencyType]?: Set<string> },
+  ];
 }

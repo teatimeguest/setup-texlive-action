@@ -7,10 +7,7 @@ export default {
   },
   resetModules: true,
   rootDir: process.cwd(),
-  setupFilesAfterEnv: [
-    '<rootDir>/node_modules/jest-extended/all',
-    '<rootDir>/node_modules/reflect-metadata/Reflect.js',
-  ],
+  setupFilesAfterEnv: ['<rootDir>/__tests__/setup.ts'],
   testEnvironment: 'node',
   testMatch: ['<rootDir>/__tests__/*.test.ts'],
   transform: {

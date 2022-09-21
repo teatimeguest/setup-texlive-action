@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { arch, platform } from 'node:os';
 import { isNativeError } from 'node:util/types';
 
-import { group, setFailed } from '@actions/core';
+import { setFailed } from '@actions/core';
 import { keys } from 'ts-transformer-keys';
 
 import { Inputs, Outputs, State } from '#/context';
@@ -29,19 +29,16 @@ export async function run(): Promise<void> {
   }
 }
 
-export async function main(
-  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-  state: State,
-  inputs: Inputs = new Inputs(),
-  outputs: Outputs = new Outputs(),
-): Promise<void> {
-  const packages = await inputs.packages;
-  let cacheType = undefined as CacheType | undefined;
+// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+export async function main(state: State): Promise<void> {
+  const inputs = await Inputs.load();
+  const outputs = new Outputs();
+  let cacheType: CacheType | undefined;
 
   if (inputs.cache) {
-    const [primary, secondary] = getCacheKeys(inputs.version, packages);
+    const [primary, secondary] = getCacheKeys(inputs.version, inputs.packages);
     state.key = primary;
-    await group('Restoring cache', async () => {
+    await log.group('Restoring cache', async () => {
       cacheType = await restoreCache(inputs.texmf.TEXDIR, primary, secondary);
       if (cacheType !== 'primary') {
         state.texdir = inputs.texmf.TEXDIR;
@@ -54,14 +51,14 @@ export async function main(
   }
 
   if (cacheType === undefined) {
-    const installtl = await group('Acquiring install-tl', async () => {
+    const installtl = await log.group('Acquiring install-tl', async () => {
       return await InstallTL.acquire(inputs.version);
     });
     const profile = new Profile(inputs.version, inputs.texmf);
-    await group('Installation profile', async () => {
+    await log.group('Installation profile', async () => {
       log.info(profile.toString());
     });
-    await group('Installing TeX Live', async () => {
+    await log.group('Installing TeX Live', async () => {
       await installtl.run(profile);
     });
   }
@@ -70,12 +67,12 @@ export async function main(
   await tlmgr.path.add();
 
   if (cacheType !== undefined) {
-    if (Version.isLatest(inputs.version)) {
-      await group('Updating tlmgr', async () => {
+    if (inputs.version.isLatest()) {
+      await log.group('Updating tlmgr', async () => {
         await tlmgr.update(undefined, { self: true });
       });
       if (inputs.updateAllPackages) {
-        await group('Updating packages', async () => {
+        await log.group('Updating packages', async () => {
           await tlmgr.update(undefined, {
             all: true,
             reinstallForciblyRemoved: true,
@@ -83,7 +80,7 @@ export async function main(
         });
       }
     }
-    await group('Adjusting TEXMF', async () => {
+    await log.group('Adjusting TEXMF', async () => {
       for (const key of keys<Texmf.UserTrees>()) {
         const value = inputs.texmf[key];
         /* eslint-disable no-await-in-loop */
@@ -97,15 +94,15 @@ export async function main(
   }
 
   if (inputs.tlcontrib) {
-    await group('Setting up TLContrib', async () => {
-      await tlmgr.repository.add(tlnet.contrib().href, 'tlcontrib');
+    await log.group('Setting up TLContrib', async () => {
+      await tlmgr.repository.add(tlnet.CONTRIB.href, 'tlcontrib');
       await tlmgr.pinning.add('tlcontrib', '*');
     });
   }
 
-  if (cacheType !== 'primary' && packages.size > 0) {
-    await group('Installing packages', async () => {
-      await tlmgr.install(...packages);
+  if (cacheType !== 'primary' && inputs.packages.size > 0) {
+    await log.group('Installing packages', async () => {
+      await tlmgr.install(...inputs.packages);
     });
   }
 

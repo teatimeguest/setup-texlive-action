@@ -3,21 +3,13 @@ import process from 'node:process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import 'jest-extended';
 
 import { Env, Inputs, Outputs, State } from '#/context';
 import * as log from '#/log';
 import { Version } from '#/texlive';
 
-jest.mock('node:fs/promises', () => ({ readFile: jest.fn() }));
-jest.mock(
-  'node:os',
-  () => ({
-    homedir: jest.fn().mockReturnValue('~'),
-    platform: jest.fn().mockReturnValue('linux'),
-  }),
-);
-jest.mock('node:path', () => jest.requireActual('path/posix'));
+const v = (spec: unknown) => new Version(`${spec}`);
+
 jest.mock('node:process', () => globalThis.process);
 beforeEach(() => {
   globalThis.process.env = {
@@ -32,42 +24,23 @@ beforeEach(() => {
   };
 });
 
-jest.mocked(cache.isFeatureAvailable).mockReturnValue(true);
-const { getInput, getBooleanInput, getState } = jest.requireActual<typeof core>(
-  '@actions/core',
-);
-jest.mocked(core.getInput).mockImplementation(getInput);
-jest.mocked(core.getBooleanInput).mockImplementation(getBooleanInput);
-jest.mocked(core.getState).mockImplementation(getState);
-
-jest.mock('#/texlive', () => {
-  const actual = jest.requireActual('#/texlive');
-  return { DependsTxt: actual.DependsTxt, Version: actual.Version };
-});
-jest.mock(
-  '#/utility',
-  () => ({
-    Serializable: jest.requireActual('#/utility').Serializable,
-    tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
-  }),
-);
 jest.unmock('#/context');
 
 describe('Inputs', () => {
   describe('cache', () => {
-    it('defaults to true', () => {
-      expect(new Inputs()).toHaveProperty('cache', true);
+    it('defaults to true', async () => {
+      await expect(Inputs.load()).resolves.toHaveProperty('cache', true);
     });
 
-    it('is set to false if false is set as input', () => {
+    it('is set to false if false is set as input', async () => {
       process.env['INPUT_CACHE'] = 'false';
-      expect(new Inputs()).toHaveProperty('cache', false);
+      await expect(Inputs.load()).resolves.toHaveProperty('cache', false);
     });
 
-    it('is set to false if cache service is not available', () => {
+    it('is set to false if cache service is not available', async () => {
       process.env['INPUT_CACHE'] = 'true';
       jest.mocked(cache.isFeatureAvailable).mockReturnValueOnce(false);
-      expect(new Inputs()).toHaveProperty('cache', false);
+      await expect(Inputs.load()).resolves.toHaveProperty('cache', false);
       expect(log.warn).toHaveBeenCalledWith(
         'Caching is disabled because cache service is not available',
       );
@@ -76,30 +49,39 @@ describe('Inputs', () => {
 
   describe('packages', () => {
     it('defaults to empty', async () => {
-      await expect(new Inputs().packages).resolves.toStrictEqual(new Set());
+      await expect(Inputs.load()).resolves.toHaveProperty(
+        'packages',
+        new Set(),
+      );
     });
 
     it('is set to the set of specified packages by packages input', async () => {
       process.env['INPUT_PACKAGES'] = 'foo bar baz';
-      await expect(new Inputs().packages).resolves.toStrictEqual(
+      await expect(Inputs.load()).resolves.toHaveProperty(
+        'packages',
         new Set(['bar', 'baz', 'foo']),
       );
     });
 
     it('is set to the set of packages defined by package file', async () => {
-      process.env['INPUT_PACKAGE-FILE'] = '<file>';
+      process.env['INPUT_PACKAGE-FILE'] = '<package-file>';
       jest.mocked(fs.readFile).mockResolvedValueOnce('foo bar baz');
-      await expect(new Inputs().packages).resolves.toStrictEqual(
+      await expect(Inputs.load()).resolves.toHaveProperty(
+        'packages',
         new Set(['bar', 'baz', 'foo']),
       );
-      expect(fs.readFile).toHaveBeenCalledWith('<file>', 'utf8');
+      expect(fs.readFile).toHaveBeenCalledWith(
+        process.env['INPUT_PACKAGE-FILE'],
+        'utf8',
+      );
     });
 
     it('contains packages specified by both input and file', async () => {
       process.env['INPUT_PACKAGES'] = 'foo bar baz';
-      process.env['INPUT_PACKAGE-FILE'] = '<file>';
+      process.env['INPUT_PACKAGE-FILE'] = '<package-file>';
       jest.mocked(fs.readFile).mockResolvedValueOnce('qux foo');
-      await expect(new Inputs().packages).resolves.toStrictEqual(
+      await expect(Inputs.load()).resolves.toHaveProperty(
+        'packages',
         new Set(['bar', 'baz', 'foo', 'qux']),
       );
     });
@@ -107,56 +89,57 @@ describe('Inputs', () => {
     it('does not contain comments or whitespaces', async () => {
       process.env['INPUT_PACKAGES'] =
         '\n  foo\t# this is a comment\nbar  baz \n# \nqux#';
-      await expect(new Inputs().packages).resolves.toStrictEqual(
+      await expect(Inputs.load()).resolves.toHaveProperty(
+        'packages',
         new Set(['bar', 'baz', 'foo', 'qux']),
       );
     });
   });
 
   describe('texmf', () => {
-    it('has the default values', () => {
-      const texmf = new Inputs().texmf;
-      expect(texmf.TEXDIR).toBe(`<tmpdir>/setup-texlive/${Version.LATEST}`);
+    it('has the default values', async () => {
+      const { texmf } = await Inputs.load();
+      expect(texmf.TEXDIR).toBe(`<tmpdir>/setup-texlive/${v`latest`}`);
       expect(texmf.TEXMFLOCAL).toBe('<tmpdir>/setup-texlive/texmf-local');
     });
 
-    it('uses prefix', () => {
+    it('uses prefix', async () => {
       process.env['INPUT_PREFIX'] = '<prefix>';
-      const texmf = new Inputs().texmf;
-      expect(texmf.TEXDIR).toBe(`<prefix>/${Version.LATEST}`);
+      const { texmf } = await Inputs.load();
+      expect(texmf.TEXDIR).toBe(`<prefix>/${v`latest`}`);
       expect(texmf.TEXMFLOCAL).toBe('<prefix>/texmf-local');
     });
 
-    it('uses TEXLIVE_INSTALL_PREFIX if set', () => {
+    it('uses TEXLIVE_INSTALL_PREFIX if set', async () => {
       process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
-      const texmf = new Inputs().texmf;
-      expect(texmf.TEXDIR).toBe(`<PREFIX>/${Version.LATEST}`);
+      const { texmf } = await Inputs.load();
+      expect(texmf.TEXDIR).toBe(`<PREFIX>/${v`latest`}`);
       expect(texmf.TEXMFLOCAL).toBe('<PREFIX>/texmf-local');
     });
 
-    it('uses prefix if prefix and TEXLIVE_INSTALL_PREFIX are both set', () => {
+    it('uses prefix if prefix and TEXLIVE_INSTALL_PREFIX are both set', async () => {
       process.env['INPUT_PREFIX'] = '<prefix>';
       process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
-      const texmf = new Inputs().texmf;
-      expect(texmf.TEXDIR).toBe(`<prefix>/${Version.LATEST}`);
+      const { texmf } = await Inputs.load();
+      expect(texmf.TEXDIR).toBe(`<prefix>/${v`latest`}`);
       expect(texmf.TEXMFLOCAL).toBe('<prefix>/texmf-local');
     });
   });
 
   describe('tlcontrib', () => {
-    it('defaults to false', () => {
-      expect(new Inputs()).toHaveProperty('tlcontrib', false);
+    it('defaults to false', async () => {
+      await expect(Inputs.load()).resolves.toHaveProperty('tlcontrib', false);
     });
 
-    it('is set to true if true is set as input', () => {
+    it('is set to true if true is set as input', async () => {
       process.env['INPUT_TLCONTRIB'] = 'true';
-      expect(new Inputs()).toHaveProperty('tlcontrib', true);
+      await expect(Inputs.load()).resolves.toHaveProperty('tlcontrib', true);
     });
 
-    it('is set to false if an older version is specified', () => {
+    it('is set to false if an older version is specified', async () => {
       process.env['INPUT_TLCONTRIB'] = 'true';
       process.env['INPUT_VERSION'] = '2010';
-      expect(new Inputs()).toHaveProperty('tlcontrib', false);
+      await expect(Inputs.load()).resolves.toHaveProperty('tlcontrib', false);
       expect(log.warn).toHaveBeenCalledWith(
         '`tlcontrib` is currently ignored for older versions',
       );
@@ -164,36 +147,45 @@ describe('Inputs', () => {
   });
 
   describe('updateAllPackages', () => {
-    it('defaults to false', () => {
-      expect(new Inputs()).toHaveProperty('updateAllPackages', false);
+    it('defaults to false', async () => {
+      await expect(Inputs.load()).resolves.toHaveProperty(
+        'updateAllPackages',
+        false,
+      );
     });
 
-    it('is set to true if true is set as input', () => {
+    it('is set to true if true is set as input', async () => {
       process.env['INPUT_UPDATE-ALL-PACKAGES'] = 'true';
-      expect(new Inputs()).toHaveProperty('updateAllPackages', true);
+      await expect(Inputs.load()).resolves.toHaveProperty(
+        'updateAllPackages',
+        true,
+      );
     });
 
-    it('is set to false if an older version is specified', () => {
+    it('is set to false if an older version is specified', async () => {
       process.env['INPUT_UPDATE-ALL-PACKAGES'] = 'true';
       process.env['INPUT_VERSION'] = '2016';
-      expect(new Inputs()).toHaveProperty('updateAllPackages', false);
+      await expect(Inputs.load()).resolves.toHaveProperty(
+        'updateAllPackages',
+        false,
+      );
       expect(log.info).toHaveBeenCalled();
     });
   });
 
   describe('version', () => {
-    it('defaults to the latest version', () => {
-      expect(new Inputs()).toHaveProperty('version', Version.LATEST);
+    it('defaults to the latest version', async () => {
+      await expect(Inputs.load()).resolves.toHaveProperty('version', v`latest`);
     });
 
-    it('is set to the specified version', () => {
+    it('is set to the specified version', async () => {
       process.env['INPUT_VERSION'] = '2018';
-      expect(new Inputs()).toHaveProperty('version', '2018');
+      await expect(Inputs.load()).resolves.toHaveProperty('version', v`2018`);
     });
 
-    it('fails with invalid input', () => {
+    it('fails with invalid input', async () => {
       process.env['INPUT_VERSION'] = 'version';
-      expect(() => new Inputs().version).toThrow('');
+      await expect(Inputs.load()).rejects.toThrow('');
     });
   });
 });
@@ -210,19 +202,18 @@ describe('Outputs#cacheHit', () => {
 
 describe('Env', () => {
   it('has some default values', () => {
-    expect(new Env(Version.LATEST)).toMatchObject({
+    expect(new Env(v`latest`)).toMatchObject({
       TEXLIVE_INSTALL_ENV_NOCHECK: '1',
       TEXLIVE_INSTALL_NO_WELCOME: '1',
-      TEXLIVE_INSTALL_TEXMFCONFIG:
-        `~/.local/texlive/${Version.LATEST}/texmf-config`,
-      TEXLIVE_INSTALL_TEXMFVAR: `~/.local/texlive/${Version.LATEST}/texmf-var`,
+      TEXLIVE_INSTALL_TEXMFCONFIG: `~/.local/texlive/${v`latest`}/texmf-config`,
+      TEXLIVE_INSTALL_TEXMFVAR: `~/.local/texlive/${v`latest`}/texmf-var`,
       TEXLIVE_INSTALL_TEXMFHOME: '~/texmf',
     });
   });
 
   it('ignores some environment variables', () => {
     process.env['TEXLIVE_INSTALL_TEXDIR'] = '<texdir>';
-    expect(new Env(Version.LATEST)).not.toHaveProperty(
+    expect(new Env(v`latest`)).not.toHaveProperty(
       'TEXLIVE_INSTALL_TEXDIR',
     );
     expect(process.env).not.toHaveProperty('TEXLIVE_INSTALL_TEXDIR');
@@ -234,7 +225,7 @@ describe('Env', () => {
   it('favors user settings over default values', () => {
     process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
     process.env['NOPERLDOC'] = 'true';
-    expect(new Env(Version.LATEST)).toMatchObject({
+    expect(new Env(v`latest`)).toMatchObject({
       ['TEXLIVE_INSTALL_PREFIX']: '<PREFIX>',
       ['NOPERLDOC']: 'true',
     });

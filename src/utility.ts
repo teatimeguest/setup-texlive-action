@@ -1,15 +1,25 @@
+import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 
 import * as cache from '@actions/cache';
 import { create as createGlobber } from '@actions/glob';
+import { rmRF } from '@actions/io';
 import { extractTar, extractZip } from '@actions/tool-cache';
-import { type ClassTransformOptions, instanceToPlain } from 'class-transformer';
+import {
+  type ClassTransformOptions,
+  Exclude,
+  instanceToPlain,
+} from 'class-transformer';
 
 import * as log from '#/log';
 
 export abstract class Serializable {
+  constructor() {
+    Exclude()(this.constructor);
+  }
+
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
   toPlain(options?: ClassTransformOptions): object {
     return instanceToPlain(this, options);
@@ -17,10 +27,6 @@ export abstract class Serializable {
 
   toJSON(): object {
     return this.toPlain();
-  }
-
-  toString(): string {
-    return JSON.stringify(this);
   }
 }
 
@@ -106,40 +112,11 @@ export function tmpdir(): string {
   return process.env['RUNNER_TEMP'] ?? os.tmpdir();
 }
 
-/**
- * Creates a union type consisting of all string literals from `Begin` to `End`.
- *
- * ```typescript
- * type T1 = Range<'10', '15'>    // ['10', '11', '12', '13', '14']
- * type T1 = Range<'10', '=15'>   // ['10', '11', '12', '13', '14', '15']
- * type T3 = Range<'foo', 'bar'>  // never
- * ```
- */
-export type Range<
-  Begin extends `${number}`,
-  End extends `${'' | '='}${number}`,
-> =
-  | Exclude<
-    keyof Replicate<End extends `=${infer E}` ? E : End, [never]>,
-    keyof Replicate<Begin, [never]>
-  >
-  | (End extends `=${infer E}` ? E : never);
-
-type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
-
-type Init<T> = T extends `${infer L}${Digit}` ? L : never;
-type Last<T> = T extends `${Init<T>}${infer N}` ? N : never;
-
-type Replicate<N, T extends Array<unknown>> = N extends '0' ? []
-  : N extends '1' ? [...T]
-  : N extends '2' ? [...T, ...T]
-  : N extends '3' ? [...T, ...T, ...T]
-  : N extends '4' ? [...T, ...T, ...T, ...T]
-  : N extends '5' ? [...T, ...T, ...T, ...T, ...T]
-  : N extends '6' ? [...T, ...T, ...T, ...T, ...T, ...T]
-  : N extends '7' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T]
-  : N extends '8' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
-  : N extends '9' ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
-  : N extends '10'
-    ? [...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T, ...T]
-  : [...Replicate<'10', Replicate<Init<N>, T>>, ...Replicate<Last<N>, T>];
+export async function* mkdtemp(): AsyncGenerator<string, void, void> {
+  const tmp = await fs.mkdtemp(path.join(tmpdir(), 'setup-texlive-'));
+  try {
+    yield tmp;
+  } finally {
+    await rmRF(tmp);
+  }
+}

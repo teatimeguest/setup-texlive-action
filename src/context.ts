@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
@@ -10,7 +11,7 @@ import {
   saveState,
   setOutput,
 } from '@actions/core';
-import { Exclude, Expose, plainToClassFromExist } from 'class-transformer';
+import { Expose, plainToClassFromExist } from 'class-transformer';
 import { cache as Cache } from 'decorator-cache-getter';
 import { keys } from 'ts-transformer-keys';
 
@@ -19,36 +20,26 @@ import { DependsTxt, type Texmf, Version } from '#/texlive';
 import { Serializable, tmpdir } from '#/utility';
 
 export class Inputs {
-  @Cache
-  get cache(): boolean {
-    const input = getBooleanInput('cache');
-    if (input && !cache.isFeatureAvailable()) {
-      log.warn('Caching is disabled because cache service is not available');
-      return false;
-    }
-    return input;
-  }
+  readonly cache: boolean = getBooleanInput('cache');
+  readonly tlcontrib: boolean = getBooleanInput('tlcontrib');
+  readonly updateAllPackages: boolean = getBooleanInput('update-all-packages');
 
-  @Cache
-  get packages(): Promise<Set<string>> {
-    return (async () => {
-      type Entry = [string, DependsTxt.Dependencies];
-      async function* dependsTxt(): AsyncGenerator<Entry, void, void> {
-        const inline = getInput('packages');
-        if (inline !== '') {
-          yield* new DependsTxt(inline);
-        }
-        const file = getInput('package-file');
-        if (file !== '') {
-          yield* await DependsTxt.fromFile(file);
-        }
-      }
-      const list = [];
-      for await (const [, { hard, soft }] of dependsTxt()) {
-        list.push(...hard, ...soft);
-      }
-      return new Set(list.sort());
-    })();
+  constructor(
+    readonly packages: ReadonlySet<string>,
+    readonly version: Version,
+  ) {
+    if (this.cache && !cache.isFeatureAvailable()) {
+      log.warn('Caching is disabled because cache service is not available');
+      this.cache = false;
+    }
+    if (this.tlcontrib && !this.version.isLatest()) {
+      log.warn('`tlcontrib` is currently ignored for older versions');
+      this.tlcontrib = false;
+    }
+    if (this.updateAllPackages && !this.version.isLatest()) {
+      log.info('`update-all-packages` is ignored for older versions');
+      this.updateAllPackages = false;
+    }
   }
 
   @Cache
@@ -58,7 +49,7 @@ export class Inputs {
     const prefix = path.normalize(
       input !== '' ? input : env.TEXLIVE_INSTALL_PREFIX,
     );
-    const TEXDIR = path.join(prefix, this.version);
+    const TEXDIR = path.join(prefix, this.version.toString());
     return {
       TEXDIR,
       TEXMFLOCAL: path.join(prefix, 'texmf-local'),
@@ -68,38 +59,33 @@ export class Inputs {
     };
   }
 
-  @Cache
-  get tlcontrib(): boolean {
-    const input = getBooleanInput('tlcontrib');
-    if (input && !Version.isLatest(this.version)) {
-      log.warn('`tlcontrib` is currently ignored for older versions');
-      return false;
-    }
-    return input;
+  static async load(this: void): Promise<Inputs> {
+    return new Inputs(
+      await Inputs.loadPackages(),
+      await Version.resolve(getInput('version')),
+    );
   }
 
-  @Cache
-  get updateAllPackages(): boolean {
-    const input = getBooleanInput('update-all-packages');
-    if (input && !Version.isLatest(this.version)) {
-      log.info('`update-all-packages` is ignored for older versions');
-      return false;
+  private static async loadPackages(this: void): Promise<Set<string>> {
+    // eslint-disable-next-line func-style
+    const dependsTxt = async function*(): AsyncIterable<DependsTxt.Entry> {
+      const inline = getInput('packages');
+      if (inline !== '') {
+        yield* new DependsTxt(inline);
+      }
+      const file = getInput('package-file');
+      if (file !== '') {
+        yield* new DependsTxt(await readFile(file, 'utf8'));
+      }
+    };
+    const packages = [];
+    for await (const [, { hard = [], soft = [] }] of dependsTxt()) {
+      packages.push(...hard, ...soft);
     }
-    return input;
-  }
-
-  @Cache
-  get version(): Version {
-    const input = getInput('version');
-    if (input === 'latest') {
-      return Version.LATEST;
-    }
-    Version.validate(input);
-    return input;
+    return new Set(packages.sort());
   }
 }
 
-@Exclude()
 export class Outputs extends Serializable {
   @Expose({ name: 'cache-hit' })
   cacheHit: boolean = false;
@@ -145,7 +131,12 @@ export class Env {
   }
 
   static defaults(version: Version): Env {
-    const TEXUSERDIR = path.join(homedir(), '.local', 'texlive', version);
+    const TEXUSERDIR = path.join(
+      homedir(),
+      '.local',
+      'texlive',
+      version.toString(),
+    );
     return {
       TEXLIVE_INSTALL_ENV_NOCHECK: '1',
       TEXLIVE_INSTALL_NO_WELCOME: '1',
@@ -157,7 +148,6 @@ export class Env {
   }
 }
 
-@Exclude()
 export class State extends Serializable {
   static readonly NAME = 'post';
 
