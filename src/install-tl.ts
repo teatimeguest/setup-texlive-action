@@ -1,7 +1,7 @@
+import { Buffer } from 'node:buffer';
 import { readFile, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import path from 'node:path';
-import { isNativeError } from 'node:util/types';
 
 import { getExecOutput as spawn } from '@actions/exec';
 import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
@@ -20,6 +20,7 @@ export class InstallTL {
   private constructor(
     private readonly version: Version,
     private readonly directory: string,
+    private readonly patch: Patch = new Patch(version),
   ) {}
 
   async run(profile: Profile): Promise<void> {
@@ -42,10 +43,12 @@ export class InstallTL {
           repo.href,
         );
       }
-      const { stderr } = await spawn(installtl, options);
+      // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
+      const execOptions = { input: Buffer.alloc(0) };
+      const { stderr } = await spawn(installtl, options, execOptions);
       tlpkg.check(stderr);
     }
-    await patch(this.version, profile.TEXDIR);
+    await this.patch.apply(profile.TEXDIR);
   }
 
   static restore(version: Version): InstallTL | undefined {
@@ -73,7 +76,8 @@ export class InstallTL {
       archive,
       platform() === 'win32' ? 'zip' : 'tgz',
     );
-    await patch(version, dest);
+    const patch = new Patch(version);
+    await patch.apply(dest);
 
     try {
       log.info('Adding to tool cache');
@@ -82,7 +86,7 @@ export class InstallTL {
       log.info('Failed to cache installer', { cause });
     }
 
-    return new this(version, dest);
+    return new this(version, dest, patch);
   }
 
   static async acquire(version: Version): Promise<InstallTL> {
@@ -221,77 +225,98 @@ export class Profile extends Serializable implements Texmf.SystemTrees {
   }
 }
 
-async function patch(version: Version, base: string): Promise<void> {
-  interface Patch {
+export class Patch {
+  private readonly hunks: typeof Patch.HUNKS;
+
+  constructor({ number: version }: Version) {
+    this.hunks = Patch.HUNKS.filter((
+      {
+        platforms = platform(),
+        versions: { since = -Infinity, until = Infinity } = {},
+      },
+    ) => platforms === platform() && since <= version && version < until);
+  }
+
+  async apply(texdir: string): Promise<void> {
+    if (this.hunks.length > 0) {
+      log.info('Applying patches');
+      const changes = await Promise.all(this.hunks.map(async (hunk) => {
+        const target = path.join(texdir, hunk.file);
+        const content = Buffer.from(hunk.from.reduce<string>(
+          (s, from, i) => s.replace(from, hunk.to[i] ?? ''),
+          await readFile(target, 'utf8'),
+        ));
+        const diff = await this.diff(hunk, content, texdir);
+        await writeFile(target, content);
+        return diff;
+      }));
+      log.info(changes.filter(Boolean).join('\n'));
+    }
+  }
+
+  private async diff(
+    { description, file }: typeof this.hunks[number],
+    input: Readonly<Buffer>,
+    cwd: string,
+  ): Promise<string> {
+    try {
+      const linePrefix = '\u001B[34m>\u001B[0m ';
+      const { exitCode, stdout, stderr } = await spawn('git', [
+        'diff',
+        '--no-index',
+        '--color',
+        `--line-prefix=${linePrefix}`,
+        '--',
+        file,
+        '-',
+      ], { input, cwd, silent: true, ignoreReturnCode: true });
+      if (exitCode === 1) {
+        return linePrefix + description + '\n' + stdout.trimEnd();
+      }
+      if (exitCode > 1) {
+        log.debug(`git-diff exited with ${exitCode}: ${stderr}`);
+      }
+    } catch (cause) {
+      log.debug('Failed to exec git-diff', { cause });
+    }
+    return '';
+  }
+
+  private static readonly HUNKS: ReadonlyArray<{
+    readonly description: string;
     readonly platforms?: NodeJS.Platform;
     readonly versions?: { readonly since?: number; readonly until?: number };
     readonly file: string;
     readonly from: ReadonlyArray<string | Readonly<RegExp>>;
     readonly to: ReadonlyArray<string>;
-  }
-  const patches: ReadonlyArray<Patch> = [{
-    // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
-    platforms: 'win32',
-    file: InstallTL.executable(version),
-    from: [/\bpause(?: Done)?\b/gmu],
-    to: [''],
-  }, {
-    // Fixes a syntax error.
+  }> = [{
+    description: 'Fixes a syntax error.',
     versions: { since: 2009, until: 2011 },
     file: 'tlpkg/TeXLive/TLWinGoo.pm',
     from: [/foreach \$p qw\((.*)\)/u],
     to: ['foreach $$p (qw($1))'],
   }, {
-    // Defines Code Page 65001 as an alias for UTF-8 on Windows.
-    // (see: https://github.com/dankogai/p5-encode/issues/37)
+    // See: https://github.com/dankogai/p5-encode/issues/37
+    description: 'Defines Code Page 65001 as an alias for UTF-8 on Windows.',
     platforms: 'win32',
     versions: { since: 2015, until: 2016 },
     file: 'tlpkg/tlperl/lib/Encode/Alias.pm',
-    from: ['# utf8 is blessed :)'],
-    to: [`define_alias(qr/cp65001/i => '"utf-8-strict"');`],
+    from: ['# utf8 is blessed :)\n'],
+    to: [`$&    define_alias(qr/cp65001/i => '"utf-8-strict"');\n`],
   }, {
-    // Makes it possible to use `\` as a directory separator on Windows.
+    description:
+      'Makes it possible to use `\\` as a directory separator on Windows.',
     platforms: 'win32',
     versions: { until: 2020 },
     file: 'tlpkg/TeXLive/TLUtils.pm',
     from: ['split (/\\//, $tree)'],
     to: ['split (/[\\/\\\\]/, $$tree)'],
   }, {
-    // Adds support for macOS 11 or later.
+    description: 'Adds support for macOS 11 or later.',
     platforms: 'darwin',
     versions: { since: 2017, until: 2020 },
     file: 'tlpkg/TeXLive/TLUtils.pm',
     from: ['$os_major != 10', '$os_minor >= $mactex_darwin'],
-    to: ['$$os_major < 10', '$$os_major >= 11 || $&'],
-  }] as const;
-
-  const apply = async (
-    { platforms = platform(), versions = {}, file, from, to }: Patch,
-  ): Promise<void> => {
-    const { since = 0, until = 9999 } = versions;
-    if (
-      platforms === platform()
-      && since <= version.number
-      && version.number < until
-    ) {
-      const target = path.join(base, file);
-      try {
-        await writeFile(
-          target,
-          from.reduce<string>(
-            (contents, search, i) => contents.replace(search, to[i] ?? ''),
-            await readFile(target, 'utf8'),
-          ),
-        );
-      } catch (error) {
-        if (isNativeError(error) && error.code === 'ENOENT') {
-          log.debug(`${target} not found`);
-          return;
-        }
-        throw error;
-      }
-    }
-  };
-  log.info('Applying patches');
-  await Promise.all(patches.map((p) => apply(p)));
+    to: ['$$os_major < 10', '$$os_major > 10 || $&'],
+  }];
 }

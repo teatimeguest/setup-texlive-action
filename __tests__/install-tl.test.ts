@@ -37,7 +37,7 @@ describe('InstallTL', () => {
         expect.stringMatching(/texlive\.profile$/u),
         '-location',
         'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2008/tlnet/',
-      ]);
+      ], expect.anything());
     });
 
     it('installs TeX Live 2012', async () => {
@@ -49,7 +49,7 @@ describe('InstallTL', () => {
         expect.stringMatching(/texlive\.profile$/u),
         '-repository',
         'http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2012/tlnet-final/',
-      ]);
+      ], expect.anything());
     });
 
     it(`installs TeX Live ${v`latest`}`, async () => {
@@ -59,7 +59,7 @@ describe('InstallTL', () => {
       expect(getExecOutput).toHaveBeenCalledWith(expect.stringContaining(''), [
         '-profile',
         expect.stringMatching(/texlive\.profile$/u),
-      ]);
+      ], expect.anything());
     });
   });
 
@@ -103,18 +103,6 @@ describe('InstallTL', () => {
       await expect(InstallTL.download(v`latest`)).toResolve();
       expect(log.info).toHaveBeenCalled();
     });
-
-    it.each<[Version]>([[v`2008`], [v`2011`], [v`2014`], [v`2017`], [v`2020`]])(
-      'applies a patch for install-tl(-windows).bat on Windows (%s)',
-      async (version) => {
-        jest.mocked(os.platform).mockReturnValue('win32');
-        await expect(InstallTL.download(version)).toResolve();
-        expect(fs.readFile).toHaveBeenCalledWith(
-          expect.stringMatching(/install-tl(?:-windows)?\.bat/u),
-          'utf8',
-        );
-      },
-    );
 
     it.each<[NodeJS.Platform, Version]>([
       ['linux', v`2009`],

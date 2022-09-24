@@ -70,7 +70,7 @@ describe('Version', () => {
   });
 
   describe('resolve', () => {
-    const { checkLatest } = Version; // eslint-disable-line jest/unbound-method
+    const { checkLatest } = Version;
 
     beforeEach(() => {
       Version.checkLatest = jest.fn().mockResolvedValue('2050');

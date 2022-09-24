@@ -151,9 +151,10 @@ export class Tlmgr {
         args.push('--self');
       }
     }
-    // `--reinstall-forcibly-removed` was first implemented in TeX Live 2009.
     if (
-      (options.reinstallForciblyRemoved ?? false) && this.version.number >= 2009
+      (options.reinstallForciblyRemoved ?? false)
+      // `--reinstall-forcibly-removed` was first implemented in TeX Live 2009.
+      && this.version.number >= 2009
     ) {
       args.push('--reinstall-forcibly-removed');
     }

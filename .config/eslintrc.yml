@@ -16,6 +16,7 @@ rules:
   node/no-unpublished-import: off
   node/no-unsupported-features/es-syntax: off
 ignorePatterns: /src/index.ts
+reportUnusedDisableDirectives: true
 overrides:
   - files: "./src/*.ts"
     extends:
@@ -147,6 +148,9 @@ overrides:
       unicorn/consistent-function-scoping: off
       unicorn/no-array-for-each: off
       unicorn/no-array-reduce: off
+      unicorn/prefer-number-properties:
+        - error
+        - checkInfinity: false
       unicorn/prefer-ternary: off
       unicorn/prevent-abbreviations: off
   - files: "./__tests__/*.ts"
