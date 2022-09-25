@@ -10,49 +10,48 @@ inputs:
     required: false
   package-file:
     description: >-
-      File containing TeX package names to be installed.
-      The file format is whitespace-delimited, and
-      everything after a `#` is treated as a comment.
-      `DEPENDS.txt` format is also acceptable.
+      File containing the names of TeX packages to be installed,
+      delimited by whitespaces.
+      Everything after a `#` is treated as a comment.
+      The `DEPENDS.txt` format is also supported.
     default: ''
     required: false
   packages:
     description: >-
       Whitespace-separated TeX package names to be installed.
-      Schemes and collections can also be specified.
+      Schemes and collections are also acceptable.
     default: ''
     required: false
   prefix:
     description: >-
       TeX Live installation prefix.
       This has the same effect as `TEXLIVE_INSTALL_PREFIX`.
-      The default is `$RUNNER_TEMP/setup-texlive`.
+      Defaults to `$RUNNER_TEMP/setup-texlive`.
     required: false
   tlcontrib:
     description: >-
       Set up TLContrib as an additional TeX package repository.
-      This input will be ignored if an older version is specified for `version`.
+      This input will be ignored for older versions.
     default: false
     required: false
   update-all-packages:
     description: >-
-      Update all TeX packages when restoring cache.
-      The default is `false` and the action updates only `tlmgr`.
+      Update all TeX packages when cache restored.
+      The default is `false` and the action will update only `tlmgr`.
     default: false
     required: false
   version:
     description: >-
       TeX Live version to install.
-      Supported versions are `2008` to `2022` for Linux and Windows,
-      `2013` to `2022` for macOS.
-      If set to `latest`, the latest version will be installed.
+      Supported values are `2008` to `2022`, and `latest`.
     default: latest
     required: false
 
 outputs:
   cache-hit:
-    description: >-
-      A boolean value to indicate if a cache was hit.
+    description: A boolean value to indicate if a cache was hit.
+  version:
+    description: The installed TeX Live version.
 
 runs:
   using: node16

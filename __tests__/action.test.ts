@@ -26,7 +26,7 @@ beforeEach(() => {
     outputs: { emit: jest.fn(), cacheHit: false } as unknown as Outputs,
   };
   jest.mocked(Inputs.load).mockResolvedValue(ctx.inputs as unknown as Inputs);
-  jest.mocked(Outputs).mockReturnValue(ctx.outputs);
+  jest.mocked(Outputs).mockReturnValue(ctx.outputs as unknown as Outputs);
 });
 
 jest.unmock('#/action');
@@ -78,15 +78,27 @@ it('does not save TEXDIR if full cache found', async () => {
   expect(mock.instances[0]).not.toHaveProperty('texdir');
 });
 
-it.each([[false, undefined], [true, 'primary'], [true, 'secondary']] as const)(
-  'sets cache-hit to %s if cache is %s',
-  async (value, kind) => {
-    jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
-    await expect(action.run()).toResolve();
-    expect(ctx.outputs.emit).toHaveBeenCalledOnce();
-    expect(ctx.outputs.cacheHit).toBe(value);
-  },
-);
+it.each<[boolean, CacheType | undefined]>([
+  [false, undefined],
+  [true, 'primary'],
+  [true, 'secondary'],
+])('sets cache-hit to %s if cache is %s', async (value, kind) => {
+  jest.mocked(util.restoreCache).mockResolvedValueOnce(kind);
+  await expect(action.run()).toResolve();
+  expect(ctx.outputs.emit).toHaveBeenCalledOnce();
+  expect(ctx.outputs.cacheHit).toBe(value);
+});
+
+it.each([
+  [Version.LATEST, v`latest`],
+  ['2009', v`2009`],
+  ['2014', v`2014`],
+])('sets version to %p if input version is %p', async (output, input) => {
+  ctx.inputs.version = input;
+  await expect(action.run()).toResolve();
+  expect(ctx.outputs.emit).toHaveBeenCalledOnce();
+  expect(ctx.outputs.version).toStrictEqual(input);
+});
 
 it('adds TeX Live to path after installation', async () => {
   await expect(action.run()).toResolve();

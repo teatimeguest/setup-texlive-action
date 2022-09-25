@@ -11,7 +11,7 @@ import {
   saveState,
   setOutput,
 } from '@actions/core';
-import { Expose, plainToClassFromExist } from 'class-transformer';
+import { Expose, Type, plainToClassFromExist } from 'class-transformer';
 import { cache as Cache } from 'decorator-cache-getter';
 import { keys } from 'ts-transformer-keys';
 
@@ -89,6 +89,8 @@ export class Inputs {
 export class Outputs extends Serializable {
   @Expose({ name: 'cache-hit' })
   cacheHit: boolean = false;
+  @Expose() @Type(() => String)
+  version?: Version;
 
   emit(): void {
     for (const [key, value] of Object.entries(this.toJSON())) {

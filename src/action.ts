@@ -33,6 +33,7 @@ export async function run(): Promise<void> {
 export async function main(state: State): Promise<void> {
   const inputs = await Inputs.load();
   const outputs = new Outputs();
+  outputs.version = inputs.version;
   let cacheType: CacheType | undefined;
 
   if (inputs.cache) {
