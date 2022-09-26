@@ -20,6 +20,8 @@ import { DependsTxt, type Texmf, Version } from '#/texlive';
 import { Serializable, tmpdir } from '#/utility';
 
 export class Inputs {
+  private readonly env: Env;
+
   readonly cache: boolean = getBooleanInput('cache');
   readonly tlcontrib: boolean = getBooleanInput('tlcontrib');
   readonly updateAllPackages: boolean = getBooleanInput('update-all-packages');
@@ -40,23 +42,27 @@ export class Inputs {
       log.info('`update-all-packages` is ignored for older versions');
       this.updateAllPackages = false;
     }
+    this.env = Env.load(this.version);
   }
 
   @Cache
   get texmf(): Omit<Texmf, 'TEXMFSYSCONFIG' | 'TEXMFSYSVAR'> {
-    const env = new Env(this.version);
     const input = getInput('prefix');
     const prefix = path.normalize(
-      input !== '' ? input : env.TEXLIVE_INSTALL_PREFIX,
+      input !== '' ? input : this.env.TEXLIVE_INSTALL_PREFIX,
     );
     const TEXDIR = path.join(prefix, this.version.toString());
     return {
       TEXDIR,
       TEXMFLOCAL: path.join(prefix, 'texmf-local'),
-      TEXMFHOME: env.TEXLIVE_INSTALL_TEXMFHOME,
-      TEXMFCONFIG: env.TEXLIVE_INSTALL_TEXMFCONFIG,
-      TEXMFVAR: env.TEXLIVE_INSTALL_TEXMFVAR,
+      TEXMFHOME: this.env.TEXLIVE_INSTALL_TEXMFHOME,
+      TEXMFCONFIG: this.env.TEXLIVE_INSTALL_TEXMFCONFIG,
+      TEXMFVAR: this.env.TEXLIVE_INSTALL_TEXMFVAR,
     };
+  }
+
+  get forceUpdateCache(): boolean {
+    return (this.env.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? '0') !== '0';
   }
 
   static async load(this: void): Promise<Inputs> {
@@ -100,6 +106,8 @@ export class Outputs extends Serializable {
 }
 
 export interface Env {
+  readonly SETUP_TEXLIVE_FORCE_UPDATE_CACHE?: string;
+
   readonly TEXLIVE_DOWNLOADER?: string;
   readonly TL_DOWNLOAD_PROGRAM?: string;
   readonly TL_DOWNLOAD_ARGS?: string;
@@ -116,8 +124,11 @@ export interface Env {
   readonly NOPERLDOC?: string;
 }
 
-export class Env {
-  constructor(version: Version) {
+export namespace Env {
+  export function load(version: Version): Env {
+    if (process.env['RUNNER_TEMP'] === undefined) {
+      log.warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} is used instead`);
+    }
     type Keys = `TEXLIVE_INSTALL_${keyof Texmf.SystemTrees}`;
     for (const key of keys<Record<Keys, unknown>>()) {
       if (key in process.env) {
@@ -125,14 +136,13 @@ export class Env {
         delete process.env[key];
       }
     }
-    for (const [key, value] of Object.entries(Env.defaults(version))) {
+    for (const [key, value] of Object.entries(defaults(version))) {
       process.env[key] ??= value;
     }
-    // eslint-disable-next-line no-constructor-return
-    return process.env as unknown as Env;
+    return process.env as Env;
   }
 
-  static defaults(version: Version): Env {
+  export function defaults(version: Version): Env {
     const TEXUSERDIR = path.join(
       homedir(),
       '.local',

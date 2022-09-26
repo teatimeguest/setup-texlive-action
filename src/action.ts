@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { arch, platform } from 'node:os';
 import { isNativeError } from 'node:util/types';
 
@@ -8,8 +8,8 @@ import { keys } from 'ts-transformer-keys';
 import { Inputs, Outputs, State } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
 import * as log from '#/log';
-import { type Texmf, Tlmgr, Version, tlnet } from '#/texlive';
-import { CacheType, restoreCache, saveCache } from '#/utility';
+import { type Texmf, Tlmgr, tlnet } from '#/texlive';
+import { restoreCache, saveCache } from '#/utility';
 
 export async function run(): Promise<void> {
   try {
@@ -29,29 +29,36 @@ export async function run(): Promise<void> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-export async function main(state: State): Promise<void> {
+export async function main(state: State = new State()): Promise<void> {
   const inputs = await Inputs.load();
   const outputs = new Outputs();
   outputs.version = inputs.version;
-  let cacheType: CacheType | undefined;
+  let installPackages = inputs.packages.size > 0;
 
   if (inputs.cache) {
-    const [primary, secondary] = getCacheKeys(inputs.version, inputs.packages);
-    state.key = primary;
+    const [unique, primary, secondary] = getCacheKeys(inputs);
     await log.group('Restoring cache', async () => {
-      cacheType = await restoreCache(inputs.texmf.TEXDIR, primary, secondary);
-      if (cacheType !== 'primary') {
+      const restored = await restoreCache(
+        inputs.texmf.TEXDIR,
+        unique,
+        [primary, secondary],
+      );
+      state.key = inputs.forceUpdateCache ? unique : primary;
+      if (restored?.startsWith(state.key) === true) {
+        state.key = restored;
+      } else {
         state.texdir = inputs.texmf.TEXDIR;
         log.info(
-          'After the job completes, '
-            + `${state.texdir} will be cached with key: ${state.key}`,
+          'After the job completes, TEXDIR will be saved to cache with key: '
+            + state.key,
         );
       }
+      outputs.cacheHit = restored !== undefined;
+      installPackages &&= restored?.startsWith(primary) !== true;
     });
   }
 
-  if (cacheType === undefined) {
+  if (!outputs.cacheHit) {
     const installtl = await log.group('Acquiring install-tl', async () => {
       return await InstallTL.acquire(inputs.version);
     });
@@ -67,19 +74,20 @@ export async function main(state: State): Promise<void> {
   const tlmgr = new Tlmgr(inputs.version, inputs.texmf.TEXDIR);
   await tlmgr.path.add();
 
-  if (cacheType !== undefined) {
+  if (outputs.cacheHit) {
     if (inputs.version.isLatest()) {
-      await log.group('Updating tlmgr', async () => {
-        await tlmgr.update(undefined, { self: true });
-      });
-      if (inputs.updateAllPackages) {
-        await log.group('Updating packages', async () => {
-          await tlmgr.update(undefined, {
-            all: true,
-            reinstallForciblyRemoved: true,
-          });
-        });
-      }
+      await log.group(
+        `Updating ${inputs.updateAllPackages ? 'packages' : 'tlmgr'}`,
+        async () => {
+          await tlmgr.update(undefined, { self: true });
+          if (inputs.updateAllPackages) {
+            await tlmgr.update(undefined, {
+              all: true,
+              reinstallForciblyRemoved: true,
+            });
+          }
+        },
+      );
     }
     await log.group('Adjusting TEXMF', async () => {
       for (const key of keys<Texmf.UserTrees>()) {
@@ -91,7 +99,6 @@ export async function main(state: State): Promise<void> {
         /* eslint-enable */
       }
     });
-    outputs.cacheHit = true;
   }
 
   if (inputs.tlcontrib) {
@@ -101,7 +108,7 @@ export async function main(state: State): Promise<void> {
     });
   }
 
-  if (cacheType !== 'primary' && inputs.packages.size > 0) {
+  if (installPackages) {
     await log.group('Installing packages', async () => {
       await tlmgr.install(...inputs.packages);
     });
@@ -120,18 +127,13 @@ export async function post({ key, texdir }: Readonly<State>): Promise<void> {
         `Cache hit occurred on the primary key ${key}, not saving cache`,
       );
     }
-  } else {
-    log.info('Nothing to do');
   }
 }
 
-function getCacheKeys(
-  version: Version,
-  packages: ReadonlySet<string>,
-): [string, [string]] {
-  const baseKey = `setup-texlive-${platform()}-${arch()}-${version}-`;
-  const primaryKey = `${baseKey}${
-    createHash('sha256').update(JSON.stringify([...packages])).digest('hex')
-  }`;
-  return [primaryKey, [baseKey]];
+function getCacheKeys({ version, packages }: Inputs): [string, string, string] {
+  const secondary = `setup-texlive-${platform()}-${arch()}-${version}-`;
+  const primary = secondary
+    + createHash('sha256').update(JSON.stringify([...packages])).digest('hex');
+  const unique = `${primary}-${randomUUID().replaceAll('-', '')}`;
+  return [unique, primary, secondary];
 }

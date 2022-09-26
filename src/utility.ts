@@ -85,27 +85,24 @@ export async function saveCache(
   }
 }
 
-export type CacheType = 'primary' | 'secondary';
-
 export async function restoreCache(
   target: string,
   primaryKey: string,
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
   restoreKeys: Array<string>,
-): Promise<CacheType | undefined> {
+): Promise<string | undefined> {
   let key: string | undefined;
   try {
     key = await cache.restoreCache([target], primaryKey, restoreKeys);
     if (key !== undefined) {
       log.info(`${target} restored from cache with key: ${key}`);
-      return key === primaryKey ? 'primary' : 'secondary';
     } else {
       log.info('Cache not found');
     }
-  } catch (error) {
-    log.warn('Failed to restore cache', { cause: error });
+  } catch (cause) {
+    log.warn('Failed to restore cache', { cause });
   }
-  return undefined;
+  return key;
 }
 
 export function tmpdir(): string {

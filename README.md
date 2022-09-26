@@ -126,7 +126,23 @@ All inputs are optional.
 
 ## Environment Variables
 
-The following [official environment variables][install-tl-env] are supported:
+The action reads the following environment variable:
+
+<table>
+<tr><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>SETUP_TEXLIVE_&#x200B;FORCE_UPDATE_CACHE</code></td><td>String</td><td><div>
+
+Setting this to anything other than `0`,
+the action will use [a unique cache key each time][update-cache]
+to keep the cache up-to-date.
+
+> **Warning**:&ensp;Enabling this will consume more [cache space][cache-limits].
+
+</div><strong>Default:</strong> <var>unset</var></td></tr>
+</table>
+
+In addition,
+the following [official environment variables][install-tl-env] are supported:
 
 |Name|Default|
 |---|---|
@@ -162,6 +178,7 @@ See the [releases page][releases].
 [actions-cache]: https://github.com/actions/toolkit/tree/main/packages/cache
 [actions-env]: https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
 [cache-api]: https://docs.github.com/en/rest/actions/cache
+[cache-limits]: https://github.com/actions/cache#cache-limits
 [ci-badge]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml
 [codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
@@ -176,3 +193,4 @@ See the [releases page][releases].
 [texdir]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#x1-250003.2.3
 [texlive]: https://tug.org/texlive/
 [tlcontrib]: https://contrib.texlive.info
+[update-cache]: https://github.com/actions/cache/blob/main/workarounds.md#update-a-cache

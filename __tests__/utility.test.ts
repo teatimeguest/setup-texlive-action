@@ -5,7 +5,7 @@ import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
 import * as log from '#/log';
-import * as util from '#/utility';
+import { determine, extract, restoreCache, saveCache, tmpdir } from '#/utility';
 
 jest.mock('node:path', () => jest.requireActual('path').posix);
 jest.unmock('#/utility');
@@ -13,7 +13,7 @@ jest.unmock('#/utility');
 describe('extract', () => {
   it('extracts files from a tarball', async () => {
     jest.mocked(tool.extractTar).mockResolvedValueOnce('<extractTar>');
-    await expect(util.extract('<tarball>', 'tgz')).resolves.toBe(
+    await expect(extract('<tarball>', 'tgz')).resolves.toBe(
       '<extractTar>',
     );
     expect(tool.extractTar).toHaveBeenCalledWith('<tarball>', undefined, [
@@ -24,7 +24,7 @@ describe('extract', () => {
 
   it('extracts files from a zipfile', async () => {
     jest.spyOn(tool, 'extractZip').mockResolvedValueOnce('<extractZip>');
-    await expect(util.extract('<zipfile>', 'zip')).resolves.toBe('<glob>');
+    await expect(extract('<zipfile>', 'zip')).resolves.toBe('<glob>');
     expect(tool.extractZip).toHaveBeenCalledWith('<zipfile>');
   });
 
@@ -33,7 +33,7 @@ describe('extract', () => {
       { glob: async (): Promise<Array<string>> => [] } as glob.Globber,
     );
     jest.mocked(tool.extractZip).mockResolvedValueOnce('<extractZip>');
-    await expect(util.extract('<zipfile>', 'zip')).rejects.toThrow(
+    await expect(extract('<zipfile>', 'zip')).rejects.toThrow(
       'Unable to locate subdirectory',
     );
   });
@@ -41,7 +41,7 @@ describe('extract', () => {
 
 describe('determine', () => {
   it('returns a unique path that matches the given pattern', async () => {
-    await expect(util.determine('<pattern>')).resolves.toBe('<glob>');
+    await expect(determine('<pattern>')).resolves.toBe('<glob>');
   });
 
   it.each<[Array<string>]>([[[]], [['<some>', '<other>']]])(
@@ -50,20 +50,20 @@ describe('determine', () => {
       jest.mocked(glob.create).mockResolvedValueOnce(
         { glob: async () => matched } as glob.Globber,
       );
-      await expect(util.determine('<pattern>')).rejects.toThrow('');
+      await expect(determine('<pattern>')).rejects.toThrow('');
     },
   );
 });
 
 describe('saveCache', () => {
   it('saves directory to cache', async () => {
-    await expect(util.saveCache('<target>', '<key>')).toResolve();
+    await expect(saveCache('<target>', '<key>')).toResolve();
     expect(cache.saveCache).toHaveBeenCalledOnce();
   });
 
   it("doesn't itself fail even if cache.saveCache fails", async () => {
     jest.mocked(cache.saveCache).mockRejectedValueOnce(new Error(''));
-    await expect(util.saveCache('<target>', '<key>')).resolves.not.toThrow();
+    await expect(saveCache('<target>', '<key>')).resolves.not.toThrow();
     expect(log.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to save to cache'),
       expect.any(Object),
@@ -74,7 +74,7 @@ describe('saveCache', () => {
 describe('restoreCache', () => {
   it('returns undefined if cache not found', async () => {
     await expect(
-      util.restoreCache('<target>', '<key>', []),
+      restoreCache('<target>', '<key>', []),
     )
       .resolves
       .toBeUndefined();
@@ -84,8 +84,8 @@ describe('restoreCache', () => {
     jest
       .mocked(cache.restoreCache)
       .mockImplementationOnce(async (target, key) => key);
-    await expect(util.restoreCache('<target>', '<key>', [])).resolves.toBe(
-      'primary',
+    await expect(restoreCache('<target>', '<key>', [])).resolves.toBe(
+      '<key>',
     );
   });
 
@@ -94,16 +94,16 @@ describe('restoreCache', () => {
       .mocked(cache.restoreCache)
       .mockImplementationOnce(async (target, key, keys) => keys?.[0]);
     await expect(
-      util.restoreCache('<target>', '<key>', ['<other key>']),
+      restoreCache('<target>', '<key>', ['<another key>']),
     )
       .resolves
-      .toBe('secondary');
+      .toBe('<another key>');
   });
 
   it('returns undefined if cache.restoreCache fails', async () => {
     jest.mocked(cache.restoreCache).mockRejectedValueOnce(new Error(''));
     await expect(
-      util.restoreCache('<target>', '<key>', []),
+      restoreCache('<target>', '<key>', []),
     )
       .resolves
       .toBeUndefined();
@@ -117,11 +117,11 @@ describe('restoreCache', () => {
 describe('tmpdir', () => {
   it('returns $RUNNER_TEMP if set', () => {
     process.env['RUNNER_TEMP'] = '<RUNNER_TEMP>';
-    expect(util.tmpdir()).toBe('<RUNNER_TEMP>');
+    expect(tmpdir()).toBe('<RUNNER_TEMP>');
   });
 
   it('returns `os.tmpdir()` if `RUNNER_TEMP` is not set', () => {
     delete process.env['RUNNER_TEMP'];
-    expect(util.tmpdir()).toBe('<tmpdir>');
+    expect(tmpdir()).toBe('<tmpdir>');
   });
 });

@@ -87,6 +87,13 @@ jest.mock('@actions/tool-cache', () => {
   };
 });
 
+jest.mock('#/context', () => {
+  const { Outputs } = jest.requireActual('#/context');
+  jest.spyOn(Outputs.prototype, 'emit');
+  const { Inputs, State } = jest.createMockFromModule<any>('#/context');
+  return { Inputs, Outputs, State };
+});
+
 jest.mock('#/install-tl', () => {
   const { InstallTL, Profile } = jest.createMockFromModule<any>('#/install-tl');
   InstallTL.acquire.mockImplementation(async () => new InstallTL());

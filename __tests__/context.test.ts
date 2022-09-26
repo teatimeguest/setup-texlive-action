@@ -214,7 +214,7 @@ describe('Outputs#cacheHit', () => {
 
 describe('Env', () => {
   it('has some default values', () => {
-    expect(new Env(v`latest`)).toMatchObject({
+    expect(Env.load(v`latest`)).toMatchObject({
       TEXLIVE_INSTALL_ENV_NOCHECK: '1',
       TEXLIVE_INSTALL_NO_WELCOME: '1',
       TEXLIVE_INSTALL_TEXMFCONFIG: `~/.local/texlive/${v`latest`}/texmf-config`,
@@ -225,7 +225,7 @@ describe('Env', () => {
 
   it('ignores some environment variables', () => {
     process.env['TEXLIVE_INSTALL_TEXDIR'] = '<texdir>';
-    expect(new Env(v`latest`)).not.toHaveProperty(
+    expect(Env.load(v`latest`)).not.toHaveProperty(
       'TEXLIVE_INSTALL_TEXDIR',
     );
     expect(process.env).not.toHaveProperty('TEXLIVE_INSTALL_TEXDIR');
@@ -237,7 +237,7 @@ describe('Env', () => {
   it('favors user settings over default values', () => {
     process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
     process.env['NOPERLDOC'] = 'true';
-    expect(new Env(v`latest`)).toMatchObject({
+    expect(Env.load(v`latest`)).toMatchObject({
       ['TEXLIVE_INSTALL_PREFIX']: '<PREFIX>',
       ['NOPERLDOC']: 'true',
     });
