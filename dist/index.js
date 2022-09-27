@@ -187,7 +187,7 @@ var require_file_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issueCommand = void 0;
-    var fs2 = __importStar(require("fs"));
+    var fs3 = __importStar(require("fs"));
     var os4 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, message) {
@@ -195,10 +195,10 @@ var require_file_command = __commonJS({
       if (!filePath) {
         throw new Error(`Unable to find environment variable for file command ${command}`);
       }
-      if (!fs2.existsSync(filePath)) {
+      if (!fs3.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs2.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os4.EOL}`, {
+      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os4.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -897,36 +897,36 @@ var require_lib = __commonJS({
     var https3 = __importStar(require("https"));
     var pm = __importStar(require_proxy());
     var tunnel2 = __importStar(require_tunnel2());
-    var HttpCodes;
-    (function(HttpCodes2) {
-      HttpCodes2[HttpCodes2["OK"] = 200] = "OK";
-      HttpCodes2[HttpCodes2["MultipleChoices"] = 300] = "MultipleChoices";
-      HttpCodes2[HttpCodes2["MovedPermanently"] = 301] = "MovedPermanently";
-      HttpCodes2[HttpCodes2["ResourceMoved"] = 302] = "ResourceMoved";
-      HttpCodes2[HttpCodes2["SeeOther"] = 303] = "SeeOther";
-      HttpCodes2[HttpCodes2["NotModified"] = 304] = "NotModified";
-      HttpCodes2[HttpCodes2["UseProxy"] = 305] = "UseProxy";
-      HttpCodes2[HttpCodes2["SwitchProxy"] = 306] = "SwitchProxy";
-      HttpCodes2[HttpCodes2["TemporaryRedirect"] = 307] = "TemporaryRedirect";
-      HttpCodes2[HttpCodes2["PermanentRedirect"] = 308] = "PermanentRedirect";
-      HttpCodes2[HttpCodes2["BadRequest"] = 400] = "BadRequest";
-      HttpCodes2[HttpCodes2["Unauthorized"] = 401] = "Unauthorized";
-      HttpCodes2[HttpCodes2["PaymentRequired"] = 402] = "PaymentRequired";
-      HttpCodes2[HttpCodes2["Forbidden"] = 403] = "Forbidden";
-      HttpCodes2[HttpCodes2["NotFound"] = 404] = "NotFound";
-      HttpCodes2[HttpCodes2["MethodNotAllowed"] = 405] = "MethodNotAllowed";
-      HttpCodes2[HttpCodes2["NotAcceptable"] = 406] = "NotAcceptable";
-      HttpCodes2[HttpCodes2["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
-      HttpCodes2[HttpCodes2["RequestTimeout"] = 408] = "RequestTimeout";
-      HttpCodes2[HttpCodes2["Conflict"] = 409] = "Conflict";
-      HttpCodes2[HttpCodes2["Gone"] = 410] = "Gone";
-      HttpCodes2[HttpCodes2["TooManyRequests"] = 429] = "TooManyRequests";
-      HttpCodes2[HttpCodes2["InternalServerError"] = 500] = "InternalServerError";
-      HttpCodes2[HttpCodes2["NotImplemented"] = 501] = "NotImplemented";
-      HttpCodes2[HttpCodes2["BadGateway"] = 502] = "BadGateway";
-      HttpCodes2[HttpCodes2["ServiceUnavailable"] = 503] = "ServiceUnavailable";
-      HttpCodes2[HttpCodes2["GatewayTimeout"] = 504] = "GatewayTimeout";
-    })(HttpCodes = exports.HttpCodes || (exports.HttpCodes = {}));
+    var HttpCodes2;
+    (function(HttpCodes3) {
+      HttpCodes3[HttpCodes3["OK"] = 200] = "OK";
+      HttpCodes3[HttpCodes3["MultipleChoices"] = 300] = "MultipleChoices";
+      HttpCodes3[HttpCodes3["MovedPermanently"] = 301] = "MovedPermanently";
+      HttpCodes3[HttpCodes3["ResourceMoved"] = 302] = "ResourceMoved";
+      HttpCodes3[HttpCodes3["SeeOther"] = 303] = "SeeOther";
+      HttpCodes3[HttpCodes3["NotModified"] = 304] = "NotModified";
+      HttpCodes3[HttpCodes3["UseProxy"] = 305] = "UseProxy";
+      HttpCodes3[HttpCodes3["SwitchProxy"] = 306] = "SwitchProxy";
+      HttpCodes3[HttpCodes3["TemporaryRedirect"] = 307] = "TemporaryRedirect";
+      HttpCodes3[HttpCodes3["PermanentRedirect"] = 308] = "PermanentRedirect";
+      HttpCodes3[HttpCodes3["BadRequest"] = 400] = "BadRequest";
+      HttpCodes3[HttpCodes3["Unauthorized"] = 401] = "Unauthorized";
+      HttpCodes3[HttpCodes3["PaymentRequired"] = 402] = "PaymentRequired";
+      HttpCodes3[HttpCodes3["Forbidden"] = 403] = "Forbidden";
+      HttpCodes3[HttpCodes3["NotFound"] = 404] = "NotFound";
+      HttpCodes3[HttpCodes3["MethodNotAllowed"] = 405] = "MethodNotAllowed";
+      HttpCodes3[HttpCodes3["NotAcceptable"] = 406] = "NotAcceptable";
+      HttpCodes3[HttpCodes3["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
+      HttpCodes3[HttpCodes3["RequestTimeout"] = 408] = "RequestTimeout";
+      HttpCodes3[HttpCodes3["Conflict"] = 409] = "Conflict";
+      HttpCodes3[HttpCodes3["Gone"] = 410] = "Gone";
+      HttpCodes3[HttpCodes3["TooManyRequests"] = 429] = "TooManyRequests";
+      HttpCodes3[HttpCodes3["InternalServerError"] = 500] = "InternalServerError";
+      HttpCodes3[HttpCodes3["NotImplemented"] = 501] = "NotImplemented";
+      HttpCodes3[HttpCodes3["BadGateway"] = 502] = "BadGateway";
+      HttpCodes3[HttpCodes3["ServiceUnavailable"] = 503] = "ServiceUnavailable";
+      HttpCodes3[HttpCodes3["GatewayTimeout"] = 504] = "GatewayTimeout";
+    })(HttpCodes2 = exports.HttpCodes || (exports.HttpCodes = {}));
     var Headers2;
     (function(Headers3) {
       Headers3["Accept"] = "accept";
@@ -942,16 +942,16 @@ var require_lib = __commonJS({
     }
     exports.getProxyUrl = getProxyUrl;
     var HttpRedirectCodes = [
-      HttpCodes.MovedPermanently,
-      HttpCodes.ResourceMoved,
-      HttpCodes.SeeOther,
-      HttpCodes.TemporaryRedirect,
-      HttpCodes.PermanentRedirect
+      HttpCodes2.MovedPermanently,
+      HttpCodes2.ResourceMoved,
+      HttpCodes2.SeeOther,
+      HttpCodes2.TemporaryRedirect,
+      HttpCodes2.PermanentRedirect
     ];
     var HttpResponseRetryCodes = [
-      HttpCodes.BadGateway,
-      HttpCodes.ServiceUnavailable,
-      HttpCodes.GatewayTimeout
+      HttpCodes2.BadGateway,
+      HttpCodes2.ServiceUnavailable,
+      HttpCodes2.GatewayTimeout
     ];
     var RetryableHttpVerbs = ["OPTIONS", "GET", "DELETE", "HEAD"];
     var ExponentialBackoffCeiling = 10;
@@ -989,7 +989,7 @@ var require_lib = __commonJS({
       return parsedUrl.protocol === "https:";
     }
     exports.isHttps = isHttps;
-    var HttpClient = class {
+    var HttpClient2 = class {
       constructor(userAgent, handlers, requestOptions) {
         this._ignoreSslError = false;
         this._allowRedirects = true;
@@ -1113,7 +1113,7 @@ var require_lib = __commonJS({
           let response;
           do {
             response = yield this.requestRaw(info2, data);
-            if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
+            if (response && response.message && response.message.statusCode === HttpCodes2.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
                 if (handler.canHandleAuthentication(response)) {
@@ -1333,7 +1333,7 @@ var require_lib = __commonJS({
               result: null,
               headers: {}
             };
-            if (statusCode === HttpCodes.NotFound) {
+            if (statusCode === HttpCodes2.NotFound) {
               resolve(response);
             }
             function dateTimeDeserializer(key, value) {
@@ -1379,7 +1379,7 @@ var require_lib = __commonJS({
         });
       }
     };
-    exports.HttpClient = HttpClient;
+    exports.HttpClient = HttpClient2;
     var lowercaseKeys = (obj) => Object.keys(obj).reduce((c, k) => (c[k.toLowerCase()] = obj[k], c), {});
   }
 });
@@ -1540,7 +1540,7 @@ var require_oidc_utils = __commonJS({
         return runtimeUrl;
       }
       static getCall(id_token_url) {
-        var _a3;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
           const httpclient = OidcClient.createHttpClient();
           const res = yield httpclient.getJson(id_token_url).catch((error2) => {
@@ -1550,7 +1550,7 @@ var require_oidc_utils = __commonJS({
  
         Error Message: ${error2.result.message}`);
           });
-          const id_token = (_a3 = res.result) === null || _a3 === void 0 ? void 0 : _a3.value;
+          const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
           if (!id_token) {
             throw new Error("Response json body do not have ID Token field");
           }
@@ -1632,7 +1632,7 @@ var require_summary = __commonJS({
           }
           try {
             yield access2(pathFromEnv, fs_1.constants.R_OK | fs_1.constants.W_OK);
-          } catch (_a3) {
+          } catch (_a) {
             throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`);
           }
           this._filePath = pathFromEnv;
@@ -2199,12 +2199,12 @@ var require_io_util = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var _a3;
+    var _a;
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rename = exports.readlink = exports.readdir = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
-    var fs2 = __importStar(require("fs"));
+    var fs3 = __importStar(require("fs"));
     var path5 = __importStar(require("path"));
-    _a3 = fs2.promises, exports.chmod = _a3.chmod, exports.copyFile = _a3.copyFile, exports.lstat = _a3.lstat, exports.mkdir = _a3.mkdir, exports.readdir = _a3.readdir, exports.readlink = _a3.readlink, exports.rename = _a3.rename, exports.rmdir = _a3.rmdir, exports.stat = _a3.stat, exports.symlink = _a3.symlink, exports.unlink = _a3.unlink;
+    _a = fs3.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
     exports.IS_WINDOWS = process.platform === "win32";
     function exists(fsPath) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -2309,8 +2309,8 @@ var require_io_util = __commonJS({
       return (stats.mode & 1) > 0 || (stats.mode & 8) > 0 && stats.gid === process.getgid() || (stats.mode & 64) > 0 && stats.uid === process.getuid();
     }
     function getCmdPath() {
-      var _a4;
-      return (_a4 = process.env["COMSPEC"]) !== null && _a4 !== void 0 ? _a4 : `cmd.exe`;
+      var _a2;
+      return (_a2 = process.env["COMSPEC"]) !== null && _a2 !== void 0 ? _a2 : `cmd.exe`;
     }
     exports.getCmdPath = getCmdPath;
   }
@@ -3155,13 +3155,13 @@ var require_exec = __commonJS({
     }
     exports.exec = exec2;
     function getExecOutput(commandLine, args, options) {
-      var _a3, _b;
+      var _a, _b;
       return __awaiter(this, void 0, void 0, function* () {
         let stdout = "";
         let stderr = "";
         const stdoutDecoder = new string_decoder_1.StringDecoder("utf8");
         const stderrDecoder = new string_decoder_1.StringDecoder("utf8");
-        const originalStdoutListener = (_a3 = options === null || options === void 0 ? void 0 : options.listeners) === null || _a3 === void 0 ? void 0 : _a3.stdout;
+        const originalStdoutListener = (_a = options === null || options === void 0 ? void 0 : options.listeners) === null || _a === void 0 ? void 0 : _a.stdout;
         const originalStdErrListener = (_b = options === null || options === void 0 ? void 0 : options.listeners) === null || _b === void 0 ? void 0 : _b.stderr;
         const stdErrListener = (data) => {
           stderr += stderrDecoder.write(data);
@@ -3224,7 +3224,7 @@ var require_internal_glob_options_helper = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getOptions = void 0;
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     function getOptions(copy) {
       const result = {
         followSymbolicLinks: true,
@@ -3234,15 +3234,15 @@ var require_internal_glob_options_helper = __commonJS({
       if (copy) {
         if (typeof copy.followSymbolicLinks === "boolean") {
           result.followSymbolicLinks = copy.followSymbolicLinks;
-          core3.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+          core2.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
         }
         if (typeof copy.implicitDescendants === "boolean") {
           result.implicitDescendants = copy.implicitDescendants;
-          core3.debug(`implicitDescendants '${result.implicitDescendants}'`);
+          core2.debug(`implicitDescendants '${result.implicitDescendants}'`);
         }
         if (typeof copy.omitBrokenSymbolicLinks === "boolean") {
           result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
-          core3.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+          core2.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
         }
       }
       return result;
@@ -4359,8 +4359,8 @@ var require_internal_path = __commonJS({
             let remaining = itemPath;
             let dir = pathHelper.dirname(remaining);
             while (dir !== remaining) {
-              const basename2 = path5.basename(remaining);
-              this.segments.unshift(basename2);
+              const basename = path5.basename(remaining);
+              this.segments.unshift(basename);
               remaining = dir;
               dir = pathHelper.dirname(remaining);
             }
@@ -4723,8 +4723,8 @@ var require_internal_globber = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DefaultGlobber = void 0;
-    var core3 = __importStar(require_core());
-    var fs2 = __importStar(require("fs"));
+    var core2 = __importStar(require_core());
+    var fs3 = __importStar(require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper());
     var path5 = __importStar(require("path"));
     var patternHelper = __importStar(require_internal_pattern_helper());
@@ -4742,7 +4742,7 @@ var require_internal_globber = __commonJS({
         return this.searchPaths.slice();
       }
       glob() {
-        var e_1, _a3;
+        var e_1, _a;
         return __awaiter(this, void 0, void 0, function* () {
           const result = [];
           try {
@@ -4754,8 +4754,8 @@ var require_internal_globber = __commonJS({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a3 = _b.return))
-                yield _a3.call(_b);
+              if (_c && !_c.done && (_a = _b.return))
+                yield _a.call(_b);
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -4776,9 +4776,9 @@ var require_internal_globber = __commonJS({
           }
           const stack = [];
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
-            core3.debug(`Search path '${searchPath}'`);
+            core2.debug(`Search path '${searchPath}'`);
             try {
-              yield __await2(fs2.promises.lstat(searchPath));
+              yield __await2(fs3.promises.lstat(searchPath));
             } catch (err) {
               if (err.code === "ENOENT") {
                 continue;
@@ -4808,7 +4808,7 @@ var require_internal_globber = __commonJS({
                 continue;
               }
               const childLevel = item.level + 1;
-              const childItems = (yield __await2(fs2.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path5.join(item.path, x), childLevel));
+              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path5.join(item.path, x), childLevel));
               stack.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
               yield yield __await2(item.path);
@@ -4840,11 +4840,11 @@ var require_internal_globber = __commonJS({
           let stats;
           if (options.followSymbolicLinks) {
             try {
-              stats = yield fs2.promises.stat(item.path);
+              stats = yield fs3.promises.stat(item.path);
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
-                  core3.debug(`Broken symlink '${item.path}'`);
+                  core2.debug(`Broken symlink '${item.path}'`);
                   return void 0;
                 }
                 throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
@@ -4852,15 +4852,15 @@ var require_internal_globber = __commonJS({
               throw err;
             }
           } else {
-            stats = yield fs2.promises.lstat(item.path);
+            stats = yield fs3.promises.lstat(item.path);
           }
           if (stats.isDirectory() && options.followSymbolicLinks) {
-            const realPath = yield fs2.promises.realpath(item.path);
+            const realPath = yield fs3.promises.realpath(item.path);
             while (traversalChain.length >= item.level) {
               traversalChain.pop();
             }
             if (traversalChain.some((x) => x === realPath)) {
-              core3.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+              core2.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
               return void 0;
             }
             traversalChain.push(realPath);
@@ -5337,8 +5337,8 @@ var require_semver = __commonJS({
     function minor(a, loose) {
       return new SemVer(a, loose).minor;
     }
-    exports.patch = patch2;
-    function patch2(a, loose) {
+    exports.patch = patch;
+    function patch(a, loose) {
       return new SemVer(a, loose).patch;
     }
     exports.compare = compare;
@@ -6284,11 +6284,11 @@ var require_cacheUtils = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     var exec2 = __importStar(require_exec());
     var glob = __importStar(require_glob());
     var io = __importStar(require_io());
-    var fs2 = __importStar(require("fs"));
+    var fs3 = __importStar(require("fs"));
     var path5 = __importStar(require("path"));
     var semver = __importStar(require_semver());
     var util3 = __importStar(require("util"));
@@ -6318,11 +6318,11 @@ var require_cacheUtils = __commonJS({
     }
     exports.createTempDirectory = createTempDirectory;
     function getArchiveFileSizeInBytes(filePath) {
-      return fs2.statSync(filePath).size;
+      return fs3.statSync(filePath).size;
     }
     exports.getArchiveFileSizeInBytes = getArchiveFileSizeInBytes;
     function resolvePaths(patterns) {
-      var e_1, _a3;
+      var e_1, _a;
       var _b;
       return __awaiter(this, void 0, void 0, function* () {
         const paths = [];
@@ -6334,7 +6334,7 @@ var require_cacheUtils = __commonJS({
           for (var _c = __asyncValues2(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done; ) {
             const file = _d.value;
             const relativeFile = path5.relative(workspace, file).replace(new RegExp(`\\${path5.sep}`, "g"), "/");
-            core3.debug(`Matched: ${relativeFile}`);
+            core2.debug(`Matched: ${relativeFile}`);
             if (relativeFile === "") {
               paths.push(".");
             } else {
@@ -6345,8 +6345,8 @@ var require_cacheUtils = __commonJS({
           e_1 = { error: e_1_1 };
         } finally {
           try {
-            if (_d && !_d.done && (_a3 = _c.return))
-              yield _a3.call(_c);
+            if (_d && !_d.done && (_a = _c.return))
+              yield _a.call(_c);
           } finally {
             if (e_1)
               throw e_1.error;
@@ -6358,13 +6358,13 @@ var require_cacheUtils = __commonJS({
     exports.resolvePaths = resolvePaths;
     function unlinkFile(filePath) {
       return __awaiter(this, void 0, void 0, function* () {
-        return util3.promisify(fs2.unlink)(filePath);
+        return util3.promisify(fs3.unlink)(filePath);
       });
     }
     exports.unlinkFile = unlinkFile;
     function getVersion(app) {
       return __awaiter(this, void 0, void 0, function* () {
-        core3.debug(`Checking ${app} --version`);
+        core2.debug(`Checking ${app} --version`);
         let versionOutput = "";
         try {
           yield exec2.exec(`${app} --version`, [], {
@@ -6376,10 +6376,10 @@ var require_cacheUtils = __commonJS({
             }
           });
         } catch (err) {
-          core3.debug(err.message);
+          core2.debug(err.message);
         }
         versionOutput = versionOutput.trim();
-        core3.debug(versionOutput);
+        core2.debug(versionOutput);
         return versionOutput;
       });
     }
@@ -7044,7 +7044,7 @@ function isSpecialXmlProperty(propertyName, options) {
   return [XML_ATTRKEY, options.xmlCharKey].includes(propertyName);
 }
 function deserializeCompositeType(serializer4, mapper, responseBody, objectName, options) {
-  var _a3;
+  var _a;
   if (getPolymorphicDiscriminatorRecursively(serializer4, mapper)) {
     mapper = getPolymorphicMapper(serializer4, mapper, responseBody, "serializedName");
   }
@@ -7077,7 +7077,7 @@ function deserializeCompositeType(serializer4, mapper, responseBody, objectName,
         const propertyName = xmlElementName || xmlName || serializedName;
         if (propertyMapper.xmlIsWrapped) {
           const wrapped = responseBody[xmlName];
-          const elementList = (_a3 = wrapped === null || wrapped === void 0 ? void 0 : wrapped[xmlElementName]) !== null && _a3 !== void 0 ? _a3 : [];
+          const elementList = (_a = wrapped === null || wrapped === void 0 ? void 0 : wrapped[xmlElementName]) !== null && _a !== void 0 ? _a : [];
           instance[key] = serializer4.deserialize(propertyMapper, elementList, propertyObjectName, options);
         } else {
           const property = responseBody[propertyName];
@@ -7258,9 +7258,9 @@ var init_serializer = __esm({
         }
       }
       serialize(mapper, object, objectName, options = {}) {
-        var _a3, _b, _c;
+        var _a, _b, _c;
         const updatedOptions = {
-          rootName: (_a3 = options.rootName) !== null && _a3 !== void 0 ? _a3 : "",
+          rootName: (_a = options.rootName) !== null && _a !== void 0 ? _a : "",
           includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
           xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
         };
@@ -7312,9 +7312,9 @@ var init_serializer = __esm({
         return payload;
       }
       deserialize(mapper, responseBody, objectName, options = {}) {
-        var _a3, _b, _c;
+        var _a, _b, _c;
         const updatedOptions = {
-          rootName: (_a3 = options.rootName) !== null && _a3 !== void 0 ? _a3 : "",
+          rootName: (_a = options.rootName) !== null && _a !== void 0 ? _a : "",
           includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
           xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
         };
@@ -29139,7 +29139,7 @@ var require_form_data = __commonJS({
     var http3 = require("http");
     var https3 = require("https");
     var parseUrl = require("url").parse;
-    var fs2 = require("fs");
+    var fs3 = require("fs");
     var Stream2 = require("stream").Stream;
     var mime = require_mime_types();
     var asynckit = require_asynckit();
@@ -29204,7 +29204,7 @@ var require_form_data = __commonJS({
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
-          fs2.stat(value.path, function(err, stat2) {
+          fs3.stat(value.path, function(err, stat2) {
             var fileSize;
             if (err) {
               callback(err);
@@ -29993,7 +29993,7 @@ var require_tr46 = __commonJS({
       TRANSITIONAL: 0,
       NONTRANSITIONAL: 1
     };
-    function normalize2(str) {
+    function normalize(str) {
       return str.split("\0").map(function(s) {
         return s.normalize("NFC");
       }).join("\0");
@@ -30073,7 +30073,7 @@ var require_tr46 = __commonJS({
         processing_option = PROCESSING_OPTIONS.NONTRANSITIONAL;
       }
       var error2 = false;
-      if (normalize2(label) !== label || label[3] === "-" && label[4] === "-" || label[0] === "-" || label[label.length - 1] === "-" || label.indexOf(".") !== -1 || label.search(combiningMarksRegex) === 0) {
+      if (normalize(label) !== label || label[3] === "-" && label[4] === "-" || label[0] === "-" || label[label.length - 1] === "-" || label.indexOf(".") !== -1 || label.search(combiningMarksRegex) === 0) {
         error2 = true;
       }
       var len = countSymbols(label);
@@ -30091,7 +30091,7 @@ var require_tr46 = __commonJS({
     }
     function processing(domain_name, useSTD3, processing_option) {
       var result = mapChars(domain_name, useSTD3, processing_option);
-      result.string = normalize2(result.string);
+      result.string = normalize(result.string);
       var labels = result.string.split(".");
       for (var i = 0; i < labels.length; ++i) {
         try {
@@ -32693,7 +32693,7 @@ var init_nodeFetchHttpClient = __esm({
         this.cookieJar = new tough.CookieJar(void 0, { looseMode: true });
       }
       async sendRequest(httpRequest) {
-        var _a3;
+        var _a;
         if (!httpRequest && typeof httpRequest !== "object") {
           throw new Error("'httpRequest' (WebResourceLike) cannot be null or undefined and must be of type object.");
         }
@@ -32766,7 +32766,7 @@ var init_nodeFetchHttpClient = __esm({
         try {
           const response = await this.fetch(httpRequest.url, requestInit);
           const headers = parseHeaders(response.headers);
-          const streaming = ((_a3 = httpRequest.streamResponseStatusCodes) === null || _a3 === void 0 ? void 0 : _a3.has(response.status)) || httpRequest.streamResponseBody;
+          const streaming = ((_a = httpRequest.streamResponseStatusCodes) === null || _a === void 0 ? void 0 : _a.has(response.status)) || httpRequest.streamResponseBody;
           operationResponse = {
             headers,
             request: httpRequest,
@@ -32809,8 +32809,8 @@ var init_nodeFetchHttpClient = __esm({
               downloadStreamDone = isStreamComplete(operationResponse.readableStreamBody, abortController);
             }
             Promise.all([uploadStreamDone, downloadStreamDone]).then(() => {
-              var _a4;
-              (_a4 = httpRequest.abortSignal) === null || _a4 === void 0 ? void 0 : _a4.removeEventListener("abort", abortListener);
+              var _a2;
+              (_a2 = httpRequest.abortSignal) === null || _a2 === void 0 ? void 0 : _a2.removeEventListener("abort", abortListener);
               return;
             }).catch((e) => {
               logger.warning("Error when cleaning up abortListener on httpRequest", e);
@@ -32819,12 +32819,12 @@ var init_nodeFetchHttpClient = __esm({
         }
       }
       getOrCreateAgent(httpRequest) {
-        var _a3;
+        var _a;
         const isHttps = isUrlHttps(httpRequest.url);
         if (httpRequest.proxySettings) {
           const { host, port, username, password } = httpRequest.proxySettings;
           const key = `${host}:${port}:${username}:${password}`;
-          const proxyAgents = (_a3 = this.proxyAgentMap.get(key)) !== null && _a3 !== void 0 ? _a3 : {};
+          const proxyAgents = (_a = this.proxyAgentMap.get(key)) !== null && _a !== void 0 ? _a : {};
           let agent = getCachedAgent(isHttps, proxyAgents);
           if (agent) {
             return agent;
@@ -38845,16 +38845,16 @@ var require_xml2js = __commonJS({
 
 // node_modules/@azure/core-http/dist-esm/src/util/xml.js
 function stringifyXML(obj, opts = {}) {
-  var _a3;
+  var _a;
   xml2jsBuilderSettings.rootName = opts.rootName;
-  xml2jsBuilderSettings.charkey = (_a3 = opts.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
+  xml2jsBuilderSettings.charkey = (_a = opts.xmlCharKey) !== null && _a !== void 0 ? _a : XML_CHARKEY;
   const builder = new xml2js.Builder(xml2jsBuilderSettings);
   return builder.buildObject(obj);
 }
 function parseXML(str, opts = {}) {
-  var _a3;
+  var _a;
   xml2jsParserSettings.explicitRoot = !!opts.includeRoot;
-  xml2jsParserSettings.charkey = (_a3 = opts.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
+  xml2jsParserSettings.charkey = (_a = opts.xmlCharKey) !== null && _a !== void 0 ? _a : XML_CHARKEY;
   const xmlParser = new xml2js.Parser(xml2jsParserSettings);
   return new Promise((resolve, reject) => {
     if (!str) {
@@ -38960,9 +38960,9 @@ function shouldDeserializeResponse(parsedResponse) {
   return result;
 }
 function deserializeResponseBody(jsonContentTypes, xmlContentTypes, response, options = {}) {
-  var _a3, _b, _c;
+  var _a, _b, _c;
   const updatedOptions = {
-    rootName: (_a3 = options.rootName) !== null && _a3 !== void 0 ? _a3 : "",
+    rootName: (_a = options.rootName) !== null && _a !== void 0 ? _a : "",
     includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
     xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
   };
@@ -39008,7 +39008,7 @@ function isOperationSpecEmpty(operationSpec) {
   return expectedStatusCodes.length === 0 || expectedStatusCodes.length === 1 && expectedStatusCodes[0] === "default";
 }
 function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
-  var _a3;
+  var _a;
   const isSuccessByStatus = 200 <= parsedResponse.status && parsedResponse.status < 300;
   const isExpectedStatusCode = isOperationSpecEmpty(operationSpec) ? isSuccessByStatus : !!responseSpec;
   if (isExpectedStatusCode) {
@@ -39021,7 +39021,7 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
     }
   }
   const errorResponseSpec = responseSpec !== null && responseSpec !== void 0 ? responseSpec : operationSpec.responses.default;
-  const streaming = ((_a3 = parsedResponse.request.streamResponseStatusCodes) === null || _a3 === void 0 ? void 0 : _a3.has(parsedResponse.status)) || parsedResponse.request.streamResponseBody;
+  const streaming = ((_a = parsedResponse.request.streamResponseStatusCodes) === null || _a === void 0 ? void 0 : _a.has(parsedResponse.status)) || parsedResponse.request.streamResponseBody;
   const initialErrorMessage = streaming ? `Unexpected status code: ${parsedResponse.status}` : parsedResponse.bodyAsText;
   const error2 = new RestError(initialErrorMessage, void 0, parsedResponse.status, parsedResponse.request, parsedResponse);
   if (!errorResponseSpec) {
@@ -39058,14 +39058,14 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
   return { error: error2, shouldReturnResponse: false };
 }
 function parse2(jsonContentTypes, xmlContentTypes, operationResponse, opts) {
-  var _a3;
+  var _a;
   const errorHandler = (err) => {
     const msg = `Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`;
     const errCode = err.code || RestError.PARSE_ERROR;
     const e = new RestError(msg, errCode, operationResponse.status, operationResponse.request, operationResponse);
     return Promise.reject(e);
   };
-  const streaming = ((_a3 = operationResponse.request.streamResponseStatusCodes) === null || _a3 === void 0 ? void 0 : _a3.has(operationResponse.status)) || operationResponse.request.streamResponseBody;
+  const streaming = ((_a = operationResponse.request.streamResponseStatusCodes) === null || _a === void 0 ? void 0 : _a.has(operationResponse.status)) || operationResponse.request.streamResponseBody;
   if (!streaming && operationResponse.bodyAsText) {
     const text = operationResponse.bodyAsText;
     const contentType2 = operationResponse.headers.get("Content-Type") || "";
@@ -39096,11 +39096,11 @@ var init_deserializationPolicy = __esm({
     defaultXmlContentTypes = ["application/xml", "application/atom+xml"];
     DeserializationPolicy = class extends BaseRequestPolicy {
       constructor(nextPolicy, requestPolicyOptions, deserializationContentTypes, parsingOptions = {}) {
-        var _a3;
+        var _a;
         super(nextPolicy, requestPolicyOptions);
         this.jsonContentTypes = deserializationContentTypes && deserializationContentTypes.json || defaultJsonContentTypes;
         this.xmlContentTypes = deserializationContentTypes && deserializationContentTypes.xml || defaultXmlContentTypes;
-        this.xmlCharKey = (_a3 = parsingOptions.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
+        this.xmlCharKey = (_a = parsingOptions.xmlCharKey) !== null && _a !== void 0 ? _a : XML_CHARKEY;
       }
       async sendRequest(request) {
         return this._nextPolicy.sendRequest(request).then((response) => deserializeResponseBody(this.jsonContentTypes, this.xmlContentTypes, response, {
@@ -39546,7 +39546,7 @@ async function beginRefresh(getAccessToken, retryIntervalInMs, timeoutInMs) {
     if (Date.now() < timeoutInMs) {
       try {
         return await getAccessToken();
-      } catch (_a3) {
+      } catch (_a) {
         return null;
       }
     } else {
@@ -39573,21 +39573,21 @@ function createTokenCycler(credential, scopes, tokenCyclerOptions) {
       return refreshWorker !== null;
     },
     get shouldRefresh() {
-      var _a3;
-      return !cycler.isRefreshing && ((_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : 0) - options.refreshWindowInMs < Date.now();
+      var _a;
+      return !cycler.isRefreshing && ((_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : 0) - options.refreshWindowInMs < Date.now();
     },
     get mustRefresh() {
       return token === null || token.expiresOnTimestamp - options.forcedRefreshWindowInMs < Date.now();
     }
   };
   function refresh(getTokenOptions) {
-    var _a3;
+    var _a;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
       refreshWorker = beginRefresh(
         tryGetAccessToken,
         options.retryIntervalInMs,
-        (_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : Date.now()
+        (_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : Date.now()
       ).then((_token) => {
         refreshWorker = null;
         token = _token;
@@ -39825,8 +39825,8 @@ var init_proxyPolicy = __esm({
         this.customNoProxyList = customNoProxyList;
       }
       sendRequest(request) {
-        var _a3;
-        if (!request.proxySettings && !isBypassed(request.url, (_a3 = this.customNoProxyList) !== null && _a3 !== void 0 ? _a3 : globalNoProxyList, this.customNoProxyList ? void 0 : globalBypassedMap)) {
+        var _a;
+        if (!request.proxySettings && !isBypassed(request.url, (_a = this.customNoProxyList) !== null && _a !== void 0 ? _a : globalNoProxyList, this.customNoProxyList ? void 0 : globalBypassedMap)) {
           request.proxySettings = this.proxySettings;
         }
         return this._nextPolicy.sendRequest(request);
@@ -40056,7 +40056,7 @@ var init_throttlingRetryPolicy = __esm({
         }
       }
       async _defaultResponseHandler(httpRequest, httpResponse) {
-        var _a3;
+        var _a;
         const retryAfterHeader = httpResponse.headers.get(Constants.HeaderConstants.RETRY_AFTER);
         if (retryAfterHeader) {
           const delayInMs = ThrottlingRetryPolicy.parseRetryAfterHeader(retryAfterHeader);
@@ -40066,7 +40066,7 @@ var init_throttlingRetryPolicy = __esm({
               abortSignal: httpRequest.abortSignal,
               abortErrorMsg: StandardAbortMessage2
             });
-            if ((_a3 = httpRequest.abortSignal) === null || _a3 === void 0 ? void 0 : _a3.aborted) {
+            if ((_a = httpRequest.abortSignal) === null || _a === void 0 ? void 0 : _a.aborted) {
               throw new AbortError(StandardAbortMessage2);
             }
             if (this.numberOfRetries < DEFAULT_CLIENT_MAX_RETRY_COUNT) {
@@ -40211,11 +40211,11 @@ var init_semver = __esm({
 
 // node_modules/@opentelemetry/api/build/esm/internal/global-utils.js
 function registerGlobal(type3, instance, diag3, allowOverride) {
-  var _a3;
+  var _a;
   if (allowOverride === void 0) {
     allowOverride = false;
   }
-  var api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a3 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a3 !== void 0 ? _a3 : {
+  var api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a !== void 0 ? _a : {
     version: VERSION
   };
   if (!allowOverride && api[type3]) {
@@ -40233,8 +40233,8 @@ function registerGlobal(type3, instance, diag3, allowOverride) {
   return true;
 }
 function getGlobal(type3) {
-  var _a3, _b;
-  var globalVersion = (_a3 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a3 === void 0 ? void 0 : _a3.version;
+  var _a, _b;
+  var globalVersion = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a === void 0 ? void 0 : _a.version;
   if (!globalVersion || !isCompatible(globalVersion)) {
     return;
   }
@@ -40387,13 +40387,13 @@ var init_diag = __esm({
         }
         var self2 = this;
         self2.setLogger = function(logger3, logLevel) {
-          var _a3, _b;
+          var _a, _b;
           if (logLevel === void 0) {
             logLevel = DiagLogLevel.INFO;
           }
           if (logger3 === self2) {
             var err = new Error("Cannot use diag as the logger for itself. Please use a DiagLogger implementation like ConsoleDiagLogger or a custom implementation");
-            self2.error((_a3 = err.stack) !== null && _a3 !== void 0 ? _a3 : err.message);
+            self2.error((_a = err.stack) !== null && _a !== void 0 ? _a : err.message);
             return false;
           }
           var oldLogger = getGlobal("diag");
@@ -40444,8 +40444,8 @@ var init_baggage_impl = __esm({
         return Object.assign({}, entry);
       };
       BaggageImpl2.prototype.getAllEntries = function() {
-        return Array.from(this._entries.entries()).map(function(_a3) {
-          var k = _a3[0], v = _a3[1];
+        return Array.from(this._entries.entries()).map(function(_a) {
+          var k = _a[0], v = _a[1];
           return [k, v];
         });
       };
@@ -40465,8 +40465,8 @@ var init_baggage_impl = __esm({
           keys[_i] = arguments[_i];
         }
         var newBaggage = new BaggageImpl2(this._entries);
-        for (var _a3 = 0, keys_1 = keys; _a3 < keys_1.length; _a3++) {
-          var key = keys_1[_a3];
+        for (var _a = 0, keys_1 = keys; _a < keys_1.length; _a++) {
+          var key = keys_1[_a];
           newBaggage._entries.delete(key);
         }
         return newBaggage;
@@ -40708,12 +40708,12 @@ var init_context2 = __esm({
         return this._getContextManager().active();
       };
       ContextAPI2.prototype.with = function(context4, fn, thisArg) {
-        var _a3;
+        var _a;
         var args = [];
         for (var _i = 3; _i < arguments.length; _i++) {
           args[_i - 3] = arguments[_i];
         }
-        return (_a3 = this._getContextManager()).with.apply(_a3, __spreadArray2([context4, fn, thisArg], args));
+        return (_a = this._getContextManager()).with.apply(_a, __spreadArray2([context4, fn, thisArg], args));
       };
       ContextAPI2.prototype.bind = function(context4, target) {
         return this._getContextManager().bind(context4, target);
@@ -40815,8 +40815,8 @@ function setSpanContext(context4, spanContext) {
   return setSpan(context4, new NonRecordingSpan(spanContext));
 }
 function getSpanContext(context4) {
-  var _a3;
-  return (_a3 = getSpan(context4)) === null || _a3 === void 0 ? void 0 : _a3.spanContext();
+  var _a;
+  return (_a = getSpan(context4)) === null || _a === void 0 ? void 0 : _a.spanContext();
 }
 var SPAN_KEY;
 var init_context_utils = __esm({
@@ -40967,19 +40967,19 @@ var init_ProxyTracerProvider = __esm({
       function ProxyTracerProvider2() {
       }
       ProxyTracerProvider2.prototype.getTracer = function(name, version3, options) {
-        var _a3;
-        return (_a3 = this.getDelegateTracer(name, version3, options)) !== null && _a3 !== void 0 ? _a3 : new ProxyTracer(this, name, version3, options);
+        var _a;
+        return (_a = this.getDelegateTracer(name, version3, options)) !== null && _a !== void 0 ? _a : new ProxyTracer(this, name, version3, options);
       };
       ProxyTracerProvider2.prototype.getDelegate = function() {
-        var _a3;
-        return (_a3 = this._delegate) !== null && _a3 !== void 0 ? _a3 : NOOP_TRACER_PROVIDER;
+        var _a;
+        return (_a = this._delegate) !== null && _a !== void 0 ? _a : NOOP_TRACER_PROVIDER;
       };
       ProxyTracerProvider2.prototype.setDelegate = function(delegate) {
         this._delegate = delegate;
       };
       ProxyTracerProvider2.prototype.getDelegateTracer = function(name, version3, options) {
-        var _a3;
-        return (_a3 = this._delegate) === null || _a3 === void 0 ? void 0 : _a3.getTracer(name, version3, options);
+        var _a;
+        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version3, options);
       };
       return ProxyTracerProvider2;
     }();
@@ -41392,11 +41392,11 @@ var init_interfaces = __esm({
 
 // node_modules/@azure/core-tracing/dist-esm/src/createSpan.js
 function isTracingDisabled() {
-  var _a3;
+  var _a;
   if (typeof process === "undefined") {
     return false;
   }
-  const azureTracingDisabledValue = (_a3 = process.env.AZURE_TRACING_DISABLED) === null || _a3 === void 0 ? void 0 : _a3.toLowerCase();
+  const azureTracingDisabledValue = (_a = process.env.AZURE_TRACING_DISABLED) === null || _a === void 0 ? void 0 : _a.toLowerCase();
   if (azureTracingDisabledValue === "false" || azureTracingDisabledValue === "0") {
     return false;
   }
@@ -41510,7 +41510,7 @@ var init_tracingPolicy = __esm({
         }
       }
       tryCreateSpan(request) {
-        var _a3;
+        var _a;
         try {
           const { span } = createSpan(`HTTP ${request.method}`, {
             tracingOptions: {
@@ -41522,7 +41522,7 @@ var init_tracingPolicy = __esm({
             span.end();
             return void 0;
           }
-          const namespaceFromContext = (_a3 = request.tracingContext) === null || _a3 === void 0 ? void 0 : _a3.getValue(Symbol.for("az.namespace"));
+          const namespaceFromContext = (_a = request.tracingContext) === null || _a === void 0 ? void 0 : _a.getValue(Symbol.for("az.namespace"));
           if (typeof namespaceFromContext === "string") {
             span.setAttribute("az.namespace", namespaceFromContext);
           }
@@ -41584,8 +41584,8 @@ var init_tracingPolicy = __esm({
 
 // node_modules/@azure/core-http/dist-esm/src/serviceClient.js
 function serializeRequestBody(serviceClient, httpRequest, operationArguments, operationSpec) {
-  var _a3, _b, _c, _d, _e, _f;
-  const serializerOptions = (_b = (_a3 = operationArguments.options) === null || _a3 === void 0 ? void 0 : _a3.serializerOptions) !== null && _b !== void 0 ? _b : {};
+  var _a, _b, _c, _d, _e, _f;
+  const serializerOptions = (_b = (_a = operationArguments.options) === null || _a === void 0 ? void 0 : _a.serializerOptions) !== null && _b !== void 0 ? _b : {};
   const updatedOptions = {
     rootName: (_c = serializerOptions.rootName) !== null && _c !== void 0 ? _c : "",
     includeRoot: (_d = serializerOptions.includeRoot) !== null && _d !== void 0 ? _d : false,
@@ -41688,12 +41688,12 @@ function getOperationArgumentValueFromParameter(serviceClient, operationArgument
   return getOperationArgumentValueFromParameterPath(serviceClient, operationArguments, parameter.parameterPath, parameter.mapper, serializer4);
 }
 function getOperationArgumentValueFromParameterPath(serviceClient, operationArguments, parameterPath, parameterMapper, serializer4) {
-  var _a3;
+  var _a;
   let value;
   if (typeof parameterPath === "string") {
     parameterPath = [parameterPath];
   }
-  const serializerOptions = (_a3 = operationArguments.options) === null || _a3 === void 0 ? void 0 : _a3.serializerOptions;
+  const serializerOptions = (_a = operationArguments.options) === null || _a === void 0 ? void 0 : _a.serializerOptions;
   if (Array.isArray(parameterPath)) {
     if (parameterPath.length > 0) {
       if (parameterMapper.isConstant) {
@@ -41903,12 +41903,12 @@ var init_serviceClient = __esm({
         return httpPipeline.sendRequest(httpRequest);
       }
       async sendOperationRequest(operationArguments, operationSpec, callback) {
-        var _a3;
+        var _a;
         if (typeof operationArguments.options === "function") {
           callback = operationArguments.options;
           operationArguments.options = void 0;
         }
-        const serializerOptions = (_a3 = operationArguments.options) === null || _a3 === void 0 ? void 0 : _a3.serializerOptions;
+        const serializerOptions = (_a = operationArguments.options) === null || _a === void 0 ? void 0 : _a.serializerOptions;
         const httpRequest = new WebResource();
         let result;
         try {
@@ -55496,9 +55496,9 @@ function ConvertInternalResponseOfListBlobFlat(internalResponse) {
   } });
 }
 function ConvertInternalResponseOfListBlobHierarchy(internalResponse) {
-  var _a3;
+  var _a;
   return Object.assign(Object.assign({}, internalResponse), { segment: {
-    blobPrefixes: (_a3 = internalResponse.segment.blobPrefixes) === null || _a3 === void 0 ? void 0 : _a3.map((blobPrefixInternal) => {
+    blobPrefixes: (_a = internalResponse.segment.blobPrefixes) === null || _a === void 0 ? void 0 : _a.map((blobPrefixInternal) => {
       const blobPrefix = {
         name: BlobNameToString(blobPrefixInternal.name)
       };
@@ -56159,7 +56159,7 @@ async function beginRefresh2(getAccessToken, retryIntervalInMs, timeoutInMs) {
     if (Date.now() < timeoutInMs) {
       try {
         return await getAccessToken();
-      } catch (_a3) {
+      } catch (_a) {
         return null;
       }
     } else {
@@ -56186,21 +56186,21 @@ function createTokenCycler2(credential, scopes, tokenCyclerOptions) {
       return refreshWorker !== null;
     },
     get shouldRefresh() {
-      var _a3;
-      return !cycler.isRefreshing && ((_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : 0) - options.refreshWindowInMs < Date.now();
+      var _a;
+      return !cycler.isRefreshing && ((_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : 0) - options.refreshWindowInMs < Date.now();
     },
     get mustRefresh() {
       return token === null || token.expiresOnTimestamp - options.forcedRefreshWindowInMs < Date.now();
     }
   };
   function refresh(getTokenOptions) {
-    var _a3;
+    var _a;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
       refreshWorker = beginRefresh2(
         tryGetAccessToken,
         options.retryIntervalInMs,
-        (_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : Date.now()
+        (_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : Date.now()
       ).then((_token) => {
         refreshWorker = null;
         token = _token;
@@ -56313,7 +56313,7 @@ function isPipelineLike(pipeline) {
   return Array.isArray(castPipeline.factories) && typeof castPipeline.options === "object" && typeof castPipeline.toServiceClientOptions === "function";
 }
 function newPipeline(credential, pipelineOptions = {}) {
-  var _a3;
+  var _a;
   if (credential === void 0) {
     credential = new AnonymousCredential();
   }
@@ -56336,7 +56336,7 @@ function newPipeline(credential, pipelineOptions = {}) {
     factories.push(proxyPolicy(pipelineOptions.proxyOptions));
     factories.push(disableResponseDecompressionPolicy());
   }
-  factories.push(isTokenCredential(credential) ? attachCredential(storageBearerTokenChallengeAuthenticationPolicy(credential, (_a3 = pipelineOptions.audience) !== null && _a3 !== void 0 ? _a3 : StorageOAuthScopes), credential) : credential);
+  factories.push(isTokenCredential(credential) ? attachCredential(storageBearerTokenChallengeAuthenticationPolicy(credential, (_a = pipelineOptions.audience) !== null && _a !== void 0 ? _a : StorageOAuthScopes), credential) : credential);
   return new Pipeline(factories, pipelineOptions);
 }
 var Pipeline;
@@ -56544,9 +56544,9 @@ var init_StorageClient = __esm({
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/tracing.js
 function convertTracingToRequestOptionsBase(options) {
-  var _a3, _b;
+  var _a, _b;
   return {
-    spanOptions: (_a3 = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _a3 === void 0 ? void 0 : _a3.spanOptions,
+    spanOptions: (_a = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _a === void 0 ? void 0 : _a.spanOptions,
     tracingContext: (_b = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _b === void 0 ? void 0 : _b.tracingContext
   };
 }
@@ -57511,9 +57511,9 @@ var init_BlobLeaseClient = __esm({
         return this._url;
       }
       async acquireLease(duration2, options = {}) {
-        var _a3, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-acquireLease", options);
-        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -57529,9 +57529,9 @@ var init_BlobLeaseClient = __esm({
         }
       }
       async changeLease(proposedLeaseId2, options = {}) {
-        var _a3, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-changeLease", options);
-        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -57549,9 +57549,9 @@ var init_BlobLeaseClient = __esm({
         }
       }
       async releaseLease(options = {}) {
-        var _a3, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-releaseLease", options);
-        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -57567,9 +57567,9 @@ var init_BlobLeaseClient = __esm({
         }
       }
       async renewLease(options = {}) {
-        var _a3, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-renewLease", options);
-        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -57585,9 +57585,9 @@ var init_BlobLeaseClient = __esm({
         }
       }
       async breakLease(breakPeriod2, options = {}) {
-        var _a3, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-breakLease", options);
-        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -58306,8 +58306,8 @@ var init_AvroReadableFromStream = __esm({
         return this._position;
       }
       async read(size, options = {}) {
-        var _a3;
-        if ((_a3 = options.abortSignal) === null || _a3 === void 0 ? void 0 : _a3.aborted) {
+        var _a;
+        if ((_a = options.abortSignal) === null || _a === void 0 ? void 0 : _a.aborted) {
           throw ABORT_ERROR;
         }
         if (size < 0) {
@@ -59451,13 +59451,13 @@ var init_Clients = __esm({
         return new PageBlobClient(this.url, this.pipeline);
       }
       async download(offset = 0, count, options = {}) {
-        var _a3;
+        var _a;
         options.conditions = options.conditions || {};
         options.conditions = options.conditions || {};
         ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
         const { span, updatedOptions } = createSpan2("BlobClient-download", options);
         try {
-          const res = await this.blobContext.download(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
+          const res = await this.blobContext.download(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), requestOptions: {
             onDownloadProgress: isNode ? void 0 : options.onProgress
           }, range: offset === 0 && !count ? void 0 : rangeToString({ offset, count }), rangeGetContentMD5: options.rangeGetContentMD5, rangeGetContentCRC64: options.rangeGetContentCrc64, snapshot: options.snapshot, cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedRes = Object.assign(Object.assign({}, res), { _response: res._response, objectReplicationDestinationPolicyId: res.objectReplicationPolicyId, objectReplicationSourceProperties: parseObjectReplicationRecord(res.objectReplicationRules) });
@@ -59474,7 +59474,7 @@ var init_Clients = __esm({
             throw new RangeError(`File download response doesn't contain valid etag header`);
           }
           return new BlobDownloadResponse(wrappedRes, async (start) => {
-            var _a4;
+            var _a2;
             const updatedDownloadOptions = {
               leaseAccessConditions: options.conditions,
               modifiedAccessConditions: {
@@ -59482,7 +59482,7 @@ var init_Clients = __esm({
                 ifModifiedSince: options.conditions.ifModifiedSince,
                 ifNoneMatch: options.conditions.ifNoneMatch,
                 ifUnmodifiedSince: options.conditions.ifUnmodifiedSince,
-                ifTags: (_a4 = options.conditions) === null || _a4 === void 0 ? void 0 : _a4.tagConditions
+                ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions
               },
               range: rangeToString({
                 count: offset + res.contentLength - start,
@@ -59535,12 +59535,12 @@ var init_Clients = __esm({
         }
       }
       async getProperties(options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-getProperties", options);
         try {
           options.conditions = options.conditions || {};
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          const res = await this.blobContext.getProperties(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const res = await this.blobContext.getProperties(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           return Object.assign(Object.assign({}, res), { _response: res._response, objectReplicationDestinationPolicyId: res.objectReplicationPolicyId, objectReplicationSourceProperties: parseObjectReplicationRecord(res.objectReplicationRules) });
         } catch (e) {
           span.setStatus({
@@ -59553,11 +59553,11 @@ var init_Clients = __esm({
         }
       }
       async delete(options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-delete", options);
         options.conditions = options.conditions || {};
         try {
-          return await this.blobContext.delete(Object.assign({ abortSignal: options.abortSignal, deleteSnapshots: options.deleteSnapshots, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.delete(Object.assign({ abortSignal: options.abortSignal, deleteSnapshots: options.deleteSnapshots, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59569,13 +59569,13 @@ var init_Clients = __esm({
         }
       }
       async deleteIfExists(options = {}) {
-        var _a3, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("BlobClient-deleteIfExists", options);
         try {
           const res = await this.delete(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "BlobNotFound") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "BlobNotFound") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when deleting a blob or snapshot only if it exists."
@@ -59606,12 +59606,12 @@ var init_Clients = __esm({
         }
       }
       async setHTTPHeaders(blobHTTPHeaders, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-setHTTPHeaders", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.setHttpHeaders(Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setHttpHeaders(Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59623,12 +59623,12 @@ var init_Clients = __esm({
         }
       }
       async setMetadata(metadata2, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-setMetadata", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.setMetadata(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: metadata2, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setMetadata(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: metadata2, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59640,10 +59640,10 @@ var init_Clients = __esm({
         }
       }
       async setTags(tags2, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-setTags", options);
         try {
-          return await this.blobContext.setTags(Object.assign(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)), { tags: toBlobTags(tags2) }));
+          return await this.blobContext.setTags(Object.assign(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)), { tags: toBlobTags(tags2) }));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59655,10 +59655,10 @@ var init_Clients = __esm({
         }
       }
       async getTags(options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-getTags", options);
         try {
-          const response = await this.blobContext.getTags(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const response = await this.blobContext.getTags(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, tags: toTags({ blobTagSet: response.blobTagSet }) || {} });
           return wrappedResponse;
         } catch (e) {
@@ -59675,12 +59675,12 @@ var init_Clients = __esm({
         return new BlobLeaseClient(this, proposeLeaseId);
       }
       async createSnapshot(options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-createSnapshot", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.createSnapshot(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.createSnapshot(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59723,12 +59723,12 @@ var init_Clients = __esm({
         }
       }
       async syncCopyFromURL(copySource2, options = {}) {
-        var _a3, _b, _c;
+        var _a, _b, _c;
         const { span, updatedOptions } = createSpan2("BlobClient-syncCopyFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
-          return await this.blobContext.copyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, metadata: options.metadata, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.blobContext.copyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, metadata: options.metadata, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -59745,10 +59745,10 @@ var init_Clients = __esm({
         }
       }
       async setAccessTier(tier2, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-setAccessTier", options);
         try {
-          return await this.blobContext.setTier(toAccessTier(tier2), Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), rehydratePriority: options.rehydratePriority }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setTier(toAccessTier(tier2), Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), rehydratePriority: options.rehydratePriority }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -59894,12 +59894,12 @@ var init_Clients = __esm({
         }
       }
       async startCopyFromURL(copySource2, options = {}) {
-        var _a3, _b, _c;
+        var _a, _b, _c;
         const { span, updatedOptions } = createSpan2("BlobClient-startCopyFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
-          return await this.blobContext.startCopyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.blobContext.startCopyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -60014,12 +60014,12 @@ var init_Clients = __esm({
         return new AppendBlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
       async create(options = {}) {
-        var _a3, _b, _c;
+        var _a, _b, _c;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-create", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.create(0, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.appendBlobContext.create(0, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60031,14 +60031,14 @@ var init_Clients = __esm({
         }
       }
       async createIfNotExists(options = {}) {
-        var _a3, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-createIfNotExists", options);
         const conditions = { ifNoneMatch: ETagAny };
         try {
           const res = await this.create(Object.assign(Object.assign({}, updatedOptions), { conditions }));
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "BlobAlreadyExists") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "BlobAlreadyExists") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when creating a blob only if it does not already exist."
@@ -60055,11 +60055,11 @@ var init_Clients = __esm({
         }
       }
       async seal(options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-seal", options);
         options.conditions = options.conditions || {};
         try {
-          return await this.appendBlobContext.seal(Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.appendBlobContext.seal(Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60071,12 +60071,12 @@ var init_Clients = __esm({
         }
       }
       async appendBlock(body2, contentLength2, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-appendBlock", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.appendBlock(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
+          return await this.appendBlobContext.appendBlock(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, transactionalContentMD5: options.transactionalContentMD5, transactionalContentCrc64: options.transactionalContentCrc64, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
@@ -60090,13 +60090,13 @@ var init_Clients = __esm({
         }
       }
       async appendBlockFromURL(sourceURL, sourceOffset, count, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-appendBlockFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.appendBlockFromUrl(sourceURL, 0, Object.assign({ abortSignal: options.abortSignal, sourceRange: rangeToString({ offset: sourceOffset, count }), sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, appendPositionAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.appendBlobContext.appendBlockFromUrl(sourceURL, 0, Object.assign({ abortSignal: options.abortSignal, sourceRange: rangeToString({ offset: sourceOffset, count }), sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, appendPositionAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -60160,7 +60160,7 @@ var init_Clients = __esm({
         return new BlockBlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
       async query(query, options = {}) {
-        var _a3;
+        var _a;
         ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
         const { span, updatedOptions } = createSpan2("BlockBlobClient-query", options);
         try {
@@ -60173,7 +60173,7 @@ var init_Clients = __esm({
             expression: query,
             inputSerialization: toQuerySerialization(options.inputTextConfiguration),
             outputSerialization: toQuerySerialization(options.outputTextConfiguration)
-          }, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
+          }, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           return new BlobQueryResponse(response, {
             abortSignal: options.abortSignal,
             onProgress: options.onProgress,
@@ -60190,12 +60190,12 @@ var init_Clients = __esm({
         }
       }
       async upload(body2, contentLength2, options = {}) {
-        var _a3, _b, _c;
+        var _a, _b, _c;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-upload", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blockBlobContext.upload(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
+          return await this.blockBlobContext.upload(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
@@ -60209,13 +60209,13 @@ var init_Clients = __esm({
         }
       }
       async syncUploadFromURL(sourceURL, options = {}) {
-        var _a3, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-syncUploadFromURL", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
           return await this.blockBlobContext.putBlobFromUrl(0, sourceURL, Object.assign(Object.assign(Object.assign({}, options), { blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: options.conditions.tagConditions }), sourceModifiedAccessConditions: {
-            sourceIfMatch: (_a3 = options.sourceConditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch,
+            sourceIfMatch: (_a = options.sourceConditions) === null || _a === void 0 ? void 0 : _a.ifMatch,
             sourceIfModifiedSince: (_b = options.sourceConditions) === null || _b === void 0 ? void 0 : _b.ifModifiedSince,
             sourceIfNoneMatch: (_c = options.sourceConditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch,
             sourceIfUnmodifiedSince: (_d = options.sourceConditions) === null || _d === void 0 ? void 0 : _d.ifUnmodifiedSince,
@@ -60264,12 +60264,12 @@ var init_Clients = __esm({
         }
       }
       async commitBlockList(blocks2, options = {}) {
-        var _a3, _b, _c;
+        var _a, _b, _c;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-commitBlockList", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blockBlobContext.commitBlockList({ latest: blocks2 }, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blockBlobContext.commitBlockList({ latest: blocks2 }, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60281,10 +60281,10 @@ var init_Clients = __esm({
         }
       }
       async getBlockList(listType2, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlockBlobClient-getBlockList", options);
         try {
-          const res = await this.blockBlobContext.getBlockList(listType2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const res = await this.blockBlobContext.getBlockList(listType2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
           if (!res.committedBlocks) {
             res.committedBlocks = [];
           }
@@ -60534,12 +60534,12 @@ var init_Clients = __esm({
         return new PageBlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
       async create(size, options = {}) {
-        var _a3, _b, _c;
+        var _a, _b, _c;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-create", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.create(0, size, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, blobSequenceNumber: options.blobSequenceNumber, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.create(0, size, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, blobSequenceNumber: options.blobSequenceNumber, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60551,14 +60551,14 @@ var init_Clients = __esm({
         }
       }
       async createIfNotExists(size, options = {}) {
-        var _a3, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("PageBlobClient-createIfNotExists", options);
         try {
           const conditions = { ifNoneMatch: ETagAny };
           const res = await this.create(size, Object.assign(Object.assign({}, options), { conditions, tracingOptions: updatedOptions.tracingOptions }));
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "BlobAlreadyExists") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "BlobAlreadyExists") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when creating a blob only if it does not already exist."
@@ -60575,12 +60575,12 @@ var init_Clients = __esm({
         }
       }
       async uploadPages(body2, offset, count, options = {}) {
-        var _a3;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-uploadPages", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.uploadPages(count, body2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
+          return await this.pageBlobContext.uploadPages(count, body2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, transactionalContentMD5: options.transactionalContentMD5, transactionalContentCrc64: options.transactionalContentCrc64, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
@@ -60594,13 +60594,13 @@ var init_Clients = __esm({
         }
       }
       async uploadPagesFromURL(sourceURL, sourceOffset, destOffset, count, options = {}) {
-        var _a3;
+        var _a;
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-uploadPagesFromURL", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.uploadPagesFromURL(sourceURL, rangeToString({ offset: sourceOffset, count }), 0, rangeToString({ offset: destOffset, count }), Object.assign({ abortSignal: options.abortSignal, sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, sequenceNumberAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.pageBlobContext.uploadPagesFromURL(sourceURL, rangeToString({ offset: sourceOffset, count }), 0, rangeToString({ offset: destOffset, count }), Object.assign({ abortSignal: options.abortSignal, sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, sequenceNumberAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -60617,11 +60617,11 @@ var init_Clients = __esm({
         }
       }
       async clearPages(offset = 0, count, options = {}) {
-        var _a3;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-clearPages", options);
         try {
-          return await this.pageBlobContext.clearPages(0, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.clearPages(0, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60633,11 +60633,11 @@ var init_Clients = __esm({
         }
       }
       async getPageRanges(offset = 0, count, options = {}) {
-        var _a3;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRanges", options);
         try {
-          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60649,10 +60649,10 @@ var init_Clients = __esm({
         }
       }
       async listPageRangesSegment(offset = 0, count, marker2, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesSegment", options);
         try {
-          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), range: rangeToString({ offset, count }), marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), range: rangeToString({ offset, count }), marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60677,7 +60677,7 @@ var init_Clients = __esm({
       }
       listPageRangeItems(offset = 0, count, options = {}) {
         return __asyncGenerator(this, arguments, function* listPageRangeItems_1() {
-          var e_1, _a3;
+          var e_1, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listPageRangeItemSegments(offset, count, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -60688,8 +60688,8 @@ var init_Clients = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a3 = _b.return))
-                yield __await(_a3.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -60713,11 +60713,11 @@ var init_Clients = __esm({
         };
       }
       async getPageRangesDiff(offset, count, prevSnapshot, options = {}) {
-        var _a3;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesDiff", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), prevsnapshot: prevSnapshot, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), prevsnapshot: prevSnapshot, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60729,10 +60729,10 @@ var init_Clients = __esm({
         }
       }
       async listPageRangesDiffSegment(offset, count, prevSnapshotOrUrl, marker2, options) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesDiffSegment", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal, leaseAccessConditions: options === null || options === void 0 ? void 0 : options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.conditions), { ifTags: (_a3 = options === null || options === void 0 ? void 0 : options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), prevsnapshot: prevSnapshotOrUrl, range: rangeToString({
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal, leaseAccessConditions: options === null || options === void 0 ? void 0 : options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.conditions), { ifTags: (_a = options === null || options === void 0 ? void 0 : options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), prevsnapshot: prevSnapshotOrUrl, range: rangeToString({
             offset,
             count
           }), marker: marker2, maxPageSize: options === null || options === void 0 ? void 0 : options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
@@ -60760,7 +60760,7 @@ var init_Clients = __esm({
       }
       listPageRangeDiffItems(offset, count, prevSnapshotOrUrl, options) {
         return __asyncGenerator(this, arguments, function* listPageRangeDiffItems_1() {
-          var e_2, _a3;
+          var e_2, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listPageRangeDiffItemSegments(offset, count, prevSnapshotOrUrl, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -60771,8 +60771,8 @@ var init_Clients = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a3 = _b.return))
-                yield __await(_a3.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -60796,11 +60796,11 @@ var init_Clients = __esm({
         };
       }
       async getPageRangesDiffForManagedDisks(offset, count, prevSnapshotUrl2, options = {}) {
-        var _a3;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-GetPageRangesDiffForManagedDisks", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), prevSnapshotUrl: prevSnapshotUrl2, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), prevSnapshotUrl: prevSnapshotUrl2, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60812,11 +60812,11 @@ var init_Clients = __esm({
         }
       }
       async resize(size, options = {}) {
-        var _a3;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-resize", options);
         try {
-          return await this.pageBlobContext.resize(size, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.resize(size, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60828,11 +60828,11 @@ var init_Clients = __esm({
         }
       }
       async updateSequenceNumber(sequenceNumberAction2, sequenceNumber, options = {}) {
-        var _a3;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-updateSequenceNumber", options);
         try {
-          return await this.pageBlobContext.updateSequenceNumber(sequenceNumberAction2, Object.assign({ abortSignal: options.abortSignal, blobSequenceNumber: sequenceNumber, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.updateSequenceNumber(sequenceNumberAction2, Object.assign({ abortSignal: options.abortSignal, blobSequenceNumber: sequenceNumber, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -60844,10 +60844,10 @@ var init_Clients = __esm({
         }
       }
       async startCopyIncremental(copySource2, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("PageBlobClient-startCopyIncremental", options);
         try {
-          return await this.pageBlobContext.copyIncremental(copySource2, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.copyIncremental(copySource2, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
             code: SpanStatusCode2.ERROR,
@@ -61432,13 +61432,13 @@ var init_ContainerClient = __esm({
         }
       }
       async createIfNotExists(options = {}) {
-        var _a3, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("ContainerClient-createIfNotExists", options);
         try {
           const res = await this.create(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "ContainerAlreadyExists") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "ContainerAlreadyExists") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when creating a container only if it does not already exist."
@@ -61526,13 +61526,13 @@ var init_ContainerClient = __esm({
         }
       }
       async deleteIfExists(options = {}) {
-        var _a3, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("ContainerClient-deleteIfExists", options);
         try {
           const res = await this.delete(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a3 = e.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "ContainerNotFound") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "ContainerNotFound") {
             span.setStatus({
               code: SpanStatusCode2.ERROR,
               message: "Expected exception when deleting a container only if it exists."
@@ -61706,7 +61706,7 @@ var init_ContainerClient = __esm({
         }
       }
       async listBlobHierarchySegment(delimiter3, marker2, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("ContainerClient-listBlobHierarchySegment", options);
         try {
           const response = await this.containerContext.listBlobHierarchySegment(delimiter3, Object.assign(Object.assign({ marker: marker2 }, options), convertTracingToRequestOptionsBase(updatedOptions)));
@@ -61721,7 +61721,7 @@ var init_ContainerClient = __esm({
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: Object.assign(Object.assign({}, response._response), { parsedBody: ConvertInternalResponseOfListBlobHierarchy(response._response.parsedBody) }), segment: Object.assign(Object.assign({}, response.segment), { blobItems: response.segment.blobItems.map((blobItemInteral) => {
             const blobItem = Object.assign(Object.assign({}, blobItemInteral), { name: BlobNameToString(blobItemInteral.name), tags: toTags(blobItemInteral.blobTags), objectReplicationSourceProperties: parseObjectReplicationRecord(blobItemInteral.objectReplicationMetadata) });
             return blobItem;
-          }), blobPrefixes: (_a3 = response.segment.blobPrefixes) === null || _a3 === void 0 ? void 0 : _a3.map((blobPrefixInternal) => {
+          }), blobPrefixes: (_a = response.segment.blobPrefixes) === null || _a === void 0 ? void 0 : _a.map((blobPrefixInternal) => {
             const blobPrefix = {
               name: BlobNameToString(blobPrefixInternal.name)
             };
@@ -61752,7 +61752,7 @@ var init_ContainerClient = __esm({
       }
       listItems(options = {}) {
         return __asyncGenerator(this, arguments, function* listItems_1() {
-          var e_1, _a3;
+          var e_1, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listSegments(marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -61763,8 +61763,8 @@ var init_ContainerClient = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a3 = _b.return))
-                yield __await(_a3.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -61835,7 +61835,7 @@ var init_ContainerClient = __esm({
       }
       listItemsByHierarchy(delimiter3, options = {}) {
         return __asyncGenerator(this, arguments, function* listItemsByHierarchy_1() {
-          var e_2, _a3;
+          var e_2, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listHierarchySegments(delimiter3, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -61854,8 +61854,8 @@ var init_ContainerClient = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a3 = _b.return))
-                yield __await(_a3.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -61920,9 +61920,9 @@ var init_ContainerClient = __esm({
         try {
           const response = await this.containerContext.filterBlobs(Object.assign({ abortSignal: options.abortSignal, where: tagFilterSqlExpression, marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, blobs: response.blobs.map((blob) => {
-            var _a3;
+            var _a;
             let tagValue = "";
-            if (((_a3 = blob.tags) === null || _a3 === void 0 ? void 0 : _a3.blobTagSet.length) === 1) {
+            if (((_a = blob.tags) === null || _a === void 0 ? void 0 : _a.blobTagSet.length) === 1) {
               tagValue = blob.tags.blobTagSet[0].value;
             }
             return Object.assign(Object.assign({}, blob), { tags: toTags(blob.tags), tagValue });
@@ -61953,7 +61953,7 @@ var init_ContainerClient = __esm({
       }
       findBlobsByTagsItems(tagFilterSqlExpression, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsItems_1() {
-          var e_3, _a3;
+          var e_3, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -61964,8 +61964,8 @@ var init_ContainerClient = __esm({
             e_3 = { error: e_3_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a3 = _b.return))
-                yield __await(_a3.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_3)
                 throw e_3.error;
@@ -62463,12 +62463,12 @@ var init_BlobServiceClient = __esm({
         }
       }
       async renameContainer(sourceContainerName2, destinationContainerName, options = {}) {
-        var _a3;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobServiceClient-renameContainer", options);
         try {
           const containerClient = this.getContainerClient(destinationContainerName);
           const containerContext = new Container(containerClient["storageClientContext"]);
-          const containerRenameResponse = await containerContext.rename(sourceContainerName2, Object.assign(Object.assign({}, updatedOptions), { sourceLeaseId: (_a3 = options.sourceCondition) === null || _a3 === void 0 ? void 0 : _a3.leaseId }));
+          const containerRenameResponse = await containerContext.rename(sourceContainerName2, Object.assign(Object.assign({}, updatedOptions), { sourceLeaseId: (_a = options.sourceCondition) === null || _a === void 0 ? void 0 : _a.leaseId }));
           return { containerClient, containerRenameResponse };
         } catch (e) {
           span.setStatus({
@@ -62555,9 +62555,9 @@ var init_BlobServiceClient = __esm({
         try {
           const response = await this.serviceContext.filterBlobs(Object.assign({ abortSignal: options.abortSignal, where: tagFilterSqlExpression, marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, blobs: response.blobs.map((blob) => {
-            var _a3;
+            var _a;
             let tagValue = "";
-            if (((_a3 = blob.tags) === null || _a3 === void 0 ? void 0 : _a3.blobTagSet.length) === 1) {
+            if (((_a = blob.tags) === null || _a === void 0 ? void 0 : _a.blobTagSet.length) === 1) {
               tagValue = blob.tags.blobTagSet[0].value;
             }
             return Object.assign(Object.assign({}, blob), { tags: toTags(blob.tags), tagValue });
@@ -62588,7 +62588,7 @@ var init_BlobServiceClient = __esm({
       }
       findBlobsByTagsItems(tagFilterSqlExpression, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsItems_1() {
-          var e_1, _a3;
+          var e_1, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -62599,8 +62599,8 @@ var init_BlobServiceClient = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a3 = _b.return))
-                yield __await(_a3.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -62638,7 +62638,7 @@ var init_BlobServiceClient = __esm({
       }
       listItems(options = {}) {
         return __asyncGenerator(this, arguments, function* listItems_1() {
-          var e_2, _a3;
+          var e_2, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listSegments(marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -62649,8 +62649,8 @@ var init_BlobServiceClient = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a3 = _b.return))
-                yield __await(_a3.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -62873,7 +62873,7 @@ var require_requestUtils = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     var http_client_1 = require_lib();
     var constants_1 = require_constants();
     function isSuccessStatusCode(statusCode) {
@@ -62934,9 +62934,9 @@ var require_requestUtils = __commonJS({
             isRetryable = isRetryableStatusCode(statusCode);
             errorMessage = `Cache service responded with ${statusCode}`;
           }
-          core3.debug(`${name} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
+          core2.debug(`${name} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
           if (!isRetryable) {
-            core3.debug(`${name} - Error is not retryable`);
+            core2.debug(`${name} - Error is not retryable`);
             break;
           }
           yield sleep(delay3);
@@ -63023,11 +63023,11 @@ var require_downloadUtils = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     var http_client_1 = require_lib();
     var storage_blob_1 = (init_src11(), __toCommonJS(src_exports2));
     var buffer = __importStar(require("buffer"));
-    var fs2 = __importStar(require("fs"));
+    var fs3 = __importStar(require("fs"));
     var stream = __importStar(require("stream"));
     var util3 = __importStar(require("util"));
     var utils = __importStar(require_cacheUtils());
@@ -63055,7 +63055,7 @@ var require_downloadUtils = __commonJS({
         this.segmentIndex = this.segmentIndex + 1;
         this.segmentSize = segmentSize;
         this.receivedBytes = 0;
-        core3.debug(`Downloading segment at offset ${this.segmentOffset} with length ${this.segmentSize}...`);
+        core2.debug(`Downloading segment at offset ${this.segmentOffset} with length ${this.segmentSize}...`);
       }
       setReceivedBytes(receivedBytes) {
         this.receivedBytes = receivedBytes;
@@ -63074,7 +63074,7 @@ var require_downloadUtils = __commonJS({
         const percentage = (100 * (transferredBytes / this.contentLength)).toFixed(1);
         const elapsedTime = Date.now() - this.startTime;
         const downloadSpeed = (transferredBytes / (1024 * 1024) / (elapsedTime / 1e3)).toFixed(1);
-        core3.info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
+        core2.info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
         if (this.isDone()) {
           this.displayedComplete = true;
         }
@@ -63104,14 +63104,14 @@ var require_downloadUtils = __commonJS({
     exports.DownloadProgress = DownloadProgress;
     function downloadCacheHttpClient(archiveLocation, archivePath) {
       return __awaiter(this, void 0, void 0, function* () {
-        const writeStream = fs2.createWriteStream(archivePath);
+        const writeStream = fs3.createWriteStream(archivePath);
         const httpClient = new http_client_1.HttpClient("actions/cache");
         const downloadResponse = yield requestUtils_1.retryHttpClientResponse("downloadCache", () => __awaiter(this, void 0, void 0, function* () {
           return httpClient.get(archiveLocation);
         }));
         downloadResponse.message.socket.setTimeout(constants_1.SocketTimeout, () => {
           downloadResponse.message.destroy();
-          core3.debug(`Aborting download, socket timed out after ${constants_1.SocketTimeout} ms`);
+          core2.debug(`Aborting download, socket timed out after ${constants_1.SocketTimeout} ms`);
         });
         yield pipeResponseToStream(downloadResponse, writeStream);
         const contentLengthHeader = downloadResponse.message.headers["content-length"];
@@ -63122,13 +63122,13 @@ var require_downloadUtils = __commonJS({
             throw new Error(`Incomplete download. Expected file size: ${expectedLength}, actual file size: ${actualLength}`);
           }
         } else {
-          core3.debug("Unable to validate download, no Content-Length header");
+          core2.debug("Unable to validate download, no Content-Length header");
         }
       });
     }
     exports.downloadCacheHttpClient = downloadCacheHttpClient;
     function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
-      var _a3;
+      var _a;
       return __awaiter(this, void 0, void 0, function* () {
         const client = new storage_blob_1.BlockBlobClient(archiveLocation, void 0, {
           retryOptions: {
@@ -63136,14 +63136,14 @@ var require_downloadUtils = __commonJS({
           }
         });
         const properties = yield client.getProperties();
-        const contentLength2 = (_a3 = properties.contentLength) !== null && _a3 !== void 0 ? _a3 : -1;
+        const contentLength2 = (_a = properties.contentLength) !== null && _a !== void 0 ? _a : -1;
         if (contentLength2 < 0) {
-          core3.debug("Unable to determine content length, downloading file with http-client...");
+          core2.debug("Unable to determine content length, downloading file with http-client...");
           yield downloadCacheHttpClient(archiveLocation, archivePath);
         } else {
           const maxSegmentSize = Math.min(2147483647, buffer.constants.MAX_LENGTH);
           const downloadProgress = new DownloadProgress(contentLength2);
-          const fd = fs2.openSync(archivePath, "w");
+          const fd = fs3.openSync(archivePath, "w");
           try {
             downloadProgress.startDisplayTimer();
             const controller = new abort_controller_1.AbortController();
@@ -63161,12 +63161,12 @@ var require_downloadUtils = __commonJS({
                 controller.abort();
                 throw new Error("Aborting cache download as the download time exceeded the timeout.");
               } else if (Buffer.isBuffer(result)) {
-                fs2.writeFileSync(fd, result);
+                fs3.writeFileSync(fd, result);
               }
             }
           } finally {
             downloadProgress.stopDisplayTimer();
-            fs2.closeSync(fd);
+            fs3.closeSync(fd);
           }
         }
       });
@@ -63202,7 +63202,7 @@ var require_options = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     function getUploadOptions(copy) {
       const result = {
         uploadConcurrency: 4,
@@ -63216,8 +63216,8 @@ var require_options = __commonJS({
           result.uploadChunkSize = copy.uploadChunkSize;
         }
       }
-      core3.debug(`Upload concurrency: ${result.uploadConcurrency}`);
-      core3.debug(`Upload chunk size: ${result.uploadChunkSize}`);
+      core2.debug(`Upload concurrency: ${result.uploadConcurrency}`);
+      core2.debug(`Upload chunk size: ${result.uploadChunkSize}`);
       return result;
     }
     exports.getUploadOptions = getUploadOptions;
@@ -63246,11 +63246,11 @@ var require_options = __commonJS({
       if (segmentDownloadTimeoutMins && !isNaN(Number(segmentDownloadTimeoutMins)) && isFinite(Number(segmentDownloadTimeoutMins))) {
         result.segmentTimeoutInMs = Number(segmentDownloadTimeoutMins) * 60 * 1e3;
       }
-      core3.debug(`Use Azure SDK: ${result.useAzureSdk}`);
-      core3.debug(`Download concurrency: ${result.downloadConcurrency}`);
-      core3.debug(`Request timeout (ms): ${result.timeoutInMs}`);
-      core3.debug(`Cache segment download timeout mins env var: ${process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"]}`);
-      core3.debug(`Segment download timeout (ms): ${result.segmentTimeoutInMs}`);
+      core2.debug(`Use Azure SDK: ${result.useAzureSdk}`);
+      core2.debug(`Download concurrency: ${result.downloadConcurrency}`);
+      core2.debug(`Request timeout (ms): ${result.timeoutInMs}`);
+      core2.debug(`Cache segment download timeout mins env var: ${process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"]}`);
+      core2.debug(`Segment download timeout (ms): ${result.segmentTimeoutInMs}`);
       return result;
     }
     exports.getDownloadOptions = getDownloadOptions;
@@ -63301,11 +63301,11 @@ var require_cacheHttpClient = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
     var crypto6 = __importStar(require("crypto"));
-    var fs2 = __importStar(require("fs"));
+    var fs3 = __importStar(require("fs"));
     var url_1 = require("url");
     var utils = __importStar(require_cacheUtils());
     var constants_1 = require_constants();
@@ -63319,7 +63319,7 @@ var require_cacheHttpClient = __commonJS({
         throw new Error("Cache Service Url not found, unable to restore cache.");
       }
       const url2 = `${baseUrl}_apis/artifactcache/${resource}`;
-      core3.debug(`Resource Url: ${url2}`);
+      core2.debug(`Resource Url: ${url2}`);
       return url2;
     }
     function createAcceptHeader(type3, apiVersion) {
@@ -63363,9 +63363,9 @@ var require_cacheHttpClient = __commonJS({
         if (!cacheDownloadUrl) {
           throw new Error("Cache not found.");
         }
-        core3.setSecret(cacheDownloadUrl);
-        core3.debug(`Cache Result:`);
-        core3.debug(JSON.stringify(cacheResult));
+        core2.setSecret(cacheDownloadUrl);
+        core2.debug(`Cache Result:`);
+        core2.debug(JSON.stringify(cacheResult));
         return cacheResult;
       });
     }
@@ -63403,7 +63403,7 @@ var require_cacheHttpClient = __commonJS({
     }
     function uploadChunk(httpClient, resourceUrl, openStream, start, end) {
       return __awaiter(this, void 0, void 0, function* () {
-        core3.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
+        core2.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
         const additionalHeaders = {
           "Content-Type": "application/octet-stream",
           "Content-Range": getContentRange(start, end)
@@ -63420,12 +63420,12 @@ var require_cacheHttpClient = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         const fileSize = utils.getArchiveFileSizeInBytes(archivePath);
         const resourceUrl = getCacheApiUrl(`caches/${cacheId.toString()}`);
-        const fd = fs2.openSync(archivePath, "r");
+        const fd = fs3.openSync(archivePath, "r");
         const uploadOptions = options_1.getUploadOptions(options);
         const concurrency = utils.assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
         const maxChunkSize = utils.assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
         const parallelUploads = [...new Array(concurrency).keys()];
-        core3.debug("Awaiting all uploads");
+        core2.debug("Awaiting all uploads");
         let offset = 0;
         try {
           yield Promise.all(parallelUploads.map(() => __awaiter(this, void 0, void 0, function* () {
@@ -63434,7 +63434,7 @@ var require_cacheHttpClient = __commonJS({
               const start = offset;
               const end = offset + chunkSize - 1;
               offset += maxChunkSize;
-              yield uploadChunk(httpClient, resourceUrl, () => fs2.createReadStream(archivePath, {
+              yield uploadChunk(httpClient, resourceUrl, () => fs3.createReadStream(archivePath, {
                 fd,
                 start,
                 end,
@@ -63445,7 +63445,7 @@ var require_cacheHttpClient = __commonJS({
             }
           })));
         } finally {
-          fs2.closeSync(fd);
+          fs3.closeSync(fd);
         }
         return;
       });
@@ -63461,16 +63461,16 @@ var require_cacheHttpClient = __commonJS({
     function saveCache3(cacheId, archivePath, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        core3.debug("Upload cache");
+        core2.debug("Upload cache");
         yield uploadFile(httpClient, cacheId, archivePath, options);
-        core3.debug("Commiting cache");
+        core2.debug("Commiting cache");
         const cacheSize = utils.getArchiveFileSizeInBytes(archivePath);
-        core3.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
+        core2.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
         const commitCacheResponse = yield commitCache(httpClient, cacheId, cacheSize);
         if (!requestUtils_1.isSuccessStatusCode(commitCacheResponse.statusCode)) {
           throw new Error(`Cache service responded with ${commitCacheResponse.statusCode} during commit cache.`);
         }
-        core3.info("Cache saved successfully");
+        core2.info("Cache saved successfully");
       });
     }
     exports.saveCache = saveCache3;
@@ -63566,8 +63566,8 @@ var require_tar = __commonJS({
       });
     }
     function getWorkingDirectory() {
-      var _a3;
-      return (_a3 = process.env["GITHUB_WORKSPACE"]) !== null && _a3 !== void 0 ? _a3 : process.cwd();
+      var _a;
+      return (_a = process.env["GITHUB_WORKSPACE"]) !== null && _a !== void 0 ? _a : process.cwd();
     }
     function getCompressionProgram(compressionMethod) {
       switch (compressionMethod) {
@@ -63693,7 +63693,7 @@ var require_cache = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     var path5 = __importStar(require("path"));
     var utils = __importStar(require_cacheUtils());
     var cacheHttpClient = __importStar(require_cacheHttpClient());
@@ -63737,8 +63737,8 @@ var require_cache = __commonJS({
         checkPaths(paths);
         restoreKeys = restoreKeys || [];
         const keys = [primaryKey, ...restoreKeys];
-        core3.debug("Resolved Keys:");
-        core3.debug(JSON.stringify(keys));
+        core2.debug("Resolved Keys:");
+        core2.debug(JSON.stringify(keys));
         if (keys.length > 10) {
           throw new ValidationError(`Key Validation Error: Keys are limited to a maximum of 10.`);
         }
@@ -63755,28 +63755,28 @@ var require_cache = __commonJS({
             return void 0;
           }
           archivePath = path5.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
-          core3.debug(`Archive Path: ${archivePath}`);
+          core2.debug(`Archive Path: ${archivePath}`);
           yield cacheHttpClient.downloadCache(cacheEntry.archiveLocation, archivePath, options);
-          if (core3.isDebug()) {
+          if (core2.isDebug()) {
             yield tar_1.listTar(archivePath, compressionMethod);
           }
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core3.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+          core2.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
           yield tar_1.extractTar(archivePath, compressionMethod);
-          core3.info("Cache restored successfully");
+          core2.info("Cache restored successfully");
           return cacheEntry.cacheKey;
         } catch (error2) {
           const typedError = error2;
           if (typedError.name === ValidationError.name) {
             throw error2;
           } else {
-            core3.warning(`Failed to restore: ${error2.message}`);
+            core2.warning(`Failed to restore: ${error2.message}`);
           }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
           } catch (error2) {
-            core3.debug(`Failed to delete archive: ${error2}`);
+            core2.debug(`Failed to delete archive: ${error2}`);
           }
         }
         return void 0;
@@ -63784,60 +63784,60 @@ var require_cache = __commonJS({
     }
     exports.restoreCache = restoreCache3;
     function saveCache3(paths, key, options) {
-      var _a3, _b, _c, _d, _e;
+      var _a, _b, _c, _d, _e;
       return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(key);
         const compressionMethod = yield utils.getCompressionMethod();
         let cacheId = -1;
         const cachePaths = yield utils.resolvePaths(paths);
-        core3.debug("Cache Paths:");
-        core3.debug(`${JSON.stringify(cachePaths)}`);
+        core2.debug("Cache Paths:");
+        core2.debug(`${JSON.stringify(cachePaths)}`);
         if (cachePaths.length === 0) {
           throw new Error(`Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.`);
         }
         const archiveFolder = yield utils.createTempDirectory();
         const archivePath = path5.join(archiveFolder, utils.getCacheFileName(compressionMethod));
-        core3.debug(`Archive Path: ${archivePath}`);
+        core2.debug(`Archive Path: ${archivePath}`);
         try {
           yield tar_1.createTar(archiveFolder, cachePaths, compressionMethod);
-          if (core3.isDebug()) {
+          if (core2.isDebug()) {
             yield tar_1.listTar(archivePath, compressionMethod);
           }
           const fileSizeLimit = 10 * 1024 * 1024 * 1024;
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core3.debug(`File Size: ${archiveFileSize}`);
+          core2.debug(`File Size: ${archiveFileSize}`);
           if (archiveFileSize > fileSizeLimit && !utils.isGhes()) {
             throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
           }
-          core3.debug("Reserving Cache");
+          core2.debug("Reserving Cache");
           const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, paths, {
             compressionMethod,
             cacheSize: archiveFileSize
           });
-          if ((_a3 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a3 === void 0 ? void 0 : _a3.cacheId) {
+          if ((_a = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a === void 0 ? void 0 : _a.cacheId) {
             cacheId = (_b = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _b === void 0 ? void 0 : _b.cacheId;
           } else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) {
             throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
           } else {
             throw new ReserveCacheError2(`Unable to reserve cache with key ${key}, another job may be creating this cache. More details: ${(_e = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _e === void 0 ? void 0 : _e.message}`);
           }
-          core3.debug(`Saving Cache (ID: ${cacheId})`);
+          core2.debug(`Saving Cache (ID: ${cacheId})`);
           yield cacheHttpClient.saveCache(cacheId, archivePath, options);
         } catch (error2) {
           const typedError = error2;
           if (typedError.name === ValidationError.name) {
             throw error2;
           } else if (typedError.name === ReserveCacheError2.name) {
-            core3.info(`Failed to save: ${typedError.message}`);
+            core2.info(`Failed to save: ${typedError.message}`);
           } else {
-            core3.warning(`Failed to save: ${typedError.message}`);
+            core2.warning(`Failed to save: ${typedError.message}`);
           }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
           } catch (error2) {
-            core3.debug(`Failed to delete archive: ${error2}`);
+            core2.debug(`Failed to delete archive: ${error2}`);
           }
         }
         return cacheId;
@@ -63905,7 +63905,7 @@ var require_internal_glob_options_helper2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getOptions = void 0;
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     function getOptions(copy) {
       const result = {
         followSymbolicLinks: true,
@@ -63916,19 +63916,19 @@ var require_internal_glob_options_helper2 = __commonJS({
       if (copy) {
         if (typeof copy.followSymbolicLinks === "boolean") {
           result.followSymbolicLinks = copy.followSymbolicLinks;
-          core3.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+          core2.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
         }
         if (typeof copy.implicitDescendants === "boolean") {
           result.implicitDescendants = copy.implicitDescendants;
-          core3.debug(`implicitDescendants '${result.implicitDescendants}'`);
+          core2.debug(`implicitDescendants '${result.implicitDescendants}'`);
         }
         if (typeof copy.matchDirectories === "boolean") {
           result.matchDirectories = copy.matchDirectories;
-          core3.debug(`matchDirectories '${result.matchDirectories}'`);
+          core2.debug(`matchDirectories '${result.matchDirectories}'`);
         }
         if (typeof copy.omitBrokenSymbolicLinks === "boolean") {
           result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
-          core3.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+          core2.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
         }
       }
       return result;
@@ -64230,8 +64230,8 @@ var require_internal_path2 = __commonJS({
             let remaining = itemPath;
             let dir = pathHelper.dirname(remaining);
             while (dir !== remaining) {
-              const basename2 = path5.basename(remaining);
-              this.segments.unshift(basename2);
+              const basename = path5.basename(remaining);
+              this.segments.unshift(basename);
               remaining = dir;
               dir = pathHelper.dirname(remaining);
             }
@@ -64594,8 +64594,8 @@ var require_internal_globber2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DefaultGlobber = void 0;
-    var core3 = __importStar(require_core());
-    var fs2 = __importStar(require("fs"));
+    var core2 = __importStar(require_core());
+    var fs3 = __importStar(require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper2());
     var path5 = __importStar(require("path"));
     var patternHelper = __importStar(require_internal_pattern_helper2());
@@ -64613,7 +64613,7 @@ var require_internal_globber2 = __commonJS({
         return this.searchPaths.slice();
       }
       glob() {
-        var e_1, _a3;
+        var e_1, _a;
         return __awaiter(this, void 0, void 0, function* () {
           const result = [];
           try {
@@ -64625,8 +64625,8 @@ var require_internal_globber2 = __commonJS({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a3 = _b.return))
-                yield _a3.call(_b);
+              if (_c && !_c.done && (_a = _b.return))
+                yield _a.call(_b);
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -64647,9 +64647,9 @@ var require_internal_globber2 = __commonJS({
           }
           const stack = [];
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
-            core3.debug(`Search path '${searchPath}'`);
+            core2.debug(`Search path '${searchPath}'`);
             try {
-              yield __await2(fs2.promises.lstat(searchPath));
+              yield __await2(fs3.promises.lstat(searchPath));
             } catch (err) {
               if (err.code === "ENOENT") {
                 continue;
@@ -64679,7 +64679,7 @@ var require_internal_globber2 = __commonJS({
                 continue;
               }
               const childLevel = item.level + 1;
-              const childItems = (yield __await2(fs2.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path5.join(item.path, x), childLevel));
+              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path5.join(item.path, x), childLevel));
               stack.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
               yield yield __await2(item.path);
@@ -64711,11 +64711,11 @@ var require_internal_globber2 = __commonJS({
           let stats;
           if (options.followSymbolicLinks) {
             try {
-              stats = yield fs2.promises.stat(item.path);
+              stats = yield fs3.promises.stat(item.path);
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
-                  core3.debug(`Broken symlink '${item.path}'`);
+                  core2.debug(`Broken symlink '${item.path}'`);
                   return void 0;
                 }
                 throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
@@ -64723,15 +64723,15 @@ var require_internal_globber2 = __commonJS({
               throw err;
             }
           } else {
-            stats = yield fs2.promises.lstat(item.path);
+            stats = yield fs3.promises.lstat(item.path);
           }
           if (stats.isDirectory() && options.followSymbolicLinks) {
-            const realPath = yield fs2.promises.realpath(item.path);
+            const realPath = yield fs3.promises.realpath(item.path);
             while (traversalChain.length >= item.level) {
               traversalChain.pop();
             }
             if (traversalChain.some((x) => x === realPath)) {
-              core3.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+              core2.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
               return void 0;
             }
             traversalChain.push(realPath);
@@ -64826,16 +64826,16 @@ var require_internal_hash_files = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.hashFiles = void 0;
     var crypto6 = __importStar(require("crypto"));
-    var core3 = __importStar(require_core());
-    var fs2 = __importStar(require("fs"));
+    var core2 = __importStar(require_core());
+    var fs3 = __importStar(require("fs"));
     var stream = __importStar(require("stream"));
     var util3 = __importStar(require("util"));
     var path5 = __importStar(require("path"));
     function hashFiles(globber, verbose = false) {
-      var e_1, _a3;
+      var e_1, _a;
       var _b;
       return __awaiter(this, void 0, void 0, function* () {
-        const writeDelegate = verbose ? core3.info : core3.debug;
+        const writeDelegate = verbose ? core2.info : core2.debug;
         let hasMatch = false;
         const githubWorkspace = (_b = process.env["GITHUB_WORKSPACE"]) !== null && _b !== void 0 ? _b : process.cwd();
         const result = crypto6.createHash("sha256");
@@ -64848,13 +64848,13 @@ var require_internal_hash_files = __commonJS({
               writeDelegate(`Ignore '${file}' since it is not under GITHUB_WORKSPACE.`);
               continue;
             }
-            if (fs2.statSync(file).isDirectory()) {
+            if (fs3.statSync(file).isDirectory()) {
               writeDelegate(`Skip directory '${file}'.`);
               continue;
             }
             const hash = crypto6.createHash("sha256");
             const pipeline = util3.promisify(stream.pipeline);
-            yield pipeline(fs2.createReadStream(file), hash);
+            yield pipeline(fs3.createReadStream(file), hash);
             result.write(hash.digest());
             count++;
             if (!hasMatch) {
@@ -64865,8 +64865,8 @@ var require_internal_hash_files = __commonJS({
           e_1 = { error: e_1_1 };
         } finally {
           try {
-            if (_d && !_d.done && (_a3 = _c.return))
-              yield _a3.call(_c);
+            if (_d && !_d.done && (_a = _c.return))
+              yield _a.call(_c);
           } finally {
             if (e_1)
               throw e_1.error;
@@ -65006,7 +65006,7 @@ var require_manifest = __commonJS({
     var core_1 = require_core();
     var os4 = require("os");
     var cp = require("child_process");
-    var fs2 = require("fs");
+    var fs3 = require("fs");
     function _findMatch(versionSpec, stable, candidates, archFilter) {
       return __awaiter(this, void 0, void 0, function* () {
         const platFilter = os4.platform();
@@ -65070,10 +65070,10 @@ var require_manifest = __commonJS({
       const lsbReleaseFile = "/etc/lsb-release";
       const osReleaseFile = "/etc/os-release";
       let contents = "";
-      if (fs2.existsSync(lsbReleaseFile)) {
-        contents = fs2.readFileSync(lsbReleaseFile).toString();
-      } else if (fs2.existsSync(osReleaseFile)) {
-        contents = fs2.readFileSync(osReleaseFile).toString();
+      if (fs3.existsSync(lsbReleaseFile)) {
+        contents = fs3.readFileSync(lsbReleaseFile).toString();
+      } else if (fs3.existsSync(osReleaseFile)) {
+        contents = fs3.readFileSync(osReleaseFile).toString();
       }
       return contents;
     }
@@ -65142,7 +65142,7 @@ var require_retry_helper = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.RetryHelper = void 0;
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     var RetryHelper = class {
       constructor(maxAttempts, minSeconds, maxSeconds) {
         if (maxAttempts < 1) {
@@ -65165,10 +65165,10 @@ var require_retry_helper = __commonJS({
               if (isRetryable && !isRetryable(err)) {
                 throw err;
               }
-              core3.info(err.message);
+              core2.info(err.message);
             }
             const seconds = this.getSleepAmount();
-            core3.info(`Waiting ${seconds} seconds before trying again`);
+            core2.info(`Waiting ${seconds} seconds before trying again`);
             yield this.sleep(seconds);
             attempt++;
           }
@@ -65252,9 +65252,9 @@ var require_tool_cache = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.evaluateVersions = exports.isExplicitVersion = exports.findFromManifest = exports.getManifestFromRepo = exports.findAllVersions = exports.find = exports.cacheFile = exports.cacheDir = exports.extractZip = exports.extractXar = exports.extractTar = exports.extract7z = exports.downloadTool = exports.HTTPError = void 0;
-    var core3 = __importStar(require_core());
+    var core2 = __importStar(require_core());
     var io = __importStar(require_io());
-    var fs2 = __importStar(require("fs"));
+    var fs3 = __importStar(require("fs"));
     var mm = __importStar(require_manifest());
     var os4 = __importStar(require("os"));
     var path5 = __importStar(require("path"));
@@ -65281,8 +65281,8 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         dest = dest || path5.join(_getTempDirectory(), v4_1.default());
         yield io.mkdirP(path5.dirname(dest));
-        core3.debug(`Downloading ${url2}`);
-        core3.debug(`Destination ${dest}`);
+        core2.debug(`Downloading ${url2}`);
+        core2.debug(`Destination ${dest}`);
         const maxAttempts = 3;
         const minSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MIN_SECONDS", 10);
         const maxSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MAX_SECONDS", 20);
@@ -65302,14 +65302,14 @@ var require_tool_cache = __commonJS({
     exports.downloadTool = downloadTool2;
     function downloadToolAttempt(url2, dest, auth, headers) {
       return __awaiter(this, void 0, void 0, function* () {
-        if (fs2.existsSync(dest)) {
+        if (fs3.existsSync(dest)) {
           throw new Error(`Destination file path ${dest} already exists`);
         }
         const http3 = new httpm.HttpClient(userAgent, [], {
           allowRetries: false
         });
         if (auth) {
-          core3.debug("set auth");
+          core2.debug("set auth");
           if (headers === void 0) {
             headers = {};
           }
@@ -65318,7 +65318,7 @@ var require_tool_cache = __commonJS({
         const response = yield http3.get(url2, headers);
         if (response.message.statusCode !== 200) {
           const err = new HTTPError(response.message.statusCode);
-          core3.debug(`Failed to download from "${url2}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
+          core2.debug(`Failed to download from "${url2}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
           throw err;
         }
         const pipeline = util3.promisify(stream.pipeline);
@@ -65326,17 +65326,17 @@ var require_tool_cache = __commonJS({
         const readStream = responseMessageFactory();
         let succeeded = false;
         try {
-          yield pipeline(readStream, fs2.createWriteStream(dest));
-          core3.debug("download complete");
+          yield pipeline(readStream, fs3.createWriteStream(dest));
+          core2.debug("download complete");
           succeeded = true;
           return dest;
         } finally {
           if (!succeeded) {
-            core3.debug("download failed");
+            core2.debug("download failed");
             try {
               yield io.rmRF(dest);
             } catch (err) {
-              core3.debug(`Failed to delete '${dest}'. ${err.message}`);
+              core2.debug(`Failed to delete '${dest}'. ${err.message}`);
             }
           }
         }
@@ -65351,7 +65351,7 @@ var require_tool_cache = __commonJS({
         process.chdir(dest);
         if (_7zPath) {
           try {
-            const logLevel = core3.isDebug() ? "-bb1" : "-bb0";
+            const logLevel = core2.isDebug() ? "-bb1" : "-bb0";
             const args = [
               "x",
               logLevel,
@@ -65401,7 +65401,7 @@ var require_tool_cache = __commonJS({
           throw new Error("parameter 'file' is required");
         }
         dest = yield _createExtractFolder(dest);
-        core3.debug("Checking tar --version");
+        core2.debug("Checking tar --version");
         let versionOutput = "";
         yield exec_1.exec("tar --version", [], {
           ignoreReturnCode: true,
@@ -65411,7 +65411,7 @@ var require_tool_cache = __commonJS({
             stderr: (data) => versionOutput += data.toString()
           }
         });
-        core3.debug(versionOutput.trim());
+        core2.debug(versionOutput.trim());
         const isGnuTar = versionOutput.toUpperCase().includes("GNU TAR");
         let args;
         if (flags instanceof Array) {
@@ -65419,7 +65419,7 @@ var require_tool_cache = __commonJS({
         } else {
           args = [flags];
         }
-        if (core3.isDebug() && !flags.includes("v")) {
+        if (core2.isDebug() && !flags.includes("v")) {
           args.push("-v");
         }
         let destArg = dest;
@@ -65451,7 +65451,7 @@ var require_tool_cache = __commonJS({
           args = [flags];
         }
         args.push("-x", "-C", dest, "-f", file);
-        if (core3.isDebug()) {
+        if (core2.isDebug()) {
           args.push("-v");
         }
         const xarPath = yield io.which("xar", true);
@@ -65496,7 +65496,7 @@ var require_tool_cache = __commonJS({
             "-Command",
             pwshCommand
           ];
-          core3.debug(`Using pwsh at path: ${pwshPath}`);
+          core2.debug(`Using pwsh at path: ${pwshPath}`);
           yield exec_1.exec(`"${pwshPath}"`, args);
         } else {
           const powershellCommand = [
@@ -65516,7 +65516,7 @@ var require_tool_cache = __commonJS({
             powershellCommand
           ];
           const powershellPath = yield io.which("powershell", true);
-          core3.debug(`Using powershell at path: ${powershellPath}`);
+          core2.debug(`Using powershell at path: ${powershellPath}`);
           yield exec_1.exec(`"${powershellPath}"`, args);
         }
       });
@@ -65525,7 +65525,7 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         const unzipPath = yield io.which("unzip", true);
         const args = [file];
-        if (!core3.isDebug()) {
+        if (!core2.isDebug()) {
           args.unshift("-q");
         }
         args.unshift("-o");
@@ -65536,13 +65536,13 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         version3 = semver.clean(version3) || version3;
         arch3 = arch3 || os4.arch();
-        core3.debug(`Caching tool ${tool} ${version3} ${arch3}`);
-        core3.debug(`source dir: ${sourceDir}`);
-        if (!fs2.statSync(sourceDir).isDirectory()) {
+        core2.debug(`Caching tool ${tool} ${version3} ${arch3}`);
+        core2.debug(`source dir: ${sourceDir}`);
+        if (!fs3.statSync(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
         const destPath = yield _createToolPath(tool, version3, arch3);
-        for (const itemName of fs2.readdirSync(sourceDir)) {
+        for (const itemName of fs3.readdirSync(sourceDir)) {
           const s = path5.join(sourceDir, itemName);
           yield io.cp(s, destPath, { recursive: true });
         }
@@ -65555,14 +65555,14 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         version3 = semver.clean(version3) || version3;
         arch3 = arch3 || os4.arch();
-        core3.debug(`Caching tool ${tool} ${version3} ${arch3}`);
-        core3.debug(`source file: ${sourceFile}`);
-        if (!fs2.statSync(sourceFile).isFile()) {
+        core2.debug(`Caching tool ${tool} ${version3} ${arch3}`);
+        core2.debug(`source file: ${sourceFile}`);
+        if (!fs3.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
         const destFolder = yield _createToolPath(tool, version3, arch3);
         const destPath = path5.join(destFolder, targetFile);
-        core3.debug(`destination file ${destPath}`);
+        core2.debug(`destination file ${destPath}`);
         yield io.cp(sourceFile, destPath);
         _completeToolPath(tool, version3, arch3);
         return destFolder;
@@ -65586,12 +65586,12 @@ var require_tool_cache = __commonJS({
       if (versionSpec) {
         versionSpec = semver.clean(versionSpec) || "";
         const cachePath = path5.join(_getCacheDirectory(), toolName, versionSpec, arch3);
-        core3.debug(`checking cache: ${cachePath}`);
-        if (fs2.existsSync(cachePath) && fs2.existsSync(`${cachePath}.complete`)) {
-          core3.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch3}`);
+        core2.debug(`checking cache: ${cachePath}`);
+        if (fs3.existsSync(cachePath) && fs3.existsSync(`${cachePath}.complete`)) {
+          core2.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch3}`);
           toolPath = cachePath;
         } else {
-          core3.debug("not found");
+          core2.debug("not found");
         }
       }
       return toolPath;
@@ -65601,12 +65601,12 @@ var require_tool_cache = __commonJS({
       const versions = [];
       arch3 = arch3 || os4.arch();
       const toolPath = path5.join(_getCacheDirectory(), toolName);
-      if (fs2.existsSync(toolPath)) {
-        const children2 = fs2.readdirSync(toolPath);
+      if (fs3.existsSync(toolPath)) {
+        const children2 = fs3.readdirSync(toolPath);
         for (const child of children2) {
           if (isExplicitVersion(child)) {
             const fullPath = path5.join(toolPath, child, arch3 || "");
-            if (fs2.existsSync(fullPath) && fs2.existsSync(`${fullPath}.complete`)) {
+            if (fs3.existsSync(fullPath) && fs3.existsSync(`${fullPath}.complete`)) {
               versions.push(child);
             }
           }
@@ -65622,7 +65622,7 @@ var require_tool_cache = __commonJS({
         const http3 = new httpm.HttpClient("tool-cache");
         const headers = {};
         if (auth) {
-          core3.debug("set auth");
+          core2.debug("set auth");
           headers.authorization = auth;
         }
         const response = yield http3.getJson(treeUrl, headers);
@@ -65642,8 +65642,8 @@ var require_tool_cache = __commonJS({
           versionsRaw = versionsRaw.replace(/^\uFEFF/, "");
           try {
             releases = JSON.parse(versionsRaw);
-          } catch (_a3) {
-            core3.debug("Invalid json");
+          } catch (_a) {
+            core2.debug("Invalid json");
           }
         }
         return releases;
@@ -65669,7 +65669,7 @@ var require_tool_cache = __commonJS({
     function _createToolPath(tool, version3, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
         const folderPath = path5.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
-        core3.debug(`destination ${folderPath}`);
+        core2.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
         yield io.rmRF(folderPath);
         yield io.rmRF(markerPath);
@@ -65680,20 +65680,20 @@ var require_tool_cache = __commonJS({
     function _completeToolPath(tool, version3, arch3) {
       const folderPath = path5.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
       const markerPath = `${folderPath}.complete`;
-      fs2.writeFileSync(markerPath, "");
-      core3.debug("finished caching tool");
+      fs3.writeFileSync(markerPath, "");
+      core2.debug("finished caching tool");
     }
     function isExplicitVersion(versionSpec) {
       const c = semver.clean(versionSpec) || "";
-      core3.debug(`isExplicit: ${c}`);
+      core2.debug(`isExplicit: ${c}`);
       const valid = semver.valid(c) != null;
-      core3.debug(`explicit? ${valid}`);
+      core2.debug(`explicit? ${valid}`);
       return valid;
     }
     exports.isExplicitVersion = isExplicitVersion;
     function evaluateVersions(versions, versionSpec) {
       let version3 = "";
-      core3.debug(`evaluating ${versions.length} versions`);
+      core2.debug(`evaluating ${versions.length} versions`);
       versions = versions.sort((a, b) => {
         if (semver.gt(a, b)) {
           return 1;
@@ -65709,9 +65709,9 @@ var require_tool_cache = __commonJS({
         }
       }
       if (version3) {
-        core3.debug(`matched: ${version3}`);
+        core2.debug(`matched: ${version3}`);
       } else {
-        core3.debug("match not found");
+        core2.debug("match not found");
       }
       return version3;
     }
@@ -65993,8 +65993,8 @@ var Reflect2;
           keys.push(key);
         }
       }
-      for (var _a3 = 0, parentKeys_1 = parentKeys; _a3 < parentKeys_1.length; _a3++) {
-        var key = parentKeys_1[_a3];
+      for (var _a = 0, parentKeys_1 = parentKeys; _a < parentKeys_1.length; _a++) {
+        var key = parentKeys_1[_a];
         var hasKey = set.has(key);
         if (!hasKey) {
           set.add(key);
@@ -66459,18 +66459,19 @@ var Reflect2;
 })(Reflect2 || (Reflect2 = {}));
 
 // lib/action.js
-var import_crypto7 = require("crypto");
-var import_os5 = require("os");
-var import_types5 = require("util/types");
-var import_core2 = __toESM(require_core());
+var import_node_crypto = require("crypto");
+var import_node_os5 = require("os");
+var import_types4 = require("util/types");
+var import_core4 = __toESM(require_core());
 
 // lib/context.js
 init_tslib_es6();
-var import_os3 = require("os");
-var path3 = __toESM(require("path"));
-var process3 = __toESM(require("process"));
+var import_promises2 = require("fs/promises");
+var import_node_os3 = require("os");
+var import_node_path3 = __toESM(require("path"));
+var import_node_process2 = __toESM(require("process"));
 var cache2 = __toESM(require_cache());
-var core2 = __toESM(require_core());
+var import_core3 = __toESM(require_core());
 
 // node_modules/class-transformer/esm5/enums/transformation-type.enum.js
 var TransformationType;
@@ -66609,8 +66610,8 @@ var MetadataStorage = function() {
       });
     }
     var metadataFromAncestors = [];
-    for (var _i = 0, _a3 = this.getAncestors(target); _i < _a3.length; _i++) {
-      var ancestor = _a3[_i];
+    for (var _i = 0, _a = this.getAncestors(target); _i < _a.length; _i++) {
+      var ancestor = _a[_i];
       var ancestorMetadataMap = metadatas.get(ancestor);
       if (ancestorMetadataMap) {
         var metadataFromAncestor = Array.from(ancestorMetadataMap.values()).filter(function(meta) {
@@ -66629,8 +66630,8 @@ var MetadataStorage = function() {
         return metadataFromTarget;
       }
     }
-    for (var _i = 0, _a3 = this.getAncestors(target); _i < _a3.length; _i++) {
-      var ancestor = _a3[_i];
+    for (var _i = 0, _a = this.getAncestors(target); _i < _a.length; _i++) {
+      var ancestor = _a[_i];
       var ancestorMetadataMap = metadatas.get(ancestor);
       if (ancestorMetadataMap) {
         var ancestorResult = ancestorMetadataMap.get(propertyName);
@@ -66648,8 +66649,8 @@ var MetadataStorage = function() {
       metadataFromTarget = metadataFromTargetMap.get(propertyName);
     }
     var metadataFromAncestorsTarget = [];
-    for (var _i = 0, _a3 = this.getAncestors(target); _i < _a3.length; _i++) {
-      var ancestor = _a3[_i];
+    for (var _i = 0, _a = this.getAncestors(target); _i < _a.length; _i++) {
+      var ancestor = _a[_i];
       var ancestorMetadataMap = metadatas.get(ancestor);
       if (ancestorMetadataMap) {
         if (ancestorMetadataMap.has(propertyName)) {
@@ -67223,6 +67224,7 @@ var import_decorator_cache_getter2 = __toESM(require_dist());
 // lib/log.js
 var import_types3 = require("util/types");
 var core = __toESM(require_core());
+var import_core = __toESM(require_core());
 function log2(message, { level = "info", cause } = {}) {
   const logger3 = core[level === "warn" ? "warning" : level];
   if (cause === void 0) {
@@ -67246,29 +67248,31 @@ function warn(message, options) {
 
 // lib/texlive.js
 init_tslib_es6();
-var import_promises = require("fs/promises");
-var import_os2 = require("os");
-var path2 = __toESM(require("path"));
-var import_core = __toESM(require_core());
+var import_node_os2 = require("os");
+var import_node_path2 = __toESM(require("path"));
+var import_core2 = __toESM(require_core());
 var import_exec = __toESM(require_exec());
+var import_http_client = __toESM(require_lib());
 var import_decorator_cache_getter = __toESM(require_dist());
 
 // lib/utility.js
-var os3 = __toESM(require("os"));
-var path = __toESM(require("path"));
-var process2 = __toESM(require("process"));
+var import_promises = __toESM(require("fs/promises"));
+var import_node_os = __toESM(require("os"));
+var import_node_path = __toESM(require("path"));
+var import_node_process = __toESM(require("process"));
 var cache = __toESM(require_cache());
 var import_glob = __toESM(require_glob2());
+var import_io = __toESM(require_io());
 var import_tool_cache = __toESM(require_tool_cache());
 var Serializable = class {
+  constructor() {
+    Exclude()(this.constructor);
+  }
   toPlain(options) {
     return instanceToPlain(this, options);
   }
   toJSON() {
     return this.toPlain();
-  }
-  toString() {
-    return JSON.stringify(this);
   }
 };
 async function extract(archive, kind) {
@@ -67277,7 +67281,7 @@ async function extract(archive, kind) {
       return await (0, import_tool_cache.extractTar)(archive, void 0, ["xz", "--strip=1"]);
     case "zip":
       try {
-        return await determine(path.join(await (0, import_tool_cache.extractZip)(archive), "*"));
+        return await determine(import_node_path.default.join(await (0, import_tool_cache.extractZip)(archive), "*"));
       } catch (cause) {
         throw new Error("Unable to locate subdirectory", { cause });
       }
@@ -67304,52 +67308,97 @@ async function saveCache2(target, primaryKey) {
   }
 }
 async function restoreCache2(target, primaryKey, restoreKeys) {
-  let key = void 0;
+  let key;
   try {
     key = await cache.restoreCache([target], primaryKey, restoreKeys);
     if (key !== void 0) {
       info(`${target} restored from cache with key: ${key}`);
-      return key === primaryKey ? "primary" : "secondary";
     } else {
       info("Cache not found");
     }
-  } catch (error2) {
-    warn("Failed to restore cache", { cause: error2 });
+  } catch (cause) {
+    warn("Failed to restore cache", { cause });
   }
-  return void 0;
+  return key;
 }
-function tmpdir2() {
-  return process2.env["RUNNER_TEMP"] ?? os3.tmpdir();
+function tmpdir() {
+  return import_node_process.default.env["RUNNER_TEMP"] ?? import_node_os.default.tmpdir();
+}
+async function* mkdtemp() {
+  const tmp = await import_promises.default.mkdtemp(import_node_path.default.join(tmpdir(), "setup-texlive-"));
+  try {
+    yield tmp;
+  } finally {
+    await (0, import_io.rmRF)(tmp);
+  }
 }
 
 // lib/texlive.js
-var Version;
-(function(Version2) {
-  Version2.LATEST = "2022";
-  function isVersion(version3) {
-    const versions = ["2022", "2008", "2020", "2021", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"];
-    return versions.includes(version3);
-  }
-  Version2.isVersion = isVersion;
-  function isLatest(version3) {
-    return version3 === Version2.LATEST;
-  }
-  Version2.isLatest = isLatest;
-  function validate3(version3) {
-    if (isVersion(version3)) {
-      if ((0, import_os2.platform)() === "darwin" && version3 < "2013") {
+var _Version = class {
+  constructor(spec) {
+    __publicField(this, "spec");
+    this.spec = spec;
+    if (/^199[6-9]|200[0-7]$/u.test(spec)) {
+      throw new RangeError("Versions prior to 2008 are not supported");
+    } else if (/^20\d\d$/u.test(spec) && spec <= _Version.LATEST) {
+      if ((0, import_node_os2.platform)() === "darwin" && spec < "2013") {
         throw new RangeError("Versions prior to 2013 does not work on 64-bit macOS");
       }
-    } else {
-      if (/^199[6-9]|200[0-7]$/u.test(version3)) {
-        throw new RangeError("Versions prior to 2008 are not supported");
-      } else {
-        throw new TypeError(`'${version3}' is not a valid version`);
-      }
+    } else if (spec !== "latest") {
+      throw new TypeError(`'${spec}' is not a valid version spec`);
     }
   }
-  Version2.validate = validate3;
-})(Version || (Version = {}));
+  get number() {
+    return Number.parseInt(this.toString());
+  }
+  isLatest() {
+    return this.spec === "latest" || this.toString() === _Version.LATEST;
+  }
+  toString() {
+    return this.spec === "latest" ? _Version.LATEST : this.spec;
+  }
+  toJSON() {
+    return this.toString();
+  }
+  [Symbol.toPrimitive](hint) {
+    return hint === "number" ? this.number : this.toString();
+  }
+  static get LATEST() {
+    return this.latest;
+  }
+  static async checkLatest() {
+    const endpoint = "https://ctan.org/json/2.0/pkg/texlive";
+    const http3 = new import_http_client.HttpClient();
+    const { result, statusCode } = await http3.getJson(endpoint);
+    if (statusCode === import_http_client.HttpCodes.NotFound) {
+      throw new Error(`${endpoint} returned ${import_http_client.HttpCodes.NotFound}`);
+    }
+    const latest = result?.version?.number ?? "";
+    if (!/^20\d\d$/u.test(latest)) {
+      throw new TypeError(`Invalid response: ${JSON.stringify(result)}`);
+    }
+    return _Version.latest = latest;
+  }
+  static async resolve(spec) {
+    if (Date.now() > Date.UTC(Number.parseInt(_Version.LATEST) + 1, 4, 1)) {
+      try {
+        info("Checking for the latest version of TeX Live");
+        info(`Latest version: ${await _Version.checkLatest()}`);
+      } catch (cause) {
+        info("Failed to check for the latest version", { cause });
+        info(`Instead ${_Version.LATEST} will be used as the latest version`);
+      }
+    }
+    return new _Version(spec);
+  }
+};
+var Version = _Version;
+__publicField(Version, "latest", "2022");
+__decorate([
+  import_decorator_cache_getter.cache,
+  __metadata("design:type", Number),
+  __metadata("design:paramtypes", [])
+], Version.prototype, "number", null);
 var Tlmgr = class {
   constructor(version3, TEXDIR) {
     __publicField(this, "version");
@@ -67361,7 +67410,7 @@ var Tlmgr = class {
     return new Tlmgr.Conf(this.version);
   }
   async install(...packages) {
-    if (packages.length !== 0) {
+    if (packages.length > 0) {
       const { stderr } = await (0, import_exec.getExecOutput)("tlmgr", ["install", ...packages]);
       tlpkg.check(stderr);
     }
@@ -67381,13 +67430,13 @@ var Tlmgr = class {
       args.push("--all");
     }
     if (options.self ?? false) {
-      if (this.version === "2008") {
+      if (this.version.number === 2008) {
         packages = ["texlive.infra", ...packages];
       } else {
         args.push("--self");
       }
     }
-    if ((options.reinstallForciblyRemoved ?? false) && this.version >= "2009") {
+    if ((options.reinstallForciblyRemoved ?? false) && this.version.number >= 2009) {
       args.push("--reinstall-forcibly-removed");
     }
     await (0, import_exec.exec)("tlmgr", [...args, ...packages]);
@@ -67421,10 +67470,11 @@ __decorate([
     }
     async texmf(key, value) {
       if (value === void 0) {
-        return (await (0, import_exec.getExecOutput)("kpsewhich", ["-var-value", key])).stdout.trim();
+        const { stdout } = await (0, import_exec.getExecOutput)("kpsewhich", ["-var-value", key]);
+        return stdout.trim();
       }
-      if (this.version < "2010") {
-        (0, import_core.exportVariable)(key, value);
+      if (this.version.number < 2010) {
+        (0, import_core2.exportVariable)(key, value);
       } else {
         await (0, import_exec.exec)("tlmgr", ["conf", "texmf", key, value]);
       }
@@ -67439,19 +67489,19 @@ __decorate([
     async add() {
       let dir;
       try {
-        dir = await determine(path2.join(this.TEXDIR, "bin", "*"));
+        dir = await determine(import_node_path2.default.join(this.TEXDIR, "bin", "*"));
       } catch (cause) {
         throw new Error("Unable to locate TeX Live's binary directory", {
           cause
         });
       }
-      (0, import_core.addPath)(dir);
+      (0, import_core2.addPath)(dir);
     }
   }
   Tlmgr2.Path = Path;
   class Pinning {
-    constructor(version3) {
-      if (version3 < "2013") {
+    constructor({ number: version3 }) {
+      if (version3 < 2013) {
         throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${version3}`);
       }
     }
@@ -67461,8 +67511,8 @@ __decorate([
   }
   Tlmgr2.Pinning = Pinning;
   class Repository {
-    constructor(version3) {
-      if (version3 < "2012") {
+    constructor({ number: version3 }) {
+      if (version3 < 2012) {
         throw new RangeError(`\`repository\` action is not implemented in TeX Live ${version3}`);
       }
     }
@@ -67474,11 +67524,9 @@ __decorate([
       const { exitCode, stderr } = await (0, import_exec.getExecOutput)("tlmgr", args, {
         ignoreReturnCode: true
       });
-      const status = exitCode === 0;
-      if (!status && !stderr.includes("repository or its tag already defined")) {
-        throw new Error(`\`tlmgr\` failed with exit code ${exitCode}: ${stderr}`);
+      if (exitCode !== 0 && !stderr.includes("repository or its tag already defined")) {
+        throw new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
       }
-      return status;
     }
   }
   Tlmgr2.Repository = Repository;
@@ -67488,7 +67536,7 @@ var tlpkg;
   function check(stderr) {
     const result = /: checksums differ for (.*):$/mu.exec(stderr);
     if (result !== null) {
-      const pkg = path2.basename(result[1] ?? "", ".tar.xz");
+      const pkg = import_node_path2.default.basename(result[1] ?? "", ".tar.xz");
       throw new Error(`The checksum of package ${pkg} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
     }
   }
@@ -67496,226 +67544,193 @@ var tlpkg;
 })(tlpkg || (tlpkg = {}));
 var tlnet;
 (function(tlnet2) {
-  function contrib() {
-    return new URL("https://mirror.ctan.org/systems/texlive/tlcontrib/");
-  }
-  tlnet2.contrib = contrib;
-  function historic(version3) {
-    return new URL(version3 < "2010" ? "tlnet/" : "tlnet-final/", `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version3}/`);
+  tlnet2.CTAN = new URL("https://mirror.ctan.org/systems/texlive/tlnet/");
+  tlnet2.CONTRIB = new URL("https://mirror.ctan.org/systems/texlive/tlcontrib/");
+  function historic({ number: version3 }) {
+    return new URL(version3 < 2010 ? "tlnet/" : "tlnet-final/", `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version3}/`);
   }
   tlnet2.historic = historic;
 })(tlnet || (tlnet = {}));
 var DependsTxt = class {
   constructor(txt) {
-    __publicField(this, "dependencies", /* @__PURE__ */ new Map());
-    for (const [name, chunk] of DependsTxt.eachPackage(txt)) {
-      const deps = new DependsTxt.Dependencies(chunk);
-      if (this.dependencies.get(name)?.merge(deps) === void 0) {
-        this.dependencies.set(name, deps);
+    __publicField(this, "bundle", /* @__PURE__ */ new Map());
+    txt = txt.replaceAll(/\s*#.*$/gmu, "");
+    for (const [name, deps] of DependsTxt.unbundle(txt)) {
+      let module2 = this.bundle.get(name);
+      if (module2 === void 0) {
+        module2 = {};
+        this.bundle.set(name, module2);
+      }
+      for (const [type3, dep] of deps) {
+        (module2[type3] ??= /* @__PURE__ */ new Set()).add(dep);
       }
     }
   }
   get(name) {
-    return this.dependencies.get(name);
+    return this.bundle.get(name);
   }
   [Symbol.iterator]() {
-    return this.dependencies.entries();
+    return this.bundle.entries();
   }
-  static *eachPackage(txt) {
-    const [chunk = "", ...rest] = txt.replaceAll(/\s*#.*$/gmu, "").split(/^\s*package(?=\s|$)(.*)$/mu);
-    yield ["", chunk];
-    for (let i = 0; i < rest.length; ++i) {
-      let name = (rest[i] ?? "").trim();
+  static *unbundle(txt) {
+    const [globals, ...rest] = txt.split(/^\s*package(?=\s|$)(.*)$/mu);
+    yield ["", this.parse(globals)];
+    const iter = rest.values();
+    for (let name of iter) {
+      name = name.trim();
       if (name === "" || /\s/u.test(name)) {
-        warn(`\`package\` directive must have exactly one argument, but given ${name.length}: ${name}`);
+        warn("`package` directive must have exactly one argument, but given: " + name);
         name = "";
       }
-      yield [name, rest[++i] ?? ""];
+      yield [name, this.parse(iter.next().value)];
     }
   }
-  static async fromFile(file) {
-    return new this(await (0, import_promises.readFile)(file, "utf8"));
-  }
-};
-(function(DependsTxt2) {
-  class Dependencies {
-    constructor(txt) {
-      __publicField(this, "hard", /* @__PURE__ */ new Set());
-      __publicField(this, "soft", /* @__PURE__ */ new Set());
-      const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
-      for (const [, directive, args = ""] of txt.matchAll(hardOrSoft)) {
-        for (const dep of args.split(/\s+/u).filter(Boolean)) {
-          (directive === "soft" ? this.soft : this.hard).add(dep);
-        }
+  static *parse(txt) {
+    const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
+    for (const [, type3 = "hard", deps] of txt?.matchAll(hardOrSoft) ?? []) {
+      for (const dep of deps?.split(/\s+/u).filter(Boolean) ?? []) {
+        yield [type3, dep];
       }
     }
-    merge(other) {
-      other.hard.forEach((dep) => this.hard.add(dep));
-      other.soft.forEach((dep) => this.soft.add(dep));
-      return this;
-    }
   }
-  DependsTxt2.Dependencies = Dependencies;
-})(DependsTxt || (DependsTxt = {}));
+};
 
 // lib/context.js
-var State_1;
 var Inputs = class {
-  get cache() {
-    const input = core2.getBooleanInput("cache");
-    if (input && !cache2.isFeatureAvailable()) {
+  constructor(packages, version3) {
+    __publicField(this, "packages");
+    __publicField(this, "version");
+    __publicField(this, "env");
+    __publicField(this, "cache", (0, import_core3.getBooleanInput)("cache"));
+    __publicField(this, "tlcontrib", (0, import_core3.getBooleanInput)("tlcontrib"));
+    __publicField(this, "updateAllPackages", (0, import_core3.getBooleanInput)("update-all-packages"));
+    this.packages = packages;
+    this.version = version3;
+    if (this.cache && !cache2.isFeatureAvailable()) {
       warn("Caching is disabled because cache service is not available");
-      return false;
+      this.cache = false;
     }
-    return input;
-  }
-  get packages() {
-    return (async () => {
-      async function* dependsTxt() {
-        const inline = core2.getInput("packages");
-        if (inline !== "") {
-          yield* new DependsTxt(inline);
-        }
-        const file = core2.getInput("package-file");
-        if (file !== "") {
-          yield* await DependsTxt.fromFile(file);
-        }
-      }
-      const list = [];
-      for await (const [, { hard, soft }] of dependsTxt()) {
-        list.push(...hard, ...soft);
-      }
-      return new Set(list.sort());
-    })();
+    if (this.tlcontrib && !this.version.isLatest()) {
+      warn("`tlcontrib` is currently ignored for older versions");
+      this.tlcontrib = false;
+    }
+    if (this.updateAllPackages && !this.version.isLatest()) {
+      info("`update-all-packages` is ignored for older versions");
+      this.updateAllPackages = false;
+    }
+    this.env = Env.load(this.version);
   }
   get texmf() {
-    const env3 = new Env(this.version);
-    const input = core2.getInput("prefix");
-    const prefix2 = path3.normalize(input !== "" ? input : env3.TEXLIVE_INSTALL_PREFIX);
-    const TEXDIR = path3.join(prefix2, this.version);
+    const input = (0, import_core3.getInput)("prefix");
+    const prefix2 = import_node_path3.default.normalize(input !== "" ? input : this.env.TEXLIVE_INSTALL_PREFIX);
+    const TEXDIR = import_node_path3.default.join(prefix2, this.version.toString());
     return {
       TEXDIR,
-      TEXMFLOCAL: path3.join(prefix2, "texmf-local"),
-      TEXMFHOME: env3.TEXLIVE_INSTALL_TEXMFHOME,
-      TEXMFCONFIG: env3.TEXLIVE_INSTALL_TEXMFCONFIG,
-      TEXMFVAR: env3.TEXLIVE_INSTALL_TEXMFVAR
+      TEXMFLOCAL: import_node_path3.default.join(prefix2, "texmf-local"),
+      TEXMFHOME: this.env.TEXLIVE_INSTALL_TEXMFHOME,
+      TEXMFCONFIG: this.env.TEXLIVE_INSTALL_TEXMFCONFIG,
+      TEXMFVAR: this.env.TEXLIVE_INSTALL_TEXMFVAR
     };
   }
-  get tlcontrib() {
-    const input = core2.getBooleanInput("tlcontrib");
-    if (input && !Version.isLatest(this.version)) {
-      warn("`tlcontrib` is currently ignored for older versions");
-      return false;
-    }
-    return input;
+  get forceUpdateCache() {
+    return (this.env.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? "0") !== "0";
   }
-  get updateAllPackages() {
-    const input = core2.getBooleanInput("update-all-packages");
-    if (input && !Version.isLatest(this.version)) {
-      info("`update-all-packages` is ignored for older versions");
-      return false;
-    }
-    return input;
+  static async load() {
+    return new Inputs(await Inputs.loadPackages(), await Version.resolve((0, import_core3.getInput)("version")));
   }
-  get version() {
-    const input = core2.getInput("version");
-    if (input === "latest") {
-      return Version.LATEST;
+  static async loadPackages() {
+    const dependsTxt = async function* () {
+      const inline = (0, import_core3.getInput)("packages");
+      if (inline !== "") {
+        yield* new DependsTxt(inline);
+      }
+      const file = (0, import_core3.getInput)("package-file");
+      if (file !== "") {
+        yield* new DependsTxt(await (0, import_promises2.readFile)(file, "utf8"));
+      }
+    };
+    const packages = [];
+    for await (const [, { hard = [], soft = [] }] of dependsTxt()) {
+      packages.push(...hard, ...soft);
     }
-    Version.validate(input);
-    return input;
+    return new Set(packages.sort());
   }
 };
-__decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", Boolean),
-  __metadata("design:paramtypes", [])
-], Inputs.prototype, "cache", null);
-__decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", Promise),
-  __metadata("design:paramtypes", [])
-], Inputs.prototype, "packages", null);
 __decorate([
   import_decorator_cache_getter2.cache,
   __metadata("design:type", Object),
   __metadata("design:paramtypes", [])
 ], Inputs.prototype, "texmf", null);
-__decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", Boolean),
-  __metadata("design:paramtypes", [])
-], Inputs.prototype, "tlcontrib", null);
-__decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", Boolean),
-  __metadata("design:paramtypes", [])
-], Inputs.prototype, "updateAllPackages", null);
-__decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", String),
-  __metadata("design:paramtypes", [])
-], Inputs.prototype, "version", null);
-var Outputs = class Outputs2 extends Serializable {
+var Outputs = class extends Serializable {
   constructor() {
     super(...arguments);
-    __publicField(this, "cache-hit", false);
+    __publicField(this, "cacheHit", false);
+    __publicField(this, "version");
   }
   emit() {
     for (const [key, value] of Object.entries(this.toJSON())) {
-      core2.setOutput(key, value);
+      (0, import_core3.setOutput)(key, value);
     }
   }
 };
 __decorate([
-  Expose(),
+  Expose({ name: "cache-hit" }),
   __metadata("design:type", Boolean)
-], Outputs.prototype, "cache-hit", void 0);
-Outputs = __decorate([
-  Exclude()
-], Outputs);
-var Env = class {
-  constructor(version3) {
+], Outputs.prototype, "cacheHit", void 0);
+__decorate([
+  Expose(),
+  Type(() => String),
+  __metadata("design:type", Version)
+], Outputs.prototype, "version", void 0);
+var Env;
+(function(Env2) {
+  function load(version3) {
+    if (import_node_process2.default.env["RUNNER_TEMP"] === void 0) {
+      warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} is used instead`);
+    }
     for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFLOCAL", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
-      if (key in process3.env) {
+      if (key in import_node_process2.default.env) {
         warn(`\`${key}\` is set, but ignored`);
-        delete process3.env[key];
+        delete import_node_process2.default.env[key];
       }
     }
-    for (const [key, value] of Object.entries(Env.defaults(version3))) {
-      process3.env[key] ??= value;
+    for (const [key, value] of Object.entries(defaults(version3))) {
+      import_node_process2.default.env[key] ??= value;
     }
-    return process3.env;
+    return import_node_process2.default.env;
   }
-  static defaults(version3) {
-    const TEXUSERDIR = path3.join((0, import_os3.homedir)(), ".local", "texlive", version3);
+  Env2.load = load;
+  function defaults(version3) {
+    const TEXUSERDIR = import_node_path3.default.join((0, import_node_os3.homedir)(), ".local", "texlive", version3.toString());
     return {
       TEXLIVE_INSTALL_ENV_NOCHECK: "1",
       TEXLIVE_INSTALL_NO_WELCOME: "1",
-      TEXLIVE_INSTALL_PREFIX: path3.join(tmpdir2(), "setup-texlive"),
-      TEXLIVE_INSTALL_TEXMFHOME: path3.join((0, import_os3.homedir)(), "texmf"),
-      TEXLIVE_INSTALL_TEXMFCONFIG: path3.join(TEXUSERDIR, "texmf-config"),
-      TEXLIVE_INSTALL_TEXMFVAR: path3.join(TEXUSERDIR, "texmf-var")
+      TEXLIVE_INSTALL_PREFIX: import_node_path3.default.join(tmpdir(), "setup-texlive"),
+      TEXLIVE_INSTALL_TEXMFHOME: import_node_path3.default.join((0, import_node_os3.homedir)(), "texmf"),
+      TEXLIVE_INSTALL_TEXMFCONFIG: import_node_path3.default.join(TEXUSERDIR, "texmf-config"),
+      TEXLIVE_INSTALL_TEXMFVAR: import_node_path3.default.join(TEXUSERDIR, "texmf-var")
     };
   }
-};
-var _a;
-var State = State_1 = (_a = class extends Serializable {
+  Env2.defaults = defaults;
+})(Env || (Env = {}));
+var _State = class extends Serializable {
   constructor() {
     super();
     __publicField(this, "post", false);
     __publicField(this, "key");
     __publicField(this, "texdir");
-    const state = core2.getState(State_1.NAME);
+    const state = (0, import_core3.getState)(_State.NAME);
     if (state !== "") {
       plainToClassFromExist(this, JSON.parse(state));
       this.post = true;
     }
   }
   save() {
-    core2.saveState(State_1.NAME, JSON.stringify(this));
+    (0, import_core3.saveState)(_State.NAME, JSON.stringify(this));
   }
-}, __publicField(_a, "NAME", "post"), _a);
+};
+var State = _State;
+__publicField(State, "NAME", "post");
 __decorate([
   Expose(),
   __metadata("design:type", String)
@@ -67724,46 +67739,45 @@ __decorate([
   Expose(),
   __metadata("design:type", String)
 ], State.prototype, "texdir", void 0);
-State = State_1 = __decorate([
-  Exclude(),
-  __metadata("design:paramtypes", [])
-], State);
 
 // lib/install-tl.js
 init_tslib_es6();
-var import_promises2 = require("fs/promises");
-var import_os4 = require("os");
-var path4 = __toESM(require("path"));
-var import_types4 = require("util/types");
+var import_node_buffer = require("buffer");
+var import_promises3 = require("fs/promises");
+var import_node_os4 = require("os");
+var import_node_path4 = __toESM(require("path"));
 var import_exec2 = __toESM(require_exec());
-var import_io = __toESM(require_io());
 var import_tool_cache2 = __toESM(require_tool_cache());
 var InstallTL = class {
-  constructor(version3, installtl) {
+  constructor(version3, directory, patch = new Patch(version3)) {
     __publicField(this, "version");
-    __publicField(this, "installtl");
+    __publicField(this, "directory");
+    __publicField(this, "patch");
     this.version = version3;
-    this.installtl = installtl;
+    this.directory = directory;
+    this.patch = patch;
   }
   async run(profile) {
+    const installtl = import_node_path4.default.join(this.directory, InstallTL.executable(this.version));
     for await (const dest of profile.open()) {
       const options = ["-profile", dest];
-      if (!Version.isLatest(this.version)) {
+      if (!this.version.isLatest()) {
         const repo = tlnet.historic(this.version);
-        if (this.version < "2018") {
+        if (this.version.number < 2018) {
           repo.protocol = "http";
         }
-        options.push(this.version === "2008" ? "-location" : "-repository", repo.href);
+        options.push(this.version.number === 2008 ? "-location" : "-repository", repo.href);
       }
-      const { stderr } = await (0, import_exec2.getExecOutput)(this.installtl, options);
+      const execOptions = { input: import_node_buffer.Buffer.alloc(0) };
+      const { stderr } = await (0, import_exec2.getExecOutput)(installtl, options, execOptions);
       tlpkg.check(stderr);
     }
-    await patch(this.version, profile.TEXDIR);
+    await this.patch.apply(profile.TEXDIR);
   }
   static restore(version3) {
     let dest = "";
     try {
-      dest = (0, import_tool_cache2.find)(this.executable(version3), version3);
+      dest = (0, import_tool_cache2.find)(this.executable(version3), version3.toString());
     } catch (cause) {
       info("Failed to restore installer", { cause });
     }
@@ -67771,44 +67785,43 @@ var InstallTL = class {
       return void 0;
     } else {
       info("Found in tool cache");
-      return new this(version3, path4.join(dest, this.executable(version3)));
+      return new this(version3, dest);
     }
   }
   static async download(version3) {
-    const url2 = this.url(version3).href;
+    const { href: url2 } = this.url(version3);
     info(`Downloading ${url2}`);
     const archive = await (0, import_tool_cache2.downloadTool)(url2);
     info(`Extracting installer from ${archive}`);
-    const dest = await extract(archive, (0, import_os4.platform)() === "win32" ? "zip" : "tgz");
-    await patch(version3, dest);
+    const dest = await extract(archive, (0, import_node_os4.platform)() === "win32" ? "zip" : "tgz");
+    const patch = new Patch(version3);
+    await patch.apply(dest);
     try {
       info("Adding to tool cache");
-      await (0, import_tool_cache2.cacheDir)(dest, this.executable(version3), version3);
+      await (0, import_tool_cache2.cacheDir)(dest, this.executable(version3), version3.toString());
     } catch (cause) {
       info("Failed to cache installer", { cause });
     }
-    return new this(version3, path4.join(dest, this.executable(version3)));
+    return new this(version3, dest, patch);
   }
   static async acquire(version3) {
     return this.restore(version3) ?? await this.download(version3);
   }
-  static executable(version3) {
-    if ((0, import_os4.platform)() !== "win32") {
+  static executable({ number: version3 }) {
+    if ((0, import_node_os4.platform)() !== "win32") {
       return "install-tl";
-    } else if (version3 < "2013") {
+    } else if (version3 < 2013) {
       return "install-tl.bat";
     } else {
       return "install-tl-windows.bat";
     }
   }
   static url(version3) {
-    const archive = (0, import_os4.platform)() === "win32" ? "install-tl.zip" : "install-tl-unx.tar.gz";
-    return new URL(Version.isLatest(version3) ? path4.posix.join("..", archive) : archive, tlnet.historic(version3));
+    return new URL((0, import_node_os4.platform)() === "win32" ? "install-tl.zip" : "install-tl-unx.tar.gz", version3.isLatest() ? tlnet.CTAN : tlnet.historic(version3));
   }
 };
-var _a2;
-var Profile = (_a2 = class extends Serializable {
-  constructor(version3, { TEXDIR, TEXMFLOCAL, TEXMFSYSCONFIG, TEXMFSYSVAR }) {
+var _Profile = class extends Serializable {
+  constructor(version3, texmf) {
     super();
     __publicField(this, "version");
     __publicField(this, "selected_scheme");
@@ -67826,27 +67839,25 @@ var Profile = (_a2 = class extends Serializable {
     __publicField(this, "tlpdbopt_w32_multi_user", false);
     __publicField(this, "option_menu_integration", false);
     this.version = version3;
-    this.selected_scheme = `scheme-${version3 < "2016" ? "minimal" : "infraonly"}`;
+    this.selected_scheme = `scheme-${version3.number < 2016 ? "minimal" : "infraonly"}`;
+    const { TEXDIR, TEXMFLOCAL, TEXMFSYSCONFIG, TEXMFSYSVAR } = texmf;
     this.TEXDIR = TEXDIR;
     this.TEXMFLOCAL = TEXMFLOCAL;
-    this.TEXMFSYSCONFIG = TEXMFSYSCONFIG ?? path4.join(TEXDIR, "texmf-config");
-    this.TEXMFSYSVAR = TEXMFSYSVAR ?? path4.join(TEXDIR, "texmf-var");
-    this.instopt_adjustrepo = Version.isLatest(this.version);
+    this.TEXMFSYSCONFIG = TEXMFSYSCONFIG ?? import_node_path4.default.join(TEXDIR, "texmf-config");
+    this.TEXMFSYSVAR = TEXMFSYSVAR ?? import_node_path4.default.join(TEXDIR, "texmf-var");
+    this.instopt_adjustrepo = this.version.isLatest();
   }
   async *open() {
-    const tmp = await (0, import_promises2.mkdtemp)(path4.join(tmpdir2(), "setup-texlive-"));
-    const target = path4.join(tmp, "texlive.profile");
-    await (0, import_promises2.writeFile)(target, this.toString());
-    try {
+    for await (const tmp of mkdtemp()) {
+      const target = import_node_path4.default.join(tmp, "texlive.profile");
+      await (0, import_promises3.writeFile)(target, this.toString());
       yield target;
-    } finally {
-      await (0, import_io.rmRF)(tmp);
     }
   }
   toString() {
     const plain = this.toPlain({
-      version: Number(this.version),
-      groups: [(0, import_os4.platform)()]
+      version: this.version.number,
+      groups: [(0, import_node_os4.platform)()]
     });
     return Object.entries(plain).map((entry) => entry.join(" ")).join("\n");
   }
@@ -67877,11 +67888,13 @@ var Profile = (_a2 = class extends Serializable {
   get option_w32_multi_user() {
     return this.tlpdbopt_w32_multi_user;
   }
-}, (() => {
+};
+var Profile = _Profile;
+(() => {
   for (const key of ["instopt_adjustpath", "instopt_adjustrepo", "tlpdbopt_autobackup", "tlpdbopt_install_docfiles", "tlpdbopt_install_srcfiles", "tlpdbopt_desktop_integration", "tlpdbopt_file_assocs", "tlpdbopt_w32_multi_user", "option_menu_integration", "option_symlinks", "option_path", "option_adjustrepo", "option_autobackup", "option_doc", "option_src", "option_desktop_integration", "option_file_assocs", "option_w32_multi_user"]) {
-    Type(() => Number)(_a2.prototype, key);
+    Type(() => Number)(_Profile.prototype, key);
   }
-})(), _a2);
+})();
 __decorate([
   Expose(),
   __metadata("design:type", String)
@@ -67983,58 +67996,78 @@ __decorate([
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_w32_multi_user", null);
-Profile = __decorate([
-  Exclude(),
-  __metadata("design:paramtypes", [String, Object])
-], Profile);
-async function patch(version3, base2) {
-  const patches = [{
-    platforms: "win32",
-    file: InstallTL.executable(version3),
-    from: [/\bpause(?: Done)?\b/gmu],
-    to: [""]
-  }, {
-    versions: { since: "2009", until: "2011" },
-    file: "tlpkg/TeXLive/TLWinGoo.pm",
-    from: [/foreach \$p qw\((.*)\)/u],
-    to: ["foreach $$p (qw($1))"]
-  }, {
-    platforms: "win32",
-    versions: { since: "2015", until: "2016" },
-    file: "tlpkg/tlperl/lib/Encode/Alias.pm",
-    from: ["# utf8 is blessed :)"],
-    to: [`define_alias(qr/cp65001/i => '"utf-8-strict"');`]
-  }, {
-    platforms: "win32",
-    versions: { until: "2020" },
-    file: "tlpkg/TeXLive/TLUtils.pm",
-    from: ["split (/\\//, $tree)"],
-    to: ["split (/[\\/\\\\]/, $$tree)"]
-  }, {
-    platforms: "darwin",
-    versions: { since: "2017", until: "2020" },
-    file: "tlpkg/TeXLive/TLUtils.pm",
-    from: ["$os_major != 10", "$os_minor >= $mactex_darwin"],
-    to: ["$$os_major < 10", "$$os_major >= 11 || $&"]
-  }];
-  const apply = async ({ platforms = (0, import_os4.platform)(), versions = {}, file, from, to }) => {
-    const { since = version3, until = "9999" } = versions;
-    if (platforms === (0, import_os4.platform)() && since <= version3 && version3 < until) {
-      const target = path4.join(base2, file);
-      try {
-        await (0, import_promises2.writeFile)(target, from.reduce((contents, search, i) => contents.replace(search, to[i] ?? ""), await (0, import_promises2.readFile)(target, "utf8")));
-      } catch (error2) {
-        if ((0, import_types4.isNativeError)(error2) && error2.code === "ENOENT") {
-          debug2(`${target} not found`);
-          return;
-        }
-        throw error2;
-      }
+var _Patch = class {
+  constructor({ number: version3 }) {
+    __publicField(this, "hunks");
+    this.hunks = _Patch.HUNKS.filter(({ platforms = (0, import_node_os4.platform)(), versions: { since = -Infinity, until = Infinity } = {} }) => platforms === (0, import_node_os4.platform)() && since <= version3 && version3 < until);
+  }
+  async apply(texdir) {
+    if (this.hunks.length > 0) {
+      info("Applying patches");
+      const changes = await Promise.all(this.hunks.map(async (hunk) => {
+        const target = import_node_path4.default.join(texdir, hunk.file);
+        const content = import_node_buffer.Buffer.from(hunk.from.reduce((s, from, i) => s.replace(from, hunk.to[i] ?? ""), await (0, import_promises3.readFile)(target, "utf8")));
+        const diff = await this.diff(hunk, content, texdir);
+        await (0, import_promises3.writeFile)(target, content);
+        return diff;
+      }));
+      info(changes.filter(Boolean).join("\n"));
     }
-  };
-  info("Applying patches");
-  await Promise.all(patches.map(apply));
-}
+  }
+  async diff({ description, file }, input, cwd) {
+    try {
+      const linePrefix = "\x1B[34m>\x1B[0m ";
+      const { exitCode, stdout, stderr } = await (0, import_exec2.getExecOutput)("git", [
+        "diff",
+        "--no-index",
+        "--color",
+        `--line-prefix=${linePrefix}`,
+        "--",
+        file,
+        "-"
+      ], { input, cwd, silent: true, ignoreReturnCode: true });
+      if (exitCode === 1) {
+        return linePrefix + description + "\n" + stdout.trimEnd();
+      }
+      if (exitCode > 1) {
+        debug2(`git-diff exited with ${exitCode}: ${stderr}`);
+      }
+    } catch (cause) {
+      debug2("Failed to exec git-diff", { cause });
+    }
+    return "";
+  }
+};
+var Patch = _Patch;
+__publicField(Patch, "HUNKS", [{
+  description: "Fixes a syntax error.",
+  versions: { since: 2009, until: 2011 },
+  file: "tlpkg/TeXLive/TLWinGoo.pm",
+  from: [/foreach \$p qw\((.*)\)/u],
+  to: ["foreach $$p (qw($1))"]
+}, {
+  description: "Defines Code Page 65001 as an alias for UTF-8 on Windows.",
+  platforms: "win32",
+  versions: { since: 2015, until: 2016 },
+  file: "tlpkg/tlperl/lib/Encode/Alias.pm",
+  from: ["# utf8 is blessed :)\n"],
+  to: [`$&    define_alias(qr/cp65001/i => '"utf-8-strict"');
+`]
+}, {
+  description: "Makes it possible to use `\\` as a directory separator on Windows.",
+  platforms: "win32",
+  versions: { until: 2020 },
+  file: "tlpkg/TeXLive/TLUtils.pm",
+  from: ["split (/\\//, $tree)"],
+  to: ["split (/[\\/\\\\]/, $$tree)"]
+}, {
+  description: "Adds support for macOS 11 or later.",
+  platforms: "darwin",
+  versions: { since: 2017, until: 2020 },
+  file: "tlpkg/TeXLive/TLUtils.pm",
+  from: ["$os_major != 10", "$os_minor >= $mactex_darwin"],
+  to: ["$$os_major < 10", "$$os_major > 10 || $&"]
+}]);
 
 // lib/action.js
 async function run() {
@@ -68046,57 +68079,61 @@ async function run() {
       await post(state);
     }
   } catch (error2) {
-    if ((0, import_types5.isNativeError)(error2)) {
+    if ((0, import_types4.isNativeError)(error2)) {
       debug2(error2.stack);
-      (0, import_core2.setFailed)(error2.message);
+      (0, import_core4.setFailed)(error2.message);
     } else {
-      (0, import_core2.setFailed)(`${error2}`);
+      (0, import_core4.setFailed)(`${error2}`);
     }
   }
 }
-async function main(state, inputs = new Inputs(), outputs = new Outputs()) {
-  const packages = await inputs.packages;
-  let cacheType = void 0;
+async function main(state = new State()) {
+  const inputs = await Inputs.load();
+  const outputs = new Outputs();
+  outputs.version = inputs.version;
+  let installPackages = inputs.packages.size > 0;
   if (inputs.cache) {
-    const [primary, secondary] = getCacheKeys(inputs.version, packages);
-    state.key = primary;
-    await (0, import_core2.group)("Restoring cache", async () => {
-      cacheType = await restoreCache2(inputs.texmf.TEXDIR, primary, secondary);
-      if (cacheType !== "primary") {
+    const [unique, primary, secondary] = getCacheKeys(inputs);
+    await import_core.group("Restoring cache", async () => {
+      const restored = await restoreCache2(inputs.texmf.TEXDIR, unique, [primary, secondary]);
+      state.key = inputs.forceUpdateCache ? unique : primary;
+      if (restored?.startsWith(state.key) === true) {
+        state.key = restored;
+      } else {
         state.texdir = inputs.texmf.TEXDIR;
-        info(`After the job completes, ${state.texdir} will be cached with key: ${state.key}`);
+        info("After the job completes, TEXDIR will be saved to cache with key: " + state.key);
       }
+      outputs.cacheHit = restored !== void 0;
+      installPackages &&= restored?.startsWith(primary) !== true;
     });
   }
-  if (cacheType === void 0) {
-    const installtl = await (0, import_core2.group)("Acquiring install-tl", async () => {
+  if (!outputs.cacheHit) {
+    const installtl = await import_core.group("Acquiring install-tl", async () => {
       return await InstallTL.acquire(inputs.version);
     });
     const profile = new Profile(inputs.version, inputs.texmf);
-    await (0, import_core2.group)("Installation profile", async () => {
+    await import_core.group("Installation profile", async () => {
       info(profile.toString());
     });
-    await (0, import_core2.group)("Installing TeX Live", async () => {
+    await import_core.group("Installing TeX Live", async () => {
       await installtl.run(profile);
     });
   }
   const tlmgr = new Tlmgr(inputs.version, inputs.texmf.TEXDIR);
   await tlmgr.path.add();
-  if (cacheType !== void 0) {
-    if (Version.isLatest(inputs.version)) {
-      await (0, import_core2.group)("Updating tlmgr", async () => {
+  if (outputs.cacheHit) {
+    if (inputs.version.isLatest()) {
+      await import_core.group(`Updating ${inputs.updateAllPackages ? "packages" : "tlmgr"}`, async () => {
         await tlmgr.update(void 0, { self: true });
-      });
-      if (inputs.updateAllPackages) {
-        await (0, import_core2.group)("Updating packages", async () => {
+        if (inputs.updateAllPackages) {
           await tlmgr.update(void 0, {
             all: true,
             reinstallForciblyRemoved: true
           });
-        });
-      }
+        }
+      });
     }
-    await (0, import_core2.group)("Adjusting TEXMF", async () => {
+    await import_core.group("Adjusting TEXMF", async () => {
       for (const key of ["TEXMFCONFIG", "TEXMFVAR", "TEXMFHOME"]) {
         const value = inputs.texmf[key];
         if (await tlmgr.conf.texmf(key) !== value) {
@@ -68104,17 +68141,16 @@ async function main(state, inputs = new Inputs(), outputs = new Outputs()) {
         }
       }
     });
-    outputs["cache-hit"] = true;
   }
   if (inputs.tlcontrib) {
-    await (0, import_core2.group)("Setting up TLContrib", async () => {
-      await tlmgr.repository.add(tlnet.contrib().href, "tlcontrib");
+    await import_core.group("Setting up TLContrib", async () => {
+      await tlmgr.repository.add(tlnet.CONTRIB.href, "tlcontrib");
       await tlmgr.pinning.add("tlcontrib", "*");
     });
   }
-  if (cacheType !== "primary" && packages.size !== 0) {
-    await (0, import_core2.group)("Installing packages", async () => {
-      await tlmgr.install(...packages);
+  if (installPackages) {
+    await import_core.group("Installing packages", async () => {
+      await tlmgr.install(...inputs.packages);
     });
   }
   state.save();
@@ -68127,14 +68163,13 @@ async function post({ key, texdir }) {
     } else {
       info(`Cache hit occurred on the primary key ${key}, not saving cache`);
     }
-  } else {
-    info("Nothing to do");
   }
 }
-function getCacheKeys(version3, packages) {
-  const baseKey = `setup-texlive-${(0, import_os5.platform)()}-${(0, import_os5.arch)()}-${version3}-`;
-  const primaryKey = `${baseKey}${(0, import_crypto7.createHash)("sha256").update(JSON.stringify([...packages])).digest("hex")}`;
-  return [primaryKey, [baseKey]];
+function getCacheKeys({ version: version3, packages }) {
+  const secondary = `setup-texlive-${(0, import_node_os5.platform)()}-${(0, import_node_os5.arch)()}-${version3}-`;
+  const primary = secondary + (0, import_node_crypto.createHash)("sha256").update(JSON.stringify([...packages])).digest("hex");
+  const unique = `${primary}-${(0, import_node_crypto.randomUUID)().replaceAll("-", "")}`;
+  return [unique, primary, secondary];
 }
 
 // lib/index.js
