@@ -45,8 +45,7 @@ export class InstallTL {
       }
       // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
       const execOptions = { input: Buffer.alloc(0) };
-      const { stderr } = await spawn(installtl, options, execOptions);
-      tlpkg.check(stderr);
+      tlpkg.check(await spawn(installtl, options, execOptions));
     }
     await this.patch.apply(profile.TEXDIR);
   }

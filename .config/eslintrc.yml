@@ -151,6 +151,7 @@ overrides:
       unicorn/prefer-number-properties:
         - error
         - checkInfinity: false
+      unicorn/prefer-spread: off
       unicorn/prefer-ternary: off
       unicorn/prevent-abbreviations: off
   - files: "./__tests__/*.ts"

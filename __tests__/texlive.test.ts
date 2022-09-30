@@ -2,8 +2,8 @@ import { platform } from 'node:os';
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import { HttpClient } from '@actions/http-client';
 
+import * as ctan from '#/ctan';
 import * as log from '#/log';
 import { DependsTxt, Tlmgr, Version } from '#/texlive';
 import * as util from '#/utility';
@@ -58,12 +58,9 @@ describe('Version', () => {
     });
 
     it('checks the latest version', async () => {
-      const res = {
-        result: { version: { number: '2050' } },
-        statusCode: 200,
-      } as unknown as ReturnType<typeof HttpClient.prototype.getJson>;
-      // eslint-disable-next-line jest/unbound-method
-      jest.mocked(HttpClient.prototype.getJson).mockResolvedValueOnce(res);
+      jest.mocked(ctan.pkg).mockResolvedValueOnce({
+        version: { number: '2050' },
+      });
       await expect(Version.checkLatest()).resolves.toBe('2050');
       expect(Version.LATEST).toBe('2050');
     });
@@ -144,10 +141,11 @@ describe('Tlmgr', () => {
     it('installs packages by invoking `tlmgr install`', async () => {
       const packages = ['foo', 'bar', 'baz'];
       await tlmgr.install(packages);
-      expect(exec.getExecOutput).toHaveBeenCalledWith('tlmgr', [
-        'install',
-        ...packages,
-      ]);
+      expect(exec.getExecOutput).toHaveBeenCalledWith(
+        'tlmgr',
+        ['install', ...packages],
+        expect.anything(),
+      );
     });
 
     it('detects forcible removal of packages', async () => {
@@ -161,6 +159,20 @@ describe('Tlmgr', () => {
       await expect(tlmgr.install(['foo', 'bar', 'baz'])).rejects.toThrow(
         'The checksum of package foo did not match.',
       );
+    });
+
+    it('tries to determine the CTAN name', async () => {
+      jest.mocked(exec.getExecOutput).mockResolvedValueOnce({
+        exitCode: 1,
+        stdout: '',
+        stderr: 'tlmgr install: package foo not present in repository.',
+      });
+      jest.mocked(ctan.pkg).mockResolvedValueOnce({ texlive: 'Foo' });
+      await expect(tlmgr.install(['foo', 'bar', 'baz'])).toResolve();
+      expect(exec.getExecOutput).toHaveBeenCalledWith('tlmgr', [
+        'install',
+        'Foo',
+      ]);
     });
   });
 

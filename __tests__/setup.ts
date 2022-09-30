@@ -94,6 +94,10 @@ jest.mock('#/context', () => {
   return { Inputs, Outputs, State };
 });
 
+jest.mock('#/ctan', () => {
+  return { pkg: jest.fn().mockResolvedValue({}) };
+});
+
 jest.mock('#/install-tl', () => {
   const { InstallTL, Profile } = jest.createMockFromModule<any>('#/install-tl');
   InstallTL.acquire.mockImplementation(async () => new InstallTL());

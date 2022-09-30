@@ -2,11 +2,11 @@ import { platform } from 'node:os';
 import path from 'node:path';
 
 import { addPath, exportVariable } from '@actions/core';
-import { exec, getExecOutput as spawn } from '@actions/exec';
-import { HttpClient, HttpCodes } from '@actions/http-client';
+import { type ExecOutput, exec, getExecOutput as spawn } from '@actions/exec';
 import { cache as Cache } from 'decorator-cache-getter';
 import type { Writable } from 'ts-essentials';
 
+import * as ctan from '#/ctan';
 import * as log from '#/log';
 import { determine } from '#/utility';
 
@@ -53,18 +53,10 @@ export class Version {
   }
 
   static async checkLatest(this: void): Promise<string> {
-    interface Json {
-      version?: { number?: string };
-    }
-    const endpoint = 'https://ctan.org/json/2.0/pkg/texlive';
-    const http = new HttpClient();
-    const { result, statusCode } = await http.getJson<Json>(endpoint);
-    if (statusCode === HttpCodes.NotFound) {
-      throw new Error(`${endpoint} returned ${HttpCodes.NotFound}`);
-    }
-    const latest = result?.version?.number ?? '';
+    const pkg = await ctan.pkg('texlive');
+    const latest = pkg.version?.number ?? '';
     if (!/^20\d\d$/u.test(latest)) {
-      throw new TypeError(`Invalid response: ${JSON.stringify(result)}`);
+      throw new TypeError(`Invalid response: ${JSON.stringify(pkg)}`);
     }
     return Version.latest = latest;
   }
@@ -116,8 +108,28 @@ export class Tlmgr {
   async install(this: void, packages: Iterable<string>): Promise<void> {
     const args = ['install', ...packages];
     if (args.length > 1) {
-      const { stderr } = await spawn('tlmgr', args);
+      const { exitCode, stderr } = await spawn('tlmgr', args, {
+        ignoreReturnCode: true,
+      });
       tlpkg.check(stderr);
+      if (exitCode !== 0) {
+        const ctanNames = Array.from(
+          stderr.matchAll(/^tlmgr install: package (\S+) not present/gmu),
+          ({ 1: pkg = '' }) => pkg,
+        );
+        if (ctanNames.length === 0) {
+          throw new Error(`\`tlmgr\` exited with ${exitCode}`);
+        }
+        log.info('Checking for the CTAN names of ' + ctanNames.join(', '));
+        const tlNames = await Promise.all(ctanNames.map(async (pkg) => {
+          const { texlive: name } = await ctan.pkg(pkg);
+          if (name === undefined) {
+            throw new Error(`Package ${pkg} not found`);
+          }
+          return name;
+        }));
+        tlpkg.check(await spawn('tlmgr', ['install', ...tlNames]));
+      }
     }
   }
 
@@ -247,7 +259,8 @@ export namespace Tlmgr {
 }
 
 export namespace tlpkg {
-  export function check(stderr: string): void {
+  export function check(output: string | Readonly<ExecOutput>): void {
+    const stderr = typeof output === 'string' ? output : output.stderr;
     // tlpkg/TeXLive/TLUtils.pm
     const result = /: checksums differ for (.*):$/mu.exec(stderr);
     if (result !== null) {
