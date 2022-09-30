@@ -153,59 +153,6 @@ var require_command = __commonJS({
   }
 });
 
-// node_modules/@actions/core/lib/file-command.js
-var require_file_command = __commonJS({
-  "node_modules/@actions/core/lib/file-command.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
-      o["default"] = v;
-    });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding(result, mod, k);
-      }
-      __setModuleDefault(result, mod);
-      return result;
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.issueCommand = void 0;
-    var fs3 = __importStar(require("fs"));
-    var os4 = __importStar(require("os"));
-    var utils_1 = require_utils();
-    function issueCommand(command, message) {
-      const filePath = process.env[`GITHUB_${command}`];
-      if (!filePath) {
-        throw new Error(`Unable to find environment variable for file command ${command}`);
-      }
-      if (!fs3.existsSync(filePath)) {
-        throw new Error(`Missing file at path: ${filePath}`);
-      }
-      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os4.EOL}`, {
-        encoding: "utf8"
-      });
-    }
-    exports.issueCommand = issueCommand;
-  }
-});
-
 // node_modules/@actions/core/node_modules/uuid/dist/esm-node/rng.js
 function rng() {
   if (poolPtr > rnds8Pool.length - 16) {
@@ -539,6 +486,72 @@ var init_esm_node = __esm({
   }
 });
 
+// node_modules/@actions/core/lib/file-command.js
+var require_file_command = __commonJS({
+  "node_modules/@actions/core/lib/file-command.js"(exports) {
+    "use strict";
+    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      Object.defineProperty(o, k2, { enumerable: true, get: function() {
+        return m[k];
+      } });
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports && exports.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
+            __createBinding(result, mod, k);
+      }
+      __setModuleDefault(result, mod);
+      return result;
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
+    var fs3 = __importStar(require("fs"));
+    var os4 = __importStar(require("os"));
+    var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
+    var utils_1 = require_utils();
+    function issueFileCommand(command, message) {
+      const filePath = process.env[`GITHUB_${command}`];
+      if (!filePath) {
+        throw new Error(`Unable to find environment variable for file command ${command}`);
+      }
+      if (!fs3.existsSync(filePath)) {
+        throw new Error(`Missing file at path: ${filePath}`);
+      }
+      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os4.EOL}`, {
+        encoding: "utf8"
+      });
+    }
+    exports.issueFileCommand = issueFileCommand;
+    function prepareKeyValueMessage(key, value) {
+      const delimiter3 = `ghadelimiter_${uuid_1.v4()}`;
+      const convertedValue = utils_1.toCommandValue(value);
+      if (key.includes(delimiter3)) {
+        throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter3}"`);
+      }
+      if (convertedValue.includes(delimiter3)) {
+        throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter3}"`);
+      }
+      return `${key}<<${delimiter3}${os4.EOL}${convertedValue}${os4.EOL}${delimiter3}`;
+    }
+    exports.prepareKeyValueMessage = prepareKeyValueMessage;
+  }
+});
+
 // node_modules/@actions/http-client/lib/proxy.js
 var require_proxy = __commonJS({
   "node_modules/@actions/http-client/lib/proxy.js"(exports) {
@@ -601,7 +614,7 @@ var require_tunnel = __commonJS({
     "use strict";
     var net = require("net");
     var tls = require("tls");
-    var http3 = require("http");
+    var http4 = require("http");
     var https3 = require("https");
     var events = require("events");
     var assert = require("assert");
@@ -612,12 +625,12 @@ var require_tunnel = __commonJS({
     exports.httpsOverHttps = httpsOverHttps2;
     function httpOverHttp2(options) {
       var agent = new TunnelingAgent(options);
-      agent.request = http3.request;
+      agent.request = http4.request;
       return agent;
     }
     function httpsOverHttp2(options) {
       var agent = new TunnelingAgent(options);
-      agent.request = http3.request;
+      agent.request = http4.request;
       agent.createSocket = createSecureSocket;
       agent.defaultPort = 443;
       return agent;
@@ -638,7 +651,7 @@ var require_tunnel = __commonJS({
       var self2 = this;
       self2.options = options || {};
       self2.proxyOptions = self2.options.proxy || {};
-      self2.maxSockets = self2.options.maxSockets || http3.Agent.defaultMaxSockets;
+      self2.maxSockets = self2.options.maxSockets || http4.Agent.defaultMaxSockets;
       self2.requests = [];
       self2.sockets = [];
       self2.on("free", function onFree(socket, host, port, localAddress) {
@@ -893,7 +906,7 @@ var require_lib = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.HttpClient = exports.isHttps = exports.HttpClientResponse = exports.HttpClientError = exports.getProxyUrl = exports.MediaTypes = exports.Headers = exports.HttpCodes = void 0;
-    var http3 = __importStar(require("http"));
+    var http4 = __importStar(require("http"));
     var https3 = __importStar(require("https"));
     var pm = __importStar(require_proxy());
     var tunnel2 = __importStar(require_tunnel2());
@@ -1234,7 +1247,7 @@ var require_lib = __commonJS({
         const info2 = {};
         info2.parsedUrl = requestUrl;
         const usingSsl = info2.parsedUrl.protocol === "https:";
-        info2.httpModule = usingSsl ? https3 : http3;
+        info2.httpModule = usingSsl ? https3 : http4;
         const defaultPort = usingSsl ? 443 : 80;
         info2.options = {};
         info2.options.host = info2.parsedUrl.hostname;
@@ -1282,7 +1295,7 @@ var require_lib = __commonJS({
         const usingSsl = parsedUrl.protocol === "https:";
         let maxSockets = 100;
         if (this.requestOptions) {
-          maxSockets = this.requestOptions.maxSockets || http3.globalAgent.maxSockets;
+          maxSockets = this.requestOptions.maxSockets || http4.globalAgent.maxSockets;
         }
         if (proxyUrl && proxyUrl.hostname) {
           const agentOptions = {
@@ -1304,11 +1317,11 @@ var require_lib = __commonJS({
         }
         if (this._keepAlive && !agent) {
           const options = { keepAlive: this._keepAlive, maxSockets };
-          agent = usingSsl ? new https3.Agent(options) : new http3.Agent(options);
+          agent = usingSsl ? new https3.Agent(options) : new http4.Agent(options);
           this._agent = agent;
         }
         if (!agent) {
-          agent = usingSsl ? https3.globalAgent : http3.globalAgent;
+          agent = usingSsl ? https3.globalAgent : http4.globalAgent;
         }
         if (usingSsl && this._ignoreSslError) {
           agent.options = Object.assign(agent.options || {}, {
@@ -1860,7 +1873,6 @@ var require_core = __commonJS({
     var utils_1 = require_utils();
     var os4 = __importStar(require("os"));
     var path5 = __importStar(require("path"));
-    var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -1872,18 +1884,9 @@ var require_core = __commonJS({
       process.env[name] = convertedVal;
       const filePath = process.env["GITHUB_ENV"] || "";
       if (filePath) {
-        const delimiter3 = `ghadelimiter_${uuid_1.v4()}`;
-        if (name.includes(delimiter3)) {
-          throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter3}"`);
-        }
-        if (convertedVal.includes(delimiter3)) {
-          throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter3}"`);
-        }
-        const commandValue = `${name}<<${delimiter3}${os4.EOL}${convertedVal}${os4.EOL}${delimiter3}`;
-        file_command_1.issueCommand("ENV", commandValue);
-      } else {
-        command_1.issueCommand("set-env", { name }, convertedVal);
+        return file_command_1.issueFileCommand("ENV", file_command_1.prepareKeyValueMessage(name, val));
       }
+      command_1.issueCommand("set-env", { name }, convertedVal);
     }
     exports.exportVariable = exportVariable2;
     function setSecret(secret) {
@@ -1893,7 +1896,7 @@ var require_core = __commonJS({
     function addPath2(inputPath) {
       const filePath = process.env["GITHUB_PATH"] || "";
       if (filePath) {
-        file_command_1.issueCommand("PATH", inputPath);
+        file_command_1.issueFileCommand("PATH", inputPath);
       } else {
         command_1.issueCommand("add-path", {}, inputPath);
       }
@@ -1913,7 +1916,10 @@ var require_core = __commonJS({
     exports.getInput = getInput2;
     function getMultilineInput(name, options) {
       const inputs = getInput2(name, options).split("\n").filter((x) => x !== "");
-      return inputs;
+      if (options && options.trimWhitespace === false) {
+        return inputs;
+      }
+      return inputs.map((input) => input.trim());
     }
     exports.getMultilineInput = getMultilineInput;
     function getBooleanInput2(name, options) {
@@ -1929,8 +1935,12 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.getBooleanInput = getBooleanInput2;
     function setOutput2(name, value) {
+      const filePath = process.env["GITHUB_OUTPUT"] || "";
+      if (filePath) {
+        return file_command_1.issueFileCommand("OUTPUT", file_command_1.prepareKeyValueMessage(name, value));
+      }
       process.stdout.write(os4.EOL);
-      command_1.issueCommand("set-output", { name }, value);
+      command_1.issueCommand("set-output", { name }, utils_1.toCommandValue(value));
     }
     exports.setOutput = setOutput2;
     function setCommandEcho(enabled2) {
@@ -1988,7 +1998,11 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.group = group2;
     function saveState2(name, value) {
-      command_1.issueCommand("save-state", { name }, value);
+      const filePath = process.env["GITHUB_STATE"] || "";
+      if (filePath) {
+        return file_command_1.issueFileCommand("STATE", file_command_1.prepareKeyValueMessage(name, value));
+      }
+      command_1.issueCommand("save-state", { name }, utils_1.toCommandValue(value));
     }
     exports.saveState = saveState2;
     function getState2(name) {
@@ -19093,9 +19107,9 @@ var require_cookie = __commonJS({
             return cb(new Error(SAME_SITE_CONTEXT_VAL_ERR));
           }
         }
-        let http3 = options.http;
-        if (http3 == null) {
-          http3 = true;
+        let http4 = options.http;
+        if (http4 == null) {
+          http4 = true;
         }
         const now = options.now || Date.now();
         const expireCheck = options.expire !== false;
@@ -19117,7 +19131,7 @@ var require_cookie = __commonJS({
           if (c.secure && !secure) {
             return false;
           }
-          if (c.httpOnly && !http3) {
+          if (c.httpOnly && !http4) {
             return false;
           }
           if (sameSiteLevel) {
@@ -29136,7 +29150,7 @@ var require_form_data = __commonJS({
     var CombinedStream = require_combined_stream();
     var util3 = require("util");
     var path5 = require("path");
-    var http3 = require("http");
+    var http4 = require("http");
     var https3 = require("https");
     var parseUrl = require("url").parse;
     var fs3 = require("fs");
@@ -29405,7 +29419,7 @@ var require_form_data = __commonJS({
       if (options.protocol == "https:") {
         request = https3.request(options);
       } else {
-        request = http3.request(options);
+        request = http4.request(options);
       }
       this.getLength(function(err, length) {
         if (err && err !== "Unknown stream") {
@@ -65305,7 +65319,7 @@ var require_tool_cache = __commonJS({
         if (fs3.existsSync(dest)) {
           throw new Error(`Destination file path ${dest} already exists`);
         }
-        const http3 = new httpm.HttpClient(userAgent, [], {
+        const http4 = new httpm.HttpClient(userAgent, [], {
           allowRetries: false
         });
         if (auth) {
@@ -65315,7 +65329,7 @@ var require_tool_cache = __commonJS({
           }
           headers.authorization = auth;
         }
-        const response = yield http3.get(url2, headers);
+        const response = yield http4.get(url2, headers);
         if (response.message.statusCode !== 200) {
           const err = new HTTPError(response.message.statusCode);
           core2.debug(`Failed to download from "${url2}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
@@ -65619,13 +65633,13 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         let releases = [];
         const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}`;
-        const http3 = new httpm.HttpClient("tool-cache");
+        const http4 = new httpm.HttpClient("tool-cache");
         const headers = {};
         if (auth) {
           core2.debug("set auth");
           headers.authorization = auth;
         }
-        const response = yield http3.getJson(treeUrl, headers);
+        const response = yield http4.getJson(treeUrl, headers);
         if (!response.result) {
           return releases;
         }
@@ -65637,7 +65651,7 @@ var require_tool_cache = __commonJS({
           }
         }
         headers["accept"] = "application/vnd.github.VERSION.raw";
-        let versionsRaw = yield (yield http3.get(manifestUrl, headers)).readBody();
+        let versionsRaw = yield (yield http4.get(manifestUrl, headers)).readBody();
         if (versionsRaw) {
           versionsRaw = versionsRaw.replace(/^\uFEFF/, "");
           try {
@@ -67252,8 +67266,20 @@ var import_node_os2 = require("os");
 var import_node_path2 = __toESM(require("path"));
 var import_core2 = __toESM(require_core());
 var import_exec = __toESM(require_exec());
-var import_http_client = __toESM(require_lib());
 var import_decorator_cache_getter = __toESM(require_dist());
+
+// lib/ctan.js
+var import_http_client = __toESM(require_lib());
+var http3;
+async function pkg(name) {
+  http3 ??= new import_http_client.HttpClient();
+  const endpoint = `https://ctan.org/json/2.0/pkg/${name}`;
+  const { result, statusCode } = await http3.getJson(endpoint);
+  if (statusCode === import_http_client.HttpCodes.NotFound) {
+    throw new Error(`${endpoint} returned ${import_http_client.HttpCodes.NotFound}`);
+  }
+  return result ?? {};
+}
 
 // lib/utility.js
 var import_promises = __toESM(require("fs/promises"));
@@ -67367,15 +67393,10 @@ var _Version = class {
     return this.latest;
   }
   static async checkLatest() {
-    const endpoint = "https://ctan.org/json/2.0/pkg/texlive";
-    const http3 = new import_http_client.HttpClient();
-    const { result, statusCode } = await http3.getJson(endpoint);
-    if (statusCode === import_http_client.HttpCodes.NotFound) {
-      throw new Error(`${endpoint} returned ${import_http_client.HttpCodes.NotFound}`);
-    }
-    const latest = result?.version?.number ?? "";
+    const pkg2 = await pkg("texlive");
+    const latest = pkg2.version?.number ?? "";
     if (!/^20\d\d$/u.test(latest)) {
-      throw new TypeError(`Invalid response: ${JSON.stringify(result)}`);
+      throw new TypeError(`Invalid response: ${JSON.stringify(pkg2)}`);
     }
     return _Version.latest = latest;
   }
@@ -67409,10 +67430,28 @@ var Tlmgr = class {
   get conf() {
     return new Tlmgr.Conf(this.version);
   }
-  async install(...packages) {
-    if (packages.length > 0) {
-      const { stderr } = await (0, import_exec.getExecOutput)("tlmgr", ["install", ...packages]);
+  async install(packages) {
+    const args = ["install", ...packages];
+    if (args.length > 1) {
+      const { exitCode, stderr } = await (0, import_exec.getExecOutput)("tlmgr", args, {
+        ignoreReturnCode: true
+      });
       tlpkg.check(stderr);
+      if (exitCode !== 0) {
+        const ctanNames = Array.from(stderr.matchAll(/^tlmgr install: package (\S+) not present/gmu), ({ 1: pkg2 = "" }) => pkg2);
+        if (ctanNames.length === 0) {
+          throw new Error(`\`tlmgr\` exited with ${exitCode}`);
+        }
+        info("Checking for the CTAN names of " + ctanNames.join(", "));
+        const tlNames = await Promise.all(ctanNames.map(async (pkg2) => {
+          const { texlive: name } = await pkg(pkg2);
+          if (name === void 0) {
+            throw new Error(`Package ${pkg2} not found`);
+          }
+          return name;
+        }));
+        tlpkg.check(await (0, import_exec.getExecOutput)("tlmgr", ["install", ...tlNames]));
+      }
     }
   }
   get path() {
@@ -67425,21 +67464,14 @@ var Tlmgr = class {
     return new Tlmgr.Repository(this.version);
   }
   async update(packages = [], options = {}) {
-    const args = ["update"];
-    if (options.all ?? false) {
-      args.push("--all");
-    }
+    const args = options.all ?? false ? ["--all"] : [...packages];
     if (options.self ?? false) {
-      if (this.version.number === 2008) {
-        packages = ["texlive.infra", ...packages];
-      } else {
-        args.push("--self");
-      }
+      args.push(this.version.number > 2008 ? "--self" : "texlive.infra");
     }
     if ((options.reinstallForciblyRemoved ?? false) && this.version.number >= 2009) {
-      args.push("--reinstall-forcibly-removed");
+      args.unshift("--reinstall-forcibly-removed");
     }
-    await (0, import_exec.exec)("tlmgr", [...args, ...packages]);
+    await (0, import_exec.exec)("tlmgr", ["update", ...args]);
   }
 };
 __decorate([
@@ -67533,11 +67565,12 @@ __decorate([
 })(Tlmgr || (Tlmgr = {}));
 var tlpkg;
 (function(tlpkg2) {
-  function check(stderr) {
+  function check(output) {
+    const stderr = typeof output === "string" ? output : output.stderr;
     const result = /: checksums differ for (.*):$/mu.exec(stderr);
     if (result !== null) {
-      const pkg = import_node_path2.default.basename(result[1] ?? "", ".tar.xz");
-      throw new Error(`The checksum of package ${pkg} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
+      const pkg2 = import_node_path2.default.basename(result[1] ?? "", ".tar.xz");
+      throw new Error(`The checksum of package ${pkg2} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
     }
   }
   tlpkg2.check = check;
@@ -67686,7 +67719,7 @@ var Env;
 (function(Env2) {
   function load(version3) {
     if (import_node_process2.default.env["RUNNER_TEMP"] === void 0) {
-      warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} is used instead`);
+      warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} will be used instead`);
     }
     for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFLOCAL", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
       if (key in import_node_process2.default.env) {
@@ -67769,8 +67802,7 @@ var InstallTL = class {
         options.push(this.version.number === 2008 ? "-location" : "-repository", repo.href);
       }
       const execOptions = { input: import_node_buffer.Buffer.alloc(0) };
-      const { stderr } = await (0, import_exec2.getExecOutput)(installtl, options, execOptions);
-      tlpkg.check(stderr);
+      tlpkg.check(await (0, import_exec2.getExecOutput)(installtl, options, execOptions));
     }
     await this.patch.apply(profile.TEXDIR);
   }
@@ -68026,11 +68058,13 @@ var _Patch = class {
         file,
         "-"
       ], { input, cwd, silent: true, ignoreReturnCode: true });
-      if (exitCode === 1) {
-        return linePrefix + description + "\n" + stdout.trimEnd();
-      }
-      if (exitCode > 1) {
-        debug2(`git-diff exited with ${exitCode}: ${stderr}`);
+      switch (exitCode) {
+        case 0:
+          break;
+        case 1:
+          return linePrefix + description + "\n" + stdout.trimEnd();
+        default:
+          debug2(`git-diff exited with ${exitCode}: ${stderr}`);
       }
     } catch (cause) {
       debug2("Failed to exec git-diff", { cause });
@@ -68056,7 +68090,7 @@ __publicField(Patch, "HUNKS", [{
 }, {
   description: "Makes it possible to use `\\` as a directory separator on Windows.",
   platforms: "win32",
-  versions: { until: 2020 },
+  versions: { until: 2019 },
   file: "tlpkg/TeXLive/TLUtils.pm",
   from: ["split (/\\//, $tree)"],
   to: ["split (/[\\/\\\\]/, $$tree)"]
@@ -68093,10 +68127,10 @@ async function main(state = new State()) {
   outputs.version = inputs.version;
   let installPackages = inputs.packages.size > 0;
   if (inputs.cache) {
-    const [unique, primary, secondary] = getCacheKeys(inputs);
     await import_core.group("Restoring cache", async () => {
-      const restored = await restoreCache2(inputs.texmf.TEXDIR, unique, [primary, secondary]);
+      const [unique, primary, secondary] = getCacheKeys(inputs);
       state.key = inputs.forceUpdateCache ? unique : primary;
+      const restored = await restoreCache2(inputs.texmf.TEXDIR, unique, [primary, secondary]);
       if (restored?.startsWith(state.key) === true) {
         state.key = restored;
       } else {
@@ -68123,13 +68157,11 @@ async function main(state = new State()) {
   await tlmgr.path.add();
   if (outputs.cacheHit) {
     if (inputs.version.isLatest()) {
-      await import_core.group(`Updating ${inputs.updateAllPackages ? "packages" : "tlmgr"}`, async () => {
-        await tlmgr.update(void 0, { self: true });
+      const target = inputs.updateAllPackages ? "all packages" : "tlmgr";
+      await import_core.group(`Updating ${target}`, async () => {
+        await tlmgr.update([], { self: true });
         if (inputs.updateAllPackages) {
-          await tlmgr.update(void 0, {
-            all: true,
-            reinstallForciblyRemoved: true
-          });
+          await tlmgr.update([], { all: true, reinstallForciblyRemoved: true });
         }
       });
     }
@@ -68150,7 +68182,7 @@ async function main(state = new State()) {
   }
   if (installPackages) {
     await import_core.group("Installing packages", async () => {
-      await tlmgr.install(...inputs.packages);
+      await tlmgr.install(inputs.packages);
     });
   }
   state.save();
