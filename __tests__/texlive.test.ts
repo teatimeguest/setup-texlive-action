@@ -137,13 +137,13 @@ describe('Tlmgr', () => {
     const tlmgr = new Tlmgr(v`latest`, '');
 
     it('does not invoke `tlmgr install` if the argument is empty', async () => {
-      await tlmgr.install();
+      await tlmgr.install([]);
       expect(exec.exec).not.toHaveBeenCalled();
     });
 
     it('installs packages by invoking `tlmgr install`', async () => {
       const packages = ['foo', 'bar', 'baz'];
-      await tlmgr.install(...packages);
+      await tlmgr.install(packages);
       expect(exec.getExecOutput).toHaveBeenCalledWith('tlmgr', [
         'install',
         ...packages,
@@ -158,7 +158,7 @@ describe('Tlmgr', () => {
           'TeXLive::TLUtils::check_file_and_remove: checksums differ for /tmp/path/to/foo.tar.xz:\n'
           + 'TeXLive::TLUtils::check_file_and_remove: ...',
       });
-      await expect(tlmgr.install('foo', 'bar', 'baz')).rejects.toThrow(
+      await expect(tlmgr.install(['foo', 'bar', 'baz'])).rejects.toThrow(
         'The checksum of package foo did not match.',
       );
     });

@@ -270,11 +270,11 @@ export class Patch {
         file,
         '-',
       ], { input, cwd, silent: true, ignoreReturnCode: true });
-      if (exitCode === 1) {
-        return linePrefix + description + '\n' + stdout.trimEnd();
-      }
-      if (exitCode > 1) {
-        log.debug(`git-diff exited with ${exitCode}: ${stderr}`);
+      // dprint-ignore
+      switch (exitCode) {
+        case 0: break;
+        case 1: return linePrefix + description + '\n' + stdout.trimEnd();
+        default: log.debug(`git-diff exited with ${exitCode}: ${stderr}`);
       }
     } catch (cause) {
       log.debug('Failed to exec git-diff', { cause });
@@ -307,7 +307,7 @@ export class Patch {
     description:
       'Makes it possible to use `\\` as a directory separator on Windows.',
     platforms: 'win32',
-    versions: { until: 2020 },
+    versions: { until: 2019 },
     file: 'tlpkg/TeXLive/TLUtils.pm',
     from: ['split (/\\//, $tree)'],
     to: ['split (/[\\/\\\\]/, $$tree)'],

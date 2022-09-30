@@ -152,9 +152,7 @@ describe('main', () => {
       setCacheType(kind);
       await expect(action.main()).toResolve();
       expect(Tlmgr.prototype.update).toHaveBeenCalledOnce();
-      expect(Tlmgr.prototype.update).toHaveBeenCalledWith(undefined, {
-        self: true,
-      });
+      expect(Tlmgr.prototype.update).toHaveBeenCalledWith([], { self: true });
     },
   );
 
@@ -165,7 +163,7 @@ describe('main', () => {
       inputs.updateAllPackages = true;
       await expect(action.main()).toResolve();
       expect(Tlmgr.prototype.update).toHaveBeenCalledTimes(2);
-      expect(Tlmgr.prototype.update).toHaveBeenCalledWith(undefined, {
+      expect(Tlmgr.prototype.update).toHaveBeenCalledWith([], {
         all: true,
         reinstallForciblyRemoved: true,
       });

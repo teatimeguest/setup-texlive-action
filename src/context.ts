@@ -127,7 +127,7 @@ export interface Env {
 export namespace Env {
   export function load(version: Version): Env {
     if (process.env['RUNNER_TEMP'] === undefined) {
-      log.warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} is used instead`);
+      log.warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} will be used instead`);
     }
     type Keys = `TEXLIVE_INSTALL_${keyof Texmf.SystemTrees}`;
     for (const key of keys<Record<Keys, unknown>>()) {

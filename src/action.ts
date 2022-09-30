@@ -36,14 +36,14 @@ export async function main(state: State = new State()): Promise<void> {
   let installPackages = inputs.packages.size > 0;
 
   if (inputs.cache) {
-    const [unique, primary, secondary] = getCacheKeys(inputs);
     await log.group('Restoring cache', async () => {
+      const [unique, primary, secondary] = getCacheKeys(inputs);
+      state.key = inputs.forceUpdateCache ? unique : primary;
       const restored = await restoreCache(
         inputs.texmf.TEXDIR,
         unique,
         [primary, secondary],
       );
-      state.key = inputs.forceUpdateCache ? unique : primary;
       if (restored?.startsWith(state.key) === true) {
         state.key = restored;
       } else {
@@ -76,18 +76,13 @@ export async function main(state: State = new State()): Promise<void> {
 
   if (outputs.cacheHit) {
     if (inputs.version.isLatest()) {
-      await log.group(
-        `Updating ${inputs.updateAllPackages ? 'packages' : 'tlmgr'}`,
-        async () => {
-          await tlmgr.update(undefined, { self: true });
-          if (inputs.updateAllPackages) {
-            await tlmgr.update(undefined, {
-              all: true,
-              reinstallForciblyRemoved: true,
-            });
-          }
-        },
-      );
+      const target = inputs.updateAllPackages ? 'all packages' : 'tlmgr';
+      await log.group(`Updating ${target}`, async () => {
+        await tlmgr.update([], { self: true });
+        if (inputs.updateAllPackages) {
+          await tlmgr.update([], { all: true, reinstallForciblyRemoved: true });
+        }
+      });
     }
     await log.group('Adjusting TEXMF', async () => {
       for (const key of keys<Texmf.UserTrees>()) {
@@ -110,7 +105,7 @@ export async function main(state: State = new State()): Promise<void> {
 
   if (installPackages) {
     await log.group('Installing packages', async () => {
-      await tlmgr.install(...inputs.packages);
+      await tlmgr.install(inputs.packages);
     });
   }
 

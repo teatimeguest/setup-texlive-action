@@ -113,9 +113,10 @@ export class Tlmgr {
     return new Tlmgr.Conf(this.version);
   }
 
-  async install(this: void, ...packages: ReadonlyArray<string>): Promise<void> {
-    if (packages.length > 0) {
-      const { stderr } = await spawn('tlmgr', ['install', ...packages]);
+  async install(this: void, packages: Iterable<string>): Promise<void> {
+    const args = ['install', ...packages];
+    if (args.length > 1) {
+      const { stderr } = await spawn('tlmgr', args);
       tlpkg.check(stderr);
     }
   }
@@ -136,29 +137,22 @@ export class Tlmgr {
   }
 
   async update(
-    packages: ReadonlyArray<string> = [],
+    packages: Iterable<string> = [],
     options: Readonly<Tlmgr.UpdateOptions> = {},
   ): Promise<void> {
-    const args = ['update'];
-    if (options.all ?? false) {
-      args.push('--all');
-    }
+    const args = (options.all ?? false) ? ['--all'] : [...packages];
     if (options.self ?? false) {
-      if (this.version.number === 2008) {
-        // tlmgr for TeX Live 2008 does not have `self` option
-        packages = ['texlive.infra', ...packages];
-      } else {
-        args.push('--self');
-      }
+      // tlmgr for TeX Live 2008 does not have `self` option
+      args.push(this.version.number > 2008 ? '--self' : 'texlive.infra');
     }
     if (
       (options.reinstallForciblyRemoved ?? false)
       // `--reinstall-forcibly-removed` was first implemented in TeX Live 2009.
       && this.version.number >= 2009
     ) {
-      args.push('--reinstall-forcibly-removed');
+      args.unshift('--reinstall-forcibly-removed');
     }
-    await exec('tlmgr', [...args, ...packages]);
+    await exec('tlmgr', ['update', ...args]);
   }
 }
 
@@ -225,9 +219,6 @@ export namespace Tlmgr {
       }
     }
 
-    /**
-     * @returns `false` if the repository already exists, otherwise `true`.
-     */
     async add(this: void, repo: string, tag?: string): Promise<void> {
       const args = ['repository', 'add', repo];
       if (tag !== undefined) {
