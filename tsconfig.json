@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    // type checking
     "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -9,27 +8,22 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "strict": true,
-    // module
     "baseUrl": "./src",
     "module": "es2020",
     "moduleResolution": "node16",
     "paths": { "#/*": ["*"] },
     "rootDirs": ["./src"],
-    // emit
     "importHelpers": true,
     "newLine": "lf",
     "outDir": "./lib",
     "removeComments": true,
-    // interop constraints
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    // language and environment
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "esnext",
-    // ttypescript
+    "target": "es2021",
     "plugins": [
-      { "transform": "ts-transformer-keys/transformer" },
+      { "transform": "ts-transformer-keys/transformer" }
     ]
   },
   "include": ["./src/*.ts"]

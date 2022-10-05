@@ -52,8 +52,8 @@ outputs:
     description: The installed TeX Live version.
 runs:
   using: node16
-  main: dist/index.js
-  post: dist/index.js
+  main: dist/index.mjs
+  post: dist/index.mjs
   post-if: success()
 branding:
   color: green
