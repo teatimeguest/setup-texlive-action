@@ -8,7 +8,8 @@ import { keys } from 'ts-transformer-keys';
 import { Inputs, Outputs, State } from '#/context';
 import { InstallTL, Profile } from '#/install-tl';
 import * as log from '#/log';
-import { type Texmf, Tlmgr, tlnet } from '#/texlive';
+import { type Texmf, tlnet } from '#/texlive';
+import { Tlmgr } from '#/tlmgr';
 import { restoreCache, saveCache } from '#/utility';
 
 export async function run(): Promise<void> {
@@ -49,9 +50,9 @@ export async function main(state: State = new State()): Promise<void> {
       } else {
         state.texdir = inputs.texmf.TEXDIR;
         log.info(
-          'After the job completes, TEXDIR will be saved to cache with key: '
-            + state.key,
+          'After the job completes, TEXDIR will be saved to cache with key:',
         );
+        log.info('  ' + state.key);
       }
       outputs.cacheHit = restored !== undefined;
       installPackages &&= restored?.startsWith(primary) !== true;
@@ -59,8 +60,10 @@ export async function main(state: State = new State()): Promise<void> {
   }
 
   if (!outputs.cacheHit) {
-    const installtl = await log.group('Acquiring install-tl', async () => {
-      return await InstallTL.acquire(inputs.version);
+    let installtl: InstallTL;
+    await log.group('Acquiring install-tl', async () => {
+      installtl = await InstallTL.acquire(inputs.version);
+      await installtl.version();
     });
     const profile = new Profile(inputs.version, inputs.texmf);
     await log.group('Installation profile', async () => {
@@ -115,6 +118,14 @@ export async function main(state: State = new State()): Promise<void> {
       await tlmgr.install(inputs.packages);
     });
   }
+
+  await log.group('TeX Live version info', async () => {
+    await tlmgr.version();
+    log.info('Package version:');
+    for await (const { name, version, revision } of tlmgr.list()) {
+      log.info(`  ${name}: ${version ?? `rev${revision}`}`);
+    }
+  });
 
   state.save();
   outputs.emit();

@@ -35,10 +35,12 @@
     "tslib": "2.4.0"
   },
   "devDependencies": {
+    "@types/dedent": "0.7.0",
     "@types/jest": "29.1.1",
     "@types/node": "18.8.2",
     "@typescript-eslint/eslint-plugin": "5.39.0",
     "@typescript-eslint/parser": "5.39.0",
+    "dedent": "0.7.0",
     "dprint": "0.32.1",
     "editorconfig-checker": "4.0.2",
     "esbuild": "0.15.10",

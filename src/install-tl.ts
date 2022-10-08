@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import path from 'node:path';
 
-import { getExecOutput as spawn } from '@actions/exec';
+import { exec, getExecOutput } from '@actions/exec';
 import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
 import { Expose, Type } from 'class-transformer';
 import type { MarkOptional, PickProperties } from 'ts-essentials';
@@ -13,41 +13,46 @@ import * as log from '#/log';
 import { type Texmf, Version, tlnet, tlpkg } from '#/texlive';
 import { Serializable, extract, mkdtemp } from '#/utility';
 
+// Prevents `install-tl(-windows).bat` from being stopped by `pause`.
+const devNull: Buffer = Buffer.alloc(0);
+
 /**
  * A class for downloading and running the installer of TeX Live.
  */
 export class InstallTL {
+  private path: string;
+
   private constructor(
-    private readonly version: Version,
-    private readonly directory: string,
-    private readonly patch: Patch = new Patch(version),
-  ) {}
+    private readonly tlversion: Version,
+    directory: string,
+    private readonly patch: Patch = new Patch(tlversion),
+  ) {
+    this.path = path.join(directory, InstallTL.executable(tlversion));
+  }
 
   async run(profile: Profile): Promise<void> {
-    const installtl = path.join(
-      this.directory,
-      InstallTL.executable(this.version),
-    );
     for await (const dest of profile.open()) {
       const options = ['-profile', dest];
-      if (!this.version.isLatest()) {
-        const repo = tlnet.historic(this.version);
+      if (!this.tlversion.isLatest()) {
+        const repo = tlnet.historic(this.tlversion);
         // `install-tl` of versions prior to 2017 does not support HTTPS, and
         // that of version 2017 supports HTTPS but does not work properly.
-        if (this.version.number < 2018) {
+        if (this.tlversion.number < 2018) {
           repo.protocol = 'http';
         }
         options.push(
           // Only version 2008 uses `-location` instead of `-repository`.
-          this.version.number === 2008 ? '-location' : '-repository',
+          this.tlversion.number === 2008 ? '-location' : '-repository',
           repo.href,
         );
       }
-      // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
-      const execOptions = { input: Buffer.alloc(0) };
-      tlpkg.check(await spawn(installtl, options, execOptions));
+      tlpkg.check(await getExecOutput(this.path, options, { input: devNull }));
     }
     await this.patch.apply(profile.TEXDIR);
+  }
+
+  async version(): Promise<void> {
+    await exec(this.path, ['-version'], { input: devNull });
   }
 
   static restore(version: Version): InstallTL | undefined {
@@ -260,7 +265,7 @@ export class Patch {
   ): Promise<string> {
     try {
       const linePrefix = '\u001B[34m>\u001B[0m ';
-      const { exitCode, stdout, stderr } = await spawn('git', [
+      const { exitCode, stdout, stderr } = await getExecOutput('git', [
         'diff',
         '--no-index',
         '--color',

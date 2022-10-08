@@ -106,19 +106,9 @@ jest.mock('#/install-tl', () => {
 
 jest.mock('#/texlive', () => {
   const { DependsTxt, Version, tlnet } = jest.requireActual('#/texlive');
-  const { Tlmgr, ...mocks } = jest.createMockFromModule<any>('#/texlive');
-  Tlmgr.prototype = {
-    conf: new Tlmgr.Conf(),
-    install: jest.fn(),
-    path: new Tlmgr.Path(),
-    pinning: new Tlmgr.Pinning(),
-    repository: new Tlmgr.Repository(),
-    update: jest.fn(),
-  };
   Version.checkLatest = jest.fn().mockResolvedValue(Version.LATEST);
   return {
-    ...mocks,
-    Tlmgr,
+    ...jest.createMockFromModule<object>('#/texlive'),
     tlpkg: { check: jest.fn() },
     DependsTxt,
     Version,
@@ -126,12 +116,40 @@ jest.mock('#/texlive', () => {
   };
 });
 
+jest.mock('#/tlmgr', () => {
+  class Conf {}
+  class Path {}
+  class Pinning {}
+  class Repository {}
+  class Tlmgr {}
+  (Conf.prototype as any).texmf = jest.fn();
+  (Path.prototype as any).add = jest.fn();
+  (Pinning.prototype as any).add = jest.fn();
+  (Repository.prototype as any).add = jest.fn();
+  (Tlmgr.prototype as any).conf = new Conf();
+  (Tlmgr.prototype as any).path = new Path();
+  (Tlmgr.prototype as any).pinning = new Pinning();
+  (Tlmgr.prototype as any).repository = new Repository();
+  (Tlmgr.prototype as any).install = jest.fn();
+  (Tlmgr.prototype as any).update = jest.fn();
+  // eslint-disable-next-line require-yield
+  (Tlmgr.prototype as any).list = jest.fn(async function*() {
+    return;
+  });
+  (Tlmgr.prototype as any).version = jest.fn();
+  (Tlmgr as any).Conf = Conf;
+  (Tlmgr as any).Path = Path;
+  (Tlmgr as any).Pinning = Pinning;
+  (Tlmgr as any).Repository = Repository;
+  return { Tlmgr };
+});
+
 jest.mock('#/utility', () => {
   const { Serializable } = jest.requireActual('#/utility');
   return {
     Serializable,
-    determine: jest.fn().mockResolvedValue('<determine>'),
     extract: jest.fn().mockResolvedValue('<extract>'),
+    determine: jest.fn().mockResolvedValue('<determine>'),
     mkdtemp: jest.fn(async function*() {
       yield '<mkdtemp>';
     }),

@@ -4,8 +4,11 @@ import type { DeepWritable } from 'ts-essentials';
 import * as action from '#/action';
 import { Inputs, Outputs, State } from '#/context';
 import { InstallTL } from '#/install-tl';
-import { type Texmf, Tlmgr, Version } from '#/texlive';
+import { type Texmf, Version } from '#/texlive';
+import { Tlmgr } from '#/tlmgr';
 import * as util from '#/utility';
+
+const { Conf, Path, Pinning, Repository } = Tlmgr;
 
 jest.unmock('#/action');
 
@@ -120,7 +123,7 @@ describe('main', () => {
 
   it('adds TeX Live to path after installation', async () => {
     await expect(action.main()).toResolve();
-    expect(Tlmgr.Path.prototype.add).toHaveBeenCalledAfter(
+    expect(Path.prototype.add).toHaveBeenCalledAfter(
       jest.mocked<(x: any) => unknown>(InstallTL.prototype.run),
     );
   });
@@ -130,10 +133,10 @@ describe('main', () => {
     async (...kind) => {
       setCacheType(kind);
       await expect(action.main()).toResolve();
-      expect(Tlmgr.Path.prototype.add).not.toHaveBeenCalledBefore(
+      expect(Path.prototype.add).not.toHaveBeenCalledBefore(
         jest.mocked<(...args: Array<any>) => unknown>(util.restoreCache),
       );
-      expect(Tlmgr.Path.prototype.add).toHaveBeenCalled();
+      expect(Path.prototype.add).toHaveBeenCalled();
     },
   );
 
@@ -183,7 +186,7 @@ describe('main', () => {
 
   it('does nothing about TEXMF for new installation', async () => {
     await expect(action.main()).toResolve();
-    expect(Tlmgr.Conf.prototype.texmf).not.toHaveBeenCalled();
+    expect(Conf.prototype.texmf).not.toHaveBeenCalled();
   });
 
   it.each(cacheTypes)(
@@ -191,8 +194,8 @@ describe('main', () => {
     async (...kind) => {
       setCacheType(kind);
       await expect(action.main()).toResolve();
-      expect(Tlmgr.Conf.prototype.texmf).not.toHaveBeenCalledBefore(
-        jest.mocked(Tlmgr.Path.prototype.add),
+      expect(Conf.prototype.texmf).not.toHaveBeenCalledBefore(
+        jest.mocked(Path.prototype.add),
       );
     },
   );
@@ -203,7 +206,7 @@ describe('main', () => {
       setCacheType(kind);
       inputs.texmf.TEXMFHOME = '<new>';
       // eslint-disable-next-line jest/unbound-method
-      const tlmgr = jest.mocked<any>(Tlmgr.Conf.prototype.texmf);
+      const tlmgr = jest.mocked<any>(Conf.prototype.texmf);
       tlmgr.mockResolvedValue('<old>');
       await expect(action.main()).toResolve();
       expect(tlmgr).toHaveBeenCalledWith('TEXMFHOME', '<new>');
@@ -217,7 +220,7 @@ describe('main', () => {
       setCacheType(kind);
       inputs.texmf.TEXMFHOME = '<old>';
       // eslint-disable-next-line jest/unbound-method
-      const tlmgr = jest.mocked<any>(Tlmgr.Conf.prototype.texmf);
+      const tlmgr = jest.mocked<any>(Conf.prototype.texmf);
       tlmgr.mockResolvedValue('<old>');
       await expect(action.main()).toResolve();
       expect(tlmgr).not.toHaveBeenCalledWith('TEXMFHOME', expect.anything());
@@ -227,24 +230,24 @@ describe('main', () => {
 
   it('does not setup tlcontrib by default', async () => {
     await expect(action.main()).toResolve();
-    expect(Tlmgr.Repository.prototype.add).not.toHaveBeenCalled();
-    expect(Tlmgr.Pinning.prototype.add).not.toHaveBeenCalled();
+    expect(Repository.prototype.add).not.toHaveBeenCalled();
+    expect(Pinning.prototype.add).not.toHaveBeenCalled();
   });
 
   it('sets up tlcontrib if input tlcontrib is true', async () => {
     inputs.tlcontrib = true;
     await expect(action.main()).toResolve();
-    const {
-      Path: { prototype: path },
-      Pinning: { prototype: pinning },
-      Repository: { prototype: repository },
-    } = Tlmgr;
-    expect(repository.add).not.toHaveBeenCalledBefore(jest.mocked(path.add));
-    expect(repository.add).toHaveBeenCalledWith(expect.anything(), 'tlcontrib');
-    expect(pinning.add).not.toHaveBeenCalledBefore(
-      jest.mocked<(x: any) => unknown>(repository.add),
+    expect(Repository.prototype.add).not.toHaveBeenCalledBefore(
+      jest.mocked(Path.prototype.add),
     );
-    expect(pinning.add).toHaveBeenCalledWith('tlcontrib', '*');
+    expect(Repository.prototype.add).toHaveBeenCalledWith(
+      expect.anything(),
+      'tlcontrib',
+    );
+    expect(Pinning.prototype.add).not.toHaveBeenCalledBefore(
+      jest.mocked<(x: any) => unknown>(Repository.prototype.add),
+    );
+    expect(Pinning.prototype.add).toHaveBeenCalledWith('tlcontrib', '*');
   });
 
   describe.each([[true], [false]])('%p', (force) => {

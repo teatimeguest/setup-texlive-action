@@ -1,3 +1,5 @@
+import packageJson from '../package.json' assert { type: 'json' };
+
 export default {
   automock: true,
   clearMocks: true,
@@ -19,7 +21,10 @@ export default {
   unmockedModulePathPatterns: [
     '<rootDir>/node_modules/class-transformer/',
     '<rootDir>/node_modules/decorator-cache-getter/',
-    '<rootDir>/node_modules/jest-extended/',
+    '<rootDir>/node_modules/reflect-metadata/',
+    ...Object
+      .keys(packageJson.devDependencies)
+      .map((module) => `<rootDir>/node_modules/${module}/`),
   ],
   verbose: false,
 };
