@@ -113,22 +113,34 @@ export class Tlmgr {
       });
       tlpkg.check(stderr);
       if (exitCode !== 0) {
-        const ctanNames = Array.from(
+        const names = Array.from(
           stderr.matchAll(/^tlmgr install: package (\S+) not present/gmu),
-          ({ 1: pkg = '' }) => pkg,
+          ([, name = '']) => name,
         );
-        if (ctanNames.length === 0) {
+        if (names.length === 0) {
           throw new Error(`\`tlmgr\` exited with ${exitCode}`);
         }
-        log.info('Checking for the CTAN names of ' + ctanNames.join(', '));
-        const tlNames = await Promise.all(ctanNames.map(async (pkg) => {
-          const { texlive: name } = await ctan.pkg(pkg);
-          if (name === undefined) {
-            throw new Error(`Package ${pkg} not found`);
+        // Some packages have different names in TeX Live and CTAN, and
+        // the DEPENDS.txt format requires a CTAN name, while
+        // `tlmgr install` requires a TeX Live one.
+        // To install such packages with tlmgr,
+        // the action uses the CTAN API to look up thier names in TeX Live.
+        log.info(`Trying to resolve package names (${names.join(', ')})`);
+        const tlnames = await Promise.all(names.map(async (name) => {
+          let pkg;
+          try {
+            pkg = await ctan.pkg(name);
+          } catch (cause) {
+            throw new Error(`Package ${name} not found`, { cause });
           }
-          return name;
+          if (pkg.texlive === undefined) {
+            log.debug(`Unexpected response data: ${JSON.stringify(pkg)}`);
+            throw new Error(`Failed to install ${name}`);
+          }
+          log.info(`  ${name} (in CTAN) => ${pkg.texlive} (in TeX Live)`);
+          return pkg.texlive;
         }));
-        tlpkg.check(await spawn('tlmgr', ['install', ...tlNames]));
+        tlpkg.check(await spawn('tlmgr', ['install', ...tlnames]));
       }
     }
   }
@@ -176,7 +188,11 @@ export namespace Tlmgr {
     texmf(key: keyof Texmf, value: string): Promise<void>;
     async texmf(key: keyof Texmf, value?: string): Promise<string | void> {
       if (value === undefined) {
-        const { stdout } = await spawn('kpsewhich', ['-var-value', key]);
+        const { stdout } = await spawn(
+          'kpsewhich',
+          ['-var-value', key],
+          { silent: true },
+        );
         return stdout.trim();
       }
       // `tlmgr conf` is not implemented prior to 2010.

@@ -225,7 +225,7 @@ export class Profile extends Serializable implements Texmf.SystemTrees {
 }
 
 export class Patch {
-  private readonly hunks: typeof Patch.HUNKS;
+  private readonly hunks: ReadonlyArray<Patch.Hunk>;
 
   constructor({ number: version }: Version) {
     this.hunks = Patch.HUNKS.filter((
@@ -254,7 +254,7 @@ export class Patch {
   }
 
   private async diff(
-    { description, file }: typeof this.hunks[number],
+    { description, file }: Patch.Hunk,
     input: Readonly<Buffer>,
     cwd: string,
   ): Promise<string> {
@@ -281,14 +281,7 @@ export class Patch {
     return '';
   }
 
-  private static readonly HUNKS: ReadonlyArray<{
-    readonly description: string;
-    readonly platforms?: NodeJS.Platform;
-    readonly versions?: { readonly since?: number; readonly until?: number };
-    readonly file: string;
-    readonly from: ReadonlyArray<string | Readonly<RegExp>>;
-    readonly to: ReadonlyArray<string>;
-  }> = [{
+  private static readonly HUNKS: ReadonlyArray<Patch.Hunk> = [{
     description: 'Fixes a syntax error.',
     versions: { since: 2009, until: 2011 },
     file: 'tlpkg/TeXLive/TLWinGoo.pm',
@@ -318,4 +311,15 @@ export class Patch {
     from: ['$os_major != 10', '$os_minor >= $mactex_darwin'],
     to: ['$$os_major < 10', '$$os_major > 10 || $&'],
   }];
+}
+
+namespace Patch {
+  export interface Hunk {
+    readonly description: string;
+    readonly platforms?: NodeJS.Platform;
+    readonly versions?: { readonly since?: number; readonly until?: number };
+    readonly file: string;
+    readonly from: ReadonlyArray<string | Readonly<RegExp>>;
+    readonly to: ReadonlyArray<string>;
+  }
 }

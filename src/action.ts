@@ -84,16 +84,23 @@ export async function main(state: State = new State()): Promise<void> {
         }
       });
     }
-    await log.group('Adjusting TEXMF', async () => {
-      for (const key of keys<Texmf.UserTrees>()) {
-        const value = inputs.texmf[key];
-        /* eslint-disable no-await-in-loop */
-        if ((await tlmgr.conf.texmf(key)) !== value) {
+    const entries = await Promise
+      .all(
+        keys<Texmf.UserTrees>().map(async (key) => {
+          const value = inputs.texmf[key];
+          const old = await tlmgr.conf.texmf(key);
+          return old === value ? [] : [[key, value]] as const;
+        }),
+      )
+      .then((e) => e.flat());
+    if (entries.length > 0) {
+      await log.group('Adjusting TEXMF', async () => {
+        for (const [key, value] of entries) {
+          // eslint-disable-next-line no-await-in-loop
           await tlmgr.conf.texmf(key, value);
         }
-        /* eslint-enable */
-      }
-    });
+      });
+    }
   }
 
   if (inputs.tlcontrib) {

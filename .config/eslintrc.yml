@@ -154,6 +154,7 @@ overrides:
       unicorn/prefer-spread: off
       unicorn/prefer-ternary: off
       unicorn/prevent-abbreviations: off
+      unicorn/switch-case-braces: off
   - files: "./__tests__/*.ts"
     extends:
       - plugin:jest/recommended
