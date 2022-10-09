@@ -79,6 +79,7 @@ describe('Tlmgr', () => {
   });
 
   describe('list', () => {
+    // editorconfig-checker-disable
     jest.mocked(readFile).mockResolvedValue(dedent`
       name 00texlive.config
       category Package
@@ -140,6 +141,7 @@ describe('Tlmgr', () => {
       catalogue-topics hyper pdf-feat adobe-distiller form-fillin etex
       catalogue-version 7.00n
     `);
+    // editorconfig-checker-enable
     const tlmgr = new Tlmgr(v`latest`, '');
     const collect = async <T>(gen: AsyncGenerator<T>): Promise<Array<T>> => {
       const a = [];
