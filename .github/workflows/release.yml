@@ -23,9 +23,14 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          git for-each-ref '${{ github.ref }}' --format='%(contents:body)' \
-            > RELEASENOTES.md
-      - uses: softprops/action-gh-release@v1
         with:
-          body_path: RELEASENOTES.md
+          ref: ${{ github.ref_name }}
+      - name: Generate release notes
+        run: >-
+          git for-each-ref '${{ github.ref }}' --format='%(contents:body)' |
+            tee RELEASENOTES.md
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create ${{ github.ref_name }} -F RELEASENOTES.md

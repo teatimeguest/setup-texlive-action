@@ -1,3 +1,4 @@
---job test
+--workflows .github/workflows/test.yml
+--job latest
 --platform ubuntu-latest=node:16
 --rm

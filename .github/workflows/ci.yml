@@ -22,17 +22,3 @@ jobs:
       - run: npm run ${{ matrix.script }}
       - if: github.event_name == 'push' && matrix.script == 'test'
         uses: codecov/codecov-action@v3
-  test:
-    if: github.event_name == 'push'
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup TeX Live
-        uses: ./
-        with:
-          cache: false
-      - run: tlmgr --version
