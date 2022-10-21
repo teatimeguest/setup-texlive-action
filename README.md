@@ -98,10 +98,12 @@ If you want to disable caching, you can use `cache` input:
 The `packages` input will affect which cache will be restored
 because its hash will be used as part of the cache key.
 
-> **Note**:&ensp;If you have problems due to a corrupt cache entry,
+> **Note**:&ensp;~~If you have problems due to a corrupt cache entry,
 > you can delete it
 > from the [GitHub CLI][gh-actions-cache] or [REST API][cache-api].
-> The cache key will be found in the workflow log.
+> The cache key will be found in the workflow log.~~
+>
+> Now you can manage cache entries from [Web interface][manage-caches].
 
 ## Inputs
 
@@ -109,13 +111,13 @@ All inputs are optional.
 
 |Name|Type|Description|
 |---|---|---|
-|`cache`|Bool|<p>Enable caching for [`TEXDIR`][texdir].</p>**Default:** `true`|
+|`cache`|Bool|<p>Enable caching for [`TEXDIR`][texdir].</p>**Default:**&ensp;`true`|
 |`package-file`|String|File containing the names of TeX packages to be installed, delimited by whitespaces. Everything after a `#` is treated as a comment. The [`DEPENDS.txt`][depends-txt] format is also supported.|
 |`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections are also acceptable.|
-|`prefix`|String|<p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p>**Default:** <code>[$RUNNER_TEMP][actions-env]/setup-texlive</code>|
-|`tlcontrib`|Bool|<p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p>**Default:** `false`|
-|`update-all-packages`|Bool|<p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p>**Default:** `false`|
-|`version`|String|<p>TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.</p>**Default:** `latest`|
+|`prefix`|String|<p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p>**Default:**&ensp;<code>[$RUNNER_TEMP][actions-env]/setup-texlive</code>|
+|`tlcontrib`|Bool|<p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p>**Default:**&ensp;`false`|
+|`update-all-packages`|Bool|<p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p>**Default:**&ensp;`false`|
+|`version`|String|<p>TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.</p>**Default:**&ensp;`latest`|
 
 ## Outputs
 
@@ -138,7 +140,7 @@ to keep the cache up-to-date.
 
 > **Warning**:&ensp;Enabling this will consume more [cache space][cache-limits].
 
-</div><strong>Default:</strong> <var>unset</var></td></tr>
+</div><strong>Default:&ensp;</strong><var>unset</var></td></tr>
 </table>
 
 In addition,
@@ -187,6 +189,7 @@ See the [releases page][releases].
 [gh-actions-cache]: https://github.com/actions/gh-actions-cache#readme
 [historic]: https://tug.org/historic/
 [install-tl-env]: https://tug.org/texlive/doc/install-tl.html#ENVIRONMENT-VARIABLES
+[manage-caches]: https://github.blog/changelog/2022-10-20-manage-caches-in-your-actions-workflows-from-web-interface/
 [marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action
 [releases]: https://github.com/teatimeguest/setup-texlive-action/releases
