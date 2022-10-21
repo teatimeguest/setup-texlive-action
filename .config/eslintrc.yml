@@ -36,6 +36,7 @@ overrides:
       no-eval: error
       no-extra-boolean-cast: off
       no-implicit-coercion: error
+      no-inner-declarations: off
       no-mixed-operators: error
       no-new-object: error
       no-new-wrappers: error

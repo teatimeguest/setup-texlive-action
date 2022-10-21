@@ -24,6 +24,7 @@ let inputs: {
   version: string;
 };
 beforeEach(() => {
+  process.env = {};
   inputs = {
     cache: true,
     packages: undefined,
@@ -102,18 +103,21 @@ describe('Inputs', () => {
   });
 
   describe('texmf', () => {
-    it('has default values', async () => {
+    it('has some default values', async () => {
       const { texmf } = await Inputs.load();
       expect(texmf).toHaveProperty('TEX_PREFIX', '<prefix>');
       expect(texmf).toHaveProperty(
         'TEXMFCONFIG',
         `~/.local/texlive/${v`latest`}/texmf-config`,
       );
+      expect(texmf).not.toHaveProperty('TEXDIR');
+      expect(texmf).not.toHaveProperty('TEXMFLOCAL');
     });
 
-    it('does not have TEXDIR by default', async () => {
+    it('has TEXMFLOCAL if TEXLIVE_INSTALL_TEXMFLOCAL is set', async () => {
+      process.env['TEXLIVE_INSTALL_TEXMFLOCAL'] = '<TEXMFLOCAL>';
       const { texmf } = await Inputs.load();
-      expect(texmf).not.toHaveProperty('TEXDIR');
+      expect(texmf).toHaveProperty('TEXMFLOCAL', '<TEXMFLOCAL>');
     });
 
     it('has TEXDIR as input', async () => {

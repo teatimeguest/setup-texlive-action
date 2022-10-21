@@ -159,6 +159,7 @@ the following [official environment variables][install-tl-env] are supported:
 |`TEXLIVE_INSTALL_NO_WELCOME`|`1`|
 |`TEXLIVE_INSTALL_PAPER`||
 |`TEXLIVE_INSTALL_PREFIX`|<code>[$RUNNER_TEMP][actions-env]/setup-texlive</code>|
+|`TEXLIVE_INSTALL_TEXMFLOCAL`||
 |`TEXLIVE_INSTALL_TEXMFHOME`|`~/texmf`|
 |`TEXLIVE_INSTALL_TEXMFCONFIG`|`~/.local/texlive/<version>/texmf-config`|
 |`TEXLIVE_INSTALL_TEXMFVAR`|`~/.local/texlive/<version>/texmf-var`|

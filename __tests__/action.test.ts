@@ -16,7 +16,6 @@ describe('main', () => {
   const v = (spec: unknown) => new Version(`${spec}`);
 
   const inputs = {} as DeepWritable<Inputs>;
-  // eslint-disable-next-line jest/unbound-method
   jest.mocked(Inputs.load).mockResolvedValue(inputs as unknown as Inputs);
 
   beforeEach(() => {

@@ -3,84 +3,98 @@ import { homedir } from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 
-import * as cache from '@actions/cache';
+import { isFeatureAvailable as isCacheAvailable } from '@actions/cache';
 import { getState, saveState, setOutput } from '@actions/core';
 import { Expose, Type, plainToClassFromExist } from 'class-transformer';
-import { cache as Cache } from 'decorator-cache-getter';
-import type { MarkRequired, MarkWritable } from 'ts-essentials';
+import type { MarkRequired, MarkWritable, Writable } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
 import { DependsTxt, type Texmf, Version } from '#/texlive';
 import { Serializable, getInput, tmpdir } from '#/utility';
 
-export class Inputs {
-  private readonly env: Env;
+export interface Inputs {
+  readonly cache: boolean;
+  readonly forceUpdateCache: boolean;
+  readonly packages: ReadonlySet<string>;
+  readonly texmf: MarkRequired<Partial<Texmf>, 'TEX_PREFIX'>;
+  readonly tlcontrib: boolean;
+  readonly updateAllPackages: boolean;
+  readonly version: Version;
+}
 
-  readonly cache: boolean = getInput('cache', { type: Boolean });
-  readonly tlcontrib: boolean = getInput('tlcontrib', { type: Boolean });
-  readonly updateAllPackages: boolean = getInput('update-all-packages', {
-    type: Boolean,
-  });
-
-  constructor(
-    readonly packages: ReadonlySet<string>,
-    readonly version: Version,
-  ) {
-    if (this.cache && !cache.isFeatureAvailable()) {
-      log.warn('Caching is disabled because cache service is not available');
-      this.cache = false;
-    }
-    if (this.tlcontrib && !this.version.isLatest()) {
-      log.warn('`tlcontrib` is currently ignored for older versions');
-      this.tlcontrib = false;
-    }
-    if (this.updateAllPackages && !this.version.isLatest()) {
-      log.info('`update-all-packages` is ignored for older versions');
-      this.updateAllPackages = false;
-    }
-    this.env = Env.load(this.version);
+export namespace Inputs {
+  export async function load(): Promise<Inputs> {
+    const version = await Version.resolve(
+      getInput('version', { default: 'latest' }),
+    );
+    const env = Env.load(version);
+    const inputs = {
+      cache: getInput('cache', { type: Boolean }),
+      forceUpdateCache: (env.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? '0') !== '0',
+      packages: await loadPackageList(),
+      texmf: loadTexmf(env),
+      tlcontrib: getInput('tlcontrib', { type: Boolean }),
+      updateAllPackages: getInput('update-all-packages', { type: Boolean }),
+      version,
+    };
+    validate(inputs);
+    return inputs;
   }
 
-  @Cache
-  get texmf(): MarkRequired<Partial<Texmf>, 'TEX_PREFIX'> {
-    const texmf: MarkWritable<Inputs['texmf'], 'TEXDIR'> = {
+  function validate(
+    this: void,
+    /* eslint-disable-next-line
+      @typescript-eslint/prefer-readonly-parameter-types */
+    inputs: MarkWritable<Inputs, 'cache' | 'tlcontrib' | 'updateAllPackages'>,
+  ): void {
+    if (inputs.cache && !isCacheAvailable()) {
+      log.warn('Caching is disabled because cache service is not available');
+      inputs.cache = false;
+    }
+    if (!inputs.version.isLatest()) {
+      if (inputs.tlcontrib) {
+        log.warn('`tlcontrib` is currently ignored for older versions');
+        inputs.tlcontrib = false;
+      }
+      if (inputs.updateAllPackages) {
+        log.info('`update-all-packages` is ignored for older versions');
+        inputs.updateAllPackages = false;
+      }
+    }
+  }
+
+  function loadTexmf(
+    this: void,
+    env: Env,
+  ): MarkRequired<Partial<Texmf>, 'TEX_PREFIX'> {
+    const texmf: Writable<Inputs['texmf']> = {
       TEX_PREFIX: path.normalize(
-        getInput('prefix', { default: this.env.TEXLIVE_INSTALL_PREFIX }),
+        getInput('prefix', { default: env.TEXLIVE_INSTALL_PREFIX }),
       ),
-      TEXMFHOME: this.env.TEXLIVE_INSTALL_TEXMFHOME,
-      TEXMFCONFIG: this.env.TEXLIVE_INSTALL_TEXMFCONFIG,
-      TEXMFVAR: this.env.TEXLIVE_INSTALL_TEXMFVAR,
     };
     const texdir = getInput('texdir');
     if (texdir !== undefined) {
       texmf.TEXDIR = path.normalize(texdir);
     }
+    if (env.TEXLIVE_INSTALL_TEXMFLOCAL !== undefined) {
+      texmf.TEXMFLOCAL = path.normalize(env.TEXLIVE_INSTALL_TEXMFLOCAL);
+    }
+    for (const key of keys<Texmf.UserTrees>()) {
+      texmf[key] = path.normalize(env[`TEXLIVE_INSTALL_${key}`]);
+    }
     return texmf;
   }
 
-  get forceUpdateCache(): boolean {
-    return (this.env.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? '0') !== '0';
-  }
-
-  static async load(): Promise<Inputs> {
-    return new Inputs(
-      await this.loadPackageList(),
-      await Version.resolve(getInput('version', { default: 'latest' })),
-    );
-  }
-
-  private static async loadPackageList(): Promise<Set<string>> {
+  async function loadPackageList(this: void): Promise<Set<string>> {
     const packages = [];
-    for await (const [, { hard = [], soft = [] }] of this.loadDependsTxt()) {
+    for await (const [, { hard = [], soft = [] }] of loadDependsTxt()) {
       packages.push(...hard, ...soft);
     }
     return new Set(packages.sort());
   }
 
-  private static async *loadDependsTxt(
-    this: void,
-  ): AsyncIterable<DependsTxt.Entry> {
+  async function* loadDependsTxt(this: void): AsyncIterable<DependsTxt.Entry> {
     const inline = getInput('packages');
     if (inline !== undefined) {
       yield* new DependsTxt(inline);
@@ -118,6 +132,7 @@ export interface Env {
   readonly TEXLIVE_INSTALL_NO_WELCOME: string;
   readonly TEXLIVE_INSTALL_PAPER?: string;
   readonly TEXLIVE_INSTALL_PREFIX: string;
+  readonly TEXLIVE_INSTALL_TEXMFLOCAL?: string;
   readonly TEXLIVE_INSTALL_TEXMFCONFIG: string;
   readonly TEXLIVE_INSTALL_TEXMFVAR: string;
   readonly TEXLIVE_INSTALL_TEXMFHOME: string;
@@ -132,7 +147,10 @@ export namespace Env {
     }
     // Use RUNNER_TEMP as a temporary directory during setup.
     process.env['TMPDIR'] = process.env['RUNNER_TEMP'];
-    type Keys = `TEXLIVE_INSTALL_${keyof Texmf.SystemTrees}`;
+    type Keys = `TEXLIVE_INSTALL_${Exclude<
+      keyof Texmf.SystemTrees,
+      'TEXMFLOCAL'
+    >}`;
     for (const key of keys<Record<Keys, unknown>>()) {
       if (key in process.env) {
         log.warn(`\`${key}\` is set, but ignored`);
