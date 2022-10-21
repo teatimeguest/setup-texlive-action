@@ -1,7 +1,5 @@
 import { platform } from 'node:os';
-import path from 'node:path';
 
-import { type ExecOutput } from '@actions/exec';
 import { cache as Cache } from 'decorator-cache-getter';
 import type { Writable } from 'ts-essentials';
 
@@ -76,7 +74,10 @@ export class Version {
   }
 }
 
-export interface Texmf extends Texmf.SystemTrees, Texmf.UserTrees {}
+export interface Texmf extends Texmf.SystemTrees, Texmf.UserTrees {
+  readonly TEX_PREFIX?: string;
+  readonly TEXUSERDIR?: string;
+}
 
 export namespace Texmf {
   export interface SystemTrees {
@@ -90,22 +91,6 @@ export namespace Texmf {
     readonly TEXMFCONFIG: string;
     readonly TEXMFVAR: string;
     readonly TEXMFHOME: string;
-  }
-}
-
-export namespace tlpkg {
-  export function check(output: string | Readonly<ExecOutput>): void {
-    const stderr = typeof output === 'string' ? output : output.stderr;
-    // tlpkg/TeXLive/TLUtils.pm
-    const result = /: checksums differ for (.*):$/mu.exec(stderr);
-    if (result !== null) {
-      const pkg = path.basename(result[1] ?? '', '.tar.xz');
-      throw new Error(
-        `The checksum of package ${pkg} did not match. `
-          + 'The CTAN mirror may be in the process of synchronization, '
-          + 'please rerun the job after some time.',
-      );
-    }
   }
 }
 

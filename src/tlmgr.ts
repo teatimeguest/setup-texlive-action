@@ -1,4 +1,3 @@
-import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { addPath, exportVariable } from '@actions/core';
@@ -7,8 +6,9 @@ import { cache as Cache } from 'decorator-cache-getter';
 
 import * as ctan from '#/ctan';
 import * as log from '#/log';
-import { type Texmf, type Version, tlpkg } from '#/texlive';
-import { type IterableIterator, determine } from '#/utility';
+import { type Texmf, type Version } from '#/texlive';
+import * as tlpkg from '#/tlpkg';
+import { determine } from '#/utility';
 
 export class Tlmgr {
   constructor(
@@ -18,7 +18,7 @@ export class Tlmgr {
 
   @Cache
   get conf(): Tlmgr.Conf {
-    return new Tlmgr.Conf(this.tlversion);
+    return new Tlmgr.Conf(this.tlversion, this.TEXDIR);
   }
 
   async install(this: void, packages: Iterable<string>): Promise<void> {
@@ -65,36 +65,9 @@ export class Tlmgr {
    * Lists packages by reading `texlive.tlpdb` directly
    * instead of running `tlmgr list`.
    */
-  async *list(): AsyncGenerator<Tlpobj, void, void> {
+  async *list(): AsyncGenerator<tlpkg.Tlpobj, void, void> {
     const tlpdbPath = path.join(this.TEXDIR, 'tlpkg', 'texlive.tlpdb');
-    let tlpdb: string;
-    try {
-      tlpdb = await readFile(tlpdbPath, 'utf8');
-    } catch (cause) {
-      log.debug(`Failed to read ${tlpdbPath}`, { cause });
-      return;
-    }
-    const nonPackage = /(?:^(?:collection|scheme)-|\.)/u;
-    const version = /^catalogue-version\s+(.*)$/mu;
-    const revision = /^revision\s+(\d+)\s*$/mu;
-    // dprint-ignore
-    const iter: IterableIterator<string, undefined> = tlpdb
-      .replaceAll(/\\\r?\n/gu, '') // Remove escaped line breaks
-      .replaceAll(/#.*/gu, '')     // Remove comments
-      .split(/^name\s(.*)$/gmu)    // Split into individual packages
-      .values();
-    iter.next(); // The first chunk should contain nothing.
-    for (let name of iter) {
-      name = name.trimEnd();
-      const data = iter.next().value;
-      if (name === 'texlive.infra' || !nonPackage.test(name)) {
-        yield {
-          name,
-          version: data?.match(version)?.[1]?.trimEnd() ?? undefined,
-          revision: data?.match(revision)?.[1] ?? '',
-        };
-      }
-    }
+    yield* tlpkg.tlpdb(tlpdbPath);
   }
 
   @Cache
@@ -136,18 +109,18 @@ export class Tlmgr {
   }
 }
 
-export interface Tlpobj {
-  readonly name: string;
-  readonly version?: string | undefined;
-  readonly revision: string;
-}
-
 export namespace Tlmgr {
   export class Conf {
-    constructor(private readonly tlversion: Version) {}
+    constructor(
+      private readonly tlversion: Version,
+      private readonly TEXDIR: string,
+    ) {}
 
     texmf(key: keyof Texmf): Promise<string>;
-    texmf(key: keyof Texmf, value: string): Promise<void>;
+    texmf(
+      key: keyof Texmf.UserTrees | 'TEXMFLOCAL',
+      value: string,
+    ): Promise<void>;
     async texmf(key: keyof Texmf, value?: string): Promise<string | void> {
       if (value === undefined) {
         const { stdout } = await getExecOutput(
@@ -162,6 +135,16 @@ export namespace Tlmgr {
         exportVariable(key, value);
       } else {
         await exec('tlmgr', ['conf', 'texmf', key, value]);
+      }
+      // Unlike user directories,
+      // system directories should be initialized at a minimum.
+      if (key === 'TEXMFLOCAL') {
+        try {
+          await tlpkg.makeLocalSkeleton(value, { TEXDIR: this.TEXDIR });
+          await exec('mktexlsr', [value]);
+        } catch (cause) {
+          log.info('Failed to initialize TEXMFLOCAL', { cause });
+        }
       }
     }
   }

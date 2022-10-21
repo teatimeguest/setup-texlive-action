@@ -43,14 +43,10 @@ jest.mock('@actions/cache', () => {
 });
 
 jest.mock('@actions/core', () => {
-  const { getInput, getBooleanInput, getState } = jest.requireActual(
-    '@actions/core',
-  );
   return {
     ...jest.createMockFromModule<object>('@actions/core'),
-    getInput,
-    getBooleanInput,
-    getState,
+    getInput: jest.fn().mockReturnValue(''),
+    getState: jest.fn().mockReturnValue(''),
     group: jest.fn(async (name, fn) => await fn()),
     setFailed: jest.fn((error) => {
       throw new Error(`${error}`);
@@ -109,7 +105,6 @@ jest.mock('#/texlive', () => {
   Version.checkLatest = jest.fn().mockResolvedValue(Version.LATEST);
   return {
     ...jest.createMockFromModule<object>('#/texlive'),
-    tlpkg: { check: jest.fn() },
     DependsTxt,
     Version,
     tlnet,
@@ -144,17 +139,27 @@ jest.mock('#/tlmgr', () => {
   return { Tlmgr };
 });
 
+jest.mock('#/tlpkg', () => {
+  return {
+    check: jest.fn(),
+    makeLocalSkeleton: jest.fn(),
+    // eslint-disable-next-line require-yield
+    tlpdb: jest.fn(async function*() {
+      return;
+    }),
+  };
+});
+
 jest.mock('#/utility', () => {
   const { Serializable } = jest.requireActual('#/utility');
   return {
+    ...jest.createMockFromModule<object>('#/utility'),
     Serializable,
     extract: jest.fn().mockResolvedValue('<extract>'),
     determine: jest.fn().mockResolvedValue('<determine>'),
     mkdtemp: jest.fn(async function*() {
       yield '<mkdtemp>';
     }),
-    restoreCache: jest.fn(),
-    saveCache: jest.fn(),
     tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
   };
 });

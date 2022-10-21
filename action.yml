@@ -27,6 +27,13 @@ inputs:
       This has the same effect as `TEXLIVE_INSTALL_PREFIX`.
       Defaults to `$RUNNER_TEMP/setup-texlive`.
     required: false
+  texdir:
+    description: >-
+      TeX Live system directory.
+      This has the same effect as the installer's `-texdir` option and
+      takes precedence
+      over the `prefix` input and related environment variables.
+    required: false
   tlcontrib:
     description: >-
       Set up TLContrib as an additional TeX package repository.

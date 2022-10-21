@@ -4,27 +4,24 @@ import path from 'node:path';
 import process from 'node:process';
 
 import * as cache from '@actions/cache';
-import {
-  getBooleanInput,
-  getInput,
-  getState,
-  saveState,
-  setOutput,
-} from '@actions/core';
+import { getState, saveState, setOutput } from '@actions/core';
 import { Expose, Type, plainToClassFromExist } from 'class-transformer';
 import { cache as Cache } from 'decorator-cache-getter';
+import type { MarkRequired, MarkWritable } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
 import { DependsTxt, type Texmf, Version } from '#/texlive';
-import { Serializable, tmpdir } from '#/utility';
+import { Serializable, getInput, tmpdir } from '#/utility';
 
 export class Inputs {
   private readonly env: Env;
 
-  readonly cache: boolean = getBooleanInput('cache');
-  readonly tlcontrib: boolean = getBooleanInput('tlcontrib');
-  readonly updateAllPackages: boolean = getBooleanInput('update-all-packages');
+  readonly cache: boolean = getInput('cache', { type: Boolean });
+  readonly tlcontrib: boolean = getInput('tlcontrib', { type: Boolean });
+  readonly updateAllPackages: boolean = getInput('update-all-packages', {
+    type: Boolean,
+  });
 
   constructor(
     readonly packages: ReadonlySet<string>,
@@ -46,49 +43,52 @@ export class Inputs {
   }
 
   @Cache
-  get texmf(): Omit<Texmf, 'TEXMFSYSCONFIG' | 'TEXMFSYSVAR'> {
-    const input = getInput('prefix');
-    const prefix = path.normalize(
-      input !== '' ? input : this.env.TEXLIVE_INSTALL_PREFIX,
-    );
-    const TEXDIR = path.join(prefix, this.version.toString());
-    return {
-      TEXDIR,
-      TEXMFLOCAL: path.join(prefix, 'texmf-local'),
+  get texmf(): MarkRequired<Partial<Texmf>, 'TEX_PREFIX'> {
+    const texmf: MarkWritable<Inputs['texmf'], 'TEXDIR'> = {
+      TEX_PREFIX: path.normalize(
+        getInput('prefix', { default: this.env.TEXLIVE_INSTALL_PREFIX }),
+      ),
       TEXMFHOME: this.env.TEXLIVE_INSTALL_TEXMFHOME,
       TEXMFCONFIG: this.env.TEXLIVE_INSTALL_TEXMFCONFIG,
       TEXMFVAR: this.env.TEXLIVE_INSTALL_TEXMFVAR,
     };
+    const texdir = getInput('texdir');
+    if (texdir !== undefined) {
+      texmf.TEXDIR = path.normalize(texdir);
+    }
+    return texmf;
   }
 
   get forceUpdateCache(): boolean {
     return (this.env.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? '0') !== '0';
   }
 
-  static async load(this: void): Promise<Inputs> {
+  static async load(): Promise<Inputs> {
     return new Inputs(
-      await Inputs.loadPackages(),
-      await Version.resolve(getInput('version')),
+      await this.loadPackageList(),
+      await Version.resolve(getInput('version', { default: 'latest' })),
     );
   }
 
-  private static async loadPackages(this: void): Promise<Set<string>> {
-    // eslint-disable-next-line func-style
-    const dependsTxt = async function*(): AsyncIterable<DependsTxt.Entry> {
-      const inline = getInput('packages');
-      if (inline !== '') {
-        yield* new DependsTxt(inline);
-      }
-      const file = getInput('package-file');
-      if (file !== '') {
-        yield* new DependsTxt(await readFile(file, 'utf8'));
-      }
-    };
+  private static async loadPackageList(): Promise<Set<string>> {
     const packages = [];
-    for await (const [, { hard = [], soft = [] }] of dependsTxt()) {
+    for await (const [, { hard = [], soft = [] }] of this.loadDependsTxt()) {
       packages.push(...hard, ...soft);
     }
     return new Set(packages.sort());
+  }
+
+  private static async *loadDependsTxt(
+    this: void,
+  ): AsyncIterable<DependsTxt.Entry> {
+    const inline = getInput('packages');
+    if (inline !== undefined) {
+      yield* new DependsTxt(inline);
+    }
+    const file = getInput('package-file');
+    if (file !== undefined) {
+      yield* new DependsTxt(await readFile(file, 'utf8'));
+    }
   }
 }
 

@@ -3,8 +3,8 @@ import type { DeepWritable } from 'ts-essentials';
 
 import * as action from '#/action';
 import { Inputs, Outputs, State } from '#/context';
-import { InstallTL } from '#/install-tl';
-import { type Texmf, Version } from '#/texlive';
+import { InstallTL, Profile } from '#/install-tl';
+import { Version } from '#/texlive';
 import { Tlmgr } from '#/tlmgr';
 import * as util from '#/utility';
 
@@ -16,12 +16,13 @@ describe('main', () => {
   const v = (spec: unknown) => new Version(`${spec}`);
 
   const inputs = {} as DeepWritable<Inputs>;
+  // eslint-disable-next-line jest/unbound-method
   jest.mocked(Inputs.load).mockResolvedValue(inputs as unknown as Inputs);
 
   beforeEach(() => {
     inputs.cache = true;
     inputs.packages = new Set();
-    inputs.texmf = { TEXDIR: '' } as Texmf;
+    inputs.texmf = { TEX_PREFIX: '' };
     inputs.tlcontrib = false;
     inputs.updateAllPackages = false;
     inputs.version = v`latest`;
@@ -204,7 +205,9 @@ describe('main', () => {
     'change old settings if they are not appropriate (case %p)',
     async (...kind) => {
       setCacheType(kind);
-      inputs.texmf.TEXMFHOME = '<new>';
+      jest.mocked(Profile).mockReturnValueOnce(
+        { TEXMFHOME: '<new>' } as Profile,
+      );
       // eslint-disable-next-line jest/unbound-method
       const tlmgr = jest.mocked<any>(Conf.prototype.texmf);
       tlmgr.mockResolvedValue('<old>');
@@ -218,7 +221,9 @@ describe('main', () => {
     'does not change old settings if not necessary (case %s)',
     async (...kind) => {
       setCacheType(kind);
-      inputs.texmf.TEXMFHOME = '<old>';
+      jest.mocked(Profile).mockReturnValueOnce(
+        { TEXMFHOME: '<old>' } as Profile,
+      );
       // eslint-disable-next-line jest/unbound-method
       const tlmgr = jest.mocked<any>(Conf.prototype.texmf);
       tlmgr.mockResolvedValue('<old>');

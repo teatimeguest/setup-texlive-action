@@ -2,7 +2,7 @@ import { platform } from 'node:os';
 
 import * as ctan from '#/ctan';
 import * as log from '#/log';
-import { DependsTxt, Version, tlpkg } from '#/texlive';
+import { DependsTxt, Version } from '#/texlive';
 
 jest.unmock('#/texlive');
 
@@ -138,20 +138,5 @@ describe('DependsTxt.parse', () => {
     expect(manifest.get('')).not.toHaveProperty('soft');
     expect([...manifest]).toHaveLength(1);
     expect(log.warn).toHaveBeenCalledTimes(3);
-  });
-});
-
-describe('tlpkg', () => {
-  describe('check', () => {
-    it('detects forcible removal of packages', () => {
-      expect(() =>
-        tlpkg.check(
-          'TeXLive::TLUtils::check_file_and_remove: '
-            + 'checksums differ for /tmp/path/to/foo.tar.xz:\n'
-            + 'TeXLive::TLUtils::check_file_and_remove: ...',
-        )
-      )
-        .toThrow('The checksum of package foo did not match.');
-    });
   });
 });

@@ -115,6 +115,7 @@ All inputs are optional.
 |`package-file`|String|File containing the names of TeX packages to be installed, delimited by whitespaces. Everything after a `#` is treated as a comment. The [`DEPENDS.txt`][depends-txt] format is also supported.|
 |`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections are also acceptable.|
 |`prefix`|String|<p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p>**Default:**&ensp;<code>[$RUNNER_TEMP][actions-env]/setup-texlive</code>|
+|`texdir`|String|TeX Live system directory. This has the same effect as the installer's [`-texdir`][install-tl-texdir] option and takes precedence over the `prefix` input and related environment variables.|
 |`tlcontrib`|Bool|<p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p>**Default:**&ensp;`false`|
 |`update-all-packages`|Bool|<p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p>**Default:**&ensp;`false`|
 |`version`|String|<p>TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.</p>**Default:**&ensp;`latest`|
@@ -189,6 +190,7 @@ See the [releases page][releases].
 [gh-actions-cache]: https://github.com/actions/gh-actions-cache#readme
 [historic]: https://tug.org/historic/
 [install-tl-env]: https://tug.org/texlive/doc/install-tl.html#ENVIRONMENT-VARIABLES
+[install-tl-texdir]: https://tug.org/texlive/doc/install-tl.html#texdir-dir
 [manage-caches]: https://github.blog/changelog/2022-10-20-manage-caches-in-your-actions-workflows-from-web-interface/
 [marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action

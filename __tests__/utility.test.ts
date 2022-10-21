@@ -1,11 +1,19 @@
 import process from 'node:process';
 
 import * as cache from '@actions/cache';
+import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
 import * as log from '#/log';
-import { determine, extract, restoreCache, saveCache, tmpdir } from '#/utility';
+import {
+  determine,
+  extract,
+  getInput,
+  restoreCache,
+  saveCache,
+  tmpdir,
+} from '#/utility';
 
 jest.mock('node:path', () => jest.requireActual('path').posix);
 jest.unmock('#/utility');
@@ -53,6 +61,28 @@ describe('determine', () => {
       await expect(determine('<pattern>')).rejects.toThrow('');
     },
   );
+});
+
+describe('getInput', () => {
+  it('returns input as string', () => {
+    jest.mocked(core.getInput).mockReturnValueOnce('<value>');
+    expect(getInput('<name>')).toBe('<value>');
+  });
+
+  it('returns undefined if input is an empty string', () => {
+    jest.mocked(core.getInput).mockReturnValueOnce('');
+    expect(getInput('<name>')).toBeUndefined();
+  });
+
+  it('returns default value if input is empty', () => {
+    jest.mocked(core.getInput).mockReturnValueOnce('');
+    expect(getInput('<name>', { default: '<default>' })).toBe('<default>');
+  });
+
+  it.each([true, false])('returns input as boolean', (value) => {
+    jest.mocked(core.getBooleanInput).mockReturnValueOnce(value);
+    expect(getInput('<name>', { type: Boolean })).toBe(value);
+  });
 });
 
 describe('saveCache', () => {

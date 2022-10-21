@@ -19,6 +19,7 @@ const fail = (): any => {
 };
 
 const texmf = {
+  TEX_PREFIX: 'TEX_PREFIX',
   TEXDIR: 'TEXDIR',
   TEXMFLOCAL: 'TEXMFLOCAL',
   TEXMFHOME: 'TEXMFHOME',
@@ -170,6 +171,60 @@ describe('Profile', () => {
         'selected_scheme',
         'scheme-minimal',
       );
+    });
+
+    it('uses individual settings', () => {
+      const profile = new Profile(v`2014`, {
+        TEX_PREFIX: '<TEX_PREFIX>',
+        TEXMFSYSCONFIG: '<TEXMFSYSCONFIG>',
+      });
+      expect(profile).toHaveProperty('TEXDIR', '<TEX_PREFIX>/2014');
+      expect(profile).toHaveProperty('TEXMFLOCAL', '<TEX_PREFIX>/texmf-local');
+      expect(profile).toHaveProperty('TEXMFSYSCONFIG', '<TEXMFSYSCONFIG>');
+      expect(profile).toHaveProperty(
+        'TEXMFSYSVAR',
+        '<TEX_PREFIX>/2014/texmf-var',
+      );
+    });
+
+    it('prioritizes TEXDIR over other settings', () => {
+      const profile = new Profile(v`2008`, {
+        TEX_PREFIX: '<TEX_PREFIX>',
+        TEXDIR: '<TEXDIR>',
+        TEXMFLOCAL: '<TEXMFLOCAL>',
+        TEXMFSYSVAR: '<TEXMFSYSVAR>',
+      });
+      expect(profile).toHaveProperty('TEXDIR', '<TEXDIR>');
+      expect(profile).toHaveProperty('TEXMFLOCAL', '<TEXDIR>/texmf-local');
+      expect(profile).toHaveProperty('TEXMFSYSCONFIG', '<TEXDIR>/texmf-config');
+      expect(profile).toHaveProperty('TEXMFSYSVAR', '<TEXDIR>/texmf-var');
+    });
+
+    it('uses system directory by default', () => {
+      const profile = new Profile(v`2012`, {
+        TEX_PREFIX: '<TEX_PREFIX>',
+        TEXDIR: '<TEXDIR>',
+        TEXMFSYSVAR: '<TEXMFSYSVAR>',
+        TEXMFCONFIG: '<TEXMFCONFIG>',
+      });
+      expect(profile).toHaveProperty('TEXMFHOME', '<TEXDIR>/texmf-local');
+      expect(profile).toHaveProperty('TEXMFCONFIG', '<TEXMFCONFIG>');
+      expect(profile).toHaveProperty('TEXMFVAR', '<TEXDIR>/texmf-var');
+    });
+
+    it('prioritizes TEXUSERDIR over other settings', () => {
+      const profile = new Profile(v`2009`, {
+        TEX_PREFIX: '<TEX_PREFIX>',
+        TEXMFLOCAL: '<TEXMFLOCAL>',
+        TEXMFSYSVAR: '<TEXMFSYSVAR>',
+        TEXUSERDIR: '<TEXUSERDIR>',
+      });
+      expect(profile).toHaveProperty('TEXMFHOME', '<TEXUSERDIR>/texmf');
+      expect(profile).toHaveProperty(
+        'TEXMFCONFIG',
+        '<TEXUSERDIR>/texmf-config',
+      );
+      expect(profile).toHaveProperty('TEXMFVAR', '<TEXUSERDIR>/texmf-var');
     });
 
     it('sets instopt_adjustrepo to true for the latest version', () => {

@@ -34,6 +34,8 @@ export async function main(state: State = new State()): Promise<void> {
   const inputs = await Inputs.load();
   const outputs = new Outputs();
   outputs.version = inputs.version;
+
+  const profile = new Profile(inputs.version, inputs.texmf);
   let installPackages = inputs.packages.size > 0;
 
   if (inputs.cache) {
@@ -41,14 +43,14 @@ export async function main(state: State = new State()): Promise<void> {
       const [unique, primary, secondary] = getCacheKeys(inputs);
       state.key = inputs.forceUpdateCache ? unique : primary;
       const restored = await restoreCache(
-        inputs.texmf.TEXDIR,
+        profile.TEXDIR,
         unique,
         [primary, secondary],
       );
       if (restored?.startsWith(state.key) === true) {
         state.key = restored;
       } else {
-        state.texdir = inputs.texmf.TEXDIR;
+        state.texdir = profile.TEXDIR;
         log.info(
           'After the job completes, TEXDIR will be saved to cache with key:',
         );
@@ -65,7 +67,6 @@ export async function main(state: State = new State()): Promise<void> {
       installtl = await InstallTL.acquire(inputs.version);
       await installtl.version();
     });
-    const profile = new Profile(inputs.version, inputs.texmf);
     await log.group('Installation profile', async () => {
       log.info(profile.toString());
     });
@@ -74,7 +75,7 @@ export async function main(state: State = new State()): Promise<void> {
     });
   }
 
-  const tlmgr = new Tlmgr(inputs.version, inputs.texmf.TEXDIR);
+  const tlmgr = new Tlmgr(inputs.version, profile.TEXDIR);
   await tlmgr.path.add();
 
   if (outputs.cacheHit) {
@@ -88,13 +89,13 @@ export async function main(state: State = new State()): Promise<void> {
       });
     }
     const entries = await Promise
-      .all(
-        keys<Texmf.UserTrees>().map(async (key) => {
-          const value = inputs.texmf[key];
+      .all((['TEXMFLOCAL', ...keys<Texmf.UserTrees>()] as const).map(
+        async (key) => {
+          const value = profile[key];
           const old = await tlmgr.conf.texmf(key);
           return old === value ? [] : [[key, value]] as const;
-        }),
-      )
+        },
+      ))
       .then((e) => e.flat());
     if (entries.length > 0) {
       await log.group('Adjusting TEXMF', async () => {

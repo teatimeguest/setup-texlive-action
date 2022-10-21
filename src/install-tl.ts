@@ -6,11 +6,12 @@ import path from 'node:path';
 import { exec, getExecOutput } from '@actions/exec';
 import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
 import { Expose, Type } from 'class-transformer';
-import type { MarkOptional, PickProperties } from 'ts-essentials';
+import type { MarkRequired, PickProperties } from 'ts-essentials';
 import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
-import { type Texmf, Version, tlnet, tlpkg } from '#/texlive';
+import { type Texmf, Version, tlnet } from '#/texlive';
+import * as tlpkg from '#/tlpkg';
 import { Serializable, extract, mkdtemp } from '#/utility';
 
 // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
@@ -115,21 +116,39 @@ export class InstallTL {
   }
 }
 
-export class Profile extends Serializable implements Texmf.SystemTrees {
+export class Profile extends Serializable implements Texmf {
   constructor(
     readonly version: Version,
-    texmf: MarkOptional<Texmf.SystemTrees, 'TEXMFSYSCONFIG' | 'TEXMFSYSVAR'>,
+    texmf: MarkRequired<Partial<Texmf>, 'TEX_PREFIX'>,
   ) {
     super();
     // `scheme-infraonly` was first introduced in TeX Live 2016.
     this.selected_scheme = `scheme-${
       version.number < 2016 ? 'minimal' : 'infraonly'
     }`;
-    const { TEXDIR, TEXMFLOCAL, TEXMFSYSCONFIG, TEXMFSYSVAR } = texmf;
-    this.TEXDIR = TEXDIR;
-    this.TEXMFLOCAL = TEXMFLOCAL;
-    this.TEXMFSYSCONFIG = TEXMFSYSCONFIG ?? path.join(TEXDIR, 'texmf-config');
-    this.TEXMFSYSVAR = TEXMFSYSVAR ?? path.join(TEXDIR, 'texmf-var');
+    if (texmf.TEXDIR !== undefined) {
+      this.TEXDIR = texmf.TEXDIR;
+      this.TEXMFLOCAL = path.join(this.TEXDIR, 'texmf-local');
+      this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
+      this.TEXMFSYSVAR = path.join(this.TEXDIR, 'texmf-var');
+    } else {
+      this.TEXDIR = path.join(texmf.TEX_PREFIX, version.toString());
+      this.TEXMFLOCAL = texmf.TEXMFLOCAL
+        ?? path.join(texmf.TEX_PREFIX, 'texmf-local');
+      this.TEXMFSYSCONFIG = texmf.TEXMFSYSCONFIG
+        ?? path.join(this.TEXDIR, 'texmf-config');
+      this.TEXMFSYSVAR = texmf.TEXMFSYSVAR
+        ?? path.join(this.TEXDIR, 'texmf-var');
+    }
+    if (texmf.TEXUSERDIR !== undefined) {
+      this.TEXMFHOME = path.join(texmf.TEXUSERDIR, 'texmf');
+      this.TEXMFCONFIG = path.join(texmf.TEXUSERDIR, 'texmf-config');
+      this.TEXMFVAR = path.join(texmf.TEXUSERDIR, 'texmf-var');
+    } else {
+      this.TEXMFHOME = texmf.TEXMFHOME ?? this.TEXMFLOCAL;
+      this.TEXMFCONFIG = texmf.TEXMFCONFIG ?? this.TEXMFSYSCONFIG;
+      this.TEXMFVAR = texmf.TEXMFVAR ?? this.TEXMFSYSVAR;
+    }
     this.instopt_adjustrepo = this.version.isLatest();
   }
 
@@ -160,6 +179,12 @@ export class Profile extends Serializable implements Texmf.SystemTrees {
   readonly TEXMFSYSCONFIG: string;
   @Expose()
   readonly TEXMFSYSVAR: string;
+  @Expose()
+  readonly TEXMFHOME: string;
+  @Expose()
+  readonly TEXMFCONFIG: string;
+  @Expose()
+  readonly TEXMFVAR: string;
 
   @Expose({ since: 2017 })
   readonly instopt_adjustpath: boolean = false;

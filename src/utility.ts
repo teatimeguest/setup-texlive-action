@@ -4,6 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 
 import * as cache from '@actions/cache';
+import * as core from '@actions/core';
 import { create as createGlobber } from '@actions/glob';
 import { rmRF } from '@actions/io';
 import { extractTar, extractZip } from '@actions/tool-cache';
@@ -46,14 +47,16 @@ export async function extract(
   kind: 'zip' | 'tgz',
 ): Promise<string> {
   switch (kind) {
-    case 'tgz':
+    case 'tgz': {
       return await extractTar(archive, undefined, ['xz', '--strip=1']);
-    case 'zip':
+    }
+    case 'zip': {
       try {
         return await determine(path.join(await extractZip(archive), '*'));
       } catch (cause) {
         throw new Error('Unable to locate subdirectory', { cause });
       }
+    }
   }
 }
 
@@ -73,6 +76,32 @@ export async function determine(pattern: string): Promise<string> {
         matched.join('; ')
       }`,
   );
+}
+
+export function getInput(name: string, options?: {
+  readonly type?: typeof String;
+}): string | undefined;
+export function getInput(name: string, options: {
+  readonly type?: typeof String;
+  readonly default: string;
+}): string;
+export function getInput(name: string, options: {
+  readonly type: typeof Boolean;
+}): boolean;
+
+export function getInput(name: string, options?: {
+  readonly type?: typeof String | typeof Boolean;
+  readonly default?: string;
+}): string | boolean | undefined {
+  switch (options?.type) {
+    case Boolean: {
+      return core.getBooleanInput(name);
+    }
+    default: {
+      const input = core.getInput(name);
+      return input === '' ? options?.default : input;
+    }
+  }
 }
 
 export async function saveCache(

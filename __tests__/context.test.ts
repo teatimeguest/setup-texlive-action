@@ -1,45 +1,54 @@
 import fs from 'node:fs/promises';
 import process from 'node:process';
 
-import * as cache from '@actions/cache';
+import { isFeatureAvailable } from '@actions/cache';
 import * as core from '@actions/core';
 
 import { Env, Inputs, Outputs, State } from '#/context';
 import * as log from '#/log';
 import { Version } from '#/texlive';
+import { getInput } from '#/utility';
 
 const v = (spec: unknown) => new Version(`${spec}`);
 
 jest.mock('node:process', () => globalThis.process);
+
+let inputs: {
+  cache: boolean;
+  packages: string | undefined;
+  'package-file': string | undefined;
+  prefix: string;
+  texdir: string | undefined;
+  tlcontrib: boolean;
+  'update-all-packages': boolean;
+  version: string;
+};
 beforeEach(() => {
-  globalThis.process.env = {
-    // default values defined in action.yml
-    INPUT_CACHE: 'true',
-    INPUT_PACKAGES: '',
-    'INPUT_PACKAGE-FILE': '',
-    INPUT_PREFIX: '',
-    INPUT_TLCONTRIB: 'false',
-    'INPUT_UPDATE-ALL-PACKAGES': 'false',
-    INPUT_VERSION: 'latest',
+  inputs = {
+    cache: true,
+    packages: undefined,
+    'package-file': undefined,
+    prefix: '<prefix>',
+    texdir: undefined,
+    tlcontrib: false,
+    'update-all-packages': false,
+    version: 'latest',
   };
 });
-
+jest.mocked(getInput).mockImplementation((name: string) => {
+  return (inputs as any)[name];
+});
 jest.unmock('#/context');
 
 describe('Inputs', () => {
   describe('cache', () => {
-    it('defaults to true', async () => {
-      await expect(Inputs.load()).resolves.toHaveProperty('cache', true);
-    });
-
-    it('is set to false if false is set as input', async () => {
-      process.env['INPUT_CACHE'] = 'false';
-      await expect(Inputs.load()).resolves.toHaveProperty('cache', false);
+    it.each([true, false])('is set as input', async (input) => {
+      inputs.cache = input;
+      await expect(Inputs.load()).resolves.toHaveProperty('cache', input);
     });
 
     it('is set to false if cache service is not available', async () => {
-      process.env['INPUT_CACHE'] = 'true';
-      jest.mocked(cache.isFeatureAvailable).mockReturnValueOnce(false);
+      jest.mocked(isFeatureAvailable).mockReturnValueOnce(false);
       await expect(Inputs.load()).resolves.toHaveProperty('cache', false);
       expect(log.warn).toHaveBeenCalledWith(
         'Caching is disabled because cache service is not available',
@@ -56,7 +65,7 @@ describe('Inputs', () => {
     });
 
     it('is set to the set of specified packages by packages input', async () => {
-      process.env['INPUT_PACKAGES'] = 'foo bar baz';
+      inputs.packages = 'foo bar baz';
       await expect(Inputs.load()).resolves.toHaveProperty(
         'packages',
         new Set(['bar', 'baz', 'foo']),
@@ -64,21 +73,18 @@ describe('Inputs', () => {
     });
 
     it('is set to the set of packages defined by package file', async () => {
-      process.env['INPUT_PACKAGE-FILE'] = '<package-file>';
+      inputs['package-file'] = '<package-file>';
       jest.mocked(fs.readFile).mockResolvedValueOnce('foo bar baz');
       await expect(Inputs.load()).resolves.toHaveProperty(
         'packages',
         new Set(['bar', 'baz', 'foo']),
       );
-      expect(fs.readFile).toHaveBeenCalledWith(
-        process.env['INPUT_PACKAGE-FILE'],
-        'utf8',
-      );
+      expect(fs.readFile).toHaveBeenCalledWith('<package-file>', 'utf8');
     });
 
     it('contains packages specified by both input and file', async () => {
-      process.env['INPUT_PACKAGES'] = 'foo bar baz';
-      process.env['INPUT_PACKAGE-FILE'] = '<package-file>';
+      inputs.packages = 'foo bar baz';
+      inputs['package-file'] = '<package-file>';
       jest.mocked(fs.readFile).mockResolvedValueOnce('qux foo');
       await expect(Inputs.load()).resolves.toHaveProperty(
         'packages',
@@ -87,8 +93,7 @@ describe('Inputs', () => {
     });
 
     it('does not contain comments or whitespaces', async () => {
-      process.env['INPUT_PACKAGES'] =
-        '\n  foo\t# this is a comment\nbar  baz \n# \nqux#';
+      inputs.packages = '\n  foo\t# this is a comment\nbar  baz \n# \nqux#';
       await expect(Inputs.load()).resolves.toHaveProperty(
         'packages',
         new Set(['bar', 'baz', 'foo', 'qux']),
@@ -97,48 +102,36 @@ describe('Inputs', () => {
   });
 
   describe('texmf', () => {
-    it('has the default values', async () => {
+    it('has default values', async () => {
       const { texmf } = await Inputs.load();
-      expect(texmf.TEXDIR).toBe(`<tmpdir>/setup-texlive/${v`latest`}`);
-      expect(texmf.TEXMFLOCAL).toBe('<tmpdir>/setup-texlive/texmf-local');
+      expect(texmf).toHaveProperty('TEX_PREFIX', '<prefix>');
+      expect(texmf).toHaveProperty(
+        'TEXMFCONFIG',
+        `~/.local/texlive/${v`latest`}/texmf-config`,
+      );
     });
 
-    it('uses prefix', async () => {
-      process.env['INPUT_PREFIX'] = '<prefix>';
+    it('does not have TEXDIR by default', async () => {
       const { texmf } = await Inputs.load();
-      expect(texmf.TEXDIR).toBe(`<prefix>/${v`latest`}`);
-      expect(texmf.TEXMFLOCAL).toBe('<prefix>/texmf-local');
+      expect(texmf).not.toHaveProperty('TEXDIR');
     });
 
-    it('uses TEXLIVE_INSTALL_PREFIX if set', async () => {
-      process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
+    it('has TEXDIR as input', async () => {
+      inputs.texdir = '<TEXDIR>';
       const { texmf } = await Inputs.load();
-      expect(texmf.TEXDIR).toBe(`<PREFIX>/${v`latest`}`);
-      expect(texmf.TEXMFLOCAL).toBe('<PREFIX>/texmf-local');
-    });
-
-    it('uses prefix if prefix and TEXLIVE_INSTALL_PREFIX are both set', async () => {
-      process.env['INPUT_PREFIX'] = '<prefix>';
-      process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
-      const { texmf } = await Inputs.load();
-      expect(texmf.TEXDIR).toBe(`<prefix>/${v`latest`}`);
-      expect(texmf.TEXMFLOCAL).toBe('<prefix>/texmf-local');
+      expect(texmf).toHaveProperty('TEXDIR', '<TEXDIR>');
     });
   });
 
   describe('tlcontrib', () => {
-    it('defaults to false', async () => {
-      await expect(Inputs.load()).resolves.toHaveProperty('tlcontrib', false);
-    });
-
-    it('is set to true if true is set as input', async () => {
-      process.env['INPUT_TLCONTRIB'] = 'true';
-      await expect(Inputs.load()).resolves.toHaveProperty('tlcontrib', true);
+    it.each([true, false])('is set as input', async (input) => {
+      inputs.tlcontrib = input;
+      await expect(Inputs.load()).resolves.toHaveProperty('tlcontrib', input);
     });
 
     it('is set to false if an older version is specified', async () => {
-      process.env['INPUT_TLCONTRIB'] = 'true';
-      process.env['INPUT_VERSION'] = '2010';
+      inputs.tlcontrib = true;
+      inputs.version = '2020';
       await expect(Inputs.load()).resolves.toHaveProperty('tlcontrib', false);
       expect(log.warn).toHaveBeenCalledWith(
         '`tlcontrib` is currently ignored for older versions',
@@ -147,24 +140,17 @@ describe('Inputs', () => {
   });
 
   describe('updateAllPackages', () => {
-    it('defaults to false', async () => {
+    it.each([true, false])('is set as input', async (input) => {
+      inputs['update-all-packages'] = input;
       await expect(Inputs.load()).resolves.toHaveProperty(
         'updateAllPackages',
-        false,
-      );
-    });
-
-    it('is set to true if true is set as input', async () => {
-      process.env['INPUT_UPDATE-ALL-PACKAGES'] = 'true';
-      await expect(Inputs.load()).resolves.toHaveProperty(
-        'updateAllPackages',
-        true,
+        input,
       );
     });
 
     it('is set to false if an older version is specified', async () => {
-      process.env['INPUT_UPDATE-ALL-PACKAGES'] = 'true';
-      process.env['INPUT_VERSION'] = '2016';
+      inputs['update-all-packages'] = true;
+      inputs.version = '2015';
       await expect(Inputs.load()).resolves.toHaveProperty(
         'updateAllPackages',
         false,
@@ -179,12 +165,12 @@ describe('Inputs', () => {
     });
 
     it('is set to the specified version', async () => {
-      process.env['INPUT_VERSION'] = '2018';
+      inputs.version = '2018';
       await expect(Inputs.load()).resolves.toHaveProperty('version', v`2018`);
     });
 
     it('fails with invalid input', async () => {
-      process.env['INPUT_VERSION'] = 'version';
+      inputs.version = '<version>';
       await expect(Inputs.load()).rejects.toThrow('');
     });
   });
@@ -246,17 +232,19 @@ describe('Env', () => {
 
 describe('State', () => {
   describe('constructor', () => {
-    it.each([[false, ''], [true, '{}'], [true, '{ "key": "key" }'], [
-      true,
-      '{ "key": "key", "texdir": "texdir" }',
-    ]])('sets post to %s (%p)', (value, state) => {
-      process.env[`STATE_${State.NAME}`] = state;
+    it.each([
+      [false, ''],
+      [true, '{}'],
+      [true, '{ "key": "key" }'],
+      [true, '{ "key": "key", "texdir": "texdir" }'],
+    ])('sets post to %s (%p)', (value, state) => {
+      jest.mocked(core.getState).mockReturnValueOnce(state);
       expect(new State()).toHaveProperty('post', value);
     });
 
     it('gets state', () => {
       const state = { key: '<key>', texdir: '<texdir>' };
-      process.env[`STATE_${State.NAME}`] = JSON.stringify(state);
+      jest.mocked(core.getState).mockReturnValueOnce(JSON.stringify(state));
       expect(new State()).toMatchObject(state);
     });
   });
