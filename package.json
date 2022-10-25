@@ -1,7 +1,7 @@
 {
   "name": "setup-texlive-action",
   "private": true,
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "build": "node scripts/build.mjs",

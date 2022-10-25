@@ -1794,7 +1794,7 @@ var require_path_utils = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.toPlatformPath = exports.toWin32Path = exports.toPosixPath = void 0;
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -1804,7 +1804,7 @@ var require_path_utils = __commonJS({
     }
     exports.toWin32Path = toWin32Path;
     function toPlatformPath(pth) {
-      return pth.replace(/[/\\]/g, path5.sep);
+      return pth.replace(/[/\\]/g, path6.sep);
     }
     exports.toPlatformPath = toPlatformPath;
   }
@@ -1875,7 +1875,7 @@ var require_core = __commonJS({
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
     var os4 = __importStar(__require("os"));
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -1903,10 +1903,10 @@ var require_core = __commonJS({
       } else {
         command_1.issueCommand("add-path", {}, inputPath);
       }
-      process.env["PATH"] = `${inputPath}${path5.delimiter}${process.env["PATH"]}`;
+      process.env["PATH"] = `${inputPath}${path6.delimiter}${process.env["PATH"]}`;
     }
     exports.addPath = addPath2;
-    function getInput2(name, options) {
+    function getInput3(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
       if (options && options.required && !val) {
         throw new Error(`Input required and not supplied: ${name}`);
@@ -1916,9 +1916,9 @@ var require_core = __commonJS({
       }
       return val.trim();
     }
-    exports.getInput = getInput2;
+    exports.getInput = getInput3;
     function getMultilineInput(name, options) {
-      const inputs = getInput2(name, options).split("\n").filter((x) => x !== "");
+      const inputs = getInput3(name, options).split("\n").filter((x) => x !== "");
       if (options && options.trimWhitespace === false) {
         return inputs;
       }
@@ -1928,7 +1928,7 @@ var require_core = __commonJS({
     function getBooleanInput2(name, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
-      const val = getInput2(name, options);
+      const val = getInput3(name, options);
       if (trueValue.includes(val))
         return true;
       if (falseValue.includes(val))
@@ -2220,7 +2220,7 @@ var require_io_util = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rename = exports.readlink = exports.readdir = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
     var fs3 = __importStar(__require("fs"));
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     _a2 = fs3.promises, exports.chmod = _a2.chmod, exports.copyFile = _a2.copyFile, exports.lstat = _a2.lstat, exports.mkdir = _a2.mkdir, exports.readdir = _a2.readdir, exports.readlink = _a2.readlink, exports.rename = _a2.rename, exports.rmdir = _a2.rmdir, exports.stat = _a2.stat, exports.symlink = _a2.symlink, exports.unlink = _a2.unlink;
     exports.IS_WINDOWS = process.platform === "win32";
     function exists(fsPath) {
@@ -2267,7 +2267,7 @@ var require_io_util = __commonJS({
         }
         if (stats && stats.isFile()) {
           if (exports.IS_WINDOWS) {
-            const upperExt = path5.extname(filePath).toUpperCase();
+            const upperExt = path6.extname(filePath).toUpperCase();
             if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) {
               return filePath;
             }
@@ -2291,11 +2291,11 @@ var require_io_util = __commonJS({
           if (stats && stats.isFile()) {
             if (exports.IS_WINDOWS) {
               try {
-                const directory = path5.dirname(filePath);
-                const upperName = path5.basename(filePath).toUpperCase();
+                const directory = path6.dirname(filePath);
+                const upperName = path6.basename(filePath).toUpperCase();
                 for (const actualName of yield exports.readdir(directory)) {
                   if (upperName === actualName.toUpperCase()) {
-                    filePath = path5.join(directory, actualName);
+                    filePath = path6.join(directory, actualName);
                     break;
                   }
                 }
@@ -2396,10 +2396,10 @@ var require_io = __commonJS({
     exports.findInPath = exports.which = exports.mkdirP = exports.rmRF = exports.mv = exports.cp = void 0;
     var assert_1 = __require("assert");
     var childProcess = __importStar(__require("child_process"));
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var util_1 = __require("util");
     var ioUtil = __importStar(require_io_util());
-    var exec2 = util_1.promisify(childProcess.exec);
+    var exec4 = util_1.promisify(childProcess.exec);
     var execFile = util_1.promisify(childProcess.execFile);
     function cp(source, dest, options = {}) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -2408,7 +2408,7 @@ var require_io = __commonJS({
         if (destStat && destStat.isFile() && !force) {
           return;
         }
-        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path5.join(dest, path5.basename(source)) : dest;
+        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path6.join(dest, path6.basename(source)) : dest;
         if (!(yield ioUtil.exists(source))) {
           throw new Error(`no such file or directory: ${source}`);
         }
@@ -2420,7 +2420,7 @@ var require_io = __commonJS({
             yield cpDirRecursive(source, newDest, 0, force);
           }
         } else {
-          if (path5.relative(source, newDest) === "") {
+          if (path6.relative(source, newDest) === "") {
             throw new Error(`'${newDest}' and '${source}' are the same file`);
           }
           yield copyFile(source, newDest, force);
@@ -2433,7 +2433,7 @@ var require_io = __commonJS({
         if (yield ioUtil.exists(dest)) {
           let destExists = true;
           if (yield ioUtil.isDirectory(dest)) {
-            dest = path5.join(dest, path5.basename(source));
+            dest = path6.join(dest, path6.basename(source));
             destExists = yield ioUtil.exists(dest);
           }
           if (destExists) {
@@ -2444,7 +2444,7 @@ var require_io = __commonJS({
             }
           }
         }
-        yield mkdirP(path5.dirname(dest));
+        yield mkdirP(path6.dirname(dest));
         yield ioUtil.rename(source, dest);
       });
     }
@@ -2458,11 +2458,11 @@ var require_io = __commonJS({
           try {
             const cmdPath = ioUtil.getCmdPath();
             if (yield ioUtil.isDirectory(inputPath, true)) {
-              yield exec2(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
+              yield exec4(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
                 env: { inputPath }
               });
             } else {
-              yield exec2(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
+              yield exec4(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
                 env: { inputPath }
               });
             }
@@ -2501,12 +2501,12 @@ var require_io = __commonJS({
       });
     }
     exports.mkdirP = mkdirP;
-    function which(tool, check) {
+    function which(tool, check2) {
       return __awaiter(this, void 0, void 0, function* () {
         if (!tool) {
           throw new Error("parameter 'tool' is required");
         }
-        if (check) {
+        if (check2) {
           const result = yield which(tool, false);
           if (!result) {
             if (ioUtil.IS_WINDOWS) {
@@ -2532,7 +2532,7 @@ var require_io = __commonJS({
         }
         const extensions = [];
         if (ioUtil.IS_WINDOWS && process.env["PATHEXT"]) {
-          for (const extension of process.env["PATHEXT"].split(path5.delimiter)) {
+          for (const extension of process.env["PATHEXT"].split(path6.delimiter)) {
             if (extension) {
               extensions.push(extension);
             }
@@ -2545,12 +2545,12 @@ var require_io = __commonJS({
           }
           return [];
         }
-        if (tool.includes(path5.sep)) {
+        if (tool.includes(path6.sep)) {
           return [];
         }
         const directories = [];
         if (process.env.PATH) {
-          for (const p of process.env.PATH.split(path5.delimiter)) {
+          for (const p of process.env.PATH.split(path6.delimiter)) {
             if (p) {
               directories.push(p);
             }
@@ -2558,7 +2558,7 @@ var require_io = __commonJS({
         }
         const matches = [];
         for (const directory of directories) {
-          const filePath = yield ioUtil.tryGetExecutablePath(path5.join(directory, tool), extensions);
+          const filePath = yield ioUtil.tryGetExecutablePath(path6.join(directory, tool), extensions);
           if (filePath) {
             matches.push(filePath);
           }
@@ -2679,7 +2679,7 @@ var require_toolrunner = __commonJS({
     var os4 = __importStar(__require("os"));
     var events = __importStar(__require("events"));
     var child = __importStar(__require("child_process"));
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var io = __importStar(require_io());
     var ioUtil = __importStar(require_io_util());
     var timers_1 = __require("timers");
@@ -2885,7 +2885,7 @@ var require_toolrunner = __commonJS({
       exec() {
         return __awaiter(this, void 0, void 0, function* () {
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
-            this.toolPath = path5.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+            this.toolPath = path6.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
           this.toolPath = yield io.which(this.toolPath, true);
           return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
@@ -3158,7 +3158,7 @@ var require_exec = __commonJS({
     exports.getExecOutput = exports.exec = void 0;
     var string_decoder_1 = __require("string_decoder");
     var tr = __importStar(require_toolrunner());
-    function exec2(commandLine, args, options) {
+    function exec4(commandLine, args, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
@@ -3170,8 +3170,8 @@ var require_exec = __commonJS({
         return runner.exec();
       });
     }
-    exports.exec = exec2;
-    function getExecOutput(commandLine, args, options) {
+    exports.exec = exec4;
+    function getExecOutput3(commandLine, args, options) {
       var _a2, _b;
       return __awaiter(this, void 0, void 0, function* () {
         let stdout = "";
@@ -3193,7 +3193,7 @@ var require_exec = __commonJS({
           }
         };
         const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec2(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        const exitCode = yield exec4(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
         stdout += stdoutDecoder.end();
         stderr += stderrDecoder.end();
         return {
@@ -3203,7 +3203,7 @@ var require_exec = __commonJS({
         };
       });
     }
-    exports.getExecOutput = getExecOutput;
+    exports.getExecOutput = getExecOutput3;
   }
 });
 
@@ -3241,7 +3241,7 @@ var require_internal_glob_options_helper = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getOptions = void 0;
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     function getOptions(copy) {
       const result = {
         followSymbolicLinks: true,
@@ -3251,15 +3251,15 @@ var require_internal_glob_options_helper = __commonJS({
       if (copy) {
         if (typeof copy.followSymbolicLinks === "boolean") {
           result.followSymbolicLinks = copy.followSymbolicLinks;
-          core2.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+          core3.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
         }
         if (typeof copy.implicitDescendants === "boolean") {
           result.implicitDescendants = copy.implicitDescendants;
-          core2.debug(`implicitDescendants '${result.implicitDescendants}'`);
+          core3.debug(`implicitDescendants '${result.implicitDescendants}'`);
         }
         if (typeof copy.omitBrokenSymbolicLinks === "boolean") {
           result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
-          core2.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+          core3.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
         }
       }
       return result;
@@ -3305,7 +3305,7 @@ var require_internal_path_helper = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.safeTrimTrailingSeparator = exports.normalizeSeparators = exports.hasRoot = exports.hasAbsoluteRoot = exports.ensureAbsoluteRoot = exports.dirname = void 0;
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var assert_1 = __importDefault(__require("assert"));
     var IS_WINDOWS = process.platform === "win32";
     function dirname(p) {
@@ -3313,7 +3313,7 @@ var require_internal_path_helper = __commonJS({
       if (IS_WINDOWS && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
         return p;
       }
-      let result = path5.dirname(p);
+      let result = path6.dirname(p);
       if (IS_WINDOWS && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
         result = safeTrimTrailingSeparator(result);
       }
@@ -3351,7 +3351,7 @@ var require_internal_path_helper = __commonJS({
       assert_1.default(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
       if (root.endsWith("/") || IS_WINDOWS && root.endsWith("\\")) {
       } else {
-        root += path5.sep;
+        root += path6.sep;
       }
       return root + itemPath;
     }
@@ -3389,10 +3389,10 @@ var require_internal_path_helper = __commonJS({
         return "";
       }
       p = normalizeSeparators(p);
-      if (!p.endsWith(path5.sep)) {
+      if (!p.endsWith(path6.sep)) {
         return p;
       }
-      if (p === path5.sep) {
+      if (p === path6.sep) {
         return p;
       }
       if (IS_WINDOWS && /^[A-Z]:\\$/i.test(p)) {
@@ -3738,7 +3738,7 @@ var require_minimatch = __commonJS({
   "node_modules/minimatch/minimatch.js"(exports, module) {
     module.exports = minimatch;
     minimatch.Minimatch = Minimatch;
-    var path5 = function() {
+    var path6 = function() {
       try {
         return __require("path");
       } catch (e) {
@@ -3746,7 +3746,7 @@ var require_minimatch = __commonJS({
     }() || {
       sep: "/"
     };
-    minimatch.sep = path5.sep;
+    minimatch.sep = path6.sep;
     var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {};
     var expand = require_brace_expansion();
     var plTypes = {
@@ -3837,8 +3837,8 @@ var require_minimatch = __commonJS({
       if (!options)
         options = {};
       pattern = pattern.trim();
-      if (!options.allowWindowsEscape && path5.sep !== "/") {
-        pattern = pattern.split(path5.sep).join("/");
+      if (!options.allowWindowsEscape && path6.sep !== "/") {
+        pattern = pattern.split(path6.sep).join("/");
       }
       this.options = options;
       this.set = [];
@@ -4215,8 +4215,8 @@ var require_minimatch = __commonJS({
       if (f === "/" && partial)
         return true;
       var options = this.options;
-      if (path5.sep !== "/") {
-        f = f.split(path5.sep).join("/");
+      if (path6.sep !== "/") {
+        f = f.split(path6.sep).join("/");
       }
       f = f.split(slashSplit);
       this.debug(this.pattern, "split", f);
@@ -4360,7 +4360,7 @@ var require_internal_path = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Path = void 0;
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var pathHelper = __importStar(require_internal_path_helper());
     var assert_1 = __importDefault(__require("assert"));
     var IS_WINDOWS = process.platform === "win32";
@@ -4371,12 +4371,12 @@ var require_internal_path = __commonJS({
           assert_1.default(itemPath, `Parameter 'itemPath' must not be empty`);
           itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
           if (!pathHelper.hasRoot(itemPath)) {
-            this.segments = itemPath.split(path5.sep);
+            this.segments = itemPath.split(path6.sep);
           } else {
             let remaining = itemPath;
             let dir = pathHelper.dirname(remaining);
             while (dir !== remaining) {
-              const basename = path5.basename(remaining);
+              const basename = path6.basename(remaining);
               this.segments.unshift(basename);
               remaining = dir;
               dir = pathHelper.dirname(remaining);
@@ -4394,7 +4394,7 @@ var require_internal_path = __commonJS({
               assert_1.default(segment === pathHelper.dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
               this.segments.push(segment);
             } else {
-              assert_1.default(!segment.includes(path5.sep), `Parameter 'itemPath' contains unexpected path separators`);
+              assert_1.default(!segment.includes(path6.sep), `Parameter 'itemPath' contains unexpected path separators`);
               this.segments.push(segment);
             }
           }
@@ -4402,12 +4402,12 @@ var require_internal_path = __commonJS({
       }
       toString() {
         let result = this.segments[0];
-        let skipSlash = result.endsWith(path5.sep) || IS_WINDOWS && /^[A-Z]:$/i.test(result);
+        let skipSlash = result.endsWith(path6.sep) || IS_WINDOWS && /^[A-Z]:$/i.test(result);
         for (let i = 1; i < this.segments.length; i++) {
           if (skipSlash) {
             skipSlash = false;
           } else {
-            result += path5.sep;
+            result += path6.sep;
           }
           result += this.segments[i];
         }
@@ -4456,7 +4456,7 @@ var require_internal_pattern = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Pattern = void 0;
     var os4 = __importStar(__require("os"));
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var pathHelper = __importStar(require_internal_path_helper());
     var assert_1 = __importDefault(__require("assert"));
     var minimatch_1 = require_minimatch();
@@ -4485,7 +4485,7 @@ var require_internal_pattern = __commonJS({
         }
         pattern = Pattern.fixupPattern(pattern, homedir2);
         this.segments = new internal_path_1.Path(pattern).segments;
-        this.trailingSeparator = pathHelper.normalizeSeparators(pattern).endsWith(path5.sep);
+        this.trailingSeparator = pathHelper.normalizeSeparators(pattern).endsWith(path6.sep);
         pattern = pathHelper.safeTrimTrailingSeparator(pattern);
         let foundGlob = false;
         const searchSegments = this.segments.map((x) => Pattern.getLiteral(x)).filter((x) => !foundGlob && !(foundGlob = x === ""));
@@ -4506,8 +4506,8 @@ var require_internal_pattern = __commonJS({
       match(itemPath) {
         if (this.segments[this.segments.length - 1] === "**") {
           itemPath = pathHelper.normalizeSeparators(itemPath);
-          if (!itemPath.endsWith(path5.sep) && this.isImplicitPattern === false) {
-            itemPath = `${itemPath}${path5.sep}`;
+          if (!itemPath.endsWith(path6.sep) && this.isImplicitPattern === false) {
+            itemPath = `${itemPath}${path6.sep}`;
           }
         } else {
           itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
@@ -4533,9 +4533,9 @@ var require_internal_pattern = __commonJS({
         assert_1.default(literalSegments.every((x, i) => (x !== "." || i === 0) && x !== ".."), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
         assert_1.default(!pathHelper.hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
         pattern = pathHelper.normalizeSeparators(pattern);
-        if (pattern === "." || pattern.startsWith(`.${path5.sep}`)) {
+        if (pattern === "." || pattern.startsWith(`.${path6.sep}`)) {
           pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
-        } else if (pattern === "~" || pattern.startsWith(`~${path5.sep}`)) {
+        } else if (pattern === "~" || pattern.startsWith(`~${path6.sep}`)) {
           homedir2 = homedir2 || os4.homedir();
           assert_1.default(homedir2, "Unable to determine HOME directory");
           assert_1.default(pathHelper.hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
@@ -4611,8 +4611,8 @@ var require_internal_search_state = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.SearchState = void 0;
     var SearchState = class {
-      constructor(path5, level) {
-        this.path = path5;
+      constructor(path6, level) {
+        this.path = path6;
         this.level = level;
       }
     };
@@ -4740,10 +4740,10 @@ var require_internal_globber = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DefaultGlobber = void 0;
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     var fs3 = __importStar(__require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper());
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var patternHelper = __importStar(require_internal_pattern_helper());
     var internal_match_kind_1 = require_internal_match_kind();
     var internal_pattern_1 = require_internal_pattern();
@@ -4793,7 +4793,7 @@ var require_internal_globber = __commonJS({
           }
           const stack = [];
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
-            core2.debug(`Search path '${searchPath}'`);
+            core3.debug(`Search path '${searchPath}'`);
             try {
               yield __await2(fs3.promises.lstat(searchPath));
             } catch (err) {
@@ -4825,7 +4825,7 @@ var require_internal_globber = __commonJS({
                 continue;
               }
               const childLevel = item.level + 1;
-              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path5.join(item.path, x), childLevel));
+              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path6.join(item.path, x), childLevel));
               stack.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
               yield yield __await2(item.path);
@@ -4861,7 +4861,7 @@ var require_internal_globber = __commonJS({
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
-                  core2.debug(`Broken symlink '${item.path}'`);
+                  core3.debug(`Broken symlink '${item.path}'`);
                   return void 0;
                 }
                 throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
@@ -4877,7 +4877,7 @@ var require_internal_globber = __commonJS({
               traversalChain.pop();
             }
             if (traversalChain.some((x) => x === realPath)) {
-              core2.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+              core3.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
               return void 0;
             }
             traversalChain.push(realPath);
@@ -6301,12 +6301,12 @@ var require_cacheUtils = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core2 = __importStar(require_core());
-    var exec2 = __importStar(require_exec());
+    var core3 = __importStar(require_core());
+    var exec4 = __importStar(require_exec());
     var glob = __importStar(require_glob());
     var io = __importStar(require_io());
     var fs3 = __importStar(__require("fs"));
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var semver = __importStar(require_semver());
     var util3 = __importStar(__require("util"));
     var uuid_1 = require_uuid();
@@ -6326,9 +6326,9 @@ var require_cacheUtils = __commonJS({
               baseLocation = "/home";
             }
           }
-          tempDirectory = path5.join(baseLocation, "actions", "temp");
+          tempDirectory = path6.join(baseLocation, "actions", "temp");
         }
-        const dest = path5.join(tempDirectory, uuid_1.v4());
+        const dest = path6.join(tempDirectory, uuid_1.v4());
         yield io.mkdirP(dest);
         return dest;
       });
@@ -6350,8 +6350,8 @@ var require_cacheUtils = __commonJS({
         try {
           for (var _c = __asyncValues2(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done; ) {
             const file = _d.value;
-            const relativeFile = path5.relative(workspace, file).replace(new RegExp(`\\${path5.sep}`, "g"), "/");
-            core2.debug(`Matched: ${relativeFile}`);
+            const relativeFile = path6.relative(workspace, file).replace(new RegExp(`\\${path6.sep}`, "g"), "/");
+            core3.debug(`Matched: ${relativeFile}`);
             if (relativeFile === "") {
               paths.push(".");
             } else {
@@ -6381,10 +6381,10 @@ var require_cacheUtils = __commonJS({
     exports.unlinkFile = unlinkFile;
     function getVersion(app) {
       return __awaiter(this, void 0, void 0, function* () {
-        core2.debug(`Checking ${app} --version`);
+        core3.debug(`Checking ${app} --version`);
         let versionOutput = "";
         try {
-          yield exec2.exec(`${app} --version`, [], {
+          yield exec4.exec(`${app} --version`, [], {
             ignoreReturnCode: true,
             silent: true,
             listeners: {
@@ -6393,10 +6393,10 @@ var require_cacheUtils = __commonJS({
             }
           });
         } catch (err) {
-          core2.debug(err.message);
+          core3.debug(err.message);
         }
         versionOutput = versionOutput.trim();
-        core2.debug(versionOutput);
+        core3.debug(versionOutput);
         return versionOutput;
       });
     }
@@ -8049,25 +8049,25 @@ var require_url_parse = __commonJS({
     function resolve(relative, base2) {
       if (relative === "")
         return base2;
-      var path5 = (base2 || "/").split("/").slice(0, -1).concat(relative.split("/")), i = path5.length, last = path5[i - 1], unshift = false, up = 0;
+      var path6 = (base2 || "/").split("/").slice(0, -1).concat(relative.split("/")), i = path6.length, last = path6[i - 1], unshift = false, up = 0;
       while (i--) {
-        if (path5[i] === ".") {
-          path5.splice(i, 1);
-        } else if (path5[i] === "..") {
-          path5.splice(i, 1);
+        if (path6[i] === ".") {
+          path6.splice(i, 1);
+        } else if (path6[i] === "..") {
+          path6.splice(i, 1);
           up++;
         } else if (up) {
           if (i === 0)
             unshift = true;
-          path5.splice(i, 1);
+          path6.splice(i, 1);
           up--;
         }
       }
       if (unshift)
-        path5.unshift("");
+        path6.unshift("");
       if (last === "." || last === "..")
-        path5.push("");
-      return path5.join("/");
+        path6.push("");
+      return path6.join("/");
     }
     function Url2(address, location, parser) {
       address = trimLeft(address);
@@ -17846,10 +17846,10 @@ var require_store = __commonJS({
       constructor() {
         this.synchronous = false;
       }
-      findCookie(domain, path5, key, cb) {
+      findCookie(domain, path6, key, cb) {
         throw new Error("findCookie is not implemented");
       }
-      findCookies(domain, path5, allowSpecialUseDomain, cb) {
+      findCookies(domain, path6, allowSpecialUseDomain, cb) {
         throw new Error("findCookies is not implemented");
       }
       putCookie(cookie, cb) {
@@ -17858,10 +17858,10 @@ var require_store = __commonJS({
       updateCookie(oldCookie, newCookie, cb) {
         throw new Error("updateCookie is not implemented");
       }
-      removeCookie(domain, path5, key, cb) {
+      removeCookie(domain, path6, key, cb) {
         throw new Error("removeCookie is not implemented");
       }
-      removeCookies(domain, path5, cb) {
+      removeCookies(domain, path6, cb) {
         throw new Error("removeCookies is not implemented");
       }
       removeAllCookies(cb) {
@@ -18023,16 +18023,16 @@ var require_memstore = __commonJS({
         const util3 = { inspect: getUtilInspect(inspectFallback) };
         return `{ idx: ${util3.inspect(this.idx, false, 2)} }`;
       }
-      findCookie(domain, path5, key, cb) {
+      findCookie(domain, path6, key, cb) {
         if (!this.idx[domain]) {
           return cb(null, void 0);
         }
-        if (!this.idx[domain][path5]) {
+        if (!this.idx[domain][path6]) {
           return cb(null, void 0);
         }
-        return cb(null, this.idx[domain][path5][key] || null);
+        return cb(null, this.idx[domain][path6][key] || null);
       }
-      findCookies(domain, path5, allowSpecialUseDomain, cb) {
+      findCookies(domain, path6, allowSpecialUseDomain, cb) {
         const results = [];
         if (typeof allowSpecialUseDomain === "function") {
           cb = allowSpecialUseDomain;
@@ -18042,7 +18042,7 @@ var require_memstore = __commonJS({
           return cb(null, []);
         }
         let pathMatcher;
-        if (!path5) {
+        if (!path6) {
           pathMatcher = function matchAll(domainIndex) {
             for (const curPath in domainIndex) {
               const pathIndex = domainIndex[curPath];
@@ -18054,7 +18054,7 @@ var require_memstore = __commonJS({
         } else {
           pathMatcher = function matchRFC(domainIndex) {
             Object.keys(domainIndex).forEach((cookiePath) => {
-              if (pathMatch(path5, cookiePath)) {
+              if (pathMatch(path6, cookiePath)) {
                 const pathIndex = domainIndex[cookiePath];
                 for (const key in pathIndex) {
                   results.push(pathIndex[key]);
@@ -18087,16 +18087,16 @@ var require_memstore = __commonJS({
       updateCookie(oldCookie, newCookie, cb) {
         this.putCookie(newCookie, cb);
       }
-      removeCookie(domain, path5, key, cb) {
-        if (this.idx[domain] && this.idx[domain][path5] && this.idx[domain][path5][key]) {
-          delete this.idx[domain][path5][key];
+      removeCookie(domain, path6, key, cb) {
+        if (this.idx[domain] && this.idx[domain][path6] && this.idx[domain][path6][key]) {
+          delete this.idx[domain][path6][key];
         }
         cb(null);
       }
-      removeCookies(domain, path5, cb) {
+      removeCookies(domain, path6, cb) {
         if (this.idx[domain]) {
-          if (path5) {
-            delete this.idx[domain][path5];
+          if (path6) {
+            delete this.idx[domain][path6];
           } else {
             delete this.idx[domain];
           }
@@ -18113,11 +18113,11 @@ var require_memstore = __commonJS({
         const domains = Object.keys(idx);
         domains.forEach((domain) => {
           const paths = Object.keys(idx[domain]);
-          paths.forEach((path5) => {
-            const keys = Object.keys(idx[domain][path5]);
+          paths.forEach((path6) => {
+            const keys = Object.keys(idx[domain][path6]);
             keys.forEach((key) => {
               if (key !== null) {
-                cookies.push(idx[domain][path5][key]);
+                cookies.push(idx[domain][path6][key]);
               }
             });
           });
@@ -18163,8 +18163,8 @@ var require_memstore = __commonJS({
       const indent = "  ";
       let result = `${indent}'${domainName}': {
 `;
-      Object.keys(domainValue).forEach((path5, i, paths) => {
-        result += formatPath(path5, domainValue[path5]);
+      Object.keys(domainValue).forEach((path6, i, paths) => {
+        result += formatPath(path6, domainValue[path6]);
         if (i < paths.length - 1) {
           result += ",";
         }
@@ -18467,18 +18467,18 @@ var require_cookie = __commonJS({
       }
       return true;
     }
-    function defaultPath(path5) {
-      if (!path5 || path5.substr(0, 1) !== "/") {
+    function defaultPath(path6) {
+      if (!path6 || path6.substr(0, 1) !== "/") {
         return "/";
       }
-      if (path5 === "/") {
-        return path5;
+      if (path6 === "/") {
+        return path6;
       }
-      const rightSlash = path5.lastIndexOf("/");
+      const rightSlash = path6.lastIndexOf("/");
       if (rightSlash === 0) {
         return "/";
       }
-      return path5.slice(0, rightSlash);
+      return path6.slice(0, rightSlash);
     }
     function trimTerminator(str) {
       if (validators.isEmptyString(str))
@@ -18687,19 +18687,19 @@ var require_cookie = __commonJS({
       cmp = a.creationIndex - b.creationIndex;
       return cmp;
     }
-    function permutePath(path5) {
-      validators.validate(validators.isString(path5));
-      if (path5 === "/") {
+    function permutePath(path6) {
+      validators.validate(validators.isString(path6));
+      if (path6 === "/") {
         return ["/"];
       }
-      const permutations = [path5];
-      while (path5.length > 1) {
-        const lindex = path5.lastIndexOf("/");
+      const permutations = [path6];
+      while (path6.length > 1) {
+        const lindex = path6.lastIndexOf("/");
         if (lindex === 0) {
           break;
         }
-        path5 = path5.substr(0, lindex);
-        permutations.push(path5);
+        path6 = path6.substr(0, lindex);
+        permutations.push(path6);
       }
       permutations.push("/");
       return permutations;
@@ -19097,7 +19097,7 @@ var require_cookie = __commonJS({
         validators.validate(validators.isObject(options), cb, options);
         validators.validate(validators.isFunction(cb), cb);
         const host = canonicalDomain(context4.hostname);
-        const path5 = context4.pathname || "/";
+        const path6 = context4.pathname || "/";
         let secure = options.secure;
         if (secure == null && context4.protocol && (context4.protocol == "https:" || context4.protocol == "wss:")) {
           secure = true;
@@ -19128,7 +19128,7 @@ var require_cookie = __commonJS({
               return false;
             }
           }
-          if (!allPaths && !pathMatch(path5, c.path)) {
+          if (!allPaths && !pathMatch(path6, c.path)) {
             return false;
           }
           if (c.secure && !secure) {
@@ -19152,7 +19152,7 @@ var require_cookie = __commonJS({
         }
         store.findCookies(
           host,
-          allPaths ? null : path5,
+          allPaths ? null : path6,
           this.allowSpecialUseDomain,
           (err, cookies) => {
             if (err) {
@@ -19658,8 +19658,8 @@ function nextPort(tokenizer) {
   }
 }
 function nextPath(tokenizer) {
-  const path5 = readUntilCharacter(tokenizer, "?");
-  tokenizer._currentToken = URLToken.path(path5);
+  const path6 = readUntilCharacter(tokenizer, "?");
+  tokenizer._currentToken = URLToken.path(path6);
   if (!hasCurrentCharacter(tokenizer)) {
     tokenizer._currentState = "DONE";
   } else {
@@ -19802,32 +19802,32 @@ var init_url = __esm({
       getPort() {
         return this._port;
       }
-      setPath(path5) {
-        if (!path5) {
+      setPath(path6) {
+        if (!path6) {
           this._path = void 0;
         } else {
-          const schemeIndex = path5.indexOf("://");
+          const schemeIndex = path6.indexOf("://");
           if (schemeIndex !== -1) {
-            const schemeStart = path5.lastIndexOf("/", schemeIndex);
-            this.set(schemeStart === -1 ? path5 : path5.substr(schemeStart + 1), "SCHEME");
+            const schemeStart = path6.lastIndexOf("/", schemeIndex);
+            this.set(schemeStart === -1 ? path6 : path6.substr(schemeStart + 1), "SCHEME");
           } else {
-            this.set(path5, "PATH");
+            this.set(path6, "PATH");
           }
         }
       }
-      appendPath(path5) {
-        if (path5) {
+      appendPath(path6) {
+        if (path6) {
           let currentPath = this.getPath();
           if (currentPath) {
             if (!currentPath.endsWith("/")) {
               currentPath += "/";
             }
-            if (path5.startsWith("/")) {
-              path5 = path5.substring(1);
+            if (path6.startsWith("/")) {
+              path6 = path6.substring(1);
             }
-            path5 = currentPath + path5;
+            path6 = currentPath + path6;
           }
-          this.set(path5, "PATH");
+          this.set(path6, "PATH");
         }
       }
       getPath() {
@@ -28891,11 +28891,11 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path5) {
-      if (!path5 || typeof path5 !== "string") {
+    function lookup(path6) {
+      if (!path6 || typeof path6 !== "string") {
         return false;
       }
-      var extension2 = extname("x." + path5).toLowerCase().substr(1);
+      var extension2 = extname("x." + path6).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -29152,7 +29152,7 @@ var require_form_data = __commonJS({
   "node_modules/@azure/core-http/node_modules/form-data/lib/form_data.js"(exports, module) {
     var CombinedStream = require_combined_stream();
     var util3 = __require("util");
-    var path5 = __require("path");
+    var path6 = __require("path");
     var http4 = __require("http");
     var https3 = __require("https");
     var parseUrl = __require("url").parse;
@@ -29277,11 +29277,11 @@ var require_form_data = __commonJS({
     FormData2.prototype._getContentDisposition = function(value, options) {
       var filename, contentDisposition;
       if (typeof options.filepath === "string") {
-        filename = path5.normalize(options.filepath).replace(/\\/g, "/");
+        filename = path6.normalize(options.filepath).replace(/\\/g, "/");
       } else if (options.filename || value.name || value.path) {
-        filename = path5.basename(options.filename || value.name || value.path);
+        filename = path6.basename(options.filename || value.name || value.path);
       } else if (value.readable && value.hasOwnProperty("httpVersion")) {
-        filename = path5.basename(value.client._httpMessage.path || "");
+        filename = path6.basename(value.client._httpMessage.path || "");
       }
       if (filename) {
         contentDisposition = 'filename="' + filename + '"';
@@ -53371,10 +53371,10 @@ var init_constants2 = __esm({
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/utils.common.js
 function escapeURLPath(url2) {
   const urlParsed = URLBuilder.parse(url2);
-  let path5 = urlParsed.getPath();
-  path5 = path5 || "/";
-  path5 = escape(path5);
-  urlParsed.setPath(path5);
+  let path6 = urlParsed.getPath();
+  path6 = path6 || "/";
+  path6 = escape(path6);
+  urlParsed.setPath(path6);
   return urlParsed.toString();
 }
 function getProxyUriFromDevConnString(connectionString) {
@@ -53453,9 +53453,9 @@ function escape(text) {
 }
 function appendToURLPath(url2, name) {
   const urlParsed = URLBuilder.parse(url2);
-  let path5 = urlParsed.getPath();
-  path5 = path5 ? path5.endsWith("/") ? `${path5}${name}` : `${path5}/${name}` : name;
-  urlParsed.setPath(path5);
+  let path6 = urlParsed.getPath();
+  path6 = path6 ? path6.endsWith("/") ? `${path6}${name}` : `${path6}/${name}` : name;
+  urlParsed.setPath(path6);
   return urlParsed.toString();
 }
 function setURLParameter(url2, name, value) {
@@ -54682,9 +54682,9 @@ var init_StorageSharedKeyCredentialPolicy = __esm({
         return canonicalizedHeadersStringToSign;
       }
       getCanonicalizedResourceString(request) {
-        const path5 = getURLPath(request.url) || "/";
+        const path6 = getURLPath(request.url) || "/";
         let canonicalizedResourceString = "";
-        canonicalizedResourceString += `/${this.factory.accountName}${path5}`;
+        canonicalizedResourceString += `/${this.factory.accountName}${path6}`;
         const queries = getURLQueries(request.url);
         const lowercaseQueries = {};
         if (queries) {
@@ -59444,8 +59444,8 @@ var init_BlobBatch = __esm({
         if (this.operationCount >= BATCH_MAX_REQUEST) {
           throw new RangeError(`Cannot exceed ${BATCH_MAX_REQUEST} sub requests in a single batch`);
         }
-        const path5 = getURLPath(subRequest.url);
-        if (!path5 || path5 === "") {
+        const path6 = getURLPath(subRequest.url);
+        if (!path6 || path6 === "") {
           throw new RangeError(`Invalid url for sub request: '${subRequest.url}'`);
         }
       }
@@ -59536,8 +59536,8 @@ var init_BlobBatchClient = __esm({
           pipeline = newPipeline(credentialOrPipeline, options);
         }
         const storageClientContext = new StorageClientContext(url2, pipeline.toServiceClientOptions());
-        const path5 = getURLPath(url2);
-        if (path5 && path5 !== "/") {
+        const path6 = getURLPath(url2);
+        if (path6 && path6 !== "/") {
           this.serviceOrContainerContext = new Container(storageClientContext);
         } else {
           this.serviceOrContainerContext = new Service(storageClientContext);
@@ -61122,7 +61122,7 @@ var require_requestUtils = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     var http_client_1 = require_lib();
     var constants_1 = require_constants();
     function isSuccessStatusCode(statusCode) {
@@ -61183,9 +61183,9 @@ var require_requestUtils = __commonJS({
             isRetryable = isRetryableStatusCode(statusCode);
             errorMessage = `Cache service responded with ${statusCode}`;
           }
-          core2.debug(`${name} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
+          core3.debug(`${name} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
           if (!isRetryable) {
-            core2.debug(`${name} - Error is not retryable`);
+            core3.debug(`${name} - Error is not retryable`);
             break;
           }
           yield sleep(delay3);
@@ -61272,7 +61272,7 @@ var require_downloadUtils = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     var http_client_1 = require_lib();
     var storage_blob_1 = (init_src11(), __toCommonJS(src_exports2));
     var buffer = __importStar(__require("buffer"));
@@ -61304,7 +61304,7 @@ var require_downloadUtils = __commonJS({
         this.segmentIndex = this.segmentIndex + 1;
         this.segmentSize = segmentSize;
         this.receivedBytes = 0;
-        core2.debug(`Downloading segment at offset ${this.segmentOffset} with length ${this.segmentSize}...`);
+        core3.debug(`Downloading segment at offset ${this.segmentOffset} with length ${this.segmentSize}...`);
       }
       setReceivedBytes(receivedBytes) {
         this.receivedBytes = receivedBytes;
@@ -61323,7 +61323,7 @@ var require_downloadUtils = __commonJS({
         const percentage = (100 * (transferredBytes / this.contentLength)).toFixed(1);
         const elapsedTime = Date.now() - this.startTime;
         const downloadSpeed = (transferredBytes / (1024 * 1024) / (elapsedTime / 1e3)).toFixed(1);
-        core2.info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
+        core3.info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
         if (this.isDone()) {
           this.displayedComplete = true;
         }
@@ -61360,7 +61360,7 @@ var require_downloadUtils = __commonJS({
         }));
         downloadResponse.message.socket.setTimeout(constants_1.SocketTimeout, () => {
           downloadResponse.message.destroy();
-          core2.debug(`Aborting download, socket timed out after ${constants_1.SocketTimeout} ms`);
+          core3.debug(`Aborting download, socket timed out after ${constants_1.SocketTimeout} ms`);
         });
         yield pipeResponseToStream(downloadResponse, writeStream);
         const contentLengthHeader = downloadResponse.message.headers["content-length"];
@@ -61371,7 +61371,7 @@ var require_downloadUtils = __commonJS({
             throw new Error(`Incomplete download. Expected file size: ${expectedLength}, actual file size: ${actualLength}`);
           }
         } else {
-          core2.debug("Unable to validate download, no Content-Length header");
+          core3.debug("Unable to validate download, no Content-Length header");
         }
       });
     }
@@ -61387,7 +61387,7 @@ var require_downloadUtils = __commonJS({
         const properties = yield client.getProperties();
         const contentLength2 = (_a2 = properties.contentLength) !== null && _a2 !== void 0 ? _a2 : -1;
         if (contentLength2 < 0) {
-          core2.debug("Unable to determine content length, downloading file with http-client...");
+          core3.debug("Unable to determine content length, downloading file with http-client...");
           yield downloadCacheHttpClient(archiveLocation, archivePath);
         } else {
           const maxSegmentSize = Math.min(2147483647, buffer.constants.MAX_LENGTH);
@@ -61451,7 +61451,7 @@ var require_options = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     function getUploadOptions(copy) {
       const result = {
         uploadConcurrency: 4,
@@ -61465,8 +61465,8 @@ var require_options = __commonJS({
           result.uploadChunkSize = copy.uploadChunkSize;
         }
       }
-      core2.debug(`Upload concurrency: ${result.uploadConcurrency}`);
-      core2.debug(`Upload chunk size: ${result.uploadChunkSize}`);
+      core3.debug(`Upload concurrency: ${result.uploadConcurrency}`);
+      core3.debug(`Upload chunk size: ${result.uploadChunkSize}`);
       return result;
     }
     exports.getUploadOptions = getUploadOptions;
@@ -61495,11 +61495,11 @@ var require_options = __commonJS({
       if (segmentDownloadTimeoutMins && !isNaN(Number(segmentDownloadTimeoutMins)) && isFinite(Number(segmentDownloadTimeoutMins))) {
         result.segmentTimeoutInMs = Number(segmentDownloadTimeoutMins) * 60 * 1e3;
       }
-      core2.debug(`Use Azure SDK: ${result.useAzureSdk}`);
-      core2.debug(`Download concurrency: ${result.downloadConcurrency}`);
-      core2.debug(`Request timeout (ms): ${result.timeoutInMs}`);
-      core2.debug(`Cache segment download timeout mins env var: ${process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"]}`);
-      core2.debug(`Segment download timeout (ms): ${result.segmentTimeoutInMs}`);
+      core3.debug(`Use Azure SDK: ${result.useAzureSdk}`);
+      core3.debug(`Download concurrency: ${result.downloadConcurrency}`);
+      core3.debug(`Request timeout (ms): ${result.timeoutInMs}`);
+      core3.debug(`Cache segment download timeout mins env var: ${process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"]}`);
+      core3.debug(`Segment download timeout (ms): ${result.segmentTimeoutInMs}`);
       return result;
     }
     exports.getDownloadOptions = getDownloadOptions;
@@ -61550,7 +61550,7 @@ var require_cacheHttpClient = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
     var crypto6 = __importStar(__require("crypto"));
@@ -61568,7 +61568,7 @@ var require_cacheHttpClient = __commonJS({
         throw new Error("Cache Service Url not found, unable to restore cache.");
       }
       const url2 = `${baseUrl}_apis/artifactcache/${resource}`;
-      core2.debug(`Resource Url: ${url2}`);
+      core3.debug(`Resource Url: ${url2}`);
       return url2;
     }
     function createAcceptHeader(type3, apiVersion) {
@@ -61612,9 +61612,9 @@ var require_cacheHttpClient = __commonJS({
         if (!cacheDownloadUrl) {
           throw new Error("Cache not found.");
         }
-        core2.setSecret(cacheDownloadUrl);
-        core2.debug(`Cache Result:`);
-        core2.debug(JSON.stringify(cacheResult));
+        core3.setSecret(cacheDownloadUrl);
+        core3.debug(`Cache Result:`);
+        core3.debug(JSON.stringify(cacheResult));
         return cacheResult;
       });
     }
@@ -61652,7 +61652,7 @@ var require_cacheHttpClient = __commonJS({
     }
     function uploadChunk(httpClient, resourceUrl, openStream, start, end) {
       return __awaiter(this, void 0, void 0, function* () {
-        core2.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
+        core3.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
         const additionalHeaders = {
           "Content-Type": "application/octet-stream",
           "Content-Range": getContentRange(start, end)
@@ -61674,7 +61674,7 @@ var require_cacheHttpClient = __commonJS({
         const concurrency = utils.assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
         const maxChunkSize = utils.assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
         const parallelUploads = [...new Array(concurrency).keys()];
-        core2.debug("Awaiting all uploads");
+        core3.debug("Awaiting all uploads");
         let offset = 0;
         try {
           yield Promise.all(parallelUploads.map(() => __awaiter(this, void 0, void 0, function* () {
@@ -61710,16 +61710,16 @@ var require_cacheHttpClient = __commonJS({
     function saveCache3(cacheId, archivePath, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        core2.debug("Upload cache");
+        core3.debug("Upload cache");
         yield uploadFile(httpClient, cacheId, archivePath, options);
-        core2.debug("Commiting cache");
+        core3.debug("Commiting cache");
         const cacheSize = utils.getArchiveFileSizeInBytes(archivePath);
-        core2.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
+        core3.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
         const commitCacheResponse = yield commitCache(httpClient, cacheId, cacheSize);
         if (!requestUtils_1.isSuccessStatusCode(commitCacheResponse.statusCode)) {
           throw new Error(`Cache service responded with ${commitCacheResponse.statusCode} during commit cache.`);
         }
-        core2.info("Cache saved successfully");
+        core3.info("Cache saved successfully");
       });
     }
     exports.saveCache = saveCache3;
@@ -61773,7 +61773,7 @@ var require_tar = __commonJS({
     var exec_1 = require_exec();
     var io = __importStar(require_io());
     var fs_1 = __require("fs");
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var utils = __importStar(require_cacheUtils());
     var constants_1 = require_constants();
     var IS_WINDOWS = process.platform === "win32";
@@ -61836,7 +61836,7 @@ var require_tar = __commonJS({
         const args = [
           ...getCompressionProgram(compressionMethod),
           "-tf",
-          archivePath.replace(new RegExp(`\\${path5.sep}`, "g"), "/"),
+          archivePath.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
           "-P"
         ];
         yield execTar(args, compressionMethod);
@@ -61850,10 +61850,10 @@ var require_tar = __commonJS({
         const args = [
           ...getCompressionProgram(compressionMethod),
           "-xf",
-          archivePath.replace(new RegExp(`\\${path5.sep}`, "g"), "/"),
+          archivePath.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
           "-P",
           "-C",
-          workingDirectory.replace(new RegExp(`\\${path5.sep}`, "g"), "/")
+          workingDirectory.replace(new RegExp(`\\${path6.sep}`, "g"), "/")
         ];
         yield execTar(args, compressionMethod);
       });
@@ -61863,7 +61863,7 @@ var require_tar = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         const manifestFilename = "manifest.txt";
         const cacheFileName = utils.getCacheFileName(compressionMethod);
-        fs_1.writeFileSync(path5.join(archiveFolder, manifestFilename), sourceDirectories.join("\n"));
+        fs_1.writeFileSync(path6.join(archiveFolder, manifestFilename), sourceDirectories.join("\n"));
         const workingDirectory = getWorkingDirectory();
         function getCompressionProgram2() {
           switch (compressionMethod) {
@@ -61882,12 +61882,12 @@ var require_tar = __commonJS({
           "--posix",
           ...getCompressionProgram2(),
           "-cf",
-          cacheFileName.replace(new RegExp(`\\${path5.sep}`, "g"), "/"),
+          cacheFileName.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
           "--exclude",
-          cacheFileName.replace(new RegExp(`\\${path5.sep}`, "g"), "/"),
+          cacheFileName.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
           "-P",
           "-C",
-          workingDirectory.replace(new RegExp(`\\${path5.sep}`, "g"), "/"),
+          workingDirectory.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
           "--files-from",
           manifestFilename
         ];
@@ -61942,8 +61942,8 @@ var require_cache = __commonJS({
       return result;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
-    var core2 = __importStar(require_core());
-    var path5 = __importStar(__require("path"));
+    var core3 = __importStar(require_core());
+    var path6 = __importStar(__require("path"));
     var utils = __importStar(require_cacheUtils());
     var cacheHttpClient = __importStar(require_cacheHttpClient());
     var tar_1 = require_tar();
@@ -61977,17 +61977,17 @@ var require_cache = __commonJS({
         throw new ValidationError(`Key Validation Error: ${key} cannot contain commas.`);
       }
     }
-    function isFeatureAvailable2() {
+    function isFeatureAvailable() {
       return !!process.env["ACTIONS_CACHE_URL"];
     }
-    exports.isFeatureAvailable = isFeatureAvailable2;
+    exports.isFeatureAvailable = isFeatureAvailable;
     function restoreCache3(paths, primaryKey, restoreKeys, options) {
       return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         restoreKeys = restoreKeys || [];
         const keys = [primaryKey, ...restoreKeys];
-        core2.debug("Resolved Keys:");
-        core2.debug(JSON.stringify(keys));
+        core3.debug("Resolved Keys:");
+        core3.debug(JSON.stringify(keys));
         if (keys.length > 10) {
           throw new ValidationError(`Key Validation Error: Keys are limited to a maximum of 10.`);
         }
@@ -62003,29 +62003,29 @@ var require_cache = __commonJS({
           if (!(cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.archiveLocation)) {
             return void 0;
           }
-          archivePath = path5.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
-          core2.debug(`Archive Path: ${archivePath}`);
+          archivePath = path6.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
+          core3.debug(`Archive Path: ${archivePath}`);
           yield cacheHttpClient.downloadCache(cacheEntry.archiveLocation, archivePath, options);
-          if (core2.isDebug()) {
+          if (core3.isDebug()) {
             yield tar_1.listTar(archivePath, compressionMethod);
           }
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core2.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+          core3.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
           yield tar_1.extractTar(archivePath, compressionMethod);
-          core2.info("Cache restored successfully");
+          core3.info("Cache restored successfully");
           return cacheEntry.cacheKey;
         } catch (error2) {
           const typedError = error2;
           if (typedError.name === ValidationError.name) {
             throw error2;
           } else {
-            core2.warning(`Failed to restore: ${error2.message}`);
+            core3.warning(`Failed to restore: ${error2.message}`);
           }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
           } catch (error2) {
-            core2.debug(`Failed to delete archive: ${error2}`);
+            core3.debug(`Failed to delete archive: ${error2}`);
           }
         }
         return void 0;
@@ -62040,26 +62040,26 @@ var require_cache = __commonJS({
         const compressionMethod = yield utils.getCompressionMethod();
         let cacheId = -1;
         const cachePaths = yield utils.resolvePaths(paths);
-        core2.debug("Cache Paths:");
-        core2.debug(`${JSON.stringify(cachePaths)}`);
+        core3.debug("Cache Paths:");
+        core3.debug(`${JSON.stringify(cachePaths)}`);
         if (cachePaths.length === 0) {
           throw new Error(`Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.`);
         }
         const archiveFolder = yield utils.createTempDirectory();
-        const archivePath = path5.join(archiveFolder, utils.getCacheFileName(compressionMethod));
-        core2.debug(`Archive Path: ${archivePath}`);
+        const archivePath = path6.join(archiveFolder, utils.getCacheFileName(compressionMethod));
+        core3.debug(`Archive Path: ${archivePath}`);
         try {
           yield tar_1.createTar(archiveFolder, cachePaths, compressionMethod);
-          if (core2.isDebug()) {
+          if (core3.isDebug()) {
             yield tar_1.listTar(archivePath, compressionMethod);
           }
           const fileSizeLimit = 10 * 1024 * 1024 * 1024;
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core2.debug(`File Size: ${archiveFileSize}`);
+          core3.debug(`File Size: ${archiveFileSize}`);
           if (archiveFileSize > fileSizeLimit && !utils.isGhes()) {
             throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
           }
-          core2.debug("Reserving Cache");
+          core3.debug("Reserving Cache");
           const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, paths, {
             compressionMethod,
             cacheSize: archiveFileSize
@@ -62071,22 +62071,22 @@ var require_cache = __commonJS({
           } else {
             throw new ReserveCacheError2(`Unable to reserve cache with key ${key}, another job may be creating this cache. More details: ${(_e = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _e === void 0 ? void 0 : _e.message}`);
           }
-          core2.debug(`Saving Cache (ID: ${cacheId})`);
+          core3.debug(`Saving Cache (ID: ${cacheId})`);
           yield cacheHttpClient.saveCache(cacheId, archivePath, options);
         } catch (error2) {
           const typedError = error2;
           if (typedError.name === ValidationError.name) {
             throw error2;
           } else if (typedError.name === ReserveCacheError2.name) {
-            core2.info(`Failed to save: ${typedError.message}`);
+            core3.info(`Failed to save: ${typedError.message}`);
           } else {
-            core2.warning(`Failed to save: ${typedError.message}`);
+            core3.warning(`Failed to save: ${typedError.message}`);
           }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
           } catch (error2) {
-            core2.debug(`Failed to delete archive: ${error2}`);
+            core3.debug(`Failed to delete archive: ${error2}`);
           }
         }
         return cacheId;
@@ -62101,7 +62101,7 @@ var require_dist = __commonJS({
   "node_modules/decorator-cache-getter/dist/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    function cache3(target, name, descriptor) {
+    function cache2(target, name, descriptor) {
       var getter = descriptor.get;
       if (!getter)
         throw new TypeError("Getter property descriptor expected");
@@ -62116,7 +62116,7 @@ var require_dist = __commonJS({
         return value;
       };
     }
-    exports.cache = cache3;
+    exports.cache = cache2;
   }
 });
 
@@ -62154,7 +62154,7 @@ var require_internal_glob_options_helper2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getOptions = void 0;
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     function getOptions(copy) {
       const result = {
         followSymbolicLinks: true,
@@ -62165,19 +62165,19 @@ var require_internal_glob_options_helper2 = __commonJS({
       if (copy) {
         if (typeof copy.followSymbolicLinks === "boolean") {
           result.followSymbolicLinks = copy.followSymbolicLinks;
-          core2.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+          core3.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
         }
         if (typeof copy.implicitDescendants === "boolean") {
           result.implicitDescendants = copy.implicitDescendants;
-          core2.debug(`implicitDescendants '${result.implicitDescendants}'`);
+          core3.debug(`implicitDescendants '${result.implicitDescendants}'`);
         }
         if (typeof copy.matchDirectories === "boolean") {
           result.matchDirectories = copy.matchDirectories;
-          core2.debug(`matchDirectories '${result.matchDirectories}'`);
+          core3.debug(`matchDirectories '${result.matchDirectories}'`);
         }
         if (typeof copy.omitBrokenSymbolicLinks === "boolean") {
           result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
-          core2.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+          core3.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
         }
       }
       return result;
@@ -62223,7 +62223,7 @@ var require_internal_path_helper2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.safeTrimTrailingSeparator = exports.normalizeSeparators = exports.hasRoot = exports.hasAbsoluteRoot = exports.ensureAbsoluteRoot = exports.dirname = void 0;
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var assert_1 = __importDefault(__require("assert"));
     var IS_WINDOWS = process.platform === "win32";
     function dirname(p) {
@@ -62231,7 +62231,7 @@ var require_internal_path_helper2 = __commonJS({
       if (IS_WINDOWS && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
         return p;
       }
-      let result = path5.dirname(p);
+      let result = path6.dirname(p);
       if (IS_WINDOWS && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
         result = safeTrimTrailingSeparator(result);
       }
@@ -62269,7 +62269,7 @@ var require_internal_path_helper2 = __commonJS({
       assert_1.default(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
       if (root.endsWith("/") || IS_WINDOWS && root.endsWith("\\")) {
       } else {
-        root += path5.sep;
+        root += path6.sep;
       }
       return root + itemPath;
     }
@@ -62307,10 +62307,10 @@ var require_internal_path_helper2 = __commonJS({
         return "";
       }
       p = normalizeSeparators(p);
-      if (!p.endsWith(path5.sep)) {
+      if (!p.endsWith(path6.sep)) {
         return p;
       }
-      if (p === path5.sep) {
+      if (p === path6.sep) {
         return p;
       }
       if (IS_WINDOWS && /^[A-Z]:\\$/i.test(p)) {
@@ -62463,7 +62463,7 @@ var require_internal_path2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Path = void 0;
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var pathHelper = __importStar(require_internal_path_helper2());
     var assert_1 = __importDefault(__require("assert"));
     var IS_WINDOWS = process.platform === "win32";
@@ -62474,12 +62474,12 @@ var require_internal_path2 = __commonJS({
           assert_1.default(itemPath, `Parameter 'itemPath' must not be empty`);
           itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
           if (!pathHelper.hasRoot(itemPath)) {
-            this.segments = itemPath.split(path5.sep);
+            this.segments = itemPath.split(path6.sep);
           } else {
             let remaining = itemPath;
             let dir = pathHelper.dirname(remaining);
             while (dir !== remaining) {
-              const basename = path5.basename(remaining);
+              const basename = path6.basename(remaining);
               this.segments.unshift(basename);
               remaining = dir;
               dir = pathHelper.dirname(remaining);
@@ -62497,7 +62497,7 @@ var require_internal_path2 = __commonJS({
               assert_1.default(segment === pathHelper.dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
               this.segments.push(segment);
             } else {
-              assert_1.default(!segment.includes(path5.sep), `Parameter 'itemPath' contains unexpected path separators`);
+              assert_1.default(!segment.includes(path6.sep), `Parameter 'itemPath' contains unexpected path separators`);
               this.segments.push(segment);
             }
           }
@@ -62505,12 +62505,12 @@ var require_internal_path2 = __commonJS({
       }
       toString() {
         let result = this.segments[0];
-        let skipSlash = result.endsWith(path5.sep) || IS_WINDOWS && /^[A-Z]:$/i.test(result);
+        let skipSlash = result.endsWith(path6.sep) || IS_WINDOWS && /^[A-Z]:$/i.test(result);
         for (let i = 1; i < this.segments.length; i++) {
           if (skipSlash) {
             skipSlash = false;
           } else {
-            result += path5.sep;
+            result += path6.sep;
           }
           result += this.segments[i];
         }
@@ -62559,7 +62559,7 @@ var require_internal_pattern2 = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Pattern = void 0;
     var os4 = __importStar(__require("os"));
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var pathHelper = __importStar(require_internal_path_helper2());
     var assert_1 = __importDefault(__require("assert"));
     var minimatch_1 = require_minimatch();
@@ -62588,7 +62588,7 @@ var require_internal_pattern2 = __commonJS({
         }
         pattern = Pattern.fixupPattern(pattern, homedir2);
         this.segments = new internal_path_1.Path(pattern).segments;
-        this.trailingSeparator = pathHelper.normalizeSeparators(pattern).endsWith(path5.sep);
+        this.trailingSeparator = pathHelper.normalizeSeparators(pattern).endsWith(path6.sep);
         pattern = pathHelper.safeTrimTrailingSeparator(pattern);
         let foundGlob = false;
         const searchSegments = this.segments.map((x) => Pattern.getLiteral(x)).filter((x) => !foundGlob && !(foundGlob = x === ""));
@@ -62609,8 +62609,8 @@ var require_internal_pattern2 = __commonJS({
       match(itemPath) {
         if (this.segments[this.segments.length - 1] === "**") {
           itemPath = pathHelper.normalizeSeparators(itemPath);
-          if (!itemPath.endsWith(path5.sep) && this.isImplicitPattern === false) {
-            itemPath = `${itemPath}${path5.sep}`;
+          if (!itemPath.endsWith(path6.sep) && this.isImplicitPattern === false) {
+            itemPath = `${itemPath}${path6.sep}`;
           }
         } else {
           itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
@@ -62636,9 +62636,9 @@ var require_internal_pattern2 = __commonJS({
         assert_1.default(literalSegments.every((x, i) => (x !== "." || i === 0) && x !== ".."), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
         assert_1.default(!pathHelper.hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
         pattern = pathHelper.normalizeSeparators(pattern);
-        if (pattern === "." || pattern.startsWith(`.${path5.sep}`)) {
+        if (pattern === "." || pattern.startsWith(`.${path6.sep}`)) {
           pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
-        } else if (pattern === "~" || pattern.startsWith(`~${path5.sep}`)) {
+        } else if (pattern === "~" || pattern.startsWith(`~${path6.sep}`)) {
           homedir2 = homedir2 || os4.homedir();
           assert_1.default(homedir2, "Unable to determine HOME directory");
           assert_1.default(pathHelper.hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
@@ -62714,8 +62714,8 @@ var require_internal_search_state2 = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.SearchState = void 0;
     var SearchState = class {
-      constructor(path5, level) {
-        this.path = path5;
+      constructor(path6, level) {
+        this.path = path6;
         this.level = level;
       }
     };
@@ -62843,10 +62843,10 @@ var require_internal_globber2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DefaultGlobber = void 0;
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     var fs3 = __importStar(__require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper2());
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var patternHelper = __importStar(require_internal_pattern_helper2());
     var internal_match_kind_1 = require_internal_match_kind2();
     var internal_pattern_1 = require_internal_pattern2();
@@ -62896,7 +62896,7 @@ var require_internal_globber2 = __commonJS({
           }
           const stack = [];
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
-            core2.debug(`Search path '${searchPath}'`);
+            core3.debug(`Search path '${searchPath}'`);
             try {
               yield __await2(fs3.promises.lstat(searchPath));
             } catch (err) {
@@ -62928,7 +62928,7 @@ var require_internal_globber2 = __commonJS({
                 continue;
               }
               const childLevel = item.level + 1;
-              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path5.join(item.path, x), childLevel));
+              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path6.join(item.path, x), childLevel));
               stack.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
               yield yield __await2(item.path);
@@ -62964,7 +62964,7 @@ var require_internal_globber2 = __commonJS({
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
-                  core2.debug(`Broken symlink '${item.path}'`);
+                  core3.debug(`Broken symlink '${item.path}'`);
                   return void 0;
                 }
                 throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
@@ -62980,7 +62980,7 @@ var require_internal_globber2 = __commonJS({
               traversalChain.pop();
             }
             if (traversalChain.some((x) => x === realPath)) {
-              core2.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+              core3.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
               return void 0;
             }
             traversalChain.push(realPath);
@@ -63075,16 +63075,16 @@ var require_internal_hash_files = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.hashFiles = void 0;
     var crypto6 = __importStar(__require("crypto"));
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     var fs3 = __importStar(__require("fs"));
     var stream = __importStar(__require("stream"));
     var util3 = __importStar(__require("util"));
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     function hashFiles(globber, verbose = false) {
       var e_1, _a2;
       var _b;
       return __awaiter(this, void 0, void 0, function* () {
-        const writeDelegate = verbose ? core2.info : core2.debug;
+        const writeDelegate = verbose ? core3.info : core3.debug;
         let hasMatch = false;
         const githubWorkspace = (_b = process.env["GITHUB_WORKSPACE"]) !== null && _b !== void 0 ? _b : process.cwd();
         const result = crypto6.createHash("sha256");
@@ -63093,7 +63093,7 @@ var require_internal_hash_files = __commonJS({
           for (var _c = __asyncValues2(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done; ) {
             const file = _d.value;
             writeDelegate(file);
-            if (!file.startsWith(`${githubWorkspace}${path5.sep}`)) {
+            if (!file.startsWith(`${githubWorkspace}${path6.sep}`)) {
               writeDelegate(`Ignore '${file}' since it is not under GITHUB_WORKSPACE.`);
               continue;
             }
@@ -63391,7 +63391,7 @@ var require_retry_helper = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.RetryHelper = void 0;
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     var RetryHelper = class {
       constructor(maxAttempts, minSeconds, maxSeconds) {
         if (maxAttempts < 1) {
@@ -63414,10 +63414,10 @@ var require_retry_helper = __commonJS({
               if (isRetryable && !isRetryable(err)) {
                 throw err;
               }
-              core2.info(err.message);
+              core3.info(err.message);
             }
             const seconds = this.getSleepAmount();
-            core2.info(`Waiting ${seconds} seconds before trying again`);
+            core3.info(`Waiting ${seconds} seconds before trying again`);
             yield this.sleep(seconds);
             attempt++;
           }
@@ -63501,12 +63501,12 @@ var require_tool_cache = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.evaluateVersions = exports.isExplicitVersion = exports.findFromManifest = exports.getManifestFromRepo = exports.findAllVersions = exports.find = exports.cacheFile = exports.cacheDir = exports.extractZip = exports.extractXar = exports.extractTar = exports.extract7z = exports.downloadTool = exports.HTTPError = void 0;
-    var core2 = __importStar(require_core());
+    var core3 = __importStar(require_core());
     var io = __importStar(require_io());
     var fs3 = __importStar(__require("fs"));
     var mm = __importStar(require_manifest());
     var os4 = __importStar(__require("os"));
-    var path5 = __importStar(__require("path"));
+    var path6 = __importStar(__require("path"));
     var httpm = __importStar(require_lib());
     var semver = __importStar(require_semver());
     var stream = __importStar(__require("stream"));
@@ -63528,10 +63528,10 @@ var require_tool_cache = __commonJS({
     var userAgent = "actions/tool-cache";
     function downloadTool2(url2, dest, auth, headers) {
       return __awaiter(this, void 0, void 0, function* () {
-        dest = dest || path5.join(_getTempDirectory(), v4_1.default());
-        yield io.mkdirP(path5.dirname(dest));
-        core2.debug(`Downloading ${url2}`);
-        core2.debug(`Destination ${dest}`);
+        dest = dest || path6.join(_getTempDirectory(), v4_1.default());
+        yield io.mkdirP(path6.dirname(dest));
+        core3.debug(`Downloading ${url2}`);
+        core3.debug(`Destination ${dest}`);
         const maxAttempts = 3;
         const minSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MIN_SECONDS", 10);
         const maxSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MAX_SECONDS", 20);
@@ -63558,7 +63558,7 @@ var require_tool_cache = __commonJS({
           allowRetries: false
         });
         if (auth) {
-          core2.debug("set auth");
+          core3.debug("set auth");
           if (headers === void 0) {
             headers = {};
           }
@@ -63567,7 +63567,7 @@ var require_tool_cache = __commonJS({
         const response = yield http4.get(url2, headers);
         if (response.message.statusCode !== 200) {
           const err = new HTTPError(response.message.statusCode);
-          core2.debug(`Failed to download from "${url2}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
+          core3.debug(`Failed to download from "${url2}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
           throw err;
         }
         const pipeline = util3.promisify(stream.pipeline);
@@ -63576,16 +63576,16 @@ var require_tool_cache = __commonJS({
         let succeeded = false;
         try {
           yield pipeline(readStream, fs3.createWriteStream(dest));
-          core2.debug("download complete");
+          core3.debug("download complete");
           succeeded = true;
           return dest;
         } finally {
           if (!succeeded) {
-            core2.debug("download failed");
+            core3.debug("download failed");
             try {
               yield io.rmRF(dest);
             } catch (err) {
-              core2.debug(`Failed to delete '${dest}'. ${err.message}`);
+              core3.debug(`Failed to delete '${dest}'. ${err.message}`);
             }
           }
         }
@@ -63600,7 +63600,7 @@ var require_tool_cache = __commonJS({
         process.chdir(dest);
         if (_7zPath) {
           try {
-            const logLevel = core2.isDebug() ? "-bb1" : "-bb0";
+            const logLevel = core3.isDebug() ? "-bb1" : "-bb0";
             const args = [
               "x",
               logLevel,
@@ -63616,7 +63616,7 @@ var require_tool_cache = __commonJS({
             process.chdir(originalCwd);
           }
         } else {
-          const escapedScript = path5.join(__dirname, "..", "scripts", "Invoke-7zdec.ps1").replace(/'/g, "''").replace(/"|\n|\r/g, "");
+          const escapedScript = path6.join(__dirname, "..", "scripts", "Invoke-7zdec.ps1").replace(/'/g, "''").replace(/"|\n|\r/g, "");
           const escapedFile = file.replace(/'/g, "''").replace(/"|\n|\r/g, "");
           const escapedTarget = dest.replace(/'/g, "''").replace(/"|\n|\r/g, "");
           const command = `& '${escapedScript}' -Source '${escapedFile}' -Target '${escapedTarget}'`;
@@ -63650,7 +63650,7 @@ var require_tool_cache = __commonJS({
           throw new Error("parameter 'file' is required");
         }
         dest = yield _createExtractFolder(dest);
-        core2.debug("Checking tar --version");
+        core3.debug("Checking tar --version");
         let versionOutput = "";
         yield exec_1.exec("tar --version", [], {
           ignoreReturnCode: true,
@@ -63660,7 +63660,7 @@ var require_tool_cache = __commonJS({
             stderr: (data) => versionOutput += data.toString()
           }
         });
-        core2.debug(versionOutput.trim());
+        core3.debug(versionOutput.trim());
         const isGnuTar = versionOutput.toUpperCase().includes("GNU TAR");
         let args;
         if (flags instanceof Array) {
@@ -63668,7 +63668,7 @@ var require_tool_cache = __commonJS({
         } else {
           args = [flags];
         }
-        if (core2.isDebug() && !flags.includes("v")) {
+        if (core3.isDebug() && !flags.includes("v")) {
           args.push("-v");
         }
         let destArg = dest;
@@ -63700,7 +63700,7 @@ var require_tool_cache = __commonJS({
           args = [flags];
         }
         args.push("-x", "-C", dest, "-f", file);
-        if (core2.isDebug()) {
+        if (core3.isDebug()) {
           args.push("-v");
         }
         const xarPath = yield io.which("xar", true);
@@ -63745,7 +63745,7 @@ var require_tool_cache = __commonJS({
             "-Command",
             pwshCommand
           ];
-          core2.debug(`Using pwsh at path: ${pwshPath}`);
+          core3.debug(`Using pwsh at path: ${pwshPath}`);
           yield exec_1.exec(`"${pwshPath}"`, args);
         } else {
           const powershellCommand = [
@@ -63765,7 +63765,7 @@ var require_tool_cache = __commonJS({
             powershellCommand
           ];
           const powershellPath = yield io.which("powershell", true);
-          core2.debug(`Using powershell at path: ${powershellPath}`);
+          core3.debug(`Using powershell at path: ${powershellPath}`);
           yield exec_1.exec(`"${powershellPath}"`, args);
         }
       });
@@ -63774,7 +63774,7 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         const unzipPath = yield io.which("unzip", true);
         const args = [file];
-        if (!core2.isDebug()) {
+        if (!core3.isDebug()) {
           args.unshift("-q");
         }
         args.unshift("-o");
@@ -63785,14 +63785,14 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         version3 = semver.clean(version3) || version3;
         arch3 = arch3 || os4.arch();
-        core2.debug(`Caching tool ${tool} ${version3} ${arch3}`);
-        core2.debug(`source dir: ${sourceDir}`);
+        core3.debug(`Caching tool ${tool} ${version3} ${arch3}`);
+        core3.debug(`source dir: ${sourceDir}`);
         if (!fs3.statSync(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
         const destPath = yield _createToolPath(tool, version3, arch3);
         for (const itemName of fs3.readdirSync(sourceDir)) {
-          const s = path5.join(sourceDir, itemName);
+          const s = path6.join(sourceDir, itemName);
           yield io.cp(s, destPath, { recursive: true });
         }
         _completeToolPath(tool, version3, arch3);
@@ -63804,14 +63804,14 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         version3 = semver.clean(version3) || version3;
         arch3 = arch3 || os4.arch();
-        core2.debug(`Caching tool ${tool} ${version3} ${arch3}`);
-        core2.debug(`source file: ${sourceFile}`);
+        core3.debug(`Caching tool ${tool} ${version3} ${arch3}`);
+        core3.debug(`source file: ${sourceFile}`);
         if (!fs3.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
         const destFolder = yield _createToolPath(tool, version3, arch3);
-        const destPath = path5.join(destFolder, targetFile);
-        core2.debug(`destination file ${destPath}`);
+        const destPath = path6.join(destFolder, targetFile);
+        core3.debug(`destination file ${destPath}`);
         yield io.cp(sourceFile, destPath);
         _completeToolPath(tool, version3, arch3);
         return destFolder;
@@ -63834,13 +63834,13 @@ var require_tool_cache = __commonJS({
       let toolPath = "";
       if (versionSpec) {
         versionSpec = semver.clean(versionSpec) || "";
-        const cachePath = path5.join(_getCacheDirectory(), toolName, versionSpec, arch3);
-        core2.debug(`checking cache: ${cachePath}`);
+        const cachePath = path6.join(_getCacheDirectory(), toolName, versionSpec, arch3);
+        core3.debug(`checking cache: ${cachePath}`);
         if (fs3.existsSync(cachePath) && fs3.existsSync(`${cachePath}.complete`)) {
-          core2.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch3}`);
+          core3.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch3}`);
           toolPath = cachePath;
         } else {
-          core2.debug("not found");
+          core3.debug("not found");
         }
       }
       return toolPath;
@@ -63849,12 +63849,12 @@ var require_tool_cache = __commonJS({
     function findAllVersions(toolName, arch3) {
       const versions = [];
       arch3 = arch3 || os4.arch();
-      const toolPath = path5.join(_getCacheDirectory(), toolName);
+      const toolPath = path6.join(_getCacheDirectory(), toolName);
       if (fs3.existsSync(toolPath)) {
         const children2 = fs3.readdirSync(toolPath);
         for (const child of children2) {
           if (isExplicitVersion(child)) {
-            const fullPath = path5.join(toolPath, child, arch3 || "");
+            const fullPath = path6.join(toolPath, child, arch3 || "");
             if (fs3.existsSync(fullPath) && fs3.existsSync(`${fullPath}.complete`)) {
               versions.push(child);
             }
@@ -63871,7 +63871,7 @@ var require_tool_cache = __commonJS({
         const http4 = new httpm.HttpClient("tool-cache");
         const headers = {};
         if (auth) {
-          core2.debug("set auth");
+          core3.debug("set auth");
           headers.authorization = auth;
         }
         const response = yield http4.getJson(treeUrl, headers);
@@ -63892,7 +63892,7 @@ var require_tool_cache = __commonJS({
           try {
             releases = JSON.parse(versionsRaw);
           } catch (_a2) {
-            core2.debug("Invalid json");
+            core3.debug("Invalid json");
           }
         }
         return releases;
@@ -63909,7 +63909,7 @@ var require_tool_cache = __commonJS({
     function _createExtractFolder(dest) {
       return __awaiter(this, void 0, void 0, function* () {
         if (!dest) {
-          dest = path5.join(_getTempDirectory(), v4_1.default());
+          dest = path6.join(_getTempDirectory(), v4_1.default());
         }
         yield io.mkdirP(dest);
         return dest;
@@ -63917,8 +63917,8 @@ var require_tool_cache = __commonJS({
     }
     function _createToolPath(tool, version3, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
-        const folderPath = path5.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
-        core2.debug(`destination ${folderPath}`);
+        const folderPath = path6.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
+        core3.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
         yield io.rmRF(folderPath);
         yield io.rmRF(markerPath);
@@ -63927,22 +63927,22 @@ var require_tool_cache = __commonJS({
       });
     }
     function _completeToolPath(tool, version3, arch3) {
-      const folderPath = path5.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
+      const folderPath = path6.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
       const markerPath = `${folderPath}.complete`;
       fs3.writeFileSync(markerPath, "");
-      core2.debug("finished caching tool");
+      core3.debug("finished caching tool");
     }
     function isExplicitVersion(versionSpec) {
       const c = semver.clean(versionSpec) || "";
-      core2.debug(`isExplicit: ${c}`);
+      core3.debug(`isExplicit: ${c}`);
       const valid = semver.valid(c) != null;
-      core2.debug(`explicit? ${valid}`);
+      core3.debug(`explicit? ${valid}`);
       return valid;
     }
     exports.isExplicitVersion = isExplicitVersion;
     function evaluateVersions(versions, versionSpec) {
       let version3 = "";
-      core2.debug(`evaluating ${versions.length} versions`);
+      core3.debug(`evaluating ${versions.length} versions`);
       versions = versions.sort((a, b) => {
         if (semver.gt(a, b)) {
           return 1;
@@ -63958,9 +63958,9 @@ var require_tool_cache = __commonJS({
         }
       }
       if (version3) {
-        core2.debug(`matched: ${version3}`);
+        core3.debug(`matched: ${version3}`);
       } else {
-        core2.debug("match not found");
+        core3.debug("match not found");
       }
       return version3;
     }
@@ -64715,11 +64715,11 @@ import { isNativeError as isNativeError2 } from "node:util/types";
 
 // lib/context.js
 init_tslib_es6();
-var cache2 = __toESM(require_cache());
-var import_core3 = __toESM(require_core());
+var import_cache2 = __toESM(require_cache());
+var import_core2 = __toESM(require_core());
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import path3 from "node:path";
+import path2 from "node:path";
 import process3 from "node:process";
 
 // node_modules/class-transformer/esm5/enums/transformation-type.enum.js
@@ -65467,9 +65467,6 @@ function plainToClassFromExist(clsObject, plain, options) {
   return classTransformer.plainToClassFromExist(clsObject, plain, options);
 }
 
-// lib/context.js
-var import_decorator_cache_getter2 = __toESM(require_dist());
-
 // lib/log.js
 var core = __toESM(require_core());
 var import_core = __toESM(require_core());
@@ -65497,11 +65494,8 @@ function warn(message, options) {
 
 // lib/texlive.js
 init_tslib_es6();
-var import_core2 = __toESM(require_core());
-var import_exec = __toESM(require_exec());
 var import_decorator_cache_getter = __toESM(require_dist());
 import { platform } from "node:os";
-import path2 from "node:path";
 
 // lib/ctan.js
 var import_http_client = __toESM(require_lib());
@@ -65514,84 +65508,6 @@ async function pkg(name) {
     throw new Error(`${endpoint} returned ${import_http_client.HttpCodes.NotFound}`);
   }
   return result ?? {};
-}
-
-// lib/utility.js
-var cache = __toESM(require_cache());
-var import_glob = __toESM(require_glob2());
-var import_io = __toESM(require_io());
-var import_tool_cache = __toESM(require_tool_cache());
-import fs2 from "node:fs/promises";
-import os3 from "node:os";
-import path from "node:path";
-import process2 from "node:process";
-var Serializable = class {
-  constructor() {
-    Exclude()(this.constructor);
-  }
-  toPlain(options) {
-    return instanceToPlain(this, options);
-  }
-  toJSON() {
-    return this.toPlain();
-  }
-};
-async function extract(archive, kind) {
-  switch (kind) {
-    case "tgz":
-      return await (0, import_tool_cache.extractTar)(archive, void 0, ["xz", "--strip=1"]);
-    case "zip":
-      try {
-        return await determine(path.join(await (0, import_tool_cache.extractZip)(archive), "*"));
-      } catch (cause) {
-        throw new Error("Unable to locate subdirectory", { cause });
-      }
-  }
-}
-async function determine(pattern) {
-  const globber = await (0, import_glob.create)(pattern, { implicitDescendants: false });
-  const matched = await globber.glob();
-  if (matched.length === 1) {
-    return matched[0] ?? "";
-  }
-  throw new Error(matched.length === 0 ? `No matches to pattern \`${pattern}\` found` : `Multiple matches to pattern \`${pattern}\` found: ${matched.join("; ")}`);
-}
-async function saveCache2(target, primaryKey) {
-  try {
-    await cache.saveCache([target], primaryKey);
-    info(`${target} saved with cache key: ${primaryKey}`);
-  } catch (error2) {
-    if (error2 instanceof cache.ReserveCacheError) {
-      info(error2.message);
-    } else {
-      warn("Failed to save to cache", { cause: error2 });
-    }
-  }
-}
-async function restoreCache2(target, primaryKey, restoreKeys) {
-  let key;
-  try {
-    key = await cache.restoreCache([target], primaryKey, restoreKeys);
-    if (key !== void 0) {
-      info(`${target} restored from cache with key: ${key}`);
-    } else {
-      info("Cache not found");
-    }
-  } catch (cause) {
-    warn("Failed to restore cache", { cause });
-  }
-  return key;
-}
-function tmpdir() {
-  return process2.env["RUNNER_TEMP"] ?? os3.tmpdir();
-}
-async function* mkdtemp() {
-  const tmp = await fs2.mkdtemp(path.join(tmpdir(), "setup-texlive-"));
-  try {
-    yield tmp;
-  } finally {
-    await (0, import_io.rmRF)(tmp);
-  }
 }
 
 // lib/texlive.js
@@ -65653,157 +65569,6 @@ __decorate([
   __metadata("design:type", Number),
   __metadata("design:paramtypes", [])
 ], Version.prototype, "number", null);
-var Tlmgr = class {
-  constructor(version3, TEXDIR) {
-    this.version = version3;
-    this.TEXDIR = TEXDIR;
-  }
-  get conf() {
-    return new Tlmgr.Conf(this.version);
-  }
-  async install(packages) {
-    const args = ["install", ...packages];
-    if (args.length > 1) {
-      const { exitCode, stderr } = await (0, import_exec.getExecOutput)("tlmgr", args, {
-        ignoreReturnCode: true
-      });
-      tlpkg.check(stderr);
-      if (exitCode !== 0) {
-        const ctanNames = Array.from(stderr.matchAll(/^tlmgr install: package (\S+) not present/gmu), ({ 1: pkg2 = "" }) => pkg2);
-        if (ctanNames.length === 0) {
-          throw new Error(`\`tlmgr\` exited with ${exitCode}`);
-        }
-        info("Checking for the CTAN names of " + ctanNames.join(", "));
-        const tlNames = await Promise.all(ctanNames.map(async (pkg2) => {
-          const { texlive: name } = await pkg(pkg2);
-          if (name === void 0) {
-            throw new Error(`Package ${pkg2} not found`);
-          }
-          return name;
-        }));
-        tlpkg.check(await (0, import_exec.getExecOutput)("tlmgr", ["install", ...tlNames]));
-      }
-    }
-  }
-  get path() {
-    return new Tlmgr.Path(this.TEXDIR);
-  }
-  get pinning() {
-    return new Tlmgr.Pinning(this.version);
-  }
-  get repository() {
-    return new Tlmgr.Repository(this.version);
-  }
-  async update(packages = [], options = {}) {
-    const args = options.all ?? false ? ["--all"] : [...packages];
-    if (options.self ?? false) {
-      args.push(this.version.number > 2008 ? "--self" : "texlive.infra");
-    }
-    if ((options.reinstallForciblyRemoved ?? false) && this.version.number >= 2009) {
-      args.unshift("--reinstall-forcibly-removed");
-    }
-    await (0, import_exec.exec)("tlmgr", ["update", ...args]);
-  }
-};
-__decorate([
-  import_decorator_cache_getter.cache,
-  __metadata("design:type", Tlmgr.Conf),
-  __metadata("design:paramtypes", [])
-], Tlmgr.prototype, "conf", null);
-__decorate([
-  import_decorator_cache_getter.cache,
-  __metadata("design:type", Tlmgr.Path),
-  __metadata("design:paramtypes", [])
-], Tlmgr.prototype, "path", null);
-__decorate([
-  import_decorator_cache_getter.cache,
-  __metadata("design:type", Tlmgr.Pinning),
-  __metadata("design:paramtypes", [])
-], Tlmgr.prototype, "pinning", null);
-__decorate([
-  import_decorator_cache_getter.cache,
-  __metadata("design:type", Tlmgr.Repository),
-  __metadata("design:paramtypes", [])
-], Tlmgr.prototype, "repository", null);
-(function(Tlmgr2) {
-  class Conf {
-    constructor(version3) {
-      this.version = version3;
-    }
-    async texmf(key, value) {
-      if (value === void 0) {
-        const { stdout } = await (0, import_exec.getExecOutput)("kpsewhich", ["-var-value", key]);
-        return stdout.trim();
-      }
-      if (this.version.number < 2010) {
-        (0, import_core2.exportVariable)(key, value);
-      } else {
-        await (0, import_exec.exec)("tlmgr", ["conf", "texmf", key, value]);
-      }
-    }
-  }
-  Tlmgr2.Conf = Conf;
-  class Path {
-    constructor(TEXDIR) {
-      this.TEXDIR = TEXDIR;
-    }
-    async add() {
-      let dir;
-      try {
-        dir = await determine(path2.join(this.TEXDIR, "bin", "*"));
-      } catch (cause) {
-        throw new Error("Unable to locate TeX Live's binary directory", {
-          cause
-        });
-      }
-      (0, import_core2.addPath)(dir);
-    }
-  }
-  Tlmgr2.Path = Path;
-  class Pinning {
-    constructor({ number: version3 }) {
-      if (version3 < 2013) {
-        throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${version3}`);
-      }
-    }
-    async add(repo, ...globs) {
-      await (0, import_exec.exec)("tlmgr", ["pinning", "add", repo, ...globs]);
-    }
-  }
-  Tlmgr2.Pinning = Pinning;
-  class Repository {
-    constructor({ number: version3 }) {
-      if (version3 < 2012) {
-        throw new RangeError(`\`repository\` action is not implemented in TeX Live ${version3}`);
-      }
-    }
-    async add(repo, tag) {
-      const args = ["repository", "add", repo];
-      if (tag !== void 0) {
-        args.push(tag);
-      }
-      const { exitCode, stderr } = await (0, import_exec.getExecOutput)("tlmgr", args, {
-        ignoreReturnCode: true
-      });
-      if (exitCode !== 0 && !stderr.includes("repository or its tag already defined")) {
-        throw new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
-      }
-    }
-  }
-  Tlmgr2.Repository = Repository;
-})(Tlmgr || (Tlmgr = {}));
-var tlpkg;
-(function(tlpkg2) {
-  function check(output) {
-    const stderr = typeof output === "string" ? output : output.stderr;
-    const result = /: checksums differ for (.*):$/mu.exec(stderr);
-    if (result !== null) {
-      const pkg2 = path2.basename(result[1] ?? "", ".tar.xz");
-      throw new Error(`The checksum of package ${pkg2} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
-    }
-  }
-  tlpkg2.check = check;
-})(tlpkg || (tlpkg = {}));
 var tlnet;
 (function(tlnet2) {
   tlnet2.CTAN = new URL("https://mirror.ctan.org/systems/texlive/tlnet/");
@@ -65857,69 +65622,167 @@ var DependsTxt = class {
   }
 };
 
+// lib/utility.js
+var cache = __toESM(require_cache());
+var core2 = __toESM(require_core());
+var import_glob = __toESM(require_glob2());
+var import_io = __toESM(require_io());
+var import_tool_cache = __toESM(require_tool_cache());
+import fs2 from "node:fs/promises";
+import os3 from "node:os";
+import path from "node:path";
+import process2 from "node:process";
+var Serializable = class {
+  constructor() {
+    Exclude()(this.constructor);
+  }
+  toPlain(options) {
+    return instanceToPlain(this, options);
+  }
+  toJSON() {
+    return this.toPlain();
+  }
+};
+async function extract(archive, kind) {
+  switch (kind) {
+    case "tgz": {
+      return await (0, import_tool_cache.extractTar)(archive, void 0, ["xz", "--strip=1"]);
+    }
+    case "zip": {
+      try {
+        return await determine(path.join(await (0, import_tool_cache.extractZip)(archive), "*"));
+      } catch (cause) {
+        throw new Error("Unable to locate subdirectory", { cause });
+      }
+    }
+  }
+}
+async function determine(pattern) {
+  const globber = await (0, import_glob.create)(pattern, { implicitDescendants: false });
+  const matched = await globber.glob();
+  if (matched.length === 1) {
+    return matched[0] ?? "";
+  }
+  throw new Error(matched.length === 0 ? `No matches to pattern \`${pattern}\` found` : `Multiple matches to pattern \`${pattern}\` found: ${matched.join("; ")}`);
+}
+function getInput2(name, options) {
+  switch (options?.type) {
+    case Boolean: {
+      return core2.getBooleanInput(name);
+    }
+    default: {
+      const input = core2.getInput(name);
+      return input === "" ? options?.default : input;
+    }
+  }
+}
+async function saveCache2(target, primaryKey) {
+  try {
+    await cache.saveCache([target], primaryKey);
+    info(`${target} saved with cache key: ${primaryKey}`);
+  } catch (error2) {
+    if (error2 instanceof cache.ReserveCacheError) {
+      info(error2.message);
+    } else {
+      warn("Failed to save to cache", { cause: error2 });
+    }
+  }
+}
+async function restoreCache2(target, primaryKey, restoreKeys) {
+  let key;
+  try {
+    key = await cache.restoreCache([target], primaryKey, restoreKeys);
+    if (key !== void 0) {
+      info(`${target} restored from cache with key: ${key}`);
+    } else {
+      info("Cache not found");
+    }
+  } catch (cause) {
+    warn("Failed to restore cache", { cause });
+  }
+  return key;
+}
+function tmpdir() {
+  return process2.env["RUNNER_TEMP"] ?? os3.tmpdir();
+}
+async function* mkdtemp() {
+  const tmp = await fs2.mkdtemp(path.join(tmpdir(), "setup-texlive-"));
+  try {
+    yield tmp;
+  } finally {
+    await (0, import_io.rmRF)(tmp);
+  }
+}
+
 // lib/context.js
-var Inputs = class {
-  constructor(packages, version3) {
-    this.packages = packages;
-    this.version = version3;
-    this.cache = (0, import_core3.getBooleanInput)("cache");
-    this.tlcontrib = (0, import_core3.getBooleanInput)("tlcontrib");
-    this.updateAllPackages = (0, import_core3.getBooleanInput)("update-all-packages");
-    if (this.cache && !cache2.isFeatureAvailable()) {
+var Inputs;
+(function(Inputs2) {
+  async function load() {
+    const version3 = await Version.resolve(getInput2("version", { default: "latest" }));
+    const env = Env.load(version3);
+    const inputs = {
+      cache: getInput2("cache", { type: Boolean }),
+      forceUpdateCache: (env.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? "0") !== "0",
+      packages: await loadPackageList(),
+      texmf: loadTexmf(env),
+      tlcontrib: getInput2("tlcontrib", { type: Boolean }),
+      updateAllPackages: getInput2("update-all-packages", { type: Boolean }),
+      version: version3
+    };
+    validate3(inputs);
+    return inputs;
+  }
+  Inputs2.load = load;
+  function validate3(inputs) {
+    if (inputs.cache && !(0, import_cache2.isFeatureAvailable)()) {
       warn("Caching is disabled because cache service is not available");
-      this.cache = false;
+      inputs.cache = false;
     }
-    if (this.tlcontrib && !this.version.isLatest()) {
-      warn("`tlcontrib` is currently ignored for older versions");
-      this.tlcontrib = false;
-    }
-    if (this.updateAllPackages && !this.version.isLatest()) {
-      info("`update-all-packages` is ignored for older versions");
-      this.updateAllPackages = false;
-    }
-    this.env = Env.load(this.version);
-  }
-  get texmf() {
-    const input = (0, import_core3.getInput)("prefix");
-    const prefix2 = path3.normalize(input !== "" ? input : this.env.TEXLIVE_INSTALL_PREFIX);
-    const TEXDIR = path3.join(prefix2, this.version.toString());
-    return {
-      TEXDIR,
-      TEXMFLOCAL: path3.join(prefix2, "texmf-local"),
-      TEXMFHOME: this.env.TEXLIVE_INSTALL_TEXMFHOME,
-      TEXMFCONFIG: this.env.TEXLIVE_INSTALL_TEXMFCONFIG,
-      TEXMFVAR: this.env.TEXLIVE_INSTALL_TEXMFVAR
-    };
-  }
-  get forceUpdateCache() {
-    return (this.env.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? "0") !== "0";
-  }
-  static async load() {
-    return new Inputs(await Inputs.loadPackages(), await Version.resolve((0, import_core3.getInput)("version")));
-  }
-  static async loadPackages() {
-    const dependsTxt = async function* () {
-      const inline = (0, import_core3.getInput)("packages");
-      if (inline !== "") {
-        yield* new DependsTxt(inline);
+    if (!inputs.version.isLatest()) {
+      if (inputs.tlcontrib) {
+        warn("`tlcontrib` is currently ignored for older versions");
+        inputs.tlcontrib = false;
       }
-      const file = (0, import_core3.getInput)("package-file");
-      if (file !== "") {
-        yield* new DependsTxt(await readFile(file, "utf8"));
+      if (inputs.updateAllPackages) {
+        info("`update-all-packages` is ignored for older versions");
+        inputs.updateAllPackages = false;
       }
+    }
+  }
+  function loadTexmf(env) {
+    const texmf = {
+      TEX_PREFIX: path2.normalize(getInput2("prefix", { default: env.TEXLIVE_INSTALL_PREFIX }))
     };
+    const texdir = getInput2("texdir");
+    if (texdir !== void 0) {
+      texmf.TEXDIR = path2.normalize(texdir);
+    }
+    if (env.TEXLIVE_INSTALL_TEXMFLOCAL !== void 0) {
+      texmf.TEXMFLOCAL = path2.normalize(env.TEXLIVE_INSTALL_TEXMFLOCAL);
+    }
+    for (const key of ["TEXMFCONFIG", "TEXMFVAR", "TEXMFHOME"]) {
+      texmf[key] = path2.normalize(env[`TEXLIVE_INSTALL_${key}`]);
+    }
+    return texmf;
+  }
+  async function loadPackageList() {
     const packages = [];
-    for await (const [, { hard = [], soft = [] }] of dependsTxt()) {
+    for await (const [, { hard = [], soft = [] }] of loadDependsTxt()) {
       packages.push(...hard, ...soft);
     }
     return new Set(packages.sort());
   }
-};
-__decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", Object),
-  __metadata("design:paramtypes", [])
-], Inputs.prototype, "texmf", null);
+  async function* loadDependsTxt() {
+    const inline = getInput2("packages");
+    if (inline !== void 0) {
+      yield* new DependsTxt(inline);
+    }
+    const file = getInput2("package-file");
+    if (file !== void 0) {
+      yield* new DependsTxt(await readFile(file, "utf8"));
+    }
+  }
+})(Inputs || (Inputs = {}));
 var Outputs = class extends Serializable {
   constructor() {
     super(...arguments);
@@ -65927,7 +65790,7 @@ var Outputs = class extends Serializable {
   }
   emit() {
     for (const [key, value] of Object.entries(this.toJSON())) {
-      (0, import_core3.setOutput)(key, value);
+      (0, import_core2.setOutput)(key, value);
     }
   }
 };
@@ -65945,8 +65808,10 @@ var Env;
   function load(version3) {
     if (process3.env["RUNNER_TEMP"] === void 0) {
       warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} will be used instead`);
+      process3.env["RUNNER_TEMP"] = tmpdir();
     }
-    for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFLOCAL", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
+    process3.env["TMPDIR"] = process3.env["RUNNER_TEMP"];
+    for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
       if (key in process3.env) {
         warn(`\`${key}\` is set, but ignored`);
         delete process3.env[key];
@@ -65959,14 +65824,14 @@ var Env;
   }
   Env2.load = load;
   function defaults(version3) {
-    const TEXUSERDIR = path3.join(homedir(), ".local", "texlive", version3.toString());
+    const TEXUSERDIR = path2.join(homedir(), ".local", "texlive", version3.toString());
     return {
       TEXLIVE_INSTALL_ENV_NOCHECK: "1",
       TEXLIVE_INSTALL_NO_WELCOME: "1",
-      TEXLIVE_INSTALL_PREFIX: path3.join(tmpdir(), "setup-texlive"),
-      TEXLIVE_INSTALL_TEXMFHOME: path3.join(homedir(), "texmf"),
-      TEXLIVE_INSTALL_TEXMFCONFIG: path3.join(TEXUSERDIR, "texmf-config"),
-      TEXLIVE_INSTALL_TEXMFVAR: path3.join(TEXUSERDIR, "texmf-var")
+      TEXLIVE_INSTALL_PREFIX: path2.join(tmpdir(), "setup-texlive"),
+      TEXLIVE_INSTALL_TEXMFHOME: path2.join(homedir(), "texmf"),
+      TEXLIVE_INSTALL_TEXMFCONFIG: path2.join(TEXUSERDIR, "texmf-config"),
+      TEXLIVE_INSTALL_TEXMFVAR: path2.join(TEXUSERDIR, "texmf-var")
     };
   }
   Env2.defaults = defaults;
@@ -65975,14 +65840,14 @@ var State = class extends Serializable {
   constructor() {
     super();
     this.post = false;
-    const state = (0, import_core3.getState)(State.NAME);
+    const state = (0, import_core2.getState)(State.NAME);
     if (state !== "") {
       plainToClassFromExist(this, JSON.parse(state));
       this.post = true;
     }
   }
   save() {
-    (0, import_core3.saveState)(State.NAME, JSON.stringify(this));
+    (0, import_core2.saveState)(State.NAME, JSON.stringify(this));
   }
 };
 State.NAME = "post";
@@ -66000,31 +65865,82 @@ init_tslib_es6();
 var import_exec2 = __toESM(require_exec());
 var import_tool_cache2 = __toESM(require_tool_cache());
 import { Buffer as Buffer2 } from "node:buffer";
-import { readFile as readFile2, writeFile } from "node:fs/promises";
+import { readFile as readFile3, writeFile } from "node:fs/promises";
 import { platform as platform2 } from "node:os";
 import path4 from "node:path";
+
+// lib/tlpkg.js
+var import_exec = __toESM(require_exec());
+import { readFile as readFile2 } from "node:fs/promises";
+import path3 from "node:path";
+function check(output) {
+  const stderr = typeof output === "string" ? output : output.stderr;
+  const result = /: checksums differ for (.*):$/mu.exec(stderr);
+  if (result !== null) {
+    const pkg2 = path3.basename(result[1] ?? "", ".tar.xz");
+    throw new Error(`The checksum of package ${pkg2} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
+  }
+}
+async function makeLocalSkeleton(texmflocal, options) {
+  await (0, import_exec.exec)("perl", [
+    `-I${path3.join(options.TEXDIR, "tlpkg")}`,
+    "-mTeXLive::TLUtils=make_local_skeleton",
+    "-e",
+    "make_local_skeleton shift",
+    texmflocal
+  ]);
+}
+async function* tlpdb(tlpdbPath) {
+  let db;
+  try {
+    db = await readFile2(tlpdbPath, "utf8");
+  } catch (cause) {
+    debug2(`Failed to read ${tlpdbPath}`, { cause });
+    return;
+  }
+  const nonPackage = /(?:^(?:collection|scheme)-|\.)/u;
+  const version3 = /^catalogue-version\s+(.*)$/mu;
+  const revision = /^revision\s+(\d+)\s*$/mu;
+  const iter = db.replaceAll(/\\\r?\n/gu, "").replaceAll(/#.*/gu, "").split(/^name\s(.*)$/gmu).values();
+  iter.next();
+  for (let name of iter) {
+    name = name.trimEnd();
+    const data = iter.next().value;
+    if (name === "texlive.infra" || !nonPackage.test(name)) {
+      yield {
+        name,
+        version: data?.match(version3)?.[1]?.trimEnd() ?? void 0,
+        revision: data?.match(revision)?.[1] ?? ""
+      };
+    }
+  }
+}
+
+// lib/install-tl.js
 var _a;
+var devNull = Buffer2.alloc(0);
 var InstallTL = class {
-  constructor(version3, directory, patch = new Patch(version3)) {
-    this.version = version3;
-    this.directory = directory;
+  constructor(tlversion, directory, patch = new Patch(tlversion)) {
+    this.tlversion = tlversion;
     this.patch = patch;
+    this.path = path4.join(directory, InstallTL.executable(tlversion));
   }
   async run(profile) {
-    const installtl = path4.join(this.directory, InstallTL.executable(this.version));
     for await (const dest of profile.open()) {
       const options = ["-profile", dest];
-      if (!this.version.isLatest()) {
-        const repo = tlnet.historic(this.version);
-        if (this.version.number < 2018) {
+      if (!this.tlversion.isLatest()) {
+        const repo = tlnet.historic(this.tlversion);
+        if (this.tlversion.number < 2018) {
           repo.protocol = "http";
         }
-        options.push(this.version.number === 2008 ? "-location" : "-repository", repo.href);
+        options.push(this.tlversion.number === 2008 ? "-location" : "-repository", repo.href);
       }
-      const execOptions = { input: Buffer2.alloc(0) };
-      tlpkg.check(await (0, import_exec2.getExecOutput)(installtl, options, execOptions));
+      check(await (0, import_exec2.getExecOutput)(this.path, options, { input: devNull }));
     }
     await this.patch.apply(profile.TEXDIR);
+  }
+  async version() {
+    await (0, import_exec2.exec)(this.path, ["-version"], { input: devNull });
   }
   static restore(version3) {
     let dest = "";
@@ -66085,11 +66001,26 @@ var Profile = class extends Serializable {
     this.tlpdbopt_w32_multi_user = false;
     this.option_menu_integration = false;
     this.selected_scheme = `scheme-${version3.number < 2016 ? "minimal" : "infraonly"}`;
-    const { TEXDIR, TEXMFLOCAL, TEXMFSYSCONFIG, TEXMFSYSVAR } = texmf;
-    this.TEXDIR = TEXDIR;
-    this.TEXMFLOCAL = TEXMFLOCAL;
-    this.TEXMFSYSCONFIG = TEXMFSYSCONFIG ?? path4.join(TEXDIR, "texmf-config");
-    this.TEXMFSYSVAR = TEXMFSYSVAR ?? path4.join(TEXDIR, "texmf-var");
+    if (texmf.TEXDIR !== void 0) {
+      this.TEXDIR = texmf.TEXDIR;
+      this.TEXMFLOCAL = path4.join(this.TEXDIR, "texmf-local");
+      this.TEXMFSYSCONFIG = path4.join(this.TEXDIR, "texmf-config");
+      this.TEXMFSYSVAR = path4.join(this.TEXDIR, "texmf-var");
+    } else {
+      this.TEXDIR = path4.join(texmf.TEX_PREFIX, version3.toString());
+      this.TEXMFLOCAL = texmf.TEXMFLOCAL ?? path4.join(texmf.TEX_PREFIX, "texmf-local");
+      this.TEXMFSYSCONFIG = texmf.TEXMFSYSCONFIG ?? path4.join(this.TEXDIR, "texmf-config");
+      this.TEXMFSYSVAR = texmf.TEXMFSYSVAR ?? path4.join(this.TEXDIR, "texmf-var");
+    }
+    if (texmf.TEXUSERDIR !== void 0) {
+      this.TEXMFHOME = path4.join(texmf.TEXUSERDIR, "texmf");
+      this.TEXMFCONFIG = path4.join(texmf.TEXUSERDIR, "texmf-config");
+      this.TEXMFVAR = path4.join(texmf.TEXUSERDIR, "texmf-var");
+    } else {
+      this.TEXMFHOME = texmf.TEXMFHOME ?? this.TEXMFLOCAL;
+      this.TEXMFCONFIG = texmf.TEXMFCONFIG ?? this.TEXMFSYSCONFIG;
+      this.TEXMFVAR = texmf.TEXMFVAR ?? this.TEXMFSYSVAR;
+    }
     this.instopt_adjustrepo = this.version.isLatest();
   }
   async *open() {
@@ -66160,6 +66091,18 @@ __decorate([
   Expose(),
   __metadata("design:type", String)
 ], Profile.prototype, "TEXMFSYSVAR", void 0);
+__decorate([
+  Expose(),
+  __metadata("design:type", String)
+], Profile.prototype, "TEXMFHOME", void 0);
+__decorate([
+  Expose(),
+  __metadata("design:type", String)
+], Profile.prototype, "TEXMFCONFIG", void 0);
+__decorate([
+  Expose(),
+  __metadata("design:type", String)
+], Profile.prototype, "TEXMFVAR", void 0);
 __decorate([
   Expose({ since: 2017 }),
   __metadata("design:type", Boolean)
@@ -66250,7 +66193,7 @@ var Patch = class {
       info("Applying patches");
       const changes = await Promise.all(this.hunks.map(async (hunk) => {
         const target = path4.join(texdir, hunk.file);
-        const content = Buffer2.from(hunk.from.reduce((s, from, i) => s.replace(from, hunk.to[i] ?? ""), await readFile2(target, "utf8")));
+        const content = Buffer2.from(hunk.from.reduce((s, from, i) => s.replace(from, hunk.to[i] ?? ""), await readFile3(target, "utf8")));
         const diff = await this.diff(hunk, content, texdir);
         await writeFile(target, content);
         return diff;
@@ -66314,6 +66257,175 @@ Patch.HUNKS = [{
   to: ["$$os_major < 10", "$$os_major > 10 || $&"]
 }];
 
+// lib/tlmgr.js
+init_tslib_es6();
+var import_core3 = __toESM(require_core());
+var import_exec3 = __toESM(require_exec());
+var import_decorator_cache_getter2 = __toESM(require_dist());
+import path5 from "node:path";
+var Tlmgr = class {
+  constructor(tlversion, TEXDIR) {
+    this.tlversion = tlversion;
+    this.TEXDIR = TEXDIR;
+  }
+  get conf() {
+    return new Tlmgr.Conf(this.tlversion, this.TEXDIR);
+  }
+  async install(packages) {
+    const args = ["install", ...packages];
+    if (args.length > 1) {
+      const { exitCode, stderr } = await (0, import_exec3.getExecOutput)("tlmgr", args, {
+        ignoreReturnCode: true
+      });
+      check(stderr);
+      if (exitCode !== 0) {
+        const names = Array.from(stderr.matchAll(/^tlmgr install: package (\S+) not present/gmu), ([, name = ""]) => name);
+        if (names.length === 0) {
+          throw new Error(`\`tlmgr\` exited with ${exitCode}`);
+        }
+        info(`Trying to resolve package names: (${names.join(", ")})`);
+        const tlnames = await Promise.all(names.map(async (name) => {
+          let pkg2;
+          try {
+            pkg2 = await pkg(name);
+          } catch (cause) {
+            throw new Error(`Package ${name} not found`, { cause });
+          }
+          if (pkg2.texlive === void 0) {
+            debug2(`Unexpected response data: ${JSON.stringify(pkg2)}`);
+            throw new Error(`Failed to install ${name}`);
+          }
+          info(`  ${name} (in CTAN) => ${pkg2.texlive} (in TeX Live)`);
+          return pkg2.texlive;
+        }));
+        check(await (0, import_exec3.getExecOutput)("tlmgr", ["install", ...tlnames]));
+      }
+    }
+  }
+  async *list() {
+    const tlpdbPath = path5.join(this.TEXDIR, "tlpkg", "texlive.tlpdb");
+    yield* tlpdb(tlpdbPath);
+  }
+  get path() {
+    return new Tlmgr.Path(this.TEXDIR);
+  }
+  get pinning() {
+    return new Tlmgr.Pinning(this.tlversion);
+  }
+  get repository() {
+    return new Tlmgr.Repository(this.tlversion);
+  }
+  async update(packages = [], options = {}) {
+    const args = options.all ?? false ? ["--all"] : [...packages];
+    if (options.self ?? false) {
+      args.push(this.tlversion.number > 2008 ? "--self" : "texlive.infra");
+    }
+    if ((options.reinstallForciblyRemoved ?? false) && this.tlversion.number >= 2009) {
+      args.unshift("--reinstall-forcibly-removed");
+    }
+    await (0, import_exec3.exec)("tlmgr", ["update", ...args]);
+  }
+  async version() {
+    await (0, import_exec3.exec)("tlmgr", ["--version"]);
+  }
+};
+__decorate([
+  import_decorator_cache_getter2.cache,
+  __metadata("design:type", Tlmgr.Conf),
+  __metadata("design:paramtypes", [])
+], Tlmgr.prototype, "conf", null);
+__decorate([
+  import_decorator_cache_getter2.cache,
+  __metadata("design:type", Tlmgr.Path),
+  __metadata("design:paramtypes", [])
+], Tlmgr.prototype, "path", null);
+__decorate([
+  import_decorator_cache_getter2.cache,
+  __metadata("design:type", Tlmgr.Pinning),
+  __metadata("design:paramtypes", [])
+], Tlmgr.prototype, "pinning", null);
+__decorate([
+  import_decorator_cache_getter2.cache,
+  __metadata("design:type", Tlmgr.Repository),
+  __metadata("design:paramtypes", [])
+], Tlmgr.prototype, "repository", null);
+(function(Tlmgr2) {
+  class Conf {
+    constructor(tlversion, TEXDIR) {
+      this.tlversion = tlversion;
+      this.TEXDIR = TEXDIR;
+    }
+    async texmf(key, value) {
+      if (value === void 0) {
+        const { stdout } = await (0, import_exec3.getExecOutput)("kpsewhich", ["-var-value", key], { silent: true });
+        return stdout.trim();
+      }
+      if (this.tlversion.number < 2010) {
+        (0, import_core3.exportVariable)(key, value);
+      } else {
+        await (0, import_exec3.exec)("tlmgr", ["conf", "texmf", key, value]);
+      }
+      if (key === "TEXMFLOCAL") {
+        try {
+          await makeLocalSkeleton(value, { TEXDIR: this.TEXDIR });
+          await (0, import_exec3.exec)("mktexlsr", [value]);
+        } catch (cause) {
+          info("Failed to initialize TEXMFLOCAL", { cause });
+        }
+      }
+    }
+  }
+  Tlmgr2.Conf = Conf;
+  class Path {
+    constructor(TEXDIR) {
+      this.TEXDIR = TEXDIR;
+    }
+    async add() {
+      let dir;
+      try {
+        dir = await determine(path5.join(this.TEXDIR, "bin", "*"));
+      } catch (cause) {
+        throw new Error("Unable to locate TeX Live's binary directory", {
+          cause
+        });
+      }
+      (0, import_core3.addPath)(dir);
+    }
+  }
+  Tlmgr2.Path = Path;
+  class Pinning {
+    constructor({ number: tlversion }) {
+      if (tlversion < 2013) {
+        throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${tlversion}`);
+      }
+    }
+    async add(repo, ...globs) {
+      await (0, import_exec3.exec)("tlmgr", ["pinning", "add", repo, ...globs]);
+    }
+  }
+  Tlmgr2.Pinning = Pinning;
+  class Repository {
+    constructor({ number: tlversion }) {
+      if (tlversion < 2012) {
+        throw new RangeError(`\`repository\` action is not implemented in TeX Live ${tlversion}`);
+      }
+    }
+    async add(repo, tag) {
+      const args = ["repository", "add", repo];
+      if (tag !== void 0) {
+        args.push(tag);
+      }
+      const { exitCode, stderr } = await (0, import_exec3.getExecOutput)("tlmgr", args, {
+        ignoreReturnCode: true
+      });
+      if (exitCode !== 0 && !stderr.includes("repository or its tag already defined")) {
+        throw new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
+      }
+    }
+  }
+  Tlmgr2.Repository = Repository;
+})(Tlmgr || (Tlmgr = {}));
+
 // lib/action.js
 async function run() {
   try {
@@ -66336,27 +66448,30 @@ async function main(state = new State()) {
   const inputs = await Inputs.load();
   const outputs = new Outputs();
   outputs.version = inputs.version;
+  const profile = new Profile(inputs.version, inputs.texmf);
   let installPackages = inputs.packages.size > 0;
   if (inputs.cache) {
     await import_core.group("Restoring cache", async () => {
       const [unique, primary, secondary] = getCacheKeys(inputs);
       state.key = inputs.forceUpdateCache ? unique : primary;
-      const restored = await restoreCache2(inputs.texmf.TEXDIR, unique, [primary, secondary]);
+      const restored = await restoreCache2(profile.TEXDIR, unique, [primary, secondary]);
       if (restored?.startsWith(state.key) === true) {
         state.key = restored;
       } else {
-        state.texdir = inputs.texmf.TEXDIR;
-        info("After the job completes, TEXDIR will be saved to cache with key: " + state.key);
+        state.texdir = profile.TEXDIR;
+        info("After the job completes, TEXDIR will be saved to cache with key:");
+        info("  " + state.key);
       }
       outputs.cacheHit = restored !== void 0;
       installPackages &&= restored?.startsWith(primary) !== true;
     });
   }
   if (!outputs.cacheHit) {
-    const installtl = await import_core.group("Acquiring install-tl", async () => {
-      return await InstallTL.acquire(inputs.version);
+    let installtl;
+    await import_core.group("Acquiring install-tl", async () => {
+      installtl = await InstallTL.acquire(inputs.version);
+      await installtl.version();
     });
-    const profile = new Profile(inputs.version, inputs.texmf);
     await import_core.group("Installation profile", async () => {
       info(profile.toString());
     });
@@ -66364,7 +66479,7 @@ async function main(state = new State()) {
       await installtl.run(profile);
     });
   }
-  const tlmgr = new Tlmgr(inputs.version, inputs.texmf.TEXDIR);
+  const tlmgr = new Tlmgr(inputs.version, profile.TEXDIR);
   await tlmgr.path.add();
   if (outputs.cacheHit) {
     if (inputs.version.isLatest()) {
@@ -66376,14 +66491,18 @@ async function main(state = new State()) {
         }
       });
     }
-    await import_core.group("Adjusting TEXMF", async () => {
-      for (const key of ["TEXMFCONFIG", "TEXMFVAR", "TEXMFHOME"]) {
-        const value = inputs.texmf[key];
-        if (await tlmgr.conf.texmf(key) !== value) {
+    const entries = await Promise.all(["TEXMFLOCAL", ...["TEXMFCONFIG", "TEXMFVAR", "TEXMFHOME"]].map(async (key) => {
+      const value = profile[key];
+      const old = await tlmgr.conf.texmf(key);
+      return old === value ? [] : [[key, value]];
+    })).then((e) => e.flat());
+    if (entries.length > 0) {
+      await import_core.group("Adjusting TEXMF", async () => {
+        for (const [key, value] of entries) {
           await tlmgr.conf.texmf(key, value);
         }
-      }
-    });
+      });
+    }
   }
   if (inputs.tlcontrib) {
     await import_core.group("Setting up TLContrib", async () => {
@@ -66396,6 +66515,13 @@ async function main(state = new State()) {
       await tlmgr.install(inputs.packages);
     });
   }
+  await import_core.group("TeX Live version info", async () => {
+    await tlmgr.version();
+    info("Package version:");
+    for await (const { name, version: version3, revision } of tlmgr.list()) {
+      info(`  ${name}: ${version3 ?? `rev${revision}`}`);
+    }
+  });
   state.save();
   outputs.emit();
 }
