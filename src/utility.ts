@@ -1,18 +1,13 @@
 import fs from 'node:fs/promises';
-import os from 'node:os';
 import path from 'node:path';
-import process from 'node:process';
+import { env } from 'node:process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import { create as createGlobber } from '@actions/glob';
 import { rmRF } from '@actions/io';
 import { extractTar, extractZip } from '@actions/tool-cache';
-import {
-  type ClassTransformOptions,
-  Exclude,
-  instanceToPlain,
-} from 'class-transformer';
+import { type ClassTransformOptions, instanceToPlain } from 'class-transformer';
 
 import * as log from '#/log';
 
@@ -23,13 +18,9 @@ export interface IterableIterator<T, TReturn = unknown, TNext = undefined>
 }
 
 export abstract class Serializable {
-  constructor() {
-    Exclude()(this.constructor);
-  }
-
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
   toPlain(options?: ClassTransformOptions): object {
-    return instanceToPlain(this, options);
+    return instanceToPlain(this, { strategy: 'excludeAll', ...options });
   }
 
   toJSON(): object {
@@ -141,7 +132,7 @@ export async function restoreCache(
 }
 
 export function tmpdir(): string {
-  return process.env['RUNNER_TEMP'] ?? os.tmpdir();
+  return env.RUNNER_TEMP;
 }
 
 export async function* mkdtemp(): AsyncGenerator<string, void, void> {

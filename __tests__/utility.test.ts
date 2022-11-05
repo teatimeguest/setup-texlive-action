@@ -1,5 +1,3 @@
-import process from 'node:process';
-
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as glob from '@actions/glob';
@@ -12,7 +10,6 @@ import {
   getInput,
   restoreCache,
   saveCache,
-  tmpdir,
 } from '#/utility';
 
 jest.mock('node:path', () => jest.requireActual('path').posix);
@@ -141,17 +138,5 @@ describe('restoreCache', () => {
       expect.stringContaining('Failed to restore cache'),
       expect.any(Object),
     );
-  });
-});
-
-describe('tmpdir', () => {
-  it('returns $RUNNER_TEMP if set', () => {
-    process.env['RUNNER_TEMP'] = '<RUNNER_TEMP>';
-    expect(tmpdir()).toBe('<RUNNER_TEMP>');
-  });
-
-  it('returns `os.tmpdir()` if `RUNNER_TEMP` is not set', () => {
-    delete process.env['RUNNER_TEMP'];
-    expect(tmpdir()).toBe('<tmpdir>');
   });
 });

@@ -74,11 +74,11 @@ overrides:
         - selector: default
           format: [camelCase]
         - selector: [
-            accessor, classProperty, objectLiteralProperty,
+            accessor, classProperty, objectLiteralProperty, typeProperty,
             parameter, parameterProperty, typeParameter,
           ]
           format: null
-          filter: '^(?:NOPERLDOC|TEX|TL_|instopt_|option_|tlpdbopt_|selected_scheme)'
+          filter: '^(?:RUNNER_TEMP$|NOPERLDOC$|TEX|TL_|instopt_|option_|tlpdbopt_|selected_scheme$)'
         - selector: variable
           modifiers: [const]
           format: [camelCase, UPPER_CASE]

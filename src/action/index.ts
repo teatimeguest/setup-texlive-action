@@ -5,11 +5,12 @@ import { isNativeError } from 'node:util/types';
 import { setFailed } from '@actions/core';
 import { keys } from 'ts-transformer-keys';
 
-import { Inputs, Outputs, State } from '#/context';
-import { InstallTL, Profile } from '#/install-tl';
+import { Inputs } from '#/action/inputs';
+import { Outputs } from '#/action/outputs';
+import { State } from '#/action/state';
 import * as log from '#/log';
-import { type Texmf, tlnet } from '#/texlive';
-import { Tlmgr } from '#/tlmgr';
+import { InstallTL, Profile, Tlmgr, tlnet } from '#/texlive';
+import type { UserTrees } from '#/texmf';
 import { restoreCache, saveCache } from '#/utility';
 
 export async function run(): Promise<void> {
@@ -35,7 +36,7 @@ export async function main(state: State = new State()): Promise<void> {
   const outputs = new Outputs();
   outputs.version = inputs.version;
 
-  const profile = new Profile(inputs.version, inputs.texmf);
+  const profile = new Profile(inputs);
   let installPackages = inputs.packages.size > 0;
 
   if (inputs.cache) {
@@ -75,7 +76,7 @@ export async function main(state: State = new State()): Promise<void> {
     });
   }
 
-  const tlmgr = new Tlmgr(inputs.version, profile.TEXDIR);
+  const tlmgr = new Tlmgr(profile);
   await tlmgr.path.add();
 
   if (outputs.cacheHit) {
@@ -89,13 +90,11 @@ export async function main(state: State = new State()): Promise<void> {
       });
     }
     const entries = await Promise
-      .all((['TEXMFLOCAL', ...keys<Texmf.UserTrees>()] as const).map(
-        async (key) => {
-          const value = profile[key];
-          const old = await tlmgr.conf.texmf(key);
-          return old === value ? [] : [[key, value]] as const;
-        },
-      ))
+      .all((['TEXMFLOCAL', ...keys<UserTrees>()] as const).map(async (key) => {
+        const value = profile[key];
+        const old = await tlmgr.conf.texmf(key);
+        return old === value ? [] : [[key, value]] as const;
+      }))
       .then((e) => e.flat());
     if (entries.length > 0) {
       await log.group('Adjusting TEXMF', async () => {

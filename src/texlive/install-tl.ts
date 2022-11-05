@@ -5,14 +5,13 @@ import path from 'node:path';
 
 import { exec, getExecOutput } from '@actions/exec';
 import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
-import { Expose, Type } from 'class-transformer';
-import type { MarkRequired, PickProperties } from 'ts-essentials';
-import { keys } from 'ts-transformer-keys';
 
 import * as log from '#/log';
-import { type Texmf, Version, tlnet } from '#/texlive';
-import * as tlpkg from '#/tlpkg';
-import { Serializable, extract, mkdtemp } from '#/utility';
+import type { Profile } from '#/texlive/profile';
+import * as tlnet from '#/texlive/tlnet';
+import * as tlpkg from '#/texlive/tlpkg';
+import type { Version } from '#/texlive/version';
+import { extract } from '#/utility';
 
 // Prevents `install-tl(-windows).bat` from being stopped by `pause`.
 const devNull: Buffer = Buffer.alloc(0);
@@ -77,10 +76,7 @@ export class InstallTL {
     const archive = await downloadTool(url);
 
     log.info(`Extracting installer from ${archive}`);
-    const dest = await extract(
-      archive,
-      platform() === 'win32' ? 'zip' : 'tgz',
-    );
+    const dest = await extract(archive, platform() === 'win32' ? 'zip' : 'tgz');
     const patch = new Patch(version);
     await patch.apply(dest);
 
@@ -113,144 +109,6 @@ export class InstallTL {
       platform() === 'win32' ? 'install-tl.zip' : 'install-tl-unx.tar.gz',
       version.isLatest() ? tlnet.CTAN : tlnet.historic(version),
     );
-  }
-}
-
-export class Profile extends Serializable implements Texmf {
-  constructor(
-    readonly version: Version,
-    texmf: MarkRequired<Partial<Texmf>, 'TEX_PREFIX'>,
-  ) {
-    super();
-    // `scheme-infraonly` was first introduced in TeX Live 2016.
-    this.selected_scheme = `scheme-${
-      version.number < 2016 ? 'minimal' : 'infraonly'
-    }`;
-    if (texmf.TEXDIR !== undefined) {
-      this.TEXDIR = texmf.TEXDIR;
-      this.TEXMFLOCAL = path.join(this.TEXDIR, 'texmf-local');
-      this.TEXMFSYSCONFIG = path.join(this.TEXDIR, 'texmf-config');
-      this.TEXMFSYSVAR = path.join(this.TEXDIR, 'texmf-var');
-    } else {
-      this.TEXDIR = path.join(texmf.TEX_PREFIX, version.toString());
-      this.TEXMFLOCAL = texmf.TEXMFLOCAL
-        ?? path.join(texmf.TEX_PREFIX, 'texmf-local');
-      this.TEXMFSYSCONFIG = texmf.TEXMFSYSCONFIG
-        ?? path.join(this.TEXDIR, 'texmf-config');
-      this.TEXMFSYSVAR = texmf.TEXMFSYSVAR
-        ?? path.join(this.TEXDIR, 'texmf-var');
-    }
-    if (texmf.TEXUSERDIR !== undefined) {
-      this.TEXMFHOME = path.join(texmf.TEXUSERDIR, 'texmf');
-      this.TEXMFCONFIG = path.join(texmf.TEXUSERDIR, 'texmf-config');
-      this.TEXMFVAR = path.join(texmf.TEXUSERDIR, 'texmf-var');
-    } else {
-      this.TEXMFHOME = texmf.TEXMFHOME ?? this.TEXMFLOCAL;
-      this.TEXMFCONFIG = texmf.TEXMFCONFIG ?? this.TEXMFSYSCONFIG;
-      this.TEXMFVAR = texmf.TEXMFVAR ?? this.TEXMFSYSVAR;
-    }
-    this.instopt_adjustrepo = this.version.isLatest();
-  }
-
-  async *open(): AsyncGenerator<string, void, void> {
-    for await (const tmp of mkdtemp()) {
-      const target = path.join(tmp, 'texlive.profile');
-      await writeFile(target, this.toString());
-      yield target;
-    }
-  }
-
-  override toString(): string {
-    const plain = this.toPlain({
-      version: this.version.number,
-      groups: [platform()],
-    });
-    return Object.entries(plain).map((entry) => entry.join(' ')).join('\n');
-  }
-
-  @Expose()
-  readonly selected_scheme: string;
-
-  @Expose()
-  readonly TEXDIR: string;
-  @Expose()
-  readonly TEXMFLOCAL: string;
-  @Expose()
-  readonly TEXMFSYSCONFIG: string;
-  @Expose()
-  readonly TEXMFSYSVAR: string;
-  @Expose()
-  readonly TEXMFHOME: string;
-  @Expose()
-  readonly TEXMFCONFIG: string;
-  @Expose()
-  readonly TEXMFVAR: string;
-
-  @Expose({ since: 2017 })
-  readonly instopt_adjustpath: boolean = false;
-  @Expose({ since: 2017 })
-  readonly instopt_adjustrepo: boolean;
-  @Expose({ since: 2017 })
-  readonly tlpdbopt_autobackup: boolean = false;
-  @Expose({ since: 2017 })
-  readonly tlpdbopt_install_docfiles: boolean = false;
-  @Expose({ since: 2017 })
-  readonly tlpdbopt_install_srcfiles: boolean = false;
-
-  // Options for Windows
-  @Expose({ since: 2017, groups: ['win32'] })
-  readonly tlpdbopt_desktop_integration: boolean = false;
-  @Expose({ since: 2017, groups: ['win32'] })
-  readonly tlpdbopt_file_assocs: boolean = false;
-  @Expose({ since: 2017, groups: ['win32'] })
-  readonly tlpdbopt_w32_multi_user: boolean = false;
-
-  // Removed option
-  @Expose({ since: 2012, until: 2017, groups: ['win32'] })
-  readonly option_menu_integration: boolean = false;
-
-  // Old option names
-  @Expose({ until: 2009 })
-  get option_symlinks(): boolean {
-    return this.instopt_adjustpath;
-  }
-  @Expose({ since: 2009, until: 2017 })
-  get option_path(): boolean {
-    return this.instopt_adjustpath;
-  }
-  @Expose({ since: 2011, until: 2017 })
-  get option_adjustrepo(): boolean {
-    return this.instopt_adjustrepo;
-  }
-  @Expose({ until: 2017 })
-  get option_autobackup(): boolean {
-    return this.tlpdbopt_autobackup;
-  }
-  @Expose({ until: 2017 })
-  get option_doc(): boolean {
-    return this.tlpdbopt_install_docfiles;
-  }
-  @Expose({ until: 2017 })
-  get option_src(): boolean {
-    return this.tlpdbopt_install_srcfiles;
-  }
-  @Expose({ since: 2009, until: 2017, groups: ['win32'] })
-  get option_desktop_integration(): boolean {
-    return this.tlpdbopt_desktop_integration;
-  }
-  @Expose({ until: 2017, groups: ['win32'] })
-  get option_file_assocs(): boolean {
-    return this.tlpdbopt_file_assocs;
-  }
-  @Expose({ since: 2009, until: 2017, groups: ['win32'] })
-  get option_w32_multi_user(): boolean {
-    return this.tlpdbopt_w32_multi_user;
-  }
-
-  static {
-    for (const key of keys<PickProperties<Profile, boolean>>()) {
-      Type(() => Number)(this.prototype, key);
-    }
   }
 }
 

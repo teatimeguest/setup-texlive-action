@@ -1,17 +1,13 @@
 import fs from 'node:fs/promises';
-import process from 'node:process';
 
 import { isFeatureAvailable } from '@actions/cache';
-import * as core from '@actions/core';
 
-import { Env, Inputs, Outputs, State } from '#/context';
+import { Inputs } from '#/action/inputs';
 import * as log from '#/log';
 import { Version } from '#/texlive';
 import { getInput } from '#/utility';
 
 const v = (spec: unknown) => new Version(`${spec}`);
-
-jest.mock('node:process', () => globalThis.process);
 
 let inputs: {
   cache: boolean;
@@ -24,7 +20,6 @@ let inputs: {
   version: string;
 };
 beforeEach(() => {
-  process.env = {};
   inputs = {
     cache: true,
     packages: undefined,
@@ -39,7 +34,7 @@ beforeEach(() => {
 jest.mocked(getInput).mockImplementation((name: string) => {
   return (inputs as any)[name];
 });
-jest.unmock('#/context');
+jest.unmock('#/action/inputs');
 
 describe('Inputs', () => {
   describe('cache', () => {
@@ -102,31 +97,6 @@ describe('Inputs', () => {
     });
   });
 
-  describe('texmf', () => {
-    it('has some default values', async () => {
-      const { texmf } = await Inputs.load();
-      expect(texmf).toHaveProperty('TEX_PREFIX', '<prefix>');
-      expect(texmf).toHaveProperty(
-        'TEXMFCONFIG',
-        `~/.local/texlive/${v`latest`}/texmf-config`,
-      );
-      expect(texmf).not.toHaveProperty('TEXDIR');
-      expect(texmf).not.toHaveProperty('TEXMFLOCAL');
-    });
-
-    it('has TEXMFLOCAL if TEXLIVE_INSTALL_TEXMFLOCAL is set', async () => {
-      process.env['TEXLIVE_INSTALL_TEXMFLOCAL'] = '<TEXMFLOCAL>';
-      const { texmf } = await Inputs.load();
-      expect(texmf).toHaveProperty('TEXMFLOCAL', '<TEXMFLOCAL>');
-    });
-
-    it('has TEXDIR as input', async () => {
-      inputs.texdir = '<TEXDIR>';
-      const { texmf } = await Inputs.load();
-      expect(texmf).toHaveProperty('TEXDIR', '<TEXDIR>');
-    });
-  });
-
   describe('tlcontrib', () => {
     it.each([true, false])('is set as input', async (input) => {
       inputs.tlcontrib = input;
@@ -176,103 +146,6 @@ describe('Inputs', () => {
     it('fails with invalid input', async () => {
       inputs.version = '<version>';
       await expect(Inputs.load()).rejects.toThrow('');
-    });
-  });
-});
-
-describe('Outputs#cacheHit', () => {
-  it.each([true, false])('sets cache-hit to %s', (value) => {
-    const outputs = new Outputs();
-    outputs.cacheHit = value;
-    outputs.version = v`latest`;
-    outputs.emit();
-    expect(core.setOutput).toHaveBeenCalledTimes(2);
-    expect(core.setOutput).toHaveBeenCalledWith('cache-hit', value);
-  });
-
-  it.each([
-    ['2017', v`2017`],
-    [Version.LATEST, v`latest`],
-  ])('sets version to %p', (value, version) => {
-    const outputs = new Outputs();
-    outputs.version = version;
-    outputs.emit();
-    expect(core.setOutput).toHaveBeenCalledTimes(2);
-    expect(core.setOutput).toHaveBeenCalledWith('version', value);
-  });
-});
-
-describe('Env', () => {
-  it('has some default values', () => {
-    expect(Env.load(v`latest`)).toMatchObject({
-      TEXLIVE_INSTALL_ENV_NOCHECK: '1',
-      TEXLIVE_INSTALL_NO_WELCOME: '1',
-      TEXLIVE_INSTALL_TEXMFCONFIG: `~/.local/texlive/${v`latest`}/texmf-config`,
-      TEXLIVE_INSTALL_TEXMFVAR: `~/.local/texlive/${v`latest`}/texmf-var`,
-      TEXLIVE_INSTALL_TEXMFHOME: '~/texmf',
-    });
-  });
-
-  it('ignores some environment variables', () => {
-    process.env['TEXLIVE_INSTALL_TEXDIR'] = '<texdir>';
-    expect(Env.load(v`latest`)).not.toHaveProperty(
-      'TEXLIVE_INSTALL_TEXDIR',
-    );
-    expect(process.env).not.toHaveProperty('TEXLIVE_INSTALL_TEXDIR');
-    expect(log.warn).toHaveBeenCalledWith(
-      '`TEXLIVE_INSTALL_TEXDIR` is set, but ignored',
-    );
-  });
-
-  it('favors user settings over default values', () => {
-    process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
-    process.env['NOPERLDOC'] = 'true';
-    expect(Env.load(v`latest`)).toMatchObject({
-      ['TEXLIVE_INSTALL_PREFIX']: '<PREFIX>',
-      ['NOPERLDOC']: 'true',
-    });
-  });
-});
-
-describe('State', () => {
-  describe('constructor', () => {
-    it.each([
-      [false, ''],
-      [true, '{}'],
-      [true, '{ "key": "key" }'],
-      [true, '{ "key": "key", "texdir": "texdir" }'],
-    ])('sets post to %s (%p)', (value, state) => {
-      jest.mocked(core.getState).mockReturnValueOnce(state);
-      expect(new State()).toHaveProperty('post', value);
-    });
-
-    it('gets state', () => {
-      const state = { key: '<key>', texdir: '<texdir>' };
-      jest.mocked(core.getState).mockReturnValueOnce(JSON.stringify(state));
-      expect(new State()).toMatchObject(state);
-    });
-  });
-
-  describe('save', () => {
-    it('saves state', () => {
-      expect(() => {
-        const state = new State();
-        state.key = '<key>';
-        state.texdir = '<texdir>';
-        state.save();
-      })
-        .not
-        .toThrow();
-      expect(core.saveState).toHaveBeenCalled();
-    });
-
-    it('saves empty state', () => {
-      expect(() => {
-        new State().save();
-      })
-        .not
-        .toThrow();
-      expect(core.saveState).toHaveBeenCalled();
     });
   });
 });

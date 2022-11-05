@@ -7,6 +7,10 @@ declare global {
     interface ErrnoException {
       stack: string;
     }
+
+    interface ProcessEnv {
+      RUNNER_TEMP: string;
+    }
   }
 }
 

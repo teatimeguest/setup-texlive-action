@@ -2,13 +2,15 @@ import * as core from '@actions/core';
 import type { DeepWritable } from 'ts-essentials';
 
 import * as action from '#/action';
-import { Inputs, Outputs, State } from '#/context';
-import { InstallTL, Profile } from '#/install-tl';
-import { Version } from '#/texlive';
-import { Tlmgr } from '#/tlmgr';
+import { Inputs } from '#/action/inputs';
+import { Outputs } from '#/action/outputs';
+import { State } from '#/action/state';
+import { InstallTL, Profile, Tlmgr, Version } from '#/texlive';
+import { Conf } from '#/texlive/tlmgr/conf';
+import { Path } from '#/texlive/tlmgr/path';
+import { Pinning } from '#/texlive/tlmgr/pinning';
+import { Repository } from '#/texlive/tlmgr/repository';
 import * as util from '#/utility';
-
-const { Conf, Path, Pinning, Repository } = Tlmgr;
 
 jest.unmock('#/action');
 
@@ -21,7 +23,7 @@ describe('main', () => {
   beforeEach(() => {
     inputs.cache = true;
     inputs.packages = new Set();
-    inputs.texmf = { TEX_PREFIX: '' };
+    inputs.prefix = '<prefix>';
     inputs.tlcontrib = false;
     inputs.updateAllPackages = false;
     inputs.version = v`latest`;

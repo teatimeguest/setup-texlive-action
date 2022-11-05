@@ -2,9 +2,9 @@ import { readFile } from 'node:fs/promises';
 
 import { dedent } from 'ts-dedent';
 
-import * as tlpkg from '#/tlpkg';
+import * as tlpkg from '#/texlive/tlpkg';
 
-jest.unmock('#/tlpkg');
+jest.unmock('#/texlive/tlpkg');
 
 describe('check', () => {
   it('detects forcible removal of packages', () => {
