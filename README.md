@@ -199,4 +199,4 @@ See the [releases page][releases].
 [texdir]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#x1-250003.2.3
 [texlive]: https://tug.org/texlive/
 [tlcontrib]: https://contrib.texlive.info
-[update-cache]: https://github.com/actions/cache/blob/main/workarounds.md#update-a-cache
+[update-cache]: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
