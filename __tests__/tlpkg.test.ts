@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 
-import dedent from 'dedent';
+import { dedent } from 'ts-dedent';
 
 import * as tlpkg from '#/tlpkg';
 
@@ -57,7 +57,7 @@ describe('tlpdb', () => {
     depend collection-latex
     containersize 440
 
-    name la\
+    name la\\
     tex#comment
     category Package
     revision 61232

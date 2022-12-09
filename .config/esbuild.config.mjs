@@ -1,40 +1,27 @@
+import { dedent } from 'ts-dedent';
+
+import packageJson from '../package.json' assert { type: 'json' };
 import tsconfig from '../tsconfig.json' assert { type: 'json' };
 
+const { outDir, target } = tsconfig.compilerOptions;
+
 export default {
-  entryPoints: ['./lib/index.js'],
+  entryPoints: [outDir],
   bundle: true,
-  target: tsconfig.target,
+  target,
   format: 'esm',
   platform: 'node',
   mainFields: ['module', 'main'],
   conditions: ['module', 'import'],
-  outfile: 'dist/index.mjs',
+  outfile: packageJson.main,
   banner: {
     // https://github.com/evanw/esbuild/issues/1921#issuecomment-1152991694
-    js: "import { createRequire } from 'node:module';\n"
-      + 'const require = createRequire(import.meta.url);',
+    js: dedent`
+      import { createRequire } from 'node:module';
+      const require = createRequire(import.meta.url);
+    `,
   },
   legalComments: 'none',
-  plugins: [{
-    name: "Resolve imports through TS's path mapping",
-    setup: ({ onResolve, resolve }) => {
-      onResolve({ filter: /^#\// }, ({ path, ...options }) => {
-        return resolve(path.replace('#', '.'), options);
-      });
-    },
-  }, {
-    // This reduces the script size by 10%.
-    name: 'Replace `whatwg-url` with the Node.js `url` module',
-    setup: ({ onResolve, onLoad }) => {
-      onResolve({ filter: /^whatwg-url$/ }, () => {
-        return { path: 'url', namespace: 'node' };
-      });
-      onLoad({ filter: /^url$/, namespace: 'node' }, async () => {
-        return {
-          contents: "export { default, URL, URLSearchParams } from 'node:url';",
-        };
-      });
-    },
-  }],
+  alias: { 'whatwg-url': 'node:url' }, // This reduces the script size by 10%.
   logLevel: 'info',
 };

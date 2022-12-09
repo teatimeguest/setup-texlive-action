@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { exec, getExecOutput } from '@actions/exec';
-import dedent from 'dedent';
+import { dedent } from 'ts-dedent';
 
 import * as ctan from '#/ctan';
 import { Version } from '#/texlive';

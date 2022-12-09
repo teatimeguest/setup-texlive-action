@@ -11,7 +11,7 @@
     "baseUrl": "./src",
     "module": "es2020",
     "moduleResolution": "node16",
-    "paths": { "#/*": ["*"] },
+    "paths": { "#/*": ["*.js", "*/index.js"] },
     "rootDirs": ["./src"],
     "importHelpers": true,
     "newLine": "lf",
@@ -23,8 +23,13 @@
     "experimentalDecorators": true,
     "target": "es2021",
     "plugins": [
-      { "transform": "ts-transformer-keys/transformer" }
+      { "transform": "ts-transformer-keys/transformer" },
+      { "transform": "typescript-transform-paths", "useRootDirs": true },
+      {
+        "transform": "typescript-transform-extensions",
+        "extensions": { ".ts": ".js" }
+      }
     ]
   },
-  "include": ["./src/*.ts"]
+  "include": ["./src/**/*.ts"]
 }

@@ -18,7 +18,7 @@ rules:
 ignorePatterns: /src/index.ts
 reportUnusedDisableDirectives: true
 overrides:
-  - files: "./src/*.ts"
+  - files: "./src/**/*.ts"
     extends:
       - plugin:import/recommended
       - plugin:import/typescript
@@ -130,13 +130,17 @@ overrides:
       import/no-duplicates: error
       import/no-namespace:
         - error
-        - ignore: ["*#/*", "@actions/*"]
+        - ignore: ["*#/**", "@actions/*"]
       import/no-import-module-exports: error
       import/no-relative-packages: error
       import/no-unresolved: off
       import/order:
         - error
         - groups: [builtin, external, internal, object]
+          pathGroups:
+            - pattern: "#/*/*/*"
+              group: internal
+              position: after
           newlines-between: always
           alphabetize:
             order: asc
@@ -148,6 +152,7 @@ overrides:
       unicorn/consistent-function-scoping: off
       unicorn/no-array-for-each: off
       unicorn/no-array-reduce: off
+      unicorn/no-negated-condition: off
       unicorn/prefer-number-properties:
         - error
         - checkInfinity: false
@@ -155,7 +160,7 @@ overrides:
       unicorn/prefer-ternary: off
       unicorn/prevent-abbreviations: off
       unicorn/switch-case-braces: off
-  - files: "./__tests__/*.ts"
+  - files: "./__tests__/**/*.ts"
     extends:
       - plugin:jest/recommended
       - plugin:jest/style

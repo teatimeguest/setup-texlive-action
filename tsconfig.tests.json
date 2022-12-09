@@ -3,9 +3,11 @@
   "compilerOptions": {
     "importHelpers": false,
     "noEmit": true,
-    "module": "commonjs",
-    "rootDirs": ["./src", "./__tests__"]
+    "rootDirs": ["./src", "./__tests__"],
+    "plugins": [
+      { "transform": "ts-transformer-keys/transformer" }
+    ]
   },
   "files": ["./src/types.d.ts"],
-  "include": ["./__tests__/*.ts"]
+  "include": ["./__tests__/**/*.ts"]
 }

@@ -11,12 +11,9 @@ export default {
   rootDir: process.cwd(),
   setupFilesAfterEnv: ['<rootDir>/__tests__/setup.ts'],
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/__tests__/*.test.ts'],
+  testMatch: ['<rootDir>/__tests__/**/*.test.ts'],
   transform: {
-    '^.+\\.ts$': ['ts-jest', {
-      compiler: 'ttypescript',
-      tsconfig: '<rootDir>/tsconfig.tests.json',
-    }],
+    '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.tests.json' }],
   },
   unmockedModulePathPatterns: [
     '<rootDir>/node_modules/class-transformer/',
