@@ -98,12 +98,9 @@ If you want to disable caching, you can use `cache` input:
 The `packages` input will affect which cache will be restored
 because its hash will be used as part of the cache key.
 
-> **Note**:&ensp;~~If you have problems due to a corrupt cache entry,
-> you can delete it
-> from the [GitHub CLI][gh-actions-cache] or [REST API][cache-api].
-> The cache key will be found in the workflow log.~~
->
-> Now you can manage cache entries from [Web interface][manage-caches].
+> **Note**:&ensp;If you have problems due to a corrupt cache entry,
+> you can delete it from the [web interface][deleting-cache-entries],
+> [GitHub CLI][gh-actions-cache], or [REST API][cache-api].
 
 ## Inputs
 
@@ -181,18 +178,18 @@ See the [releases page][releases].
 
 [actions-cache]: https://github.com/actions/toolkit/tree/main/packages/cache
 [actions-env]: https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
-[cache-api]: https://docs.github.com/en/rest/actions/cache
+[cache-api]: https://docs.github.com/en/rest/actions/cache?apiVersion=2022-11-28#delete-github-actions-caches-for-a-repository-using-a-cache-key
 [cache-limits]: https://github.com/actions/cache#cache-limits
 [ci-badge]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml
 [codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
 [codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
+[deleting-cache-entries]: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#deleting-cache-entries
 [depends-txt]: https://tug.org/texlive/pkgcontrib.html#deps
-[gh-actions-cache]: https://github.com/actions/gh-actions-cache#readme
+[gh-actions-cache]: https://github.com/actions/gh-actions-cache
 [historic]: https://tug.org/historic/
 [install-tl-env]: https://tug.org/texlive/doc/install-tl.html#ENVIRONMENT-VARIABLES
 [install-tl-texdir]: https://tug.org/texlive/doc/install-tl.html#texdir-dir
-[manage-caches]: https://github.blog/changelog/2022-10-20-manage-caches-in-your-actions-workflows-from-web-interface/
 [marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action
 [releases]: https://github.com/teatimeguest/setup-texlive-action/releases
