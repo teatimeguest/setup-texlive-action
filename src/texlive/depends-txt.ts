@@ -1,72 +1,46 @@
-import type { Writable } from 'ts-essentials';
-
 import * as log from '#/log';
 import type { IterableIterator } from '#/utility';
 
-export class DependsTxt {
-  private readonly bundle = new Map<
-    DependsTxt.Entry[0],
-    Writable<DependsTxt.Entry[1]>
-  >();
+const RE = {
+  comments: /\s*#.*$/gmu,
+  hardOrSoft: /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu,
+  packages: /^\s*package(?=\s|$)(.*)$/mu,
+  whitespaces: /\s+/u,
+};
 
-  constructor(txt: string) {
-    txt = txt.replaceAll(/\s*#.*$/gmu, ''); // remove comments
-    for (const [name, deps] of DependsTxt.unbundle(txt)) {
-      let module = this.bundle.get(name);
-      if (module === undefined) {
-        module = {};
-        this.bundle.set(name, module);
-      }
-      for (const [type, dep] of deps) {
-        (module[type] ??= new Set()).add(dep);
-      }
+export interface Dependency {
+  readonly name: string;
+  readonly type: 'hard' | 'soft';
+  readonly package?: string | undefined;
+}
+
+export function* parse(input: string): Iterable<Dependency> {
+  const [globals = '', ...rest] = input
+    .replaceAll(RE.comments, '')
+    .split(RE.packages);
+  yield* parseDeps(undefined, globals);
+
+  const iter: IterableIterator<string, undefined> = rest.values();
+  for (const s of iter) {
+    let packageName: string | undefined = s.trim();
+    if (packageName === '' || RE.whitespaces.test(packageName)) {
+      log.warn(
+        '`package` directive must have exactly one argument, but given: '
+          + JSON.stringify(packageName),
+      );
+      packageName = undefined;
     }
-  }
-
-  get(name: string): DependsTxt.Entry[1] | undefined {
-    return this.bundle.get(name);
-  }
-
-  [Symbol.iterator](): Iterator<DependsTxt.Entry, void, void> {
-    return this.bundle.entries();
-  }
-
-  private static *unbundle(
-    txt: string,
-  ): Iterable<[string, ReturnType<typeof this.parse>]> {
-    const [globals, ...rest] = txt.split(/^\s*package(?=\s|$)(.*)$/mu);
-    yield ['', this.parse(globals)];
-    const iter: IterableIterator<string, undefined> = rest.values();
-    for (let name of iter) {
-      name = name.trim();
-      if (name === '' || /\s/u.test(name)) {
-        log.warn(
-          '`package` directive must have exactly one argument, but given: '
-            + name,
-        );
-        name = '';
-      }
-      yield [name, this.parse(iter.next().value)];
-    }
-  }
-
-  private static *parse(
-    this: void,
-    txt?: string,
-  ): Iterable<[DependsTxt.DependencyType, string]> {
-    const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
-    for (const [, type = 'hard', deps] of txt?.matchAll(hardOrSoft) ?? []) {
-      for (const dep of deps?.split(/\s+/u).filter(Boolean) ?? []) {
-        yield [type as DependsTxt.DependencyType, dep];
-      }
-    }
+    yield* parseDeps(packageName, iter.next().value ?? '');
   }
 }
 
-export namespace DependsTxt {
-  export type DependencyType = 'hard' | 'soft';
-  export type Entry = [
-    string,
-    { readonly [T in DependencyType]?: Set<string> },
-  ];
+function* parseDeps(
+  packageName: string | undefined,
+  input: string,
+): Iterable<Dependency> {
+  for (const [, type = 'hard', names = ''] of input.matchAll(RE.hardOrSoft)) {
+    for (const name of names.split(RE.whitespaces).filter(Boolean)) {
+      yield { name, type, package: packageName } as Dependency;
+    }
+  }
 }

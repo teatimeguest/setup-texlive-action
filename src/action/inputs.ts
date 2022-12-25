@@ -5,7 +5,7 @@ import type { MarkWritable } from 'ts-essentials';
 
 import { Env } from '#/action/env';
 import * as log from '#/log';
-import { DependsTxt, Version } from '#/texlive';
+import { Version, dependsTxt } from '#/texlive';
 import { getInput } from '#/utility';
 
 export interface Inputs {
@@ -63,20 +63,22 @@ export namespace Inputs {
 
   async function loadPackageList(this: void): Promise<Set<string>> {
     const packages = [];
-    for await (const [, { hard = [], soft = [] }] of loadDependsTxt()) {
-      packages.push(...hard, ...soft);
+    for await (const { name } of loadDependsTxt()) {
+      packages.push(name);
     }
     return new Set(packages.sort());
   }
 
-  async function* loadDependsTxt(this: void): AsyncIterable<DependsTxt.Entry> {
+  async function* loadDependsTxt(
+    this: void,
+  ): AsyncIterable<dependsTxt.Dependency> {
     const inline = getInput('packages');
     if (inline !== undefined) {
-      yield* new DependsTxt(inline);
+      yield* dependsTxt.parse(inline);
     }
     const file = getInput('package-file');
     if (file !== undefined) {
-      yield* new DependsTxt(await readFile(file, 'utf8'));
+      yield* dependsTxt.parse(await readFile(file, 'utf8'));
     }
   }
 }
