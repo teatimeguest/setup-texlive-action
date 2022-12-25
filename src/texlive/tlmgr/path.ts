@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { addPath } from '@actions/core';
 
-import { determine } from '#/utility';
+import { uniqueChild } from '#/utility';
 
 export class Path {
   constructor(private readonly options: { readonly TEXDIR: string }) {}
@@ -10,7 +10,7 @@ export class Path {
   async add(): Promise<void> {
     let dir: string;
     try {
-      dir = await determine(path.join(this.options.TEXDIR, 'bin', '*'));
+      dir = await uniqueChild(path.join(this.options.TEXDIR, 'bin'));
     } catch (cause) {
       throw new Error("Unable to locate TeX Live's binary directory", {
         cause,

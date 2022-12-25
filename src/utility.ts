@@ -4,7 +4,6 @@ import { env } from 'node:process';
 
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import { create as createGlobber } from '@actions/glob';
 import { rmRF } from '@actions/io';
 import { extractTar, extractZip } from '@actions/tool-cache';
 import { type ClassTransformOptions, instanceToPlain } from 'class-transformer';
@@ -42,31 +41,25 @@ export async function extract(
       return await extractTar(archive, undefined, ['xz', '--strip=1']);
     }
     case 'zip': {
+      const parent = await extractZip(archive);
       try {
-        return await determine(path.join(await extractZip(archive), '*'));
+        return await uniqueChild(parent);
       } catch (cause) {
-        throw new Error('Unable to locate subdirectory', { cause });
+        throw new Error('Unable to locate unzipped subdirectory', { cause });
       }
     }
   }
 }
 
-/**
- * @returns The unique path that matches the given glob pattern.
- */
-export async function determine(pattern: string): Promise<string> {
-  const globber = await createGlobber(pattern, { implicitDescendants: false });
-  const matched = await globber.glob();
-  if (matched.length === 1) {
-    return matched[0] ?? '';
+export async function uniqueChild(parent: string): Promise<string> {
+  const [child, ...rest] = await fs.readdir(parent);
+  if (child === undefined) {
+    throw new Error(`${parent} has no entries`);
   }
-  throw new Error(
-    matched.length === 0
-      ? `No matches to pattern \`${pattern}\` found`
-      : `Multiple matches to pattern \`${pattern}\` found: ${
-        matched.join('; ')
-      }`,
-  );
+  if (rest.length > 0) {
+    throw new Error(`${parent} has multiple entries`);
+  }
+  return path.join(parent, child);
 }
 
 export function getInput(name: string, options?: {

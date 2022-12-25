@@ -1,16 +1,11 @@
+import fs from 'node:fs/promises';
+
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import * as glob from '@actions/glob';
 import * as tool from '@actions/tool-cache';
 
 import * as log from '#/log';
-import {
-  determine,
-  extract,
-  getInput,
-  restoreCache,
-  saveCache,
-} from '#/utility';
+import { extract, getInput, restoreCache, saveCache } from '#/utility';
 
 jest.mock('node:path', () => jest.requireActual('path').posix);
 jest.unmock('#/utility');
@@ -29,33 +24,18 @@ describe('extract', () => {
 
   it('extracts files from a zipfile', async () => {
     jest.spyOn(tool, 'extractZip').mockResolvedValueOnce('<extractZip>');
-    await expect(extract('<zipfile>', 'zip')).resolves.toBe('<glob>');
+    await expect(extract('<zipfile>', 'zip')).toResolve();
     expect(tool.extractZip).toHaveBeenCalledWith('<zipfile>');
   });
 
-  it('throws an exception if the directory cannot be located', async () => {
-    jest.mocked(glob.create).mockResolvedValueOnce(
-      { glob: async (): Promise<Array<string>> => [] } as glob.Globber,
-    );
-    jest.mocked(tool.extractZip).mockResolvedValueOnce('<extractZip>');
-    await expect(extract('<zipfile>', 'zip')).rejects.toThrow(
-      'Unable to locate subdirectory',
-    );
-  });
-});
-
-describe('determine', () => {
-  it('returns a unique path that matches the given pattern', async () => {
-    await expect(determine('<pattern>')).resolves.toBe('<glob>');
-  });
-
-  it.each<[Array<string>]>([[[]], [['<some>', '<other>']]])(
-    'returns `undefined` if the matched path is not unique',
-    async (matched) => {
-      jest.mocked(glob.create).mockResolvedValueOnce(
-        { glob: async () => matched } as glob.Globber,
+  it.each<[Array<string>]>([[[]], [['', '']]])(
+    'throws an exception if the directory cannot be located',
+    async (files) => {
+      jest.spyOn(fs, 'readdir').mockResolvedValueOnce(files as Array<any>);
+      jest.spyOn(tool, 'extractZip').mockResolvedValueOnce('<extractZip>');
+      await expect(extract('<zipfile>', 'zip')).rejects.toThrow(
+        'Unable to locate unzipped subdirectory',
       );
-      await expect(determine('<pattern>')).rejects.toThrow('');
     },
   );
 });

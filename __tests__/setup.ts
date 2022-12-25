@@ -5,6 +5,7 @@ import 'reflect-metadata';
 jest.mock('node:fs/promises', () => {
   return {
     readFile: jest.fn().mockResolvedValue('<readFile>'),
+    readdir: jest.fn().mockResolvedValue(['<readdir>']),
     writeFile: jest.fn(),
   };
 });
@@ -61,16 +62,6 @@ jest.mock('@actions/exec', () => {
       exitCode: 0,
       stdout: '',
       stderr: '',
-    }),
-  };
-});
-
-jest.mock('@actions/glob', () => {
-  return {
-    create: jest.fn().mockResolvedValue({
-      glob: jest
-        .fn()
-        .mockResolvedValue(['<glob>']),
     }),
   };
 });
@@ -164,10 +155,10 @@ jest.mock('#/utility', () => {
     ...jest.createMockFromModule<object>('#/utility'),
     Serializable,
     extract: jest.fn().mockResolvedValue('<extract>'),
-    determine: jest.fn().mockResolvedValue('<determine>'),
     mkdtemp: jest.fn(async function*() {
       yield '<mkdtemp>';
     }),
     tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
+    uniqueChild: jest.fn().mockResolvedValue('<uniqueChild>'),
   };
 });
