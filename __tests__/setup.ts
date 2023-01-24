@@ -95,17 +95,7 @@ jest.mock('#/ctan', () => {
 });
 
 jest.unmock('#/texlive');
-
 jest.unmock('#/texlive/depends-txt');
-
-jest.mock('#/texlive/install-tl', () => {
-  const { InstallTL } = jest.createMockFromModule<any>('#/texlive/install-tl');
-  InstallTL.acquire.mockImplementation(async () => new InstallTL());
-  return { InstallTL };
-});
-
-jest.mock('#/texlive/profile');
-
 jest.unmock('#/texlive/tlnet');
 
 jest.mock('#/texlive/tlmgr', () => {
@@ -125,29 +115,13 @@ jest.mock('#/texlive/tlmgr', () => {
   return { Tlmgr };
 });
 
-jest.mock('#/texlive/tlmgr/conf');
-jest.mock('#/texlive/tlmgr/path');
-jest.mock('#/texlive/tlmgr/pinning');
-jest.mock('#/texlive/tlmgr/repository');
-
-jest.mock('#/texlive/tlpkg', () => {
-  return {
-    check: jest.fn(),
-    makeLocalSkeleton: jest.fn(),
-    // eslint-disable-next-line require-yield
-    tlpdb: jest.fn(async function*() {
-      return;
-    }),
-  };
-});
-
 jest.mock('#/texlive/version', () => {
   const { Version } = jest.requireActual('#/texlive/version');
   Version.checkLatest = jest.fn().mockResolvedValue(Version.LATEST);
   return { Version };
 });
 
-jest.mock('#/texmf', () => jest.requireActual('#/texmf'));
+jest.unmock('#/texmf');
 
 jest.mock('#/utility', () => {
   const { Serializable } = jest.requireActual('#/utility');

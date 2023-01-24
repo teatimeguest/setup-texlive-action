@@ -5,7 +5,7 @@ import * as action from '#/action';
 import { Inputs } from '#/action/inputs';
 import { Outputs } from '#/action/outputs';
 import { State } from '#/action/state';
-import { InstallTL, Profile, Tlmgr, Version } from '#/texlive';
+import { Profile, Tlmgr, Version, installTL } from '#/texlive';
 import { Conf } from '#/texlive/tlmgr/conf';
 import { Path } from '#/texlive/tlmgr/path';
 import { Pinning } from '#/texlive/tlmgr/pinning';
@@ -49,7 +49,7 @@ describe('main', () => {
   it('installs TeX Live if cache not found', async () => {
     await expect(action.main()).toResolve();
     expect(util.restoreCache).toHaveBeenCalled();
-    expect(InstallTL.prototype.run).toHaveBeenCalled();
+    expect(installTL).toHaveBeenCalled();
   });
 
   it('does not use cache if input cache is false', async () => {
@@ -63,7 +63,7 @@ describe('main', () => {
     async (...kind) => {
       setCacheType(kind);
       await expect(action.main()).toResolve();
-      expect(InstallTL.prototype.run).not.toHaveBeenCalled();
+      expect(installTL).not.toHaveBeenCalled();
     },
   );
 
@@ -126,7 +126,7 @@ describe('main', () => {
   it('adds TeX Live to path after installation', async () => {
     await expect(action.main()).toResolve();
     expect(Path.prototype.add).toHaveBeenCalledAfter(
-      jest.mocked<(x: any) => unknown>(InstallTL.prototype.run),
+      jest.mocked<(_: any) => unknown>(installTL),
     );
   });
 

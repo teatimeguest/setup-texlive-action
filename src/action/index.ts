@@ -9,7 +9,7 @@ import { Inputs } from '#/action/inputs';
 import { Outputs } from '#/action/outputs';
 import { State } from '#/action/state';
 import * as log from '#/log';
-import { InstallTL, Profile, Tlmgr, tlnet } from '#/texlive';
+import { Profile, Tlmgr, installTL, tlnet } from '#/texlive';
 import type { UserTrees } from '#/texmf';
 import { restoreCache, saveCache } from '#/utility';
 
@@ -63,16 +63,11 @@ export async function main(state: State = new State()): Promise<void> {
   }
 
   if (!outputs.cacheHit) {
-    let installtl: InstallTL;
-    await log.group('Acquiring install-tl', async () => {
-      installtl = await InstallTL.acquire(inputs.version);
-      await installtl.version();
-    });
     await log.group('Installation profile', async () => {
       log.info(profile.toString());
     });
     await log.group('Installing TeX Live', async () => {
-      await installtl.run(profile);
+      await installTL(profile);
     });
   }
 

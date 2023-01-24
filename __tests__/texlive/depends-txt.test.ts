@@ -7,6 +7,7 @@ jest.unmock('#/texlive/depends-txt');
 
 describe('parse', () => {
   it('parses DEPENDS.txt', () => {
+    // editorconfig-checker-disable
     const txt = dedent`
       foo bar  baz
       hard\tqux
@@ -20,6 +21,7 @@ describe('parse', () => {
       package\tcorge
         \tbaz
     `;
+    // editorconfig-checker-enable
     const deps = [...parse(txt)];
     expect(deps).toHaveLength(8);
     expect(deps).toContainEqual({

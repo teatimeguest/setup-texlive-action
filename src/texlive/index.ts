@@ -1,5 +1,5 @@
 export * as dependsTxt from '#/texlive/depends-txt';
-export { InstallTL } from '#/texlive/install-tl';
+export { installTL } from '#/texlive/install-tl';
 export { Profile } from '#/texlive/profile';
 export { Tlmgr } from '#/texlive/tlmgr';
 export * as tlnet from '#/texlive/tlnet';

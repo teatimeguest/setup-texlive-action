@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { exec, getExecOutput } from '@actions/exec';
@@ -72,7 +73,18 @@ export class Tlmgr {
    */
   async *list(): AsyncGenerator<tlpkg.Tlpobj, void, void> {
     const tlpdbPath = path.join(this.options.TEXDIR, 'tlpkg', 'texlive.tlpdb');
-    yield* tlpkg.tlpdb(tlpdbPath);
+    let db: string;
+    try {
+      db = await readFile(tlpdbPath, 'utf8');
+    } catch (cause) {
+      log.info(`Failed to read ${tlpdbPath}`, { cause });
+      return;
+    }
+    try {
+      yield* tlpkg.tlpdb(db);
+    } catch (cause) {
+      log.info(`Failed to parse ${tlpdbPath}`, { cause });
+    }
   }
 
   @Cache
