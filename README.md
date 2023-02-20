@@ -9,8 +9,10 @@
 This action provides the following functionality:
 
 - Installing and setting up a specific version of [TeX Live][texlive];
-- Caching and restoring [`TEXDIR`][texdir] by default to improve workflow execution time;
-- Optionally configuring an additional package repository and installing TeX packages.
+- Caching and restoring [`TEXDIR`][texdir] by default
+  to improve workflow execution time;
+- Optionally configuring an additional package repository
+  and installing TeX packages.
 
 Linux, Windows, and macOS are supported.
 
@@ -54,8 +56,8 @@ If you want to install additional packages, you can use `packages` input:
 ```
 
 If you don't know exactly all the packages you need,
-it is recommended to install `scheme-basic`, which contains
-fundamental packages such as `latex` and `amsmath`.
+it is recommended to install `scheme-basic`,
+which contains fundamental packages such as `latex` and `amsmath`.
 
 You can also specify packages by file using [`package-file`](#inputs) input.
 
@@ -70,22 +72,18 @@ You can use an older version of TeX Live by setting `version`:
     version: 2008
 ```
 
-The action will install it by
-downloading the installation script from the [historic archives][historic] and
-configuring the main package repository appropriately.
-
-Supported versions are `2008` to `2022` for Linux and Windows, and
-`2013` to `2022` for macOS.
+The action will install it by using [historic archive][historic].
+Supported versions are `2008` to `2022` for Linux and Windows,
+and `2013` to `2022` for macOS.
 
 > **Note**:&ensp;Versions `2008`–`2012` do not work on `macos-latest`
-> because the `kpsewhich` for those versions is a 32-bit executable and
-> crashes with _<q>Bad CPU type in executable.</q>_
+> because the `kpsewhich` for those versions is a 32-bit executable
+> and crashes with _<q>Bad CPU type in executable.</q>_
 
 ### Caching
 
-By default,
-the action will save `TEXDIR` to cache using [`@actions/cache`][actions-cache]
-after the workflow job completes.
+By default, the action will save `TEXDIR` to cache
+using [`@actions/cache`][actions-cache] after the workflow job completes.
 If you want to disable caching, you can use `cache` input:
 
 ```yaml
@@ -106,23 +104,23 @@ because its hash will be used as part of the cache key.
 
 All inputs are optional.
 
-|Name|Type|Description|
-|---|---|---|
-|`cache`|Bool|<p>Enable caching for [`TEXDIR`][texdir].</p>**Default:**&ensp;`true`|
-|`package-file`|String|File containing the names of TeX packages to be installed, delimited by whitespaces. Everything after a `#` is treated as a comment. The [`DEPENDS.txt`][depends-txt] format is also supported.|
-|`packages`|String|Whitespace-delimited TeX package names to be installed. Schemes and collections are also acceptable.|
-|`prefix`|String|<p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p>**Default:**&ensp;<code>[$RUNNER_TEMP][actions-env]/setup-texlive</code>|
-|`texdir`|String|TeX Live system directory. This has the same effect as the installer's [`-texdir`][install-tl-texdir] option and takes precedence over the `prefix` input and related environment variables.|
-|`tlcontrib`|Bool|<p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p>**Default:**&ensp;`false`|
-|`update-all-packages`|Bool|<p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p>**Default:**&ensp;`false`|
-|`version`|String|<p>TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.</p>**Default:**&ensp;`latest`|
+| Name                  | Type   | Description                                                                                                                                                                                     |
+| --------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cache`               | Bool   | <p>Enable caching for [`TEXDIR`][texdir].</p> **Default:**&ensp;`true`                                                                                                                          |
+| `package-file`        | String | File containing the names of TeX packages to be installed, delimited by whitespaces. Everything after a `#` is treated as a comment. The [`DEPENDS.txt`][depends-txt] format is also supported. |
+| `packages`            | String | Whitespace-delimited TeX package names to be installed. Schemes and collections are also acceptable.                                                                                            |
+| `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p> **Default:**&ensp;<code> [$RUNNER_TEMP][actions-env]/setup-texlive</code>          |
+| `texdir`              | String | TeX Live system directory. This has the same effect as the installer's [`-texdir`][install-tl-texdir] option and takes precedence over the `prefix` input and related environment variables.    |
+| `tlcontrib`           | Bool   | <p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                          |
+| `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                     |
+| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.</p> **Default:**&ensp;`latest`                                                                             |
 
 ## Outputs
 
-|Name|Type|Description|
-|---|---|---|
-|`cache-hit`|Bool|A boolean value to indicate if a cache was hit.|
-|`version`|String|The installed TeX Live version.|
+| Name        | Type   | Description                                     |
+| ----------- | ------ | ----------------------------------------------- |
+| `cache-hit` | Bool   | A boolean value to indicate if a cache was hit. |
+| `version`   | String | The installed TeX Live version.                 |
 
 ## Environment Variables
 
@@ -132,9 +130,8 @@ The action reads the following environment variable:
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
 <tr><td><code>SETUP_TEXLIVE_&#x200B;FORCE_UPDATE_CACHE</code></td><td>String</td><td><div>
 
-Setting this to anything other than `0`,
-the action will use [a unique cache key each time][update-cache]
-to keep the cache up-to-date.
+Setting this to anything other than `0`, the action will use
+[a unique cache key each time][update-cache] to keep the cache up-to-date.
 
 > **Warning**:&ensp;Enabling this will consume more [cache space][cache-limits].
 
@@ -144,23 +141,23 @@ to keep the cache up-to-date.
 In addition,
 the following [official environment variables][install-tl-env] are supported:
 
-|Name|Default|
-|---|---|
-|`TEXLIVE_DOWNLOADER`||
-|`TL_DOWNLOAD_PROGRAM`||
-|`TL_DOWNLOAD_ARGS`||
-|`TEXLIVE_INSTALL_ENV_NOCHECK`|`1`|
-|`TEXLIVE_INSTALL_NO_CONTEXT_CACHE`||
-|`TEXLIVE_INSTALL_NO_DISKCHECK`||
-|`TEXLIVE_INSTALL_NO_RESUME`||
-|`TEXLIVE_INSTALL_NO_WELCOME`|`1`|
-|`TEXLIVE_INSTALL_PAPER`||
-|`TEXLIVE_INSTALL_PREFIX`|<code>[$RUNNER_TEMP][actions-env]/setup-texlive</code>|
-|`TEXLIVE_INSTALL_TEXMFLOCAL`||
-|`TEXLIVE_INSTALL_TEXMFHOME`|`~/texmf`|
-|`TEXLIVE_INSTALL_TEXMFCONFIG`|`~/.local/texlive/<version>/texmf-config`|
-|`TEXLIVE_INSTALL_TEXMFVAR`|`~/.local/texlive/<version>/texmf-var`|
-|`NOPERLDOC`||
+| Name                               | Default                                                 |
+| ---------------------------------- | ------------------------------------------------------- |
+| `TEXLIVE_DOWNLOADER`               |                                                         |
+| `TL_DOWNLOAD_PROGRAM`              |                                                         |
+| `TL_DOWNLOAD_ARGS`                 |                                                         |
+| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                                     |
+| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                         |
+| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                         |
+| `TEXLIVE_INSTALL_NO_RESUME`        |                                                         |
+| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                                     |
+| `TEXLIVE_INSTALL_PAPER`            |                                                         |
+| `TEXLIVE_INSTALL_PREFIX`           | <code> [$RUNNER_TEMP][actions-env]/setup-texlive</code> |
+| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                         |
+| `TEXLIVE_INSTALL_TEXMFHOME`        | `~/texmf`                                               |
+| `TEXLIVE_INSTALL_TEXMFCONFIG`      | `~/.local/texlive/<version>/texmf-config`               |
+| `TEXLIVE_INSTALL_TEXMFVAR`         | `~/.local/texlive/<version>/texmf-var`                  |
+| `NOPERLDOC`                        |                                                         |
 
 If `prefix` and `TEXLIVE_INSTALL_PREFIX` are both set, `prefix` will be used.
 

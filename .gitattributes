@@ -1,2 +1,3 @@
+.actrc linguist-language=opts
 /dist/** linguist-generated=true -diff -merge
 package-lock.json -diff

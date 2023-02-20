@@ -23,9 +23,11 @@
     "importDeclaration.sortNamedImports": "caseSensitive"
   },
   "includes": [
-    "./{src,__tests__}/**/*.ts"
+    "./{src,__tests__}/**/*.ts",
+    "**/*.md"
   ],
   "plugins": [
-    "https://plugins.dprint.dev/typescript-0.73.1.wasm"
+    "https://plugins.dprint.dev/typescript-0.83.0.wasm",
+    "https://plugins.dprint.dev/markdown-0.15.2.wasm"
   ]
 }
