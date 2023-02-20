@@ -32,6 +32,10 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
@@ -103,11 +107,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issue = exports.issueCommand = void 0;
-    var os4 = __importStar(__require("os"));
+    var os3 = __importStar(__require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os4.EOL);
+      process.stdout.write(cmd.toString() + os3.EOL);
     }
     exports.issueCommand = issueCommand;
     function issue(name, message = "") {
@@ -524,7 +528,7 @@ var require_file_command = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
     var fs3 = __importStar(__require("fs"));
-    var os4 = __importStar(__require("os"));
+    var os3 = __importStar(__require("os"));
     var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
@@ -535,7 +539,7 @@ var require_file_command = __commonJS({
       if (!fs3.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os4.EOL}`, {
+      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os3.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -549,7 +553,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter3)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter3}"`);
       }
-      return `${key}<<${delimiter3}${os4.EOL}${convertedValue}${os4.EOL}${delimiter3}`;
+      return `${key}<<${delimiter3}${os3.EOL}${convertedValue}${os3.EOL}${delimiter3}`;
     }
     exports.prepareKeyValueMessage = prepareKeyValueMessage;
   }
@@ -1083,6 +1087,10 @@ var require_lib = __commonJS({
           return this.request(verb, requestUrl, stream, additionalHeaders);
         });
       }
+      /**
+       * Gets a typed object from an endpoint
+       * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
+       */
       getJson(requestUrl, additionalHeaders = {}) {
         return __awaiter(this, void 0, void 0, function* () {
           additionalHeaders[Headers2.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers2.Accept, MediaTypes.ApplicationJson);
@@ -1117,6 +1125,11 @@ var require_lib = __commonJS({
           return this._processResponse(res, this.requestOptions);
         });
       }
+      /**
+       * Makes a raw http request.
+       * All other methods such as get, post, patch, and request ultimately call this.
+       * Prefer get, del, post and patch
+       */
       request(verb, requestUrl, data, headers) {
         return __awaiter(this, void 0, void 0, function* () {
           if (this._disposed) {
@@ -1177,12 +1190,20 @@ var require_lib = __commonJS({
           return response;
         });
       }
+      /**
+       * Needs to be called if keepAlive is set to true in request options.
+       */
       dispose() {
         if (this._agent) {
           this._agent.destroy();
         }
         this._disposed = true;
       }
+      /**
+       * Raw request.
+       * @param info
+       * @param data
+       */
       requestRaw(info2, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
@@ -1199,6 +1220,12 @@ var require_lib = __commonJS({
           });
         });
       }
+      /**
+       * Raw request with callback.
+       * @param info
+       * @param data
+       * @param onResult
+       */
       requestRawWithCallback(info2, data, onResult) {
         if (typeof data === "string") {
           if (!info2.options.headers) {
@@ -1242,6 +1269,11 @@ var require_lib = __commonJS({
           req.end();
         }
       }
+      /**
+       * Gets an http agent. This function is useful when you need an http agent that handles
+       * routing through a proxy server - depending upon the url and proxy environment variables.
+       * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
+       */
       getAgent(serverUrl) {
         const parsedUrl = new URL(serverUrl);
         return this._getAgent(parsedUrl);
@@ -1444,6 +1476,7 @@ var require_auth = __commonJS({
         }
         options.headers["Authorization"] = `Basic ${Buffer.from(`${this.username}:${this.password}`).toString("base64")}`;
       }
+      // This handler cannot handle 401
       canHandleAuthentication() {
         return false;
       }
@@ -1458,12 +1491,15 @@ var require_auth = __commonJS({
       constructor(token) {
         this.token = token;
       }
+      // currently implements pre-authorization
+      // TODO: support preAuth = false where it hooks on 401
       prepareRequest(options) {
         if (!options.headers) {
           throw Error("The request has no headers");
         }
         options.headers["Authorization"] = `Bearer ${this.token}`;
       }
+      // This handler cannot handle 401
       canHandleAuthentication() {
         return false;
       }
@@ -1478,12 +1514,15 @@ var require_auth = __commonJS({
       constructor(token) {
         this.token = token;
       }
+      // currently implements pre-authorization
+      // TODO: support preAuth = false where it hooks on 401
       prepareRequest(options) {
         if (!options.headers) {
           throw Error("The request has no headers");
         }
         options.headers["Authorization"] = `Basic ${Buffer.from(`PAT:${this.token}`).toString("base64")}`;
       }
+      // This handler cannot handle 401
       canHandleAuthentication() {
         return false;
       }
@@ -1556,7 +1595,7 @@ var require_oidc_utils = __commonJS({
         return runtimeUrl;
       }
       static getCall(id_token_url) {
-        var _a2;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
           const httpclient = OidcClient.createHttpClient();
           const res = yield httpclient.getJson(id_token_url).catch((error2) => {
@@ -1566,7 +1605,7 @@ var require_oidc_utils = __commonJS({
  
         Error Message: ${error2.result.message}`);
           });
-          const id_token = (_a2 = res.result) === null || _a2 === void 0 ? void 0 : _a2.value;
+          const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
           if (!id_token) {
             throw new Error("Response json body do not have ID Token field");
           }
@@ -1630,13 +1669,19 @@ var require_summary = __commonJS({
     exports.summary = exports.markdownSummary = exports.SUMMARY_DOCS_URL = exports.SUMMARY_ENV_VAR = void 0;
     var os_1 = __require("os");
     var fs_1 = __require("fs");
-    var { access: access2, appendFile, writeFile: writeFile2 } = fs_1.promises;
+    var { access: access2, appendFile, writeFile: writeFile3 } = fs_1.promises;
     exports.SUMMARY_ENV_VAR = "GITHUB_STEP_SUMMARY";
     exports.SUMMARY_DOCS_URL = "https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary";
     var Summary = class {
       constructor() {
         this._buffer = "";
       }
+      /**
+       * Finds the summary file path from the environment, rejects if env var is not found or file does not exist
+       * Also checks r/w permissions.
+       *
+       * @returns step summary file path
+       */
       filePath() {
         return __awaiter(this, void 0, void 0, function* () {
           if (this._filePath) {
@@ -1648,13 +1693,22 @@ var require_summary = __commonJS({
           }
           try {
             yield access2(pathFromEnv, fs_1.constants.R_OK | fs_1.constants.W_OK);
-          } catch (_a2) {
+          } catch (_a) {
             throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`);
           }
           this._filePath = pathFromEnv;
           return this._filePath;
         });
       }
+      /**
+       * Wraps content in an HTML tag, adding any HTML attributes
+       *
+       * @param {string} tag HTML tag to wrap
+       * @param {string | null} content content within the tag
+       * @param {[attribute: string]: string} attrs key-value list of HTML attributes to add
+       *
+       * @returns {string} content wrapped in HTML element
+       */
       wrap(tag, content, attrs = {}) {
         const htmlAttrs = Object.entries(attrs).map(([key, value]) => ` ${key}="${value}"`).join("");
         if (!content) {
@@ -1662,48 +1716,111 @@ var require_summary = __commonJS({
         }
         return `<${tag}${htmlAttrs}>${content}</${tag}>`;
       }
+      /**
+       * Writes text in the buffer to the summary buffer file and empties buffer. Will append by default.
+       *
+       * @param {SummaryWriteOptions} [options] (optional) options for write operation
+       *
+       * @returns {Promise<Summary>} summary instance
+       */
       write(options) {
         return __awaiter(this, void 0, void 0, function* () {
           const overwrite = !!(options === null || options === void 0 ? void 0 : options.overwrite);
           const filePath = yield this.filePath();
-          const writeFunc = overwrite ? writeFile2 : appendFile;
+          const writeFunc = overwrite ? writeFile3 : appendFile;
           yield writeFunc(filePath, this._buffer, { encoding: "utf8" });
           return this.emptyBuffer();
         });
       }
+      /**
+       * Clears the summary buffer and wipes the summary file
+       *
+       * @returns {Summary} summary instance
+       */
       clear() {
         return __awaiter(this, void 0, void 0, function* () {
           return this.emptyBuffer().write({ overwrite: true });
         });
       }
+      /**
+       * Returns the current summary buffer as a string
+       *
+       * @returns {string} string of summary buffer
+       */
       stringify() {
         return this._buffer;
       }
+      /**
+       * If the summary buffer is empty
+       *
+       * @returns {boolen} true if the buffer is empty
+       */
       isEmptyBuffer() {
         return this._buffer.length === 0;
       }
+      /**
+       * Resets the summary buffer without writing to summary file
+       *
+       * @returns {Summary} summary instance
+       */
       emptyBuffer() {
         this._buffer = "";
         return this;
       }
+      /**
+       * Adds raw text to the summary buffer
+       *
+       * @param {string} text content to add
+       * @param {boolean} [addEOL=false] (optional) append an EOL to the raw text (default: false)
+       *
+       * @returns {Summary} summary instance
+       */
       addRaw(text, addEOL = false) {
         this._buffer += text;
         return addEOL ? this.addEOL() : this;
       }
+      /**
+       * Adds the operating system-specific end-of-line marker to the buffer
+       *
+       * @returns {Summary} summary instance
+       */
       addEOL() {
         return this.addRaw(os_1.EOL);
       }
+      /**
+       * Adds an HTML codeblock to the summary buffer
+       *
+       * @param {string} code content to render within fenced code block
+       * @param {string} lang (optional) language to syntax highlight code
+       *
+       * @returns {Summary} summary instance
+       */
       addCodeBlock(code, lang) {
         const attrs = Object.assign({}, lang && { lang });
         const element = this.wrap("pre", this.wrap("code", code), attrs);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML list to the summary buffer
+       *
+       * @param {string[]} items list of items to render
+       * @param {boolean} [ordered=false] (optional) if the rendered list should be ordered or not (default: false)
+       *
+       * @returns {Summary} summary instance
+       */
       addList(items, ordered = false) {
         const tag = ordered ? "ol" : "ul";
         const listItems = items.map((item) => this.wrap("li", item)).join("");
         const element = this.wrap(tag, listItems);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML table to the summary buffer
+       *
+       * @param {SummaryTableCell[]} rows table rows
+       *
+       * @returns {Summary} summary instance
+       */
       addTable(rows) {
         const tableBody = rows.map((row) => {
           const cells = row.map((cell) => {
@@ -1720,35 +1837,86 @@ var require_summary = __commonJS({
         const element = this.wrap("table", tableBody);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds a collapsable HTML details element to the summary buffer
+       *
+       * @param {string} label text for the closed state
+       * @param {string} content collapsable content
+       *
+       * @returns {Summary} summary instance
+       */
       addDetails(label, content) {
         const element = this.wrap("details", this.wrap("summary", label) + content);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML image tag to the summary buffer
+       *
+       * @param {string} src path to the image you to embed
+       * @param {string} alt text description of the image
+       * @param {SummaryImageOptions} options (optional) addition image attributes
+       *
+       * @returns {Summary} summary instance
+       */
       addImage(src, alt, options) {
         const { width, height } = options || {};
         const attrs = Object.assign(Object.assign({}, width && { width }), height && { height });
         const element = this.wrap("img", null, Object.assign({ src, alt }, attrs));
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML section heading element
+       *
+       * @param {string} text heading text
+       * @param {number | string} [level=1] (optional) the heading level, default: 1
+       *
+       * @returns {Summary} summary instance
+       */
       addHeading(text, level) {
         const tag = `h${level}`;
         const allowedTag = ["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag) ? tag : "h1";
         const element = this.wrap(allowedTag, text);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML thematic break (<hr>) to the summary buffer
+       *
+       * @returns {Summary} summary instance
+       */
       addSeparator() {
         const element = this.wrap("hr", null);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML line break (<br>) to the summary buffer
+       *
+       * @returns {Summary} summary instance
+       */
       addBreak() {
         const element = this.wrap("br", null);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML blockquote to the summary buffer
+       *
+       * @param {string} text quote text
+       * @param {string} cite (optional) citation url
+       *
+       * @returns {Summary} summary instance
+       */
       addQuote(text, cite) {
         const attrs = Object.assign({}, cite && { cite });
         const element = this.wrap("blockquote", text, attrs);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML anchor tag to the summary buffer
+       *
+       * @param {string} text link text/content
+       * @param {string} href hyperlink
+       *
+       * @returns {Summary} summary instance
+       */
       addLink(text, href) {
         const element = this.wrap("a", text, { href });
         return this.addRaw(element).addEOL();
@@ -1794,7 +1962,7 @@ var require_path_utils = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.toPlatformPath = exports.toWin32Path = exports.toPosixPath = void 0;
-    var path6 = __importStar(__require("path"));
+    var path8 = __importStar(__require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -1804,7 +1972,7 @@ var require_path_utils = __commonJS({
     }
     exports.toWin32Path = toWin32Path;
     function toPlatformPath(pth) {
-      return pth.replace(/[/\\]/g, path6.sep);
+      return pth.replace(/[/\\]/g, path8.sep);
     }
     exports.toPlatformPath = toPlatformPath;
   }
@@ -1874,8 +2042,8 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os4 = __importStar(__require("os"));
-    var path6 = __importStar(__require("path"));
+    var os3 = __importStar(__require("os"));
+    var path8 = __importStar(__require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -1903,7 +2071,7 @@ var require_core = __commonJS({
       } else {
         command_1.issueCommand("add-path", {}, inputPath);
       }
-      process.env["PATH"] = `${inputPath}${path6.delimiter}${process.env["PATH"]}`;
+      process.env["PATH"] = `${inputPath}${path8.delimiter}${process.env["PATH"]}`;
     }
     exports.addPath = addPath2;
     function getInput3(name, options) {
@@ -1942,7 +2110,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       if (filePath) {
         return file_command_1.issueFileCommand("OUTPUT", file_command_1.prepareKeyValueMessage(name, value));
       }
-      process.stdout.write(os4.EOL);
+      process.stdout.write(os3.EOL);
       command_1.issueCommand("set-output", { name }, utils_1.toCommandValue(value));
     }
     exports.setOutput = setOutput2;
@@ -1976,7 +2144,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.notice = notice;
     function info2(message) {
-      process.stdout.write(message + os4.EOL);
+      process.stdout.write(message + os3.EOL);
     }
     exports.info = info2;
     function startGroup(name) {
@@ -2039,124 +2207,6 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
   }
 });
 
-// node_modules/tslib/tslib.es6.js
-function __rest(s, e) {
-  var t = {};
-  for (var p in s)
-    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-      t[p] = s[p];
-  if (s != null && typeof Object.getOwnPropertySymbols === "function")
-    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-        t[p[i]] = s[p[i]];
-    }
-  return t;
-}
-function __decorate(decorators, target, key, desc) {
-  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-    r = Reflect.decorate(decorators, target, key, desc);
-  else
-    for (var i = decorators.length - 1; i >= 0; i--)
-      if (d = decorators[i])
-        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-  return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-function __metadata(metadataKey, metadataValue) {
-  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
-    return Reflect.metadata(metadataKey, metadataValue);
-}
-function __values2(o) {
-  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-  if (m)
-    return m.call(o);
-  if (o && typeof o.length === "number")
-    return {
-      next: function() {
-        if (o && i >= o.length)
-          o = void 0;
-        return { value: o && o[i++], done: !o };
-      }
-    };
-  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-}
-function __await(v) {
-  return this instanceof __await ? (this.v = v, this) : new __await(v);
-}
-function __asyncGenerator(thisArg, _arguments, generator) {
-  if (!Symbol.asyncIterator)
-    throw new TypeError("Symbol.asyncIterator is not defined.");
-  var g = generator.apply(thisArg, _arguments || []), i, q = [];
-  return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-    return this;
-  }, i;
-  function verb(n) {
-    if (g[n])
-      i[n] = function(v) {
-        return new Promise(function(a, b) {
-          q.push([n, v, a, b]) > 1 || resume(n, v);
-        });
-      };
-  }
-  function resume(n, v) {
-    try {
-      step(g[n](v));
-    } catch (e) {
-      settle(q[0][3], e);
-    }
-  }
-  function step(r) {
-    r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
-  }
-  function fulfill(value) {
-    resume("next", value);
-  }
-  function reject(value) {
-    resume("throw", value);
-  }
-  function settle(f, v) {
-    if (f(v), q.shift(), q.length)
-      resume(q[0][0], q[0][1]);
-  }
-}
-function __asyncDelegator(o) {
-  var i, p;
-  return i = {}, verb("next"), verb("throw", function(e) {
-    throw e;
-  }), verb("return"), i[Symbol.iterator] = function() {
-    return this;
-  }, i;
-  function verb(n, f) {
-    i[n] = o[n] ? function(v) {
-      return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v;
-    } : f;
-  }
-}
-function __asyncValues(o) {
-  if (!Symbol.asyncIterator)
-    throw new TypeError("Symbol.asyncIterator is not defined.");
-  var m = o[Symbol.asyncIterator], i;
-  return m ? m.call(o) : (o = typeof __values2 === "function" ? __values2(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-    return this;
-  }, i);
-  function verb(n) {
-    i[n] = o[n] && function(v) {
-      return new Promise(function(resolve, reject) {
-        v = o[n](v), settle(resolve, reject, v.done, v.value);
-      });
-    };
-  }
-  function settle(resolve, reject, d, v) {
-    Promise.resolve(v).then(function(v2) {
-      resolve({ value: v2, done: d });
-    }, reject);
-  }
-}
-var init_tslib_es6 = __esm({
-  "node_modules/tslib/tslib.es6.js"() {
-  }
-});
-
 // node_modules/@actions/io/lib/io-util.js
 var require_io_util = __commonJS({
   "node_modules/@actions/io/lib/io-util.js"(exports) {
@@ -2216,12 +2266,12 @@ var require_io_util = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var _a2;
+    var _a;
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rename = exports.readlink = exports.readdir = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
     var fs3 = __importStar(__require("fs"));
-    var path6 = __importStar(__require("path"));
-    _a2 = fs3.promises, exports.chmod = _a2.chmod, exports.copyFile = _a2.copyFile, exports.lstat = _a2.lstat, exports.mkdir = _a2.mkdir, exports.readdir = _a2.readdir, exports.readlink = _a2.readlink, exports.rename = _a2.rename, exports.rmdir = _a2.rmdir, exports.stat = _a2.stat, exports.symlink = _a2.symlink, exports.unlink = _a2.unlink;
+    var path8 = __importStar(__require("path"));
+    _a = fs3.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
     exports.IS_WINDOWS = process.platform === "win32";
     function exists(fsPath) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -2267,7 +2317,7 @@ var require_io_util = __commonJS({
         }
         if (stats && stats.isFile()) {
           if (exports.IS_WINDOWS) {
-            const upperExt = path6.extname(filePath).toUpperCase();
+            const upperExt = path8.extname(filePath).toUpperCase();
             if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) {
               return filePath;
             }
@@ -2291,11 +2341,11 @@ var require_io_util = __commonJS({
           if (stats && stats.isFile()) {
             if (exports.IS_WINDOWS) {
               try {
-                const directory = path6.dirname(filePath);
-                const upperName = path6.basename(filePath).toUpperCase();
+                const directory = path8.dirname(filePath);
+                const upperName = path8.basename(filePath).toUpperCase();
                 for (const actualName of yield exports.readdir(directory)) {
                   if (upperName === actualName.toUpperCase()) {
-                    filePath = path6.join(directory, actualName);
+                    filePath = path8.join(directory, actualName);
                     break;
                   }
                 }
@@ -2326,8 +2376,8 @@ var require_io_util = __commonJS({
       return (stats.mode & 1) > 0 || (stats.mode & 8) > 0 && stats.gid === process.getgid() || (stats.mode & 64) > 0 && stats.uid === process.getuid();
     }
     function getCmdPath() {
-      var _a3;
-      return (_a3 = process.env["COMSPEC"]) !== null && _a3 !== void 0 ? _a3 : `cmd.exe`;
+      var _a2;
+      return (_a2 = process.env["COMSPEC"]) !== null && _a2 !== void 0 ? _a2 : `cmd.exe`;
     }
     exports.getCmdPath = getCmdPath;
   }
@@ -2396,10 +2446,10 @@ var require_io = __commonJS({
     exports.findInPath = exports.which = exports.mkdirP = exports.rmRF = exports.mv = exports.cp = void 0;
     var assert_1 = __require("assert");
     var childProcess = __importStar(__require("child_process"));
-    var path6 = __importStar(__require("path"));
+    var path8 = __importStar(__require("path"));
     var util_1 = __require("util");
     var ioUtil = __importStar(require_io_util());
-    var exec4 = util_1.promisify(childProcess.exec);
+    var exec6 = util_1.promisify(childProcess.exec);
     var execFile = util_1.promisify(childProcess.execFile);
     function cp(source, dest, options = {}) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -2408,7 +2458,7 @@ var require_io = __commonJS({
         if (destStat && destStat.isFile() && !force) {
           return;
         }
-        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path6.join(dest, path6.basename(source)) : dest;
+        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path8.join(dest, path8.basename(source)) : dest;
         if (!(yield ioUtil.exists(source))) {
           throw new Error(`no such file or directory: ${source}`);
         }
@@ -2420,7 +2470,7 @@ var require_io = __commonJS({
             yield cpDirRecursive(source, newDest, 0, force);
           }
         } else {
-          if (path6.relative(source, newDest) === "") {
+          if (path8.relative(source, newDest) === "") {
             throw new Error(`'${newDest}' and '${source}' are the same file`);
           }
           yield copyFile(source, newDest, force);
@@ -2433,7 +2483,7 @@ var require_io = __commonJS({
         if (yield ioUtil.exists(dest)) {
           let destExists = true;
           if (yield ioUtil.isDirectory(dest)) {
-            dest = path6.join(dest, path6.basename(source));
+            dest = path8.join(dest, path8.basename(source));
             destExists = yield ioUtil.exists(dest);
           }
           if (destExists) {
@@ -2444,7 +2494,7 @@ var require_io = __commonJS({
             }
           }
         }
-        yield mkdirP(path6.dirname(dest));
+        yield mkdirP(path8.dirname(dest));
         yield ioUtil.rename(source, dest);
       });
     }
@@ -2458,11 +2508,11 @@ var require_io = __commonJS({
           try {
             const cmdPath = ioUtil.getCmdPath();
             if (yield ioUtil.isDirectory(inputPath, true)) {
-              yield exec4(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
+              yield exec6(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
                 env: { inputPath }
               });
             } else {
-              yield exec4(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
+              yield exec6(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
                 env: { inputPath }
               });
             }
@@ -2532,7 +2582,7 @@ var require_io = __commonJS({
         }
         const extensions = [];
         if (ioUtil.IS_WINDOWS && process.env["PATHEXT"]) {
-          for (const extension of process.env["PATHEXT"].split(path6.delimiter)) {
+          for (const extension of process.env["PATHEXT"].split(path8.delimiter)) {
             if (extension) {
               extensions.push(extension);
             }
@@ -2545,12 +2595,12 @@ var require_io = __commonJS({
           }
           return [];
         }
-        if (tool.includes(path6.sep)) {
+        if (tool.includes(path8.sep)) {
           return [];
         }
         const directories = [];
         if (process.env.PATH) {
-          for (const p of process.env.PATH.split(path6.delimiter)) {
+          for (const p of process.env.PATH.split(path8.delimiter)) {
             if (p) {
               directories.push(p);
             }
@@ -2558,7 +2608,7 @@ var require_io = __commonJS({
         }
         const matches = [];
         for (const directory of directories) {
-          const filePath = yield ioUtil.tryGetExecutablePath(path6.join(directory, tool), extensions);
+          const filePath = yield ioUtil.tryGetExecutablePath(path8.join(directory, tool), extensions);
           if (filePath) {
             matches.push(filePath);
           }
@@ -2676,10 +2726,10 @@ var require_toolrunner = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.argStringToArray = exports.ToolRunner = void 0;
-    var os4 = __importStar(__require("os"));
+    var os3 = __importStar(__require("os"));
     var events = __importStar(__require("events"));
     var child = __importStar(__require("child_process"));
-    var path6 = __importStar(__require("path"));
+    var path8 = __importStar(__require("path"));
     var io = __importStar(require_io());
     var ioUtil = __importStar(require_io_util());
     var timers_1 = __require("timers");
@@ -2731,12 +2781,12 @@ var require_toolrunner = __commonJS({
       _processLineBuffer(data, strBuffer, onLine) {
         try {
           let s = strBuffer + data.toString();
-          let n = s.indexOf(os4.EOL);
+          let n = s.indexOf(os3.EOL);
           while (n > -1) {
             const line = s.substring(0, n);
             onLine(line);
-            s = s.substring(n + os4.EOL.length);
-            n = s.indexOf(os4.EOL);
+            s = s.substring(n + os3.EOL.length);
+            n = s.indexOf(os3.EOL);
           }
           return s;
         } catch (err) {
@@ -2882,10 +2932,19 @@ var require_toolrunner = __commonJS({
         }
         return result;
       }
+      /**
+       * Exec a tool.
+       * Output will be streamed to the live console.
+       * Returns promise with return code
+       *
+       * @param     tool     path to tool to exec
+       * @param     options  optional exec options.  See ExecOptions
+       * @returns   number
+       */
       exec() {
         return __awaiter(this, void 0, void 0, function* () {
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
-            this.toolPath = path6.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+            this.toolPath = path8.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
           this.toolPath = yield io.which(this.toolPath, true);
           return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
@@ -2896,7 +2955,7 @@ var require_toolrunner = __commonJS({
             }
             const optionsNonNull = this._cloneExecOptions(this.options);
             if (!optionsNonNull.silent && optionsNonNull.outStream) {
-              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os4.EOL);
+              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os3.EOL);
             }
             const state = new ExecState(optionsNonNull, this.toolPath);
             state.on("debug", (message) => {
@@ -3158,7 +3217,7 @@ var require_exec = __commonJS({
     exports.getExecOutput = exports.exec = void 0;
     var string_decoder_1 = __require("string_decoder");
     var tr = __importStar(require_toolrunner());
-    function exec4(commandLine, args, options) {
+    function exec6(commandLine, args, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
@@ -3170,15 +3229,15 @@ var require_exec = __commonJS({
         return runner.exec();
       });
     }
-    exports.exec = exec4;
-    function getExecOutput3(commandLine, args, options) {
-      var _a2, _b;
+    exports.exec = exec6;
+    function getExecOutput6(commandLine, args, options) {
+      var _a, _b;
       return __awaiter(this, void 0, void 0, function* () {
         let stdout = "";
         let stderr = "";
         const stdoutDecoder = new string_decoder_1.StringDecoder("utf8");
         const stderrDecoder = new string_decoder_1.StringDecoder("utf8");
-        const originalStdoutListener = (_a2 = options === null || options === void 0 ? void 0 : options.listeners) === null || _a2 === void 0 ? void 0 : _a2.stdout;
+        const originalStdoutListener = (_a = options === null || options === void 0 ? void 0 : options.listeners) === null || _a === void 0 ? void 0 : _a.stdout;
         const originalStdErrListener = (_b = options === null || options === void 0 ? void 0 : options.listeners) === null || _b === void 0 ? void 0 : _b.stderr;
         const stdErrListener = (data) => {
           stderr += stderrDecoder.write(data);
@@ -3193,7 +3252,7 @@ var require_exec = __commonJS({
           }
         };
         const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec4(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        const exitCode = yield exec6(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
         stdout += stdoutDecoder.end();
         stderr += stderrDecoder.end();
         return {
@@ -3203,13 +3262,13 @@ var require_exec = __commonJS({
         };
       });
     }
-    exports.getExecOutput = getExecOutput3;
+    exports.getExecOutput = getExecOutput6;
   }
 });
 
-// node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-glob-options-helper.js
+// node_modules/@actions/glob/lib/internal-glob-options-helper.js
 var require_internal_glob_options_helper = __commonJS({
-  "node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-glob-options-helper.js"(exports) {
+  "node_modules/@actions/glob/lib/internal-glob-options-helper.js"(exports) {
     "use strict";
     var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
@@ -3268,9 +3327,9 @@ var require_internal_glob_options_helper = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-path-helper.js
+// node_modules/@actions/glob/lib/internal-path-helper.js
 var require_internal_path_helper = __commonJS({
-  "node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-path-helper.js"(exports) {
+  "node_modules/@actions/glob/lib/internal-path-helper.js"(exports) {
     "use strict";
     var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
@@ -3305,7 +3364,7 @@ var require_internal_path_helper = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.safeTrimTrailingSeparator = exports.normalizeSeparators = exports.hasRoot = exports.hasAbsoluteRoot = exports.ensureAbsoluteRoot = exports.dirname = void 0;
-    var path6 = __importStar(__require("path"));
+    var path8 = __importStar(__require("path"));
     var assert_1 = __importDefault(__require("assert"));
     var IS_WINDOWS = process.platform === "win32";
     function dirname(p) {
@@ -3313,7 +3372,7 @@ var require_internal_path_helper = __commonJS({
       if (IS_WINDOWS && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
         return p;
       }
-      let result = path6.dirname(p);
+      let result = path8.dirname(p);
       if (IS_WINDOWS && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
         result = safeTrimTrailingSeparator(result);
       }
@@ -3351,7 +3410,7 @@ var require_internal_path_helper = __commonJS({
       assert_1.default(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
       if (root.endsWith("/") || IS_WINDOWS && root.endsWith("\\")) {
       } else {
-        root += path6.sep;
+        root += path8.sep;
       }
       return root + itemPath;
     }
@@ -3389,10 +3448,10 @@ var require_internal_path_helper = __commonJS({
         return "";
       }
       p = normalizeSeparators(p);
-      if (!p.endsWith(path6.sep)) {
+      if (!p.endsWith(path8.sep)) {
         return p;
       }
-      if (p === path6.sep) {
+      if (p === path8.sep) {
         return p;
       }
       if (IS_WINDOWS && /^[A-Z]:\\$/i.test(p)) {
@@ -3404,9 +3463,9 @@ var require_internal_path_helper = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-match-kind.js
+// node_modules/@actions/glob/lib/internal-match-kind.js
 var require_internal_match_kind = __commonJS({
-  "node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-match-kind.js"(exports) {
+  "node_modules/@actions/glob/lib/internal-match-kind.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MatchKind = void 0;
@@ -3420,9 +3479,9 @@ var require_internal_match_kind = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-pattern-helper.js
+// node_modules/@actions/glob/lib/internal-pattern-helper.js
 var require_internal_pattern_helper = __commonJS({
-  "node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-pattern-helper.js"(exports) {
+  "node_modules/@actions/glob/lib/internal-pattern-helper.js"(exports) {
     "use strict";
     var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
@@ -3738,7 +3797,7 @@ var require_minimatch = __commonJS({
   "node_modules/minimatch/minimatch.js"(exports, module) {
     module.exports = minimatch;
     minimatch.Minimatch = Minimatch;
-    var path6 = function() {
+    var path8 = function() {
       try {
         return __require("path");
       } catch (e) {
@@ -3746,7 +3805,7 @@ var require_minimatch = __commonJS({
     }() || {
       sep: "/"
     };
-    minimatch.sep = path6.sep;
+    minimatch.sep = path8.sep;
     var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {};
     var expand = require_brace_expansion();
     var plTypes = {
@@ -3837,8 +3896,8 @@ var require_minimatch = __commonJS({
       if (!options)
         options = {};
       pattern = pattern.trim();
-      if (!options.allowWindowsEscape && path6.sep !== "/") {
-        pattern = pattern.split(path6.sep).join("/");
+      if (!options.allowWindowsEscape && path8.sep !== "/") {
+        pattern = pattern.split(path8.sep).join("/");
       }
       this.options = options;
       this.set = [];
@@ -3929,9 +3988,9 @@ var require_minimatch = __commonJS({
         throw new TypeError("pattern is too long");
       }
     };
-    Minimatch.prototype.parse = parse3;
+    Minimatch.prototype.parse = parse4;
     var SUBPARSE = {};
-    function parse3(pattern, isSub) {
+    function parse4(pattern, isSub) {
       assertValidPattern(pattern);
       var options = this.options;
       if (pattern === "**") {
@@ -4215,8 +4274,8 @@ var require_minimatch = __commonJS({
       if (f === "/" && partial)
         return true;
       var options = this.options;
-      if (path6.sep !== "/") {
-        f = f.split(path6.sep).join("/");
+      if (path8.sep !== "/") {
+        f = f.split(path8.sep).join("/");
       }
       f = f.split(slashSplit);
       this.debug(this.pattern, "split", f);
@@ -4323,9 +4382,9 @@ var require_minimatch = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-path.js
+// node_modules/@actions/glob/lib/internal-path.js
 var require_internal_path = __commonJS({
-  "node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-path.js"(exports) {
+  "node_modules/@actions/glob/lib/internal-path.js"(exports) {
     "use strict";
     var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
@@ -4360,23 +4419,27 @@ var require_internal_path = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Path = void 0;
-    var path6 = __importStar(__require("path"));
+    var path8 = __importStar(__require("path"));
     var pathHelper = __importStar(require_internal_path_helper());
     var assert_1 = __importDefault(__require("assert"));
     var IS_WINDOWS = process.platform === "win32";
-    var Path = class {
+    var Path2 = class {
+      /**
+       * Constructs a Path
+       * @param itemPath Path or array of segments
+       */
       constructor(itemPath) {
         this.segments = [];
         if (typeof itemPath === "string") {
           assert_1.default(itemPath, `Parameter 'itemPath' must not be empty`);
           itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
           if (!pathHelper.hasRoot(itemPath)) {
-            this.segments = itemPath.split(path6.sep);
+            this.segments = itemPath.split(path8.sep);
           } else {
             let remaining = itemPath;
             let dir = pathHelper.dirname(remaining);
             while (dir !== remaining) {
-              const basename = path6.basename(remaining);
+              const basename = path8.basename(remaining);
               this.segments.unshift(basename);
               remaining = dir;
               dir = pathHelper.dirname(remaining);
@@ -4394,33 +4457,36 @@ var require_internal_path = __commonJS({
               assert_1.default(segment === pathHelper.dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
               this.segments.push(segment);
             } else {
-              assert_1.default(!segment.includes(path6.sep), `Parameter 'itemPath' contains unexpected path separators`);
+              assert_1.default(!segment.includes(path8.sep), `Parameter 'itemPath' contains unexpected path separators`);
               this.segments.push(segment);
             }
           }
         }
       }
+      /**
+       * Converts the path to it's string representation
+       */
       toString() {
         let result = this.segments[0];
-        let skipSlash = result.endsWith(path6.sep) || IS_WINDOWS && /^[A-Z]:$/i.test(result);
+        let skipSlash = result.endsWith(path8.sep) || IS_WINDOWS && /^[A-Z]:$/i.test(result);
         for (let i = 1; i < this.segments.length; i++) {
           if (skipSlash) {
             skipSlash = false;
           } else {
-            result += path6.sep;
+            result += path8.sep;
           }
           result += this.segments[i];
         }
         return result;
       }
     };
-    exports.Path = Path;
+    exports.Path = Path2;
   }
 });
 
-// node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-pattern.js
+// node_modules/@actions/glob/lib/internal-pattern.js
 var require_internal_pattern = __commonJS({
-  "node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-pattern.js"(exports) {
+  "node_modules/@actions/glob/lib/internal-pattern.js"(exports) {
     "use strict";
     var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
@@ -4455,8 +4521,8 @@ var require_internal_pattern = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Pattern = void 0;
-    var os4 = __importStar(__require("os"));
-    var path6 = __importStar(__require("path"));
+    var os3 = __importStar(__require("os"));
+    var path8 = __importStar(__require("path"));
     var pathHelper = __importStar(require_internal_path_helper());
     var assert_1 = __importDefault(__require("assert"));
     var minimatch_1 = require_minimatch();
@@ -4485,7 +4551,7 @@ var require_internal_pattern = __commonJS({
         }
         pattern = Pattern.fixupPattern(pattern, homedir2);
         this.segments = new internal_path_1.Path(pattern).segments;
-        this.trailingSeparator = pathHelper.normalizeSeparators(pattern).endsWith(path6.sep);
+        this.trailingSeparator = pathHelper.normalizeSeparators(pattern).endsWith(path8.sep);
         pattern = pathHelper.safeTrimTrailingSeparator(pattern);
         let foundGlob = false;
         const searchSegments = this.segments.map((x) => Pattern.getLiteral(x)).filter((x) => !foundGlob && !(foundGlob = x === ""));
@@ -4503,11 +4569,14 @@ var require_internal_pattern = __commonJS({
         pattern = IS_WINDOWS ? pattern.replace(/\\/g, "/") : pattern;
         this.minimatch = new minimatch_1.Minimatch(pattern, minimatchOptions);
       }
+      /**
+       * Matches the pattern against the specified path
+       */
       match(itemPath) {
         if (this.segments[this.segments.length - 1] === "**") {
           itemPath = pathHelper.normalizeSeparators(itemPath);
-          if (!itemPath.endsWith(path6.sep) && this.isImplicitPattern === false) {
-            itemPath = `${itemPath}${path6.sep}`;
+          if (!itemPath.endsWith(path8.sep) && this.isImplicitPattern === false) {
+            itemPath = `${itemPath}${path8.sep}`;
           }
         } else {
           itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
@@ -4517,6 +4586,9 @@ var require_internal_pattern = __commonJS({
         }
         return internal_match_kind_1.MatchKind.None;
       }
+      /**
+       * Indicates whether the pattern may match descendants of the specified path
+       */
       partialMatch(itemPath) {
         itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
         if (pathHelper.dirname(itemPath) === itemPath) {
@@ -4524,19 +4596,25 @@ var require_internal_pattern = __commonJS({
         }
         return this.minimatch.matchOne(itemPath.split(IS_WINDOWS ? /\\+/ : /\/+/), this.minimatch.set[0], true);
       }
+      /**
+       * Escapes glob patterns within a path
+       */
       static globEscape(s) {
         return (IS_WINDOWS ? s : s.replace(/\\/g, "\\\\")).replace(/(\[)(?=[^/]+\])/g, "[[]").replace(/\?/g, "[?]").replace(/\*/g, "[*]");
       }
+      /**
+       * Normalizes slashes and ensures absolute root
+       */
       static fixupPattern(pattern, homedir2) {
         assert_1.default(pattern, "pattern cannot be empty");
         const literalSegments = new internal_path_1.Path(pattern).segments.map((x) => Pattern.getLiteral(x));
         assert_1.default(literalSegments.every((x, i) => (x !== "." || i === 0) && x !== ".."), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
         assert_1.default(!pathHelper.hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
         pattern = pathHelper.normalizeSeparators(pattern);
-        if (pattern === "." || pattern.startsWith(`.${path6.sep}`)) {
+        if (pattern === "." || pattern.startsWith(`.${path8.sep}`)) {
           pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
-        } else if (pattern === "~" || pattern.startsWith(`~${path6.sep}`)) {
-          homedir2 = homedir2 || os4.homedir();
+        } else if (pattern === "~" || pattern.startsWith(`~${path8.sep}`)) {
+          homedir2 = homedir2 || os3.homedir();
           assert_1.default(homedir2, "Unable to determine HOME directory");
           assert_1.default(pathHelper.hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
           pattern = Pattern.globEscape(homedir2) + pattern.substr(1);
@@ -4557,6 +4635,10 @@ var require_internal_pattern = __commonJS({
         }
         return pathHelper.normalizeSeparators(pattern);
       }
+      /**
+       * Attempts to unescape a pattern segment to create a literal path segment.
+       * Otherwise returns empty string.
+       */
       static getLiteral(segment) {
         let literal = "";
         for (let i = 0; i < segment.length; i++) {
@@ -4596,6 +4678,10 @@ var require_internal_pattern = __commonJS({
         }
         return literal;
       }
+      /**
+       * Escapes regexp special characters
+       * https://javascript.info/regexp-escaping
+       */
       static regExpEscape(s) {
         return s.replace(/[[\\^$.|?*+()]/g, "\\$&");
       }
@@ -4604,15 +4690,15 @@ var require_internal_pattern = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-search-state.js
+// node_modules/@actions/glob/lib/internal-search-state.js
 var require_internal_search_state = __commonJS({
-  "node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-search-state.js"(exports) {
+  "node_modules/@actions/glob/lib/internal-search-state.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.SearchState = void 0;
     var SearchState = class {
-      constructor(path6, level) {
-        this.path = path6;
+      constructor(path8, level) {
+        this.path = path8;
         this.level = level;
       }
     };
@@ -4620,9 +4706,9 @@ var require_internal_search_state = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-globber.js
+// node_modules/@actions/glob/lib/internal-globber.js
 var require_internal_globber = __commonJS({
-  "node_modules/@actions/cache/node_modules/@actions/glob/lib/internal-globber.js"(exports) {
+  "node_modules/@actions/glob/lib/internal-globber.js"(exports) {
     "use strict";
     var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
@@ -4743,7 +4829,7 @@ var require_internal_globber = __commonJS({
     var core3 = __importStar(require_core());
     var fs3 = __importStar(__require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper());
-    var path6 = __importStar(__require("path"));
+    var path8 = __importStar(__require("path"));
     var patternHelper = __importStar(require_internal_pattern_helper());
     var internal_match_kind_1 = require_internal_match_kind();
     var internal_pattern_1 = require_internal_pattern();
@@ -4759,7 +4845,7 @@ var require_internal_globber = __commonJS({
         return this.searchPaths.slice();
       }
       glob() {
-        var e_1, _a2;
+        var e_1, _a;
         return __awaiter(this, void 0, void 0, function* () {
           const result = [];
           try {
@@ -4771,8 +4857,8 @@ var require_internal_globber = __commonJS({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield _a2.call(_b);
+              if (_c && !_c.done && (_a = _b.return))
+                yield _a.call(_b);
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -4814,6 +4900,7 @@ var require_internal_globber = __commonJS({
             }
             const stats = yield __await2(
               DefaultGlobber.stat(item, options, traversalChain)
+              // Broken symlink, or symlink cycle detected, or no longer exists
             );
             if (!stats) {
               continue;
@@ -4825,7 +4912,7 @@ var require_internal_globber = __commonJS({
                 continue;
               }
               const childLevel = item.level + 1;
-              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path6.join(item.path, x), childLevel));
+              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path8.join(item.path, x), childLevel));
               stack.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
               yield yield __await2(item.path);
@@ -4833,6 +4920,9 @@ var require_internal_globber = __commonJS({
           }
         });
       }
+      /**
+       * Constructs a DefaultGlobber
+       */
       static create(patterns, options) {
         return __awaiter(this, void 0, void 0, function* () {
           const result = new DefaultGlobber(options);
@@ -4890,9 +4980,9 @@ var require_internal_globber = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/node_modules/@actions/glob/lib/glob.js
+// node_modules/@actions/glob/lib/glob.js
 var require_glob = __commonJS({
-  "node_modules/@actions/cache/node_modules/@actions/glob/lib/glob.js"(exports) {
+  "node_modules/@actions/glob/lib/glob.js"(exports) {
     "use strict";
     var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
@@ -4950,7 +5040,8 @@ var require_semver = __commonJS({
     }
     exports.SEMVER_SPEC_VERSION = "2.0.0";
     var MAX_LENGTH = 256;
-    var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
+    var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || /* istanbul ignore next */
+    9007199254740991;
     var MAX_SAFE_COMPONENT_LENGTH = 16;
     var re2 = exports.re = [];
     var src = exports.src = [];
@@ -5048,8 +5139,8 @@ var require_semver = __commonJS({
       }
     }
     var i;
-    exports.parse = parse3;
-    function parse3(version3, options) {
+    exports.parse = parse4;
+    function parse4(version3, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
@@ -5077,12 +5168,12 @@ var require_semver = __commonJS({
     }
     exports.valid = valid;
     function valid(version3, options) {
-      var v = parse3(version3, options);
+      var v = parse4(version3, options);
       return v ? v.version : null;
     }
     exports.clean = clean;
     function clean(version3, options) {
-      var s = parse3(version3.trim().replace(/^[=v]+/, ""), options);
+      var s = parse4(version3.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     }
     exports.SemVer = SemVer;
@@ -5314,8 +5405,8 @@ var require_semver = __commonJS({
       if (eq(version1, version22)) {
         return null;
       } else {
-        var v12 = parse3(version1);
-        var v2 = parse3(version22);
+        var v12 = parse4(version1);
+        var v2 = parse4(version22);
         var prefix2 = "";
         if (v12.prerelease.length || v2.prerelease.length) {
           prefix2 = "pre";
@@ -5354,8 +5445,8 @@ var require_semver = __commonJS({
     function minor(a, loose) {
       return new SemVer(a, loose).minor;
     }
-    exports.patch = patch;
-    function patch(a, loose) {
+    exports.patch = patch2;
+    function patch2(a, loose) {
       return new SemVer(a, loose).patch;
     }
     exports.compare = compare;
@@ -6019,7 +6110,7 @@ var require_semver = __commonJS({
     }
     exports.prerelease = prerelease;
     function prerelease(version3, options) {
-      var parsed = parse3(version3, options);
+      var parsed = parse4(version3, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     }
     exports.intersects = intersects;
@@ -6056,7 +6147,7 @@ var require_semver = __commonJS({
       if (match === null) {
         return null;
       }
-      return parse3(match[2] + "." + (match[3] || "0") + "." + (match[4] || "0"), options);
+      return parse4(match[2] + "." + (match[3] || "0") + "." + (match[4] || "0"), options);
     }
   }
 });
@@ -6140,7 +6231,7 @@ var require_v1 = __commonJS({
           clockseq = _clockseq2 = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
         }
       }
-      var msecs = options.msecs !== void 0 ? options.msecs : new Date().getTime();
+      var msecs = options.msecs !== void 0 ? options.msecs : (/* @__PURE__ */ new Date()).getTime();
       var nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs2 + 1;
       var dt = msecs - _lastMSecs2 + (nsecs - _lastNSecs2) / 1e4;
       if (dt < 0 && options.clockseq === void 0) {
@@ -6231,9 +6322,18 @@ var require_constants = __commonJS({
       CompressionMethod2["ZstdWithoutLong"] = "zstd-without-long";
       CompressionMethod2["Zstd"] = "zstd";
     })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
+    var ArchiveToolType;
+    (function(ArchiveToolType2) {
+      ArchiveToolType2["GNU"] = "gnu";
+      ArchiveToolType2["BSD"] = "bsd";
+    })(ArchiveToolType = exports.ArchiveToolType || (exports.ArchiveToolType = {}));
     exports.DefaultRetryAttempts = 2;
     exports.DefaultRetryDelay = 5e3;
     exports.SocketTimeout = 5e3;
+    exports.GnuTarPathOnWindows = `${process.env["PROGRAMFILES"]}\\Git\\usr\\bin\\tar.exe`;
+    exports.SystemTarPathOnWindows = `${process.env["SYSTEMDRIVE"]}\\Windows\\System32\\tar.exe`;
+    exports.TarFilename = "cache.tar";
+    exports.ManifestFilename = "manifest.txt";
   }
 });
 
@@ -6302,11 +6402,11 @@ var require_cacheUtils = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var core3 = __importStar(require_core());
-    var exec4 = __importStar(require_exec());
+    var exec6 = __importStar(require_exec());
     var glob = __importStar(require_glob());
     var io = __importStar(require_io());
     var fs3 = __importStar(__require("fs"));
-    var path6 = __importStar(__require("path"));
+    var path8 = __importStar(__require("path"));
     var semver = __importStar(require_semver());
     var util3 = __importStar(__require("util"));
     var uuid_1 = require_uuid();
@@ -6326,9 +6426,9 @@ var require_cacheUtils = __commonJS({
               baseLocation = "/home";
             }
           }
-          tempDirectory = path6.join(baseLocation, "actions", "temp");
+          tempDirectory = path8.join(baseLocation, "actions", "temp");
         }
-        const dest = path6.join(tempDirectory, uuid_1.v4());
+        const dest = path8.join(tempDirectory, uuid_1.v4());
         yield io.mkdirP(dest);
         return dest;
       });
@@ -6339,7 +6439,7 @@ var require_cacheUtils = __commonJS({
     }
     exports.getArchiveFileSizeInBytes = getArchiveFileSizeInBytes;
     function resolvePaths(patterns) {
-      var e_1, _a2;
+      var e_1, _a;
       var _b;
       return __awaiter(this, void 0, void 0, function* () {
         const paths = [];
@@ -6350,7 +6450,7 @@ var require_cacheUtils = __commonJS({
         try {
           for (var _c = __asyncValues2(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done; ) {
             const file = _d.value;
-            const relativeFile = path6.relative(workspace, file).replace(new RegExp(`\\${path6.sep}`, "g"), "/");
+            const relativeFile = path8.relative(workspace, file).replace(new RegExp(`\\${path8.sep}`, "g"), "/");
             core3.debug(`Matched: ${relativeFile}`);
             if (relativeFile === "") {
               paths.push(".");
@@ -6362,8 +6462,8 @@ var require_cacheUtils = __commonJS({
           e_1 = { error: e_1_1 };
         } finally {
           try {
-            if (_d && !_d.done && (_a2 = _c.return))
-              yield _a2.call(_c);
+            if (_d && !_d.done && (_a = _c.return))
+              yield _a.call(_c);
           } finally {
             if (e_1)
               throw e_1.error;
@@ -6384,7 +6484,7 @@ var require_cacheUtils = __commonJS({
         core3.debug(`Checking ${app} --version`);
         let versionOutput = "";
         try {
-          yield exec4.exec(`${app} --version`, [], {
+          yield exec6.exec(`${app} --version`, [], {
             ignoreReturnCode: true,
             silent: true,
             listeners: {
@@ -6402,9 +6502,6 @@ var require_cacheUtils = __commonJS({
     }
     function getCompressionMethod() {
       return __awaiter(this, void 0, void 0, function* () {
-        if (process.platform === "win32" && !(yield isGnuTarInstalled())) {
-          return constants_1.CompressionMethod.Gzip;
-        }
         const versionOutput = yield getVersion("zstd");
         const version3 = semver.clean(versionOutput);
         if (!versionOutput.toLowerCase().includes("zstd command line interface")) {
@@ -6421,13 +6518,16 @@ var require_cacheUtils = __commonJS({
       return compressionMethod === constants_1.CompressionMethod.Gzip ? constants_1.CacheFilename.Gzip : constants_1.CacheFilename.Zstd;
     }
     exports.getCacheFileName = getCacheFileName;
-    function isGnuTarInstalled() {
+    function getGnuTarPathOnWindows() {
       return __awaiter(this, void 0, void 0, function* () {
+        if (fs3.existsSync(constants_1.GnuTarPathOnWindows)) {
+          return constants_1.GnuTarPathOnWindows;
+        }
         const versionOutput = yield getVersion("tar");
-        return versionOutput.toLowerCase().includes("gnu tar");
+        return versionOutput.toLowerCase().includes("gnu tar") ? io.which("tar") : "";
       });
     }
-    exports.isGnuTarInstalled = isGnuTarInstalled;
+    exports.getGnuTarPathOnWindows = getGnuTarPathOnWindows;
     function assertDefined(name, value) {
       if (value === void 0) {
         throw Error(`Expected ${name} but value was undefiend`);
@@ -6468,27 +6568,52 @@ var init_httpHeaders = __esm({
           }
         }
       }
+      /**
+       * Set a header in this collection with the provided name and value. The name is
+       * case-insensitive.
+       * @param headerName - The name of the header to set. This value is case-insensitive.
+       * @param headerValue - The value of the header to set.
+       */
       set(headerName, headerValue) {
         this._headersMap[getHeaderKey(headerName)] = {
           name: headerName,
           value: headerValue.toString()
         };
       }
+      /**
+       * Get the header value for the provided header name, or undefined if no header exists in this
+       * collection with the provided name.
+       * @param headerName - The name of the header.
+       */
       get(headerName) {
         const header = this._headersMap[getHeaderKey(headerName)];
         return !header ? void 0 : header.value;
       }
+      /**
+       * Get whether or not this header collection contains a header entry for the provided header name.
+       */
       contains(headerName) {
         return !!this._headersMap[getHeaderKey(headerName)];
       }
+      /**
+       * Remove the header with the provided headerName. Return whether or not the header existed and
+       * was removed.
+       * @param headerName - The name of the header to remove.
+       */
       remove(headerName) {
         const result = this.contains(headerName);
         delete this._headersMap[getHeaderKey(headerName)];
         return result;
       }
+      /**
+       * Get the headers that are contained this collection as an object.
+       */
       rawHeaders() {
         return this.toJson({ preserveCase: true });
       }
+      /**
+       * Get the headers that are contained in this collection as an array.
+       */
       headersArray() {
         const headers = [];
         for (const headerKey in this._headersMap) {
@@ -6496,6 +6621,9 @@ var init_httpHeaders = __esm({
         }
         return headers;
       }
+      /**
+       * Get the header names that are contained in this collection.
+       */
       headerNames() {
         const headerNames = [];
         const headers = this.headersArray();
@@ -6504,6 +6632,9 @@ var init_httpHeaders = __esm({
         }
         return headerNames;
       }
+      /**
+       * Get the header values that are contained in this collection.
+       */
       headerValues() {
         const headerValues = [];
         const headers = this.headersArray();
@@ -6512,6 +6643,9 @@ var init_httpHeaders = __esm({
         }
         return headerValues;
       }
+      /**
+       * Get the JSON object representation of this HTTP header collection.
+       */
       toJson(options = {}) {
         const result = {};
         if (options.preserveCase) {
@@ -6527,9 +6661,15 @@ var init_httpHeaders = __esm({
         }
         return result;
       }
+      /**
+       * Get the string representation of this HTTP header collection.
+       */
       toString() {
         return JSON.stringify(this.toJson({ preserveCase: true }));
       }
+      /**
+       * Create a deep clone/copy of this HttpHeaders collection.
+       */
       clone() {
         const resultPreservingCasing = {};
         for (const headerKey in this._headersMap) {
@@ -6560,14 +6700,38 @@ var Constants;
 var init_constants = __esm({
   "node_modules/@azure/core-http/dist-esm/src/util/constants.js"() {
     Constants = {
-      coreHttpVersion: "2.2.7",
+      /**
+       * The core-http version
+       */
+      coreHttpVersion: "2.3.1",
+      /**
+       * Specifies HTTP.
+       */
       HTTP: "http:",
+      /**
+       * Specifies HTTPS.
+       */
       HTTPS: "https:",
+      /**
+       * Specifies HTTP Proxy.
+       */
       HTTP_PROXY: "HTTP_PROXY",
+      /**
+       * Specifies HTTPS Proxy.
+       */
       HTTPS_PROXY: "HTTPS_PROXY",
+      /**
+       * Specifies NO Proxy.
+       */
       NO_PROXY: "NO_PROXY",
+      /**
+       * Specifies ALL Proxy.
+       */
       ALL_PROXY: "ALL_PROXY",
       HttpConstants: {
+        /**
+         * Http Verbs
+         */
         HttpVerbs: {
           PUT: "PUT",
           GET: "GET",
@@ -6582,10 +6746,24 @@ var init_constants = __esm({
           ServiceUnavailable: 503
         }
       },
+      /**
+       * Defines constants for use with HTTP headers.
+       */
       HeaderConstants: {
+        /**
+         * The Authorization header.
+         */
         AUTHORIZATION: "authorization",
         AUTHORIZATION_SCHEME: "Bearer",
+        /**
+         * The Retry-After response-header field can be used with a 503 (Service
+         * Unavailable) or 349 (Too Many Requests) responses to indicate how long
+         * the service is expected to be unavailable to the requesting client.
+         */
         RETRY_AFTER: "Retry-After",
+        /**
+         * The UserAgent header.
+         */
         USER_AGENT: "User-Agent"
       }
     };
@@ -7061,7 +7239,8 @@ function isSpecialXmlProperty(propertyName, options) {
   return [XML_ATTRKEY, options.xmlCharKey].includes(propertyName);
 }
 function deserializeCompositeType(serializer4, mapper, responseBody, objectName, options) {
-  var _a2;
+  var _a, _b;
+  const xmlCharKey = (_a = options.xmlCharKey) !== null && _a !== void 0 ? _a : XML_CHARKEY;
   if (getPolymorphicDiscriminatorRecursively(serializer4, mapper)) {
     mapper = getPolymorphicMapper(serializer4, mapper, responseBody, "serializedName");
   }
@@ -7090,11 +7269,17 @@ function deserializeCompositeType(serializer4, mapper, responseBody, objectName,
     } else if (serializer4.isXML) {
       if (propertyMapper.xmlIsAttribute && responseBody[XML_ATTRKEY]) {
         instance[key] = serializer4.deserialize(propertyMapper, responseBody[XML_ATTRKEY][xmlName], propertyObjectName, options);
+      } else if (propertyMapper.xmlIsMsText) {
+        if (responseBody[xmlCharKey] !== void 0) {
+          instance[key] = responseBody[xmlCharKey];
+        } else if (typeof responseBody === "string") {
+          instance[key] = responseBody;
+        }
       } else {
         const propertyName = xmlElementName || xmlName || serializedName;
         if (propertyMapper.xmlIsWrapped) {
           const wrapped = responseBody[xmlName];
-          const elementList = (_a2 = wrapped === null || wrapped === void 0 ? void 0 : wrapped[xmlElementName]) !== null && _a2 !== void 0 ? _a2 : [];
+          const elementList = (_b = wrapped === null || wrapped === void 0 ? void 0 : wrapped[xmlElementName]) !== null && _b !== void 0 ? _b : [];
           instance[key] = serializer4.deserialize(propertyMapper, elementList, propertyObjectName, options);
         } else {
           const property = responseBody[propertyName];
@@ -7228,6 +7413,13 @@ var init_serializer = __esm({
         this.modelMappers = modelMappers;
         this.isXML = isXML;
       }
+      /**
+       * Validates constraints, if any. This function will throw if the provided value does not respect those constraints.
+       * @param mapper - The definition of data models.
+       * @param value - The value.
+       * @param objectName - Name of the object. Used in the error messages.
+       * @deprecated Removing the constraints validation on client side.
+       */
       validateConstraints(mapper, value, objectName) {
         const failValidation = (constraintName, constraintValue) => {
           throw new Error(`"${objectName}" with value "${value}" should satisfy the constraint "${constraintName}": ${constraintValue}.`);
@@ -7274,10 +7466,19 @@ var init_serializer = __esm({
           }
         }
       }
+      /**
+       * Serialize the given object based on its metadata defined in the mapper.
+       *
+       * @param mapper - The mapper which defines the metadata of the serializable object.
+       * @param object - A valid Javascript object to be serialized.
+       * @param objectName - Name of the serialized object.
+       * @param options - additional options to deserialization.
+       * @returns A valid serialized Javascript object.
+       */
       serialize(mapper, object, objectName, options = {}) {
-        var _a2, _b, _c;
+        var _a, _b, _c;
         const updatedOptions = {
-          rootName: (_a2 = options.rootName) !== null && _a2 !== void 0 ? _a2 : "",
+          rootName: (_a = options.rootName) !== null && _a !== void 0 ? _a : "",
           includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
           xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
         };
@@ -7328,10 +7529,19 @@ var init_serializer = __esm({
         }
         return payload;
       }
+      /**
+       * Deserialize the given object based on its metadata defined in the mapper.
+       *
+       * @param mapper - The mapper which defines the metadata of the serializable object.
+       * @param responseBody - A valid Javascript entity to be deserialized.
+       * @param objectName - Name of the deserialized object.
+       * @param options - Controls behavior of XML parser and builder.
+       * @returns A valid deserialized Javascript object.
+       */
       deserialize(mapper, responseBody, objectName, options = {}) {
-        var _a2, _b, _c;
+        var _a, _b, _c;
         const updatedOptions = {
-          rootName: (_a2 = options.rootName) !== null && _a2 !== void 0 ? _a2 : "",
+          rootName: (_a = options.rootName) !== null && _a !== void 0 ? _a : "",
           includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
           xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
         };
@@ -7432,10 +7642,10 @@ var init_webResource = __esm({
     init_serializer();
     init_utils();
     WebResource = class {
-      constructor(url2, method, body2, query, headers, streamResponseBody, withCredentials, abortSignal2, timeout, onUploadProgress, onDownloadProgress, proxySettings, keepAlive, decompressResponse, streamResponseStatusCodes) {
+      constructor(url3, method, body2, query, headers, streamResponseBody, withCredentials, abortSignal2, timeout, onUploadProgress, onDownloadProgress, proxySettings, keepAlive, decompressResponse, streamResponseStatusCodes) {
         this.streamResponseBody = streamResponseBody;
         this.streamResponseStatusCodes = streamResponseStatusCodes;
-        this.url = url2 || "";
+        this.url = url3 || "";
         this.method = method || "GET";
         this.headers = isHttpHeadersLike(headers) ? headers : new HttpHeaders(headers);
         this.body = body2;
@@ -7451,6 +7661,11 @@ var init_webResource = __esm({
         this.decompressResponse = decompressResponse;
         this.requestId = this.headers.get("x-ms-client-request-id") || generateUuid();
       }
+      /**
+       * Validates that the required properties such as method, url, headers["Content-Type"],
+       * headers["accept-language"] are defined. It will throw an error if one of the above
+       * mentioned properties are not defined.
+       */
       validateRequestProperties() {
         if (!this.method) {
           throw new Error("WebResource.method is required.");
@@ -7459,6 +7674,11 @@ var init_webResource = __esm({
           throw new Error("WebResource.url is required.");
         }
       }
+      /**
+       * Prepares the request.
+       * @param options - Options to provide for preparing the request.
+       * @returns Returns the prepared WebResource (HTTP Request) object that needs to be given to the request pipeline.
+       */
       prepare(options) {
         if (!options) {
           throw new Error("options object is required");
@@ -7494,8 +7714,8 @@ var init_webResource = __esm({
             options.baseUrl = "https://management.azure.com";
           }
           const baseUrl = options.baseUrl;
-          let url2 = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + (pathTemplate.startsWith("/") ? pathTemplate.slice(1) : pathTemplate);
-          const segments = url2.match(/({[\w-]*\s*[\w-]*})/gi);
+          let url3 = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + (pathTemplate.startsWith("/") ? pathTemplate.slice(1) : pathTemplate);
+          const segments = url3.match(/({[\w-]*\s*[\w-]*})/gi);
           if (segments && segments.length) {
             if (!pathParameters) {
               throw new Error(`pathTemplate: ${pathTemplate} has been provided. Hence, options.pathParameters must also be provided.`);
@@ -7508,21 +7728,21 @@ var init_webResource = __esm({
                 throw new Error(`pathTemplate: ${pathTemplate} contains the path parameter ${pathParamName} however, it is not present in parameters: ${stringifiedPathParameters}.The value of the path parameter can either be a "string" of the form { ${pathParamName}: "some sample value" } or it can be an "object" of the form { "${pathParamName}": { value: "some sample value", skipUrlEncoding: true } }.`);
               }
               if (typeof pathParam.valueOf() === "string") {
-                url2 = url2.replace(item, encodeURIComponent(pathParam));
+                url3 = url3.replace(item, encodeURIComponent(pathParam));
               }
               if (typeof pathParam.valueOf() === "object") {
                 if (!pathParam.value) {
                   throw new Error(`options.pathParameters[${pathParamName}] is of type "object" but it does not contain a "value" property.`);
                 }
                 if (pathParam.skipUrlEncoding) {
-                  url2 = url2.replace(item, pathParam.value);
+                  url3 = url3.replace(item, pathParam.value);
                 } else {
-                  url2 = url2.replace(item, encodeURIComponent(pathParam.value));
+                  url3 = url3.replace(item, encodeURIComponent(pathParam.value));
                 }
               }
             });
           }
-          this.url = url2;
+          this.url = url3;
         }
         if (options.queryParameters) {
           const queryParameters = options.queryParameters;
@@ -7600,6 +7820,10 @@ var init_webResource = __esm({
         this.onUploadProgress = options.onUploadProgress;
         return this;
       }
+      /**
+       * Clone this WebResource HTTP request object.
+       * @returns The clone of this WebResource HTTP request object.
+       */
       clone() {
         const result = new WebResource(this.url, this.method, this.body, this.query, this.headers && this.headers.clone(), this.streamResponseBody, this.withCredentials, this.abortSignal, this.timeout, this.onUploadProgress, this.onDownloadProgress, this.proxySettings, this.keepAlive, this.decompressResponse, this.streamResponseStatusCodes);
         if (this.formData) {
@@ -7634,24 +7858,24 @@ __export(punycode_es6_exports, {
 function error(type3) {
   throw new RangeError(errors[type3]);
 }
-function map(array, fn) {
+function map(array, callback) {
   const result = [];
   let length = array.length;
   while (length--) {
-    result[length] = fn(array[length]);
+    result[length] = callback(array[length]);
   }
   return result;
 }
-function mapDomain(string, fn) {
-  const parts = string.split("@");
+function mapDomain(domain, callback) {
+  const parts = domain.split("@");
   let result = "";
   if (parts.length > 1) {
     result = parts[0] + "@";
-    string = parts[1];
+    domain = parts[1];
   }
-  string = string.replace(regexSeparators, ".");
-  const labels = string.split(".");
-  const encoded = map(labels, fn).join(".");
+  domain = domain.replace(regexSeparators, ".");
+  const labels = domain.split(".");
+  const encoded = map(labels, callback).join(".");
   return result + encoded;
 }
 function ucs2decode(string) {
@@ -7688,7 +7912,7 @@ var init_punycode_es6 = __esm({
     initialN = 128;
     delimiter = "-";
     regexPunycode = /^xn--/;
-    regexNonASCII = /[^\0-\x7E]/;
+    regexNonASCII = /[^\0-\x7F]/;
     regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g;
     errors = {
       "overflow": "Overflow: input needs wider integers to process",
@@ -7698,15 +7922,15 @@ var init_punycode_es6 = __esm({
     baseMinusTMin = base - tMin;
     floor = Math.floor;
     stringFromCharCode = String.fromCharCode;
-    ucs2encode = (array) => String.fromCodePoint(...array);
+    ucs2encode = (codePoints) => String.fromCodePoint(...codePoints);
     basicToDigit = function(codePoint) {
-      if (codePoint - 48 < 10) {
-        return codePoint - 22;
+      if (codePoint >= 48 && codePoint < 58) {
+        return 26 + (codePoint - 48);
       }
-      if (codePoint - 65 < 26) {
+      if (codePoint >= 65 && codePoint < 91) {
         return codePoint - 65;
       }
-      if (codePoint - 97 < 26) {
+      if (codePoint >= 97 && codePoint < 123) {
         return codePoint - 97;
       }
       return base;
@@ -7740,13 +7964,16 @@ var init_punycode_es6 = __esm({
         output.push(input.charCodeAt(j));
       }
       for (let index = basic > 0 ? basic + 1 : 0; index < inputLength; ) {
-        let oldi = i;
+        const oldi = i;
         for (let w = 1, k = base; ; k += base) {
           if (index >= inputLength) {
             error("invalid-input");
           }
           const digit = basicToDigit(input.charCodeAt(index++));
-          if (digit >= base || digit > floor((maxInt - i) / w)) {
+          if (digit >= base) {
+            error("invalid-input");
+          }
+          if (digit > floor((maxInt - i) / w)) {
             error("overflow");
           }
           i += digit * w;
@@ -7774,7 +8001,7 @@ var init_punycode_es6 = __esm({
     encode = function(input) {
       const output = [];
       input = ucs2decode(input);
-      let inputLength = input.length;
+      const inputLength = input.length;
       let n = initialN;
       let delta = 0;
       let bias = initialBias;
@@ -7783,7 +8010,7 @@ var init_punycode_es6 = __esm({
           output.push(stringFromCharCode(currentValue));
         }
       }
-      let basicLength = output.length;
+      const basicLength = output.length;
       let handledCPCount = basicLength;
       if (basicLength) {
         output.push(delimiter);
@@ -7805,7 +8032,7 @@ var init_punycode_es6 = __esm({
           if (currentValue < n && ++delta > maxInt) {
             error("overflow");
           }
-          if (currentValue == n) {
+          if (currentValue === n) {
             let q = delta;
             for (let k = base; ; k += base) {
               const t = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
@@ -7820,7 +8047,7 @@ var init_punycode_es6 = __esm({
               q = floor(qMinusT / baseMinusT);
             }
             output.push(stringFromCharCode(digitToBasic(q, 0)));
-            bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
+            bias = adapt(delta, handledCPCountPlusOne, handledCPCount === basicLength);
             delta = 0;
             ++handledCPCount;
           }
@@ -7841,7 +8068,19 @@ var init_punycode_es6 = __esm({
       });
     };
     punycode = {
+      /**
+       * A string representing the current Punycode.js version number.
+       * @memberOf punycode
+       * @type String
+       */
       "version": "2.1.0",
+      /**
+       * An object of methods to convert from JavaScript's internal character
+       * representation (UCS-2) to Unicode code points, and back.
+       * @see <https://mathiasbynens.be/notes/javascript-encoding>
+       * @memberOf punycode
+       * @type Object
+       */
       "ucs2": {
         "decode": ucs2decode,
         "encode": ucs2encode
@@ -7955,15 +8194,22 @@ var require_url_parse = __commonJS({
     }
     var rules = [
       ["#", "hash"],
+      // Extract from the back.
       ["?", "query"],
-      function sanitize(address, url2) {
-        return isSpecial(url2.protocol) ? address.replace(/\\/g, "/") : address;
+      // Extract from the back.
+      function sanitize(address, url3) {
+        return isSpecial(url3.protocol) ? address.replace(/\\/g, "/") : address;
       },
       ["/", "pathname"],
+      // Extract from the back.
       ["@", "auth", 1],
+      // Extract from the front.
       [NaN, "host", void 0, 1, 1],
+      // Set left over value.
       [/:(\d*)$/, "port", void 0, 1],
+      // RegExp the back.
       [NaN, "hostname", void 0, 1, 1]
+      // Set left over.
     ];
     var ignore = { hash: 1, query: 1 };
     function lolcation(loc) {
@@ -8049,25 +8295,25 @@ var require_url_parse = __commonJS({
     function resolve(relative, base2) {
       if (relative === "")
         return base2;
-      var path6 = (base2 || "/").split("/").slice(0, -1).concat(relative.split("/")), i = path6.length, last = path6[i - 1], unshift = false, up = 0;
+      var path8 = (base2 || "/").split("/").slice(0, -1).concat(relative.split("/")), i = path8.length, last = path8[i - 1], unshift = false, up = 0;
       while (i--) {
-        if (path6[i] === ".") {
-          path6.splice(i, 1);
-        } else if (path6[i] === "..") {
-          path6.splice(i, 1);
+        if (path8[i] === ".") {
+          path8.splice(i, 1);
+        } else if (path8[i] === "..") {
+          path8.splice(i, 1);
           up++;
         } else if (up) {
           if (i === 0)
             unshift = true;
-          path6.splice(i, 1);
+          path8.splice(i, 1);
           up--;
         }
       }
       if (unshift)
-        path6.unshift("");
+        path8.unshift("");
       if (last === "." || last === "..")
-        path6.push("");
-      return path6.join("/");
+        path8.push("");
+      return path8.join("/");
     }
     function Url2(address, location, parser) {
       address = trimLeft(address);
@@ -8075,7 +8321,7 @@ var require_url_parse = __commonJS({
       if (!(this instanceof Url2)) {
         return new Url2(address, location, parser);
       }
-      var relative, extracted, parse3, instruction, index, key, instructions = rules.slice(), type3 = typeof location, url2 = this, i = 0;
+      var relative, extracted, parse4, instruction, index, key, instructions = rules.slice(), type3 = typeof location, url3 = this, i = 0;
       if ("object" !== type3 && "string" !== type3) {
         parser = location;
         location = null;
@@ -8085,169 +8331,169 @@ var require_url_parse = __commonJS({
       location = lolcation(location);
       extracted = extractProtocol(address || "", location);
       relative = !extracted.protocol && !extracted.slashes;
-      url2.slashes = extracted.slashes || relative && location.slashes;
-      url2.protocol = extracted.protocol || location.protocol || "";
+      url3.slashes = extracted.slashes || relative && location.slashes;
+      url3.protocol = extracted.protocol || location.protocol || "";
       address = extracted.rest;
-      if (extracted.protocol === "file:" && (extracted.slashesCount !== 2 || windowsDriveLetter.test(address)) || !extracted.slashes && (extracted.protocol || extracted.slashesCount < 2 || !isSpecial(url2.protocol))) {
+      if (extracted.protocol === "file:" && (extracted.slashesCount !== 2 || windowsDriveLetter.test(address)) || !extracted.slashes && (extracted.protocol || extracted.slashesCount < 2 || !isSpecial(url3.protocol))) {
         instructions[3] = [/(.*)/, "pathname"];
       }
       for (; i < instructions.length; i++) {
         instruction = instructions[i];
         if (typeof instruction === "function") {
-          address = instruction(address, url2);
+          address = instruction(address, url3);
           continue;
         }
-        parse3 = instruction[0];
+        parse4 = instruction[0];
         key = instruction[1];
-        if (parse3 !== parse3) {
-          url2[key] = address;
-        } else if ("string" === typeof parse3) {
-          index = parse3 === "@" ? address.lastIndexOf(parse3) : address.indexOf(parse3);
+        if (parse4 !== parse4) {
+          url3[key] = address;
+        } else if ("string" === typeof parse4) {
+          index = parse4 === "@" ? address.lastIndexOf(parse4) : address.indexOf(parse4);
           if (~index) {
             if ("number" === typeof instruction[2]) {
-              url2[key] = address.slice(0, index);
+              url3[key] = address.slice(0, index);
               address = address.slice(index + instruction[2]);
             } else {
-              url2[key] = address.slice(index);
+              url3[key] = address.slice(index);
               address = address.slice(0, index);
             }
           }
-        } else if (index = parse3.exec(address)) {
-          url2[key] = index[1];
+        } else if (index = parse4.exec(address)) {
+          url3[key] = index[1];
           address = address.slice(0, index.index);
         }
-        url2[key] = url2[key] || (relative && instruction[3] ? location[key] || "" : "");
+        url3[key] = url3[key] || (relative && instruction[3] ? location[key] || "" : "");
         if (instruction[4])
-          url2[key] = url2[key].toLowerCase();
+          url3[key] = url3[key].toLowerCase();
       }
       if (parser)
-        url2.query = parser(url2.query);
-      if (relative && location.slashes && url2.pathname.charAt(0) !== "/" && (url2.pathname !== "" || location.pathname !== "")) {
-        url2.pathname = resolve(url2.pathname, location.pathname);
+        url3.query = parser(url3.query);
+      if (relative && location.slashes && url3.pathname.charAt(0) !== "/" && (url3.pathname !== "" || location.pathname !== "")) {
+        url3.pathname = resolve(url3.pathname, location.pathname);
       }
-      if (url2.pathname.charAt(0) !== "/" && isSpecial(url2.protocol)) {
-        url2.pathname = "/" + url2.pathname;
+      if (url3.pathname.charAt(0) !== "/" && isSpecial(url3.protocol)) {
+        url3.pathname = "/" + url3.pathname;
       }
-      if (!required(url2.port, url2.protocol)) {
-        url2.host = url2.hostname;
-        url2.port = "";
+      if (!required(url3.port, url3.protocol)) {
+        url3.host = url3.hostname;
+        url3.port = "";
       }
-      url2.username = url2.password = "";
-      if (url2.auth) {
-        index = url2.auth.indexOf(":");
+      url3.username = url3.password = "";
+      if (url3.auth) {
+        index = url3.auth.indexOf(":");
         if (~index) {
-          url2.username = url2.auth.slice(0, index);
-          url2.username = encodeURIComponent(decodeURIComponent(url2.username));
-          url2.password = url2.auth.slice(index + 1);
-          url2.password = encodeURIComponent(decodeURIComponent(url2.password));
+          url3.username = url3.auth.slice(0, index);
+          url3.username = encodeURIComponent(decodeURIComponent(url3.username));
+          url3.password = url3.auth.slice(index + 1);
+          url3.password = encodeURIComponent(decodeURIComponent(url3.password));
         } else {
-          url2.username = encodeURIComponent(decodeURIComponent(url2.auth));
+          url3.username = encodeURIComponent(decodeURIComponent(url3.auth));
         }
-        url2.auth = url2.password ? url2.username + ":" + url2.password : url2.username;
+        url3.auth = url3.password ? url3.username + ":" + url3.password : url3.username;
       }
-      url2.origin = url2.protocol !== "file:" && isSpecial(url2.protocol) && url2.host ? url2.protocol + "//" + url2.host : "null";
-      url2.href = url2.toString();
+      url3.origin = url3.protocol !== "file:" && isSpecial(url3.protocol) && url3.host ? url3.protocol + "//" + url3.host : "null";
+      url3.href = url3.toString();
     }
     function set(part, value, fn) {
-      var url2 = this;
+      var url3 = this;
       switch (part) {
         case "query":
           if ("string" === typeof value && value.length) {
             value = (fn || qs.parse)(value);
           }
-          url2[part] = value;
+          url3[part] = value;
           break;
         case "port":
-          url2[part] = value;
-          if (!required(value, url2.protocol)) {
-            url2.host = url2.hostname;
-            url2[part] = "";
+          url3[part] = value;
+          if (!required(value, url3.protocol)) {
+            url3.host = url3.hostname;
+            url3[part] = "";
           } else if (value) {
-            url2.host = url2.hostname + ":" + value;
+            url3.host = url3.hostname + ":" + value;
           }
           break;
         case "hostname":
-          url2[part] = value;
-          if (url2.port)
-            value += ":" + url2.port;
-          url2.host = value;
+          url3[part] = value;
+          if (url3.port)
+            value += ":" + url3.port;
+          url3.host = value;
           break;
         case "host":
-          url2[part] = value;
+          url3[part] = value;
           if (port.test(value)) {
             value = value.split(":");
-            url2.port = value.pop();
-            url2.hostname = value.join(":");
+            url3.port = value.pop();
+            url3.hostname = value.join(":");
           } else {
-            url2.hostname = value;
-            url2.port = "";
+            url3.hostname = value;
+            url3.port = "";
           }
           break;
         case "protocol":
-          url2.protocol = value.toLowerCase();
-          url2.slashes = !fn;
+          url3.protocol = value.toLowerCase();
+          url3.slashes = !fn;
           break;
         case "pathname":
         case "hash":
           if (value) {
             var char = part === "pathname" ? "/" : "#";
-            url2[part] = value.charAt(0) !== char ? char + value : value;
+            url3[part] = value.charAt(0) !== char ? char + value : value;
           } else {
-            url2[part] = value;
+            url3[part] = value;
           }
           break;
         case "username":
         case "password":
-          url2[part] = encodeURIComponent(value);
+          url3[part] = encodeURIComponent(value);
           break;
         case "auth":
           var index = value.indexOf(":");
           if (~index) {
-            url2.username = value.slice(0, index);
-            url2.username = encodeURIComponent(decodeURIComponent(url2.username));
-            url2.password = value.slice(index + 1);
-            url2.password = encodeURIComponent(decodeURIComponent(url2.password));
+            url3.username = value.slice(0, index);
+            url3.username = encodeURIComponent(decodeURIComponent(url3.username));
+            url3.password = value.slice(index + 1);
+            url3.password = encodeURIComponent(decodeURIComponent(url3.password));
           } else {
-            url2.username = encodeURIComponent(decodeURIComponent(value));
+            url3.username = encodeURIComponent(decodeURIComponent(value));
           }
       }
       for (var i = 0; i < rules.length; i++) {
         var ins = rules[i];
         if (ins[4])
-          url2[ins[1]] = url2[ins[1]].toLowerCase();
+          url3[ins[1]] = url3[ins[1]].toLowerCase();
       }
-      url2.auth = url2.password ? url2.username + ":" + url2.password : url2.username;
-      url2.origin = url2.protocol !== "file:" && isSpecial(url2.protocol) && url2.host ? url2.protocol + "//" + url2.host : "null";
-      url2.href = url2.toString();
-      return url2;
+      url3.auth = url3.password ? url3.username + ":" + url3.password : url3.username;
+      url3.origin = url3.protocol !== "file:" && isSpecial(url3.protocol) && url3.host ? url3.protocol + "//" + url3.host : "null";
+      url3.href = url3.toString();
+      return url3;
     }
     function toString4(stringify3) {
       if (!stringify3 || "function" !== typeof stringify3)
         stringify3 = qs.stringify;
-      var query, url2 = this, host = url2.host, protocol = url2.protocol;
+      var query, url3 = this, host = url3.host, protocol = url3.protocol;
       if (protocol && protocol.charAt(protocol.length - 1) !== ":")
         protocol += ":";
-      var result = protocol + (url2.protocol && url2.slashes || isSpecial(url2.protocol) ? "//" : "");
-      if (url2.username) {
-        result += url2.username;
-        if (url2.password)
-          result += ":" + url2.password;
+      var result = protocol + (url3.protocol && url3.slashes || isSpecial(url3.protocol) ? "//" : "");
+      if (url3.username) {
+        result += url3.username;
+        if (url3.password)
+          result += ":" + url3.password;
         result += "@";
-      } else if (url2.password) {
-        result += ":" + url2.password;
+      } else if (url3.password) {
+        result += ":" + url3.password;
         result += "@";
-      } else if (url2.protocol !== "file:" && isSpecial(url2.protocol) && !host && url2.pathname !== "/") {
+      } else if (url3.protocol !== "file:" && isSpecial(url3.protocol) && !host && url3.pathname !== "/") {
         result += "@";
       }
-      if (host[host.length - 1] === ":" || port.test(url2.hostname) && !url2.port) {
+      if (host[host.length - 1] === ":" || port.test(url3.hostname) && !url3.port) {
         host += ":";
       }
-      result += host + url2.pathname;
-      query = "object" === typeof url2.query ? stringify3(url2.query) : url2.query;
+      result += host + url3.pathname;
+      query = "object" === typeof url3.query ? stringify3(url3.query) : url3.query;
       if (query)
         result += "?" !== query.charAt(0) ? "?" + query : query;
-      if (url2.hash)
-        result += url2.hash;
+      if (url3.hash)
+        result += url3.hash;
       return result;
     }
     Url2.prototype = { set, toString: toString4 };
@@ -17846,10 +18092,10 @@ var require_store = __commonJS({
       constructor() {
         this.synchronous = false;
       }
-      findCookie(domain, path6, key, cb) {
+      findCookie(domain, path8, key, cb) {
         throw new Error("findCookie is not implemented");
       }
-      findCookies(domain, path6, allowSpecialUseDomain, cb) {
+      findCookies(domain, path8, allowSpecialUseDomain, cb) {
         throw new Error("findCookies is not implemented");
       }
       putCookie(cookie, cb) {
@@ -17858,10 +18104,10 @@ var require_store = __commonJS({
       updateCookie(oldCookie, newCookie, cb) {
         throw new Error("updateCookie is not implemented");
       }
-      removeCookie(domain, path6, key, cb) {
+      removeCookie(domain, path8, key, cb) {
         throw new Error("removeCookie is not implemented");
       }
-      removeCookies(domain, path6, cb) {
+      removeCookies(domain, path8, cb) {
         throw new Error("removeCookies is not implemented");
       }
       removeAllCookies(cb) {
@@ -18023,16 +18269,16 @@ var require_memstore = __commonJS({
         const util3 = { inspect: getUtilInspect(inspectFallback) };
         return `{ idx: ${util3.inspect(this.idx, false, 2)} }`;
       }
-      findCookie(domain, path6, key, cb) {
+      findCookie(domain, path8, key, cb) {
         if (!this.idx[domain]) {
           return cb(null, void 0);
         }
-        if (!this.idx[domain][path6]) {
+        if (!this.idx[domain][path8]) {
           return cb(null, void 0);
         }
-        return cb(null, this.idx[domain][path6][key] || null);
+        return cb(null, this.idx[domain][path8][key] || null);
       }
-      findCookies(domain, path6, allowSpecialUseDomain, cb) {
+      findCookies(domain, path8, allowSpecialUseDomain, cb) {
         const results = [];
         if (typeof allowSpecialUseDomain === "function") {
           cb = allowSpecialUseDomain;
@@ -18042,7 +18288,7 @@ var require_memstore = __commonJS({
           return cb(null, []);
         }
         let pathMatcher;
-        if (!path6) {
+        if (!path8) {
           pathMatcher = function matchAll(domainIndex) {
             for (const curPath in domainIndex) {
               const pathIndex = domainIndex[curPath];
@@ -18054,7 +18300,7 @@ var require_memstore = __commonJS({
         } else {
           pathMatcher = function matchRFC(domainIndex) {
             Object.keys(domainIndex).forEach((cookiePath) => {
-              if (pathMatch(path6, cookiePath)) {
+              if (pathMatch(path8, cookiePath)) {
                 const pathIndex = domainIndex[cookiePath];
                 for (const key in pathIndex) {
                   results.push(pathIndex[key]);
@@ -18087,16 +18333,16 @@ var require_memstore = __commonJS({
       updateCookie(oldCookie, newCookie, cb) {
         this.putCookie(newCookie, cb);
       }
-      removeCookie(domain, path6, key, cb) {
-        if (this.idx[domain] && this.idx[domain][path6] && this.idx[domain][path6][key]) {
-          delete this.idx[domain][path6][key];
+      removeCookie(domain, path8, key, cb) {
+        if (this.idx[domain] && this.idx[domain][path8] && this.idx[domain][path8][key]) {
+          delete this.idx[domain][path8][key];
         }
         cb(null);
       }
-      removeCookies(domain, path6, cb) {
+      removeCookies(domain, path8, cb) {
         if (this.idx[domain]) {
-          if (path6) {
-            delete this.idx[domain][path6];
+          if (path8) {
+            delete this.idx[domain][path8];
           } else {
             delete this.idx[domain];
           }
@@ -18113,11 +18359,11 @@ var require_memstore = __commonJS({
         const domains = Object.keys(idx);
         domains.forEach((domain) => {
           const paths = Object.keys(idx[domain]);
-          paths.forEach((path6) => {
-            const keys = Object.keys(idx[domain][path6]);
+          paths.forEach((path8) => {
+            const keys = Object.keys(idx[domain][path8]);
             keys.forEach((key) => {
               if (key !== null) {
-                cookies.push(idx[domain][path6][key]);
+                cookies.push(idx[domain][path8][key]);
               }
             });
           });
@@ -18163,8 +18409,8 @@ var require_memstore = __commonJS({
       const indent = "  ";
       let result = `${indent}'${domainName}': {
 `;
-      Object.keys(domainValue).forEach((path6, i, paths) => {
-        result += formatPath(path6, domainValue[path6]);
+      Object.keys(domainValue).forEach((path8, i, paths) => {
+        result += formatPath(path8, domainValue[path8]);
         if (i < paths.length - 1) {
           result += ",";
         }
@@ -18300,9 +18546,9 @@ var require_cookie = __commonJS({
     var SAME_SITE_CONTEXT_VAL_ERR = 'Invalid sameSiteContext option for getCookies(); expected one of "strict", "lax", or "none"';
     function checkSameSiteContext(value) {
       validators.validate(validators.isNonEmptyString(value), value);
-      const context4 = String(value).toLowerCase();
-      if (context4 === "none" || context4 === "lax" || context4 === "strict") {
-        return context4;
+      const context3 = String(value).toLowerCase();
+      if (context3 === "none" || context3 === "lax" || context3 === "strict") {
+        return context3;
       } else {
         return null;
       }
@@ -18467,18 +18713,18 @@ var require_cookie = __commonJS({
       }
       return true;
     }
-    function defaultPath(path6) {
-      if (!path6 || path6.substr(0, 1) !== "/") {
+    function defaultPath(path8) {
+      if (!path8 || path8.substr(0, 1) !== "/") {
         return "/";
       }
-      if (path6 === "/") {
-        return path6;
+      if (path8 === "/") {
+        return path8;
       }
-      const rightSlash = path6.lastIndexOf("/");
+      const rightSlash = path8.lastIndexOf("/");
       if (rightSlash === 0) {
         return "/";
       }
-      return path6.slice(0, rightSlash);
+      return path8.slice(0, rightSlash);
     }
     function trimTerminator(str) {
       if (validators.isEmptyString(str))
@@ -18521,7 +18767,7 @@ var require_cookie = __commonJS({
       c.value = cookieValue;
       return c;
     }
-    function parse3(str, options) {
+    function parse4(str, options) {
       if (!options || typeof options !== "object") {
         options = {};
       }
@@ -18687,34 +18933,35 @@ var require_cookie = __commonJS({
       cmp = a.creationIndex - b.creationIndex;
       return cmp;
     }
-    function permutePath(path6) {
-      validators.validate(validators.isString(path6));
-      if (path6 === "/") {
+    function permutePath(path8) {
+      validators.validate(validators.isString(path8));
+      if (path8 === "/") {
         return ["/"];
       }
-      const permutations = [path6];
-      while (path6.length > 1) {
-        const lindex = path6.lastIndexOf("/");
+      const permutations = [path8];
+      while (path8.length > 1) {
+        const lindex = path8.lastIndexOf("/");
         if (lindex === 0) {
           break;
         }
-        path6 = path6.substr(0, lindex);
-        permutations.push(path6);
+        path8 = path8.substr(0, lindex);
+        permutations.push(path8);
       }
       permutations.push("/");
       return permutations;
     }
-    function getCookieContext(url2) {
-      if (url2 instanceof Object) {
-        return url2;
+    function getCookieContext(url3) {
+      if (url3 instanceof Object) {
+        return url3;
       }
       try {
-        url2 = decodeURI(url2);
+        url3 = decodeURI(url3);
       } catch (err) {
       }
-      return urlParse(url2);
+      return urlParse(url3);
     }
     var cookieDefaults = {
+      // the order in which the RFC has them:
       key: "",
       value: "",
       expires: "Infinity",
@@ -18724,6 +18971,7 @@ var require_cookie = __commonJS({
       secure: false,
       httpOnly: false,
       extensions: null,
+      // set by the CookieJar:
       hostOnly: null,
       pathIsDefault: null,
       creation: null,
@@ -18737,10 +18985,11 @@ var require_cookie = __commonJS({
           this[customInspectSymbol] = this.inspect;
         }
         Object.assign(this, cookieDefaults, options);
-        this.creation = this.creation || new Date();
+        this.creation = this.creation || /* @__PURE__ */ new Date();
         Object.defineProperty(this, "creationIndex", {
           configurable: false,
           enumerable: false,
+          // important for assert.deepEqual checks
           writable: true,
           value: ++Cookie.cookiesCreated
         });
@@ -18828,6 +19077,7 @@ var require_cookie = __commonJS({
         }
         return `${this.key}=${val}`;
       }
+      // gives Set-Cookie header format
       toString() {
         let str = this.cookieString();
         if (this.expires != Infinity) {
@@ -18863,6 +19113,10 @@ var require_cookie = __commonJS({
         }
         return str;
       }
+      // TTL() partially replaces the "expiry-time" parts of S5.3 step 3 (setCookie()
+      // elsewhere)
+      // S5.3 says to give the "latest representable date" for which we use Infinity
+      // For "expired" we use 0
       TTL(now) {
         if (this.maxAge != null) {
           return this.maxAge <= 0 ? 0 : this.maxAge * 1e3;
@@ -18879,9 +19133,11 @@ var require_cookie = __commonJS({
         }
         return Infinity;
       }
+      // expiryTime() replaces the "expiry-time" parts of S5.3 step 3 (setCookie()
+      // elsewhere)
       expiryTime(now) {
         if (this.maxAge != null) {
-          const relativeTo = now || this.creation || new Date();
+          const relativeTo = now || this.creation || /* @__PURE__ */ new Date();
           const age = this.maxAge <= 0 ? -Infinity : this.maxAge * 1e3;
           return relativeTo.getTime() + age;
         }
@@ -18890,6 +19146,8 @@ var require_cookie = __commonJS({
         }
         return this.expires.getTime();
       }
+      // expiryDate() replaces the "expiry-time" parts of S5.3 step 3 (setCookie()
+      // elsewhere), except it returns a Date
       expiryDate(now) {
         const millisec = this.expiryTime(now);
         if (millisec == Infinity) {
@@ -18900,9 +19158,11 @@ var require_cookie = __commonJS({
           return new Date(millisec);
         }
       }
+      // This replaces the "persistent-flag" parts of S5.3 step 3
       isPersistent() {
         return this.maxAge != null || this.expires != Infinity;
       }
+      // Mostly S5.1.2 and S5.2.3:
       canonicalizedDomain() {
         if (this.domain == null) {
           return null;
@@ -18914,7 +19174,7 @@ var require_cookie = __commonJS({
       }
     };
     Cookie.cookiesCreated = 0;
-    Cookie.parse = parse3;
+    Cookie.parse = parse4;
     Cookie.fromJSON = fromJSON;
     Cookie.serializableProperties = Object.keys(cookieDefaults);
     Cookie.sameSiteLevel = {
@@ -18958,14 +19218,14 @@ var require_cookie = __commonJS({
         this.setCookieSync = syncWrap("setCookie");
         this.serializeSync = syncWrap("serialize");
       }
-      setCookie(cookie, url2, options, cb) {
-        validators.validate(validators.isNonEmptyString(url2), cb, options);
+      setCookie(cookie, url3, options, cb) {
+        validators.validate(validators.isNonEmptyString(url3), cb, options);
         let err;
-        if (validators.isFunction(url2)) {
-          cb = url2;
+        if (validators.isFunction(url3)) {
+          cb = url3;
           return cb(new Error("No URL was specified"));
         }
-        const context4 = getCookieContext(url2);
+        const context3 = getCookieContext(url3);
         if (validators.isFunction(options)) {
           cb = options;
           options = {};
@@ -18974,7 +19234,7 @@ var require_cookie = __commonJS({
         if (!validators.isNonEmptyString(cookie) && !validators.isObject(cookie) && cookie instanceof String && cookie.length == 0) {
           return cb(null);
         }
-        const host = canonicalDomain(context4.hostname);
+        const host = canonicalDomain(context3.hostname);
         const loose = options.loose || this.enableLooseMode;
         let sameSiteContext = null;
         if (options.sameSiteContext) {
@@ -18995,7 +19255,7 @@ var require_cookie = __commonJS({
           );
           return cb(options.ignoreError ? null : err);
         }
-        const now = options.now || new Date();
+        const now = options.now || /* @__PURE__ */ new Date();
         if (this.rejectPublicSuffixes && cookie.domain) {
           const suffix = pubsuffix.getPublicSuffix(cookie.cdomain(), {
             allowSpecialUseDomain: this.allowSpecialUseDomain,
@@ -19021,7 +19281,7 @@ var require_cookie = __commonJS({
           cookie.domain = host;
         }
         if (!cookie.path || cookie.path[0] !== "/") {
-          cookie.path = defaultPath(context4.pathname);
+          cookie.path = defaultPath(context3.pathname);
           cookie.pathIsDefault = true;
         }
         if (options.http === false && cookie.httpOnly) {
@@ -19087,19 +19347,20 @@ var require_cookie = __commonJS({
         }
         store.findCookie(cookie.domain, cookie.path, cookie.key, withCookie);
       }
-      getCookies(url2, options, cb) {
-        validators.validate(validators.isNonEmptyString(url2), cb, url2);
-        const context4 = getCookieContext(url2);
+      // RFC6365 S5.4
+      getCookies(url3, options, cb) {
+        validators.validate(validators.isNonEmptyString(url3), cb, url3);
+        const context3 = getCookieContext(url3);
         if (validators.isFunction(options)) {
           cb = options;
           options = {};
         }
         validators.validate(validators.isObject(options), cb, options);
         validators.validate(validators.isFunction(cb), cb);
-        const host = canonicalDomain(context4.hostname);
-        const path6 = context4.pathname || "/";
+        const host = canonicalDomain(context3.hostname);
+        const path8 = context3.pathname || "/";
         let secure = options.secure;
-        if (secure == null && context4.protocol && (context4.protocol == "https:" || context4.protocol == "wss:")) {
+        if (secure == null && context3.protocol && (context3.protocol == "https:" || context3.protocol == "wss:")) {
           secure = true;
         }
         let sameSiteLevel = 0;
@@ -19128,7 +19389,7 @@ var require_cookie = __commonJS({
               return false;
             }
           }
-          if (!allPaths && !pathMatch(path6, c.path)) {
+          if (!allPaths && !pathMatch(path8, c.path)) {
             return false;
           }
           if (c.secure && !secure) {
@@ -19152,7 +19413,7 @@ var require_cookie = __commonJS({
         }
         store.findCookies(
           host,
-          allPaths ? null : path6,
+          allPaths ? null : path8,
           this.allowSpecialUseDomain,
           (err, cookies) => {
             if (err) {
@@ -19162,7 +19423,7 @@ var require_cookie = __commonJS({
             if (options.sort !== false) {
               cookies = cookies.sort(cookieCompare);
             }
-            const now2 = new Date();
+            const now2 = /* @__PURE__ */ new Date();
             for (const cookie of cookies) {
               cookie.lastAccessed = now2;
             }
@@ -19211,12 +19472,18 @@ var require_cookie = __commonJS({
           type3 = null;
         }
         const serialized = {
+          // The version of tough-cookie that serialized this jar. Generally a good
+          // practice since future versions can make data import decisions based on
+          // known past behavior. When/if this matters, use `semver`.
           version: `tough-cookie@${VERSION3}`,
+          // add the store type, to make humans happy:
           storeType: type3,
+          // CookieJar configuration:
           rejectPublicSuffixes: !!this.rejectPublicSuffixes,
           enableLooseMode: !!this.enableLooseMode,
           allowSpecialUseDomain: !!this.allowSpecialUseDomain,
           prefixSecurity: getNormalizedPrefixSecurity(this.prefixSecurity),
+          // this gets filled from getAllCookies:
           cookies: []
         };
         if (!(this.store.getAllCookies && typeof this.store.getAllCookies === "function")) {
@@ -19241,6 +19508,7 @@ var require_cookie = __commonJS({
       toJSON() {
         return this.serializeSync();
       }
+      // use the class method CookieJar.deserialize instead of calling this directly
       _importCookies(serialized, cb) {
         let cookies = serialized.cookies;
         if (!cookies || !Array.isArray(cookies)) {
@@ -19406,7 +19674,7 @@ var require_cookie = __commonJS({
     exports.MemoryCookieStore = MemoryCookieStore;
     exports.parseDate = parseDate;
     exports.formatDate = formatDate;
-    exports.parse = parse3;
+    exports.parse = parse4;
     exports.fromJSON = fromJSON;
     exports.domainMatch = domainMatch;
     exports.defaultPath = defaultPath;
@@ -19448,15 +19716,31 @@ var init_AbortSignal = __esm({
         listenersMap.set(this, []);
         abortedMap.set(this, false);
       }
+      /**
+       * Status of whether aborted or not.
+       *
+       * @readonly
+       */
       get aborted() {
         if (!abortedMap.has(this)) {
           throw new TypeError("Expected `this` to be an instance of AbortSignal.");
         }
         return abortedMap.get(this);
       }
+      /**
+       * Creates a new AbortSignal instance that will never be aborted.
+       *
+       * @readonly
+       */
       static get none() {
         return new AbortSignal();
       }
+      /**
+       * Added new "abort" event listener, only support "abort" event.
+       *
+       * @param _type - Only support "abort" event
+       * @param listener - The listener to be added
+       */
       addEventListener(_type, listener) {
         if (!listenersMap.has(this)) {
           throw new TypeError("Expected `this` to be an instance of AbortSignal.");
@@ -19464,6 +19748,12 @@ var init_AbortSignal = __esm({
         const listeners = listenersMap.get(this);
         listeners.push(listener);
       }
+      /**
+       * Remove "abort" event listener, only support "abort" event.
+       *
+       * @param _type - Only support "abort" event
+       * @param listener - The listener to be removed
+       */
       removeEventListener(_type, listener) {
         if (!listenersMap.has(this)) {
           throw new TypeError("Expected `this` to be an instance of AbortSignal.");
@@ -19474,6 +19764,9 @@ var init_AbortSignal = __esm({
           listeners.splice(index, 1);
         }
       }
+      /**
+       * Dispatches a synthetic event to the AbortSignal.
+       */
       dispatchEvent(_event) {
         throw new Error("This is a stub dispatchEvent implementation that should not be used.  It only exists for type-checking purposes.");
       }
@@ -19493,6 +19786,7 @@ var init_AbortController = __esm({
       }
     };
     AbortController = class {
+      // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
       constructor(parentSignals) {
         this._signal = new AbortSignal();
         if (!parentSignals) {
@@ -19511,12 +19805,26 @@ var init_AbortController = __esm({
           }
         }
       }
+      /**
+       * The AbortSignal associated with this controller that will signal aborted
+       * when the abort method is called on this controller.
+       *
+       * @readonly
+       */
       get signal() {
         return this._signal;
       }
+      /**
+       * Signal that any operations passed this controller's associated abort signal
+       * to cancel any remaining work and throw an `AbortError`.
+       */
       abort() {
         abortSignal(this._signal);
       }
+      /**
+       * Creates a new AbortSignal instance that will abort after the provided ms.
+       * @param ms - Elapsed time in milliseconds to trigger an abort.
+       */
       static timeout(ms) {
         const signal = new AbortSignal();
         const timer = setTimeout(abortSignal, ms, signal);
@@ -19658,8 +19966,8 @@ function nextPort(tokenizer) {
   }
 }
 function nextPath(tokenizer) {
-  const path6 = readUntilCharacter(tokenizer, "?");
-  tokenizer._currentToken = URLToken.path(path6);
+  const path8 = readUntilCharacter(tokenizer, "?");
+  tokenizer._currentToken = URLToken.path(path8);
   if (!hasCurrentCharacter(tokenizer)) {
     tokenizer._currentState = "DONE";
   } else {
@@ -19682,12 +19990,23 @@ var init_url = __esm({
       constructor() {
         this._rawQuery = {};
       }
+      /**
+       * Get whether or not there any query parameters in this URLQuery.
+       */
       any() {
         return Object.keys(this._rawQuery).length > 0;
       }
+      /**
+       * Get the keys of the query string.
+       */
       keys() {
         return Object.keys(this._rawQuery);
       }
+      /**
+       * Set a query parameter with the provided name and value. If the parameterValue is undefined or
+       * empty, then this will attempt to remove an existing query parameter with the provided
+       * parameterName.
+       */
       set(parameterName, parameterValue) {
         const caseParameterValue = parameterValue;
         if (parameterName) {
@@ -19699,9 +20018,16 @@ var init_url = __esm({
           }
         }
       }
+      /**
+       * Get the value of the query parameter with the provided name. If no parameter exists with the
+       * provided parameter name, then undefined will be returned.
+       */
       get(parameterName) {
         return parameterName ? this._rawQuery[parameterName] : void 0;
       }
+      /**
+       * Get the string representation of this query. The return value will not start with a "?".
+       */
       toString() {
         let result = "";
         for (const parameterName in this._rawQuery) {
@@ -19721,6 +20047,9 @@ var init_url = __esm({
         }
         return result;
       }
+      /**
+       * Parse a URLQuery from the provided text.
+       */
       static parse(text) {
         const result = new URLQuery();
         if (text) {
@@ -19772,6 +20101,10 @@ var init_url = __esm({
       }
     };
     URLBuilder = class {
+      /**
+       * Set the scheme/protocol for this URL. If the provided scheme contains other parts of a URL
+       * (such as a host, port, path, or query), those parts will be added to this URL as well.
+       */
       setScheme(scheme) {
         if (!scheme) {
           this._scheme = void 0;
@@ -19779,9 +20112,16 @@ var init_url = __esm({
           this.set(scheme, "SCHEME");
         }
       }
+      /**
+       * Get the scheme that has been set in this URL.
+       */
       getScheme() {
         return this._scheme;
       }
+      /**
+       * Set the host for this URL. If the provided host contains other parts of a URL (such as a
+       * port, path, or query), those parts will be added to this URL as well.
+       */
       setHost(host) {
         if (!host) {
           this._host = void 0;
@@ -19789,9 +20129,16 @@ var init_url = __esm({
           this.set(host, "SCHEME_OR_HOST");
         }
       }
+      /**
+       * Get the host that has been set in this URL.
+       */
       getHost() {
         return this._host;
       }
+      /**
+       * Set the port for this URL. If the provided port contains other parts of a URL (such as a
+       * path or query), those parts will be added to this URL as well.
+       */
       setPort(port) {
         if (port === void 0 || port === null || port === "") {
           this._port = void 0;
@@ -19799,40 +20146,57 @@ var init_url = __esm({
           this.set(port.toString(), "PORT");
         }
       }
+      /**
+       * Get the port that has been set in this URL.
+       */
       getPort() {
         return this._port;
       }
-      setPath(path6) {
-        if (!path6) {
+      /**
+       * Set the path for this URL. If the provided path contains a query, then it will be added to
+       * this URL as well.
+       */
+      setPath(path8) {
+        if (!path8) {
           this._path = void 0;
         } else {
-          const schemeIndex = path6.indexOf("://");
+          const schemeIndex = path8.indexOf("://");
           if (schemeIndex !== -1) {
-            const schemeStart = path6.lastIndexOf("/", schemeIndex);
-            this.set(schemeStart === -1 ? path6 : path6.substr(schemeStart + 1), "SCHEME");
+            const schemeStart = path8.lastIndexOf("/", schemeIndex);
+            this.set(schemeStart === -1 ? path8 : path8.substr(schemeStart + 1), "SCHEME");
           } else {
-            this.set(path6, "PATH");
+            this.set(path8, "PATH");
           }
         }
       }
-      appendPath(path6) {
-        if (path6) {
+      /**
+       * Append the provided path to this URL's existing path. If the provided path contains a query,
+       * then it will be added to this URL as well.
+       */
+      appendPath(path8) {
+        if (path8) {
           let currentPath = this.getPath();
           if (currentPath) {
             if (!currentPath.endsWith("/")) {
               currentPath += "/";
             }
-            if (path6.startsWith("/")) {
-              path6 = path6.substring(1);
+            if (path8.startsWith("/")) {
+              path8 = path8.substring(1);
             }
-            path6 = currentPath + path6;
+            path8 = currentPath + path8;
           }
-          this.set(path6, "PATH");
+          this.set(path8, "PATH");
         }
       }
+      /**
+       * Get the path that has been set in this URL.
+       */
       getPath() {
         return this._path;
       }
+      /**
+       * Set the query in this URL.
+       */
       setQuery(query) {
         if (!query) {
           this._query = void 0;
@@ -19840,6 +20204,11 @@ var init_url = __esm({
           this._query = URLQuery.parse(query);
         }
       }
+      /**
+       * Set a query parameter with the provided name and value in this URL's query. If the provided
+       * query parameter value is undefined or empty, then the query parameter will be removed if it
+       * existed.
+       */
       setQueryParameter(queryParameterName, queryParameterValue) {
         if (queryParameterName) {
           if (!this._query) {
@@ -19848,12 +20217,22 @@ var init_url = __esm({
           this._query.set(queryParameterName, queryParameterValue);
         }
       }
+      /**
+       * Get the value of the query parameter with the provided query parameter name. If no query
+       * parameter exists with the provided name, then undefined will be returned.
+       */
       getQueryParameterValue(queryParameterName) {
         return this._query ? this._query.get(queryParameterName) : void 0;
       }
+      /**
+       * Get the query in this URL.
+       */
       getQuery() {
         return this._query ? this._query.toString() : void 0;
       }
+      /**
+       * Set the parts of this URL by parsing the provided text using the provided startState.
+       */
       set(text, startState) {
         const tokenizer = new URLTokenizer(text, startState);
         while (tokenizer.next()) {
@@ -19885,6 +20264,10 @@ var init_url = __esm({
           }
         }
       }
+      /**
+       * Serializes the URL as a string.
+       * @returns the URL as a string.
+       */
       toString() {
         let result = "";
         if (this._scheme) {
@@ -19907,6 +20290,10 @@ var init_url = __esm({
         }
         return result;
       }
+      /**
+       * If the provided searchValue is found in this URLBuilder, then replace it with the provided
+       * replaceValue.
+       */
       replaceAll(searchValue, replaceValue) {
         if (searchValue) {
           this.setScheme(replaceAll(this.getScheme(), searchValue, replaceValue));
@@ -19916,6 +20303,9 @@ var init_url = __esm({
           this.setQuery(replaceAll(this.getQuery(), searchValue, replaceValue));
         }
       }
+      /**
+       * Parses a given string URL into a new {@link URLBuilder}.
+       */
       static parse(text) {
         const result = new URLBuilder();
         result.set(text, "SCHEME_OR_HOST");
@@ -19950,9 +20340,16 @@ var init_url = __esm({
         this._currentState = state !== void 0 && state !== null ? state : "SCHEME_OR_HOST";
         this._currentIndex = 0;
       }
+      /**
+       * Get the current URLToken this URLTokenizer is pointing at, or undefined if the URLTokenizer
+       * hasn't started or has finished tokenizing.
+       */
       current() {
         return this._currentToken;
       }
+      /**
+       * Advance to the next URLToken and return whether or not a URLToken was found.
+       */
       next() {
         if (!hasCurrentCharacter(this)) {
           this._currentToken = void 0;
@@ -20015,8 +20412,8 @@ function createProxyAgent(requestUrl, proxySettings, headers) {
   };
   return proxyAgent;
 }
-function isUrlHttps(url2) {
-  const urlScheme = URLBuilder.parse(url2).getScheme() || "";
+function isUrlHttps(url3) {
+  const urlScheme = URLBuilder.parse(url3).getScheme() || "";
   return urlScheme.toLowerCase() === "https";
 }
 function createTunnel(isRequestHttps, isProxyHttps, tunnelOptions) {
@@ -28891,11 +29288,11 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path6) {
-      if (!path6 || typeof path6 !== "string") {
+    function lookup(path8) {
+      if (!path8 || typeof path8 !== "string") {
         return false;
       }
-      var extension2 = extname("x." + path6).toLowerCase().substr(1);
+      var extension2 = extname("x." + path8).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -29152,7 +29549,7 @@ var require_form_data = __commonJS({
   "node_modules/@azure/core-http/node_modules/form-data/lib/form_data.js"(exports, module) {
     var CombinedStream = require_combined_stream();
     var util3 = __require("util");
-    var path6 = __require("path");
+    var path8 = __require("path");
     var http4 = __require("http");
     var https3 = __require("https");
     var parseUrl = __require("url").parse;
@@ -29251,7 +29648,9 @@ var require_form_data = __commonJS({
       var contentType2 = this._getContentType(value, options);
       var contents = "";
       var headers = {
+        // add custom disposition as third element or keep it two elements if not
         "Content-Disposition": ["form-data", 'name="' + field + '"'].concat(contentDisposition || []),
+        // if no content type. allow it to be empty array
         "Content-Type": [].concat(contentType2 || [])
       };
       if (typeof options.header == "object") {
@@ -29277,11 +29676,11 @@ var require_form_data = __commonJS({
     FormData2.prototype._getContentDisposition = function(value, options) {
       var filename, contentDisposition;
       if (typeof options.filepath === "string") {
-        filename = path6.normalize(options.filepath).replace(/\\/g, "/");
+        filename = path8.normalize(options.filepath).replace(/\\/g, "/");
       } else if (options.filename || value.name || value.path) {
-        filename = path6.basename(options.filename || value.name || value.path);
+        filename = path8.basename(options.filename || value.name || value.path);
       } else if (value.readable && value.hasOwnProperty("httpVersion")) {
-        filename = path6.basename(value.client._httpMessage.path || "");
+        filename = path8.basename(value.client._httpMessage.path || "");
       }
       if (filename) {
         contentDisposition = 'filename="' + filename + '"';
@@ -29611,6 +30010,9 @@ var init_restError = __esm({
         this.response = response;
         Object.setPrototypeOf(this, RestError.prototype);
       }
+      /**
+       * Logging method for util.inspect in Node
+       */
       [custom]() {
         return `RestError: ${this.message} 
  ${errorSanitizer.sanitize(this)}`;
@@ -29814,17 +30216,11 @@ var init_log2 = __esm({
   }
 });
 
-// node:url
-import { default as default2, URL as URL3, URLSearchParams } from "node:url";
-var init_url2 = __esm({
-  "node:url"() {
-  }
-});
-
 // node_modules/node-fetch/lib/index.mjs
 import Stream from "stream";
 import http from "http";
 import Url from "url";
+import whatwgUrl from "url";
 import https from "https";
 import zlib from "zlib";
 function FetchError(message, type3, systemError) {
@@ -30033,7 +30429,8 @@ function getTotalBytes(instance) {
   } else if (Buffer.isBuffer(body2)) {
     return body2.length;
   } else if (body2 && typeof body2.getLengthSync === "function") {
-    if (body2._lengthRetrievers && body2._lengthRetrievers.length == 0 || body2.hasKnownLength && body2.hasKnownLength()) {
+    if (body2._lengthRetrievers && body2._lengthRetrievers.length == 0 || // 1.x
+    body2.hasKnownLength && body2.hasKnownLength()) {
       return body2.getLengthSync();
     }
     return null;
@@ -30128,7 +30525,7 @@ function createHeadersLenient(obj) {
 }
 function parseURL(urlStr) {
   if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.exec(urlStr)) {
-    urlStr = new URL4(urlStr).toString();
+    urlStr = new URL3(urlStr).toString();
   }
   return parse_url(urlStr);
 }
@@ -30192,13 +30589,13 @@ function AbortError2(message) {
   this.message = message;
   Error.captureStackTrace(this, this.constructor);
 }
-function fetch(url2, opts) {
+function fetch(url3, opts) {
   if (!fetch.Promise) {
     throw new Error("native promise missing, set fetch.Promise to your favorite alternative");
   }
   Body.Promise = fetch.Promise;
   return new fetch.Promise(function(resolve, reject) {
-    const request = new Request(url2, opts);
+    const request = new Request(url3, opts);
     const options = getNodeRequestOptions(request);
     const send = (options.protocol === "https:" ? https : http).request;
     const signal = request.signal;
@@ -30207,7 +30604,7 @@ function fetch(url2, opts) {
       let error2 = new AbortError2("The user aborted a request.");
       reject(error2);
       if (request.body && request.body instanceof Stream.Readable) {
-        request.body.destroy(error2);
+        destroyStream(request.body, error2);
       }
       if (!response || !response.body)
         return;
@@ -30242,8 +30639,31 @@ function fetch(url2, opts) {
     }
     req.on("error", function(err) {
       reject(new FetchError(`request to ${request.url} failed, reason: ${err.message}`, "system", err));
+      if (response && response.body) {
+        destroyStream(response.body, err);
+      }
       finalize();
     });
+    fixResponseChunkedTransferBadEnding(req, function(err) {
+      if (signal && signal.aborted) {
+        return;
+      }
+      if (response && response.body) {
+        destroyStream(response.body, err);
+      }
+    });
+    if (parseInt(process.version.substring(1)) < 14) {
+      req.on("socket", function(s) {
+        s.addListener("close", function(hadError) {
+          const hasDataListener = s.listenerCount("data") > 0;
+          if (response && hasDataListener && !hadError && !(signal && signal.aborted)) {
+            const err = new Error("Premature close");
+            err.code = "ERR_STREAM_PREMATURE_CLOSE";
+            response.body.emit("error", err);
+          }
+        });
+      });
+    }
     req.on("response", function(res) {
       clearTimeout(reqTimeout);
       const headers = createHeadersLenient(res.headers);
@@ -30294,7 +30714,7 @@ function fetch(url2, opts) {
               timeout: request.timeout,
               size: request.size
             };
-            if (!isDomainOrSubdomain(request.url, locationURL)) {
+            if (!isDomainOrSubdomain(request.url, locationURL) || !isSameProtocol(request.url, locationURL)) {
               for (const name of ["authorization", "www-authenticate", "cookie", "cookie2"]) {
                 requestOpts.headers.delete(name);
               }
@@ -30355,6 +30775,12 @@ function fetch(url2, opts) {
           response = new Response(body2, response_options);
           resolve(response);
         });
+        raw.on("end", function() {
+          if (!response) {
+            response = new Response(body2, response_options);
+            resolve(response);
+          }
+        });
         return;
       }
       if (codings == "br" && typeof zlib.createBrotliDecompress === "function") {
@@ -30369,10 +30795,36 @@ function fetch(url2, opts) {
     writeToStream(req, request);
   });
 }
-var Readable, BUFFER, TYPE, Blob2, convert, INTERNALS, PassThrough, invalidTokenRegex, invalidHeaderCharRegex, MAP, Headers, INTERNAL, HeadersIteratorPrototype, INTERNALS$1, STATUS_CODES, Response, INTERNALS$2, URL4, parse_url, format_url, streamDestructionSupported, Request, URL$1, PassThrough$1, isDomainOrSubdomain, lib_default;
+function fixResponseChunkedTransferBadEnding(request, errorCallback) {
+  let socket;
+  request.on("socket", function(s) {
+    socket = s;
+  });
+  request.on("response", function(response) {
+    const headers = response.headers;
+    if (headers["transfer-encoding"] === "chunked" && !headers["content-length"]) {
+      response.once("close", function(hadError) {
+        const hasDataListener = socket.listenerCount("data") > 0;
+        if (hasDataListener && !hadError) {
+          const err = new Error("Premature close");
+          err.code = "ERR_STREAM_PREMATURE_CLOSE";
+          errorCallback(err);
+        }
+      });
+    }
+  });
+}
+function destroyStream(stream, err) {
+  if (stream.destroy) {
+    stream.destroy(err);
+  } else {
+    stream.emit("error", err);
+    stream.end();
+  }
+}
+var Readable, BUFFER, TYPE, Blob2, convert, INTERNALS, PassThrough, invalidTokenRegex, invalidHeaderCharRegex, MAP, Headers, INTERNAL, HeadersIteratorPrototype, INTERNALS$1, STATUS_CODES, Response, INTERNALS$2, URL3, parse_url, format_url, streamDestructionSupported, Request, URL$1, PassThrough$1, isDomainOrSubdomain, isSameProtocol, lib_default;
 var init_lib = __esm({
   "node_modules/node-fetch/lib/index.mjs"() {
-    init_url2();
     Readable = Stream.Readable;
     BUFFER = Symbol("buffer");
     TYPE = Symbol("type");
@@ -30489,15 +30941,26 @@ var init_lib = __esm({
       get bodyUsed() {
         return this[INTERNALS].disturbed;
       },
+      /**
+       * Decode response as ArrayBuffer
+       *
+       * @return  Promise
+       */
       arrayBuffer() {
         return consumeBody.call(this).then(function(buf) {
           return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
         });
       },
+      /**
+       * Return raw response as Blob
+       *
+       * @return Promise
+       */
       blob() {
         let ct = this.headers && this.headers.get("content-type") || "";
         return consumeBody.call(this).then(function(buf) {
           return Object.assign(
+            // Prevent copying
             new Blob2([], {
               type: ct.toLowerCase()
             }),
@@ -30507,6 +30970,11 @@ var init_lib = __esm({
           );
         });
       },
+      /**
+       * Decode response as json
+       *
+       * @return  Promise
+       */
       json() {
         var _this2 = this;
         return consumeBody.call(this).then(function(buffer) {
@@ -30517,14 +30985,30 @@ var init_lib = __esm({
           }
         });
       },
+      /**
+       * Decode response as text
+       *
+       * @return  Promise
+       */
       text() {
         return consumeBody.call(this).then(function(buffer) {
           return buffer.toString();
         });
       },
+      /**
+       * Decode response as buffer (non-spec api)
+       *
+       * @return  Promise
+       */
       buffer() {
         return consumeBody.call(this);
       },
+      /**
+       * Decode response as text, while automatically detecting the encoding and
+       * trying to decode to UTF-8 (non-spec api)
+       *
+       * @return  Promise
+       */
       textConverted() {
         var _this3 = this;
         return consumeBody.call(this).then(function(buffer) {
@@ -30553,6 +31037,12 @@ var init_lib = __esm({
     invalidHeaderCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
     MAP = Symbol("map");
     Headers = class {
+      /**
+       * Headers class
+       *
+       * @param   Object  headers  Response headers
+       * @return  Void
+       */
       constructor() {
         let init = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : void 0;
         this[MAP] = /* @__PURE__ */ Object.create(null);
@@ -30597,6 +31087,12 @@ var init_lib = __esm({
           throw new TypeError("Provided initializer must be an object");
         }
       }
+      /**
+       * Return combined header value given name
+       *
+       * @param   String  name  Header name
+       * @return  Mixed
+       */
       get(name) {
         name = `${name}`;
         validateName(name);
@@ -30606,6 +31102,13 @@ var init_lib = __esm({
         }
         return this[MAP][key].join(", ");
       }
+      /**
+       * Iterate over all headers
+       *
+       * @param   Function  callback  Executed for each item with parameters (value, name, thisArg)
+       * @param   Boolean   thisArg   `this` context for callback function
+       * @return  Void
+       */
       forEach(callback) {
         let thisArg = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : void 0;
         let pairs = getHeaders(this);
@@ -30618,6 +31121,13 @@ var init_lib = __esm({
           i++;
         }
       }
+      /**
+       * Overwrite header values given name
+       *
+       * @param   String  name   Header name
+       * @param   String  value  Header value
+       * @return  Void
+       */
       set(name, value) {
         name = `${name}`;
         value = `${value}`;
@@ -30626,6 +31136,13 @@ var init_lib = __esm({
         const key = find(this[MAP], name);
         this[MAP][key !== void 0 ? key : name] = [value];
       }
+      /**
+       * Append a value onto existing header
+       *
+       * @param   String  name   Header name
+       * @param   String  value  Header value
+       * @return  Void
+       */
       append(name, value) {
         name = `${name}`;
         value = `${value}`;
@@ -30638,11 +31155,23 @@ var init_lib = __esm({
           this[MAP][name] = [value];
         }
       }
+      /**
+       * Check for header name existence
+       *
+       * @param   String   name  Header name
+       * @return  Boolean
+       */
       has(name) {
         name = `${name}`;
         validateName(name);
         return find(this[MAP], name) !== void 0;
       }
+      /**
+       * Delete all header values given name
+       *
+       * @param   String  name  Header name
+       * @return  Void
+       */
       delete(name) {
         name = `${name}`;
         validateName(name);
@@ -30651,15 +31180,37 @@ var init_lib = __esm({
           delete this[MAP][key];
         }
       }
+      /**
+       * Return raw headers (non-spec api)
+       *
+       * @return  Object
+       */
       raw() {
         return this[MAP];
       }
+      /**
+       * Get an iterator on keys.
+       *
+       * @return  Iterator
+       */
       keys() {
         return createHeadersIterator(this, "key");
       }
+      /**
+       * Get an iterator on values.
+       *
+       * @return  Iterator
+       */
       values() {
         return createHeadersIterator(this, "value");
       }
+      /**
+       * Get an iterator on entries.
+       *
+       * This is the default iterator of the Headers object.
+       *
+       * @return  Iterator
+       */
       [Symbol.iterator]() {
         return createHeadersIterator(this, "key+value");
       }
@@ -30740,6 +31291,9 @@ var init_lib = __esm({
       get status() {
         return this[INTERNALS$1].status;
       }
+      /**
+       * Convenience property representing if the request ended normally
+       */
       get ok() {
         return this[INTERNALS$1].status >= 200 && this[INTERNALS$1].status < 300;
       }
@@ -30752,6 +31306,11 @@ var init_lib = __esm({
       get headers() {
         return this[INTERNALS$1].headers;
       }
+      /**
+       * Clone this response
+       *
+       * @return  Response
+       */
       clone() {
         return new Response(clone(this), {
           url: this.url,
@@ -30780,7 +31339,7 @@ var init_lib = __esm({
       configurable: true
     });
     INTERNALS$2 = Symbol("Request internals");
-    URL4 = Url.URL || default2.URL;
+    URL3 = Url.URL || whatwgUrl.URL;
     parse_url = Url.parse;
     format_url = Url.format;
     streamDestructionSupported = "destroy" in Stream.Readable.prototype;
@@ -30848,6 +31407,11 @@ var init_lib = __esm({
       get signal() {
         return this[INTERNALS$2].signal;
       }
+      /**
+       * Clone this request
+       *
+       * @return  Request
+       */
       clone() {
         return new Request(this);
       }
@@ -30870,12 +31434,17 @@ var init_lib = __esm({
     AbortError2.prototype = Object.create(Error.prototype);
     AbortError2.prototype.constructor = AbortError2;
     AbortError2.prototype.name = "AbortError";
-    URL$1 = Url.URL || default2.URL;
+    URL$1 = Url.URL || whatwgUrl.URL;
     PassThrough$1 = Stream.PassThrough;
     isDomainOrSubdomain = function isDomainOrSubdomain2(destination, original) {
       const orig = new URL$1(original).hostname;
       const dest = new URL$1(destination).hostname;
       return orig === dest || orig[orig.length - dest.length - 1] === "." && orig.endsWith(dest);
+    };
+    isSameProtocol = function isSameProtocol2(destination, original) {
+      const orig = new URL$1(original).protocol;
+      const dest = new URL$1(destination).protocol;
+      return orig === dest;
     };
     fetch.isRedirect = function(code) {
       return code === 301 || code === 302 || code === 303 || code === 307 || code === 308;
@@ -30942,8 +31511,13 @@ var init_nodeFetchHttpClient = __esm({
         this.keepAliveAgents = {};
         this.cookieJar = new tough.CookieJar(void 0, { looseMode: true });
       }
+      /**
+       * Provides minimum viable error handling and the logic that executes the abstract methods.
+       * @param httpRequest - Object representing the outgoing HTTP request.
+       * @returns An object representing the incoming HTTP response.
+       */
       async sendRequest(httpRequest) {
-        var _a2;
+        var _a;
         if (!httpRequest && typeof httpRequest !== "object") {
           throw new Error("'httpRequest' (WebResourceLike) cannot be null or undefined and must be of type object.");
         }
@@ -31011,12 +31585,21 @@ var init_nodeFetchHttpClient = __esm({
           body2 = uploadReportStream;
         }
         const platformSpecificRequestInit = await this.prepareRequest(httpRequest);
-        const requestInit = Object.assign({ body: body2, headers: httpRequest.headers.rawHeaders(), method: httpRequest.method, signal: abortController.signal, redirect: "manual" }, platformSpecificRequestInit);
+        const requestInit = Object.assign({
+          body: body2,
+          headers: httpRequest.headers.rawHeaders(),
+          method: httpRequest.method,
+          // the types for RequestInit are from the browser, which expects AbortSignal to
+          // have `reason` and `throwIfAborted`, but these don't exist on our polyfill
+          // for Node.
+          signal: abortController.signal,
+          redirect: "manual"
+        }, platformSpecificRequestInit);
         let operationResponse;
         try {
           const response = await this.fetch(httpRequest.url, requestInit);
           const headers = parseHeaders(response.headers);
-          const streaming = ((_a2 = httpRequest.streamResponseStatusCodes) === null || _a2 === void 0 ? void 0 : _a2.has(response.status)) || httpRequest.streamResponseBody;
+          const streaming = ((_a = httpRequest.streamResponseStatusCodes) === null || _a === void 0 ? void 0 : _a.has(response.status)) || httpRequest.streamResponseBody;
           operationResponse = {
             headers,
             request: httpRequest,
@@ -31059,8 +31642,8 @@ var init_nodeFetchHttpClient = __esm({
               downloadStreamDone = isStreamComplete(operationResponse.readableStreamBody, abortController);
             }
             Promise.all([uploadStreamDone, downloadStreamDone]).then(() => {
-              var _a3;
-              (_a3 = httpRequest.abortSignal) === null || _a3 === void 0 ? void 0 : _a3.removeEventListener("abort", abortListener);
+              var _a2;
+              (_a2 = httpRequest.abortSignal) === null || _a2 === void 0 ? void 0 : _a2.removeEventListener("abort", abortListener);
               return;
             }).catch((e) => {
               logger.warning("Error when cleaning up abortListener on httpRequest", e);
@@ -31069,12 +31652,12 @@ var init_nodeFetchHttpClient = __esm({
         }
       }
       getOrCreateAgent(httpRequest) {
-        var _a2;
+        var _a;
         const isHttps = isUrlHttps(httpRequest.url);
         if (httpRequest.proxySettings) {
           const { host, port, username, password } = httpRequest.proxySettings;
           const key = `${host}:${port}:${username}:${password}`;
-          const proxyAgents = (_a2 = this.proxyAgentMap.get(key)) !== null && _a2 !== void 0 ? _a2 : {};
+          const proxyAgents = (_a = this.proxyAgentMap.get(key)) !== null && _a !== void 0 ? _a : {};
           let agent = getCachedAgent(isHttps, proxyAgents);
           if (agent) {
             return agent;
@@ -31106,9 +31689,16 @@ var init_nodeFetchHttpClient = __esm({
           return isHttps ? https2.globalAgent : http2.globalAgent;
         }
       }
+      /**
+       * Uses `node-fetch` to perform the request.
+       */
+      // eslint-disable-next-line @azure/azure-sdk/ts-apisurface-standardized-verbs
       async fetch(input, init) {
         return lib_default(input, init);
       }
+      /**
+       * Prepares a request based on the provided web resource.
+       */
       async prepareRequest(httpRequest) {
         const requestInit = {};
         if (this.cookieJar && !httpRequest.headers.get("Cookie")) {
@@ -31127,6 +31717,9 @@ var init_nodeFetchHttpClient = __esm({
         requestInit.compress = httpRequest.decompressResponse;
         return requestInit;
       }
+      /**
+       * Process an HTTP response. Handles persisting a cookie for subsequent requests if the response has a "Set-Cookie" header.
+       */
       async processRequest(operationResponse) {
         if (this.cookieJar) {
           const setCookieHeader = operationResponse.headers.get("Set-Cookie");
@@ -31167,6 +31760,124 @@ var init_httpPipelineLogLevel = __esm({
   }
 });
 
+// node_modules/tslib/tslib.es6.js
+function __rest(s, e) {
+  var t = {};
+  for (var p in s)
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+  if (s != null && typeof Object.getOwnPropertySymbols === "function")
+    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+        t[p[i]] = s[p[i]];
+    }
+  return t;
+}
+function __decorate(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+function __metadata(metadataKey, metadataValue) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+    return Reflect.metadata(metadataKey, metadataValue);
+}
+function __values2(o) {
+  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+  if (m)
+    return m.call(o);
+  if (o && typeof o.length === "number")
+    return {
+      next: function() {
+        if (o && i >= o.length)
+          o = void 0;
+        return { value: o && o[i++], done: !o };
+      }
+    };
+  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+function __await(v) {
+  return this instanceof __await ? (this.v = v, this) : new __await(v);
+}
+function __asyncGenerator(thisArg, _arguments, generator) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var g = generator.apply(thisArg, _arguments || []), i, q = [];
+  return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i;
+  function verb(n) {
+    if (g[n])
+      i[n] = function(v) {
+        return new Promise(function(a, b) {
+          q.push([n, v, a, b]) > 1 || resume(n, v);
+        });
+      };
+  }
+  function resume(n, v) {
+    try {
+      step(g[n](v));
+    } catch (e) {
+      settle(q[0][3], e);
+    }
+  }
+  function step(r) {
+    r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+  }
+  function fulfill(value) {
+    resume("next", value);
+  }
+  function reject(value) {
+    resume("throw", value);
+  }
+  function settle(f, v) {
+    if (f(v), q.shift(), q.length)
+      resume(q[0][0], q[0][1]);
+  }
+}
+function __asyncDelegator(o) {
+  var i, p;
+  return i = {}, verb("next"), verb("throw", function(e) {
+    throw e;
+  }), verb("return"), i[Symbol.iterator] = function() {
+    return this;
+  }, i;
+  function verb(n, f) {
+    i[n] = o[n] ? function(v) {
+      return (p = !p) ? { value: __await(o[n](v)), done: false } : f ? f(v) : v;
+    } : f;
+  }
+}
+function __asyncValues(o) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var m = o[Symbol.asyncIterator], i;
+  return m ? m.call(o) : (o = typeof __values2 === "function" ? __values2(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i);
+  function verb(n) {
+    i[n] = o[n] && function(v) {
+      return new Promise(function(resolve, reject) {
+        v = o[n](v), settle(resolve, reject, v.done, v.value);
+      });
+    };
+  }
+  function settle(resolve, reject, d, v) {
+    Promise.resolve(v).then(function(v2) {
+      resolve({ value: v2, done: d });
+    }, reject);
+  }
+}
+var init_tslib_es6 = __esm({
+  "node_modules/tslib/tslib.es6.js"() {
+  }
+});
+
 // node_modules/@azure/core-http/dist-esm/src/operationOptions.js
 function operationOptionsToRequestOptionsBase(opts) {
   const { requestOptions, tracingOptions } = opts, additionalOptions = __rest(opts, ["requestOptions", "tracingOptions"]);
@@ -31192,13 +31903,27 @@ var init_requestPolicy = __esm({
   "node_modules/@azure/core-http/dist-esm/src/policies/requestPolicy.js"() {
     init_httpPipelineLogLevel();
     BaseRequestPolicy = class {
+      /**
+       * The main method to implement that manipulates a request/response.
+       */
       constructor(_nextPolicy, _options) {
         this._nextPolicy = _nextPolicy;
         this._options = _options;
       }
+      /**
+       * Get whether or not a log with the provided log level should be logged.
+       * @param logLevel - The log level of the log that will be logged.
+       * @returns Whether or not a log with the provided log level should be logged.
+       */
       shouldLog(logLevel) {
         return this._options.shouldLog(logLevel);
       }
+      /**
+       * Attempt to log the provided message to the provided logger. If no logger was provided or if
+       * the log level does not meat the logger's threshold, then nothing will be logged.
+       * @param logLevel - The log level of this log.
+       * @param message - The message of this log.
+       */
       log(logLevel, message) {
         this._options.log(logLevel, message);
       }
@@ -31207,9 +31932,20 @@ var init_requestPolicy = __esm({
       constructor(_logger) {
         this._logger = _logger;
       }
+      /**
+       * Get whether or not a log with the provided log level should be logged.
+       * @param logLevel - The log level of the log that will be logged.
+       * @returns Whether or not a log with the provided log level should be logged.
+       */
       shouldLog(logLevel) {
         return !!this._logger && logLevel !== HttpPipelineLogLevel.OFF && logLevel <= this._logger.minimumLogLevel;
       }
+      /**
+       * Attempt to log the provided message to the provided logger. If no logger was provided or if
+       * the log level does not meet the logger's threshold, then nothing will be logged.
+       * @param logLevel - The log level of this log.
+       * @param message - The message of this log.
+       */
       log(logLevel, message) {
         if (this._logger && this.shouldLog(logLevel)) {
           this._logger.log(logLevel, message);
@@ -35482,41 +36218,77 @@ var require_sax = __commonJS({
       var S = 0;
       sax.STATE = {
         BEGIN: S++,
+        // leading byte order mark or whitespace
         BEGIN_WHITESPACE: S++,
+        // leading whitespace
         TEXT: S++,
+        // general stuff
         TEXT_ENTITY: S++,
+        // &amp and such.
         OPEN_WAKA: S++,
+        // <
         SGML_DECL: S++,
+        // <!BLARG
         SGML_DECL_QUOTED: S++,
+        // <!BLARG foo "bar
         DOCTYPE: S++,
+        // <!DOCTYPE
         DOCTYPE_QUOTED: S++,
+        // <!DOCTYPE "//blah
         DOCTYPE_DTD: S++,
+        // <!DOCTYPE "//blah" [ ...
         DOCTYPE_DTD_QUOTED: S++,
+        // <!DOCTYPE "//blah" [ "foo
         COMMENT_STARTING: S++,
+        // <!-
         COMMENT: S++,
+        // <!--
         COMMENT_ENDING: S++,
+        // <!-- blah -
         COMMENT_ENDED: S++,
+        // <!-- blah --
         CDATA: S++,
+        // <![CDATA[ something
         CDATA_ENDING: S++,
+        // ]
         CDATA_ENDING_2: S++,
+        // ]]
         PROC_INST: S++,
+        // <?hi
         PROC_INST_BODY: S++,
+        // <?hi there
         PROC_INST_ENDING: S++,
+        // <?hi "there" ?
         OPEN_TAG: S++,
+        // <strong
         OPEN_TAG_SLASH: S++,
+        // <strong /
         ATTRIB: S++,
+        // <a
         ATTRIB_NAME: S++,
+        // <a foo
         ATTRIB_NAME_SAW_WHITE: S++,
+        // <a foo _
         ATTRIB_VALUE: S++,
+        // <a foo=
         ATTRIB_VALUE_QUOTED: S++,
+        // <a foo="bar
         ATTRIB_VALUE_CLOSED: S++,
+        // <a foo="bar"
         ATTRIB_VALUE_UNQUOTED: S++,
+        // <a foo=bar
         ATTRIB_VALUE_ENTITY_Q: S++,
+        // <foo bar="&quot;"
         ATTRIB_VALUE_ENTITY_U: S++,
+        // <foo bar=&quot
         CLOSE_TAG: S++,
+        // </a
         CLOSE_TAG_SAW_WHITE: S++,
+        // </a   >
         SCRIPT: S++,
+        // <script> ...
         SCRIPT_ENDING: S++
+        // <script> ... <
       };
       sax.XML_ENTITIES = {
         "amp": "&",
@@ -36590,7 +37362,10 @@ var require_sax = __commonJS({
             var result = "";
             while (++index < length) {
               var codePoint = Number(arguments[index]);
-              if (!isFinite(codePoint) || codePoint < 0 || codePoint > 1114111 || floor2(codePoint) !== codePoint) {
+              if (!isFinite(codePoint) || // `NaN`, `+Infinity`, or `-Infinity`
+              codePoint < 0 || // not a valid Unicode code point
+              codePoint > 1114111 || // not a valid Unicode code point
+              floor2(codePoint) !== codePoint) {
                 throw RangeError("Invalid code point: " + codePoint);
               }
               if (codePoint <= 65535) {
@@ -36703,10 +37478,10 @@ var require_parser = __commonJS({
         return typeof thing === "object" && thing != null && Object.keys(thing).length === 0;
       };
       processItem = function(processors2, item, key) {
-        var i, len, process4;
+        var i, len, process2;
         for (i = 0, len = processors2.length; i < len; i++) {
-          process4 = processors2[i];
-          item = process4(item, key);
+          process2 = processors2[i];
+          item = process2(item, key);
         }
         return item;
       };
@@ -37095,16 +37870,16 @@ var require_xml2js = __commonJS({
 
 // node_modules/@azure/core-http/dist-esm/src/util/xml.js
 function stringifyXML(obj, opts = {}) {
-  var _a2;
+  var _a;
   xml2jsBuilderSettings.rootName = opts.rootName;
-  xml2jsBuilderSettings.charkey = (_a2 = opts.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+  xml2jsBuilderSettings.charkey = (_a = opts.xmlCharKey) !== null && _a !== void 0 ? _a : XML_CHARKEY;
   const builder = new xml2js.Builder(xml2jsBuilderSettings);
   return builder.buildObject(obj);
 }
 function parseXML(str, opts = {}) {
-  var _a2;
+  var _a;
   xml2jsParserSettings.explicitRoot = !!opts.includeRoot;
-  xml2jsParserSettings.charkey = (_a2 = opts.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+  xml2jsParserSettings.charkey = (_a = opts.xmlCharKey) !== null && _a !== void 0 ? _a : XML_CHARKEY;
   const xmlParser = new xml2js.Parser(xml2jsParserSettings);
   return new Promise((resolve, reject) => {
     if (!str) {
@@ -37210,9 +37985,9 @@ function shouldDeserializeResponse(parsedResponse) {
   return result;
 }
 function deserializeResponseBody(jsonContentTypes, xmlContentTypes, response, options = {}) {
-  var _a2, _b, _c;
+  var _a, _b, _c;
   const updatedOptions = {
-    rootName: (_a2 = options.rootName) !== null && _a2 !== void 0 ? _a2 : "",
+    rootName: (_a = options.rootName) !== null && _a !== void 0 ? _a : "",
     includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
     xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
   };
@@ -37258,7 +38033,7 @@ function isOperationSpecEmpty(operationSpec) {
   return expectedStatusCodes.length === 0 || expectedStatusCodes.length === 1 && expectedStatusCodes[0] === "default";
 }
 function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
-  var _a2;
+  var _a;
   const isSuccessByStatus = 200 <= parsedResponse.status && parsedResponse.status < 300;
   const isExpectedStatusCode = isOperationSpecEmpty(operationSpec) ? isSuccessByStatus : !!responseSpec;
   if (isExpectedStatusCode) {
@@ -37271,7 +38046,7 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
     }
   }
   const errorResponseSpec = responseSpec !== null && responseSpec !== void 0 ? responseSpec : operationSpec.responses.default;
-  const streaming = ((_a2 = parsedResponse.request.streamResponseStatusCodes) === null || _a2 === void 0 ? void 0 : _a2.has(parsedResponse.status)) || parsedResponse.request.streamResponseBody;
+  const streaming = ((_a = parsedResponse.request.streamResponseStatusCodes) === null || _a === void 0 ? void 0 : _a.has(parsedResponse.status)) || parsedResponse.request.streamResponseBody;
   const initialErrorMessage = streaming ? `Unexpected status code: ${parsedResponse.status}` : parsedResponse.bodyAsText;
   const error2 = new RestError(initialErrorMessage, void 0, parsedResponse.status, parsedResponse.request, parsedResponse);
   if (!errorResponseSpec) {
@@ -37308,14 +38083,14 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
   return { error: error2, shouldReturnResponse: false };
 }
 function parse2(jsonContentTypes, xmlContentTypes, operationResponse, opts) {
-  var _a2;
+  var _a;
   const errorHandler = (err) => {
     const msg = `Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`;
     const errCode = err.code || RestError.PARSE_ERROR;
     const e = new RestError(msg, errCode, operationResponse.status, operationResponse.request, operationResponse);
     return Promise.reject(e);
   };
-  const streaming = ((_a2 = operationResponse.request.streamResponseStatusCodes) === null || _a2 === void 0 ? void 0 : _a2.has(operationResponse.status)) || operationResponse.request.streamResponseBody;
+  const streaming = ((_a = operationResponse.request.streamResponseStatusCodes) === null || _a === void 0 ? void 0 : _a.has(operationResponse.status)) || operationResponse.request.streamResponseBody;
   if (!streaming && operationResponse.bodyAsText) {
     const text = operationResponse.bodyAsText;
     const contentType2 = operationResponse.headers.get("Content-Type") || "";
@@ -37346,11 +38121,11 @@ var init_deserializationPolicy = __esm({
     defaultXmlContentTypes = ["application/xml", "application/atom+xml"];
     DeserializationPolicy = class extends BaseRequestPolicy {
       constructor(nextPolicy, requestPolicyOptions, deserializationContentTypes, parsingOptions = {}) {
-        var _a2;
+        var _a;
         super(nextPolicy, requestPolicyOptions);
         this.jsonContentTypes = deserializationContentTypes && deserializationContentTypes.json || defaultJsonContentTypes;
         this.xmlContentTypes = deserializationContentTypes && deserializationContentTypes.xml || defaultXmlContentTypes;
-        this.xmlCharKey = (_a2 = parsingOptions.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+        this.xmlCharKey = (_a = parsingOptions.xmlCharKey) !== null && _a !== void 0 ? _a : XML_CHARKEY;
       }
       async sendRequest(request) {
         return this._nextPolicy.sendRequest(request).then((response) => deserializeResponseBody(this.jsonContentTypes, this.xmlContentTypes, response, {
@@ -37377,10 +38152,23 @@ var init_keepAlivePolicy = __esm({
       enable: true
     };
     KeepAlivePolicy = class extends BaseRequestPolicy {
+      /**
+       * Creates an instance of KeepAlivePolicy.
+       *
+       * @param nextPolicy -
+       * @param options -
+       * @param keepAliveOptions -
+       */
       constructor(nextPolicy, options, keepAliveOptions) {
         super(nextPolicy, options);
         this.keepAliveOptions = keepAliveOptions;
       }
+      /**
+       * Sends out request.
+       *
+       * @param request -
+       * @returns
+       */
       async sendRequest(request) {
         request.keepAlive = this.keepAliveOptions.enable;
         return this._nextPolicy.sendRequest(request);
@@ -37473,20 +38261,14 @@ var init_typeGuards = __esm({
   }
 });
 
-// node_modules/@azure/core-util/dist-esm/src/index.js
-var init_src3 = __esm({
-  "node_modules/@azure/core-util/dist-esm/src/index.js"() {
-    init_typeGuards();
-  }
-});
-
-// node_modules/@azure/core-http/dist-esm/src/util/delay.js
-function delay(delayInMs, value, options) {
+// node_modules/@azure/core-util/dist-esm/src/delay.js
+function delay(timeInMs, options) {
   return new Promise((resolve, reject) => {
     let timer = void 0;
     let onAborted = void 0;
     const rejectOnAbort = () => {
-      return reject(new AbortError((options === null || options === void 0 ? void 0 : options.abortErrorMsg) ? options === null || options === void 0 ? void 0 : options.abortErrorMsg : StandardAbortMessage));
+      var _a;
+      return reject(new AbortError((_a = options === null || options === void 0 ? void 0 : options.abortErrorMsg) !== null && _a !== void 0 ? _a : StandardAbortMessage));
     };
     const removeListeners = () => {
       if ((options === null || options === void 0 ? void 0 : options.abortSignal) && onAborted) {
@@ -37505,8 +38287,8 @@ function delay(delayInMs, value, options) {
     }
     timer = setTimeout(() => {
       removeListeners();
-      resolve(value);
-    }, delayInMs);
+      resolve();
+    }, timeInMs);
     if (options === null || options === void 0 ? void 0 : options.abortSignal) {
       options.abortSignal.addEventListener("abort", onAborted);
     }
@@ -37514,10 +38296,17 @@ function delay(delayInMs, value, options) {
 }
 var StandardAbortMessage;
 var init_delay = __esm({
-  "node_modules/@azure/core-http/dist-esm/src/util/delay.js"() {
+  "node_modules/@azure/core-util/dist-esm/src/delay.js"() {
     init_src();
-    init_src3();
+    init_typeGuards();
     StandardAbortMessage = "The operation was aborted.";
+  }
+});
+
+// node_modules/@azure/core-util/dist-esm/src/index.js
+var init_src3 = __esm({
+  "node_modules/@azure/core-util/dist-esm/src/index.js"() {
+    init_delay();
   }
 });
 
@@ -37569,12 +38358,20 @@ var init_exponentialRetryPolicy = __esm({
     init_exponentialBackoffStrategy();
     init_constants();
     init_restError();
-    init_delay();
+    init_src3();
     init_log2();
     (function(RetryMode2) {
       RetryMode2[RetryMode2["Exponential"] = 0] = "Exponential";
     })(RetryMode || (RetryMode = {}));
     ExponentialRetryPolicy = class extends BaseRequestPolicy {
+      /**
+       * @param nextPolicy - The next RequestPolicy in the pipeline chain.
+       * @param options - The options for this RequestPolicy.
+       * @param retryCount - The client retry count.
+       * @param retryInterval - The client retry interval, in milliseconds.
+       * @param minRetryInterval - The minimum retry interval, in milliseconds.
+       * @param maxRetryInterval - The maximum retry interval, in milliseconds.
+       */
       constructor(nextPolicy, options, retryCount, retryInterval, maxRetryInterval) {
         super(nextPolicy, options);
         this.retryCount = isNumber(retryCount) ? retryCount : DEFAULT_CLIENT_RETRY_COUNT;
@@ -37608,15 +38405,39 @@ var init_logPolicy = __esm({
         this.logger = logger3;
         this.sanitizer = new Sanitizer({ allowedHeaderNames, allowedQueryParameters });
       }
+      /**
+       * Header names whose values will be logged when logging is enabled. Defaults to
+       * Date, traceparent, x-ms-client-request-id, and x-ms-request id.  Any headers
+       * specified in this field will be added to that list.  Any other values will
+       * be written to logs as "REDACTED".
+       * @deprecated Pass these into the constructor instead.
+       */
       get allowedHeaderNames() {
         return this.sanitizer.allowedHeaderNames;
       }
+      /**
+       * Header names whose values will be logged when logging is enabled. Defaults to
+       * Date, traceparent, x-ms-client-request-id, and x-ms-request id.  Any headers
+       * specified in this field will be added to that list.  Any other values will
+       * be written to logs as "REDACTED".
+       * @deprecated Pass these into the constructor instead.
+       */
       set allowedHeaderNames(allowedHeaderNames) {
         this.sanitizer.allowedHeaderNames = allowedHeaderNames;
       }
+      /**
+       * Query string names whose values will be logged when logging is enabled. By default no
+       * query string values are logged.
+       * @deprecated Pass these into the constructor instead.
+       */
       get allowedQueryParameters() {
         return this.sanitizer.allowedQueryParameters;
       }
+      /**
+       * Query string names whose values will be logged when logging is enabled. By default no
+       * query string values are logged.
+       * @deprecated Pass these into the constructor instead.
+       */
       set allowedQueryParameters(allowedQueryParameters) {
         this.sanitizer.allowedQueryParameters = allowedQueryParameters;
       }
@@ -37763,6 +38584,9 @@ var init_userAgentPolicy = __esm({
         this.addUserAgentHeader(request);
         return this._nextPolicy.sendRequest(request);
       }
+      /**
+       * Adds the user agent header to the outgoing request.
+       */
       addUserAgentHeader(request) {
         if (!request.headers) {
           request.headers = new HttpHeaders();
@@ -37795,7 +38619,7 @@ async function beginRefresh(getAccessToken, retryIntervalInMs, timeoutInMs) {
     if (Date.now() < timeoutInMs) {
       try {
         return await getAccessToken();
-      } catch (_a2) {
+      } catch (_a) {
         return null;
       }
     } else {
@@ -37818,25 +38642,37 @@ function createTokenCycler(credential, scopes, tokenCyclerOptions) {
   let token = null;
   const options = Object.assign(Object.assign({}, DEFAULT_CYCLER_OPTIONS), tokenCyclerOptions);
   const cycler = {
+    /**
+     * Produces true if a refresh job is currently in progress.
+     */
     get isRefreshing() {
       return refreshWorker !== null;
     },
+    /**
+     * Produces true if the cycler SHOULD refresh (we are within the refresh
+     * window and not already refreshing)
+     */
     get shouldRefresh() {
-      var _a2;
-      return !cycler.isRefreshing && ((_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : 0) - options.refreshWindowInMs < Date.now();
+      var _a;
+      return !cycler.isRefreshing && ((_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : 0) - options.refreshWindowInMs < Date.now();
     },
+    /**
+     * Produces true if the cycler MUST refresh (null or nearly-expired
+     * token).
+     */
     get mustRefresh() {
       return token === null || token.expiresOnTimestamp - options.forcedRefreshWindowInMs < Date.now();
     }
   };
   function refresh(getTokenOptions) {
-    var _a2;
+    var _a;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
       refreshWorker = beginRefresh(
         tryGetAccessToken,
         options.retryIntervalInMs,
-        (_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : Date.now()
+        // If we don't have a token, then we should timeout immediately
+        (_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : Date.now()
       ).then((_token) => {
         refreshWorker = null;
         token = _token;
@@ -37859,7 +38695,11 @@ function createTokenCycler(credential, scopes, tokenCyclerOptions) {
   };
 }
 function bearerTokenAuthenticationPolicy(credential, scopes) {
-  const getToken = createTokenCycler(credential, scopes);
+  const getToken = createTokenCycler(
+    credential,
+    scopes
+    /* , options */
+  );
   class BearerTokenAuthenticationPolicy extends BaseRequestPolicy {
     constructor(nextPolicy, options) {
       super(nextPolicy, options);
@@ -37889,11 +38729,12 @@ var init_bearerTokenAuthenticationPolicy = __esm({
   "node_modules/@azure/core-http/dist-esm/src/policies/bearerTokenAuthenticationPolicy.js"() {
     init_requestPolicy();
     init_constants();
-    init_delay();
+    init_src3();
     DEFAULT_CYCLER_OPTIONS = {
       forcedRefreshWindowInMs: 1e3,
       retryIntervalInMs: 3e3,
       refreshWindowInMs: 1e3 * 60 * 2
+      // Start refreshing 2m before expiry
     };
   }
 });
@@ -37911,9 +38752,23 @@ var init_disableResponseDecompressionPolicy = __esm({
   "node_modules/@azure/core-http/dist-esm/src/policies/disableResponseDecompressionPolicy.js"() {
     init_requestPolicy();
     DisableResponseDecompressionPolicy = class extends BaseRequestPolicy {
+      /**
+       * Creates an instance of DisableResponseDecompressionPolicy.
+       *
+       * @param nextPolicy -
+       * @param options -
+       */
+      // The parent constructor is protected.
+      /* eslint-disable-next-line @typescript-eslint/no-useless-constructor */
       constructor(nextPolicy, options) {
         super(nextPolicy, options);
       }
+      /**
+       * Sends out request.
+       *
+       * @param request -
+       * @returns
+       */
       async sendRequest(request) {
         request.decompressResponse = false;
         return this._nextPolicy.sendRequest(request);
@@ -38038,19 +38893,19 @@ function proxyPolicy(proxySettings, options) {
     }
   };
 }
-function extractAuthFromUrl(url2) {
-  const atIndex = url2.indexOf("@");
+function extractAuthFromUrl(url3) {
+  const atIndex = url3.indexOf("@");
   if (atIndex === -1) {
-    return { urlWithoutAuth: url2 };
+    return { urlWithoutAuth: url3 };
   }
-  const schemeIndex = url2.indexOf("://");
+  const schemeIndex = url3.indexOf("://");
   const authStart = schemeIndex !== -1 ? schemeIndex + 3 : 0;
-  const auth = url2.substring(authStart, atIndex);
+  const auth = url3.substring(authStart, atIndex);
   const colonIndex = auth.indexOf(":");
   const hasPassword = colonIndex !== -1;
   const username = hasPassword ? auth.substring(0, colonIndex) : auth;
   const password = hasPassword ? auth.substring(colonIndex + 1) : void 0;
-  const urlWithoutAuth = url2.substring(0, authStart) + url2.substring(atIndex + 1);
+  const urlWithoutAuth = url3.substring(0, authStart) + url3.substring(atIndex + 1);
   return {
     username,
     password,
@@ -38074,8 +38929,8 @@ var init_proxyPolicy = __esm({
         this.customNoProxyList = customNoProxyList;
       }
       sendRequest(request) {
-        var _a2;
-        if (!request.proxySettings && !isBypassed(request.url, (_a2 = this.customNoProxyList) !== null && _a2 !== void 0 ? _a2 : globalNoProxyList, this.customNoProxyList ? void 0 : globalBypassedMap)) {
+        var _a;
+        if (!request.proxySettings && !isBypassed(request.url, (_a = this.customNoProxyList) !== null && _a !== void 0 ? _a : globalNoProxyList, this.customNoProxyList ? void 0 : globalBypassedMap)) {
           request.proxySettings = this.proxySettings;
         }
         return this._nextPolicy.sendRequest(request);
@@ -38133,13 +38988,13 @@ function checkRPNotRegisteredError(body2) {
   }
   return result;
 }
-function extractSubscriptionUrl(url2) {
+function extractSubscriptionUrl(url3) {
   let result;
-  const matchRes = url2.match(/.*\/subscriptions\/[a-f0-9-]+\//gi);
+  const matchRes = url3.match(/.*\/subscriptions\/[a-f0-9-]+\//gi);
   if (matchRes && matchRes[0]) {
     result = matchRes[0];
   } else {
-    throw new Error(`Unable to extract subscriptionId from the given url - ${url2}.`);
+    throw new Error(`Unable to extract subscriptionId from the given url - ${url3}.`);
   }
   return result;
 }
@@ -38155,9 +39010,9 @@ async function registerRP(policy, urlPrefix, provider, originalRequest) {
   }
   return getRegistrationStatus(policy, getUrl, originalRequest);
 }
-async function getRegistrationStatus(policy, url2, originalRequest) {
+async function getRegistrationStatus(policy, url3, originalRequest) {
   const reqOptions = getRequestEssentials(originalRequest);
-  reqOptions.url = url2;
+  reqOptions.url = url3;
   reqOptions.method = "GET";
   const res = await policy._nextPolicy.sendRequest(reqOptions);
   const obj = res.parsedBody;
@@ -38165,7 +39020,7 @@ async function getRegistrationStatus(policy, url2, originalRequest) {
     return true;
   } else {
     await delay(policy._retryTimeout * 1e3);
-    return getRegistrationStatus(policy, url2, originalRequest);
+    return getRegistrationStatus(policy, url3, originalRequest);
   }
 }
 var RPRegistrationPolicy;
@@ -38173,7 +39028,7 @@ var init_rpRegistrationPolicy = __esm({
   "node_modules/@azure/core-http/dist-esm/src/policies/rpRegistrationPolicy.js"() {
     init_utils();
     init_requestPolicy();
-    init_delay();
+    init_src3();
     RPRegistrationPolicy = class extends BaseRequestPolicy {
       constructor(nextPolicy, options, _retryTimeout = 30) {
         super(nextPolicy, options);
@@ -38248,7 +39103,7 @@ var init_systemErrorRetryPolicy = __esm({
   "node_modules/@azure/core-http/dist-esm/src/policies/systemErrorRetryPolicy.js"() {
     init_requestPolicy();
     init_exponentialBackoffStrategy();
-    init_delay();
+    init_src3();
     SystemErrorRetryPolicy = class extends BaseRequestPolicy {
       constructor(nextPolicy, options, retryCount, retryInterval, minRetryInterval, maxRetryInterval) {
         super(nextPolicy, options);
@@ -38287,7 +39142,7 @@ var init_throttlingRetryPolicy = __esm({
     init_src();
     init_constants();
     init_throttlingRetryStrategy();
-    init_delay();
+    init_src3();
     StatusCodes = Constants.HttpConstants.StatusCodes;
     StandardAbortMessage2 = "The operation was aborted.";
     ThrottlingRetryPolicy = class extends BaseRequestPolicy {
@@ -38305,17 +39160,17 @@ var init_throttlingRetryPolicy = __esm({
         }
       }
       async _defaultResponseHandler(httpRequest, httpResponse) {
-        var _a2;
+        var _a;
         const retryAfterHeader = httpResponse.headers.get(Constants.HeaderConstants.RETRY_AFTER);
         if (retryAfterHeader) {
           const delayInMs = ThrottlingRetryPolicy.parseRetryAfterHeader(retryAfterHeader);
           if (delayInMs) {
             this.numberOfRetries += 1;
-            await delay(delayInMs, void 0, {
+            await delay(delayInMs, {
               abortSignal: httpRequest.abortSignal,
               abortErrorMsg: StandardAbortMessage2
             });
-            if ((_a2 = httpRequest.abortSignal) === null || _a2 === void 0 ? void 0 : _a2.aborted) {
+            if ((_a = httpRequest.abortSignal) === null || _a === void 0 ? void 0 : _a.aborted) {
               throw new AbortError(StandardAbortMessage2);
             }
             if (this.numberOfRetries < DEFAULT_CLIENT_MAX_RETRY_COUNT) {
@@ -38349,12 +39204,6 @@ var init_throttlingRetryPolicy = __esm({
   }
 });
 
-// node_modules/@opentelemetry/api/build/esm/baggage/types.js
-var init_types = __esm({
-  "node_modules/@opentelemetry/api/build/esm/baggage/types.js"() {
-  }
-});
-
 // node_modules/@opentelemetry/api/build/esm/platform/node/globalThis.js
 var _globalThis;
 var init_globalThis = __esm({
@@ -38381,7 +39230,7 @@ var init_platform = __esm({
 var VERSION;
 var init_version2 = __esm({
   "node_modules/@opentelemetry/api/build/esm/version.js"() {
-    VERSION = "1.2.0";
+    VERSION = "1.4.0";
   }
 });
 
@@ -38459,38 +39308,38 @@ var init_semver = __esm({
 });
 
 // node_modules/@opentelemetry/api/build/esm/internal/global-utils.js
-function registerGlobal(type3, instance, diag3, allowOverride) {
-  var _a2;
+function registerGlobal(type3, instance, diag, allowOverride) {
+  var _a;
   if (allowOverride === void 0) {
     allowOverride = false;
   }
-  var api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a2 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a2 !== void 0 ? _a2 : {
+  var api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a !== void 0 ? _a : {
     version: VERSION
   };
   if (!allowOverride && api[type3]) {
     var err = new Error("@opentelemetry/api: Attempted duplicate registration of API: " + type3);
-    diag3.error(err.stack || err.message);
+    diag.error(err.stack || err.message);
     return false;
   }
   if (api.version !== VERSION) {
     var err = new Error("@opentelemetry/api: All API registration versions must match");
-    diag3.error(err.stack || err.message);
+    diag.error(err.stack || err.message);
     return false;
   }
   api[type3] = instance;
-  diag3.debug("@opentelemetry/api: Registered a global for " + type3 + " v" + VERSION + ".");
+  diag.debug("@opentelemetry/api: Registered a global for " + type3 + " v" + VERSION + ".");
   return true;
 }
 function getGlobal(type3) {
-  var _a2, _b;
-  var globalVersion = (_a2 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a2 === void 0 ? void 0 : _a2.version;
+  var _a, _b;
+  var globalVersion = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a === void 0 ? void 0 : _a.version;
   if (!globalVersion || !isCompatible(globalVersion)) {
     return;
   }
   return (_b = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _b === void 0 ? void 0 : _b[type3];
 }
-function unregisterGlobal(type3, diag3) {
-  diag3.debug("@opentelemetry/api: Unregistering a global for " + type3 + " v" + VERSION + ".");
+function unregisterGlobal(type3, diag) {
+  diag.debug("@opentelemetry/api: Unregistering a global for " + type3 + " v" + VERSION + ".");
   var api = _global[GLOBAL_OPENTELEMETRY_API_KEY];
   if (api) {
     delete api[type3];
@@ -38515,13 +39364,46 @@ function logProxy(funcName, namespace, args) {
     return;
   }
   args.unshift(namespace);
-  return logger3[funcName].apply(logger3, args);
+  return logger3[funcName].apply(logger3, __spreadArray([], __read(args), false));
 }
-var DiagComponentLogger;
+var __read, __spreadArray, DiagComponentLogger;
 var init_ComponentLogger = __esm({
   "node_modules/@opentelemetry/api/build/esm/diag/ComponentLogger.js"() {
     init_global_utils();
-    DiagComponentLogger = function() {
+    __read = function(o, n) {
+      var m = typeof Symbol === "function" && o[Symbol.iterator];
+      if (!m)
+        return o;
+      var i = m.call(o), r, ar = [], e;
+      try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
+          ar.push(r.value);
+      } catch (error2) {
+        e = { error: error2 };
+      } finally {
+        try {
+          if (r && !r.done && (m = i["return"]))
+            m.call(i);
+        } finally {
+          if (e)
+            throw e.error;
+        }
+      }
+      return ar;
+    };
+    __spreadArray = function(to, from, pack) {
+      if (pack || arguments.length === 2)
+        for (var i = 0, l = from.length, ar; i < l; i++) {
+          if (ar || !(i in from)) {
+            if (!ar)
+              ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+          }
+        }
+      return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    DiagComponentLogger = /** @class */
+    function() {
       function DiagComponentLogger2(props) {
         this._namespace = props.namespace || "DiagComponentLogger";
       }
@@ -38567,7 +39449,7 @@ var init_ComponentLogger = __esm({
 
 // node_modules/@opentelemetry/api/build/esm/diag/types.js
 var DiagLogLevel;
-var init_types2 = __esm({
+var init_types = __esm({
   "node_modules/@opentelemetry/api/build/esm/diag/types.js"() {
     (function(DiagLogLevel2) {
       DiagLogLevel2[DiagLogLevel2["NONE"] = 0] = "NONE";
@@ -38607,20 +39489,53 @@ function createLogLevelDiagLogger(maxLevel, logger3) {
 }
 var init_logLevelLogger = __esm({
   "node_modules/@opentelemetry/api/build/esm/diag/internal/logLevelLogger.js"() {
-    init_types2();
+    init_types();
   }
 });
 
 // node_modules/@opentelemetry/api/build/esm/api/diag.js
-var API_NAME, DiagAPI;
+var __read2, __spreadArray2, API_NAME, DiagAPI;
 var init_diag = __esm({
   "node_modules/@opentelemetry/api/build/esm/api/diag.js"() {
     init_ComponentLogger();
     init_logLevelLogger();
-    init_types2();
+    init_types();
     init_global_utils();
+    __read2 = function(o, n) {
+      var m = typeof Symbol === "function" && o[Symbol.iterator];
+      if (!m)
+        return o;
+      var i = m.call(o), r, ar = [], e;
+      try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
+          ar.push(r.value);
+      } catch (error2) {
+        e = { error: error2 };
+      } finally {
+        try {
+          if (r && !r.done && (m = i["return"]))
+            m.call(i);
+        } finally {
+          if (e)
+            throw e.error;
+        }
+      }
+      return ar;
+    };
+    __spreadArray2 = function(to, from, pack) {
+      if (pack || arguments.length === 2)
+        for (var i = 0, l = from.length, ar; i < l; i++) {
+          if (ar || !(i in from)) {
+            if (!ar)
+              ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+          }
+        }
+      return to.concat(ar || Array.prototype.slice.call(from));
+    };
     API_NAME = "diag";
-    DiagAPI = function() {
+    DiagAPI = /** @class */
+    function() {
       function DiagAPI2() {
         function _logProxy(funcName) {
           return function() {
@@ -38631,29 +39546,35 @@ var init_diag = __esm({
             var logger3 = getGlobal("diag");
             if (!logger3)
               return;
-            return logger3[funcName].apply(logger3, args);
+            return logger3[funcName].apply(logger3, __spreadArray2([], __read2(args), false));
           };
         }
         var self2 = this;
-        self2.setLogger = function(logger3, logLevel) {
-          var _a2, _b;
-          if (logLevel === void 0) {
-            logLevel = DiagLogLevel.INFO;
+        var setLogger = function(logger3, optionsOrLogLevel) {
+          var _a, _b, _c;
+          if (optionsOrLogLevel === void 0) {
+            optionsOrLogLevel = { logLevel: DiagLogLevel.INFO };
           }
           if (logger3 === self2) {
             var err = new Error("Cannot use diag as the logger for itself. Please use a DiagLogger implementation like ConsoleDiagLogger or a custom implementation");
-            self2.error((_a2 = err.stack) !== null && _a2 !== void 0 ? _a2 : err.message);
+            self2.error((_a = err.stack) !== null && _a !== void 0 ? _a : err.message);
             return false;
           }
+          if (typeof optionsOrLogLevel === "number") {
+            optionsOrLogLevel = {
+              logLevel: optionsOrLogLevel
+            };
+          }
           var oldLogger = getGlobal("diag");
-          var newLogger = createLogLevelDiagLogger(logLevel, logger3);
-          if (oldLogger) {
-            var stack = (_b = new Error().stack) !== null && _b !== void 0 ? _b : "<failed to generate stacktrace>";
+          var newLogger = createLogLevelDiagLogger((_b = optionsOrLogLevel.logLevel) !== null && _b !== void 0 ? _b : DiagLogLevel.INFO, logger3);
+          if (oldLogger && !optionsOrLogLevel.suppressOverrideMessage) {
+            var stack = (_c = new Error().stack) !== null && _c !== void 0 ? _c : "<failed to generate stacktrace>";
             oldLogger.warn("Current logger will be overwritten from " + stack);
             newLogger.warn("Current logger will overwrite one already registered from " + stack);
           }
           return registerGlobal("diag", newLogger, self2, true);
         };
+        self2.setLogger = setLogger;
         self2.disable = function() {
           unregisterGlobal(API_NAME, self2);
         };
@@ -38677,188 +39598,6 @@ var init_diag = __esm({
   }
 });
 
-// node_modules/@opentelemetry/api/build/esm/baggage/internal/baggage-impl.js
-var BaggageImpl;
-var init_baggage_impl = __esm({
-  "node_modules/@opentelemetry/api/build/esm/baggage/internal/baggage-impl.js"() {
-    BaggageImpl = function() {
-      function BaggageImpl2(entries) {
-        this._entries = entries ? new Map(entries) : /* @__PURE__ */ new Map();
-      }
-      BaggageImpl2.prototype.getEntry = function(key) {
-        var entry = this._entries.get(key);
-        if (!entry) {
-          return void 0;
-        }
-        return Object.assign({}, entry);
-      };
-      BaggageImpl2.prototype.getAllEntries = function() {
-        return Array.from(this._entries.entries()).map(function(_a2) {
-          var k = _a2[0], v = _a2[1];
-          return [k, v];
-        });
-      };
-      BaggageImpl2.prototype.setEntry = function(key, entry) {
-        var newBaggage = new BaggageImpl2(this._entries);
-        newBaggage._entries.set(key, entry);
-        return newBaggage;
-      };
-      BaggageImpl2.prototype.removeEntry = function(key) {
-        var newBaggage = new BaggageImpl2(this._entries);
-        newBaggage._entries.delete(key);
-        return newBaggage;
-      };
-      BaggageImpl2.prototype.removeEntries = function() {
-        var keys = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          keys[_i] = arguments[_i];
-        }
-        var newBaggage = new BaggageImpl2(this._entries);
-        for (var _a2 = 0, keys_1 = keys; _a2 < keys_1.length; _a2++) {
-          var key = keys_1[_a2];
-          newBaggage._entries.delete(key);
-        }
-        return newBaggage;
-      };
-      BaggageImpl2.prototype.clear = function() {
-        return new BaggageImpl2();
-      };
-      return BaggageImpl2;
-    }();
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/baggage/internal/symbol.js
-var baggageEntryMetadataSymbol;
-var init_symbol = __esm({
-  "node_modules/@opentelemetry/api/build/esm/baggage/internal/symbol.js"() {
-    baggageEntryMetadataSymbol = Symbol("BaggageEntryMetadata");
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/baggage/utils.js
-function createBaggage(entries) {
-  if (entries === void 0) {
-    entries = {};
-  }
-  return new BaggageImpl(new Map(Object.entries(entries)));
-}
-var diag;
-var init_utils2 = __esm({
-  "node_modules/@opentelemetry/api/build/esm/baggage/utils.js"() {
-    init_diag();
-    init_baggage_impl();
-    init_symbol();
-    diag = DiagAPI.instance();
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/common/Exception.js
-var init_Exception = __esm({
-  "node_modules/@opentelemetry/api/build/esm/common/Exception.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/common/Time.js
-var init_Time = __esm({
-  "node_modules/@opentelemetry/api/build/esm/common/Time.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/common/Attributes.js
-var init_Attributes = __esm({
-  "node_modules/@opentelemetry/api/build/esm/common/Attributes.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/diag/consoleLogger.js
-var consoleMap, DiagConsoleLogger;
-var init_consoleLogger = __esm({
-  "node_modules/@opentelemetry/api/build/esm/diag/consoleLogger.js"() {
-    consoleMap = [
-      { n: "error", c: "error" },
-      { n: "warn", c: "warn" },
-      { n: "info", c: "info" },
-      { n: "debug", c: "debug" },
-      { n: "verbose", c: "trace" }
-    ];
-    DiagConsoleLogger = function() {
-      function DiagConsoleLogger2() {
-        function _consoleFunc(funcName) {
-          return function() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-              args[_i] = arguments[_i];
-            }
-            if (console) {
-              var theFunc = console[funcName];
-              if (typeof theFunc !== "function") {
-                theFunc = console.log;
-              }
-              if (typeof theFunc === "function") {
-                return theFunc.apply(console, args);
-              }
-            }
-          };
-        }
-        for (var i = 0; i < consoleMap.length; i++) {
-          this[consoleMap[i].n] = _consoleFunc(consoleMap[i].c);
-        }
-      }
-      return DiagConsoleLogger2;
-    }();
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/diag/index.js
-var init_diag2 = __esm({
-  "node_modules/@opentelemetry/api/build/esm/diag/index.js"() {
-    init_consoleLogger();
-    init_types2();
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/propagation/TextMapPropagator.js
-var defaultTextMapGetter, defaultTextMapSetter;
-var init_TextMapPropagator = __esm({
-  "node_modules/@opentelemetry/api/build/esm/propagation/TextMapPropagator.js"() {
-    defaultTextMapGetter = {
-      get: function(carrier, key) {
-        if (carrier == null) {
-          return void 0;
-        }
-        return carrier[key];
-      },
-      keys: function(carrier) {
-        if (carrier == null) {
-          return [];
-        }
-        return Object.keys(carrier);
-      }
-    };
-    defaultTextMapSetter = {
-      set: function(carrier, key, value) {
-        if (carrier == null) {
-          return;
-        }
-        carrier[key] = value;
-      }
-    };
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/attributes.js
-var init_attributes = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/attributes.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/link.js
-var init_link = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/link.js"() {
-  }
-});
-
 // node_modules/@opentelemetry/api/build/esm/context/context.js
 function createContextKey(description) {
   return Symbol.for(description);
@@ -38866,7 +39605,8 @@ function createContextKey(description) {
 var BaseContext, ROOT_CONTEXT;
 var init_context = __esm({
   "node_modules/@opentelemetry/api/build/esm/context/context.js"() {
-    BaseContext = function() {
+    BaseContext = /** @class */
+    function() {
       function BaseContext2(parentContext) {
         var self2 = this;
         self2._currentContext = parentContext ? new Map(parentContext) : /* @__PURE__ */ new Map();
@@ -38874,14 +39614,14 @@ var init_context = __esm({
           return self2._currentContext.get(key);
         };
         self2.setValue = function(key, value) {
-          var context4 = new BaseContext2(self2._currentContext);
-          context4._currentContext.set(key, value);
-          return context4;
+          var context3 = new BaseContext2(self2._currentContext);
+          context3._currentContext.set(key, value);
+          return context3;
         };
         self2.deleteValue = function(key) {
-          var context4 = new BaseContext2(self2._currentContext);
-          context4._currentContext.delete(key);
-          return context4;
+          var context3 = new BaseContext2(self2._currentContext);
+          context3._currentContext.delete(key);
+          return context3;
         };
       }
       return BaseContext2;
@@ -38891,16 +39631,44 @@ var init_context = __esm({
 });
 
 // node_modules/@opentelemetry/api/build/esm/context/NoopContextManager.js
-var __spreadArray, NoopContextManager;
+var __read3, __spreadArray3, NoopContextManager;
 var init_NoopContextManager = __esm({
   "node_modules/@opentelemetry/api/build/esm/context/NoopContextManager.js"() {
     init_context();
-    __spreadArray = function(to, from) {
-      for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-      return to;
+    __read3 = function(o, n) {
+      var m = typeof Symbol === "function" && o[Symbol.iterator];
+      if (!m)
+        return o;
+      var i = m.call(o), r, ar = [], e;
+      try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
+          ar.push(r.value);
+      } catch (error2) {
+        e = { error: error2 };
+      } finally {
+        try {
+          if (r && !r.done && (m = i["return"]))
+            m.call(i);
+        } finally {
+          if (e)
+            throw e.error;
+        }
+      }
+      return ar;
     };
-    NoopContextManager = function() {
+    __spreadArray3 = function(to, from, pack) {
+      if (pack || arguments.length === 2)
+        for (var i = 0, l = from.length, ar; i < l; i++) {
+          if (ar || !(i in from)) {
+            if (!ar)
+              ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+          }
+        }
+      return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    NoopContextManager = /** @class */
+    function() {
       function NoopContextManager2() {
       }
       NoopContextManager2.prototype.active = function() {
@@ -38911,7 +39679,7 @@ var init_NoopContextManager = __esm({
         for (var _i = 3; _i < arguments.length; _i++) {
           args[_i - 3] = arguments[_i];
         }
-        return fn.call.apply(fn, __spreadArray([thisArg], args));
+        return fn.call.apply(fn, __spreadArray3([thisArg], __read3(args), false));
       };
       NoopContextManager2.prototype.bind = function(_context, target) {
         return target;
@@ -38928,20 +39696,48 @@ var init_NoopContextManager = __esm({
 });
 
 // node_modules/@opentelemetry/api/build/esm/api/context.js
-var __spreadArray2, API_NAME2, NOOP_CONTEXT_MANAGER, ContextAPI;
+var __read4, __spreadArray4, API_NAME2, NOOP_CONTEXT_MANAGER, ContextAPI;
 var init_context2 = __esm({
   "node_modules/@opentelemetry/api/build/esm/api/context.js"() {
     init_NoopContextManager();
     init_global_utils();
     init_diag();
-    __spreadArray2 = function(to, from) {
-      for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-      return to;
+    __read4 = function(o, n) {
+      var m = typeof Symbol === "function" && o[Symbol.iterator];
+      if (!m)
+        return o;
+      var i = m.call(o), r, ar = [], e;
+      try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
+          ar.push(r.value);
+      } catch (error2) {
+        e = { error: error2 };
+      } finally {
+        try {
+          if (r && !r.done && (m = i["return"]))
+            m.call(i);
+        } finally {
+          if (e)
+            throw e.error;
+        }
+      }
+      return ar;
+    };
+    __spreadArray4 = function(to, from, pack) {
+      if (pack || arguments.length === 2)
+        for (var i = 0, l = from.length, ar; i < l; i++) {
+          if (ar || !(i in from)) {
+            if (!ar)
+              ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+          }
+        }
+      return to.concat(ar || Array.prototype.slice.call(from));
     };
     API_NAME2 = "context";
     NOOP_CONTEXT_MANAGER = new NoopContextManager();
-    ContextAPI = function() {
+    ContextAPI = /** @class */
+    function() {
       function ContextAPI2() {
       }
       ContextAPI2.getInstance = function() {
@@ -38956,16 +39752,16 @@ var init_context2 = __esm({
       ContextAPI2.prototype.active = function() {
         return this._getContextManager().active();
       };
-      ContextAPI2.prototype.with = function(context4, fn, thisArg) {
-        var _a2;
+      ContextAPI2.prototype.with = function(context3, fn, thisArg) {
+        var _a;
         var args = [];
         for (var _i = 3; _i < arguments.length; _i++) {
           args[_i - 3] = arguments[_i];
         }
-        return (_a2 = this._getContextManager()).with.apply(_a2, __spreadArray2([context4, fn, thisArg], args));
+        return (_a = this._getContextManager()).with.apply(_a, __spreadArray4([context3, fn, thisArg], __read4(args), false));
       };
-      ContextAPI2.prototype.bind = function(context4, target) {
-        return this._getContextManager().bind(context4, target);
+      ContextAPI2.prototype.bind = function(context3, target) {
+        return this._getContextManager().bind(context3, target);
       };
       ContextAPI2.prototype._getContextManager = function() {
         return getGlobal(API_NAME2) || NOOP_CONTEXT_MANAGER;
@@ -39010,7 +39806,8 @@ var NonRecordingSpan;
 var init_NonRecordingSpan = __esm({
   "node_modules/@opentelemetry/api/build/esm/trace/NonRecordingSpan.js"() {
     init_invalid_span_constants();
-    NonRecordingSpan = function() {
+    NonRecordingSpan = /** @class */
+    function() {
       function NonRecordingSpan2(_spanContext) {
         if (_spanContext === void 0) {
           _spanContext = INVALID_SPAN_CONTEXT;
@@ -39048,24 +39845,24 @@ var init_NonRecordingSpan = __esm({
 });
 
 // node_modules/@opentelemetry/api/build/esm/trace/context-utils.js
-function getSpan(context4) {
-  return context4.getValue(SPAN_KEY) || void 0;
+function getSpan(context3) {
+  return context3.getValue(SPAN_KEY) || void 0;
 }
 function getActiveSpan() {
   return getSpan(ContextAPI.getInstance().active());
 }
-function setSpan(context4, span) {
-  return context4.setValue(SPAN_KEY, span);
+function setSpan(context3, span) {
+  return context3.setValue(SPAN_KEY, span);
 }
-function deleteSpan(context4) {
-  return context4.deleteValue(SPAN_KEY);
+function deleteSpan(context3) {
+  return context3.deleteValue(SPAN_KEY);
 }
-function setSpanContext(context4, spanContext) {
-  return setSpan(context4, new NonRecordingSpan(spanContext));
+function setSpanContext(context3, spanContext) {
+  return setSpan(context3, new NonRecordingSpan(spanContext));
 }
-function getSpanContext(context4) {
-  var _a2;
-  return (_a2 = getSpan(context4)) === null || _a2 === void 0 ? void 0 : _a2.spanContext();
+function getSpanContext(context3) {
+  var _a;
+  return (_a = getSpan(context3)) === null || _a === void 0 ? void 0 : _a.spanContext();
 }
 var SPAN_KEY;
 var init_context_utils = __esm({
@@ -39104,23 +39901,27 @@ var init_spancontext_utils = __esm({
 function isSpanContext(spanContext) {
   return typeof spanContext === "object" && typeof spanContext["spanId"] === "string" && typeof spanContext["traceId"] === "string" && typeof spanContext["traceFlags"] === "number";
 }
-var context, NoopTracer;
+var contextApi, NoopTracer;
 var init_NoopTracer = __esm({
   "node_modules/@opentelemetry/api/build/esm/trace/NoopTracer.js"() {
     init_context2();
     init_context_utils();
     init_NonRecordingSpan();
     init_spancontext_utils();
-    context = ContextAPI.getInstance();
-    NoopTracer = function() {
+    contextApi = ContextAPI.getInstance();
+    NoopTracer = /** @class */
+    function() {
       function NoopTracer2() {
       }
-      NoopTracer2.prototype.startSpan = function(name, options, context4) {
+      NoopTracer2.prototype.startSpan = function(name, options, context3) {
+        if (context3 === void 0) {
+          context3 = contextApi.active();
+        }
         var root = Boolean(options === null || options === void 0 ? void 0 : options.root);
         if (root) {
           return new NonRecordingSpan();
         }
-        var parentFromContext = context4 && getSpanContext(context4);
+        var parentFromContext = context3 && getSpanContext(context3);
         if (isSpanContext(parentFromContext) && isSpanContextValid(parentFromContext)) {
           return new NonRecordingSpan(parentFromContext);
         } else {
@@ -39143,10 +39944,10 @@ var init_NoopTracer = __esm({
           ctx = arg3;
           fn = arg4;
         }
-        var parentContext = ctx !== null && ctx !== void 0 ? ctx : context.active();
+        var parentContext = ctx !== null && ctx !== void 0 ? ctx : contextApi.active();
         var span = this.startSpan(name, opts, parentContext);
         var contextWithSpanSet = setSpan(parentContext, span);
-        return context.with(contextWithSpanSet, fn, void 0, span);
+        return contextApi.with(contextWithSpanSet, fn, void 0, span);
       };
       return NoopTracer2;
     }();
@@ -39159,15 +39960,16 @@ var init_ProxyTracer = __esm({
   "node_modules/@opentelemetry/api/build/esm/trace/ProxyTracer.js"() {
     init_NoopTracer();
     NOOP_TRACER = new NoopTracer();
-    ProxyTracer = function() {
+    ProxyTracer = /** @class */
+    function() {
       function ProxyTracer2(_provider, name, version3, options) {
         this._provider = _provider;
         this.name = name;
         this.version = version3;
         this.options = options;
       }
-      ProxyTracer2.prototype.startSpan = function(name, options, context4) {
-        return this._getTracer().startSpan(name, options, context4);
+      ProxyTracer2.prototype.startSpan = function(name, options, context3) {
+        return this._getTracer().startSpan(name, options, context3);
       };
       ProxyTracer2.prototype.startActiveSpan = function(_name, _options, _context, _fn) {
         var tracer = this._getTracer();
@@ -39194,7 +39996,8 @@ var NoopTracerProvider;
 var init_NoopTracerProvider = __esm({
   "node_modules/@opentelemetry/api/build/esm/trace/NoopTracerProvider.js"() {
     init_NoopTracer();
-    NoopTracerProvider = function() {
+    NoopTracerProvider = /** @class */
+    function() {
       function NoopTracerProvider2() {
       }
       NoopTracerProvider2.prototype.getTracer = function(_name, _version, _options) {
@@ -39212,215 +40015,36 @@ var init_ProxyTracerProvider = __esm({
     init_ProxyTracer();
     init_NoopTracerProvider();
     NOOP_TRACER_PROVIDER = new NoopTracerProvider();
-    ProxyTracerProvider = function() {
+    ProxyTracerProvider = /** @class */
+    function() {
       function ProxyTracerProvider2() {
       }
       ProxyTracerProvider2.prototype.getTracer = function(name, version3, options) {
-        var _a2;
-        return (_a2 = this.getDelegateTracer(name, version3, options)) !== null && _a2 !== void 0 ? _a2 : new ProxyTracer(this, name, version3, options);
+        var _a;
+        return (_a = this.getDelegateTracer(name, version3, options)) !== null && _a !== void 0 ? _a : new ProxyTracer(this, name, version3, options);
       };
       ProxyTracerProvider2.prototype.getDelegate = function() {
-        var _a2;
-        return (_a2 = this._delegate) !== null && _a2 !== void 0 ? _a2 : NOOP_TRACER_PROVIDER;
+        var _a;
+        return (_a = this._delegate) !== null && _a !== void 0 ? _a : NOOP_TRACER_PROVIDER;
       };
       ProxyTracerProvider2.prototype.setDelegate = function(delegate) {
         this._delegate = delegate;
       };
       ProxyTracerProvider2.prototype.getDelegateTracer = function(name, version3, options) {
-        var _a2;
-        return (_a2 = this._delegate) === null || _a2 === void 0 ? void 0 : _a2.getTracer(name, version3, options);
+        var _a;
+        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version3, options);
       };
       return ProxyTracerProvider2;
     }();
   }
 });
 
-// node_modules/@opentelemetry/api/build/esm/trace/Sampler.js
-var init_Sampler = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/Sampler.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/SamplingResult.js
-var SamplingDecision;
-var init_SamplingResult = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/SamplingResult.js"() {
-    (function(SamplingDecision2) {
-      SamplingDecision2[SamplingDecision2["NOT_RECORD"] = 0] = "NOT_RECORD";
-      SamplingDecision2[SamplingDecision2["RECORD"] = 1] = "RECORD";
-      SamplingDecision2[SamplingDecision2["RECORD_AND_SAMPLED"] = 2] = "RECORD_AND_SAMPLED";
-    })(SamplingDecision || (SamplingDecision = {}));
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/span_context.js
-var init_span_context = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/span_context.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/span_kind.js
-var SpanKind;
-var init_span_kind = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/span_kind.js"() {
-    (function(SpanKind3) {
-      SpanKind3[SpanKind3["INTERNAL"] = 0] = "INTERNAL";
-      SpanKind3[SpanKind3["SERVER"] = 1] = "SERVER";
-      SpanKind3[SpanKind3["CLIENT"] = 2] = "CLIENT";
-      SpanKind3[SpanKind3["PRODUCER"] = 3] = "PRODUCER";
-      SpanKind3[SpanKind3["CONSUMER"] = 4] = "CONSUMER";
-    })(SpanKind || (SpanKind = {}));
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/span.js
-var init_span = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/span.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/SpanOptions.js
-var init_SpanOptions = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/SpanOptions.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/status.js
-var SpanStatusCode;
-var init_status = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/status.js"() {
-    (function(SpanStatusCode3) {
-      SpanStatusCode3[SpanStatusCode3["UNSET"] = 0] = "UNSET";
-      SpanStatusCode3[SpanStatusCode3["OK"] = 1] = "OK";
-      SpanStatusCode3[SpanStatusCode3["ERROR"] = 2] = "ERROR";
-    })(SpanStatusCode || (SpanStatusCode = {}));
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/trace_state.js
-var init_trace_state = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/trace_state.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/internal/tracestate-validators.js
-function validateKey(key) {
-  return VALID_KEY_REGEX.test(key);
-}
-function validateValue2(value) {
-  return VALID_VALUE_BASE_REGEX.test(value) && !INVALID_VALUE_COMMA_EQUAL_REGEX.test(value);
-}
-var VALID_KEY_CHAR_RANGE, VALID_KEY, VALID_VENDOR_KEY, VALID_KEY_REGEX, VALID_VALUE_BASE_REGEX, INVALID_VALUE_COMMA_EQUAL_REGEX;
-var init_tracestate_validators = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/internal/tracestate-validators.js"() {
-    VALID_KEY_CHAR_RANGE = "[_0-9a-z-*/]";
-    VALID_KEY = "[a-z]" + VALID_KEY_CHAR_RANGE + "{0,255}";
-    VALID_VENDOR_KEY = "[a-z0-9]" + VALID_KEY_CHAR_RANGE + "{0,240}@[a-z]" + VALID_KEY_CHAR_RANGE + "{0,13}";
-    VALID_KEY_REGEX = new RegExp("^(?:" + VALID_KEY + "|" + VALID_VENDOR_KEY + ")$");
-    VALID_VALUE_BASE_REGEX = /^[ -~]{0,255}[!-~]$/;
-    INVALID_VALUE_COMMA_EQUAL_REGEX = /,|=/;
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/internal/tracestate-impl.js
-var MAX_TRACE_STATE_ITEMS, MAX_TRACE_STATE_LEN, LIST_MEMBERS_SEPARATOR, LIST_MEMBER_KEY_VALUE_SPLITTER, TraceStateImpl;
-var init_tracestate_impl = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/internal/tracestate-impl.js"() {
-    init_tracestate_validators();
-    MAX_TRACE_STATE_ITEMS = 32;
-    MAX_TRACE_STATE_LEN = 512;
-    LIST_MEMBERS_SEPARATOR = ",";
-    LIST_MEMBER_KEY_VALUE_SPLITTER = "=";
-    TraceStateImpl = function() {
-      function TraceStateImpl2(rawTraceState) {
-        this._internalState = /* @__PURE__ */ new Map();
-        if (rawTraceState)
-          this._parse(rawTraceState);
-      }
-      TraceStateImpl2.prototype.set = function(key, value) {
-        var traceState = this._clone();
-        if (traceState._internalState.has(key)) {
-          traceState._internalState.delete(key);
-        }
-        traceState._internalState.set(key, value);
-        return traceState;
-      };
-      TraceStateImpl2.prototype.unset = function(key) {
-        var traceState = this._clone();
-        traceState._internalState.delete(key);
-        return traceState;
-      };
-      TraceStateImpl2.prototype.get = function(key) {
-        return this._internalState.get(key);
-      };
-      TraceStateImpl2.prototype.serialize = function() {
-        var _this = this;
-        return this._keys().reduce(function(agg, key) {
-          agg.push(key + LIST_MEMBER_KEY_VALUE_SPLITTER + _this.get(key));
-          return agg;
-        }, []).join(LIST_MEMBERS_SEPARATOR);
-      };
-      TraceStateImpl2.prototype._parse = function(rawTraceState) {
-        if (rawTraceState.length > MAX_TRACE_STATE_LEN)
-          return;
-        this._internalState = rawTraceState.split(LIST_MEMBERS_SEPARATOR).reverse().reduce(function(agg, part) {
-          var listMember = part.trim();
-          var i = listMember.indexOf(LIST_MEMBER_KEY_VALUE_SPLITTER);
-          if (i !== -1) {
-            var key = listMember.slice(0, i);
-            var value = listMember.slice(i + 1, part.length);
-            if (validateKey(key) && validateValue2(value)) {
-              agg.set(key, value);
-            } else {
-            }
-          }
-          return agg;
-        }, /* @__PURE__ */ new Map());
-        if (this._internalState.size > MAX_TRACE_STATE_ITEMS) {
-          this._internalState = new Map(Array.from(this._internalState.entries()).reverse().slice(0, MAX_TRACE_STATE_ITEMS));
-        }
-      };
-      TraceStateImpl2.prototype._keys = function() {
-        return Array.from(this._internalState.keys()).reverse();
-      };
-      TraceStateImpl2.prototype._clone = function() {
-        var traceState = new TraceStateImpl2();
-        traceState._internalState = new Map(this._internalState);
-        return traceState;
-      };
-      return TraceStateImpl2;
-    }();
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/internal/utils.js
-var init_utils3 = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/internal/utils.js"() {
-    init_tracestate_impl();
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/tracer_provider.js
-var init_tracer_provider = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/tracer_provider.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/tracer.js
-var init_tracer = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/tracer.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/trace/tracer_options.js
-var init_tracer_options = __esm({
-  "node_modules/@opentelemetry/api/build/esm/trace/tracer_options.js"() {
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/context/types.js
-var init_types3 = __esm({
-  "node_modules/@opentelemetry/api/build/esm/context/types.js"() {
+// node_modules/@opentelemetry/api/build/esm/context-api.js
+var context;
+var init_context_api = __esm({
+  "node_modules/@opentelemetry/api/build/esm/context-api.js"() {
+    init_context2();
+    context = ContextAPI.getInstance();
   }
 });
 
@@ -39434,7 +40058,8 @@ var init_trace = __esm({
     init_context_utils();
     init_diag();
     API_NAME3 = "trace";
-    TraceAPI = function() {
+    TraceAPI = /** @class */
+    function() {
       function TraceAPI2() {
         this._proxyTracerProvider = new ProxyTracerProvider();
         this.wrapSpanContext = wrapSpanContext;
@@ -39474,178 +40099,61 @@ var init_trace = __esm({
   }
 });
 
-// node_modules/@opentelemetry/api/build/esm/propagation/NoopTextMapPropagator.js
-var NoopTextMapPropagator;
-var init_NoopTextMapPropagator = __esm({
-  "node_modules/@opentelemetry/api/build/esm/propagation/NoopTextMapPropagator.js"() {
-    NoopTextMapPropagator = function() {
-      function NoopTextMapPropagator2() {
-      }
-      NoopTextMapPropagator2.prototype.inject = function(_context, _carrier) {
-      };
-      NoopTextMapPropagator2.prototype.extract = function(context4, _carrier) {
-        return context4;
-      };
-      NoopTextMapPropagator2.prototype.fields = function() {
-        return [];
-      };
-      return NoopTextMapPropagator2;
-    }();
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/baggage/context-helpers.js
-function getBaggage(context4) {
-  return context4.getValue(BAGGAGE_KEY) || void 0;
-}
-function setBaggage(context4, baggage) {
-  return context4.setValue(BAGGAGE_KEY, baggage);
-}
-function deleteBaggage(context4) {
-  return context4.deleteValue(BAGGAGE_KEY);
-}
-var BAGGAGE_KEY;
-var init_context_helpers = __esm({
-  "node_modules/@opentelemetry/api/build/esm/baggage/context-helpers.js"() {
-    init_context();
-    BAGGAGE_KEY = createContextKey("OpenTelemetry Baggage Key");
-  }
-});
-
-// node_modules/@opentelemetry/api/build/esm/api/propagation.js
-var API_NAME4, NOOP_TEXT_MAP_PROPAGATOR, PropagationAPI;
-var init_propagation = __esm({
-  "node_modules/@opentelemetry/api/build/esm/api/propagation.js"() {
-    init_global_utils();
-    init_NoopTextMapPropagator();
-    init_TextMapPropagator();
-    init_context_helpers();
-    init_utils2();
-    init_diag();
-    API_NAME4 = "propagation";
-    NOOP_TEXT_MAP_PROPAGATOR = new NoopTextMapPropagator();
-    PropagationAPI = function() {
-      function PropagationAPI2() {
-        this.createBaggage = createBaggage;
-        this.getBaggage = getBaggage;
-        this.setBaggage = setBaggage;
-        this.deleteBaggage = deleteBaggage;
-      }
-      PropagationAPI2.getInstance = function() {
-        if (!this._instance) {
-          this._instance = new PropagationAPI2();
-        }
-        return this._instance;
-      };
-      PropagationAPI2.prototype.setGlobalPropagator = function(propagator) {
-        return registerGlobal(API_NAME4, propagator, DiagAPI.instance());
-      };
-      PropagationAPI2.prototype.inject = function(context4, carrier, setter) {
-        if (setter === void 0) {
-          setter = defaultTextMapSetter;
-        }
-        return this._getGlobalPropagator().inject(context4, carrier, setter);
-      };
-      PropagationAPI2.prototype.extract = function(context4, carrier, getter) {
-        if (getter === void 0) {
-          getter = defaultTextMapGetter;
-        }
-        return this._getGlobalPropagator().extract(context4, carrier, getter);
-      };
-      PropagationAPI2.prototype.fields = function() {
-        return this._getGlobalPropagator().fields();
-      };
-      PropagationAPI2.prototype.disable = function() {
-        unregisterGlobal(API_NAME4, DiagAPI.instance());
-      };
-      PropagationAPI2.prototype._getGlobalPropagator = function() {
-        return getGlobal(API_NAME4) || NOOP_TEXT_MAP_PROPAGATOR;
-      };
-      return PropagationAPI2;
-    }();
+// node_modules/@opentelemetry/api/build/esm/trace-api.js
+var trace;
+var init_trace_api = __esm({
+  "node_modules/@opentelemetry/api/build/esm/trace-api.js"() {
+    init_trace();
+    trace = TraceAPI.getInstance();
   }
 });
 
 // node_modules/@opentelemetry/api/build/esm/index.js
-var context2, trace, propagation, diag2;
 var init_esm = __esm({
   "node_modules/@opentelemetry/api/build/esm/index.js"() {
-    init_types();
-    init_utils2();
-    init_Exception();
-    init_Time();
-    init_Attributes();
-    init_diag2();
-    init_TextMapPropagator();
-    init_attributes();
-    init_link();
-    init_ProxyTracer();
-    init_ProxyTracerProvider();
-    init_Sampler();
-    init_SamplingResult();
-    init_span_context();
-    init_span_kind();
-    init_span();
-    init_SpanOptions();
-    init_status();
-    init_trace_flags();
-    init_trace_state();
-    init_utils3();
-    init_tracer_provider();
-    init_tracer();
-    init_tracer_options();
-    init_spancontext_utils();
     init_invalid_span_constants();
-    init_context();
-    init_types3();
-    init_context2();
-    init_trace();
-    init_propagation();
-    init_diag();
-    context2 = ContextAPI.getInstance();
-    trace = TraceAPI.getInstance();
-    propagation = PropagationAPI.getInstance();
-    diag2 = DiagAPI.instance();
+    init_context_api();
+    init_trace_api();
   }
 });
 
 // node_modules/@azure/core-tracing/dist-esm/src/interfaces.js
-function setSpan2(context4, span) {
-  return trace.setSpan(context4, span);
+function setSpan2(context3, span) {
+  return trace.setSpan(context3, span);
 }
-function isSpanContextValid2(context4) {
-  return trace.isSpanContextValid(context4);
+function isSpanContextValid2(context3) {
+  return trace.isSpanContextValid(context3);
 }
 function getTracer(name, version3) {
   return trace.getTracer(name || "azure/core-tracing", version3);
 }
-var SpanKind2, context3, SpanStatusCode2;
+var SpanKind, context2, SpanStatusCode;
 var init_interfaces = __esm({
   "node_modules/@azure/core-tracing/dist-esm/src/interfaces.js"() {
     init_esm();
-    (function(SpanKind3) {
-      SpanKind3[SpanKind3["INTERNAL"] = 0] = "INTERNAL";
-      SpanKind3[SpanKind3["SERVER"] = 1] = "SERVER";
-      SpanKind3[SpanKind3["CLIENT"] = 2] = "CLIENT";
-      SpanKind3[SpanKind3["PRODUCER"] = 3] = "PRODUCER";
-      SpanKind3[SpanKind3["CONSUMER"] = 4] = "CONSUMER";
-    })(SpanKind2 || (SpanKind2 = {}));
-    context3 = context2;
-    (function(SpanStatusCode3) {
-      SpanStatusCode3[SpanStatusCode3["UNSET"] = 0] = "UNSET";
-      SpanStatusCode3[SpanStatusCode3["OK"] = 1] = "OK";
-      SpanStatusCode3[SpanStatusCode3["ERROR"] = 2] = "ERROR";
-    })(SpanStatusCode2 || (SpanStatusCode2 = {}));
+    (function(SpanKind2) {
+      SpanKind2[SpanKind2["INTERNAL"] = 0] = "INTERNAL";
+      SpanKind2[SpanKind2["SERVER"] = 1] = "SERVER";
+      SpanKind2[SpanKind2["CLIENT"] = 2] = "CLIENT";
+      SpanKind2[SpanKind2["PRODUCER"] = 3] = "PRODUCER";
+      SpanKind2[SpanKind2["CONSUMER"] = 4] = "CONSUMER";
+    })(SpanKind || (SpanKind = {}));
+    context2 = context;
+    (function(SpanStatusCode2) {
+      SpanStatusCode2[SpanStatusCode2["UNSET"] = 0] = "UNSET";
+      SpanStatusCode2[SpanStatusCode2["OK"] = 1] = "OK";
+      SpanStatusCode2[SpanStatusCode2["ERROR"] = 2] = "ERROR";
+    })(SpanStatusCode || (SpanStatusCode = {}));
   }
 });
 
 // node_modules/@azure/core-tracing/dist-esm/src/createSpan.js
 function isTracingDisabled() {
-  var _a2;
+  var _a;
   if (typeof process === "undefined") {
     return false;
   }
-  const azureTracingDisabledValue = (_a2 = process.env.AZURE_TRACING_DISABLED) === null || _a2 === void 0 ? void 0 : _a2.toLowerCase();
+  const azureTracingDisabledValue = (_a = process.env.AZURE_TRACING_DISABLED) === null || _a === void 0 ? void 0 : _a.toLowerCase();
   if (azureTracingDisabledValue === "false" || azureTracingDisabledValue === "0") {
     return false;
   }
@@ -39655,7 +40163,7 @@ function createSpanFunction(args) {
   return function(operationName, operationOptions) {
     const tracer = getTracer();
     const tracingOptions = (operationOptions === null || operationOptions === void 0 ? void 0 : operationOptions.tracingOptions) || {};
-    const spanOptions = Object.assign({ kind: SpanKind2.INTERNAL }, tracingOptions.spanOptions);
+    const spanOptions = Object.assign({ kind: SpanKind.INTERNAL }, tracingOptions.spanOptions);
     const spanName = args.packagePrefix ? `${args.packagePrefix}.${operationName}` : operationName;
     let span;
     if (isTracingDisabled()) {
@@ -39670,7 +40178,7 @@ function createSpanFunction(args) {
     if (span.isRecording() && args.namespace) {
       newSpanOptions = Object.assign(Object.assign({}, tracingOptions.spanOptions), { attributes: Object.assign(Object.assign({}, spanOptions.attributes), { "az.namespace": args.namespace }) });
     }
-    const newTracingOptions = Object.assign(Object.assign({}, tracingOptions), { spanOptions: newSpanOptions, tracingContext: setSpan2(tracingOptions.tracingContext || context3.active(), span) });
+    const newTracingOptions = Object.assign(Object.assign({}, tracingOptions), { spanOptions: newSpanOptions, tracingContext: setSpan2(tracingOptions.tracingContext || context2.active(), span) });
     const newOperationOptions = Object.assign(Object.assign({}, operationOptions), { tracingOptions: newTracingOptions });
     return {
       span,
@@ -39759,11 +40267,11 @@ var init_tracingPolicy = __esm({
         }
       }
       tryCreateSpan(request) {
-        var _a2;
+        var _a;
         try {
           const { span } = createSpan(`HTTP ${request.method}`, {
             tracingOptions: {
-              spanOptions: Object.assign(Object.assign({}, request.spanOptions), { kind: SpanKind2.CLIENT }),
+              spanOptions: Object.assign(Object.assign({}, request.spanOptions), { kind: SpanKind.CLIENT }),
               tracingContext: request.tracingContext
             }
           });
@@ -39771,7 +40279,7 @@ var init_tracingPolicy = __esm({
             span.end();
             return void 0;
           }
-          const namespaceFromContext = (_a2 = request.tracingContext) === null || _a2 === void 0 ? void 0 : _a2.getValue(Symbol.for("az.namespace"));
+          const namespaceFromContext = (_a = request.tracingContext) === null || _a === void 0 ? void 0 : _a.getValue(Symbol.for("az.namespace"));
           if (typeof namespaceFromContext === "string") {
             span.setAttribute("az.namespace", namespaceFromContext);
           }
@@ -39801,7 +40309,7 @@ var init_tracingPolicy = __esm({
       tryProcessError(span, err) {
         try {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: err.message
           });
           if (err.statusCode) {
@@ -39820,7 +40328,7 @@ var init_tracingPolicy = __esm({
             span.setAttribute("serviceRequestId", serviceRequestId);
           }
           span.setStatus({
-            code: SpanStatusCode2.OK
+            code: SpanStatusCode.OK
           });
           span.end();
         } catch (error2) {
@@ -39833,8 +40341,8 @@ var init_tracingPolicy = __esm({
 
 // node_modules/@azure/core-http/dist-esm/src/serviceClient.js
 function serializeRequestBody(serviceClient, httpRequest, operationArguments, operationSpec) {
-  var _a2, _b, _c, _d, _e, _f;
-  const serializerOptions = (_b = (_a2 = operationArguments.options) === null || _a2 === void 0 ? void 0 : _a2.serializerOptions) !== null && _b !== void 0 ? _b : {};
+  var _a, _b, _c, _d, _e, _f;
+  const serializerOptions = (_b = (_a = operationArguments.options) === null || _a === void 0 ? void 0 : _a.serializerOptions) !== null && _b !== void 0 ? _b : {};
   const updatedOptions = {
     rootName: (_c = serializerOptions.rootName) !== null && _c !== void 0 ? _c : "",
     includeRoot: (_d = serializerOptions.includeRoot) !== null && _d !== void 0 ? _d : false,
@@ -39937,12 +40445,12 @@ function getOperationArgumentValueFromParameter(serviceClient, operationArgument
   return getOperationArgumentValueFromParameterPath(serviceClient, operationArguments, parameter.parameterPath, parameter.mapper, serializer4);
 }
 function getOperationArgumentValueFromParameterPath(serviceClient, operationArguments, parameterPath, parameterMapper, serializer4) {
-  var _a2;
+  var _a;
   let value;
   if (typeof parameterPath === "string") {
     parameterPath = [parameterPath];
   }
-  const serializerOptions = (_a2 = operationArguments.options) === null || _a2 === void 0 ? void 0 : _a2.serializerOptions;
+  const serializerOptions = (_a = operationArguments.options) === null || _a === void 0 ? void 0 : _a.serializerOptions;
   if (Array.isArray(parameterPath)) {
     if (parameterPath.length > 0) {
       if (parameterMapper.isConstant) {
@@ -40077,6 +40585,11 @@ var init_serviceClient = __esm({
     init_systemErrorRetryPolicy();
     init_throttlingRetryPolicy();
     ServiceClient = class {
+      /**
+       * The ServiceClient constructor
+       * @param credentials - The credentials used for authentication with the service.
+       * @param options - The service client options that govern the behavior of the client.
+       */
       constructor(credentials, options) {
         if (!options) {
           options = {};
@@ -40127,6 +40640,9 @@ var init_serviceClient = __esm({
         }
         this._requestPolicyFactories = requestPolicyFactories;
       }
+      /**
+       * Send the provided httpRequest.
+       */
       sendRequest(options) {
         if (options === null || options === void 0 || typeof options !== "object") {
           throw new Error("options cannot be null or undefined and it must be of type object.");
@@ -40151,13 +40667,19 @@ var init_serviceClient = __esm({
         }
         return httpPipeline.sendRequest(httpRequest);
       }
+      /**
+       * Send an HTTP request that is populated using the provided OperationSpec.
+       * @param operationArguments - The arguments that the HTTP request's templated values will be populated from.
+       * @param operationSpec - The OperationSpec to use to populate the httpRequest.
+       * @param callback - The callback to call when the response is received.
+       */
       async sendOperationRequest(operationArguments, operationSpec, callback) {
-        var _a2;
+        var _a;
         if (typeof operationArguments.options === "function") {
           callback = operationArguments.options;
           operationArguments.options = void 0;
         }
-        const serializerOptions = (_a2 = operationArguments.options) === null || _a2 === void 0 ? void 0 : _a2.serializerOptions;
+        const serializerOptions = (_a = operationArguments.options) === null || _a === void 0 ? void 0 : _a.serializerOptions;
         const httpRequest = new WebResource();
         let result;
         try {
@@ -40301,9 +40823,9 @@ var init_serviceClient = __esm({
   }
 });
 
-// node_modules/@azure/core-http/dist-esm/src/coreHttp.js
-var init_coreHttp = __esm({
-  "node_modules/@azure/core-http/dist-esm/src/coreHttp.js"() {
+// node_modules/@azure/core-http/dist-esm/src/index.js
+var init_src6 = __esm({
+  "node_modules/@azure/core-http/dist-esm/src/index.js"() {
     init_webResource();
     init_defaultHttpClient();
     init_httpHeaders();
@@ -40324,7 +40846,7 @@ var init_coreHttp = __esm({
     init_serializer();
     init_utils();
     init_url();
-    init_delay();
+    init_src3();
     init_src4();
   }
 });
@@ -48706,7 +49228,7 @@ var init_mappers = __esm({
 var contentType, blobServiceProperties, accept, url, restype, comp, timeoutInSeconds, version2, requestId, accept1, comp1, comp2, prefix, marker, maxPageSize, include, keyInfo, comp3, restype1, body, comp4, contentLength, multipartContentType, comp5, where, restype2, metadata, access, defaultEncryptionScope, preventEncryptionScopeOverride, leaseId, ifModifiedSince, ifUnmodifiedSince, comp6, comp7, containerAcl, comp8, deletedContainerName, deletedContainerVersion, comp9, sourceContainerName, sourceLeaseId, comp10, action, duration, proposedLeaseId, action1, leaseId1, action2, action3, breakPeriod, action4, proposedLeaseId1, include1, delimiter2, snapshot, versionId, range, rangeGetContentMD5, rangeGetContentCRC64, encryptionKey, encryptionKeySha256, encryptionAlgorithm, ifMatch, ifNoneMatch, ifTags, deleteSnapshots, blobDeleteType, comp11, expiryOptions, expiresOn, blobCacheControl, blobContentType, blobContentMD5, blobContentEncoding, blobContentLanguage, blobContentDisposition, comp12, immutabilityPolicyExpiry, immutabilityPolicyMode, comp13, legalHold, encryptionScope, comp14, tier, rehydratePriority, sourceIfModifiedSince, sourceIfUnmodifiedSince, sourceIfMatch, sourceIfNoneMatch, sourceIfTags, copySource, blobTagsString, sealBlob, legalHold1, xMsRequiresSync, sourceContentMD5, copySourceAuthorization, copySourceTags, comp15, copyActionAbortConstant, copyId, comp16, tier1, queryRequest, comp17, comp18, tags, transactionalContentMD5, transactionalContentCrc64, blobType, blobContentLength, blobSequenceNumber, contentType1, body1, accept2, comp19, pageWrite, ifSequenceNumberLessThanOrEqualTo, ifSequenceNumberLessThan, ifSequenceNumberEqualTo, pageWrite1, sourceUrl, sourceRange, sourceContentCrc64, range1, comp20, prevsnapshot, prevSnapshotUrl, sequenceNumberAction, comp21, blobType1, comp22, maxSize, appendPosition, sourceRange1, comp23, blobType2, copySourceBlobProperties, comp24, blockId, blocks, comp25, listType;
 var init_parameters = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/models/parameters.js"() {
-    init_coreHttp();
+    init_src6();
     init_mappers();
     contentType = {
       parameterPath: ["options", "contentType"],
@@ -48784,7 +49306,7 @@ var init_parameters = __esm({
     version2 = {
       parameterPath: "version",
       mapper: {
-        defaultValue: "2021-08-06",
+        defaultValue: "2021-10-04",
         isConstant: true,
         serializedName: "x-ms-version",
         type: {
@@ -50313,13 +50835,23 @@ var init_parameters = __esm({
 var Service, xmlSerializer, setPropertiesOperationSpec, getPropertiesOperationSpec, getStatisticsOperationSpec, listContainersSegmentOperationSpec, getUserDelegationKeyOperationSpec, getAccountInfoOperationSpec, submitBatchOperationSpec, filterBlobsOperationSpec;
 var init_service = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/operations/service.js"() {
-    init_coreHttp();
+    init_src6();
     init_mappers();
     init_parameters();
     Service = class {
+      /**
+       * Initialize a new instance of the class Service class.
+       * @param client Reference to the service client
+       */
       constructor(client) {
         this.client = client;
       }
+      /**
+       * Sets properties for a storage account's Blob service endpoint, including properties for Storage
+       * Analytics and CORS (Cross-Origin Resource Sharing) rules
+       * @param blobServiceProperties The StorageService properties.
+       * @param options The options parameters.
+       */
       setProperties(blobServiceProperties2, options) {
         const operationArguments = {
           blobServiceProperties: blobServiceProperties2,
@@ -50327,24 +50859,45 @@ var init_service = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, setPropertiesOperationSpec);
       }
+      /**
+       * gets the properties of a storage account's Blob service, including properties for Storage Analytics
+       * and CORS (Cross-Origin Resource Sharing) rules.
+       * @param options The options parameters.
+       */
       getProperties(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getPropertiesOperationSpec);
       }
+      /**
+       * Retrieves statistics related to replication for the Blob service. It is only available on the
+       * secondary location endpoint when read-access geo-redundant replication is enabled for the storage
+       * account.
+       * @param options The options parameters.
+       */
       getStatistics(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getStatisticsOperationSpec);
       }
+      /**
+       * The List Containers Segment operation returns a list of the containers under the specified account
+       * @param options The options parameters.
+       */
       listContainersSegment(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, listContainersSegmentOperationSpec);
       }
+      /**
+       * Retrieves a user delegation key for the Blob service. This is only a valid operation when using
+       * bearer token authentication.
+       * @param keyInfo Key information
+       * @param options The options parameters.
+       */
       getUserDelegationKey(keyInfo2, options) {
         const operationArguments = {
           keyInfo: keyInfo2,
@@ -50352,12 +50905,24 @@ var init_service = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, getUserDelegationKeyOperationSpec);
       }
+      /**
+       * Returns the sku name and account kind
+       * @param options The options parameters.
+       */
       getAccountInfo(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getAccountInfoOperationSpec);
       }
+      /**
+       * The Batch operation allows multiple API calls to be embedded into a single HTTP request.
+       * @param contentLength The length of the request.
+       * @param multipartContentType Required. The value of this header must be multipart/mixed with a batch
+       *                             boundary. Example header value: multipart/mixed; boundary=batch_<GUID>
+       * @param body Initial data
+       * @param options The options parameters.
+       */
       submitBatch(contentLength2, multipartContentType2, body2, options) {
         const operationArguments = {
           contentLength: contentLength2,
@@ -50367,6 +50932,12 @@ var init_service = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, submitBatchOperationSpec);
       }
+      /**
+       * The Filter Blobs operation enables callers to list blobs across all containers whose tags match a
+       * given search expression.  Filter blobs searches across all containers within a storage account but
+       * can be scoped within the expression to a single container.
+       * @param options The options parameters.
+       */
       filterBlobs(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
@@ -50374,7 +50945,11 @@ var init_service = __esm({
         return this.client.sendOperationRequest(operationArguments, filterBlobsOperationSpec);
       }
     };
-    xmlSerializer = new Serializer(mappers_exports, true);
+    xmlSerializer = new Serializer(
+      mappers_exports,
+      /* isXml */
+      true
+    );
     setPropertiesOperationSpec = {
       path: "/",
       httpMethod: "PUT",
@@ -50606,55 +51181,97 @@ var init_service = __esm({
 var Container, xmlSerializer2, createOperationSpec, getPropertiesOperationSpec2, deleteOperationSpec, setMetadataOperationSpec, getAccessPolicyOperationSpec, setAccessPolicyOperationSpec, restoreOperationSpec, renameOperationSpec, submitBatchOperationSpec2, filterBlobsOperationSpec2, acquireLeaseOperationSpec, releaseLeaseOperationSpec, renewLeaseOperationSpec, breakLeaseOperationSpec, changeLeaseOperationSpec, listBlobFlatSegmentOperationSpec, listBlobHierarchySegmentOperationSpec, getAccountInfoOperationSpec2;
 var init_container = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/operations/container.js"() {
-    init_coreHttp();
+    init_src6();
     init_mappers();
     init_parameters();
     Container = class {
+      /**
+       * Initialize a new instance of the class Container class.
+       * @param client Reference to the service client
+       */
       constructor(client) {
         this.client = client;
       }
+      /**
+       * creates a new container under the specified account. If the container with the same name already
+       * exists, the operation fails
+       * @param options The options parameters.
+       */
       create(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, createOperationSpec);
       }
+      /**
+       * returns all user-defined metadata and system properties for the specified container. The data
+       * returned does not include the container's list of blobs
+       * @param options The options parameters.
+       */
       getProperties(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getPropertiesOperationSpec2);
       }
+      /**
+       * operation marks the specified container for deletion. The container and any blobs contained within
+       * it are later deleted during garbage collection
+       * @param options The options parameters.
+       */
       delete(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, deleteOperationSpec);
       }
+      /**
+       * operation sets one or more user-defined name-value pairs for the specified container.
+       * @param options The options parameters.
+       */
       setMetadata(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, setMetadataOperationSpec);
       }
+      /**
+       * gets the permissions for the specified container. The permissions indicate whether container data
+       * may be accessed publicly.
+       * @param options The options parameters.
+       */
       getAccessPolicy(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getAccessPolicyOperationSpec);
       }
+      /**
+       * sets the permissions for the specified container. The permissions indicate whether blobs in a
+       * container may be accessed publicly.
+       * @param options The options parameters.
+       */
       setAccessPolicy(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, setAccessPolicyOperationSpec);
       }
+      /**
+       * Restores a previously-deleted container.
+       * @param options The options parameters.
+       */
       restore(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, restoreOperationSpec);
       }
+      /**
+       * Renames an existing container.
+       * @param sourceContainerName Required.  Specifies the name of the container to rename.
+       * @param options The options parameters.
+       */
       rename(sourceContainerName2, options) {
         const operationArguments = {
           sourceContainerName: sourceContainerName2,
@@ -50662,6 +51279,14 @@ var init_container = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, renameOperationSpec);
       }
+      /**
+       * The Batch operation allows multiple API calls to be embedded into a single HTTP request.
+       * @param contentLength The length of the request.
+       * @param multipartContentType Required. The value of this header must be multipart/mixed with a batch
+       *                             boundary. Example header value: multipart/mixed; boundary=batch_<GUID>
+       * @param body Initial data
+       * @param options The options parameters.
+       */
       submitBatch(contentLength2, multipartContentType2, body2, options) {
         const operationArguments = {
           contentLength: contentLength2,
@@ -50671,18 +51296,34 @@ var init_container = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, submitBatchOperationSpec2);
       }
+      /**
+       * The Filter Blobs operation enables callers to list blobs in a container whose tags match a given
+       * search expression.  Filter blobs searches within the given container.
+       * @param options The options parameters.
+       */
       filterBlobs(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, filterBlobsOperationSpec2);
       }
+      /**
+       * [Update] establishes and manages a lock on a container for delete operations. The lock duration can
+       * be 15 to 60 seconds, or can be infinite
+       * @param options The options parameters.
+       */
       acquireLease(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, acquireLeaseOperationSpec);
       }
+      /**
+       * [Update] establishes and manages a lock on a container for delete operations. The lock duration can
+       * be 15 to 60 seconds, or can be infinite
+       * @param leaseId Specifies the current lease ID on the resource.
+       * @param options The options parameters.
+       */
       releaseLease(leaseId2, options) {
         const operationArguments = {
           leaseId: leaseId2,
@@ -50690,6 +51331,12 @@ var init_container = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, releaseLeaseOperationSpec);
       }
+      /**
+       * [Update] establishes and manages a lock on a container for delete operations. The lock duration can
+       * be 15 to 60 seconds, or can be infinite
+       * @param leaseId Specifies the current lease ID on the resource.
+       * @param options The options parameters.
+       */
       renewLease(leaseId2, options) {
         const operationArguments = {
           leaseId: leaseId2,
@@ -50697,12 +51344,26 @@ var init_container = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, renewLeaseOperationSpec);
       }
+      /**
+       * [Update] establishes and manages a lock on a container for delete operations. The lock duration can
+       * be 15 to 60 seconds, or can be infinite
+       * @param options The options parameters.
+       */
       breakLease(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, breakLeaseOperationSpec);
       }
+      /**
+       * [Update] establishes and manages a lock on a container for delete operations. The lock duration can
+       * be 15 to 60 seconds, or can be infinite
+       * @param leaseId Specifies the current lease ID on the resource.
+       * @param proposedLeaseId Proposed lease ID, in a GUID string format. The Blob service returns 400
+       *                        (Invalid request) if the proposed lease ID is not in the correct format. See Guid Constructor
+       *                        (String) for a list of valid GUID string formats.
+       * @param options The options parameters.
+       */
       changeLease(leaseId2, proposedLeaseId2, options) {
         const operationArguments = {
           leaseId: leaseId2,
@@ -50711,12 +51372,24 @@ var init_container = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, changeLeaseOperationSpec);
       }
+      /**
+       * [Update] The List Blobs operation returns a list of the blobs under the specified container
+       * @param options The options parameters.
+       */
       listBlobFlatSegment(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, listBlobFlatSegmentOperationSpec);
       }
+      /**
+       * [Update] The List Blobs operation returns a list of the blobs under the specified container
+       * @param delimiter When the request includes this parameter, the operation returns a BlobPrefix
+       *                  element in the response body that acts as a placeholder for all blobs whose names begin with the
+       *                  same substring up to the appearance of the delimiter character. The delimiter may be a single
+       *                  character or a string.
+       * @param options The options parameters.
+       */
       listBlobHierarchySegment(delimiter3, options) {
         const operationArguments = {
           delimiter: delimiter3,
@@ -50724,6 +51397,10 @@ var init_container = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, listBlobHierarchySegmentOperationSpec);
       }
+      /**
+       * Returns the sku name and account kind
+       * @param options The options parameters.
+       */
       getAccountInfo(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
@@ -50731,7 +51408,11 @@ var init_container = __esm({
         return this.client.sendOperationRequest(operationArguments, getAccountInfoOperationSpec2);
       }
     };
-    xmlSerializer2 = new Serializer(mappers_exports, true);
+    xmlSerializer2 = new Serializer(
+      mappers_exports,
+      /* isXml */
+      true
+    );
     createOperationSpec = {
       path: "/{containerName}",
       httpMethod: "PUT",
@@ -51270,37 +51951,75 @@ var init_container = __esm({
 var Blob3, xmlSerializer3, downloadOperationSpec, getPropertiesOperationSpec3, deleteOperationSpec2, undeleteOperationSpec, setExpiryOperationSpec, setHttpHeadersOperationSpec, setImmutabilityPolicyOperationSpec, deleteImmutabilityPolicyOperationSpec, setLegalHoldOperationSpec, setMetadataOperationSpec2, acquireLeaseOperationSpec2, releaseLeaseOperationSpec2, renewLeaseOperationSpec2, changeLeaseOperationSpec2, breakLeaseOperationSpec2, createSnapshotOperationSpec, startCopyFromURLOperationSpec, copyFromURLOperationSpec, abortCopyFromURLOperationSpec, setTierOperationSpec, getAccountInfoOperationSpec3, queryOperationSpec, getTagsOperationSpec, setTagsOperationSpec;
 var init_blob = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/operations/blob.js"() {
-    init_coreHttp();
+    init_src6();
     init_mappers();
     init_parameters();
     Blob3 = class {
+      /**
+       * Initialize a new instance of the class Blob class.
+       * @param client Reference to the service client
+       */
       constructor(client) {
         this.client = client;
       }
+      /**
+       * The Download operation reads or downloads a blob from the system, including its metadata and
+       * properties. You can also call Download to read a snapshot.
+       * @param options The options parameters.
+       */
       download(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, downloadOperationSpec);
       }
+      /**
+       * The Get Properties operation returns all user-defined metadata, standard HTTP properties, and system
+       * properties for the blob. It does not return the content of the blob.
+       * @param options The options parameters.
+       */
       getProperties(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getPropertiesOperationSpec3);
       }
+      /**
+       * If the storage account's soft delete feature is disabled then, when a blob is deleted, it is
+       * permanently removed from the storage account. If the storage account's soft delete feature is
+       * enabled, then, when a blob is deleted, it is marked for deletion and becomes inaccessible
+       * immediately. However, the blob service retains the blob or snapshot for the number of days specified
+       * by the DeleteRetentionPolicy section of [Storage service properties]
+       * (Set-Blob-Service-Properties.md). After the specified number of days has passed, the blob's data is
+       * permanently removed from the storage account. Note that you continue to be charged for the
+       * soft-deleted blob's storage until it is permanently removed. Use the List Blobs API and specify the
+       * "include=deleted" query parameter to discover which blobs and snapshots have been soft deleted. You
+       * can then use the Undelete Blob API to restore a soft-deleted blob. All other operations on a
+       * soft-deleted blob or snapshot causes the service to return an HTTP status code of 404
+       * (ResourceNotFound).
+       * @param options The options parameters.
+       */
       delete(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, deleteOperationSpec2);
       }
+      /**
+       * Undelete a blob that was previously soft deleted
+       * @param options The options parameters.
+       */
       undelete(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, undeleteOperationSpec);
       }
+      /**
+       * Sets the time a blob will expire and be deleted.
+       * @param expiryOptions Required. Indicates mode of the expiry time
+       * @param options The options parameters.
+       */
       setExpiry(expiryOptions2, options) {
         const operationArguments = {
           expiryOptions: expiryOptions2,
@@ -51308,24 +52027,41 @@ var init_blob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, setExpiryOperationSpec);
       }
+      /**
+       * The Set HTTP Headers operation sets system properties on the blob
+       * @param options The options parameters.
+       */
       setHttpHeaders(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, setHttpHeadersOperationSpec);
       }
+      /**
+       * The Set Immutability Policy operation sets the immutability policy on the blob
+       * @param options The options parameters.
+       */
       setImmutabilityPolicy(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, setImmutabilityPolicyOperationSpec);
       }
+      /**
+       * The Delete Immutability Policy operation deletes the immutability policy on the blob
+       * @param options The options parameters.
+       */
       deleteImmutabilityPolicy(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, deleteImmutabilityPolicyOperationSpec);
       }
+      /**
+       * The Set Legal Hold operation sets a legal hold on the blob.
+       * @param legalHold Specified if a legal hold should be set on the blob.
+       * @param options The options parameters.
+       */
       setLegalHold(legalHold2, options) {
         const operationArguments = {
           legalHold: legalHold2,
@@ -51333,18 +52069,34 @@ var init_blob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, setLegalHoldOperationSpec);
       }
+      /**
+       * The Set Blob Metadata operation sets user-defined metadata for the specified blob as one or more
+       * name-value pairs
+       * @param options The options parameters.
+       */
       setMetadata(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, setMetadataOperationSpec2);
       }
+      /**
+       * [Update] The Lease Blob operation establishes and manages a lock on a blob for write and delete
+       * operations
+       * @param options The options parameters.
+       */
       acquireLease(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, acquireLeaseOperationSpec2);
       }
+      /**
+       * [Update] The Lease Blob operation establishes and manages a lock on a blob for write and delete
+       * operations
+       * @param leaseId Specifies the current lease ID on the resource.
+       * @param options The options parameters.
+       */
       releaseLease(leaseId2, options) {
         const operationArguments = {
           leaseId: leaseId2,
@@ -51352,6 +52104,12 @@ var init_blob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, releaseLeaseOperationSpec2);
       }
+      /**
+       * [Update] The Lease Blob operation establishes and manages a lock on a blob for write and delete
+       * operations
+       * @param leaseId Specifies the current lease ID on the resource.
+       * @param options The options parameters.
+       */
       renewLease(leaseId2, options) {
         const operationArguments = {
           leaseId: leaseId2,
@@ -51359,6 +52117,15 @@ var init_blob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, renewLeaseOperationSpec2);
       }
+      /**
+       * [Update] The Lease Blob operation establishes and manages a lock on a blob for write and delete
+       * operations
+       * @param leaseId Specifies the current lease ID on the resource.
+       * @param proposedLeaseId Proposed lease ID, in a GUID string format. The Blob service returns 400
+       *                        (Invalid request) if the proposed lease ID is not in the correct format. See Guid Constructor
+       *                        (String) for a list of valid GUID string formats.
+       * @param options The options parameters.
+       */
       changeLease(leaseId2, proposedLeaseId2, options) {
         const operationArguments = {
           leaseId: leaseId2,
@@ -51367,18 +52134,35 @@ var init_blob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, changeLeaseOperationSpec2);
       }
+      /**
+       * [Update] The Lease Blob operation establishes and manages a lock on a blob for write and delete
+       * operations
+       * @param options The options parameters.
+       */
       breakLease(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, breakLeaseOperationSpec2);
       }
+      /**
+       * The Create Snapshot operation creates a read-only snapshot of a blob
+       * @param options The options parameters.
+       */
       createSnapshot(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, createSnapshotOperationSpec);
       }
+      /**
+       * The Start Copy From URL operation copies a blob or an internet resource to a new blob.
+       * @param copySource Specifies the name of the source page blob snapshot. This value is a URL of up to
+       *                   2 KB in length that specifies a page blob snapshot. The value should be URL-encoded as it would
+       *                   appear in a request URI. The source blob must either be public or must be authenticated via a shared
+       *                   access signature.
+       * @param options The options parameters.
+       */
       startCopyFromURL(copySource2, options) {
         const operationArguments = {
           copySource: copySource2,
@@ -51386,6 +52170,15 @@ var init_blob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, startCopyFromURLOperationSpec);
       }
+      /**
+       * The Copy From URL operation copies a blob or an internet resource to a new blob. It will not return
+       * a response until the copy is complete.
+       * @param copySource Specifies the name of the source page blob snapshot. This value is a URL of up to
+       *                   2 KB in length that specifies a page blob snapshot. The value should be URL-encoded as it would
+       *                   appear in a request URI. The source blob must either be public or must be authenticated via a shared
+       *                   access signature.
+       * @param options The options parameters.
+       */
       copyFromURL(copySource2, options) {
         const operationArguments = {
           copySource: copySource2,
@@ -51393,6 +52186,13 @@ var init_blob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, copyFromURLOperationSpec);
       }
+      /**
+       * The Abort Copy From URL operation aborts a pending Copy From URL operation, and leaves a destination
+       * blob with zero length and full metadata.
+       * @param copyId The copy identifier provided in the x-ms-copy-id header of the original Copy Blob
+       *               operation.
+       * @param options The options parameters.
+       */
       abortCopyFromURL(copyId2, options) {
         const operationArguments = {
           copyId: copyId2,
@@ -51400,6 +52200,15 @@ var init_blob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, abortCopyFromURLOperationSpec);
       }
+      /**
+       * The Set Tier operation sets the tier on a blob. The operation is allowed on a page blob in a premium
+       * storage account and on a block blob in a blob storage account (locally redundant storage only). A
+       * premium page blob's tier determines the allowed size, IOPS, and bandwidth of the blob. A block
+       * blob's tier determines Hot/Cool/Archive storage type. This operation does not update the blob's
+       * ETag.
+       * @param tier Indicates the tier to be set on the blob.
+       * @param options The options parameters.
+       */
       setTier(tier2, options) {
         const operationArguments = {
           tier: tier2,
@@ -51407,24 +52216,41 @@ var init_blob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, setTierOperationSpec);
       }
+      /**
+       * Returns the sku name and account kind
+       * @param options The options parameters.
+       */
       getAccountInfo(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getAccountInfoOperationSpec3);
       }
+      /**
+       * The Query operation enables users to select/project on blob data by providing simple query
+       * expressions.
+       * @param options The options parameters.
+       */
       query(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, queryOperationSpec);
       }
+      /**
+       * The Get Tags operation enables users to get the tags associated with a blob.
+       * @param options The options parameters.
+       */
       getTags(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getTagsOperationSpec);
       }
+      /**
+       * The Set Tags operation enables users to set tags on a blob.
+       * @param options The options parameters.
+       */
       setTags(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
@@ -51432,7 +52258,11 @@ var init_blob = __esm({
         return this.client.sendOperationRequest(operationArguments, setTagsOperationSpec);
       }
     };
-    xmlSerializer3 = new Serializer(mappers_exports, true);
+    xmlSerializer3 = new Serializer(
+      mappers_exports,
+      /* isXml */
+      true
+    );
     downloadOperationSpec = {
       path: "/{containerName}/{blob}",
       httpMethod: "GET",
@@ -52201,13 +53031,24 @@ var init_blob = __esm({
 var PageBlob, xmlSerializer4, serializer, createOperationSpec2, uploadPagesOperationSpec, clearPagesOperationSpec, uploadPagesFromURLOperationSpec, getPageRangesOperationSpec, getPageRangesDiffOperationSpec, resizeOperationSpec, updateSequenceNumberOperationSpec, copyIncrementalOperationSpec;
 var init_pageBlob = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/operations/pageBlob.js"() {
-    init_coreHttp();
+    init_src6();
     init_mappers();
     init_parameters();
     PageBlob = class {
+      /**
+       * Initialize a new instance of the class PageBlob class.
+       * @param client Reference to the service client
+       */
       constructor(client) {
         this.client = client;
       }
+      /**
+       * The Create operation creates a new page blob.
+       * @param contentLength The length of the request.
+       * @param blobContentLength This header specifies the maximum size for the page blob, up to 1 TB. The
+       *                          page blob size must be aligned to a 512-byte boundary.
+       * @param options The options parameters.
+       */
       create(contentLength2, blobContentLength2, options) {
         const operationArguments = {
           contentLength: contentLength2,
@@ -52216,6 +53057,12 @@ var init_pageBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, createOperationSpec2);
       }
+      /**
+       * The Upload Pages operation writes a range of pages to a page blob
+       * @param contentLength The length of the request.
+       * @param body Initial data
+       * @param options The options parameters.
+       */
       uploadPages(contentLength2, body2, options) {
         const operationArguments = {
           contentLength: contentLength2,
@@ -52224,6 +53071,11 @@ var init_pageBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, uploadPagesOperationSpec);
       }
+      /**
+       * The Clear Pages operation clears a set of pages from a page blob
+       * @param contentLength The length of the request.
+       * @param options The options parameters.
+       */
       clearPages(contentLength2, options) {
         const operationArguments = {
           contentLength: contentLength2,
@@ -52231,6 +53083,17 @@ var init_pageBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, clearPagesOperationSpec);
       }
+      /**
+       * The Upload Pages operation writes a range of pages to a page blob where the contents are read from a
+       * URL
+       * @param sourceUrl Specify a URL to the copy source.
+       * @param sourceRange Bytes of source data in the specified range. The length of this range should
+       *                    match the ContentLength header and x-ms-range/Range destination range header.
+       * @param contentLength The length of the request.
+       * @param range The range of bytes to which the source range would be written. The range should be 512
+       *              aligned and range-end is required.
+       * @param options The options parameters.
+       */
       uploadPagesFromURL(sourceUrl2, sourceRange2, contentLength2, range2, options) {
         const operationArguments = {
           sourceUrl: sourceUrl2,
@@ -52241,18 +53104,34 @@ var init_pageBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, uploadPagesFromURLOperationSpec);
       }
+      /**
+       * The Get Page Ranges operation returns the list of valid page ranges for a page blob or snapshot of a
+       * page blob
+       * @param options The options parameters.
+       */
       getPageRanges(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getPageRangesOperationSpec);
       }
+      /**
+       * The Get Page Ranges Diff operation returns the list of valid page ranges for a page blob that were
+       * changed between target blob and previous snapshot.
+       * @param options The options parameters.
+       */
       getPageRangesDiff(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
         };
         return this.client.sendOperationRequest(operationArguments, getPageRangesDiffOperationSpec);
       }
+      /**
+       * Resize the Blob
+       * @param blobContentLength This header specifies the maximum size for the page blob, up to 1 TB. The
+       *                          page blob size must be aligned to a 512-byte boundary.
+       * @param options The options parameters.
+       */
       resize(blobContentLength2, options) {
         const operationArguments = {
           blobContentLength: blobContentLength2,
@@ -52260,6 +53139,13 @@ var init_pageBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, resizeOperationSpec);
       }
+      /**
+       * Update the sequence number of the blob
+       * @param sequenceNumberAction Required if the x-ms-blob-sequence-number header is set for the request.
+       *                             This property applies to page blobs only. This property indicates how the service should modify the
+       *                             blob's sequence number
+       * @param options The options parameters.
+       */
       updateSequenceNumber(sequenceNumberAction2, options) {
         const operationArguments = {
           sequenceNumberAction: sequenceNumberAction2,
@@ -52267,6 +53153,18 @@ var init_pageBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, updateSequenceNumberOperationSpec);
       }
+      /**
+       * The Copy Incremental operation copies a snapshot of the source page blob to a destination page blob.
+       * The snapshot is copied such that only the differential changes between the previously copied
+       * snapshot are transferred to the destination. The copied snapshots are complete copies of the
+       * original snapshot and can be read or copied from as usual. This API is supported since REST version
+       * 2016-05-31.
+       * @param copySource Specifies the name of the source page blob snapshot. This value is a URL of up to
+       *                   2 KB in length that specifies a page blob snapshot. The value should be URL-encoded as it would
+       *                   appear in a request URI. The source blob must either be public or must be authenticated via a shared
+       *                   access signature.
+       * @param options The options parameters.
+       */
       copyIncremental(copySource2, options) {
         const operationArguments = {
           copySource: copySource2,
@@ -52275,8 +53173,16 @@ var init_pageBlob = __esm({
         return this.client.sendOperationRequest(operationArguments, copyIncrementalOperationSpec);
       }
     };
-    xmlSerializer4 = new Serializer(mappers_exports, true);
-    serializer = new Serializer(mappers_exports, false);
+    xmlSerializer4 = new Serializer(
+      mappers_exports,
+      /* isXml */
+      true
+    );
+    serializer = new Serializer(
+      mappers_exports,
+      /* isXml */
+      false
+    );
     createOperationSpec2 = {
       path: "/{containerName}/{blob}",
       httpMethod: "PUT",
@@ -52624,13 +53530,22 @@ var init_pageBlob = __esm({
 var AppendBlob, xmlSerializer5, serializer2, createOperationSpec3, appendBlockOperationSpec, appendBlockFromUrlOperationSpec, sealOperationSpec;
 var init_appendBlob = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/operations/appendBlob.js"() {
-    init_coreHttp();
+    init_src6();
     init_mappers();
     init_parameters();
     AppendBlob = class {
+      /**
+       * Initialize a new instance of the class AppendBlob class.
+       * @param client Reference to the service client
+       */
       constructor(client) {
         this.client = client;
       }
+      /**
+       * The Create Append Blob operation creates a new append blob.
+       * @param contentLength The length of the request.
+       * @param options The options parameters.
+       */
       create(contentLength2, options) {
         const operationArguments = {
           contentLength: contentLength2,
@@ -52638,6 +53553,14 @@ var init_appendBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, createOperationSpec3);
       }
+      /**
+       * The Append Block operation commits a new block of data to the end of an existing append blob. The
+       * Append Block operation is permitted only if the blob was created with x-ms-blob-type set to
+       * AppendBlob. Append Block is supported only on version 2015-02-21 version or later.
+       * @param contentLength The length of the request.
+       * @param body Initial data
+       * @param options The options parameters.
+       */
       appendBlock(contentLength2, body2, options) {
         const operationArguments = {
           contentLength: contentLength2,
@@ -52646,6 +53569,15 @@ var init_appendBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, appendBlockOperationSpec);
       }
+      /**
+       * The Append Block operation commits a new block of data to the end of an existing append blob where
+       * the contents are read from a source url. The Append Block operation is permitted only if the blob
+       * was created with x-ms-blob-type set to AppendBlob. Append Block is supported only on version
+       * 2015-02-21 version or later.
+       * @param sourceUrl Specify a URL to the copy source.
+       * @param contentLength The length of the request.
+       * @param options The options parameters.
+       */
       appendBlockFromUrl(sourceUrl2, contentLength2, options) {
         const operationArguments = {
           sourceUrl: sourceUrl2,
@@ -52654,6 +53586,11 @@ var init_appendBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, appendBlockFromUrlOperationSpec);
       }
+      /**
+       * The Seal operation seals the Append Blob to make it read-only. Seal is supported only on version
+       * 2019-12-12 version or later.
+       * @param options The options parameters.
+       */
       seal(options) {
         const operationArguments = {
           options: operationOptionsToRequestOptionsBase(options || {})
@@ -52661,8 +53598,16 @@ var init_appendBlob = __esm({
         return this.client.sendOperationRequest(operationArguments, sealOperationSpec);
       }
     };
-    xmlSerializer5 = new Serializer(mappers_exports, true);
-    serializer2 = new Serializer(mappers_exports, false);
+    xmlSerializer5 = new Serializer(
+      mappers_exports,
+      /* isXml */
+      true
+    );
+    serializer2 = new Serializer(
+      mappers_exports,
+      /* isXml */
+      false
+    );
     createOperationSpec3 = {
       path: "/{containerName}/{blob}",
       httpMethod: "PUT",
@@ -52827,13 +53772,26 @@ var init_appendBlob = __esm({
 var BlockBlob, xmlSerializer6, serializer3, uploadOperationSpec, putBlobFromUrlOperationSpec, stageBlockOperationSpec, stageBlockFromURLOperationSpec, commitBlockListOperationSpec, getBlockListOperationSpec;
 var init_blockBlob = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/operations/blockBlob.js"() {
-    init_coreHttp();
+    init_src6();
     init_mappers();
     init_parameters();
     BlockBlob = class {
+      /**
+       * Initialize a new instance of the class BlockBlob class.
+       * @param client Reference to the service client
+       */
       constructor(client) {
         this.client = client;
       }
+      /**
+       * The Upload Block Blob operation updates the content of an existing block blob. Updating an existing
+       * block blob overwrites any existing metadata on the blob. Partial updates are not supported with Put
+       * Blob; the content of the existing blob is overwritten with the content of the new blob. To perform a
+       * partial update of the content of a block blob, use the Put Block List operation.
+       * @param contentLength The length of the request.
+       * @param body Initial data
+       * @param options The options parameters.
+       */
       upload(contentLength2, body2, options) {
         const operationArguments = {
           contentLength: contentLength2,
@@ -52842,6 +53800,19 @@ var init_blockBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, uploadOperationSpec);
       }
+      /**
+       * The Put Blob from URL operation creates a new Block Blob where the contents of the blob are read
+       * from a given URL.  This API is supported beginning with the 2020-04-08 version. Partial updates are
+       * not supported with Put Blob from URL; the content of an existing blob is overwritten with the
+       * content of the new blob.  To perform partial updates to a block blob’s contents using a source URL,
+       * use the Put Block from URL API in conjunction with Put Block List.
+       * @param contentLength The length of the request.
+       * @param copySource Specifies the name of the source page blob snapshot. This value is a URL of up to
+       *                   2 KB in length that specifies a page blob snapshot. The value should be URL-encoded as it would
+       *                   appear in a request URI. The source blob must either be public or must be authenticated via a shared
+       *                   access signature.
+       * @param options The options parameters.
+       */
       putBlobFromUrl(contentLength2, copySource2, options) {
         const operationArguments = {
           contentLength: contentLength2,
@@ -52850,6 +53821,15 @@ var init_blockBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, putBlobFromUrlOperationSpec);
       }
+      /**
+       * The Stage Block operation creates a new block to be committed as part of a blob
+       * @param blockId A valid Base64 string value that identifies the block. Prior to encoding, the string
+       *                must be less than or equal to 64 bytes in size. For a given blob, the length of the value specified
+       *                for the blockid parameter must be the same size for each block.
+       * @param contentLength The length of the request.
+       * @param body Initial data
+       * @param options The options parameters.
+       */
       stageBlock(blockId2, contentLength2, body2, options) {
         const operationArguments = {
           blockId: blockId2,
@@ -52859,6 +53839,16 @@ var init_blockBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, stageBlockOperationSpec);
       }
+      /**
+       * The Stage Block operation creates a new block to be committed as part of a blob where the contents
+       * are read from a URL.
+       * @param blockId A valid Base64 string value that identifies the block. Prior to encoding, the string
+       *                must be less than or equal to 64 bytes in size. For a given blob, the length of the value specified
+       *                for the blockid parameter must be the same size for each block.
+       * @param contentLength The length of the request.
+       * @param sourceUrl Specify a URL to the copy source.
+       * @param options The options parameters.
+       */
       stageBlockFromURL(blockId2, contentLength2, sourceUrl2, options) {
         const operationArguments = {
           blockId: blockId2,
@@ -52868,6 +53858,17 @@ var init_blockBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, stageBlockFromURLOperationSpec);
       }
+      /**
+       * The Commit Block List operation writes a blob by specifying the list of block IDs that make up the
+       * blob. In order to be written as part of a blob, a block must have been successfully written to the
+       * server in a prior Put Block operation. You can call Put Block List to update a blob by uploading
+       * only those blocks that have changed, then committing the new and existing blocks together. You can
+       * do this by specifying whether to commit a block from the committed block list or from the
+       * uncommitted block list, or to commit the most recently uploaded version of the block, whichever list
+       * it may belong to.
+       * @param blocks Blob Blocks.
+       * @param options The options parameters.
+       */
       commitBlockList(blocks2, options) {
         const operationArguments = {
           blocks: blocks2,
@@ -52875,6 +53876,13 @@ var init_blockBlob = __esm({
         };
         return this.client.sendOperationRequest(operationArguments, commitBlockListOperationSpec);
       }
+      /**
+       * The Get Block List operation retrieves the list of blocks that have been uploaded as part of a block
+       * blob
+       * @param listType Specifies whether to return the list of committed blocks, the list of uncommitted
+       *                 blocks, or both lists together.
+       * @param options The options parameters.
+       */
       getBlockList(listType2, options) {
         const operationArguments = {
           listType: listType2,
@@ -52883,8 +53891,16 @@ var init_blockBlob = __esm({
         return this.client.sendOperationRequest(operationArguments, getBlockListOperationSpec);
       }
     };
-    xmlSerializer6 = new Serializer(mappers_exports, true);
-    serializer3 = new Serializer(mappers_exports, false);
+    xmlSerializer6 = new Serializer(
+      mappers_exports,
+      /* isXml */
+      true
+    );
+    serializer3 = new Serializer(
+      mappers_exports,
+      /* isXml */
+      false
+    );
     uploadOperationSpec = {
       path: "/{containerName}/{blob}",
       httpMethod: "PUT",
@@ -53170,17 +54186,18 @@ var init_log3 = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/constants.js
-var SDK_VERSION, SERVICE_VERSION, BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES, BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES, BLOCK_BLOB_MAX_BLOCKS, DEFAULT_BLOCK_BUFFER_SIZE_BYTES, DEFAULT_BLOB_DOWNLOAD_BLOCK_BYTES, DEFAULT_MAX_DOWNLOAD_RETRY_REQUESTS, StorageOAuthScopes, URLConstants, HTTPURLConnection, HeaderConstants, ETagNone, ETagAny, SIZE_1_MB, BATCH_MAX_REQUEST, BATCH_MAX_PAYLOAD_IN_BYTES, HTTP_LINE_ENDING, HTTP_VERSION_1_1, EncryptionAlgorithmAES25, DevelopmentConnectionString, StorageBlobLoggingAllowedHeaderNames, StorageBlobLoggingAllowedQueryParameters, BlobUsesCustomerSpecifiedEncryptionMsg, BlobDoesNotUseCustomerSpecifiedEncryption;
+var SDK_VERSION, SERVICE_VERSION, BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES, BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES, BLOCK_BLOB_MAX_BLOCKS, DEFAULT_BLOCK_BUFFER_SIZE_BYTES, DEFAULT_BLOB_DOWNLOAD_BLOCK_BYTES, DEFAULT_MAX_DOWNLOAD_RETRY_REQUESTS, REQUEST_TIMEOUT, StorageOAuthScopes, URLConstants, HTTPURLConnection, HeaderConstants, ETagNone, ETagAny, SIZE_1_MB, BATCH_MAX_REQUEST, BATCH_MAX_PAYLOAD_IN_BYTES, HTTP_LINE_ENDING, HTTP_VERSION_1_1, EncryptionAlgorithmAES25, DevelopmentConnectionString, StorageBlobLoggingAllowedHeaderNames, StorageBlobLoggingAllowedQueryParameters, BlobUsesCustomerSpecifiedEncryptionMsg, BlobDoesNotUseCustomerSpecifiedEncryption, PathStylePorts;
 var init_constants2 = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/constants.js"() {
-    SDK_VERSION = "12.11.0";
-    SERVICE_VERSION = "2021-08-06";
+    SDK_VERSION = "12.12.0";
+    SERVICE_VERSION = "2021-10-04";
     BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES = 256 * 1024 * 1024;
     BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES = 4e3 * 1024 * 1024;
     BLOCK_BLOB_MAX_BLOCKS = 5e4;
     DEFAULT_BLOCK_BUFFER_SIZE_BYTES = 8 * 1024 * 1024;
     DEFAULT_BLOB_DOWNLOAD_BLOCK_BYTES = 4 * 1024 * 1024;
     DEFAULT_MAX_DOWNLOAD_RETRY_REQUESTS = 5;
+    REQUEST_TIMEOUT = 100 * 1e3;
     StorageOAuthScopes = "https://storage.azure.com/.default";
     URLConstants = {
       Parameters: {
@@ -53365,16 +54382,38 @@ var init_constants2 = __esm({
     ];
     BlobUsesCustomerSpecifiedEncryptionMsg = "BlobUsesCustomerSpecifiedEncryption";
     BlobDoesNotUseCustomerSpecifiedEncryption = "BlobDoesNotUseCustomerSpecifiedEncryption";
+    PathStylePorts = [
+      "10000",
+      "10001",
+      "10002",
+      "10003",
+      "10004",
+      "10100",
+      "10101",
+      "10102",
+      "10103",
+      "10104",
+      "11000",
+      "11001",
+      "11002",
+      "11003",
+      "11004",
+      "11100",
+      "11101",
+      "11102",
+      "11103",
+      "11104"
+    ];
   }
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/utils.common.js
-function escapeURLPath(url2) {
-  const urlParsed = URLBuilder.parse(url2);
-  let path6 = urlParsed.getPath();
-  path6 = path6 || "/";
-  path6 = escape(path6);
-  urlParsed.setPath(path6);
+function escapeURLPath(url3) {
+  const urlParsed = URLBuilder.parse(url3);
+  let path8 = urlParsed.getPath();
+  path8 = path8 || "/";
+  path8 = escape(path8);
+  urlParsed.setPath(path8);
   return urlParsed.toString();
 }
 function getProxyUriFromDevConnString(connectionString) {
@@ -53451,37 +54490,37 @@ function extractConnectionStringParts(connectionString) {
 function escape(text) {
   return encodeURIComponent(text).replace(/%2F/g, "/").replace(/'/g, "%27").replace(/\+/g, "%20").replace(/%25/g, "%");
 }
-function appendToURLPath(url2, name) {
-  const urlParsed = URLBuilder.parse(url2);
-  let path6 = urlParsed.getPath();
-  path6 = path6 ? path6.endsWith("/") ? `${path6}${name}` : `${path6}/${name}` : name;
-  urlParsed.setPath(path6);
+function appendToURLPath(url3, name) {
+  const urlParsed = URLBuilder.parse(url3);
+  let path8 = urlParsed.getPath();
+  path8 = path8 ? path8.endsWith("/") ? `${path8}${name}` : `${path8}/${name}` : name;
+  urlParsed.setPath(path8);
   return urlParsed.toString();
 }
-function setURLParameter(url2, name, value) {
-  const urlParsed = URLBuilder.parse(url2);
+function setURLParameter(url3, name, value) {
+  const urlParsed = URLBuilder.parse(url3);
   urlParsed.setQueryParameter(name, value);
   return urlParsed.toString();
 }
-function getURLParameter(url2, name) {
-  const urlParsed = URLBuilder.parse(url2);
+function getURLParameter(url3, name) {
+  const urlParsed = URLBuilder.parse(url3);
   return urlParsed.getQueryParameterValue(name);
 }
-function setURLHost(url2, host) {
-  const urlParsed = URLBuilder.parse(url2);
+function setURLHost(url3, host) {
+  const urlParsed = URLBuilder.parse(url3);
   urlParsed.setHost(host);
   return urlParsed.toString();
 }
-function getURLPath(url2) {
-  const urlParsed = URLBuilder.parse(url2);
+function getURLPath(url3) {
+  const urlParsed = URLBuilder.parse(url3);
   return urlParsed.getPath();
 }
-function getURLScheme(url2) {
-  const urlParsed = URLBuilder.parse(url2);
+function getURLScheme(url3) {
+  const urlParsed = URLBuilder.parse(url3);
   return urlParsed.getScheme();
 }
-function getURLPathAndQuery(url2) {
-  const urlParsed = URLBuilder.parse(url2);
+function getURLPathAndQuery(url3) {
+  const urlParsed = URLBuilder.parse(url3);
   const pathString = urlParsed.getPath();
   if (!pathString) {
     throw new RangeError("Invalid url without valid path.");
@@ -53493,8 +54532,8 @@ function getURLPathAndQuery(url2) {
   }
   return `${pathString}${queryString}`;
 }
-function getURLQueries(url2) {
-  let queryString = URLBuilder.parse(url2).getQuery();
+function getURLQueries(url3) {
+  let queryString = URLBuilder.parse(url3).getQuery();
   if (!queryString) {
     return {};
   }
@@ -53515,8 +54554,8 @@ function getURLQueries(url2) {
   }
   return queries;
 }
-function appendToURLQuery(url2, queryParts) {
-  const urlParsed = URLBuilder.parse(url2);
+function appendToURLQuery(url3, queryParts) {
+  const urlParsed = URLBuilder.parse(url3);
   let query = urlParsed.getQuery();
   if (query) {
     query += "&" + queryParts;
@@ -53582,8 +54621,8 @@ function padStart(currentString, targetLength, padString = " ") {
 function iEqual(str1, str2) {
   return str1.toLocaleLowerCase() === str2.toLocaleLowerCase();
 }
-function getAccountNameFromUrl(url2) {
-  const parsedUrl = URLBuilder.parse(url2);
+function getAccountNameFromUrl(url3) {
+  const parsedUrl = URLBuilder.parse(url3);
   let accountName;
   try {
     if (parsedUrl.getHost().split(".")[1] === "blob") {
@@ -53603,7 +54642,7 @@ function isIpEndpointStyle(parsedUrl) {
     return false;
   }
   const host = parsedUrl.getHost() + (parsedUrl.getPort() === void 0 ? "" : ":" + parsedUrl.getPort());
-  return /^.*:.*:.*$|^localhost(:[0-9]+)?$|^(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])){3}(:[0-9]+)?$/.test(host);
+  return /^.*:.*:.*$|^localhost(:[0-9]+)?$|^(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])){3}(:[0-9]+)?$/.test(host) || parsedUrl.getPort() !== void 0 && PathStylePorts.includes(parsedUrl.getPort());
 }
 function toBlobTagsString(tags2) {
   if (tags2 === void 0) {
@@ -53745,9 +54784,9 @@ function ConvertInternalResponseOfListBlobFlat(internalResponse) {
   } });
 }
 function ConvertInternalResponseOfListBlobHierarchy(internalResponse) {
-  var _a2;
+  var _a;
   return Object.assign(Object.assign({}, internalResponse), { segment: {
-    blobPrefixes: (_a2 = internalResponse.segment.blobPrefixes) === null || _a2 === void 0 ? void 0 : _a2.map((blobPrefixInternal) => {
+    blobPrefixes: (_a = internalResponse.segment.blobPrefixes) === null || _a === void 0 ? void 0 : _a.map((blobPrefixInternal) => {
       const blobPrefix = {
         name: BlobNameToString(blobPrefixInternal.name)
       };
@@ -54083,9 +55122,16 @@ function* ExtractPageRangeInfoItems(getPageRangesSegment) {
     };
   }
 }
+function EscapePath(blobName) {
+  const split = blobName.split("/");
+  for (let i = 0; i < split.length; i++) {
+    split[i] = encodeURIComponent(split[i]);
+  }
+  return split.join("/");
+}
 var init_utils_common = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/utils.common.js"() {
-    init_coreHttp();
+    init_src6();
     init_constants2();
   }
 });
@@ -54094,19 +55140,31 @@ var init_utils_common = __esm({
 var StorageBrowserPolicy;
 var init_StorageBrowserPolicy = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/policies/StorageBrowserPolicy.js"() {
-    init_coreHttp();
+    init_src6();
     init_constants2();
     init_utils_common();
     StorageBrowserPolicy = class extends BaseRequestPolicy {
+      /**
+       * Creates an instance of StorageBrowserPolicy.
+       * @param nextPolicy -
+       * @param options -
+       */
+      // The base class has a protected constructor. Adding a public one to enable constructing of this class.
+      /* eslint-disable-next-line @typescript-eslint/no-useless-constructor*/
       constructor(nextPolicy, options) {
         super(nextPolicy, options);
       }
+      /**
+       * Sends out request.
+       *
+       * @param request -
+       */
       async sendRequest(request) {
         if (isNode) {
           return this._nextPolicy.sendRequest(request);
         }
         if (request.method.toUpperCase() === "GET" || request.method.toUpperCase() === "HEAD") {
-          request.url = setURLParameter(request.url, URLConstants.Parameters.FORCE_BROWSER_NO_CACHE, new Date().getTime().toString());
+          request.url = setURLParameter(request.url, URLConstants.Parameters.FORCE_BROWSER_NO_CACHE, (/* @__PURE__ */ new Date()).getTime().toString());
         }
         request.headers.remove(HeaderConstants.COOKIE);
         request.headers.remove(HeaderConstants.CONTENT_LENGTH);
@@ -54122,6 +55180,12 @@ var init_StorageBrowserPolicyFactory = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/StorageBrowserPolicyFactory.js"() {
     init_StorageBrowserPolicy();
     StorageBrowserPolicyFactory = class {
+      /**
+       * Creates a StorageBrowserPolicyFactory object.
+       *
+       * @param nextPolicy -
+       * @param options -
+       */
       create(nextPolicy, options) {
         return new StorageBrowserPolicy(nextPolicy, options);
       }
@@ -54134,7 +55198,7 @@ var StorageRetryPolicyType, DEFAULT_RETRY_OPTIONS, RETRY_ABORT_ERROR, StorageRet
 var init_StorageRetryPolicy = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/policies/StorageRetryPolicy.js"() {
     init_src();
-    init_coreHttp();
+    init_src6();
     init_constants2();
     init_utils_common();
     init_log3();
@@ -54149,9 +55213,17 @@ var init_StorageRetryPolicy = __esm({
       retryPolicyType: StorageRetryPolicyType.EXPONENTIAL,
       secondaryHost: "",
       tryTimeoutInMs: void 0
+      // Use server side default timeout strategy
     };
     RETRY_ABORT_ERROR = new AbortError("The operation was aborted.");
     StorageRetryPolicy = class extends BaseRequestPolicy {
+      /**
+       * Creates an instance of RetryPolicy.
+       *
+       * @param nextPolicy -
+       * @param options -
+       * @param retryOptions -
+       */
       constructor(nextPolicy, options, retryOptions = DEFAULT_RETRY_OPTIONS) {
         super(nextPolicy, options);
         this.retryOptions = {
@@ -54163,9 +55235,24 @@ var init_StorageRetryPolicy = __esm({
           secondaryHost: retryOptions.secondaryHost ? retryOptions.secondaryHost : DEFAULT_RETRY_OPTIONS.secondaryHost
         };
       }
+      /**
+       * Sends request.
+       *
+       * @param request -
+       */
       async sendRequest(request) {
         return this.attemptSendRequest(request, false, 1);
       }
+      /**
+       * Decide and perform next retry. Won't mutate request parameter.
+       *
+       * @param request -
+       * @param secondaryHas404 -  If attempt was against the secondary & it returned a StatusNotFound (404), then
+       *                                   the resource was not found. This may be due to replication delay. So, in this
+       *                                   case, we'll never try the secondary again for this operation.
+       * @param attempt -           How many retries has been attempted to performed, starting from 1, which includes
+       *                                   the attempt will be performed by this method call.
+       */
       async attemptSendRequest(request, secondaryHas404, attempt) {
         const newRequest = request.clone();
         const isPrimaryRetry = secondaryHas404 || !this.retryOptions.secondaryHost || !(request.method === "GET" || request.method === "HEAD" || request.method === "OPTIONS") || attempt % 2 === 1;
@@ -54192,6 +55279,14 @@ var init_StorageRetryPolicy = __esm({
         await this.delay(isPrimaryRetry, attempt, request.abortSignal);
         return this.attemptSendRequest(request, secondaryHas404, ++attempt);
       }
+      /**
+       * Decide whether to retry according to last HTTP response and retry counters.
+       *
+       * @param isPrimaryRetry -
+       * @param attempt -
+       * @param response -
+       * @param err -
+       */
       shouldRetry(isPrimaryRetry, attempt, response, err) {
         if (attempt >= this.retryOptions.maxTries) {
           logger2.info(`RetryPolicy: Attempt(s) ${attempt} >= maxTries ${this.retryOptions.maxTries}, no further try.`);
@@ -54207,6 +55302,7 @@ var init_StorageRetryPolicy = __esm({
           "TIMEOUT",
           "EPIPE",
           "REQUEST_SEND_ERROR"
+          // For default xhr based http client provided in ms-rest-js
         ];
         if (err) {
           for (const retriableError of retriableErrors) {
@@ -54233,6 +55329,13 @@ var init_StorageRetryPolicy = __esm({
         }
         return false;
       }
+      /**
+       * Delay a calculated time between retries.
+       *
+       * @param isPrimaryRetry -
+       * @param attempt -
+       * @param abortSignal -
+       */
       async delay(isPrimaryRetry, attempt, abortSignal2) {
         let delayTimeInMs = 0;
         if (isPrimaryRetry) {
@@ -54260,9 +55363,19 @@ var init_StorageRetryPolicyFactory = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/StorageRetryPolicyFactory.js"() {
     init_StorageRetryPolicy();
     StorageRetryPolicyFactory = class {
+      /**
+       * Creates an instance of StorageRetryPolicyFactory.
+       * @param retryOptions -
+       */
       constructor(retryOptions) {
         this.retryOptions = retryOptions;
       }
+      /**
+       * Creates a StorageRetryPolicy object.
+       *
+       * @param nextPolicy -
+       * @param options -
+       */
       create(nextPolicy, options) {
         return new StorageRetryPolicy(nextPolicy, options, this.retryOptions);
       }
@@ -54274,11 +55387,22 @@ var init_StorageRetryPolicyFactory = __esm({
 var CredentialPolicy;
 var init_CredentialPolicy = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/policies/CredentialPolicy.js"() {
-    init_coreHttp();
+    init_src6();
     CredentialPolicy = class extends BaseRequestPolicy {
+      /**
+       * Sends out request.
+       *
+       * @param request -
+       */
       sendRequest(request) {
         return this._nextPolicy.sendRequest(this.signRequest(request));
       }
+      /**
+       * Child classes must implement this method with request signing. This method
+       * will be executed in {@link sendRequest}.
+       *
+       * @param request -
+       */
       signRequest(request) {
         return request;
       }
@@ -54292,6 +55416,13 @@ var init_AnonymousCredentialPolicy = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/policies/AnonymousCredentialPolicy.js"() {
     init_CredentialPolicy();
     AnonymousCredentialPolicy = class extends CredentialPolicy {
+      /**
+       * Creates an instance of AnonymousCredentialPolicy.
+       * @param nextPolicy -
+       * @param options -
+       */
+      // The base class has a protected constructor. Adding a public one to enable constructing of this class.
+      /* eslint-disable-next-line @typescript-eslint/no-useless-constructor*/
       constructor(nextPolicy, options) {
         super(nextPolicy, options);
       }
@@ -54304,6 +55435,12 @@ var Credential;
 var init_Credential = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/credentials/Credential.js"() {
     Credential = class {
+      /**
+       * Creates a RequestPolicy object.
+       *
+       * @param _nextPolicy -
+       * @param _options -
+       */
       create(_nextPolicy, _options) {
         throw new Error("Method should be implemented in children classes.");
       }
@@ -54318,6 +55455,12 @@ var init_AnonymousCredential = __esm({
     init_AnonymousCredentialPolicy();
     init_Credential();
     AnonymousCredential = class extends Credential {
+      /**
+       * Creates an {@link AnonymousCredentialPolicy} object.
+       *
+       * @param nextPolicy -
+       * @param options -
+       */
       create(nextPolicy, options) {
         return new AnonymousCredentialPolicy(nextPolicy, options);
       }
@@ -54329,13 +55472,24 @@ var init_AnonymousCredential = __esm({
 var TelemetryPolicy;
 var init_TelemetryPolicy = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/policies/TelemetryPolicy.js"() {
-    init_coreHttp();
+    init_src6();
     init_constants2();
     TelemetryPolicy = class extends BaseRequestPolicy {
+      /**
+       * Creates an instance of TelemetryPolicy.
+       * @param nextPolicy -
+       * @param options -
+       * @param telemetry -
+       */
       constructor(nextPolicy, options, telemetry) {
         super(nextPolicy, options);
         this.telemetry = telemetry;
       }
+      /**
+       * Sends out request.
+       *
+       * @param request -
+       */
       async sendRequest(request) {
         if (isNode) {
           if (!request.headers) {
@@ -54356,10 +55510,14 @@ import * as os2 from "os";
 var TelemetryPolicyFactory;
 var init_TelemetryPolicyFactory = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/TelemetryPolicyFactory.js"() {
-    init_coreHttp();
+    init_src6();
     init_TelemetryPolicy();
     init_constants2();
     TelemetryPolicyFactory = class {
+      /**
+       * Creates an instance of TelemetryPolicyFactory.
+       * @param telemetry -
+       */
       constructor(telemetry) {
         const userAgentInfo = [];
         if (isNode) {
@@ -54383,6 +55541,12 @@ var init_TelemetryPolicyFactory = __esm({
         }
         this.telemetryString = userAgentInfo.join(" ");
       }
+      /**
+       * Creates a TelemetryPolicy object.
+       *
+       * @param nextPolicy -
+       * @param options -
+       */
       create(nextPolicy, options) {
         return new TelemetryPolicy(nextPolicy, options, this.telemetryString);
       }
@@ -54397,7 +55561,7 @@ function getCachedDefaultHttpClient2() {
 var _defaultHttpClient;
 var init_cache = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/cache.js"() {
-    init_coreHttp();
+    init_src6();
     _defaultHttpClient = new NodeFetchHttpClient();
   }
 });
@@ -54408,7 +55572,7 @@ async function beginRefresh2(getAccessToken, retryIntervalInMs, timeoutInMs) {
     if (Date.now() < timeoutInMs) {
       try {
         return await getAccessToken();
-      } catch (_a2) {
+      } catch (_a) {
         return null;
       }
     } else {
@@ -54431,25 +55595,37 @@ function createTokenCycler2(credential, scopes, tokenCyclerOptions) {
   let token = null;
   const options = Object.assign(Object.assign({}, DEFAULT_CYCLER_OPTIONS2), tokenCyclerOptions);
   const cycler = {
+    /**
+     * Produces true if a refresh job is currently in progress.
+     */
     get isRefreshing() {
       return refreshWorker !== null;
     },
+    /**
+     * Produces true if the cycler SHOULD refresh (we are within the refresh
+     * window and not already refreshing)
+     */
     get shouldRefresh() {
-      var _a2;
-      return !cycler.isRefreshing && ((_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : 0) - options.refreshWindowInMs < Date.now();
+      var _a;
+      return !cycler.isRefreshing && ((_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : 0) - options.refreshWindowInMs < Date.now();
     },
+    /**
+     * Produces true if the cycler MUST refresh (null or nearly-expired
+     * token).
+     */
     get mustRefresh() {
       return token === null || token.expiresOnTimestamp - options.forcedRefreshWindowInMs < Date.now();
     }
   };
   function refresh(getTokenOptions) {
-    var _a2;
+    var _a;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
       refreshWorker = beginRefresh2(
         tryGetAccessToken,
         options.retryIntervalInMs,
-        (_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : Date.now()
+        // If we don't have a token, then we should timeout immediately
+        (_a = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a !== void 0 ? _a : Date.now()
       ).then((_token) => {
         refreshWorker = null;
         token = _token;
@@ -54536,12 +55712,18 @@ function storageBearerTokenChallengeAuthenticationPolicy(credential, scopes) {
 var Constants2, DEFAULT_CYCLER_OPTIONS2;
 var init_StorageBearerTokenChallengeAuthenticationPolicy = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/policies/StorageBearerTokenChallengeAuthenticationPolicy.js"() {
-    init_coreHttp();
-    init_coreHttp();
-    init_coreHttp();
+    init_src6();
+    init_src6();
+    init_src6();
     Constants2 = {
       DefaultScope: "/.default",
+      /**
+       * Defines constants for use with HTTP headers.
+       */
       HeaderConstants: {
+        /**
+         * The Authorization header.
+         */
         AUTHORIZATION: "authorization"
       }
     };
@@ -54549,6 +55731,7 @@ var init_StorageBearerTokenChallengeAuthenticationPolicy = __esm({
       forcedRefreshWindowInMs: 1e3,
       retryIntervalInMs: 3e3,
       refreshWindowInMs: 1e3 * 60 * 2
+      // Start refreshing 2m before expiry
     };
   }
 });
@@ -54562,7 +55745,7 @@ function isPipelineLike(pipeline) {
   return Array.isArray(castPipeline.factories) && typeof castPipeline.options === "object" && typeof castPipeline.toServiceClientOptions === "function";
 }
 function newPipeline(credential, pipelineOptions = {}) {
-  var _a2;
+  var _a;
   if (credential === void 0) {
     credential = new AnonymousCredential();
   }
@@ -54574,6 +55757,9 @@ function newPipeline(credential, pipelineOptions = {}) {
     generateClientRequestIdPolicy(),
     new StorageBrowserPolicyFactory(),
     new StorageRetryPolicyFactory(pipelineOptions.retryOptions),
+    // Default deserializationPolicy is provided by protocol layer
+    // Use customized XML char key of "#" so we could deserialize metadata
+    // with "_" key
     deserializationPolicy(void 0, { xmlCharKey: "#" }),
     logPolicy({
       logger: logger2.info,
@@ -54585,13 +55771,13 @@ function newPipeline(credential, pipelineOptions = {}) {
     factories.push(proxyPolicy(pipelineOptions.proxyOptions));
     factories.push(disableResponseDecompressionPolicy());
   }
-  factories.push(isTokenCredential(credential) ? attachCredential(storageBearerTokenChallengeAuthenticationPolicy(credential, (_a2 = pipelineOptions.audience) !== null && _a2 !== void 0 ? _a2 : StorageOAuthScopes), credential) : credential);
+  factories.push(isTokenCredential(credential) ? attachCredential(storageBearerTokenChallengeAuthenticationPolicy(credential, (_a = pipelineOptions.audience) !== null && _a !== void 0 ? _a : StorageOAuthScopes), credential) : credential);
   return new Pipeline(factories, pipelineOptions);
 }
 var Pipeline;
 var init_Pipeline = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/Pipeline.js"() {
-    init_coreHttp();
+    init_src6();
     init_log3();
     init_StorageBrowserPolicyFactory();
     init_StorageRetryPolicyFactory();
@@ -54602,10 +55788,22 @@ var init_Pipeline = __esm({
     init_utils_common();
     init_StorageBearerTokenChallengeAuthenticationPolicy();
     Pipeline = class {
+      /**
+       * Creates an instance of Pipeline. Customize HTTPClient by implementing IHttpClient interface.
+       *
+       * @param factories -
+       * @param options -
+       */
       constructor(factories, options = {}) {
         this.factories = factories;
         this.options = Object.assign(Object.assign({}, options), { httpClient: options.httpClient || getCachedDefaultHttpClient2() });
       }
+      /**
+       * Transfer Pipeline object to ServiceClientOptions object which is required by
+       * ServiceClient constructor.
+       *
+       * @returns The ServiceClientOptions object from this Pipeline.
+       */
       toServiceClientOptions() {
         return {
           httpClient: this.options.httpClient,
@@ -54624,12 +55822,23 @@ var init_StorageSharedKeyCredentialPolicy = __esm({
     init_utils_common();
     init_CredentialPolicy();
     StorageSharedKeyCredentialPolicy = class extends CredentialPolicy {
+      /**
+       * Creates an instance of StorageSharedKeyCredentialPolicy.
+       * @param nextPolicy -
+       * @param options -
+       * @param factory -
+       */
       constructor(nextPolicy, options, factory) {
         super(nextPolicy, options);
         this.factory = factory;
       }
+      /**
+       * Signs request.
+       *
+       * @param request -
+       */
       signRequest(request) {
-        request.headers.set(HeaderConstants.X_MS_DATE, new Date().toUTCString());
+        request.headers.set(HeaderConstants.X_MS_DATE, (/* @__PURE__ */ new Date()).toUTCString());
         if (request.body && (typeof request.body === "string" || request.body !== void 0) && request.body.length > 0) {
           request.headers.set(HeaderConstants.CONTENT_LENGTH, Buffer.byteLength(request.body));
         }
@@ -54651,6 +55860,13 @@ var init_StorageSharedKeyCredentialPolicy = __esm({
         request.headers.set(HeaderConstants.AUTHORIZATION, `SharedKey ${this.factory.accountName}:${signature}`);
         return request;
       }
+      /**
+       * Retrieve header value according to shared key sign rules.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/authenticate-with-shared-key
+       *
+       * @param request -
+       * @param headerName -
+       */
       getHeaderValueToSign(request, headerName) {
         const value = request.headers.get(headerName);
         if (!value) {
@@ -54661,6 +55877,19 @@ var init_StorageSharedKeyCredentialPolicy = __esm({
         }
         return value;
       }
+      /**
+       * To construct the CanonicalizedHeaders portion of the signature string, follow these steps:
+       * 1. Retrieve all headers for the resource that begin with x-ms-, including the x-ms-date header.
+       * 2. Convert each HTTP header name to lowercase.
+       * 3. Sort the headers lexicographically by header name, in ascending order.
+       *    Each header may appear only once in the string.
+       * 4. Replace any linear whitespace in the header value with a single space.
+       * 5. Trim any whitespace around the colon in the header.
+       * 6. Finally, append a new-line character to each canonicalized header in the resulting list.
+       *    Construct the CanonicalizedHeaders string by concatenating all headers in this list into a single string.
+       *
+       * @param request -
+       */
       getCanonicalizedHeadersString(request) {
         let headersArray = request.headers.headersArray().filter((value) => {
           return value.name.toLowerCase().startsWith(HeaderConstants.PREFIX_FOR_STORAGE);
@@ -54681,10 +55910,15 @@ var init_StorageSharedKeyCredentialPolicy = __esm({
         });
         return canonicalizedHeadersStringToSign;
       }
+      /**
+       * Retrieves the webResource canonicalized resource string.
+       *
+       * @param request -
+       */
       getCanonicalizedResourceString(request) {
-        const path6 = getURLPath(request.url) || "/";
+        const path8 = getURLPath(request.url) || "/";
         let canonicalizedResourceString = "";
-        canonicalizedResourceString += `/${this.factory.accountName}${path6}`;
+        canonicalizedResourceString += `/${this.factory.accountName}${path8}`;
         const queries = getURLQueries(request.url);
         const lowercaseQueries = {};
         if (queries) {
@@ -54716,14 +55950,30 @@ var init_StorageSharedKeyCredential = __esm({
     init_StorageSharedKeyCredentialPolicy();
     init_Credential();
     StorageSharedKeyCredential = class extends Credential {
+      /**
+       * Creates an instance of StorageSharedKeyCredential.
+       * @param accountName -
+       * @param accountKey -
+       */
       constructor(accountName, accountKey) {
         super();
         this.accountName = accountName;
         this.accountKey = Buffer.from(accountKey, "base64");
       }
+      /**
+       * Creates a StorageSharedKeyCredentialPolicy object.
+       *
+       * @param nextPolicy -
+       * @param options -
+       */
       create(nextPolicy, options) {
         return new StorageSharedKeyCredentialPolicy(nextPolicy, options, this);
       }
+      /**
+       * Generates a hash signature for an HTTP request or for a SAS.
+       *
+       * @param stringToSign -
+       */
       computeHMACSHA256(stringToSign) {
         return createHmac("sha256", this.accountKey).update(stringToSign, "utf8").digest("base64");
       }
@@ -54735,12 +55985,18 @@ var init_StorageSharedKeyCredential = __esm({
 var packageName, packageVersion, StorageClientContext;
 var init_storageClientContext = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/storageClientContext.js"() {
-    init_coreHttp();
+    init_src6();
     packageName = "azure-storage-blob";
-    packageVersion = "12.11.0";
+    packageVersion = "12.12.0";
     StorageClientContext = class extends ServiceClient {
-      constructor(url2, options) {
-        if (url2 === void 0) {
+      /**
+       * Initializes a new instance of the StorageClientContext class.
+       * @param url The URL of the service account, container, or blob that is the target of the desired
+       *            operation.
+       * @param options The parameter options
+       */
+      constructor(url3, options) {
+        if (url3 === void 0) {
           throw new Error("'url' cannot be null");
         }
         if (!options) {
@@ -54753,8 +56009,8 @@ var init_storageClientContext = __esm({
         super(void 0, options);
         this.requestContentType = "application/json; charset=utf-8";
         this.baseUri = options.endpoint || "{url}";
-        this.url = url2;
-        this.version = options.version || "2021-08-06";
+        this.url = url3;
+        this.version = options.version || "2021-10-04";
       }
     };
   }
@@ -54768,11 +56024,16 @@ var init_StorageClient = __esm({
     init_utils_common();
     init_AnonymousCredential();
     init_StorageSharedKeyCredential();
-    init_coreHttp();
+    init_src6();
     StorageClient = class {
-      constructor(url2, pipeline) {
-        this.url = escapeURLPath(url2);
-        this.accountName = getAccountNameFromUrl(url2);
+      /**
+       * Creates an instance of StorageClient.
+       * @param url - url to resource
+       * @param pipeline - request policy pipeline.
+       */
+      constructor(url3, pipeline) {
+        this.url = escapeURLPath(url3);
+        this.accountName = getAccountNameFromUrl(url3);
         this.pipeline = pipeline;
         this.storageClientContext = new StorageClientContext(this.url, pipeline.toServiceClientOptions());
         this.isHttps = iEqual(getURLScheme(this.url) || "", "https");
@@ -54793,9 +56054,10 @@ var init_StorageClient = __esm({
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/tracing.js
 function convertTracingToRequestOptionsBase(options) {
-  var _a2, _b;
+  var _a, _b;
   return {
-    spanOptions: (_a2 = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _a2 === void 0 ? void 0 : _a2.spanOptions,
+    // By passing spanOptions if they exist at runtime, we're backwards compatible with @azure/core-tracing@preview.13 and earlier.
+    spanOptions: (_a = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _a === void 0 ? void 0 : _a.spanOptions,
     tracingContext: (_b = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _b === void 0 ? void 0 : _b.tracingContext
   };
 }
@@ -54828,6 +56090,12 @@ var init_BlobSASPermissions = __esm({
         this.setImmutabilityPolicy = false;
         this.permanentDelete = false;
       }
+      /**
+       * Creates a {@link BlobSASPermissions} from the specified permissions string. This method will throw an
+       * Error if it encounters a character that does not correspond to a valid permission.
+       *
+       * @param permissions -
+       */
       static parse(permissions) {
         const blobSASPermissions = new BlobSASPermissions();
         for (const char of permissions) {
@@ -54871,6 +56139,12 @@ var init_BlobSASPermissions = __esm({
         }
         return blobSASPermissions;
       }
+      /**
+       * Creates a {@link BlobSASPermissions} from a raw object which contains same keys as it
+       * and boolean values for them.
+       *
+       * @param permissionLike -
+       */
       static from(permissionLike) {
         const blobSASPermissions = new BlobSASPermissions();
         if (permissionLike.read) {
@@ -54908,6 +56182,12 @@ var init_BlobSASPermissions = __esm({
         }
         return blobSASPermissions;
       }
+      /**
+       * Converts the given permissions to a string. Using this method will guarantee the permissions are in an
+       * order accepted by the service.
+       *
+       * @returns A string which represents the BlobSASPermissions
+       */
       toString() {
         const permissions = [];
         if (this.read) {
@@ -54969,6 +56249,12 @@ var init_ContainerSASPermissions = __esm({
         this.permanentDelete = false;
         this.filterByTags = false;
       }
+      /**
+       * Creates an {@link ContainerSASPermissions} from the specified permissions string. This method will throw an
+       * Error if it encounters a character that does not correspond to a valid permission.
+       *
+       * @param permissions -
+       */
       static parse(permissions) {
         const containerSASPermissions = new ContainerSASPermissions();
         for (const char of permissions) {
@@ -55018,6 +56304,12 @@ var init_ContainerSASPermissions = __esm({
         }
         return containerSASPermissions;
       }
+      /**
+       * Creates a {@link ContainerSASPermissions} from a raw object which contains same keys as it
+       * and boolean values for them.
+       *
+       * @param permissionLike -
+       */
       static from(permissionLike) {
         const containerSASPermissions = new ContainerSASPermissions();
         if (permissionLike.read) {
@@ -55061,6 +56353,14 @@ var init_ContainerSASPermissions = __esm({
         }
         return containerSASPermissions;
       }
+      /**
+       * Converts the given permissions to a string. Using this method will guarantee the permissions are in an
+       * order accepted by the service.
+       *
+       * The order of the characters should be as specified here to ensure correctness.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-a-service-sas
+       *
+       */
       toString() {
         const permissions = [];
         if (this.read) {
@@ -55114,11 +56414,21 @@ var UserDelegationKeyCredential;
 var init_UserDelegationKeyCredential = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/credentials/UserDelegationKeyCredential.js"() {
     UserDelegationKeyCredential = class {
+      /**
+       * Creates an instance of UserDelegationKeyCredential.
+       * @param accountName -
+       * @param userDelegationKey -
+       */
       constructor(accountName, userDelegationKey) {
         this.accountName = accountName;
         this.userDelegationKey = userDelegationKey;
         this.key = Buffer.from(userDelegationKey.value, "base64");
       }
+      /**
+       * Generates a hash signature for an HTTP request or for a SAS.
+       *
+       * @param stringToSign -
+       */
       computeHMACSHA256(stringToSign) {
         return createHmac2("sha256", this.key).update(stringToSign, "utf8").digest("base64");
       }
@@ -55203,6 +56513,11 @@ var init_SASQueryParameters = __esm({
           }
         }
       }
+      /**
+       * Optional. IP range allowed for this SAS.
+       *
+       * @readonly
+       */
       get ipRange() {
         if (this.ipRangeInner) {
           return {
@@ -55212,6 +56527,10 @@ var init_SASQueryParameters = __esm({
         }
         return void 0;
       }
+      /**
+       * Encodes all SAS query parameters into a string that can be appended to a URL.
+       *
+       */
       toString() {
         const params = [
           "sv",
@@ -55322,6 +56641,13 @@ var init_SASQueryParameters = __esm({
         }
         return queries.join("&");
       }
+      /**
+       * A private helper method used to filter and append query key/value pairs into an array.
+       *
+       * @param queries -
+       * @param key -
+       * @param value -
+       */
       tryAppendQueryParameter(queries, key, value) {
         if (!value) {
           return;
@@ -55720,7 +57046,7 @@ var init_models = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/index.js
-var init_src6 = __esm({
+var init_src7 = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/generated/src/index.js"() {
     init_models();
     init_storageClientContext();
@@ -55731,13 +57057,18 @@ var init_src6 = __esm({
 var BlobLeaseClient;
 var init_BlobLeaseClient = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/BlobLeaseClient.js"() {
-    init_coreHttp();
     init_src6();
+    init_src7();
     init_src5();
     init_operations();
     init_constants2();
     init_tracing();
     BlobLeaseClient = class {
+      /**
+       * Creates an instance of BlobLeaseClient.
+       * @param client - The client to make the lease operation requests.
+       * @param leaseId - Initial proposed lease id.
+       */
       constructor(client, leaseId2) {
         const clientContext = new StorageClientContext(client.url, client.pipeline.toServiceClientOptions());
         this._url = client.url;
@@ -55753,23 +57084,45 @@ var init_BlobLeaseClient = __esm({
         }
         this._leaseId = leaseId2;
       }
+      /**
+       * Gets the lease Id.
+       *
+       * @readonly
+       */
       get leaseId() {
         return this._leaseId;
       }
+      /**
+       * Gets the url.
+       *
+       * @readonly
+       */
       get url() {
         return this._url;
       }
+      /**
+       * Establishes and manages a lock on a container for delete operations, or on a blob
+       * for write and delete operations.
+       * The lock duration can be 15 to 60 seconds, or can be infinite.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-container
+       * and
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-blob
+       *
+       * @param duration - Must be between 15 to 60 seconds, or infinite (-1)
+       * @param options - option to configure lease management operations.
+       * @returns Response data for acquire lease operation.
+       */
       async acquireLease(duration2, options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-acquireLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
           return await this._containerOrBlobOperation.acquireLease(Object.assign({ abortSignal: options.abortSignal, duration: duration2, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_f = options.conditions) === null || _f === void 0 ? void 0 : _f.tagConditions }), proposedLeaseId: this._leaseId }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -55777,10 +57130,20 @@ var init_BlobLeaseClient = __esm({
           span.end();
         }
       }
+      /**
+       * To change the ID of the lease.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-container
+       * and
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-blob
+       *
+       * @param proposedLeaseId - the proposed new lease Id.
+       * @param options - option to configure lease management operations.
+       * @returns Response data for change lease operation.
+       */
       async changeLease(proposedLeaseId2, options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-changeLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -55789,7 +57152,7 @@ var init_BlobLeaseClient = __esm({
           return response;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -55797,17 +57160,27 @@ var init_BlobLeaseClient = __esm({
           span.end();
         }
       }
+      /**
+       * To free the lease if it is no longer needed so that another client may
+       * immediately acquire a lease against the container or the blob.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-container
+       * and
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-blob
+       *
+       * @param options - option to configure lease management operations.
+       * @returns Response data for release lease operation.
+       */
       async releaseLease(options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-releaseLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
           return await this._containerOrBlobOperation.releaseLease(this._leaseId, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_f = options.conditions) === null || _f === void 0 ? void 0 : _f.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -55815,17 +57188,26 @@ var init_BlobLeaseClient = __esm({
           span.end();
         }
       }
+      /**
+       * To renew the lease.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-container
+       * and
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-blob
+       *
+       * @param options - Optional option to configure lease management operations.
+       * @returns Response data for renew lease operation.
+       */
       async renewLease(options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-renewLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
           return await this._containerOrBlobOperation.renewLease(this._leaseId, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_f = options.conditions) === null || _f === void 0 ? void 0 : _f.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -55833,10 +57215,21 @@ var init_BlobLeaseClient = __esm({
           span.end();
         }
       }
+      /**
+       * To end the lease but ensure that another client cannot acquire a new lease
+       * until the current lease period has expired.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-container
+       * and
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/lease-blob
+       *
+       * @param breakPeriod - Break period
+       * @param options - Optional options to configure lease management operations.
+       * @returns Response data for break lease operation.
+       */
       async breakLease(breakPeriod2, options = {}) {
-        var _a2, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-breakLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
+        if (this._isContainer && (((_a = options.conditions) === null || _a === void 0 ? void 0 : _a.ifMatch) && ((_b = options.conditions) === null || _b === void 0 ? void 0 : _b.ifMatch) !== ETagNone || ((_c = options.conditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch) && ((_d = options.conditions) === null || _d === void 0 ? void 0 : _d.ifNoneMatch) !== ETagNone || ((_e = options.conditions) === null || _e === void 0 ? void 0 : _e.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -55844,7 +57237,7 @@ var init_BlobLeaseClient = __esm({
           return await this._containerOrBlobOperation.breakLease(operationOptions);
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -55862,6 +57255,16 @@ var RetriableReadableStream;
 var init_RetriableReadableStream = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/RetriableReadableStream.js"() {
     RetriableReadableStream = class extends Readable2 {
+      /**
+       * Creates an instance of RetriableReadableStream.
+       *
+       * @param source - The current ReadableStream returned from getter
+       * @param getter - A method calling downloading request returning
+       *                                      a new ReadableStream from specified offset
+       * @param offset - Offset position in original data source to read
+       * @param count - How much data in original data source to read
+       * @param options -
+       */
       constructor(source, getter, offset, count, options = {}) {
         super({ highWaterMark: options.highWaterMark });
         this.retries = 0;
@@ -55942,148 +57345,444 @@ var init_RetriableReadableStream = __esm({
 var BlobDownloadResponse;
 var init_BlobDownloadResponse = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/BlobDownloadResponse.js"() {
-    init_coreHttp();
+    init_src6();
     init_RetriableReadableStream();
     BlobDownloadResponse = class {
+      /**
+       * Creates an instance of BlobDownloadResponse.
+       *
+       * @param originalResponse -
+       * @param getter -
+       * @param offset -
+       * @param count -
+       * @param options -
+       */
       constructor(originalResponse, getter, offset, count, options = {}) {
         this.originalResponse = originalResponse;
         this.blobDownloadStream = new RetriableReadableStream(this.originalResponse.readableStreamBody, getter, offset, count, options);
       }
+      /**
+       * Indicates that the service supports
+       * requests for partial file content.
+       *
+       * @readonly
+       */
       get acceptRanges() {
         return this.originalResponse.acceptRanges;
       }
+      /**
+       * Returns if it was previously specified
+       * for the file.
+       *
+       * @readonly
+       */
       get cacheControl() {
         return this.originalResponse.cacheControl;
       }
+      /**
+       * Returns the value that was specified
+       * for the 'x-ms-content-disposition' header and specifies how to process the
+       * response.
+       *
+       * @readonly
+       */
       get contentDisposition() {
         return this.originalResponse.contentDisposition;
       }
+      /**
+       * Returns the value that was specified
+       * for the Content-Encoding request header.
+       *
+       * @readonly
+       */
       get contentEncoding() {
         return this.originalResponse.contentEncoding;
       }
+      /**
+       * Returns the value that was specified
+       * for the Content-Language request header.
+       *
+       * @readonly
+       */
       get contentLanguage() {
         return this.originalResponse.contentLanguage;
       }
+      /**
+       * The current sequence number for a
+       * page blob. This header is not returned for block blobs or append blobs.
+       *
+       * @readonly
+       */
       get blobSequenceNumber() {
         return this.originalResponse.blobSequenceNumber;
       }
+      /**
+       * The blob's type. Possible values include:
+       * 'BlockBlob', 'PageBlob', 'AppendBlob'.
+       *
+       * @readonly
+       */
       get blobType() {
         return this.originalResponse.blobType;
       }
+      /**
+       * The number of bytes present in the
+       * response body.
+       *
+       * @readonly
+       */
       get contentLength() {
         return this.originalResponse.contentLength;
       }
+      /**
+       * If the file has an MD5 hash and the
+       * request is to read the full file, this response header is returned so that
+       * the client can check for message content integrity. If the request is to
+       * read a specified range and the 'x-ms-range-get-content-md5' is set to
+       * true, then the request returns an MD5 hash for the range, as long as the
+       * range size is less than or equal to 4 MB. If neither of these sets of
+       * conditions is true, then no value is returned for the 'Content-MD5'
+       * header.
+       *
+       * @readonly
+       */
       get contentMD5() {
         return this.originalResponse.contentMD5;
       }
+      /**
+       * Indicates the range of bytes returned if
+       * the client requested a subset of the file by setting the Range request
+       * header.
+       *
+       * @readonly
+       */
       get contentRange() {
         return this.originalResponse.contentRange;
       }
+      /**
+       * The content type specified for the file.
+       * The default content type is 'application/octet-stream'
+       *
+       * @readonly
+       */
       get contentType() {
         return this.originalResponse.contentType;
       }
+      /**
+       * Conclusion time of the last attempted
+       * Copy File operation where this file was the destination file. This value
+       * can specify the time of a completed, aborted, or failed copy attempt.
+       *
+       * @readonly
+       */
       get copyCompletedOn() {
         return this.originalResponse.copyCompletedOn;
       }
+      /**
+       * String identifier for the last attempted Copy
+       * File operation where this file was the destination file.
+       *
+       * @readonly
+       */
       get copyId() {
         return this.originalResponse.copyId;
       }
+      /**
+       * Contains the number of bytes copied and
+       * the total bytes in the source in the last attempted Copy File operation
+       * where this file was the destination file. Can show between 0 and
+       * Content-Length bytes copied.
+       *
+       * @readonly
+       */
       get copyProgress() {
         return this.originalResponse.copyProgress;
       }
+      /**
+       * URL up to 2KB in length that specifies the
+       * source file used in the last attempted Copy File operation where this file
+       * was the destination file.
+       *
+       * @readonly
+       */
       get copySource() {
         return this.originalResponse.copySource;
       }
+      /**
+       * State of the copy operation
+       * identified by 'x-ms-copy-id'. Possible values include: 'pending',
+       * 'success', 'aborted', 'failed'
+       *
+       * @readonly
+       */
       get copyStatus() {
         return this.originalResponse.copyStatus;
       }
+      /**
+       * Only appears when
+       * x-ms-copy-status is failed or pending. Describes cause of fatal or
+       * non-fatal copy operation failure.
+       *
+       * @readonly
+       */
       get copyStatusDescription() {
         return this.originalResponse.copyStatusDescription;
       }
+      /**
+       * When a blob is leased,
+       * specifies whether the lease is of infinite or fixed duration. Possible
+       * values include: 'infinite', 'fixed'.
+       *
+       * @readonly
+       */
       get leaseDuration() {
         return this.originalResponse.leaseDuration;
       }
+      /**
+       * Lease state of the blob. Possible
+       * values include: 'available', 'leased', 'expired', 'breaking', 'broken'.
+       *
+       * @readonly
+       */
       get leaseState() {
         return this.originalResponse.leaseState;
       }
+      /**
+       * The current lease status of the
+       * blob. Possible values include: 'locked', 'unlocked'.
+       *
+       * @readonly
+       */
       get leaseStatus() {
         return this.originalResponse.leaseStatus;
       }
+      /**
+       * A UTC date/time value generated by the service that
+       * indicates the time at which the response was initiated.
+       *
+       * @readonly
+       */
       get date() {
         return this.originalResponse.date;
       }
+      /**
+       * The number of committed blocks
+       * present in the blob. This header is returned only for append blobs.
+       *
+       * @readonly
+       */
       get blobCommittedBlockCount() {
         return this.originalResponse.blobCommittedBlockCount;
       }
+      /**
+       * The ETag contains a value that you can use to
+       * perform operations conditionally, in quotes.
+       *
+       * @readonly
+       */
       get etag() {
         return this.originalResponse.etag;
       }
+      /**
+       * The number of tags associated with the blob
+       *
+       * @readonly
+       */
       get tagCount() {
         return this.originalResponse.tagCount;
       }
+      /**
+       * The error code.
+       *
+       * @readonly
+       */
       get errorCode() {
         return this.originalResponse.errorCode;
       }
+      /**
+       * The value of this header is set to
+       * true if the file data and application metadata are completely encrypted
+       * using the specified algorithm. Otherwise, the value is set to false (when
+       * the file is unencrypted, or if only parts of the file/application metadata
+       * are encrypted).
+       *
+       * @readonly
+       */
       get isServerEncrypted() {
         return this.originalResponse.isServerEncrypted;
       }
+      /**
+       * If the blob has a MD5 hash, and if
+       * request contains range header (Range or x-ms-range), this response header
+       * is returned with the value of the whole blob's MD5 value. This value may
+       * or may not be equal to the value returned in Content-MD5 header, with the
+       * latter calculated from the requested range.
+       *
+       * @readonly
+       */
       get blobContentMD5() {
         return this.originalResponse.blobContentMD5;
       }
+      /**
+       * Returns the date and time the file was last
+       * modified. Any operation that modifies the file or its properties updates
+       * the last modified time.
+       *
+       * @readonly
+       */
       get lastModified() {
         return this.originalResponse.lastModified;
       }
+      /**
+       * Returns the UTC date and time generated by the service that indicates the time at which the blob was
+       * last read or written to.
+       *
+       * @readonly
+       */
       get lastAccessed() {
         return this.originalResponse.lastAccessed;
       }
+      /**
+       * A name-value pair
+       * to associate with a file storage object.
+       *
+       * @readonly
+       */
       get metadata() {
         return this.originalResponse.metadata;
       }
+      /**
+       * This header uniquely identifies the request
+       * that was made and can be used for troubleshooting the request.
+       *
+       * @readonly
+       */
       get requestId() {
         return this.originalResponse.requestId;
       }
+      /**
+       * If a client request id header is sent in the request, this header will be present in the
+       * response with the same value.
+       *
+       * @readonly
+       */
       get clientRequestId() {
         return this.originalResponse.clientRequestId;
       }
+      /**
+       * Indicates the version of the Blob service used
+       * to execute the request.
+       *
+       * @readonly
+       */
       get version() {
         return this.originalResponse.version;
       }
+      /**
+       * Indicates the versionId of the downloaded blob version.
+       *
+       * @readonly
+       */
       get versionId() {
         return this.originalResponse.versionId;
       }
+      /**
+       * Indicates whether version of this blob is a current version.
+       *
+       * @readonly
+       */
       get isCurrentVersion() {
         return this.originalResponse.isCurrentVersion;
       }
+      /**
+       * The SHA-256 hash of the encryption key used to encrypt the blob. This value is only returned
+       * when the blob was encrypted with a customer-provided key.
+       *
+       * @readonly
+       */
       get encryptionKeySha256() {
         return this.originalResponse.encryptionKeySha256;
       }
+      /**
+       * If the request is to read a specified range and the x-ms-range-get-content-crc64 is set to
+       * true, then the request returns a crc64 for the range, as long as the range size is less than
+       * or equal to 4 MB. If both x-ms-range-get-content-crc64 & x-ms-range-get-content-md5 is
+       * specified in the same request, it will fail with 400(Bad Request)
+       */
       get contentCrc64() {
         return this.originalResponse.contentCrc64;
       }
+      /**
+       * Object Replication Policy Id of the destination blob.
+       *
+       * @readonly
+       */
       get objectReplicationDestinationPolicyId() {
         return this.originalResponse.objectReplicationDestinationPolicyId;
       }
+      /**
+       * Parsed Object Replication Policy Id, Rule Id(s) and status of the source blob.
+       *
+       * @readonly
+       */
       get objectReplicationSourceProperties() {
         return this.originalResponse.objectReplicationSourceProperties;
       }
+      /**
+       * If this blob has been sealed.
+       *
+       * @readonly
+       */
       get isSealed() {
         return this.originalResponse.isSealed;
       }
+      /**
+       * UTC date/time value generated by the service that indicates the time at which the blob immutability policy will expire.
+       *
+       * @readonly
+       */
       get immutabilityPolicyExpiresOn() {
         return this.originalResponse.immutabilityPolicyExpiresOn;
       }
+      /**
+       * Indicates immutability policy mode.
+       *
+       * @readonly
+       */
       get immutabilityPolicyMode() {
         return this.originalResponse.immutabilityPolicyMode;
       }
+      /**
+       * Indicates if a legal hold is present on the blob.
+       *
+       * @readonly
+       */
       get legalHold() {
         return this.originalResponse.legalHold;
       }
+      /**
+       * The response body as a browser Blob.
+       * Always undefined in node.js.
+       *
+       * @readonly
+       */
       get contentAsBlob() {
         return this.originalResponse.blobBody;
       }
+      /**
+       * The response body as a node.js Readable stream.
+       * Always undefined in the browser.
+       *
+       * It will automatically retry when internal read stream unexpected ends.
+       *
+       * @readonly
+       */
       get readableStreamBody() {
         return isNode ? this.blobDownloadStream : void 0;
       }
+      /**
+       * The HTTP response.
+       */
       get _response() {
         return this.originalResponse._response;
       }
@@ -56104,7 +57803,7 @@ var init_getPagedAsyncIterator = __esm({
 });
 
 // node_modules/@azure/core-paging/dist-esm/src/index.js
-var init_src7 = __esm({
+var init_src8 = __esm({
   "node_modules/@azure/core-paging/dist-esm/src/index.js"() {
     init_models2();
     init_getPagedAsyncIterator();
@@ -56127,6 +57826,13 @@ var AvroParser, AvroComplex, AvroPrimitive, AvroType, AvroPrimitiveType, AvroEnu
 var init_AvroParser = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-internal-avro/src/AvroParser.js"() {
     AvroParser = class {
+      /**
+       * Reads a fixed number of bytes from the stream.
+       *
+       * @param stream -
+       * @param length -
+       * @param options -
+       */
       static async readFixedBytes(stream, length, options = {}) {
         const bytes = await stream.read(length, { abortSignal: options.abortSignal });
         if (bytes.length !== length) {
@@ -56134,10 +57840,19 @@ var init_AvroParser = __esm({
         }
         return bytes;
       }
+      /**
+       * Reads a single byte from the stream.
+       *
+       * @param stream -
+       * @param options -
+       */
       static async readByte(stream, options = {}) {
         const buf = await AvroParser.readFixedBytes(stream, 1, options);
         return buf[0];
       }
+      // int and long are stored in variable-length zig-zag coding.
+      // variable-length: https://lucene.apache.org/core/3_5_0/fileformats.html#VInt
+      // zig-zag: https://developers.google.com/protocol-buffers/docs/encoding?csw=1#types
       static async readZigZagLong(stream, options = {}) {
         let zigZagEncoded = 0;
         let significanceInBit = 0;
@@ -56255,6 +57970,9 @@ var init_AvroParser = __esm({
       AvroPrimitive2["STRING"] = "string";
     })(AvroPrimitive || (AvroPrimitive = {}));
     AvroType = class {
+      /**
+       * Determines the AvroType from the Avro Schema.
+       */
       static fromSchema(schema) {
         if (typeof schema === "string") {
           return AvroType.fromStringSchema(schema);
@@ -56428,7 +58146,7 @@ var AvroReader;
 var init_AvroReader = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-internal-avro/src/AvroReader.js"() {
     init_tslib_es6();
-    init_src7();
+    init_src8();
     init_AvroConstants();
     init_AvroParser();
     init_utils_common2();
@@ -56555,8 +58273,8 @@ var init_AvroReadableFromStream = __esm({
         return this._position;
       }
       async read(size, options = {}) {
-        var _a2;
-        if ((_a2 = options.abortSignal) === null || _a2 === void 0 ? void 0 : _a2.aborted) {
+        var _a;
+        if ((_a = options.abortSignal) === null || _a === void 0 ? void 0 : _a.aborted) {
           throw ABORT_ERROR;
         }
         if (size < 0) {
@@ -56614,7 +58332,7 @@ var init_AvroReadableFromStream = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-internal-avro/src/index.js
-var init_src8 = __esm({
+var init_src9 = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-internal-avro/src/index.js"() {
     init_AvroReader();
     init_AvroReadableFromStream();
@@ -56626,8 +58344,14 @@ import { Readable as Readable3 } from "stream";
 var BlobQuickQueryStream;
 var init_BlobQuickQueryStream = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/BlobQuickQueryStream.js"() {
-    init_src8();
+    init_src9();
     BlobQuickQueryStream = class extends Readable3 {
+      /**
+       * Creates an instance of BlobQuickQueryStream.
+       *
+       * @param source - The current ReadableStream returned from getter
+       * @param options -
+       */
       constructor(source, options = {}) {
         super();
         this.avroPaused = true;
@@ -56729,118 +58453,360 @@ var init_BlobQuickQueryStream = __esm({
 var BlobQueryResponse;
 var init_BlobQueryResponse = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/BlobQueryResponse.js"() {
-    init_coreHttp();
+    init_src6();
     init_BlobQuickQueryStream();
     BlobQueryResponse = class {
+      /**
+       * Creates an instance of BlobQueryResponse.
+       *
+       * @param originalResponse -
+       * @param options -
+       */
       constructor(originalResponse, options = {}) {
         this.originalResponse = originalResponse;
         this.blobDownloadStream = new BlobQuickQueryStream(this.originalResponse.readableStreamBody, options);
       }
+      /**
+       * Indicates that the service supports
+       * requests for partial file content.
+       *
+       * @readonly
+       */
       get acceptRanges() {
         return this.originalResponse.acceptRanges;
       }
+      /**
+       * Returns if it was previously specified
+       * for the file.
+       *
+       * @readonly
+       */
       get cacheControl() {
         return this.originalResponse.cacheControl;
       }
+      /**
+       * Returns the value that was specified
+       * for the 'x-ms-content-disposition' header and specifies how to process the
+       * response.
+       *
+       * @readonly
+       */
       get contentDisposition() {
         return this.originalResponse.contentDisposition;
       }
+      /**
+       * Returns the value that was specified
+       * for the Content-Encoding request header.
+       *
+       * @readonly
+       */
       get contentEncoding() {
         return this.originalResponse.contentEncoding;
       }
+      /**
+       * Returns the value that was specified
+       * for the Content-Language request header.
+       *
+       * @readonly
+       */
       get contentLanguage() {
         return this.originalResponse.contentLanguage;
       }
+      /**
+       * The current sequence number for a
+       * page blob. This header is not returned for block blobs or append blobs.
+       *
+       * @readonly
+       */
       get blobSequenceNumber() {
         return this.originalResponse.blobSequenceNumber;
       }
+      /**
+       * The blob's type. Possible values include:
+       * 'BlockBlob', 'PageBlob', 'AppendBlob'.
+       *
+       * @readonly
+       */
       get blobType() {
         return this.originalResponse.blobType;
       }
+      /**
+       * The number of bytes present in the
+       * response body.
+       *
+       * @readonly
+       */
       get contentLength() {
         return this.originalResponse.contentLength;
       }
+      /**
+       * If the file has an MD5 hash and the
+       * request is to read the full file, this response header is returned so that
+       * the client can check for message content integrity. If the request is to
+       * read a specified range and the 'x-ms-range-get-content-md5' is set to
+       * true, then the request returns an MD5 hash for the range, as long as the
+       * range size is less than or equal to 4 MB. If neither of these sets of
+       * conditions is true, then no value is returned for the 'Content-MD5'
+       * header.
+       *
+       * @readonly
+       */
       get contentMD5() {
         return this.originalResponse.contentMD5;
       }
+      /**
+       * Indicates the range of bytes returned if
+       * the client requested a subset of the file by setting the Range request
+       * header.
+       *
+       * @readonly
+       */
       get contentRange() {
         return this.originalResponse.contentRange;
       }
+      /**
+       * The content type specified for the file.
+       * The default content type is 'application/octet-stream'
+       *
+       * @readonly
+       */
       get contentType() {
         return this.originalResponse.contentType;
       }
+      /**
+       * Conclusion time of the last attempted
+       * Copy File operation where this file was the destination file. This value
+       * can specify the time of a completed, aborted, or failed copy attempt.
+       *
+       * @readonly
+       */
       get copyCompletedOn() {
         return void 0;
       }
+      /**
+       * String identifier for the last attempted Copy
+       * File operation where this file was the destination file.
+       *
+       * @readonly
+       */
       get copyId() {
         return this.originalResponse.copyId;
       }
+      /**
+       * Contains the number of bytes copied and
+       * the total bytes in the source in the last attempted Copy File operation
+       * where this file was the destination file. Can show between 0 and
+       * Content-Length bytes copied.
+       *
+       * @readonly
+       */
       get copyProgress() {
         return this.originalResponse.copyProgress;
       }
+      /**
+       * URL up to 2KB in length that specifies the
+       * source file used in the last attempted Copy File operation where this file
+       * was the destination file.
+       *
+       * @readonly
+       */
       get copySource() {
         return this.originalResponse.copySource;
       }
+      /**
+       * State of the copy operation
+       * identified by 'x-ms-copy-id'. Possible values include: 'pending',
+       * 'success', 'aborted', 'failed'
+       *
+       * @readonly
+       */
       get copyStatus() {
         return this.originalResponse.copyStatus;
       }
+      /**
+       * Only appears when
+       * x-ms-copy-status is failed or pending. Describes cause of fatal or
+       * non-fatal copy operation failure.
+       *
+       * @readonly
+       */
       get copyStatusDescription() {
         return this.originalResponse.copyStatusDescription;
       }
+      /**
+       * When a blob is leased,
+       * specifies whether the lease is of infinite or fixed duration. Possible
+       * values include: 'infinite', 'fixed'.
+       *
+       * @readonly
+       */
       get leaseDuration() {
         return this.originalResponse.leaseDuration;
       }
+      /**
+       * Lease state of the blob. Possible
+       * values include: 'available', 'leased', 'expired', 'breaking', 'broken'.
+       *
+       * @readonly
+       */
       get leaseState() {
         return this.originalResponse.leaseState;
       }
+      /**
+       * The current lease status of the
+       * blob. Possible values include: 'locked', 'unlocked'.
+       *
+       * @readonly
+       */
       get leaseStatus() {
         return this.originalResponse.leaseStatus;
       }
+      /**
+       * A UTC date/time value generated by the service that
+       * indicates the time at which the response was initiated.
+       *
+       * @readonly
+       */
       get date() {
         return this.originalResponse.date;
       }
+      /**
+       * The number of committed blocks
+       * present in the blob. This header is returned only for append blobs.
+       *
+       * @readonly
+       */
       get blobCommittedBlockCount() {
         return this.originalResponse.blobCommittedBlockCount;
       }
+      /**
+       * The ETag contains a value that you can use to
+       * perform operations conditionally, in quotes.
+       *
+       * @readonly
+       */
       get etag() {
         return this.originalResponse.etag;
       }
+      /**
+       * The error code.
+       *
+       * @readonly
+       */
       get errorCode() {
         return this.originalResponse.errorCode;
       }
+      /**
+       * The value of this header is set to
+       * true if the file data and application metadata are completely encrypted
+       * using the specified algorithm. Otherwise, the value is set to false (when
+       * the file is unencrypted, or if only parts of the file/application metadata
+       * are encrypted).
+       *
+       * @readonly
+       */
       get isServerEncrypted() {
         return this.originalResponse.isServerEncrypted;
       }
+      /**
+       * If the blob has a MD5 hash, and if
+       * request contains range header (Range or x-ms-range), this response header
+       * is returned with the value of the whole blob's MD5 value. This value may
+       * or may not be equal to the value returned in Content-MD5 header, with the
+       * latter calculated from the requested range.
+       *
+       * @readonly
+       */
       get blobContentMD5() {
         return this.originalResponse.blobContentMD5;
       }
+      /**
+       * Returns the date and time the file was last
+       * modified. Any operation that modifies the file or its properties updates
+       * the last modified time.
+       *
+       * @readonly
+       */
       get lastModified() {
         return this.originalResponse.lastModified;
       }
+      /**
+       * A name-value pair
+       * to associate with a file storage object.
+       *
+       * @readonly
+       */
       get metadata() {
         return this.originalResponse.metadata;
       }
+      /**
+       * This header uniquely identifies the request
+       * that was made and can be used for troubleshooting the request.
+       *
+       * @readonly
+       */
       get requestId() {
         return this.originalResponse.requestId;
       }
+      /**
+       * If a client request id header is sent in the request, this header will be present in the
+       * response with the same value.
+       *
+       * @readonly
+       */
       get clientRequestId() {
         return this.originalResponse.clientRequestId;
       }
+      /**
+       * Indicates the version of the File service used
+       * to execute the request.
+       *
+       * @readonly
+       */
       get version() {
         return this.originalResponse.version;
       }
+      /**
+       * The SHA-256 hash of the encryption key used to encrypt the blob. This value is only returned
+       * when the blob was encrypted with a customer-provided key.
+       *
+       * @readonly
+       */
       get encryptionKeySha256() {
         return this.originalResponse.encryptionKeySha256;
       }
+      /**
+       * If the request is to read a specified range and the x-ms-range-get-content-crc64 is set to
+       * true, then the request returns a crc64 for the range, as long as the range size is less than
+       * or equal to 4 MB. If both x-ms-range-get-content-crc64 & x-ms-range-get-content-md5 is
+       * specified in the same request, it will fail with 400(Bad Request)
+       */
       get contentCrc64() {
         return this.originalResponse.contentCrc64;
       }
+      /**
+       * The response body as a browser Blob.
+       * Always undefined in node.js.
+       *
+       * @readonly
+       */
       get blobBody() {
         return void 0;
       }
+      /**
+       * The response body as a node.js Readable stream.
+       * Always undefined in the browser.
+       *
+       * It will parse avor data returned by blob query.
+       *
+       * @readonly
+       */
       get readableStreamBody() {
         return isNode ? this.blobDownloadStream : void 0;
       }
+      /**
+       * The HTTP response.
+       */
       get _response() {
         return this.originalResponse._response;
       }
@@ -56935,7 +58901,73 @@ var init_poller = __esm({
       }
     };
     Poller = class {
+      /**
+       * A poller needs to be initialized by passing in at least the basic properties of the `PollOperation<TState, TResult>`.
+       *
+       * When writing an implementation of a Poller, this implementation needs to deal with the initialization
+       * of any custom state beyond the basic definition of the poller. The basic poller assumes that the poller's
+       * operation has already been defined, at least its basic properties. The code below shows how to approach
+       * the definition of the constructor of a new custom poller.
+       *
+       * ```ts
+       * export class MyPoller extends Poller<MyOperationState, string> {
+       *   constructor({
+       *     // Anything you might need outside of the basics
+       *   }) {
+       *     let state: MyOperationState = {
+       *       privateProperty: private,
+       *       publicProperty: public,
+       *     };
+       *
+       *     const operation = {
+       *       state,
+       *       update,
+       *       cancel,
+       *       toString
+       *     }
+       *
+       *     // Sending the operation to the parent's constructor.
+       *     super(operation);
+       *
+       *     // You can assign more local properties here.
+       *   }
+       * }
+       * ```
+       *
+       * Inside of this constructor, a new promise is created. This will be used to
+       * tell the user when the poller finishes (see `pollUntilDone()`). The promise's
+       * resolve and reject methods are also used internally to control when to resolve
+       * or reject anyone waiting for the poller to finish.
+       *
+       * The constructor of a custom implementation of a poller is where any serialized version of
+       * a previous poller's operation should be deserialized into the operation sent to the
+       * base constructor. For example:
+       *
+       * ```ts
+       * export class MyPoller extends Poller<MyOperationState, string> {
+       *   constructor(
+       *     baseOperation: string | undefined
+       *   ) {
+       *     let state: MyOperationState = {};
+       *     if (baseOperation) {
+       *       state = {
+       *         ...JSON.parse(baseOperation).state,
+       *         ...state
+       *       };
+       *     }
+       *     const operation = {
+       *       state,
+       *       // ...
+       *     }
+       *     super(operation);
+       *   }
+       * }
+       * ```
+       *
+       * @param operation - Must contain the basic properties of `PollOperation<State, TResult>`.
+       */
       constructor(operation) {
+        this.resolveOnUnsuccessful = false;
         this.stopped = true;
         this.pollProgressCallbacks = [];
         this.operation = operation;
@@ -56946,6 +58978,10 @@ var init_poller = __esm({
         this.promise.catch(() => {
         });
       }
+      /**
+       * Starts a loop that will break only if the poller is done
+       * or if the poller is stopped.
+       */
       async startPolling(pollOptions = {}) {
         if (this.stopped) {
           this.stopped = false;
@@ -56955,27 +58991,50 @@ var init_poller = __esm({
           await this.delay();
         }
       }
+      /**
+       * pollOnce does one polling, by calling to the update method of the underlying
+       * poll operation to make any relevant change effective.
+       *
+       * It only optionally receives an object with an abortSignal property, from \@azure/abort-controller's AbortSignalLike.
+       *
+       * @param options - Optional properties passed to the operation's update method.
+       */
       async pollOnce(options = {}) {
         if (!this.isDone()) {
-          try {
-            this.operation = await this.operation.update({
-              abortSignal: options.abortSignal,
-              fireProgress: this.fireProgress.bind(this)
-            });
-          } catch (e) {
-            this.operation.state.error = e;
-          }
+          this.operation = await this.operation.update({
+            abortSignal: options.abortSignal,
+            fireProgress: this.fireProgress.bind(this)
+          });
         }
         this.processUpdatedState();
       }
+      /**
+       * fireProgress calls the functions passed in via onProgress the method of the poller.
+       *
+       * It loops over all of the callbacks received from onProgress, and executes them, sending them
+       * the current operation state.
+       *
+       * @param state - The current operation state.
+       */
       fireProgress(state) {
         for (const callback of this.pollProgressCallbacks) {
           callback(state);
         }
       }
+      /**
+       * Invokes the underlying operation's cancel method.
+       */
       async cancelOnce(options = {}) {
         this.operation = await this.operation.cancel(options);
       }
+      /**
+       * Returns a promise that will resolve once a single polling request finishes.
+       * It does this by calling the update method of the Poller's operation.
+       *
+       * It only optionally receives an object with an abortSignal property, from \@azure/abort-controller's AbortSignalLike.
+       *
+       * @param options - Optional properties passed to the operation's update method.
+       */
       poll(options = {}) {
         if (!this.pollOncePromise) {
           this.pollOncePromise = this.pollOnce(options);
@@ -56989,18 +59048,26 @@ var init_poller = __esm({
       processUpdatedState() {
         if (this.operation.state.error) {
           this.stopped = true;
-          this.reject(this.operation.state.error);
-          throw this.operation.state.error;
+          if (!this.resolveOnUnsuccessful) {
+            this.reject(this.operation.state.error);
+            throw this.operation.state.error;
+          }
         }
         if (this.operation.state.isCancelled) {
           this.stopped = true;
-          const error2 = new PollerCancelledError("Operation was canceled");
-          this.reject(error2);
-          throw error2;
-        } else if (this.isDone() && this.resolve) {
-          this.resolve(this.operation.state.result);
+          if (!this.resolveOnUnsuccessful) {
+            const error2 = new PollerCancelledError("Operation was canceled");
+            this.reject(error2);
+            throw error2;
+          }
+        }
+        if (this.isDone() && this.resolve) {
+          this.resolve(this.getResult());
         }
       }
+      /**
+       * Returns a promise that will resolve once the underlying operation is completed.
+       */
       async pollUntilDone(pollOptions = {}) {
         if (this.stopped) {
           this.startPolling(pollOptions).catch(this.reject);
@@ -57008,16 +59075,28 @@ var init_poller = __esm({
         this.processUpdatedState();
         return this.promise;
       }
+      /**
+       * Invokes the provided callback after each polling is completed,
+       * sending the current state of the poller's operation.
+       *
+       * It returns a method that can be used to stop receiving updates on the given callback function.
+       */
       onProgress(callback) {
         this.pollProgressCallbacks.push(callback);
         return () => {
           this.pollProgressCallbacks = this.pollProgressCallbacks.filter((c) => c !== callback);
         };
       }
+      /**
+       * Returns true if the poller has finished polling.
+       */
       isDone() {
         const state = this.operation.state;
         return Boolean(state.isCompleted || state.isCancelled || state.error);
       }
+      /**
+       * Stops the poller from continuing to poll.
+       */
       stopPolling() {
         if (!this.stopped) {
           this.stopped = true;
@@ -57026,9 +59105,21 @@ var init_poller = __esm({
           }
         }
       }
+      /**
+       * Returns true if the poller is stopped.
+       */
       isStopped() {
         return this.stopped;
       }
+      /**
+       * Attempts to cancel the underlying operation.
+       *
+       * It only optionally receives an object with an abortSignal property, from \@azure/abort-controller's AbortSignalLike.
+       *
+       * If it's called again before it finishes, it will throw an error.
+       *
+       * @param options - Optional properties passed to the operation's update method.
+       */
       cancelOperation(options = {}) {
         if (!this.cancelPromise) {
           this.cancelPromise = this.cancelOnce(options);
@@ -57037,13 +59128,71 @@ var init_poller = __esm({
         }
         return this.cancelPromise;
       }
+      /**
+       * Returns the state of the operation.
+       *
+       * Even though TState will be the same type inside any of the methods of any extension of the Poller class,
+       * implementations of the pollers can customize what's shared with the public by writing their own
+       * version of the `getOperationState` method, and by defining two types, one representing the internal state of the poller
+       * and a public type representing a safe to share subset of the properties of the internal state.
+       * Their definition of getOperationState can then return their public type.
+       *
+       * Example:
+       *
+       * ```ts
+       * // Let's say we have our poller's operation state defined as:
+       * interface MyOperationState extends PollOperationState<ResultType> {
+       *   privateProperty?: string;
+       *   publicProperty?: string;
+       * }
+       *
+       * // To allow us to have a true separation of public and private state, we have to define another interface:
+       * interface PublicState extends PollOperationState<ResultType> {
+       *   publicProperty?: string;
+       * }
+       *
+       * // Then, we define our Poller as follows:
+       * export class MyPoller extends Poller<MyOperationState, ResultType> {
+       *   // ... More content is needed here ...
+       *
+       *   public getOperationState(): PublicState {
+       *     const state: PublicState = this.operation.state;
+       *     return {
+       *       // Properties from PollOperationState<TResult>
+       *       isStarted: state.isStarted,
+       *       isCompleted: state.isCompleted,
+       *       isCancelled: state.isCancelled,
+       *       error: state.error,
+       *       result: state.result,
+       *
+       *       // The only other property needed by PublicState.
+       *       publicProperty: state.publicProperty
+       *     }
+       *   }
+       * }
+       * ```
+       *
+       * You can see this in the tests of this repository, go to the file:
+       * `../test/utils/testPoller.ts`
+       * and look for the getOperationState implementation.
+       */
       getOperationState() {
         return this.operation.state;
       }
+      /**
+       * Returns the result value of the operation,
+       * regardless of the state of the poller.
+       * It can return undefined or an incomplete form of the final TResult value
+       * depending on the implementation.
+       */
       getResult() {
         const state = this.operation.state;
         return state.result;
       }
+      /**
+       * Returns a serialized version of the poller's operation
+       * by invoking the operation's toString method.
+       */
       toString() {
         return this.operation.toString();
       }
@@ -57064,7 +59213,7 @@ var init_pollOperation = __esm({
 });
 
 // node_modules/@azure/core-lro/dist-esm/src/index.js
-var init_src9 = __esm({
+var init_src10 = __esm({
   "node_modules/@azure/core-lro/dist-esm/src/index.js"() {
     init_lroEngine();
     init_poller();
@@ -57084,8 +59233,8 @@ function makeBlobBeginCopyFromURLPollOperation(state) {
 var BlobBeginCopyFromUrlPoller, cancel, update, toString2;
 var init_BlobStartCopyFromUrlPoller = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/pollers/BlobStartCopyFromUrlPoller.js"() {
-    init_coreHttp();
-    init_src9();
+    init_src6();
+    init_src10();
     BlobBeginCopyFromUrlPoller = class extends Poller {
       constructor(options) {
         const { blobClient, copySource: copySource2, intervalInMs = 15e3, onProgress, resumeFrom, startCopyFromURLOptions } = options;
@@ -57195,6 +59344,10 @@ var init_Batch = __esm({
       BatchStates2[BatchStates2["Error"] = 1] = "Error";
     })(BatchStates || (BatchStates = {}));
     Batch = class {
+      /**
+       * Creates an instance of Batch.
+       * @param concurrency -
+       */
       constructor(concurrency = 5) {
         this.actives = 0;
         this.completed = 0;
@@ -57207,6 +59360,11 @@ var init_Batch = __esm({
         this.concurrency = concurrency;
         this.emitter = new EventEmitter();
       }
+      /**
+       * Add a operation into queue.
+       *
+       * @param operation -
+       */
       addOperation(operation) {
         this.operations.push(async () => {
           try {
@@ -57220,6 +59378,10 @@ var init_Batch = __esm({
           }
         });
       }
+      /**
+       * Start execute operations in the queue.
+       *
+       */
       async do() {
         if (this.operations.length === 0) {
           return Promise.resolve();
@@ -57233,12 +59395,21 @@ var init_Batch = __esm({
           });
         });
       }
+      /**
+       * Get next operation to be executed. Return null when reaching ends.
+       *
+       */
       nextOperation() {
         if (this.offset < this.operations.length) {
           return this.operations[this.offset++];
         }
         return null;
       }
+      /**
+       * Start execute operations. One one the most important difference between
+       * this method with do() is that do() wraps as an sync method.
+       *
+       */
       parallelExecute() {
         if (this.state === BatchStates.Error) {
           return;
@@ -57266,6 +59437,13 @@ var BuffersStream;
 var init_BuffersStream = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-common/src/BuffersStream.js"() {
     BuffersStream = class extends Readable4 {
+      /**
+       * Creates an instance of BuffersStream that will emit the data
+       * contained in the array of buffers.
+       *
+       * @param buffers - Array of buffers containing the data
+       * @param byteLength - The total length of data contained in the buffers
+       */
       constructor(buffers, byteLength, options) {
         super(options);
         this.buffers = buffers;
@@ -57281,6 +59459,11 @@ var init_BuffersStream = __esm({
           throw new Error("Data size shouldn't be larger than the total length of buffers.");
         }
       }
+      /**
+       * Internal _read() that will be called when the stream wants to pull more data in.
+       *
+       * @param size - Optional. The size of data to be read
+       */
       _read(size) {
         if (this.pushedBytesLength >= this.byteLength) {
           this.push(null);
@@ -57347,9 +59530,21 @@ var init_PooledBuffer = __esm({
           this.fill(buffers, totalLength);
         }
       }
+      /**
+       * The size of the data contained in the pooled buffers.
+       */
       get size() {
         return this._size;
       }
+      /**
+       * Fill the internal buffers with data in the input buffers serially
+       * with respect to the total length and the total capacity of the internal buffers.
+       * Data copied will be shift out of the input buffers.
+       *
+       * @param buffers - Input buffers containing the data to be filled in the pooled buffer
+       * @param totalLength - Total length of the data to be filled in.
+       *
+       */
       fill(buffers, totalLength) {
         this._size = Math.min(this.capacity, totalLength);
         let i = 0, j = 0, targetOffset = 0, sourceOffset = 0, totalCopiedNum = 0;
@@ -57374,6 +59569,10 @@ var init_PooledBuffer = __esm({
           buffers[0] = buffers[0].slice(sourceOffset);
         }
       }
+      /**
+       * Get the readable stream assembled from all the data in the internal buffers.
+       *
+       */
       getReadableStream() {
         return new BuffersStream(this.buffers, this.size);
       }
@@ -57388,6 +59587,18 @@ var init_BufferScheduler = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-common/src/BufferScheduler.js"() {
     init_PooledBuffer();
     BufferScheduler = class {
+      /**
+       * Creates an instance of BufferScheduler.
+       *
+       * @param readable - A Node.js Readable stream
+       * @param bufferSize - Buffer size of every maintained buffer
+       * @param maxBuffers - How many buffers can be allocated
+       * @param outgoingHandler - An async function scheduled to be
+       *                                          triggered when a buffer fully filled
+       *                                          with stream data
+       * @param concurrency - Concurrency of executing outgoingHandlers (>0)
+       * @param encoding - [Optional] Encoding of Readable stream when it's a string stream
+       */
       constructor(readable, bufferSize, maxBuffers, outgoingHandler, concurrency, encoding) {
         this.emitter = new EventEmitter2();
         this.offset = 0;
@@ -57415,6 +59626,11 @@ var init_BufferScheduler = __esm({
         this.concurrency = concurrency;
         this.encoding = encoding;
       }
+      /**
+       * Start the scheduler, will return error when stream of any of the outgoingHandlers
+       * returns error.
+       *
+       */
       async do() {
         return new Promise((resolve, reject) => {
           this.readable.on("data", (data) => {
@@ -57454,10 +59670,20 @@ var init_BufferScheduler = __esm({
           });
         });
       }
+      /**
+       * Insert a new data into unresolved array.
+       *
+       * @param data -
+       */
       appendUnresolvedData(data) {
         this.unresolvedDataArray.push(data);
         this.unresolvedLength += data.length;
       }
+      /**
+       * Try to shift a buffer with size in blockSize. The buffer returned may be less
+       * than blockSize when data in unresolvedDataArray is less than bufferSize.
+       *
+       */
       shiftBufferFromUnresolvedDataArray(buffer) {
         if (!buffer) {
           buffer = new PooledBuffer(this.bufferSize, this.unresolvedDataArray, this.unresolvedLength);
@@ -57467,6 +59693,15 @@ var init_BufferScheduler = __esm({
         this.unresolvedLength -= buffer.size;
         return buffer;
       }
+      /**
+       * Resolve data in unresolvedDataArray. For every buffer with size in blockSize
+       * shifted, it will try to get (or allocate a buffer) from incoming, and fill it,
+       * then push it into outgoing to be handled by outgoing handler.
+       *
+       * Return false when available buffers in incoming are not enough, else true.
+       *
+       * @returns Return false when buffers in incoming are not enough, else true.
+       */
       resolveData() {
         while (this.unresolvedLength >= this.bufferSize) {
           let buffer;
@@ -57486,6 +59721,10 @@ var init_BufferScheduler = __esm({
         }
         return true;
       }
+      /**
+       * Try to trigger a outgoing handler for every buffer in outgoing. Stop when
+       * concurrency reaches.
+       */
       async triggerOutgoingHandlers() {
         let buffer;
         do {
@@ -57498,6 +59737,11 @@ var init_BufferScheduler = __esm({
           }
         } while (buffer);
       }
+      /**
+       * Trigger a outgoing handler for a buffer shifted from outgoing.
+       *
+       * @param buffer -
+       */
       async triggerOutgoingHandler(buffer) {
         const bufferLength = buffer.size;
         this.executingOutgoingHandlers++;
@@ -57512,6 +59756,11 @@ var init_BufferScheduler = __esm({
         this.reuseBuffer(buffer);
         this.emitter.emit("checkEnd");
       }
+      /**
+       * Return buffer used by outgoing handler into incoming.
+       *
+       * @param buffer -
+       */
       reuseBuffer(buffer) {
         this.incoming.push(buffer);
         if (!this.isError && this.resolveData() && !this.isStreamEnd) {
@@ -57523,7 +59772,7 @@ var init_BufferScheduler = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-common/src/index.js
-var init_src10 = __esm({
+var init_src11 = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-common/src/index.js"() {
     init_BufferScheduler();
   }
@@ -57536,8 +59785,10 @@ async function streamToBuffer(stream, buffer, offset, end, encoding) {
   let pos = 0;
   const count = end - offset;
   return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error(`The operation cannot be completed in timeout.`)), REQUEST_TIMEOUT);
     stream.on("readable", () => {
       if (pos >= count) {
+        clearTimeout(timeout);
         resolve();
         return;
       }
@@ -57553,12 +59804,16 @@ async function streamToBuffer(stream, buffer, offset, end, encoding) {
       pos += chunkLength;
     });
     stream.on("end", () => {
+      clearTimeout(timeout);
       if (pos < count) {
         reject(new Error(`Stream drains before getting enough data needed. Data read: ${pos}, data need: ${count}`));
       }
       resolve();
     });
-    stream.on("error", reject);
+    stream.on("error", (msg) => {
+      clearTimeout(timeout);
+      reject(msg);
+    });
   });
 }
 async function streamToBuffer2(stream, buffer, encoding) {
@@ -57602,6 +59857,7 @@ async function readStreamToLocalFile(rs, file) {
 var fsStat, fsCreateReadStream;
 var init_utils_node = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/utils.node.js"() {
+    init_constants2();
     fsStat = util2.promisify(fs.stat);
     fsCreateReadStream = fs.createReadStream;
   }
@@ -57612,7 +59868,7 @@ var BlobClient, AppendBlobClient, BlockBlobClient, PageBlobClient;
 var init_Clients = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/Clients.js"() {
     init_tslib_es6();
-    init_coreHttp();
+    init_src6();
     init_src5();
     init_BlobDownloadResponse();
     init_BlobQueryResponse();
@@ -57626,7 +59882,7 @@ var init_Clients = __esm({
     init_Range();
     init_StorageClient();
     init_Batch();
-    init_src10();
+    init_src11();
     init_constants2();
     init_tracing();
     init_utils_common();
@@ -57637,16 +59893,16 @@ var init_Clients = __esm({
       constructor(urlOrConnectionString, credentialOrPipelineOrContainerName, blobNameOrOptions, options) {
         options = options || {};
         let pipeline;
-        let url2;
+        let url3;
         if (isPipelineLike(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = credentialOrPipelineOrContainerName;
         } else if (isNode && credentialOrPipelineOrContainerName instanceof StorageSharedKeyCredential || credentialOrPipelineOrContainerName instanceof AnonymousCredential || isTokenCredential(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           options = blobNameOrOptions;
           pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
         } else if (!credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName !== "string") {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = newPipeline(new AnonymousCredential(), options);
         } else if (credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName === "string" && blobNameOrOptions && typeof blobNameOrOptions === "string") {
           const containerName = credentialOrPipelineOrContainerName;
@@ -57655,7 +59911,7 @@ var init_Clients = __esm({
           if (extractedCreds.kind === "AccountConnString") {
             if (isNode) {
               const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
-              url2 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
+              url3 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
               if (!options.proxyOptions) {
                 options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
               }
@@ -57664,7 +59920,7 @@ var init_Clients = __esm({
               throw new Error("Account connection string is only supported in Node.js environment");
             }
           } else if (extractedCreds.kind === "SASConnString") {
-            url2 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
+            url3 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
             pipeline = newPipeline(new AnonymousCredential(), options);
           } else {
             throw new Error("Connection string must be either an Account connection string or a SAS connection string");
@@ -57672,42 +59928,134 @@ var init_Clients = __esm({
         } else {
           throw new Error("Expecting non-empty strings for containerName and blobName parameters");
         }
-        super(url2, pipeline);
+        super(url3, pipeline);
         ({ blobName: this._name, containerName: this._containerName } = this.getBlobAndContainerNamesFromUrl());
         this.blobContext = new Blob3(this.storageClientContext);
         this._snapshot = getURLParameter(this.url, URLConstants.Parameters.SNAPSHOT);
         this._versionId = getURLParameter(this.url, URLConstants.Parameters.VERSIONID);
       }
+      /**
+       * The name of the blob.
+       */
       get name() {
         return this._name;
       }
+      /**
+       * The name of the storage container the blob is associated with.
+       */
       get containerName() {
         return this._containerName;
       }
+      /**
+       * Creates a new BlobClient object identical to the source but with the specified snapshot timestamp.
+       * Provide "" will remove the snapshot and return a Client to the base blob.
+       *
+       * @param snapshot - The snapshot timestamp.
+       * @returns A new BlobClient object identical to the source but with the specified snapshot timestamp
+       */
       withSnapshot(snapshot2) {
         return new BlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
+      /**
+       * Creates a new BlobClient object pointing to a version of this blob.
+       * Provide "" will remove the versionId and return a Client to the base blob.
+       *
+       * @param versionId - The versionId.
+       * @returns A new BlobClient object pointing to the version of this blob.
+       */
       withVersion(versionId2) {
         return new BlobClient(setURLParameter(this.url, URLConstants.Parameters.VERSIONID, versionId2.length === 0 ? void 0 : versionId2), this.pipeline);
       }
+      /**
+       * Creates a AppendBlobClient object.
+       *
+       */
       getAppendBlobClient() {
         return new AppendBlobClient(this.url, this.pipeline);
       }
+      /**
+       * Creates a BlockBlobClient object.
+       *
+       */
       getBlockBlobClient() {
         return new BlockBlobClient(this.url, this.pipeline);
       }
+      /**
+       * Creates a PageBlobClient object.
+       *
+       */
       getPageBlobClient() {
         return new PageBlobClient(this.url, this.pipeline);
       }
+      /**
+       * Reads or downloads a blob from the system, including its metadata and properties.
+       * You can also call Get Blob to read a snapshot.
+       *
+       * * In Node.js, data returns in a Readable stream readableStreamBody
+       * * In browsers, data returns in a promise blobBody
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/get-blob
+       *
+       * @param offset - From which position of the blob to download, greater than or equal to 0
+       * @param count - How much data to be downloaded, greater than 0. Will download to the end when undefined
+       * @param options - Optional options to Blob Download operation.
+       *
+       *
+       * Example usage (Node.js):
+       *
+       * ```js
+       * // Download and convert a blob to a string
+       * const downloadBlockBlobResponse = await blobClient.download();
+       * const downloaded = await streamToBuffer(downloadBlockBlobResponse.readableStreamBody);
+       * console.log("Downloaded blob content:", downloaded.toString());
+       *
+       * async function streamToBuffer(readableStream) {
+       * return new Promise((resolve, reject) => {
+       * const chunks = [];
+       * readableStream.on("data", (data) => {
+       * chunks.push(data instanceof Buffer ? data : Buffer.from(data));
+       * });
+       * readableStream.on("end", () => {
+       * resolve(Buffer.concat(chunks));
+       * });
+       * readableStream.on("error", reject);
+       * });
+       * }
+       * ```
+       *
+       * Example usage (browser):
+       *
+       * ```js
+       * // Download and convert a blob to a string
+       * const downloadBlockBlobResponse = await blobClient.download();
+       * const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+       * console.log(
+       *   "Downloaded blob content",
+       *   downloaded
+       * );
+       *
+       * async function blobToString(blob: Blob): Promise<string> {
+       *   const fileReader = new FileReader();
+       *   return new Promise<string>((resolve, reject) => {
+       *     fileReader.onloadend = (ev: any) => {
+       *       resolve(ev.target!.result);
+       *     };
+       *     fileReader.onerror = reject;
+       *     fileReader.readAsText(blob);
+       *   });
+       * }
+       * ```
+       */
       async download(offset = 0, count, options = {}) {
-        var _a2;
+        var _a;
         options.conditions = options.conditions || {};
         options.conditions = options.conditions || {};
         ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
         const { span, updatedOptions } = createSpan2("BlobClient-download", options);
         try {
-          const res = await this.blobContext.download(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          const res = await this.blobContext.download(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), requestOptions: {
             onDownloadProgress: isNode ? void 0 : options.onProgress
+            // for Node.js, progress is reported by RetriableReadableStream
           }, range: offset === 0 && !count ? void 0 : rangeToString({ offset, count }), rangeGetContentMD5: options.rangeGetContentMD5, rangeGetContentCRC64: options.rangeGetContentCrc64, snapshot: options.snapshot, cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedRes = Object.assign(Object.assign({}, res), { _response: res._response, objectReplicationDestinationPolicyId: res.objectReplicationPolicyId, objectReplicationSourceProperties: parseObjectReplicationRecord(res.objectReplicationRules) });
           if (!isNode) {
@@ -57723,7 +60071,7 @@ var init_Clients = __esm({
             throw new RangeError(`File download response doesn't contain valid etag header`);
           }
           return new BlobDownloadResponse(wrappedRes, async (start) => {
-            var _a3;
+            var _a2;
             const updatedDownloadOptions = {
               leaseAccessConditions: options.conditions,
               modifiedAccessConditions: {
@@ -57731,7 +60079,7 @@ var init_Clients = __esm({
                 ifModifiedSince: options.conditions.ifModifiedSince,
                 ifNoneMatch: options.conditions.ifNoneMatch,
                 ifUnmodifiedSince: options.conditions.ifUnmodifiedSince,
-                ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions
+                ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions
               },
               range: rangeToString({
                 count: offset + res.contentLength - start,
@@ -57749,7 +60097,7 @@ var init_Clients = __esm({
           });
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57757,6 +60105,15 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Returns true if the Azure blob resource represented by this client exists; false otherwise.
+       *
+       * NOTE: use this function with care since an existing blob might be deleted by other clients or
+       * applications. Vice versa new blobs might be added by other clients or applications after this
+       * function completes.
+       *
+       * @param options - options to Exists operation.
+       */
       async exists(options = {}) {
         const { span, updatedOptions } = createSpan2("BlobClient-exists", options);
         try {
@@ -57775,7 +60132,7 @@ var init_Clients = __esm({
             return true;
           }
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57783,17 +60140,29 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Returns all user-defined metadata, standard HTTP properties, and system properties
+       * for the blob. It does not return the content of the blob.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/get-blob-properties
+       *
+       * WARNING: The `metadata` object returned in the response will have its keys in lowercase, even if
+       * they originally contained uppercase characters. This differs from the metadata keys returned by
+       * the methods of {@link ContainerClient} that list blobs using the `includeMetadata` option, which
+       * will retain their original casing.
+       *
+       * @param options - Optional options to Get Properties operation.
+       */
       async getProperties(options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-getProperties", options);
         try {
           options.conditions = options.conditions || {};
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          const res = await this.blobContext.getProperties(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const res = await this.blobContext.getProperties(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           return Object.assign(Object.assign({}, res), { _response: res._response, objectReplicationDestinationPolicyId: res.objectReplicationPolicyId, objectReplicationSourceProperties: parseObjectReplicationRecord(res.objectReplicationRules) });
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57801,15 +60170,24 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Marks the specified blob or snapshot for deletion. The blob is later deleted
+       * during garbage collection. Note that in order to delete a blob, you must delete
+       * all of its snapshots. You can delete both at the same time with the Delete
+       * Blob operation.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/delete-blob
+       *
+       * @param options - Optional options to Blob Delete operation.
+       */
       async delete(options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-delete", options);
         options.conditions = options.conditions || {};
         try {
-          return await this.blobContext.delete(Object.assign({ abortSignal: options.abortSignal, deleteSnapshots: options.deleteSnapshots, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.delete(Object.assign({ abortSignal: options.abortSignal, deleteSnapshots: options.deleteSnapshots, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57817,22 +60195,31 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Marks the specified blob or snapshot for deletion if it exists. The blob is later deleted
+       * during garbage collection. Note that in order to delete a blob, you must delete
+       * all of its snapshots. You can delete both at the same time with the Delete
+       * Blob operation.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/delete-blob
+       *
+       * @param options - Optional options to Blob Delete operation.
+       */
       async deleteIfExists(options = {}) {
-        var _a2, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("BlobClient-deleteIfExists", options);
         try {
           const res = await this.delete(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "BlobNotFound") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "BlobNotFound") {
             span.setStatus({
-              code: SpanStatusCode2.ERROR,
+              code: SpanStatusCode.ERROR,
               message: "Expected exception when deleting a blob or snapshot only if it exists."
             });
             return Object.assign(Object.assign({ succeeded: false }, (_b = e.response) === null || _b === void 0 ? void 0 : _b.parsedHeaders), { _response: e.response });
           }
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57840,13 +60227,21 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Restores the contents and metadata of soft deleted blob and any associated
+       * soft deleted snapshots. Undelete Blob is supported only on version 2017-07-29
+       * or later.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/undelete-blob
+       *
+       * @param options - Optional options to Blob Undelete operation.
+       */
       async undelete(options = {}) {
         const { span, updatedOptions } = createSpan2("BlobClient-undelete", options);
         try {
           return await this.blobContext.undelete(Object.assign({ abortSignal: options.abortSignal }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57854,16 +60249,31 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Sets system properties on the blob.
+       *
+       * If no value provided, or no value provided for the specified blob HTTP headers,
+       * these blob HTTP headers without a value will be cleared.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/set-blob-properties
+       *
+       * @param blobHTTPHeaders - If no value provided, or no value provided for
+       *                                                   the specified blob HTTP headers, these blob HTTP
+       *                                                   headers without a value will be cleared.
+       *                                                   A common header to set is `blobContentType`
+       *                                                   enabling the browser to provide functionality
+       *                                                   based on file type.
+       * @param options - Optional options to Blob Set HTTP Headers operation.
+       */
       async setHTTPHeaders(blobHTTPHeaders, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-setHTTPHeaders", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.setHttpHeaders(Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setHttpHeaders(Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57871,16 +60281,27 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Sets user-defined metadata for the specified blob as one or more name-value pairs.
+       *
+       * If no option provided, or no metadata defined in the parameter, the blob
+       * metadata will be removed.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/set-blob-metadata
+       *
+       * @param metadata - Replace existing metadata with this value.
+       *                               If no value provided the existing metadata will be removed.
+       * @param options - Optional options to Set Metadata operation.
+       */
       async setMetadata(metadata2, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-setMetadata", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.setMetadata(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: metadata2, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setMetadata(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: metadata2, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57888,14 +60309,23 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Sets tags on the underlying blob.
+       * A blob can have up to 10 tags. Tag keys must be between 1 and 128 characters.  Tag values must be between 0 and 256 characters.
+       * Valid tag key and value characters include lower and upper case letters, digits (0-9),
+       * space (' '), plus ('+'), minus ('-'), period ('.'), foward slash ('/'), colon (':'), equals ('='), and underscore ('_').
+       *
+       * @param tags -
+       * @param options -
+       */
       async setTags(tags2, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-setTags", options);
         try {
-          return await this.blobContext.setTags(Object.assign(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)), { tags: toBlobTags(tags2) }));
+          return await this.blobContext.setTags(Object.assign(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)), { tags: toBlobTags(tags2) }));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57903,16 +60333,21 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Gets the tags associated with the underlying blob.
+       *
+       * @param options -
+       */
       async getTags(options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-getTags", options);
         try {
-          const response = await this.blobContext.getTags(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const response = await this.blobContext.getTags(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, tags: toTags({ blobTagSet: response.blobTagSet }) || {} });
           return wrappedResponse;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57920,19 +60355,31 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Get a {@link BlobLeaseClient} that manages leases on the blob.
+       *
+       * @param proposeLeaseId - Initial proposed lease Id.
+       * @returns A new BlobLeaseClient object for managing leases on the blob.
+       */
       getBlobLeaseClient(proposeLeaseId) {
         return new BlobLeaseClient(this, proposeLeaseId);
       }
+      /**
+       * Creates a read-only snapshot of a blob.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/snapshot-blob
+       *
+       * @param options - Optional options to the Blob Create Snapshot operation.
+       */
       async createSnapshot(options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-createSnapshot", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.createSnapshot(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.createSnapshot(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57940,6 +60387,78 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Asynchronously copies a blob to a destination within the storage account.
+       * This method returns a long running operation poller that allows you to wait
+       * indefinitely until the copy is completed.
+       * You can also cancel a copy before it is completed by calling `cancelOperation` on the poller.
+       * Note that the onProgress callback will not be invoked if the operation completes in the first
+       * request, and attempting to cancel a completed copy will result in an error being thrown.
+       *
+       * In version 2012-02-12 and later, the source for a Copy Blob operation can be
+       * a committed blob in any Azure storage account.
+       * Beginning with version 2015-02-21, the source for a Copy Blob operation can be
+       * an Azure file in any Azure storage account.
+       * Only storage accounts created on or after June 7th, 2012 allow the Copy Blob
+       * operation to copy from another storage account.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/copy-blob
+       *
+       * Example using automatic polling:
+       *
+       * ```js
+       * const copyPoller = await blobClient.beginCopyFromURL('url');
+       * const result = await copyPoller.pollUntilDone();
+       * ```
+       *
+       * Example using manual polling:
+       *
+       * ```js
+       * const copyPoller = await blobClient.beginCopyFromURL('url');
+       * while (!poller.isDone()) {
+       *    await poller.poll();
+       * }
+       * const result = copyPoller.getResult();
+       * ```
+       *
+       * Example using progress updates:
+       *
+       * ```js
+       * const copyPoller = await blobClient.beginCopyFromURL('url', {
+       *   onProgress(state) {
+       *     console.log(`Progress: ${state.copyProgress}`);
+       *   }
+       * });
+       * const result = await copyPoller.pollUntilDone();
+       * ```
+       *
+       * Example using a changing polling interval (default 15 seconds):
+       *
+       * ```js
+       * const copyPoller = await blobClient.beginCopyFromURL('url', {
+       *   intervalInMs: 1000 // poll blob every 1 second for copy progress
+       * });
+       * const result = await copyPoller.pollUntilDone();
+       * ```
+       *
+       * Example using copy cancellation:
+       *
+       * ```js
+       * const copyPoller = await blobClient.beginCopyFromURL('url');
+       * // cancel operation after starting it.
+       * try {
+       *   await copyPoller.cancelOperation();
+       *   // calls to get the result now throw PollerCancelledError
+       *   await copyPoller.getResult();
+       * } catch (err) {
+       *   if (err.name === 'PollerCancelledError') {
+       *     console.log('The copy was cancelled.');
+       *   }
+       * }
+       * ```
+       *
+       * @param copySource - url to the source Azure Blob/File.
+       * @param options - Optional options to the Blob Start Copy From URL operation.
+       */
       async beginCopyFromURL(copySource2, options = {}) {
         const client = {
           abortCopyFromURL: (...args) => this.abortCopyFromURL(...args),
@@ -57957,13 +60476,21 @@ var init_Clients = __esm({
         await poller.poll();
         return poller;
       }
+      /**
+       * Aborts a pending asynchronous Copy Blob operation, and leaves a destination blob with zero
+       * length and full metadata. Version 2012-02-12 and newer.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/abort-copy-blob
+       *
+       * @param copyId - Id of the Copy From URL operation.
+       * @param options - Optional options to the Blob Abort Copy From URL operation.
+       */
       async abortCopyFromURL(copyId2, options = {}) {
         const { span, updatedOptions } = createSpan2("BlobClient-abortCopyFromURL", options);
         try {
           return await this.blobContext.abortCopyFromURL(copyId2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57971,13 +60498,21 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * The synchronous Copy From URL operation copies a blob or an internet resource to a new blob. It will not
+       * return a response until the copy is complete.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/copy-blob-from-url
+       *
+       * @param copySource - The source URL to copy from, Shared Access Signature(SAS) maybe needed for authentication
+       * @param options -
+       */
       async syncCopyFromURL(copySource2, options = {}) {
-        var _a2, _b, _c;
+        var _a, _b, _c;
         const { span, updatedOptions } = createSpan2("BlobClient-syncCopyFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
-          return await this.blobContext.copyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, metadata: options.metadata, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.blobContext.copyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, metadata: options.metadata, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -57985,7 +60520,7 @@ var init_Clients = __esm({
           }, sourceContentMD5: options.sourceContentMD5, copySourceAuthorization: httpAuthorizationToString(options.sourceAuthorization), blobTagsString: toBlobTagsString(options.tags), immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, encryptionScope: options.encryptionScope, copySourceTags: options.copySourceTags }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -57993,14 +60528,25 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Sets the tier on a blob. The operation is allowed on a page blob in a premium
+       * storage account and on a block blob in a blob storage account (locally redundant
+       * storage only). A premium page blob's tier determines the allowed size, IOPS,
+       * and bandwidth of the blob. A block blob's tier determines Hot/Cool/Archive
+       * storage type. This operation does not update the blob's ETag.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/set-blob-tier
+       *
+       * @param tier - The tier to be set on the blob. Valid values are Hot, Cool, or Archive.
+       * @param options - Optional options to the Blob Set Tier operation.
+       */
       async setAccessTier(tier2, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobClient-setAccessTier", options);
         try {
-          return await this.blobContext.setTier(toAccessTier(tier2), Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), rehydratePriority: options.rehydratePriority }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setTier(toAccessTier(tier2), Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), rehydratePriority: options.rehydratePriority }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58086,7 +60632,7 @@ var init_Clients = __esm({
           return buffer;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58094,6 +60640,22 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * ONLY AVAILABLE IN NODE.JS RUNTIME.
+       *
+       * Downloads an Azure Blob to a local file.
+       * Fails if the the given file path already exits.
+       * Offset and count are optional, pass 0 and undefined respectively to download the entire blob.
+       *
+       * @param filePath -
+       * @param offset - From which position of the block blob to download.
+       * @param count - How much data to be downloaded. Will download to the end when passing undefined.
+       * @param options - Options to Blob download options.
+       * @returns The response data for blob download operation,
+       *                                                 but with readableStreamBody set to undefined since its
+       *                                                 content is already read and written into a local file
+       *                                                 at the specified path.
+       */
       async downloadToFile(filePath, offset = 0, count, options = {}) {
         const { span, updatedOptions } = createSpan2("BlobClient-downloadToFile", options);
         try {
@@ -58105,7 +60667,7 @@ var init_Clients = __esm({
           return response;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58142,13 +60704,26 @@ var init_Clients = __esm({
           throw new Error("Unable to extract blobName and containerName with provided information.");
         }
       }
+      /**
+       * Asynchronously copies a blob to a destination within the storage account.
+       * In version 2012-02-12 and later, the source for a Copy Blob operation can be
+       * a committed blob in any Azure storage account.
+       * Beginning with version 2015-02-21, the source for a Copy Blob operation can be
+       * an Azure file in any Azure storage account.
+       * Only storage accounts created on or after June 7th, 2012 allow the Copy Blob
+       * operation to copy from another storage account.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/copy-blob
+       *
+       * @param copySource - url to the source Azure Blob/File.
+       * @param options - Optional options to the Blob Start Copy From URL operation.
+       */
       async startCopyFromURL(copySource2, options = {}) {
-        var _a2, _b, _c;
+        var _a, _b, _c;
         const { span, updatedOptions } = createSpan2("BlobClient-startCopyFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
-          return await this.blobContext.startCopyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.blobContext.startCopyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -58157,7 +60732,7 @@ var init_Clients = __esm({
           }, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, rehydratePriority: options.rehydratePriority, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags), sealBlob: options.sealBlob }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58165,6 +60740,17 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Only available for BlobClient constructed with a shared key credential.
+       *
+       * Generates a Blob Service Shared Access Signature (SAS) URI based on the client properties
+       * and parameters passed in. The SAS is signed by the shared key credential of the client.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-a-service-sas
+       *
+       * @param options - Optional parameters.
+       * @returns The SAS URI consisting of the URI to the resource represented by this client, followed by the generated SAS token.
+       */
       generateSasUrl(options) {
         return new Promise((resolve) => {
           if (!(this.credential instanceof StorageSharedKeyCredential)) {
@@ -58174,13 +60760,18 @@ var init_Clients = __esm({
           resolve(appendToURLQuery(this.url, sas));
         });
       }
+      /**
+       * Delete the immutablility policy on the blob.
+       *
+       * @param options - Optional options to delete immutability policy on the blob.
+       */
       async deleteImmutabilityPolicy(options) {
         const { span, updatedOptions } = createSpan2("BlobClient-deleteImmutabilityPolicy", options);
         try {
           return await this.blobContext.deleteImmutabilityPolicy(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58188,13 +60779,18 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Set immutablility policy on the blob.
+       *
+       * @param options - Optional options to set immutability policy on the blob.
+       */
       async setImmutabilityPolicy(immutabilityPolicy, options) {
         const { span, updatedOptions } = createSpan2("BlobClient-setImmutabilityPolicy", options);
         try {
           return await this.blobContext.setImmutabilityPolicy(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal, immutabilityPolicyExpiry: immutabilityPolicy.expiriesOn, immutabilityPolicyMode: immutabilityPolicy.policyMode, modifiedAccessConditions: options === null || options === void 0 ? void 0 : options.modifiedAccessCondition }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58202,13 +60798,18 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Set legal hold on the blob.
+       *
+       * @param options - Optional options to set legal hold on the blob.
+       */
       async setLegalHold(legalHoldEnabled, options) {
         const { span, updatedOptions } = createSpan2("BlobClient-setLegalHold", options);
         try {
           return await this.blobContext.setLegalHold(legalHoldEnabled, Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58220,17 +60821,17 @@ var init_Clients = __esm({
     AppendBlobClient = class extends BlobClient {
       constructor(urlOrConnectionString, credentialOrPipelineOrContainerName, blobNameOrOptions, options) {
         let pipeline;
-        let url2;
+        let url3;
         options = options || {};
         if (isPipelineLike(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = credentialOrPipelineOrContainerName;
         } else if (isNode && credentialOrPipelineOrContainerName instanceof StorageSharedKeyCredential || credentialOrPipelineOrContainerName instanceof AnonymousCredential || isTokenCredential(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           options = blobNameOrOptions;
           pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
         } else if (!credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName !== "string") {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = newPipeline(new AnonymousCredential(), options);
         } else if (credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName === "string" && blobNameOrOptions && typeof blobNameOrOptions === "string") {
           const containerName = credentialOrPipelineOrContainerName;
@@ -58239,7 +60840,7 @@ var init_Clients = __esm({
           if (extractedCreds.kind === "AccountConnString") {
             if (isNode) {
               const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
-              url2 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
+              url3 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
               if (!options.proxyOptions) {
                 options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
               }
@@ -58248,7 +60849,7 @@ var init_Clients = __esm({
               throw new Error("Account connection string is only supported in Node.js environment");
             }
           } else if (extractedCreds.kind === "SASConnString") {
-            url2 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
+            url3 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
             pipeline = newPipeline(new AnonymousCredential(), options);
           } else {
             throw new Error("Connection string must be either an Account connection string or a SAS connection string");
@@ -58256,22 +60857,44 @@ var init_Clients = __esm({
         } else {
           throw new Error("Expecting non-empty strings for containerName and blobName parameters");
         }
-        super(url2, pipeline);
+        super(url3, pipeline);
         this.appendBlobContext = new AppendBlob(this.storageClientContext);
       }
+      /**
+       * Creates a new AppendBlobClient object identical to the source but with the
+       * specified snapshot timestamp.
+       * Provide "" will remove the snapshot and return a Client to the base blob.
+       *
+       * @param snapshot - The snapshot timestamp.
+       * @returns A new AppendBlobClient object identical to the source but with the specified snapshot timestamp.
+       */
       withSnapshot(snapshot2) {
         return new AppendBlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
+      /**
+       * Creates a 0-length append blob. Call AppendBlock to append data to an append blob.
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-blob
+       *
+       * @param options - Options to the Append Block Create operation.
+       *
+       *
+       * Example usage:
+       *
+       * ```js
+       * const appendBlobClient = containerClient.getAppendBlobClient("<blob name>");
+       * await appendBlobClient.create();
+       * ```
+       */
       async create(options = {}) {
-        var _a2, _b, _c;
+        var _a, _b, _c;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-create", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.create(0, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.appendBlobContext.create(0, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58279,23 +60902,30 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Creates a 0-length append blob. Call AppendBlock to append data to an append blob.
+       * If the blob with the same name already exists, the content of the existing blob will remain unchanged.
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-blob
+       *
+       * @param options -
+       */
       async createIfNotExists(options = {}) {
-        var _a2, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-createIfNotExists", options);
         const conditions = { ifNoneMatch: ETagAny };
         try {
           const res = await this.create(Object.assign(Object.assign({}, updatedOptions), { conditions }));
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "BlobAlreadyExists") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "BlobAlreadyExists") {
             span.setStatus({
-              code: SpanStatusCode2.ERROR,
+              code: SpanStatusCode.ERROR,
               message: "Expected exception when creating a blob only if it does not already exist."
             });
             return Object.assign(Object.assign({ succeeded: false }, (_b = e.response) === null || _b === void 0 ? void 0 : _b.parsedHeaders), { _response: e.response });
           }
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58303,15 +60933,20 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Seals the append blob, making it read only.
+       *
+       * @param options -
+       */
       async seal(options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-seal", options);
         options.conditions = options.conditions || {};
         try {
-          return await this.appendBlobContext.seal(Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.appendBlobContext.seal(Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58319,18 +60954,42 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Commits a new block of data to the end of the existing append blob.
+       * @see https://docs.microsoft.com/rest/api/storageservices/append-block
+       *
+       * @param body - Data to be appended.
+       * @param contentLength - Length of the body in bytes.
+       * @param options - Options to the Append Block operation.
+       *
+       *
+       * Example usage:
+       *
+       * ```js
+       * const content = "Hello World!";
+       *
+       * // Create a new append blob and append data to the blob.
+       * const newAppendBlobClient = containerClient.getAppendBlobClient("<blob name>");
+       * await newAppendBlobClient.create();
+       * await newAppendBlobClient.appendBlock(content, content.length);
+       *
+       * // Append data to an existing append blob.
+       * const existingAppendBlobClient = containerClient.getAppendBlobClient("<blob name>");
+       * await existingAppendBlobClient.appendBlock(content, content.length);
+       * ```
+       */
       async appendBlock(body2, contentLength2, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-appendBlock", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.appendBlock(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          return await this.appendBlobContext.appendBlock(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, transactionalContentMD5: options.transactionalContentMD5, transactionalContentCrc64: options.transactionalContentCrc64, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58338,14 +60997,28 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * The Append Block operation commits a new block of data to the end of an existing append blob
+       * where the contents are read from a source url.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/append-block-from-url
+       *
+       * @param sourceURL -
+       *                 The url to the blob that will be the source of the copy. A source blob in the same storage account can
+       *                 be authenticated via Shared Key. However, if the source is a blob in another account, the source blob
+       *                 must either be public or must be authenticated via a shared access signature. If the source blob is
+       *                 public, no authentication is required to perform the operation.
+       * @param sourceOffset - Offset in source to be appended
+       * @param count - Number of bytes to be appended as a block
+       * @param options -
+       */
       async appendBlockFromURL(sourceURL, sourceOffset, count, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-appendBlockFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.appendBlockFromUrl(sourceURL, 0, Object.assign({ abortSignal: options.abortSignal, sourceRange: rangeToString({ offset: sourceOffset, count }), sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, appendPositionAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.appendBlobContext.appendBlockFromUrl(sourceURL, 0, Object.assign({ abortSignal: options.abortSignal, sourceRange: rangeToString({ offset: sourceOffset, count }), sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, appendPositionAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -58353,7 +61026,7 @@ var init_Clients = __esm({
           }, copySourceAuthorization: httpAuthorizationToString(options.sourceAuthorization), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58365,17 +61038,17 @@ var init_Clients = __esm({
     BlockBlobClient = class extends BlobClient {
       constructor(urlOrConnectionString, credentialOrPipelineOrContainerName, blobNameOrOptions, options) {
         let pipeline;
-        let url2;
+        let url3;
         options = options || {};
         if (isPipelineLike(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = credentialOrPipelineOrContainerName;
         } else if (isNode && credentialOrPipelineOrContainerName instanceof StorageSharedKeyCredential || credentialOrPipelineOrContainerName instanceof AnonymousCredential || isTokenCredential(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           options = blobNameOrOptions;
           pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
         } else if (!credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName !== "string") {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = newPipeline(new AnonymousCredential(), options);
         } else if (credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName === "string" && blobNameOrOptions && typeof blobNameOrOptions === "string") {
           const containerName = credentialOrPipelineOrContainerName;
@@ -58384,7 +61057,7 @@ var init_Clients = __esm({
           if (extractedCreds.kind === "AccountConnString") {
             if (isNode) {
               const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
-              url2 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
+              url3 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
               if (!options.proxyOptions) {
                 options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
               }
@@ -58393,7 +61066,7 @@ var init_Clients = __esm({
               throw new Error("Account connection string is only supported in Node.js environment");
             }
           } else if (extractedCreds.kind === "SASConnString") {
-            url2 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
+            url3 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
             pipeline = newPipeline(new AnonymousCredential(), options);
           } else {
             throw new Error("Connection string must be either an Account connection string or a SAS connection string");
@@ -58401,15 +61074,53 @@ var init_Clients = __esm({
         } else {
           throw new Error("Expecting non-empty strings for containerName and blobName parameters");
         }
-        super(url2, pipeline);
+        super(url3, pipeline);
         this.blockBlobContext = new BlockBlob(this.storageClientContext);
         this._blobContext = new Blob3(this.storageClientContext);
       }
+      /**
+       * Creates a new BlockBlobClient object identical to the source but with the
+       * specified snapshot timestamp.
+       * Provide "" will remove the snapshot and return a URL to the base blob.
+       *
+       * @param snapshot - The snapshot timestamp.
+       * @returns A new BlockBlobClient object identical to the source but with the specified snapshot timestamp.
+       */
       withSnapshot(snapshot2) {
         return new BlockBlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
+      /**
+       * ONLY AVAILABLE IN NODE.JS RUNTIME.
+       *
+       * Quick query for a JSON or CSV formatted blob.
+       *
+       * Example usage (Node.js):
+       *
+       * ```js
+       * // Query and convert a blob to a string
+       * const queryBlockBlobResponse = await blockBlobClient.query("select * from BlobStorage");
+       * const downloaded = (await streamToBuffer(queryBlockBlobResponse.readableStreamBody)).toString();
+       * console.log("Query blob content:", downloaded);
+       *
+       * async function streamToBuffer(readableStream) {
+       *   return new Promise((resolve, reject) => {
+       *     const chunks = [];
+       *     readableStream.on("data", (data) => {
+       *       chunks.push(data instanceof Buffer ? data : Buffer.from(data));
+       *     });
+       *     readableStream.on("end", () => {
+       *       resolve(Buffer.concat(chunks));
+       *     });
+       *     readableStream.on("error", reject);
+       *   });
+       * }
+       * ```
+       *
+       * @param query -
+       * @param options -
+       */
       async query(query, options = {}) {
-        var _a2;
+        var _a;
         ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
         const { span, updatedOptions } = createSpan2("BlockBlobClient-query", options);
         try {
@@ -58422,7 +61133,7 @@ var init_Clients = __esm({
             expression: query,
             inputSerialization: toQuerySerialization(options.inputTextConfiguration),
             outputSerialization: toQuerySerialization(options.outputTextConfiguration)
-          }, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
+          }, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           return new BlobQueryResponse(response, {
             abortSignal: options.abortSignal,
             onProgress: options.onProgress,
@@ -58430,7 +61141,7 @@ var init_Clients = __esm({
           });
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58438,18 +61149,45 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Creates a new block blob, or updates the content of an existing block blob.
+       * Updating an existing block blob overwrites any existing metadata on the blob.
+       * Partial updates are not supported; the content of the existing blob is
+       * overwritten with the new content. To perform a partial update of a block blob's,
+       * use {@link stageBlock} and {@link commitBlockList}.
+       *
+       * This is a non-parallel uploading method, please use {@link uploadFile},
+       * {@link uploadStream} or {@link uploadBrowserData} for better performance
+       * with concurrency uploading.
+       *
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-blob
+       *
+       * @param body - Blob, string, ArrayBuffer, ArrayBufferView or a function
+       *                               which returns a new Readable stream whose offset is from data source beginning.
+       * @param contentLength - Length of body in bytes. Use Buffer.byteLength() to calculate body length for a
+       *                               string including non non-Base64/Hex-encoded characters.
+       * @param options - Options to the Block Blob Upload operation.
+       * @returns Response data for the Block Blob Upload operation.
+       *
+       * Example usage:
+       *
+       * ```js
+       * const content = "Hello world!";
+       * const uploadBlobResponse = await blockBlobClient.upload(content, content.length);
+       * ```
+       */
       async upload(body2, contentLength2, options = {}) {
-        var _a2, _b, _c;
+        var _a, _b, _c;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-upload", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blockBlobContext.upload(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          return await this.blockBlobContext.upload(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58457,14 +61195,32 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Creates a new Block Blob where the contents of the blob are read from a given URL.
+       * This API is supported beginning with the 2020-04-08 version. Partial updates
+       * are not supported with Put Blob from URL; the content of an existing blob is overwritten with
+       * the content of the new blob.  To perform partial updates to a block blob’s contents using a
+       * source URL, use {@link stageBlockFromURL} and {@link commitBlockList}.
+       *
+       * @param sourceURL - Specifies the URL of the blob. The value
+       *                           may be a URL of up to 2 KB in length that specifies a blob.
+       *                           The value should be URL-encoded as it would appear
+       *                           in a request URI. The source blob must either be public
+       *                           or must be authenticated via a shared access signature.
+       *                           If the source blob is public, no authentication is required
+       *                           to perform the operation. Here are some examples of source object URLs:
+       *                           - https://myaccount.blob.core.windows.net/mycontainer/myblob
+       *                           - https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>
+       * @param options - Optional parameters.
+       */
       async syncUploadFromURL(sourceURL, options = {}) {
-        var _a2, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-syncUploadFromURL", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
           return await this.blockBlobContext.putBlobFromUrl(0, sourceURL, Object.assign(Object.assign(Object.assign({}, options), { blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: options.conditions.tagConditions }), sourceModifiedAccessConditions: {
-            sourceIfMatch: (_a2 = options.sourceConditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch,
+            sourceIfMatch: (_a = options.sourceConditions) === null || _a === void 0 ? void 0 : _a.ifMatch,
             sourceIfModifiedSince: (_b = options.sourceConditions) === null || _b === void 0 ? void 0 : _b.ifModifiedSince,
             sourceIfNoneMatch: (_c = options.sourceConditions) === null || _c === void 0 ? void 0 : _c.ifNoneMatch,
             sourceIfUnmodifiedSince: (_d = options.sourceConditions) === null || _d === void 0 ? void 0 : _d.ifUnmodifiedSince,
@@ -58472,7 +61228,7 @@ var init_Clients = __esm({
           }, cpkInfo: options.customerProvidedKey, copySourceAuthorization: httpAuthorizationToString(options.sourceAuthorization), tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags), copySourceTags: options.copySourceTags }), convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58480,6 +61236,17 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Uploads the specified block to the block blob's "staging area" to be later
+       * committed by a call to commitBlockList.
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-block
+       *
+       * @param blockId - A 64-byte value that is base64-encoded
+       * @param body - Data to upload to the staging area.
+       * @param contentLength - Number of bytes to upload.
+       * @param options - Options to the Block Blob Stage Block operation.
+       * @returns Response data for the Block Blob Stage Block operation.
+       */
       async stageBlock(blockId2, body2, contentLength2, options = {}) {
         const { span, updatedOptions } = createSpan2("BlockBlobClient-stageBlock", options);
         try {
@@ -58489,7 +61256,7 @@ var init_Clients = __esm({
           }, transactionalContentMD5: options.transactionalContentMD5, transactionalContentCrc64: options.transactionalContentCrc64, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58497,6 +61264,27 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * The Stage Block From URL operation creates a new block to be committed as part
+       * of a blob where the contents are read from a URL.
+       * This API is available starting in version 2018-03-28.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/put-block-from-url
+       *
+       * @param blockId - A 64-byte value that is base64-encoded
+       * @param sourceURL - Specifies the URL of the blob. The value
+       *                           may be a URL of up to 2 KB in length that specifies a blob.
+       *                           The value should be URL-encoded as it would appear
+       *                           in a request URI. The source blob must either be public
+       *                           or must be authenticated via a shared access signature.
+       *                           If the source blob is public, no authentication is required
+       *                           to perform the operation. Here are some examples of source object URLs:
+       *                           - https://myaccount.blob.core.windows.net/mycontainer/myblob
+       *                           - https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>
+       * @param offset - From which position of the blob to download, greater than or equal to 0
+       * @param count - How much data to be downloaded, greater than 0. Will download to the end when undefined
+       * @param options - Options to the Block Blob Stage Block From URL operation.
+       * @returns Response data for the Block Blob Stage Block From URL operation.
+       */
       async stageBlockFromURL(blockId2, sourceURL, offset = 0, count, options = {}) {
         const { span, updatedOptions } = createSpan2("BlockBlobClient-stageBlockFromURL", options);
         try {
@@ -58504,7 +61292,7 @@ var init_Clients = __esm({
           return await this.blockBlobContext.stageBlockFromURL(blockId2, 0, sourceURL, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, sourceRange: offset === 0 && !count ? void 0 : rangeToString({ offset, count }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, copySourceAuthorization: httpAuthorizationToString(options.sourceAuthorization) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58512,16 +61300,28 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Writes a blob by specifying the list of block IDs that make up the blob.
+       * In order to be written as part of a blob, a block must have been successfully written
+       * to the server in a prior {@link stageBlock} operation. You can call {@link commitBlockList} to
+       * update a blob by uploading only those blocks that have changed, then committing the new and existing
+       * blocks together. Any blocks not specified in the block list and permanently deleted.
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-block-list
+       *
+       * @param blocks -  Array of 64-byte value that is base64-encoded
+       * @param options - Options to the Block Blob Commit Block List operation.
+       * @returns Response data for the Block Blob Commit Block List operation.
+       */
       async commitBlockList(blocks2, options = {}) {
-        var _a2, _b, _c;
+        var _a, _b, _c;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-commitBlockList", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blockBlobContext.commitBlockList({ latest: blocks2 }, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blockBlobContext.commitBlockList({ latest: blocks2 }, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58529,11 +61329,21 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Returns the list of blocks that have been uploaded as part of a block blob
+       * using the specified block list filter.
+       * @see https://docs.microsoft.com/rest/api/storageservices/get-block-list
+       *
+       * @param listType - Specifies whether to return the list of committed blocks,
+       *                                        the list of uncommitted blocks, or both lists together.
+       * @param options - Options to the Block Blob Get Block List operation.
+       * @returns Response data for the Block Blob Get Block List operation.
+       */
       async getBlockList(listType2, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlockBlobClient-getBlockList", options);
         try {
-          const res = await this.blockBlobContext.getBlockList(listType2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const res = await this.blockBlobContext.getBlockList(listType2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
           if (!res.committedBlocks) {
             res.committedBlocks = [];
           }
@@ -58543,7 +61353,7 @@ var init_Clients = __esm({
           return res;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58551,6 +61361,22 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      // High level functions
+      /**
+       * Uploads a Buffer(Node.js)/Blob(browsers)/ArrayBuffer/ArrayBufferView object to a BlockBlob.
+       *
+       * When data length is no more than the specifiled {@link BlockBlobParallelUploadOptions.maxSingleShotSize} (default is
+       * {@link BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES}), this method will use 1 {@link upload} call to finish the upload.
+       * Otherwise, this method will call {@link stageBlock} to upload blocks, and finally call {@link commitBlockList}
+       * to commit the block list.
+       *
+       * A common {@link BlockBlobParallelUploadOptions.blobHTTPHeaders} option to set is
+       * `blobContentType`, enabling the browser to provide
+       * functionality based on file type.
+       *
+       * @param data - Buffer(Node.js), Blob, ArrayBuffer or ArrayBufferView
+       * @param options -
+       */
       async uploadData(data, options = {}) {
         const { span, updatedOptions } = createSpan2("BlockBlobClient-uploadData", options);
         try {
@@ -58571,7 +61397,7 @@ var init_Clients = __esm({
           }
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58579,6 +61405,25 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * ONLY AVAILABLE IN BROWSERS.
+       *
+       * Uploads a browser Blob/File/ArrayBuffer/ArrayBufferView object to block blob.
+       *
+       * When buffer length lesser than or equal to 256MB, this method will use 1 upload call to finish the upload.
+       * Otherwise, this method will call {@link stageBlock} to upload blocks, and finally call
+       * {@link commitBlockList} to commit the block list.
+       *
+       * A common {@link BlockBlobParallelUploadOptions.blobHTTPHeaders} option to set is
+       * `blobContentType`, enabling the browser to provide
+       * functionality based on file type.
+       *
+       * @deprecated Use {@link uploadData} instead.
+       *
+       * @param browserData - Blob, File, ArrayBuffer or ArrayBufferView
+       * @param options - Options to upload browser data.
+       * @returns Response data for the Blob Upload operation.
+       */
       async uploadBrowserData(browserData, options = {}) {
         const { span, updatedOptions } = createSpan2("BlockBlobClient-uploadBrowserData", options);
         try {
@@ -58586,7 +61431,7 @@ var init_Clients = __esm({
           return await this.uploadSeekableInternal((offset, size) => browserBlob.slice(offset, offset + size), browserBlob.size, updatedOptions);
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58594,6 +61439,21 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       *
+       * Uploads data to block blob. Requires a bodyFactory as the data source,
+       * which need to return a {@link HttpRequestBody} object with the offset and size provided.
+       *
+       * When data length is no more than the specified {@link BlockBlobParallelUploadOptions.maxSingleShotSize} (default is
+       * {@link BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES}), this method will use 1 {@link upload} call to finish the upload.
+       * Otherwise, this method will call {@link stageBlock} to upload blocks, and finally call {@link commitBlockList}
+       * to commit the block list.
+       *
+       * @param bodyFactory -
+       * @param size - size of the data to upload.
+       * @param options - Options to Upload to Block Blob operation.
+       * @returns Response data for the Blob Upload operation.
+       */
       async uploadSeekableInternal(bodyFactory, size, options = {}) {
         if (!options.blockSize) {
           options.blockSize = 0;
@@ -58662,7 +61522,7 @@ var init_Clients = __esm({
           return this.commitBlockList(blockList, updatedOptions);
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58670,6 +61530,19 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * ONLY AVAILABLE IN NODE.JS RUNTIME.
+       *
+       * Uploads a local file in blocks to a block blob.
+       *
+       * When file size lesser than or equal to 256MB, this method will use 1 upload call to finish the upload.
+       * Otherwise, this method will call stageBlock to upload blocks, and finally call commitBlockList
+       * to commit the block list.
+       *
+       * @param filePath - Full path of local file
+       * @param options - Options to Upload to Block Blob operation.
+       * @returns Response data for the Blob Upload operation.
+       */
       async uploadFile(filePath, options = {}) {
         const { span, updatedOptions } = createSpan2("BlockBlobClient-uploadFile", options);
         try {
@@ -58683,7 +61556,7 @@ var init_Clients = __esm({
           }, size, Object.assign(Object.assign({}, options), { tracingOptions: Object.assign(Object.assign({}, options.tracingOptions), convertTracingToRequestOptionsBase(updatedOptions)) }));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58691,6 +61564,22 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * ONLY AVAILABLE IN NODE.JS RUNTIME.
+       *
+       * Uploads a Node.js Readable stream into block blob.
+       *
+       * PERFORMANCE IMPROVEMENT TIPS:
+       * * Input stream highWaterMark is better to set a same value with bufferSize
+       *    parameter, which will avoid Buffer.concat() operations.
+       *
+       * @param stream - Node.js Readable stream
+       * @param bufferSize - Size of every buffer allocated, also the block size in the uploaded block blob. Default value is 8MB
+       * @param maxConcurrency -  Max concurrency indicates the max number of buffers that can be allocated,
+       *                                 positive correlation with max uploading concurrency. Default value is 5
+       * @param options - Options to Upload Stream to Block Blob operation.
+       * @returns Response data for the Blob Upload operation.
+       */
       async uploadStream(stream, bufferSize = DEFAULT_BLOCK_BUFFER_SIZE_BYTES, maxConcurrency = 5, options = {}) {
         if (!options.blobHTTPHeaders) {
           options.blobHTTPHeaders = {};
@@ -58722,13 +61611,17 @@ var init_Clients = __esm({
                 options.onProgress({ loadedBytes: transferProgress });
               }
             },
+            // concurrency should set a smaller value than maxConcurrency, which is helpful to
+            // reduce the possibility when a outgoing handler waits for stream data, in
+            // this situation, outgoing handlers are blocked.
+            // Outgoing queue shouldn't be empty.
             Math.ceil(maxConcurrency / 4 * 3)
           );
           await scheduler.do();
           return await this.commitBlockList(blockList, Object.assign(Object.assign({}, options), { tracingOptions: Object.assign(Object.assign({}, options.tracingOptions), convertTracingToRequestOptionsBase(updatedOptions)) }));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58740,17 +61633,17 @@ var init_Clients = __esm({
     PageBlobClient = class extends BlobClient {
       constructor(urlOrConnectionString, credentialOrPipelineOrContainerName, blobNameOrOptions, options) {
         let pipeline;
-        let url2;
+        let url3;
         options = options || {};
         if (isPipelineLike(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = credentialOrPipelineOrContainerName;
         } else if (isNode && credentialOrPipelineOrContainerName instanceof StorageSharedKeyCredential || credentialOrPipelineOrContainerName instanceof AnonymousCredential || isTokenCredential(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           options = blobNameOrOptions;
           pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
         } else if (!credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName !== "string") {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = newPipeline(new AnonymousCredential(), options);
         } else if (credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName === "string" && blobNameOrOptions && typeof blobNameOrOptions === "string") {
           const containerName = credentialOrPipelineOrContainerName;
@@ -58759,7 +61652,7 @@ var init_Clients = __esm({
           if (extractedCreds.kind === "AccountConnString") {
             if (isNode) {
               const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
-              url2 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
+              url3 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
               if (!options.proxyOptions) {
                 options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
               }
@@ -58768,7 +61661,7 @@ var init_Clients = __esm({
               throw new Error("Account connection string is only supported in Node.js environment");
             }
           } else if (extractedCreds.kind === "SASConnString") {
-            url2 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
+            url3 = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
             pipeline = newPipeline(new AnonymousCredential(), options);
           } else {
             throw new Error("Connection string must be either an Account connection string or a SAS connection string");
@@ -58776,22 +61669,39 @@ var init_Clients = __esm({
         } else {
           throw new Error("Expecting non-empty strings for containerName and blobName parameters");
         }
-        super(url2, pipeline);
+        super(url3, pipeline);
         this.pageBlobContext = new PageBlob(this.storageClientContext);
       }
+      /**
+       * Creates a new PageBlobClient object identical to the source but with the
+       * specified snapshot timestamp.
+       * Provide "" will remove the snapshot and return a Client to the base blob.
+       *
+       * @param snapshot - The snapshot timestamp.
+       * @returns A new PageBlobClient object identical to the source but with the specified snapshot timestamp.
+       */
       withSnapshot(snapshot2) {
         return new PageBlobClient(setURLParameter(this.url, URLConstants.Parameters.SNAPSHOT, snapshot2.length === 0 ? void 0 : snapshot2), this.pipeline);
       }
+      /**
+       * Creates a page blob of the specified length. Call uploadPages to upload data
+       * data to a page blob.
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-blob
+       *
+       * @param size - size of the page blob.
+       * @param options - Options to the Page Blob Create operation.
+       * @returns Response data for the Page Blob Create operation.
+       */
       async create(size, options = {}) {
-        var _a2, _b, _c;
+        var _a, _b, _c;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-create", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.create(0, size, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, blobSequenceNumber: options.blobSequenceNumber, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.create(0, size, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, blobSequenceNumber: options.blobSequenceNumber, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b = options.immutabilityPolicy) === null || _b === void 0 ? void 0 : _b.expiriesOn, immutabilityPolicyMode: (_c = options.immutabilityPolicy) === null || _c === void 0 ? void 0 : _c.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58799,23 +61709,32 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Creates a page blob of the specified length. Call uploadPages to upload data
+       * data to a page blob. If the blob with the same name already exists, the content
+       * of the existing blob will remain unchanged.
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-blob
+       *
+       * @param size - size of the page blob.
+       * @param options -
+       */
       async createIfNotExists(size, options = {}) {
-        var _a2, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("PageBlobClient-createIfNotExists", options);
         try {
           const conditions = { ifNoneMatch: ETagAny };
           const res = await this.create(size, Object.assign(Object.assign({}, options), { conditions, tracingOptions: updatedOptions.tracingOptions }));
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "BlobAlreadyExists") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "BlobAlreadyExists") {
             span.setStatus({
-              code: SpanStatusCode2.ERROR,
+              code: SpanStatusCode.ERROR,
               message: "Expected exception when creating a blob only if it does not already exist."
             });
             return Object.assign(Object.assign({ succeeded: false }, (_b = e.response) === null || _b === void 0 ? void 0 : _b.parsedHeaders), { _response: e.response });
           }
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58823,18 +61742,28 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Writes 1 or more pages to the page blob. The start and end offsets must be a multiple of 512.
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-page
+       *
+       * @param body - Data to upload
+       * @param offset - Offset of destination page blob
+       * @param count - Content length of the body, also number of bytes to be uploaded
+       * @param options - Options to the Page Blob Upload Pages operation.
+       * @returns Response data for the Page Blob Upload Pages operation.
+       */
       async uploadPages(body2, offset, count, options = {}) {
-        var _a2;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-uploadPages", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.uploadPages(count, body2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          return await this.pageBlobContext.uploadPages(count, body2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, transactionalContentMD5: options.transactionalContentMD5, transactionalContentCrc64: options.transactionalContentCrc64, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58842,14 +61771,25 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * The Upload Pages operation writes a range of pages to a page blob where the
+       * contents are read from a URL.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/put-page-from-url
+       *
+       * @param sourceURL - Specify a URL to the copy source, Shared Access Signature(SAS) maybe needed for authentication
+       * @param sourceOffset - The source offset to copy from. Pass 0 to copy from the beginning of source page blob
+       * @param destOffset - Offset of destination page blob
+       * @param count - Number of bytes to be uploaded from source page blob
+       * @param options -
+       */
       async uploadPagesFromURL(sourceURL, sourceOffset, destOffset, count, options = {}) {
-        var _a2;
+        var _a;
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-uploadPagesFromURL", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.uploadPagesFromURL(sourceURL, rangeToString({ offset: sourceOffset, count }), 0, rangeToString({ offset: destOffset, count }), Object.assign({ abortSignal: options.abortSignal, sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, sequenceNumberAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.pageBlobContext.uploadPagesFromURL(sourceURL, rangeToString({ offset: sourceOffset, count }), 0, rangeToString({ offset: destOffset, count }), Object.assign({ abortSignal: options.abortSignal, sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, sequenceNumberAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -58857,7 +61797,7 @@ var init_Clients = __esm({
           }, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, copySourceAuthorization: httpAuthorizationToString(options.sourceAuthorization) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58865,15 +61805,24 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Frees the specified pages from the page blob.
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-page
+       *
+       * @param offset - Starting byte position of the pages to clear.
+       * @param count - Number of bytes to clear.
+       * @param options - Options to the Page Blob Clear Pages operation.
+       * @returns Response data for the Page Blob Clear Pages operation.
+       */
       async clearPages(offset = 0, count, options = {}) {
-        var _a2;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-clearPages", options);
         try {
-          return await this.pageBlobContext.clearPages(0, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.clearPages(0, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58881,15 +61830,24 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Returns the list of valid page ranges for a page blob or snapshot of a page blob.
+       * @see https://docs.microsoft.com/rest/api/storageservices/get-page-ranges
+       *
+       * @param offset - Starting byte position of the page ranges.
+       * @param count - Number of bytes to get.
+       * @param options - Options to the Page Blob Get Ranges operation.
+       * @returns Response data for the Page Blob Get Ranges operation.
+       */
       async getPageRanges(offset = 0, count, options = {}) {
-        var _a2;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRanges", options);
         try {
-          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58897,14 +61855,26 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * getPageRangesSegment returns a single segment of page ranges starting from the
+       * specified Marker. Use an empty Marker to start enumeration from the beginning.
+       * After getting a segment, process it, and then call getPageRangesSegment again
+       * (passing the the previously-returned Marker) to get the next segment.
+       * @see https://docs.microsoft.com/rest/api/storageservices/get-page-ranges
+       *
+       * @param offset - Starting byte position of the page ranges.
+       * @param count - Number of bytes to get.
+       * @param marker - A string value that identifies the portion of the list to be returned with the next list operation.
+       * @param options - Options to PageBlob Get Page Ranges Segment operation.
+       */
       async listPageRangesSegment(offset = 0, count, marker2, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesSegment", options);
         try {
-          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), range: rangeToString({ offset, count }), marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), range: rangeToString({ offset, count }), marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58912,6 +61882,20 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Returns an AsyncIterableIterator for {@link PageBlobGetPageRangesResponseModel}
+       *
+       * @param offset - Starting byte position of the page ranges.
+       * @param count - Number of bytes to get.
+       * @param marker - A string value that identifies the portion of
+       *                          the get of page ranges to be returned with the next getting operation. The
+       *                          operation returns the ContinuationToken value within the response body if the
+       *                          getting operation did not return all page ranges remaining within the current page.
+       *                          The ContinuationToken value can be used as the value for
+       *                          the marker parameter in a subsequent call to request the next page of get
+       *                          items. The marker value is opaque to the client.
+       * @param options - Options to List Page Ranges operation.
+       */
       listPageRangeItemSegments(offset = 0, count, marker2, options = {}) {
         return __asyncGenerator(this, arguments, function* listPageRangeItemSegments_1() {
           let getPageRangeItemSegmentsResponse;
@@ -58924,9 +61908,16 @@ var init_Clients = __esm({
           }
         });
       }
+      /**
+       * Returns an AsyncIterableIterator of {@link PageRangeInfo} objects
+       *
+       * @param offset - Starting byte position of the page ranges.
+       * @param count - Number of bytes to get.
+       * @param options - Options to List Page Ranges operation.
+       */
       listPageRangeItems(offset = 0, count, options = {}) {
         return __asyncGenerator(this, arguments, function* listPageRangeItems_1() {
-          var e_1, _a2;
+          var e_1, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listPageRangeItemSegments(offset, count, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -58937,8 +61928,8 @@ var init_Clients = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -58946,30 +61937,120 @@ var init_Clients = __esm({
           }
         });
       }
+      /**
+       * Returns an async iterable iterator to list of page ranges for a page blob.
+       * @see https://docs.microsoft.com/rest/api/storageservices/get-page-ranges
+       *
+       *  .byPage() returns an async iterable iterator to list of page ranges for a page blob.
+       *
+       * Example using `for await` syntax:
+       *
+       * ```js
+       * // Get the pageBlobClient before you run these snippets,
+       * // Can be obtained from `blobServiceClient.getContainerClient("<your-container-name>").getPageBlobClient("<your-blob-name>");`
+       * let i = 1;
+       * for await (const pageRange of pageBlobClient.listPageRanges()) {
+       *   console.log(`Page range ${i++}: ${pageRange.start} - ${pageRange.end}`);
+       * }
+       * ```
+       *
+       * Example using `iter.next()`:
+       *
+       * ```js
+       * let i = 1;
+       * let iter = pageBlobClient.listPageRanges();
+       * let pageRangeItem = await iter.next();
+       * while (!pageRangeItem.done) {
+       *   console.log(`Page range ${i++}: ${pageRangeItem.value.start} - ${pageRangeItem.value.end}, IsClear: ${pageRangeItem.value.isClear}`);
+       *   pageRangeItem = await iter.next();
+       * }
+       * ```
+       *
+       * Example using `byPage()`:
+       *
+       * ```js
+       * // passing optional maxPageSize in the page settings
+       * let i = 1;
+       * for await (const response of pageBlobClient.listPageRanges().byPage({ maxPageSize: 20 })) {
+       *   for (const pageRange of response) {
+       *     console.log(`Page range ${i++}: ${pageRange.start} - ${pageRange.end}`);
+       *   }
+       * }
+       * ```
+       *
+       * Example using paging with a marker:
+       *
+       * ```js
+       * let i = 1;
+       * let iterator = pageBlobClient.listPageRanges().byPage({ maxPageSize: 2 });
+       * let response = (await iterator.next()).value;
+       *
+       * // Prints 2 page ranges
+       * for (const pageRange of response) {
+       *   console.log(`Page range ${i++}: ${pageRange.start} - ${pageRange.end}`);
+       * }
+       *
+       * // Gets next marker
+       * let marker = response.continuationToken;
+       *
+       * // Passing next marker as continuationToken
+       *
+       * iterator = pageBlobClient.listPageRanges().byPage({ continuationToken: marker, maxPageSize: 10 });
+       * response = (await iterator.next()).value;
+       *
+       * // Prints 10 page ranges
+       * for (const blob of response) {
+       *   console.log(`Page range ${i++}: ${pageRange.start} - ${pageRange.end}`);
+       * }
+       * ```
+       * @param offset - Starting byte position of the page ranges.
+       * @param count - Number of bytes to get.
+       * @param options - Options to the Page Blob Get Ranges operation.
+       * @returns An asyncIterableIterator that supports paging.
+       */
       listPageRanges(offset = 0, count, options = {}) {
         options.conditions = options.conditions || {};
         const iter = this.listPageRangeItems(offset, count, options);
         return {
+          /**
+           * The next method, part of the iteration protocol
+           */
           next() {
             return iter.next();
           },
+          /**
+           * The connection to the async iterator, part of the iteration protocol
+           */
           [Symbol.asyncIterator]() {
             return this;
           },
+          /**
+           * Return an AsyncIterableIterator that works a page at a time
+           */
           byPage: (settings = {}) => {
             return this.listPageRangeItemSegments(offset, count, settings.continuationToken, Object.assign({ maxPageSize: settings.maxPageSize }, options));
           }
         };
       }
+      /**
+       * Gets the collection of page ranges that differ between a specified snapshot and this page blob.
+       * @see https://docs.microsoft.com/rest/api/storageservices/get-page-ranges
+       *
+       * @param offset - Starting byte position of the page blob
+       * @param count - Number of bytes to get ranges diff.
+       * @param prevSnapshot - Timestamp of snapshot to retrieve the difference.
+       * @param options - Options to the Page Blob Get Page Ranges Diff operation.
+       * @returns Response data for the Page Blob Get Page Range Diff operation.
+       */
       async getPageRangesDiff(offset, count, prevSnapshot, options = {}) {
-        var _a2;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesDiff", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), prevsnapshot: prevSnapshot, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), prevsnapshot: prevSnapshot, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58977,17 +62058,31 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * getPageRangesDiffSegment returns a single segment of page ranges starting from the
+       * specified Marker for difference between previous snapshot and the target page blob.
+       * Use an empty Marker to start enumeration from the beginning.
+       * After getting a segment, process it, and then call getPageRangesDiffSegment again
+       * (passing the the previously-returned Marker) to get the next segment.
+       * @see https://docs.microsoft.com/rest/api/storageservices/get-page-ranges
+       *
+       * @param offset - Starting byte position of the page ranges.
+       * @param count - Number of bytes to get.
+       * @param prevSnapshotOrUrl - Timestamp of snapshot to retrieve the difference or URL of snapshot to retrieve the difference.
+       * @param marker - A string value that identifies the portion of the get to be returned with the next get operation.
+       * @param options - Options to the Page Blob Get Page Ranges Diff operation.
+       */
       async listPageRangesDiffSegment(offset, count, prevSnapshotOrUrl, marker2, options) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesDiffSegment", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal, leaseAccessConditions: options === null || options === void 0 ? void 0 : options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.conditions), { ifTags: (_a2 = options === null || options === void 0 ? void 0 : options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), prevsnapshot: prevSnapshotOrUrl, range: rangeToString({
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal, leaseAccessConditions: options === null || options === void 0 ? void 0 : options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.conditions), { ifTags: (_a = options === null || options === void 0 ? void 0 : options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), prevsnapshot: prevSnapshotOrUrl, range: rangeToString({
             offset,
             count
           }), marker: marker2, maxPageSize: options === null || options === void 0 ? void 0 : options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -58995,6 +62090,22 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Returns an AsyncIterableIterator for {@link PageBlobGetPageRangesDiffResponseModel}
+       *
+       *
+       * @param offset - Starting byte position of the page ranges.
+       * @param count - Number of bytes to get.
+       * @param prevSnapshotOrUrl - Timestamp of snapshot to retrieve the difference or URL of snapshot to retrieve the difference.
+       * @param marker - A string value that identifies the portion of
+       *                          the get of page ranges to be returned with the next getting operation. The
+       *                          operation returns the ContinuationToken value within the response body if the
+       *                          getting operation did not return all page ranges remaining within the current page.
+       *                          The ContinuationToken value can be used as the value for
+       *                          the marker parameter in a subsequent call to request the next page of get
+       *                          items. The marker value is opaque to the client.
+       * @param options - Options to the Page Blob Get Page Ranges Diff operation.
+       */
       listPageRangeDiffItemSegments(offset, count, prevSnapshotOrUrl, marker2, options) {
         return __asyncGenerator(this, arguments, function* listPageRangeDiffItemSegments_1() {
           let getPageRangeItemSegmentsResponse;
@@ -59007,9 +62118,17 @@ var init_Clients = __esm({
           }
         });
       }
+      /**
+       * Returns an AsyncIterableIterator of {@link PageRangeInfo} objects
+       *
+       * @param offset - Starting byte position of the page ranges.
+       * @param count - Number of bytes to get.
+       * @param prevSnapshotOrUrl - Timestamp of snapshot to retrieve the difference or URL of snapshot to retrieve the difference.
+       * @param options - Options to the Page Blob Get Page Ranges Diff operation.
+       */
       listPageRangeDiffItems(offset, count, prevSnapshotOrUrl, options) {
         return __asyncGenerator(this, arguments, function* listPageRangeDiffItems_1() {
-          var e_2, _a2;
+          var e_2, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listPageRangeDiffItemSegments(offset, count, prevSnapshotOrUrl, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -59020,8 +62139,8 @@ var init_Clients = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -59029,30 +62148,121 @@ var init_Clients = __esm({
           }
         });
       }
+      /**
+       * Returns an async iterable iterator to list of page ranges that differ between a specified snapshot and this page blob.
+       * @see https://docs.microsoft.com/rest/api/storageservices/get-page-ranges
+       *
+       *  .byPage() returns an async iterable iterator to list of page ranges that differ between a specified snapshot and this page blob.
+       *
+       * Example using `for await` syntax:
+       *
+       * ```js
+       * // Get the pageBlobClient before you run these snippets,
+       * // Can be obtained from `blobServiceClient.getContainerClient("<your-container-name>").getPageBlobClient("<your-blob-name>");`
+       * let i = 1;
+       * for await (const pageRange of pageBlobClient.listPageRangesDiff()) {
+       *   console.log(`Page range ${i++}: ${pageRange.start} - ${pageRange.end}`);
+       * }
+       * ```
+       *
+       * Example using `iter.next()`:
+       *
+       * ```js
+       * let i = 1;
+       * let iter = pageBlobClient.listPageRangesDiff();
+       * let pageRangeItem = await iter.next();
+       * while (!pageRangeItem.done) {
+       *   console.log(`Page range ${i++}: ${pageRangeItem.value.start} - ${pageRangeItem.value.end}, IsClear: ${pageRangeItem.value.isClear}`);
+       *   pageRangeItem = await iter.next();
+       * }
+       * ```
+       *
+       * Example using `byPage()`:
+       *
+       * ```js
+       * // passing optional maxPageSize in the page settings
+       * let i = 1;
+       * for await (const response of pageBlobClient.listPageRangesDiff().byPage({ maxPageSize: 20 })) {
+       *   for (const pageRange of response) {
+       *     console.log(`Page range ${i++}: ${pageRange.start} - ${pageRange.end}`);
+       *   }
+       * }
+       * ```
+       *
+       * Example using paging with a marker:
+       *
+       * ```js
+       * let i = 1;
+       * let iterator = pageBlobClient.listPageRangesDiff().byPage({ maxPageSize: 2 });
+       * let response = (await iterator.next()).value;
+       *
+       * // Prints 2 page ranges
+       * for (const pageRange of response) {
+       *   console.log(`Page range ${i++}: ${pageRange.start} - ${pageRange.end}`);
+       * }
+       *
+       * // Gets next marker
+       * let marker = response.continuationToken;
+       *
+       * // Passing next marker as continuationToken
+       *
+       * iterator = pageBlobClient.listPageRangesDiff().byPage({ continuationToken: marker, maxPageSize: 10 });
+       * response = (await iterator.next()).value;
+       *
+       * // Prints 10 page ranges
+       * for (const blob of response) {
+       *   console.log(`Page range ${i++}: ${pageRange.start} - ${pageRange.end}`);
+       * }
+       * ```
+       * @param offset - Starting byte position of the page ranges.
+       * @param count - Number of bytes to get.
+       * @param prevSnapshot - Timestamp of snapshot to retrieve the difference.
+       * @param options - Options to the Page Blob Get Ranges operation.
+       * @returns An asyncIterableIterator that supports paging.
+       */
       listPageRangesDiff(offset, count, prevSnapshot, options = {}) {
         options.conditions = options.conditions || {};
         const iter = this.listPageRangeDiffItems(offset, count, prevSnapshot, Object.assign({}, options));
         return {
+          /**
+           * The next method, part of the iteration protocol
+           */
           next() {
             return iter.next();
           },
+          /**
+           * The connection to the async iterator, part of the iteration protocol
+           */
           [Symbol.asyncIterator]() {
             return this;
           },
+          /**
+           * Return an AsyncIterableIterator that works a page at a time
+           */
           byPage: (settings = {}) => {
             return this.listPageRangeDiffItemSegments(offset, count, prevSnapshot, settings.continuationToken, Object.assign({ maxPageSize: settings.maxPageSize }, options));
           }
         };
       }
+      /**
+       * Gets the collection of page ranges that differ between a specified snapshot and this page blob for managed disks.
+       * @see https://docs.microsoft.com/rest/api/storageservices/get-page-ranges
+       *
+       * @param offset - Starting byte position of the page blob
+       * @param count - Number of bytes to get ranges diff.
+       * @param prevSnapshotUrl - URL of snapshot to retrieve the difference.
+       * @param options - Options to the Page Blob Get Page Ranges Diff operation.
+       * @returns Response data for the Page Blob Get Page Range Diff operation.
+       */
       async getPageRangesDiffForManagedDisks(offset, count, prevSnapshotUrl2, options = {}) {
-        var _a2;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-GetPageRangesDiffForManagedDisks", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), prevSnapshotUrl: prevSnapshotUrl2, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), prevSnapshotUrl: prevSnapshotUrl2, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59060,15 +62270,23 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Resizes the page blob to the specified size (which must be a multiple of 512).
+       * @see https://docs.microsoft.com/rest/api/storageservices/set-blob-properties
+       *
+       * @param size - Target size
+       * @param options - Options to the Page Blob Resize operation.
+       * @returns Response data for the Page Blob Resize operation.
+       */
       async resize(size, options = {}) {
-        var _a2;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-resize", options);
         try {
-          return await this.pageBlobContext.resize(size, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.resize(size, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }), encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59076,15 +62294,24 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Sets a page blob's sequence number.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/set-blob-properties
+       *
+       * @param sequenceNumberAction - Indicates how the service should modify the blob's sequence number.
+       * @param sequenceNumber - Required if sequenceNumberAction is max or update
+       * @param options - Options to the Page Blob Update Sequence Number operation.
+       * @returns Response data for the Page Blob Update Sequence Number operation.
+       */
       async updateSequenceNumber(sequenceNumberAction2, sequenceNumber, options = {}) {
-        var _a2;
+        var _a;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-updateSequenceNumber", options);
         try {
-          return await this.pageBlobContext.updateSequenceNumber(sequenceNumberAction2, Object.assign({ abortSignal: options.abortSignal, blobSequenceNumber: sequenceNumber, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.updateSequenceNumber(sequenceNumberAction2, Object.assign({ abortSignal: options.abortSignal, blobSequenceNumber: sequenceNumber, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59092,14 +62319,27 @@ var init_Clients = __esm({
           span.end();
         }
       }
+      /**
+       * Begins an operation to start an incremental copy from one page blob's snapshot to this page blob.
+       * The snapshot is copied such that only the differential changes between the previously
+       * copied snapshot are transferred to the destination.
+       * The copied snapshots are complete copies of the original snapshot and can be read or copied from as usual.
+       * @see https://docs.microsoft.com/rest/api/storageservices/incremental-copy-blob
+       * @see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/incremental-snapshots
+       *
+       * @param copySource - Specifies the name of the source page blob snapshot. For example,
+       *                            https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>
+       * @param options - Options to the Page Blob Copy Incremental operation.
+       * @returns Response data for the Page Blob Copy Incremental operation.
+       */
       async startCopyIncremental(copySource2, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("PageBlobClient-startCopyIncremental", options);
         try {
-          return await this.pageBlobContext.copyIncremental(copySource2, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.copyIncremental(copySource2, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a = options.conditions) === null || _a === void 0 ? void 0 : _a.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59132,7 +62372,7 @@ var init_BatchUtils = __esm({
 var HTTP_HEADER_DELIMITER, SPACE_DELIMITER, NOT_FOUND, BatchResponseParser;
 var init_BatchResponseParser = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/BatchResponseParser.js"() {
-    init_coreHttp();
+    init_src6();
     init_constants2();
     init_BatchUtils();
     init_log3();
@@ -59153,6 +62393,7 @@ var init_BatchResponseParser = __esm({
         this.perResponsePrefix = `--${this.responseBatchBoundary}${HTTP_LINE_ENDING}`;
         this.batchResponseEnding = `--${this.responseBatchBoundary}--`;
       }
+      // For example of response, please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/blob-batch#response
       async parseBatchResponse() {
         if (this.batchResponse._response.status !== HTTPURLConnection.HTTP_ACCEPTED) {
           throw new Error(`Invalid state: batch request failed with status: '${this.batchResponse._response.status}'.`);
@@ -59242,6 +62483,12 @@ var init_Mutex = __esm({
       MutexLockStatus2[MutexLockStatus2["UNLOCKED"] = 1] = "UNLOCKED";
     })(MutexLockStatus || (MutexLockStatus = {}));
     Mutex = class {
+      /**
+       * Lock for a specific key. If the lock has been acquired by another customer, then
+       * will wait until getting the lock.
+       *
+       * @param key - lock key
+       */
       static async lock(key) {
         return new Promise((resolve) => {
           if (this.keys[key] === void 0 || this.keys[key] === MutexLockStatus.UNLOCKED) {
@@ -59255,6 +62502,11 @@ var init_Mutex = __esm({
           }
         });
       }
+      /**
+       * Unlock a key.
+       *
+       * @param key -
+       */
       static async unlock(key) {
         return new Promise((resolve) => {
           if (this.keys[key] === MutexLockStatus.LOCKED) {
@@ -59289,7 +62541,7 @@ var init_Mutex = __esm({
 var BlobBatch, InnerBatchRequest, BatchRequestAssemblePolicy, BatchRequestAssemblePolicyFactory, BatchHeaderFilterPolicy, BatchHeaderFilterPolicyFactory;
 var init_BlobBatch = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/BlobBatch.js"() {
-    init_coreHttp();
+    init_src6();
     init_src5();
     init_AnonymousCredential();
     init_Clients();
@@ -59304,12 +62556,23 @@ var init_BlobBatch = __esm({
         this.batch = "batch";
         this.batchRequest = new InnerBatchRequest();
       }
+      /**
+       * Get the value of Content-Type for a batch request.
+       * The value must be multipart/mixed with a batch boundary.
+       * Example: multipart/mixed; boundary=batch_a81786c8-e301-4e42-a729-a32ca24ae252
+       */
       getMultiPartContentType() {
         return this.batchRequest.getMultipartContentType();
       }
+      /**
+       * Get assembled HTTP request body for sub requests.
+       */
       getHttpRequestBody() {
         return this.batchRequest.getHttpRequestBody();
       }
+      /**
+       * Get sub requests that are added into the batch request.
+       */
       getSubRequests() {
         return this.batchRequest.getSubRequests();
       }
@@ -59332,13 +62595,13 @@ var init_BlobBatch = __esm({
         }
       }
       async deleteBlob(urlOrBlobClient, credentialOrOptions, options) {
-        let url2;
+        let url3;
         let credential;
         if (typeof urlOrBlobClient === "string" && (isNode && credentialOrOptions instanceof StorageSharedKeyCredential || credentialOrOptions instanceof AnonymousCredential || isTokenCredential(credentialOrOptions))) {
-          url2 = urlOrBlobClient;
+          url3 = urlOrBlobClient;
           credential = credentialOrOptions;
         } else if (urlOrBlobClient instanceof BlobClient) {
-          url2 = urlOrBlobClient.url;
+          url3 = urlOrBlobClient.url;
           credential = urlOrBlobClient.credential;
           options = credentialOrOptions;
         } else {
@@ -59351,14 +62614,14 @@ var init_BlobBatch = __esm({
         try {
           this.setBatchType("delete");
           await this.addSubRequestInternal({
-            url: url2,
+            url: url3,
             credential
           }, async () => {
-            await new BlobClient(url2, this.batchRequest.createPipeline(credential)).delete(updatedOptions);
+            await new BlobClient(url3, this.batchRequest.createPipeline(credential)).delete(updatedOptions);
           });
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59367,15 +62630,15 @@ var init_BlobBatch = __esm({
         }
       }
       async setBlobAccessTier(urlOrBlobClient, credentialOrTier, tierOrOptions, options) {
-        let url2;
+        let url3;
         let credential;
         let tier2;
         if (typeof urlOrBlobClient === "string" && (isNode && credentialOrTier instanceof StorageSharedKeyCredential || credentialOrTier instanceof AnonymousCredential || isTokenCredential(credentialOrTier))) {
-          url2 = urlOrBlobClient;
+          url3 = urlOrBlobClient;
           credential = credentialOrTier;
           tier2 = tierOrOptions;
         } else if (urlOrBlobClient instanceof BlobClient) {
-          url2 = urlOrBlobClient.url;
+          url3 = urlOrBlobClient.url;
           credential = urlOrBlobClient.credential;
           tier2 = credentialOrTier;
           options = tierOrOptions;
@@ -59389,14 +62652,14 @@ var init_BlobBatch = __esm({
         try {
           this.setBatchType("setAccessTier");
           await this.addSubRequestInternal({
-            url: url2,
+            url: url3,
             credential
           }, async () => {
-            await new BlobClient(url2, this.batchRequest.createPipeline(credential)).setAccessTier(tier2, updatedOptions);
+            await new BlobClient(url3, this.batchRequest.createPipeline(credential)).setAccessTier(tier2, updatedOptions);
           });
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59416,6 +62679,13 @@ var init_BlobBatch = __esm({
         this.batchRequestEnding = `--${this.boundary}--`;
         this.subRequests = /* @__PURE__ */ new Map();
       }
+      /**
+       * Create pipeline to assemble sub requests. The idea here is to use existing
+       * credential and serialization/deserialization components, with additional policies to
+       * filter unnecessary headers, assemble sub requests into request's body
+       * and intercept request from going to wire.
+       * @param credential -  Such as AnonymousCredential, StorageSharedKeyCredential or any credential from the `@azure/identity` package to authenticate requests to the service. You can also provide an object that implements the TokenCredential interface. If not specified, AnonymousCredential is used.
+       */
       createPipeline(credential) {
         const isAnonymousCreds = credential instanceof AnonymousCredential;
         const policyFactoryLength = 3 + (isAnonymousCreds ? 0 : 1);
@@ -59434,6 +62704,7 @@ var init_BlobBatch = __esm({
           `${HeaderConstants.CONTENT_ID}: ${this.operationCount}`,
           "",
           `${request.method.toString()} ${getURLPathAndQuery(request.url)} ${HTTP_VERSION_1_1}${HTTP_LINE_ENDING}`
+          // sub request start line with method
         ].join(HTTP_LINE_ENDING);
         for (const header of request.headers.headersArray()) {
           this.body += `${header.name}: ${header.value}${HTTP_LINE_ENDING}`;
@@ -59444,8 +62715,8 @@ var init_BlobBatch = __esm({
         if (this.operationCount >= BATCH_MAX_REQUEST) {
           throw new RangeError(`Cannot exceed ${BATCH_MAX_REQUEST} sub requests in a single batch`);
         }
-        const path6 = getURLPath(subRequest.url);
-        if (!path6 || path6 === "") {
+        const path8 = getURLPath(subRequest.url);
+        if (!path8 || path8 === "") {
           throw new RangeError(`Invalid url for sub request: '${subRequest.url}'`);
         }
       }
@@ -59453,6 +62724,7 @@ var init_BlobBatch = __esm({
         this.subRequests.set(this.operationCount, subRequest);
         this.operationCount++;
       }
+      // Return the http request body with assembling the ending line to the sub request body.
       getHttpRequestBody() {
         return `${this.body}${this.batchRequestEnding}${HTTP_LINE_ENDING}`;
       }
@@ -59487,6 +62759,8 @@ var init_BlobBatch = __esm({
       }
     };
     BatchHeaderFilterPolicy = class extends BaseRequestPolicy {
+      // The base class has a protected constructor. Adding a public one to enable constructing of this class.
+      /* eslint-disable-next-line @typescript-eslint/no-useless-constructor*/
       constructor(nextPolicy, options) {
         super(nextPolicy, options);
       }
@@ -59526,7 +62800,7 @@ var init_BlobBatchClient = __esm({
     init_Pipeline();
     init_utils_common();
     BlobBatchClient = class {
-      constructor(url2, credentialOrPipeline, options) {
+      constructor(url3, credentialOrPipeline, options) {
         let pipeline;
         if (isPipelineLike(credentialOrPipeline)) {
           pipeline = credentialOrPipeline;
@@ -59535,14 +62809,18 @@ var init_BlobBatchClient = __esm({
         } else {
           pipeline = newPipeline(credentialOrPipeline, options);
         }
-        const storageClientContext = new StorageClientContext(url2, pipeline.toServiceClientOptions());
-        const path6 = getURLPath(url2);
-        if (path6 && path6 !== "/") {
+        const storageClientContext = new StorageClientContext(url3, pipeline.toServiceClientOptions());
+        const path8 = getURLPath(url3);
+        if (path8 && path8 !== "/") {
           this.serviceOrContainerContext = new Container(storageClientContext);
         } else {
           this.serviceOrContainerContext = new Service(storageClientContext);
         }
       }
+      /**
+       * Creates a {@link BlobBatch}.
+       * A BlobBatch represents an aggregated set of operations on blobs.
+       */
       createBatch() {
         return new BlobBatch();
       }
@@ -59568,6 +62846,41 @@ var init_BlobBatchClient = __esm({
         }
         return this.submitBatch(batch);
       }
+      /**
+       * Submit batch request which consists of multiple subrequests.
+       *
+       * Get `blobBatchClient` and other details before running the snippets.
+       * `blobServiceClient.getBlobBatchClient()` gives the `blobBatchClient`
+       *
+       * Example usage:
+       *
+       * ```js
+       * let batchRequest = new BlobBatch();
+       * await batchRequest.deleteBlob(urlInString0, credential0);
+       * await batchRequest.deleteBlob(urlInString1, credential1, {
+       *  deleteSnapshots: "include"
+       * });
+       * const batchResp = await blobBatchClient.submitBatch(batchRequest);
+       * console.log(batchResp.subResponsesSucceededCount);
+       * ```
+       *
+       * Example using a lease:
+       *
+       * ```js
+       * let batchRequest = new BlobBatch();
+       * await batchRequest.setBlobAccessTier(blockBlobClient0, "Cool");
+       * await batchRequest.setBlobAccessTier(blockBlobClient1, "Cool", {
+       *  conditions: { leaseId: leaseId }
+       * });
+       * const batchResp = await blobBatchClient.submitBatch(batchRequest);
+       * console.log(batchResp.subResponsesSucceededCount);
+       * ```
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/blob-batch
+       *
+       * @param batchRequest - A set of Delete or SetTier operations.
+       * @param options -
+       */
       async submitBatch(batchRequest, options = {}) {
         if (!batchRequest || batchRequest.getSubRequests().size === 0) {
           throw new RangeError("Batch request should contain one or more sub requests.");
@@ -59592,7 +62905,7 @@ var init_BlobBatchClient = __esm({
           return res;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59609,7 +62922,7 @@ var ContainerClient;
 var init_ContainerClient = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/ContainerClient.js"() {
     init_tslib_es6();
-    init_coreHttp();
+    init_src6();
     init_src5();
     init_AnonymousCredential();
     init_StorageSharedKeyCredential();
@@ -59625,16 +62938,16 @@ var init_ContainerClient = __esm({
     ContainerClient = class extends StorageClient {
       constructor(urlOrConnectionString, credentialOrPipelineOrContainerName, options) {
         let pipeline;
-        let url2;
+        let url3;
         options = options || {};
         if (isPipelineLike(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = credentialOrPipelineOrContainerName;
         } else if (isNode && credentialOrPipelineOrContainerName instanceof StorageSharedKeyCredential || credentialOrPipelineOrContainerName instanceof AnonymousCredential || isTokenCredential(credentialOrPipelineOrContainerName)) {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
         } else if (!credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName !== "string") {
-          url2 = urlOrConnectionString;
+          url3 = urlOrConnectionString;
           pipeline = newPipeline(new AnonymousCredential(), options);
         } else if (credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName === "string") {
           const containerName = credentialOrPipelineOrContainerName;
@@ -59642,7 +62955,7 @@ var init_ContainerClient = __esm({
           if (extractedCreds.kind === "AccountConnString") {
             if (isNode) {
               const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
-              url2 = appendToURLPath(extractedCreds.url, encodeURIComponent(containerName));
+              url3 = appendToURLPath(extractedCreds.url, encodeURIComponent(containerName));
               if (!options.proxyOptions) {
                 options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
               }
@@ -59651,7 +62964,7 @@ var init_ContainerClient = __esm({
               throw new Error("Account connection string is only supported in Node.js environment");
             }
           } else if (extractedCreds.kind === "SASConnString") {
-            url2 = appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)) + "?" + extractedCreds.accountSas;
+            url3 = appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)) + "?" + extractedCreds.accountSas;
             pipeline = newPipeline(new AnonymousCredential(), options);
           } else {
             throw new Error("Connection string must be either an Account connection string or a SAS connection string");
@@ -59659,20 +62972,39 @@ var init_ContainerClient = __esm({
         } else {
           throw new Error("Expecting non-empty strings for containerName parameter");
         }
-        super(url2, pipeline);
+        super(url3, pipeline);
         this._containerName = this.getContainerNameFromUrl();
         this.containerContext = new Container(this.storageClientContext);
       }
+      /**
+       * The name of the container.
+       */
       get containerName() {
         return this._containerName;
       }
+      /**
+       * Creates a new container under the specified account. If the container with
+       * the same name already exists, the operation fails.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/create-container
+       *
+       * @param options - Options to Container Create operation.
+       *
+       *
+       * Example usage:
+       *
+       * ```js
+       * const containerClient = blobServiceClient.getContainerClient("<container name>");
+       * const createContainerResponse = await containerClient.create();
+       * console.log("Container was created successfully", createContainerResponse.requestId);
+       * ```
+       */
       async create(options = {}) {
         const { span, updatedOptions } = createSpan2("ContainerClient-create", options);
         try {
           return await this.containerContext.create(Object.assign(Object.assign({}, options), convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59680,22 +63012,29 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Creates a new container under the specified account. If the container with
+       * the same name already exists, it is not changed.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/create-container
+       *
+       * @param options -
+       */
       async createIfNotExists(options = {}) {
-        var _a2, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("ContainerClient-createIfNotExists", options);
         try {
           const res = await this.create(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "ContainerAlreadyExists") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "ContainerAlreadyExists") {
             span.setStatus({
-              code: SpanStatusCode2.ERROR,
+              code: SpanStatusCode.ERROR,
               message: "Expected exception when creating a container only if it does not already exist."
             });
             return Object.assign(Object.assign({ succeeded: false }, (_b = e.response) === null || _b === void 0 ? void 0 : _b.parsedHeaders), { _response: e.response });
           }
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59703,6 +63042,15 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Returns true if the Azure container resource represented by this client exists; false otherwise.
+       *
+       * NOTE: use this function with care since an existing container might be deleted by other clients or
+       * applications. Vice versa new containers with the same name might be added by other clients or
+       * applications after this function completes.
+       *
+       * @param options -
+       */
       async exists(options = {}) {
         const { span, updatedOptions } = createSpan2("ContainerClient-exists", options);
         try {
@@ -59714,13 +63062,13 @@ var init_ContainerClient = __esm({
         } catch (e) {
           if (e.statusCode === 404) {
             span.setStatus({
-              code: SpanStatusCode2.ERROR,
+              code: SpanStatusCode.ERROR,
               message: "Expected exception when checking container existence"
             });
             return false;
           }
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59728,18 +63076,61 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Creates a {@link BlobClient}
+       *
+       * @param blobName - A blob name
+       * @returns A new BlobClient object for the given blob name.
+       */
       getBlobClient(blobName) {
-        return new BlobClient(appendToURLPath(this.url, encodeURIComponent(blobName)), this.pipeline);
+        return new BlobClient(appendToURLPath(this.url, EscapePath(blobName)), this.pipeline);
       }
+      /**
+       * Creates an {@link AppendBlobClient}
+       *
+       * @param blobName - An append blob name
+       */
       getAppendBlobClient(blobName) {
-        return new AppendBlobClient(appendToURLPath(this.url, encodeURIComponent(blobName)), this.pipeline);
+        return new AppendBlobClient(appendToURLPath(this.url, EscapePath(blobName)), this.pipeline);
       }
+      /**
+       * Creates a {@link BlockBlobClient}
+       *
+       * @param blobName - A block blob name
+       *
+       *
+       * Example usage:
+       *
+       * ```js
+       * const content = "Hello world!";
+       *
+       * const blockBlobClient = containerClient.getBlockBlobClient("<blob name>");
+       * const uploadBlobResponse = await blockBlobClient.upload(content, content.length);
+       * ```
+       */
       getBlockBlobClient(blobName) {
-        return new BlockBlobClient(appendToURLPath(this.url, encodeURIComponent(blobName)), this.pipeline);
+        return new BlockBlobClient(appendToURLPath(this.url, EscapePath(blobName)), this.pipeline);
       }
+      /**
+       * Creates a {@link PageBlobClient}
+       *
+       * @param blobName - A page blob name
+       */
       getPageBlobClient(blobName) {
-        return new PageBlobClient(appendToURLPath(this.url, encodeURIComponent(blobName)), this.pipeline);
+        return new PageBlobClient(appendToURLPath(this.url, EscapePath(blobName)), this.pipeline);
       }
+      /**
+       * Returns all user-defined metadata and system properties for the specified
+       * container. The data returned does not include the container's list of blobs.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/get-container-properties
+       *
+       * WARNING: The `metadata` object returned in the response will have its keys in lowercase, even if
+       * they originally contained uppercase characters. This differs from the metadata keys returned by
+       * the `listContainers` method of {@link BlobServiceClient} using the `includeMetadata` option, which
+       * will retain their original casing.
+       *
+       * @param options - Options to Container Get Properties operation.
+       */
       async getProperties(options = {}) {
         if (!options.conditions) {
           options.conditions = {};
@@ -59749,7 +63140,7 @@ var init_ContainerClient = __esm({
           return await this.containerContext.getProperties(Object.assign(Object.assign({ abortSignal: options.abortSignal }, options.conditions), convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59757,6 +63148,13 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Marks the specified container for deletion. The container and any blobs
+       * contained within it are later deleted during garbage collection.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/delete-container
+       *
+       * @param options - Options to Container Delete operation.
+       */
       async delete(options = {}) {
         if (!options.conditions) {
           options.conditions = {};
@@ -59766,7 +63164,7 @@ var init_ContainerClient = __esm({
           return await this.containerContext.delete(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: options.conditions }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59774,22 +63172,29 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Marks the specified container for deletion if it exists. The container and any blobs
+       * contained within it are later deleted during garbage collection.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/delete-container
+       *
+       * @param options - Options to Container Delete operation.
+       */
       async deleteIfExists(options = {}) {
-        var _a2, _b;
+        var _a, _b;
         const { span, updatedOptions } = createSpan2("ContainerClient-deleteIfExists", options);
         try {
           const res = await this.delete(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e) {
-          if (((_a2 = e.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "ContainerNotFound") {
+          if (((_a = e.details) === null || _a === void 0 ? void 0 : _a.errorCode) === "ContainerNotFound") {
             span.setStatus({
-              code: SpanStatusCode2.ERROR,
+              code: SpanStatusCode.ERROR,
               message: "Expected exception when deleting a container only if it exists."
             });
             return Object.assign(Object.assign({ succeeded: false }, (_b = e.response) === null || _b === void 0 ? void 0 : _b.parsedHeaders), { _response: e.response });
           }
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59797,6 +63202,18 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Sets one or more user-defined name-value pairs for the specified container.
+       *
+       * If no option provided, or no metadata defined in the parameter, the container
+       * metadata will be removed.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/set-container-metadata
+       *
+       * @param metadata - Replace existing metadata with this value.
+       *                            If no value provided the existing metadata will be removed.
+       * @param options - Options to Container Set Metadata operation.
+       */
       async setMetadata(metadata2, options = {}) {
         if (!options.conditions) {
           options.conditions = {};
@@ -59809,7 +63226,7 @@ var init_ContainerClient = __esm({
           return await this.containerContext.setMetadata(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: metadata2, modifiedAccessConditions: options.conditions }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59817,6 +63234,17 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Gets the permissions for the specified container. The permissions indicate
+       * whether container data may be accessed publicly.
+       *
+       * WARNING: JavaScript Date will potentially lose precision when parsing startsOn and expiresOn strings.
+       * For example, new Date("2018-12-31T03:44:23.8827891Z").toISOString() will get "2018-12-31T03:44:23.882Z".
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/get-container-acl
+       *
+       * @param options - Options to Container Get Access Policy operation.
+       */
       async getAccessPolicy(options = {}) {
         if (!options.conditions) {
           options.conditions = {};
@@ -59857,7 +63285,7 @@ var init_ContainerClient = __esm({
           return res;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59865,6 +63293,23 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Sets the permissions for the specified container. The permissions indicate
+       * whether blobs in a container may be accessed publicly.
+       *
+       * When you set permissions for a container, the existing permissions are replaced.
+       * If no access or containerAcl provided, the existing container ACL will be
+       * removed.
+       *
+       * When you establish a stored access policy on a container, it may take up to 30 seconds to take effect.
+       * During this interval, a shared access signature that is associated with the stored access policy will
+       * fail with status code 403 (Forbidden), until the access policy becomes active.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/set-container-acl
+       *
+       * @param access - The level of public access to data in the container.
+       * @param containerAcl - Array of elements each having a unique Id and details of the access policy.
+       * @param options - Options to Container Set Access Policy operation.
+       */
       async setAccessPolicy(access2, containerAcl2, options = {}) {
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("ContainerClient-setAccessPolicy", options);
@@ -59883,7 +63328,7 @@ var init_ContainerClient = __esm({
           return await this.containerContext.setAccessPolicy(Object.assign({ abortSignal: options.abortSignal, access: access2, containerAcl: acl, leaseAccessConditions: options.conditions, modifiedAccessConditions: options.conditions }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59891,9 +63336,37 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Get a {@link BlobLeaseClient} that manages leases on the container.
+       *
+       * @param proposeLeaseId - Initial proposed lease Id.
+       * @returns A new BlobLeaseClient object for managing leases on the container.
+       */
       getBlobLeaseClient(proposeLeaseId) {
         return new BlobLeaseClient(this, proposeLeaseId);
       }
+      /**
+       * Creates a new block blob, or updates the content of an existing block blob.
+       *
+       * Updating an existing block blob overwrites any existing metadata on the blob.
+       * Partial updates are not supported; the content of the existing blob is
+       * overwritten with the new content. To perform a partial update of a block blob's,
+       * use {@link BlockBlobClient.stageBlock} and {@link BlockBlobClient.commitBlockList}.
+       *
+       * This is a non-parallel uploading method, please use {@link BlockBlobClient.uploadFile},
+       * {@link BlockBlobClient.uploadStream} or {@link BlockBlobClient.uploadBrowserData} for better
+       * performance with concurrency uploading.
+       *
+       * @see https://docs.microsoft.com/rest/api/storageservices/put-blob
+       *
+       * @param blobName - Name of the block blob to create or update.
+       * @param body - Blob, string, ArrayBuffer, ArrayBufferView or a function
+       *                               which returns a new Readable stream whose offset is from data source beginning.
+       * @param contentLength - Length of body in bytes. Use Buffer.byteLength() to calculate body length for a
+       *                               string including non non-Base64/Hex-encoded characters.
+       * @param options - Options to configure the Block Blob Upload operation.
+       * @returns Block Blob upload response data and the corresponding BlockBlobClient instance.
+       */
       async uploadBlockBlob(blobName, body2, contentLength2, options = {}) {
         const { span, updatedOptions } = createSpan2("ContainerClient-uploadBlockBlob", options);
         try {
@@ -59905,7 +63378,7 @@ var init_ContainerClient = __esm({
           };
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59913,6 +63386,17 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Marks the specified blob or snapshot for deletion. The blob is later deleted
+       * during garbage collection. Note that in order to delete a blob, you must delete
+       * all of its snapshots. You can delete both at the same time with the Delete
+       * Blob operation.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/delete-blob
+       *
+       * @param blobName -
+       * @param options - Options to Blob Delete operation.
+       * @returns Block blob deletion response data.
+       */
       async deleteBlob(blobName, options = {}) {
         const { span, updatedOptions } = createSpan2("ContainerClient-deleteBlob", options);
         try {
@@ -59923,7 +63407,7 @@ var init_ContainerClient = __esm({
           return await blobClient.delete(updatedOptions);
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59931,6 +63415,16 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * listBlobFlatSegment returns a single segment of blobs starting from the
+       * specified Marker. Use an empty Marker to start enumeration from the beginning.
+       * After getting a segment, process it, and then call listBlobsFlatSegment again
+       * (passing the the previously-returned Marker) to get the next segment.
+       * @see https://docs.microsoft.com/rest/api/storageservices/list-blobs
+       *
+       * @param marker - A string value that identifies the portion of the list to be returned with the next list operation.
+       * @param options - Options to Container List Blob Flat Segment operation.
+       */
       async listBlobFlatSegment(marker2, options = {}) {
         const { span, updatedOptions } = createSpan2("ContainerClient-listBlobFlatSegment", options);
         try {
@@ -59946,7 +63440,7 @@ var init_ContainerClient = __esm({
           return wrappedResponse;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59954,8 +63448,19 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * listBlobHierarchySegment returns a single segment of blobs starting from
+       * the specified Marker. Use an empty Marker to start enumeration from the
+       * beginning. After getting a segment, process it, and then call listBlobsHierarchicalSegment
+       * again (passing the the previously-returned Marker) to get the next segment.
+       * @see https://docs.microsoft.com/rest/api/storageservices/list-blobs
+       *
+       * @param delimiter - The character or string used to define the virtual hierarchy
+       * @param marker - A string value that identifies the portion of the list to be returned with the next list operation.
+       * @param options - Options to Container List Blob Hierarchy Segment operation.
+       */
       async listBlobHierarchySegment(delimiter3, marker2, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("ContainerClient-listBlobHierarchySegment", options);
         try {
           const response = await this.containerContext.listBlobHierarchySegment(delimiter3, Object.assign(Object.assign({ marker: marker2 }, options), convertTracingToRequestOptionsBase(updatedOptions)));
@@ -59970,7 +63475,7 @@ var init_ContainerClient = __esm({
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: Object.assign(Object.assign({}, response._response), { parsedBody: ConvertInternalResponseOfListBlobHierarchy(response._response.parsedBody) }), segment: Object.assign(Object.assign({}, response.segment), { blobItems: response.segment.blobItems.map((blobItemInteral) => {
             const blobItem = Object.assign(Object.assign({}, blobItemInteral), { name: BlobNameToString(blobItemInteral.name), tags: toTags(blobItemInteral.blobTags), objectReplicationSourceProperties: parseObjectReplicationRecord(blobItemInteral.objectReplicationMetadata) });
             return blobItem;
-          }), blobPrefixes: (_a2 = response.segment.blobPrefixes) === null || _a2 === void 0 ? void 0 : _a2.map((blobPrefixInternal) => {
+          }), blobPrefixes: (_a = response.segment.blobPrefixes) === null || _a === void 0 ? void 0 : _a.map((blobPrefixInternal) => {
             const blobPrefix = {
               name: BlobNameToString(blobPrefixInternal.name)
             };
@@ -59979,7 +63484,7 @@ var init_ContainerClient = __esm({
           return wrappedResponse;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -59987,6 +63492,18 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Returns an AsyncIterableIterator for ContainerListBlobFlatSegmentResponse
+       *
+       * @param marker - A string value that identifies the portion of
+       *                          the list of blobs to be returned with the next listing operation. The
+       *                          operation returns the ContinuationToken value within the response body if the
+       *                          listing operation did not return all blobs remaining to be listed
+       *                          with the current page. The ContinuationToken value can be used as the value for
+       *                          the marker parameter in a subsequent call to request the next page of list
+       *                          items. The marker value is opaque to the client.
+       * @param options - Options to list blobs operation.
+       */
       listSegments(marker2, options = {}) {
         return __asyncGenerator(this, arguments, function* listSegments_1() {
           let listBlobsFlatSegmentResponse;
@@ -59999,9 +63516,14 @@ var init_ContainerClient = __esm({
           }
         });
       }
+      /**
+       * Returns an AsyncIterableIterator of {@link BlobItem} objects
+       *
+       * @param options - Options to list blobs operation.
+       */
       listItems(options = {}) {
         return __asyncGenerator(this, arguments, function* listItems_1() {
-          var e_1, _a2;
+          var e_1, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listSegments(marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -60012,8 +63534,8 @@ var init_ContainerClient = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -60021,6 +63543,76 @@ var init_ContainerClient = __esm({
           }
         });
       }
+      /**
+       * Returns an async iterable iterator to list all the blobs
+       * under the specified account.
+       *
+       * .byPage() returns an async iterable iterator to list the blobs in pages.
+       *
+       * Example using `for await` syntax:
+       *
+       * ```js
+       * // Get the containerClient before you run these snippets,
+       * // Can be obtained from `blobServiceClient.getContainerClient("<your-container-name>");`
+       * let i = 1;
+       * for await (const blob of containerClient.listBlobsFlat()) {
+       *   console.log(`Blob ${i++}: ${blob.name}`);
+       * }
+       * ```
+       *
+       * Example using `iter.next()`:
+       *
+       * ```js
+       * let i = 1;
+       * let iter = containerClient.listBlobsFlat();
+       * let blobItem = await iter.next();
+       * while (!blobItem.done) {
+       *   console.log(`Blob ${i++}: ${blobItem.value.name}`);
+       *   blobItem = await iter.next();
+       * }
+       * ```
+       *
+       * Example using `byPage()`:
+       *
+       * ```js
+       * // passing optional maxPageSize in the page settings
+       * let i = 1;
+       * for await (const response of containerClient.listBlobsFlat().byPage({ maxPageSize: 20 })) {
+       *   for (const blob of response.segment.blobItems) {
+       *     console.log(`Blob ${i++}: ${blob.name}`);
+       *   }
+       * }
+       * ```
+       *
+       * Example using paging with a marker:
+       *
+       * ```js
+       * let i = 1;
+       * let iterator = containerClient.listBlobsFlat().byPage({ maxPageSize: 2 });
+       * let response = (await iterator.next()).value;
+       *
+       * // Prints 2 blob names
+       * for (const blob of response.segment.blobItems) {
+       *   console.log(`Blob ${i++}: ${blob.name}`);
+       * }
+       *
+       * // Gets next marker
+       * let marker = response.continuationToken;
+       *
+       * // Passing next marker as continuationToken
+       *
+       * iterator = containerClient.listBlobsFlat().byPage({ continuationToken: marker, maxPageSize: 10 });
+       * response = (await iterator.next()).value;
+       *
+       * // Prints 10 blob names
+       * for (const blob of response.segment.blobItems) {
+       *   console.log(`Blob ${i++}: ${blob.name}`);
+       * }
+       * ```
+       *
+       * @param options - Options to list blobs.
+       * @returns An asyncIterableIterator that supports paging.
+       */
       listBlobsFlat(options = {}) {
         const include2 = [];
         if (options.includeCopy) {
@@ -60059,17 +63651,39 @@ var init_ContainerClient = __esm({
         const updatedOptions = Object.assign(Object.assign({}, options), include2.length > 0 ? { include: include2 } : {});
         const iter = this.listItems(updatedOptions);
         return {
+          /**
+           * The next method, part of the iteration protocol
+           */
           next() {
             return iter.next();
           },
+          /**
+           * The connection to the async iterator, part of the iteration protocol
+           */
           [Symbol.asyncIterator]() {
             return this;
           },
+          /**
+           * Return an AsyncIterableIterator that works a page at a time
+           */
           byPage: (settings = {}) => {
             return this.listSegments(settings.continuationToken, Object.assign({ maxPageSize: settings.maxPageSize }, updatedOptions));
           }
         };
       }
+      /**
+       * Returns an AsyncIterableIterator for ContainerListBlobHierarchySegmentResponse
+       *
+       * @param delimiter - The character or string used to define the virtual hierarchy
+       * @param marker - A string value that identifies the portion of
+       *                          the list of blobs to be returned with the next listing operation. The
+       *                          operation returns the ContinuationToken value within the response body if the
+       *                          listing operation did not return all blobs remaining to be listed
+       *                          with the current page. The ContinuationToken value can be used as the value for
+       *                          the marker parameter in a subsequent call to request the next page of list
+       *                          items. The marker value is opaque to the client.
+       * @param options - Options to list blobs operation.
+       */
       listHierarchySegments(delimiter3, marker2, options = {}) {
         return __asyncGenerator(this, arguments, function* listHierarchySegments_1() {
           let listBlobsHierarchySegmentResponse;
@@ -60082,9 +63696,15 @@ var init_ContainerClient = __esm({
           }
         });
       }
+      /**
+       * Returns an AsyncIterableIterator for {@link BlobPrefix} and {@link BlobItem} objects.
+       *
+       * @param delimiter - The character or string used to define the virtual hierarchy
+       * @param options - Options to list blobs operation.
+       */
       listItemsByHierarchy(delimiter3, options = {}) {
         return __asyncGenerator(this, arguments, function* listItemsByHierarchy_1() {
-          var e_2, _a2;
+          var e_2, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listHierarchySegments(delimiter3, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -60103,8 +63723,8 @@ var init_ContainerClient = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -60112,6 +63732,84 @@ var init_ContainerClient = __esm({
           }
         });
       }
+      /**
+       * Returns an async iterable iterator to list all the blobs by hierarchy.
+       * under the specified account.
+       *
+       * .byPage() returns an async iterable iterator to list the blobs by hierarchy in pages.
+       *
+       * Example using `for await` syntax:
+       *
+       * ```js
+       * for await (const item of containerClient.listBlobsByHierarchy("/")) {
+       *   if (item.kind === "prefix") {
+       *     console.log(`\tBlobPrefix: ${item.name}`);
+       *   } else {
+       *     console.log(`\tBlobItem: name - ${item.name}`);
+       *   }
+       * }
+       * ```
+       *
+       * Example using `iter.next()`:
+       *
+       * ```js
+       * let iter = containerClient.listBlobsByHierarchy("/", { prefix: "prefix1/" });
+       * let entity = await iter.next();
+       * while (!entity.done) {
+       *   let item = entity.value;
+       *   if (item.kind === "prefix") {
+       *     console.log(`\tBlobPrefix: ${item.name}`);
+       *   } else {
+       *     console.log(`\tBlobItem: name - ${item.name}`);
+       *   }
+       *   entity = await iter.next();
+       * }
+       * ```
+       *
+       * Example using `byPage()`:
+       *
+       * ```js
+       * console.log("Listing blobs by hierarchy by page");
+       * for await (const response of containerClient.listBlobsByHierarchy("/").byPage()) {
+       *   const segment = response.segment;
+       *   if (segment.blobPrefixes) {
+       *     for (const prefix of segment.blobPrefixes) {
+       *       console.log(`\tBlobPrefix: ${prefix.name}`);
+       *     }
+       *   }
+       *   for (const blob of response.segment.blobItems) {
+       *     console.log(`\tBlobItem: name - ${blob.name}`);
+       *   }
+       * }
+       * ```
+       *
+       * Example using paging with a max page size:
+       *
+       * ```js
+       * console.log("Listing blobs by hierarchy by page, specifying a prefix and a max page size");
+       *
+       * let i = 1;
+       * for await (const response of containerClient
+       *   .listBlobsByHierarchy("/", { prefix: "prefix2/sub1/" })
+       *   .byPage({ maxPageSize: 2 })) {
+       *   console.log(`Page ${i++}`);
+       *   const segment = response.segment;
+       *
+       *   if (segment.blobPrefixes) {
+       *     for (const prefix of segment.blobPrefixes) {
+       *       console.log(`\tBlobPrefix: ${prefix.name}`);
+       *     }
+       *   }
+       *
+       *   for (const blob of response.segment.blobItems) {
+       *     console.log(`\tBlobItem: name - ${blob.name}`);
+       *   }
+       * }
+       * ```
+       *
+       * @param delimiter - The character or string used to define the virtual hierarchy
+       * @param options - Options to list blobs operation.
+       */
       listBlobsByHierarchy(delimiter3, options = {}) {
         if (delimiter3 === "") {
           throw new RangeError("delimiter should contain one or more characters");
@@ -60153,25 +63851,51 @@ var init_ContainerClient = __esm({
         const updatedOptions = Object.assign(Object.assign({}, options), include2.length > 0 ? { include: include2 } : {});
         const iter = this.listItemsByHierarchy(delimiter3, updatedOptions);
         return {
+          /**
+           * The next method, part of the iteration protocol
+           */
           async next() {
             return iter.next();
           },
+          /**
+           * The connection to the async iterator, part of the iteration protocol
+           */
           [Symbol.asyncIterator]() {
             return this;
           },
+          /**
+           * Return an AsyncIterableIterator that works a page at a time
+           */
           byPage: (settings = {}) => {
             return this.listHierarchySegments(delimiter3, settings.continuationToken, Object.assign({ maxPageSize: settings.maxPageSize }, updatedOptions));
           }
         };
       }
+      /**
+       * The Filter Blobs operation enables callers to list blobs in the container whose tags
+       * match a given search expression.
+       *
+       * @param tagFilterSqlExpression - The where parameter enables the caller to query blobs whose tags match a given expression.
+       *                                        The given expression must evaluate to true for a blob to be returned in the results.
+       *                                        The[OData - ABNF] filter syntax rule defines the formal grammar for the value of the where query parameter;
+       *                                        however, only a subset of the OData filter syntax is supported in the Blob service.
+       * @param marker - A string value that identifies the portion of
+       *                          the list of blobs to be returned with the next listing operation. The
+       *                          operation returns the continuationToken value within the response body if the
+       *                          listing operation did not return all blobs remaining to be listed
+       *                          with the current page. The continuationToken value can be used as the value for
+       *                          the marker parameter in a subsequent call to request the next page of list
+       *                          items. The marker value is opaque to the client.
+       * @param options - Options to find blobs by tags.
+       */
       async findBlobsByTagsSegment(tagFilterSqlExpression, marker2, options = {}) {
         const { span, updatedOptions } = createSpan2("ContainerClient-findBlobsByTagsSegment", options);
         try {
           const response = await this.containerContext.filterBlobs(Object.assign({ abortSignal: options.abortSignal, where: tagFilterSqlExpression, marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, blobs: response.blobs.map((blob) => {
-            var _a2;
+            var _a;
             let tagValue = "";
-            if (((_a2 = blob.tags) === null || _a2 === void 0 ? void 0 : _a2.blobTagSet.length) === 1) {
+            if (((_a = blob.tags) === null || _a === void 0 ? void 0 : _a.blobTagSet.length) === 1) {
               tagValue = blob.tags.blobTagSet[0].value;
             }
             return Object.assign(Object.assign({}, blob), { tags: toTags(blob.tags), tagValue });
@@ -60179,7 +63903,7 @@ var init_ContainerClient = __esm({
           return wrappedResponse;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60187,6 +63911,22 @@ var init_ContainerClient = __esm({
           span.end();
         }
       }
+      /**
+       * Returns an AsyncIterableIterator for ContainerFindBlobsByTagsSegmentResponse.
+       *
+       * @param tagFilterSqlExpression -  The where parameter enables the caller to query blobs whose tags match a given expression.
+       *                                         The given expression must evaluate to true for a blob to be returned in the results.
+       *                                         The[OData - ABNF] filter syntax rule defines the formal grammar for the value of the where query parameter;
+       *                                         however, only a subset of the OData filter syntax is supported in the Blob service.
+       * @param marker - A string value that identifies the portion of
+       *                          the list of blobs to be returned with the next listing operation. The
+       *                          operation returns the continuationToken value within the response body if the
+       *                          listing operation did not return all blobs remaining to be listed
+       *                          with the current page. The continuationToken value can be used as the value for
+       *                          the marker parameter in a subsequent call to request the next page of list
+       *                          items. The marker value is opaque to the client.
+       * @param options - Options to find blobs by tags.
+       */
       findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsSegments_1() {
           let response;
@@ -60200,9 +63940,18 @@ var init_ContainerClient = __esm({
           }
         });
       }
+      /**
+       * Returns an AsyncIterableIterator for blobs.
+       *
+       * @param tagFilterSqlExpression -  The where parameter enables the caller to query blobs whose tags match a given expression.
+       *                                         The given expression must evaluate to true for a blob to be returned in the results.
+       *                                         The[OData - ABNF] filter syntax rule defines the formal grammar for the value of the where query parameter;
+       *                                         however, only a subset of the OData filter syntax is supported in the Blob service.
+       * @param options - Options to findBlobsByTagsItems.
+       */
       findBlobsByTagsItems(tagFilterSqlExpression, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsItems_1() {
-          var e_3, _a2;
+          var e_3, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -60213,8 +63962,8 @@ var init_ContainerClient = __esm({
             e_3 = { error: e_3_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_3)
                 throw e_3.error;
@@ -60222,16 +63971,102 @@ var init_ContainerClient = __esm({
           }
         });
       }
+      /**
+       * Returns an async iterable iterator to find all blobs with specified tag
+       * under the specified container.
+       *
+       * .byPage() returns an async iterable iterator to list the blobs in pages.
+       *
+       * Example using `for await` syntax:
+       *
+       * ```js
+       * let i = 1;
+       * for await (const blob of containerClient.findBlobsByTags("tagkey='tagvalue'")) {
+       *   console.log(`Blob ${i++}: ${blob.name}`);
+       * }
+       * ```
+       *
+       * Example using `iter.next()`:
+       *
+       * ```js
+       * let i = 1;
+       * const iter = containerClient.findBlobsByTags("tagkey='tagvalue'");
+       * let blobItem = await iter.next();
+       * while (!blobItem.done) {
+       *   console.log(`Blob ${i++}: ${blobItem.value.name}`);
+       *   blobItem = await iter.next();
+       * }
+       * ```
+       *
+       * Example using `byPage()`:
+       *
+       * ```js
+       * // passing optional maxPageSize in the page settings
+       * let i = 1;
+       * for await (const response of containerClient.findBlobsByTags("tagkey='tagvalue'").byPage({ maxPageSize: 20 })) {
+       *   if (response.blobs) {
+       *     for (const blob of response.blobs) {
+       *       console.log(`Blob ${i++}: ${blob.name}`);
+       *     }
+       *   }
+       * }
+       * ```
+       *
+       * Example using paging with a marker:
+       *
+       * ```js
+       * let i = 1;
+       * let iterator = containerClient.findBlobsByTags("tagkey='tagvalue'").byPage({ maxPageSize: 2 });
+       * let response = (await iterator.next()).value;
+       *
+       * // Prints 2 blob names
+       * if (response.blobs) {
+       *   for (const blob of response.blobs) {
+       *     console.log(`Blob ${i++}: ${blob.name}`);
+       *   }
+       * }
+       *
+       * // Gets next marker
+       * let marker = response.continuationToken;
+       * // Passing next marker as continuationToken
+       * iterator = containerClient
+       *   .findBlobsByTags("tagkey='tagvalue'")
+       *   .byPage({ continuationToken: marker, maxPageSize: 10 });
+       * response = (await iterator.next()).value;
+       *
+       * // Prints blob names
+       * if (response.blobs) {
+       *   for (const blob of response.blobs) {
+       *      console.log(`Blob ${i++}: ${blob.name}`);
+       *   }
+       * }
+       * ```
+       *
+       * @param tagFilterSqlExpression -  The where parameter enables the caller to query blobs whose tags match a given expression.
+       *                                         The given expression must evaluate to true for a blob to be returned in the results.
+       *                                         The[OData - ABNF] filter syntax rule defines the formal grammar for the value of the where query parameter;
+       *                                         however, only a subset of the OData filter syntax is supported in the Blob service.
+       * @param options - Options to find blobs by tags.
+       */
       findBlobsByTags(tagFilterSqlExpression, options = {}) {
         const listSegmentOptions = Object.assign({}, options);
         const iter = this.findBlobsByTagsItems(tagFilterSqlExpression, listSegmentOptions);
         return {
+          /**
+           * The next method, part of the iteration protocol
+           */
           next() {
             return iter.next();
           },
+          /**
+           * The connection to the async iterator, part of the iteration protocol
+           */
           [Symbol.asyncIterator]() {
             return this;
           },
+          /**
+           * Return an AsyncIterableIterator that works a page at a time
+           */
           byPage: (settings = {}) => {
             return this.findBlobsByTagsSegments(tagFilterSqlExpression, settings.continuationToken, Object.assign({ maxPageSize: settings.maxPageSize }, listSegmentOptions));
           }
@@ -60257,6 +64092,17 @@ var init_ContainerClient = __esm({
           throw new Error("Unable to extract containerName with provided information.");
         }
       }
+      /**
+       * Only available for ContainerClient constructed with a shared key credential.
+       *
+       * Generates a Blob Container Service Shared Access Signature (SAS) URI based on the client properties
+       * and parameters passed in. The SAS is signed by the shared key credential of the client.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-a-service-sas
+       *
+       * @param options - Optional parameters.
+       * @returns The SAS URI consisting of the URI to the resource represented by this client, followed by the generated SAS token.
+       */
       generateSasUrl(options) {
         return new Promise((resolve) => {
           if (!(this.credential instanceof StorageSharedKeyCredential)) {
@@ -60266,6 +64112,13 @@ var init_ContainerClient = __esm({
           resolve(appendToURLQuery(this.url, sas));
         });
       }
+      /**
+       * Creates a BlobBatchClient object to conduct batch operations.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/blob-batch
+       *
+       * @returns A new BlobBatchClient object for this container.
+       */
       getBlobBatchClient() {
         return new BlobBatchClient(this.url, this.pipeline);
       }
@@ -60293,6 +64146,11 @@ var init_AccountSASPermissions = __esm({
         this.setImmutabilityPolicy = false;
         this.permanentDelete = false;
       }
+      /**
+       * Parse initializes the AccountSASPermissions fields from a string.
+       *
+       * @param permissions -
+       */
       static parse(permissions) {
         const accountSASPermissions = new AccountSASPermissions();
         for (const c of permissions) {
@@ -60342,6 +64200,12 @@ var init_AccountSASPermissions = __esm({
         }
         return accountSASPermissions;
       }
+      /**
+       * Creates a {@link AccountSASPermissions} from a raw object which contains same keys as it
+       * and boolean values for them.
+       *
+       * @param permissionLike -
+       */
       static from(permissionLike) {
         const accountSASPermissions = new AccountSASPermissions();
         if (permissionLike.read) {
@@ -60385,6 +64249,16 @@ var init_AccountSASPermissions = __esm({
         }
         return accountSASPermissions;
       }
+      /**
+       * Produces the SAS permissions string for an Azure Storage account.
+       * Call this method to set AccountSASSignatureValues Permissions field.
+       *
+       * Using this method will guarantee the resource types are in
+       * an order accepted by the service.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-an-account-sas
+       *
+       */
       toString() {
         const permissions = [];
         if (this.read) {
@@ -60442,6 +64316,12 @@ var init_AccountSASResourceTypes = __esm({
         this.container = false;
         this.object = false;
       }
+      /**
+       * Creates an {@link AccountSASResourceTypes} from the specified resource types string. This method will throw an
+       * Error if it encounters a character that does not correspond to a valid resource type.
+       *
+       * @param resourceTypes -
+       */
       static parse(resourceTypes) {
         const accountSASResourceTypes = new AccountSASResourceTypes();
         for (const c of resourceTypes) {
@@ -60461,6 +64341,12 @@ var init_AccountSASResourceTypes = __esm({
         }
         return accountSASResourceTypes;
       }
+      /**
+       * Converts the given resource types to a string.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-an-account-sas
+       *
+       */
       toString() {
         const resourceTypes = [];
         if (this.service) {
@@ -60489,6 +64375,12 @@ var init_AccountSASServices = __esm({
         this.queue = false;
         this.table = false;
       }
+      /**
+       * Creates an {@link AccountSASServices} from the specified services string. This method will throw an
+       * Error if it encounters a character that does not correspond to a valid service.
+       *
+       * @param services -
+       */
       static parse(services) {
         const accountSASServices = new AccountSASServices();
         for (const c of services) {
@@ -60511,6 +64403,10 @@ var init_AccountSASServices = __esm({
         }
         return accountSASServices;
       }
+      /**
+       * Converts the given services to a string.
+       *
+       */
       toString() {
         const services = [];
         if (this.blob) {
@@ -60569,6 +64465,7 @@ function generateAccountSASQueryParameters(accountSASSignatureValues, sharedKeyC
       version3,
       accountSASSignatureValues.encryptionScope ? accountSASSignatureValues.encryptionScope : "",
       ""
+      // Account SAS requires an additional newline character
     ].join("\n");
   } else {
     stringToSign = [
@@ -60582,6 +64479,7 @@ function generateAccountSASQueryParameters(accountSASSignatureValues, sharedKeyC
       accountSASSignatureValues.protocol ? accountSASSignatureValues.protocol : "",
       version3,
       ""
+      // Account SAS requires an additional newline character
     ].join("\n");
   }
   const signature = sharedKeyCredential.computeHMACSHA256(stringToSign);
@@ -60604,7 +64502,7 @@ var BlobServiceClient;
 var init_BlobServiceClient = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/BlobServiceClient.js"() {
     init_tslib_es6();
-    init_coreHttp();
+    init_src6();
     init_src5();
     init_operations();
     init_Pipeline();
@@ -60612,7 +64510,7 @@ var init_BlobServiceClient = __esm({
     init_utils_common();
     init_StorageSharedKeyCredential();
     init_AnonymousCredential();
-    init_src7();
+    init_src8();
     init_utils_common();
     init_tracing();
     init_BlobBatchClient();
@@ -60621,7 +64519,7 @@ var init_BlobServiceClient = __esm({
     init_AccountSASSignatureValues();
     init_AccountSASServices();
     BlobServiceClient = class extends StorageClient {
-      constructor(url2, credentialOrPipeline, options) {
+      constructor(url3, credentialOrPipeline, options) {
         let pipeline;
         if (isPipelineLike(credentialOrPipeline)) {
           pipeline = credentialOrPipeline;
@@ -60630,9 +64528,21 @@ var init_BlobServiceClient = __esm({
         } else {
           pipeline = newPipeline(new AnonymousCredential(), options);
         }
-        super(url2, pipeline);
+        super(url3, pipeline);
         this.serviceContext = new Service(this.storageClientContext);
       }
+      /**
+       *
+       * Creates an instance of BlobServiceClient from connection string.
+       *
+       * @param connectionString - Account connection string or a SAS connection string of an Azure storage account.
+       *                                  [ Note - Account connection string can only be used in NODE.JS runtime. ]
+       *                                  Account connection string example -
+       *                                  `DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=accountKey;EndpointSuffix=core.windows.net`
+       *                                  SAS connection string example -
+       *                                  `BlobEndpoint=https://myaccount.blob.core.windows.net/;QueueEndpoint=https://myaccount.queue.core.windows.net/;FileEndpoint=https://myaccount.file.core.windows.net/;TableEndpoint=https://myaccount.table.core.windows.net/;SharedAccessSignature=sasString`
+       * @param options - Optional. Options to configure the HTTP pipeline.
+       */
       static fromConnectionString(connectionString, options) {
         options = options || {};
         const extractedCreds = extractConnectionStringParts(connectionString);
@@ -60654,9 +64564,28 @@ var init_BlobServiceClient = __esm({
           throw new Error("Connection string must be either an Account connection string or a SAS connection string");
         }
       }
+      /**
+       * Creates a {@link ContainerClient} object
+       *
+       * @param containerName - A container name
+       * @returns A new ContainerClient object for the given container name.
+       *
+       * Example usage:
+       *
+       * ```js
+       * const containerClient = blobServiceClient.getContainerClient("<container name>");
+       * ```
+       */
       getContainerClient(containerName) {
         return new ContainerClient(appendToURLPath(this.url, encodeURIComponent(containerName)), this.pipeline);
       }
+      /**
+       * Create a Blob container.
+       *
+       * @param containerName - Name of the container to create.
+       * @param options - Options to configure Container Create operation.
+       * @returns Container creation response and the corresponding container client.
+       */
       async createContainer(containerName, options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-createContainer", options);
         try {
@@ -60668,7 +64597,7 @@ var init_BlobServiceClient = __esm({
           };
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60676,6 +64605,13 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * Deletes a Blob container.
+       *
+       * @param containerName - Name of the container to delete.
+       * @param options - Options to configure Container Delete operation.
+       * @returns Container deletion response.
+       */
       async deleteContainer(containerName, options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-deleteContainer", options);
         try {
@@ -60683,7 +64619,7 @@ var init_BlobServiceClient = __esm({
           return await containerClient.delete(updatedOptions);
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60691,6 +64627,15 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * Restore a previously deleted Blob container.
+       * This API is only functional if Container Soft Delete is enabled for the storage account associated with the container.
+       *
+       * @param deletedContainerName - Name of the previously deleted container.
+       * @param deletedContainerVersion - Version of the previously deleted container, used to uniquely identify the deleted container.
+       * @param options - Options to configure Container Restore operation.
+       * @returns Container deletion response.
+       */
       async undeleteContainer(deletedContainerName2, deletedContainerVersion2, options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-undeleteContainer", options);
         try {
@@ -60703,7 +64648,7 @@ var init_BlobServiceClient = __esm({
           return { containerClient, containerUndeleteResponse };
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60711,17 +64656,26 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * Rename an existing Blob Container.
+       *
+       * @param sourceContainerName - The name of the source container.
+       * @param destinationContainerName - The new name of the container.
+       * @param options - Options to configure Container Rename operation.
+       */
+      /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+      // @ts-ignore Need to hide this interface for now. Make it public and turn on the live tests for it when the service is ready.
       async renameContainer(sourceContainerName2, destinationContainerName, options = {}) {
-        var _a2;
+        var _a;
         const { span, updatedOptions } = createSpan2("BlobServiceClient-renameContainer", options);
         try {
           const containerClient = this.getContainerClient(destinationContainerName);
           const containerContext = new Container(containerClient["storageClientContext"]);
-          const containerRenameResponse = await containerContext.rename(sourceContainerName2, Object.assign(Object.assign({}, updatedOptions), { sourceLeaseId: (_a2 = options.sourceCondition) === null || _a2 === void 0 ? void 0 : _a2.leaseId }));
+          const containerRenameResponse = await containerContext.rename(sourceContainerName2, Object.assign(Object.assign({}, updatedOptions), { sourceLeaseId: (_a = options.sourceCondition) === null || _a === void 0 ? void 0 : _a.leaseId }));
           return { containerClient, containerRenameResponse };
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60729,13 +64683,21 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * Gets the properties of a storage account’s Blob service, including properties
+       * for Storage Analytics and CORS (Cross-Origin Resource Sharing) rules.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/get-blob-service-properties
+       *
+       * @param options - Options to the Service Get Properties operation.
+       * @returns Response data for the Service Get Properties operation.
+       */
       async getProperties(options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-getProperties", options);
         try {
           return await this.serviceContext.getProperties(Object.assign({ abortSignal: options.abortSignal }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60743,13 +64705,22 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * Sets properties for a storage account’s Blob service endpoint, including properties
+       * for Storage Analytics, CORS (Cross-Origin Resource Sharing) rules and soft delete settings.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/set-blob-service-properties
+       *
+       * @param properties -
+       * @param options - Options to the Service Set Properties operation.
+       * @returns Response data for the Service Set Properties operation.
+       */
       async setProperties(properties, options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-setProperties", options);
         try {
           return await this.serviceContext.setProperties(properties, Object.assign({ abortSignal: options.abortSignal }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60757,13 +64728,22 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * Retrieves statistics related to replication for the Blob service. It is only
+       * available on the secondary location endpoint when read-access geo-redundant
+       * replication is enabled for the storage account.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/get-blob-service-stats
+       *
+       * @param options - Options to the Service Get Statistics operation.
+       * @returns Response data for the Service Get Statistics operation.
+       */
       async getStatistics(options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-getStatistics", options);
         try {
           return await this.serviceContext.getStatistics(Object.assign({ abortSignal: options.abortSignal }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60771,13 +64751,23 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * The Get Account Information operation returns the sku name and account kind
+       * for the specified account.
+       * The Get Account Information operation is available on service versions beginning
+       * with version 2018-03-28.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/get-account-information
+       *
+       * @param options - Options to the Service Get Account Info operation.
+       * @returns Response data for the Service Get Account Info operation.
+       */
       async getAccountInfo(options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-getAccountInfo", options);
         try {
           return await this.serviceContext.getAccountInfo(Object.assign({ abortSignal: options.abortSignal }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60785,13 +64775,27 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * Returns a list of the containers under the specified account.
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/list-containers2
+       *
+       * @param marker - A string value that identifies the portion of
+       *                        the list of containers to be returned with the next listing operation. The
+       *                        operation returns the continuationToken value within the response body if the
+       *                        listing operation did not return all containers remaining to be listed
+       *                        with the current page. The continuationToken value can be used as the value for
+       *                        the marker parameter in a subsequent call to request the next page of list
+       *                        items. The marker value is opaque to the client.
+       * @param options - Options to the Service List Container Segment operation.
+       * @returns Response data for the Service List Container Segment operation.
+       */
       async listContainersSegment(marker2, options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-listContainersSegment", options);
         try {
           return await this.serviceContext.listContainersSegment(Object.assign(Object.assign(Object.assign({ abortSignal: options.abortSignal, marker: marker2 }, options), { include: typeof options.include === "string" ? [options.include] : options.include }), convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60799,14 +64803,32 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * The Filter Blobs operation enables callers to list blobs across all containers whose tags
+       * match a given search expression. Filter blobs searches across all containers within a
+       * storage account but can be scoped within the expression to a single container.
+       *
+       * @param tagFilterSqlExpression - The where parameter enables the caller to query blobs whose tags match a given expression.
+       *                                        The given expression must evaluate to true for a blob to be returned in the results.
+       *                                        The[OData - ABNF] filter syntax rule defines the formal grammar for the value of the where query parameter;
+       *                                        however, only a subset of the OData filter syntax is supported in the Blob service.
+       * @param marker - A string value that identifies the portion of
+       *                          the list of blobs to be returned with the next listing operation. The
+       *                          operation returns the continuationToken value within the response body if the
+       *                          listing operation did not return all blobs remaining to be listed
+       *                          with the current page. The continuationToken value can be used as the value for
+       *                          the marker parameter in a subsequent call to request the next page of list
+       *                          items. The marker value is opaque to the client.
+       * @param options - Options to find blobs by tags.
+       */
       async findBlobsByTagsSegment(tagFilterSqlExpression, marker2, options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-findBlobsByTagsSegment", options);
         try {
           const response = await this.serviceContext.filterBlobs(Object.assign({ abortSignal: options.abortSignal, where: tagFilterSqlExpression, marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, blobs: response.blobs.map((blob) => {
-            var _a2;
+            var _a;
             let tagValue = "";
-            if (((_a2 = blob.tags) === null || _a2 === void 0 ? void 0 : _a2.blobTagSet.length) === 1) {
+            if (((_a = blob.tags) === null || _a === void 0 ? void 0 : _a.blobTagSet.length) === 1) {
               tagValue = blob.tags.blobTagSet[0].value;
             }
             return Object.assign(Object.assign({}, blob), { tags: toTags(blob.tags), tagValue });
@@ -60814,7 +64836,7 @@ var init_BlobServiceClient = __esm({
           return wrappedResponse;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60822,6 +64844,22 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * Returns an AsyncIterableIterator for ServiceFindBlobsByTagsSegmentResponse.
+       *
+       * @param tagFilterSqlExpression -  The where parameter enables the caller to query blobs whose tags match a given expression.
+       *                                         The given expression must evaluate to true for a blob to be returned in the results.
+       *                                         The[OData - ABNF] filter syntax rule defines the formal grammar for the value of the where query parameter;
+       *                                         however, only a subset of the OData filter syntax is supported in the Blob service.
+       * @param marker - A string value that identifies the portion of
+       *                          the list of blobs to be returned with the next listing operation. The
+       *                          operation returns the continuationToken value within the response body if the
+       *                          listing operation did not return all blobs remaining to be listed
+       *                          with the current page. The continuationToken value can be used as the value for
+       *                          the marker parameter in a subsequent call to request the next page of list
+       *                          items. The marker value is opaque to the client.
+       * @param options - Options to find blobs by tags.
+       */
       findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsSegments_1() {
           let response;
@@ -60835,9 +64873,18 @@ var init_BlobServiceClient = __esm({
           }
         });
       }
+      /**
+       * Returns an AsyncIterableIterator for blobs.
+       *
+       * @param tagFilterSqlExpression -  The where parameter enables the caller to query blobs whose tags match a given expression.
+       *                                         The given expression must evaluate to true for a blob to be returned in the results.
+       *                                         The[OData - ABNF] filter syntax rule defines the formal grammar for the value of the where query parameter;
+       *                                         however, only a subset of the OData filter syntax is supported in the Blob service.
+       * @param options - Options to findBlobsByTagsItems.
+       */
       findBlobsByTagsItems(tagFilterSqlExpression, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsItems_1() {
-          var e_1, _a2;
+          var e_1, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -60848,8 +64895,8 @@ var init_BlobServiceClient = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -60857,21 +64904,121 @@ var init_BlobServiceClient = __esm({
           }
         });
       }
+      /**
+       * Returns an async iterable iterator to find all blobs with specified tag
+       * under the specified account.
+       *
+       * .byPage() returns an async iterable iterator to list the blobs in pages.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/get-blob-service-properties
+       *
+       * Example using `for await` syntax:
+       *
+       * ```js
+       * let i = 1;
+       * for await (const blob of blobServiceClient.findBlobsByTags("tagkey='tagvalue'")) {
+       *   console.log(`Blob ${i++}: ${container.name}`);
+       * }
+       * ```
+       *
+       * Example using `iter.next()`:
+       *
+       * ```js
+       * let i = 1;
+       * const iter = blobServiceClient.findBlobsByTags("tagkey='tagvalue'");
+       * let blobItem = await iter.next();
+       * while (!blobItem.done) {
+       *   console.log(`Blob ${i++}: ${blobItem.value.name}`);
+       *   blobItem = await iter.next();
+       * }
+       * ```
+       *
+       * Example using `byPage()`:
+       *
+       * ```js
+       * // passing optional maxPageSize in the page settings
+       * let i = 1;
+       * for await (const response of blobServiceClient.findBlobsByTags("tagkey='tagvalue'").byPage({ maxPageSize: 20 })) {
+       *   if (response.blobs) {
+       *     for (const blob of response.blobs) {
+       *       console.log(`Blob ${i++}: ${blob.name}`);
+       *     }
+       *   }
+       * }
+       * ```
+       *
+       * Example using paging with a marker:
+       *
+       * ```js
+       * let i = 1;
+       * let iterator = blobServiceClient.findBlobsByTags("tagkey='tagvalue'").byPage({ maxPageSize: 2 });
+       * let response = (await iterator.next()).value;
+       *
+       * // Prints 2 blob names
+       * if (response.blobs) {
+       *   for (const blob of response.blobs) {
+       *     console.log(`Blob ${i++}: ${blob.name}`);
+       *   }
+       * }
+       *
+       * // Gets next marker
+       * let marker = response.continuationToken;
+       * // Passing next marker as continuationToken
+       * iterator = blobServiceClient
+       *   .findBlobsByTags("tagkey='tagvalue'")
+       *   .byPage({ continuationToken: marker, maxPageSize: 10 });
+       * response = (await iterator.next()).value;
+       *
+       * // Prints blob names
+       * if (response.blobs) {
+       *   for (const blob of response.blobs) {
+       *      console.log(`Blob ${i++}: ${blob.name}`);
+       *   }
+       * }
+       * ```
+       *
+       * @param tagFilterSqlExpression -  The where parameter enables the caller to query blobs whose tags match a given expression.
+       *                                         The given expression must evaluate to true for a blob to be returned in the results.
+       *                                         The[OData - ABNF] filter syntax rule defines the formal grammar for the value of the where query parameter;
+       *                                         however, only a subset of the OData filter syntax is supported in the Blob service.
+       * @param options - Options to find blobs by tags.
+       */
       findBlobsByTags(tagFilterSqlExpression, options = {}) {
         const listSegmentOptions = Object.assign({}, options);
         const iter = this.findBlobsByTagsItems(tagFilterSqlExpression, listSegmentOptions);
         return {
+          /**
+           * The next method, part of the iteration protocol
+           */
           next() {
             return iter.next();
           },
+          /**
+           * The connection to the async iterator, part of the iteration protocol
+           */
           [Symbol.asyncIterator]() {
             return this;
           },
+          /**
+           * Return an AsyncIterableIterator that works a page at a time
+           */
           byPage: (settings = {}) => {
             return this.findBlobsByTagsSegments(tagFilterSqlExpression, settings.continuationToken, Object.assign({ maxPageSize: settings.maxPageSize }, listSegmentOptions));
           }
         };
       }
+      /**
+       * Returns an AsyncIterableIterator for ServiceListContainersSegmentResponses
+       *
+       * @param marker - A string value that identifies the portion of
+       *                        the list of containers to be returned with the next listing operation. The
+       *                        operation returns the continuationToken value within the response body if the
+       *                        listing operation did not return all containers remaining to be listed
+       *                        with the current page. The continuationToken value can be used as the value for
+       *                        the marker parameter in a subsequent call to request the next page of list
+       *                        items. The marker value is opaque to the client.
+       * @param options - Options to list containers operation.
+       */
       listSegments(marker2, options = {}) {
         return __asyncGenerator(this, arguments, function* listSegments_1() {
           let listContainersSegmentResponse;
@@ -60885,9 +65032,14 @@ var init_BlobServiceClient = __esm({
           }
         });
       }
+      /**
+       * Returns an AsyncIterableIterator for Container Items
+       *
+       * @param options - Options to list containers operation.
+       */
       listItems(options = {}) {
         return __asyncGenerator(this, arguments, function* listItems_1() {
-          var e_2, _a2;
+          var e_2, _a;
           let marker2;
           try {
             for (var _b = __asyncValues(this.listSegments(marker2, options)), _c; _c = yield __await(_b.next()), !_c.done; ) {
@@ -60898,8 +65050,8 @@ var init_BlobServiceClient = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield __await(_a2.call(_b));
+              if (_c && !_c.done && (_a = _b.return))
+                yield __await(_a.call(_b));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -60907,6 +65059,80 @@ var init_BlobServiceClient = __esm({
           }
         });
       }
+      /**
+       * Returns an async iterable iterator to list all the containers
+       * under the specified account.
+       *
+       * .byPage() returns an async iterable iterator to list the containers in pages.
+       *
+       * Example using `for await` syntax:
+       *
+       * ```js
+       * let i = 1;
+       * for await (const container of blobServiceClient.listContainers()) {
+       *   console.log(`Container ${i++}: ${container.name}`);
+       * }
+       * ```
+       *
+       * Example using `iter.next()`:
+       *
+       * ```js
+       * let i = 1;
+       * const iter = blobServiceClient.listContainers();
+       * let containerItem = await iter.next();
+       * while (!containerItem.done) {
+       *   console.log(`Container ${i++}: ${containerItem.value.name}`);
+       *   containerItem = await iter.next();
+       * }
+       * ```
+       *
+       * Example using `byPage()`:
+       *
+       * ```js
+       * // passing optional maxPageSize in the page settings
+       * let i = 1;
+       * for await (const response of blobServiceClient.listContainers().byPage({ maxPageSize: 20 })) {
+       *   if (response.containerItems) {
+       *     for (const container of response.containerItems) {
+       *       console.log(`Container ${i++}: ${container.name}`);
+       *     }
+       *   }
+       * }
+       * ```
+       *
+       * Example using paging with a marker:
+       *
+       * ```js
+       * let i = 1;
+       * let iterator = blobServiceClient.listContainers().byPage({ maxPageSize: 2 });
+       * let response = (await iterator.next()).value;
+       *
+       * // Prints 2 container names
+       * if (response.containerItems) {
+       *   for (const container of response.containerItems) {
+       *     console.log(`Container ${i++}: ${container.name}`);
+       *   }
+       * }
+       *
+       * // Gets next marker
+       * let marker = response.continuationToken;
+       * // Passing next marker as continuationToken
+       * iterator = blobServiceClient
+       *   .listContainers()
+       *   .byPage({ continuationToken: marker, maxPageSize: 10 });
+       * response = (await iterator.next()).value;
+       *
+       * // Prints 10 container names
+       * if (response.containerItems) {
+       *   for (const container of response.containerItems) {
+       *      console.log(`Container ${i++}: ${container.name}`);
+       *   }
+       * }
+       * ```
+       *
+       * @param options - Options to list containers.
+       * @returns An asyncIterableIterator that supports paging.
+       */
       listContainers(options = {}) {
         if (options.prefix === "") {
           options.prefix = void 0;
@@ -60924,17 +65150,37 @@ var init_BlobServiceClient = __esm({
         const listSegmentOptions = Object.assign(Object.assign({}, options), include2.length > 0 ? { include: include2 } : {});
         const iter = this.listItems(listSegmentOptions);
         return {
+          /**
+           * The next method, part of the iteration protocol
+           */
           next() {
             return iter.next();
           },
+          /**
+           * The connection to the async iterator, part of the iteration protocol
+           */
           [Symbol.asyncIterator]() {
             return this;
           },
+          /**
+           * Return an AsyncIterableIterator that works a page at a time
+           */
           byPage: (settings = {}) => {
             return this.listSegments(settings.continuationToken, Object.assign({ maxPageSize: settings.maxPageSize }, listSegmentOptions));
           }
         };
       }
+      /**
+       * ONLY AVAILABLE WHEN USING BEARER TOKEN AUTHENTICATION (TokenCredential).
+       *
+       * Retrieves a user delegation key for the Blob service. This is only a valid operation when using
+       * bearer token authentication.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/get-user-delegation-key
+       *
+       * @param startsOn -      The start time for the user delegation SAS. Must be within 7 days of the current time
+       * @param expiresOn -     The end time for the user delegation SAS. Must be within 7 days of the current time
+       */
       async getUserDelegationKey(startsOn, expiresOn2, options = {}) {
         const { span, updatedOptions } = createSpan2("BlobServiceClient-getUserDelegationKey", options);
         try {
@@ -60955,7 +65201,7 @@ var init_BlobServiceClient = __esm({
           return res;
         } catch (e) {
           span.setStatus({
-            code: SpanStatusCode2.ERROR,
+            code: SpanStatusCode.ERROR,
             message: e.message
           });
           throw e;
@@ -60963,15 +65209,36 @@ var init_BlobServiceClient = __esm({
           span.end();
         }
       }
+      /**
+       * Creates a BlobBatchClient object to conduct batch operations.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/blob-batch
+       *
+       * @returns A new BlobBatchClient object for this service.
+       */
       getBlobBatchClient() {
         return new BlobBatchClient(this.url, this.pipeline);
       }
+      /**
+       * Only available for BlobServiceClient constructed with a shared key credential.
+       *
+       * Generates a Blob account Shared Access Signature (SAS) URI based on the client properties
+       * and parameters passed in. The SAS is signed by the shared key credential of the client.
+       *
+       * @see https://docs.microsoft.com/en-us/rest/api/storageservices/create-account-sas
+       *
+       * @param expiresOn - Optional. The time at which the shared access signature becomes invalid. Default to an hour later if not provided.
+       * @param permissions - Specifies the list of permissions to be associated with the SAS.
+       * @param resourceTypes - Specifies the resource types associated with the shared access signature.
+       * @param options - Optional parameters.
+       * @returns An account SAS URI consisting of the URI to the resource represented by this client, followed by the generated SAS token.
+       */
       generateAccountSasUrl(expiresOn2, permissions = AccountSASPermissions.parse("r"), resourceTypes = "sco", options = {}) {
         if (!(this.credential instanceof StorageSharedKeyCredential)) {
           throw RangeError("Can only generate the account SAS when the client is initialized with a shared key credential");
         }
         if (expiresOn2 === void 0) {
-          const now = new Date();
+          const now = /* @__PURE__ */ new Date();
           expiresOn2 = new Date(now.getTime() + 3600 * 1e3);
         }
         const sas = generateAccountSASQueryParameters(Object.assign({
@@ -60999,8 +65266,8 @@ var init_generatedModels = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/index.js
-var src_exports2 = {};
-__export(src_exports2, {
+var src_exports3 = {};
+__export(src_exports3, {
   AccountSASPermissions: () => AccountSASPermissions,
   AccountSASResourceTypes: () => AccountSASResourceTypes,
   AccountSASServices: () => AccountSASServices,
@@ -61045,9 +65312,9 @@ __export(src_exports2, {
   logger: () => logger2,
   newPipeline: () => newPipeline
 });
-var init_src11 = __esm({
+var init_src12 = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/index.js"() {
-    init_coreHttp();
+    init_src6();
     init_BlobServiceClient();
     init_Clients();
     init_ContainerClient();
@@ -61203,6 +65470,8 @@ var require_requestUtils = __commonJS({
           (response) => response.statusCode,
           maxAttempts,
           delay3,
+          // If the error object contains the statusCode property, extract it and return
+          // an TypedResponse<T> so it can be processed by the retry logic.
           (error2) => {
             if (error2 instanceof http_client_1.HttpClientError) {
               return {
@@ -61274,7 +65543,7 @@ var require_downloadUtils = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     var core3 = __importStar(require_core());
     var http_client_1 = require_lib();
-    var storage_blob_1 = (init_src11(), __toCommonJS(src_exports2));
+    var storage_blob_1 = (init_src12(), __toCommonJS(src_exports3));
     var buffer = __importStar(__require("buffer"));
     var fs3 = __importStar(__require("fs"));
     var stream = __importStar(__require("stream"));
@@ -61299,6 +65568,12 @@ var require_downloadUtils = __commonJS({
         this.displayedComplete = false;
         this.startTime = Date.now();
       }
+      /**
+       * Progress to the next segment. Only call this method when the previous segment
+       * is complete.
+       *
+       * @param segmentSize the length of the next segment
+       */
       nextSegment(segmentSize) {
         this.segmentOffset = this.segmentOffset + this.segmentSize;
         this.segmentIndex = this.segmentIndex + 1;
@@ -61306,15 +65581,30 @@ var require_downloadUtils = __commonJS({
         this.receivedBytes = 0;
         core3.debug(`Downloading segment at offset ${this.segmentOffset} with length ${this.segmentSize}...`);
       }
+      /**
+       * Sets the number of bytes received for the current segment.
+       *
+       * @param receivedBytes the number of bytes received
+       */
       setReceivedBytes(receivedBytes) {
         this.receivedBytes = receivedBytes;
       }
+      /**
+       * Returns the total number of bytes transferred.
+       */
       getTransferredBytes() {
         return this.segmentOffset + this.receivedBytes;
       }
+      /**
+       * Returns true if the download is complete.
+       */
       isDone() {
         return this.getTransferredBytes() === this.contentLength;
       }
+      /**
+       * Prints the current download stats. Once the download completes, this will print one
+       * last line and then stop.
+       */
       display() {
         if (this.displayedComplete) {
           return;
@@ -61328,11 +65618,19 @@ var require_downloadUtils = __commonJS({
           this.displayedComplete = true;
         }
       }
+      /**
+       * Returns a function used to handle TransferProgressEvents.
+       */
       onProgress() {
         return (progress) => {
           this.setReceivedBytes(progress.loadedBytes);
         };
       }
+      /**
+       * Starts the timer that displays the stats.
+       *
+       * @param delayInMs the delay between each write
+       */
       startDisplayTimer(delayInMs = 1e3) {
         const displayCallback = () => {
           this.display();
@@ -61342,6 +65640,11 @@ var require_downloadUtils = __commonJS({
         };
         this.timeoutHandle = setTimeout(displayCallback, delayInMs);
       }
+      /**
+       * Stops the timer that displays the stats. As this typically indicates the download
+       * is complete, this will display one last line, unless the last line has already
+       * been written.
+       */
       stopDisplayTimer() {
         if (this.timeoutHandle) {
           clearTimeout(this.timeoutHandle);
@@ -61377,15 +65680,17 @@ var require_downloadUtils = __commonJS({
     }
     exports.downloadCacheHttpClient = downloadCacheHttpClient;
     function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
-      var _a2;
+      var _a;
       return __awaiter(this, void 0, void 0, function* () {
         const client = new storage_blob_1.BlockBlobClient(archiveLocation, void 0, {
           retryOptions: {
+            // Override the timeout used when downloading each 4 MB chunk
+            // The default is 2 min / MB, which is way too slow
             tryTimeoutInMs: options.timeoutInMs
           }
         });
         const properties = yield client.getProperties();
-        const contentLength2 = (_a2 = properties.contentLength) !== null && _a2 !== void 0 ? _a2 : -1;
+        const contentLength2 = (_a = properties.contentLength) !== null && _a !== void 0 ? _a : -1;
         if (contentLength2 < 0) {
           core3.debug("Unable to determine content length, downloading file with http-client...");
           yield downloadCacheHttpClient(archiveLocation, archivePath);
@@ -61557,7 +65862,6 @@ var require_cacheHttpClient = __commonJS({
     var fs3 = __importStar(__require("fs"));
     var url_1 = __require("url");
     var utils = __importStar(require_cacheUtils());
-    var constants_1 = require_constants();
     var downloadUtils_1 = require_downloadUtils();
     var options_1 = require_options();
     var requestUtils_1 = require_requestUtils();
@@ -61567,9 +65871,9 @@ var require_cacheHttpClient = __commonJS({
       if (!baseUrl) {
         throw new Error("Cache Service Url not found, unable to restore cache.");
       }
-      const url2 = `${baseUrl}_apis/artifactcache/${resource}`;
-      core3.debug(`Resource Url: ${url2}`);
-      return url2;
+      const url3 = `${baseUrl}_apis/artifactcache/${resource}`;
+      core3.debug(`Resource Url: ${url3}`);
+      return url3;
     }
     function createAcceptHeader(type3, apiVersion) {
       return `${type3};api-version=${apiVersion}`;
@@ -61587,8 +65891,14 @@ var require_cacheHttpClient = __commonJS({
       const bearerCredentialHandler = new auth_1.BearerCredentialHandler(token);
       return new http_client_1.HttpClient("actions/cache", [bearerCredentialHandler], getRequestOptions());
     }
-    function getCacheVersion(paths, compressionMethod) {
-      const components = paths.concat(!compressionMethod || compressionMethod === constants_1.CompressionMethod.Gzip ? [] : [compressionMethod]);
+    function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false) {
+      const components = paths;
+      if (compressionMethod) {
+        components.push(compressionMethod);
+      }
+      if (process.platform === "win32" && !enableCrossOsArchive) {
+        components.push("windows-only");
+      }
       components.push(versionSalt);
       return crypto6.createHash("sha256").update(components.join("|")).digest("hex");
     }
@@ -61596,12 +65906,15 @@ var require_cacheHttpClient = __commonJS({
     function getCacheEntry(keys, paths, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version3 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
+        const version3 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
         const resource = `cache?keys=${encodeURIComponent(keys.join(","))}&version=${version3}`;
         const response = yield requestUtils_1.retryTypedResponse("getCacheEntry", () => __awaiter(this, void 0, void 0, function* () {
           return httpClient.getJson(getCacheApiUrl(resource));
         }));
         if (response.statusCode === 204) {
+          if (core3.isDebug()) {
+            yield printCachesListForDiagnostics(keys[0], httpClient, version3);
+          }
           return null;
         }
         if (!requestUtils_1.isSuccessStatusCode(response.statusCode)) {
@@ -61619,6 +65932,25 @@ var require_cacheHttpClient = __commonJS({
       });
     }
     exports.getCacheEntry = getCacheEntry;
+    function printCachesListForDiagnostics(key, httpClient, version3) {
+      return __awaiter(this, void 0, void 0, function* () {
+        const resource = `caches?key=${encodeURIComponent(key)}`;
+        const response = yield requestUtils_1.retryTypedResponse("listCache", () => __awaiter(this, void 0, void 0, function* () {
+          return httpClient.getJson(getCacheApiUrl(resource));
+        }));
+        if (response.statusCode === 200) {
+          const cacheListResult = response.result;
+          const totalCount = cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.totalCount;
+          if (totalCount && totalCount > 0) {
+            core3.debug(`No matching cache found for cache key '${key}', version '${version3} and scope ${process.env["GITHUB_REF"]}. There exist one or more cache(s) with similar key but they have different version or scope. See more info on cache matching here: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#matching-a-cache-key 
+Other caches with similar key:`);
+            for (const cacheEntry of (cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.artifactCaches) || []) {
+              core3.debug(`Cache Key: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheKey}, Cache Version: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheVersion}, Cache Scope: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.scope}, Cache Created: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.creationTime}`);
+            }
+          }
+        }
+      });
+    }
     function downloadCache(archiveLocation, archivePath, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const archiveUrl = new url_1.URL(archiveLocation);
@@ -61634,7 +65966,7 @@ var require_cacheHttpClient = __commonJS({
     function reserveCache(key, paths, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version3 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
+        const version3 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
         const reserveCacheRequest = {
           key,
           version: version3,
@@ -61773,73 +66105,163 @@ var require_tar = __commonJS({
     var exec_1 = require_exec();
     var io = __importStar(require_io());
     var fs_1 = __require("fs");
-    var path6 = __importStar(__require("path"));
+    var path8 = __importStar(__require("path"));
     var utils = __importStar(require_cacheUtils());
     var constants_1 = require_constants();
     var IS_WINDOWS = process.platform === "win32";
-    function getTarPath(args, compressionMethod) {
+    function getTarPath() {
       return __awaiter(this, void 0, void 0, function* () {
         switch (process.platform) {
           case "win32": {
-            const systemTar = `${process.env["windir"]}\\System32\\tar.exe`;
-            if (compressionMethod !== constants_1.CompressionMethod.Gzip) {
-              args.push("--force-local");
+            const gnuTar = yield utils.getGnuTarPathOnWindows();
+            const systemTar = constants_1.SystemTarPathOnWindows;
+            if (gnuTar) {
+              return { path: gnuTar, type: constants_1.ArchiveToolType.GNU };
             } else if (fs_1.existsSync(systemTar)) {
-              return systemTar;
-            } else if (yield utils.isGnuTarInstalled()) {
-              args.push("--force-local");
+              return { path: systemTar, type: constants_1.ArchiveToolType.BSD };
             }
             break;
           }
           case "darwin": {
             const gnuTar = yield io.which("gtar", false);
             if (gnuTar) {
-              args.push("--delay-directory-restore");
-              return gnuTar;
+              return { path: gnuTar, type: constants_1.ArchiveToolType.GNU };
+            } else {
+              return {
+                path: yield io.which("tar", true),
+                type: constants_1.ArchiveToolType.BSD
+              };
             }
-            break;
           }
           default:
             break;
         }
-        return yield io.which("tar", true);
+        return {
+          path: yield io.which("tar", true),
+          type: constants_1.ArchiveToolType.GNU
+        };
       });
     }
-    function execTar(args, compressionMethod, cwd) {
+    function getTarArgs(tarPath, compressionMethod, type3, archivePath = "") {
       return __awaiter(this, void 0, void 0, function* () {
-        try {
-          yield exec_1.exec(`"${yield getTarPath(args, compressionMethod)}"`, args, { cwd });
-        } catch (error2) {
-          throw new Error(`Tar failed with error: ${error2 === null || error2 === void 0 ? void 0 : error2.message}`);
+        const args = [`"${tarPath.path}"`];
+        const cacheFileName = utils.getCacheFileName(compressionMethod);
+        const tarFile = "cache.tar";
+        const workingDirectory = getWorkingDirectory();
+        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
+        switch (type3) {
+          case "create":
+            args.push("--posix", "-cf", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path8.sep}`, "g"), "/"), "--exclude", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path8.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path8.sep}`, "g"), "/"), "--files-from", constants_1.ManifestFilename);
+            break;
+          case "extract":
+            args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path8.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path8.sep}`, "g"), "/"));
+            break;
+          case "list":
+            args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path8.sep}`, "g"), "/"), "-P");
+            break;
         }
+        if (tarPath.type === constants_1.ArchiveToolType.GNU) {
+          switch (process.platform) {
+            case "win32":
+              args.push("--force-local");
+              break;
+            case "darwin":
+              args.push("--delay-directory-restore");
+              break;
+          }
+        }
+        return args;
+      });
+    }
+    function getCommands(compressionMethod, type3, archivePath = "") {
+      return __awaiter(this, void 0, void 0, function* () {
+        let args;
+        const tarPath = yield getTarPath();
+        const tarArgs = yield getTarArgs(tarPath, compressionMethod, type3, archivePath);
+        const compressionArgs = type3 !== "create" ? yield getDecompressionProgram(tarPath, compressionMethod, archivePath) : yield getCompressionProgram(tarPath, compressionMethod);
+        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
+        if (BSD_TAR_ZSTD && type3 !== "create") {
+          args = [[...compressionArgs].join(" "), [...tarArgs].join(" ")];
+        } else {
+          args = [[...tarArgs].join(" "), [...compressionArgs].join(" ")];
+        }
+        if (BSD_TAR_ZSTD) {
+          return args;
+        }
+        return [args.join(" ")];
       });
     }
     function getWorkingDirectory() {
-      var _a2;
-      return (_a2 = process.env["GITHUB_WORKSPACE"]) !== null && _a2 !== void 0 ? _a2 : process.cwd();
+      var _a;
+      return (_a = process.env["GITHUB_WORKSPACE"]) !== null && _a !== void 0 ? _a : process.cwd();
     }
-    function getCompressionProgram(compressionMethod) {
-      switch (compressionMethod) {
-        case constants_1.CompressionMethod.Zstd:
-          return [
-            "--use-compress-program",
-            IS_WINDOWS ? "zstd -d --long=30" : "unzstd --long=30"
-          ];
-        case constants_1.CompressionMethod.ZstdWithoutLong:
-          return ["--use-compress-program", IS_WINDOWS ? "zstd -d" : "unzstd"];
-        default:
-          return ["-z"];
-      }
+    function getDecompressionProgram(tarPath, compressionMethod, archivePath) {
+      return __awaiter(this, void 0, void 0, function* () {
+        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
+        switch (compressionMethod) {
+          case constants_1.CompressionMethod.Zstd:
+            return BSD_TAR_ZSTD ? [
+              "zstd -d --long=30 --force -o",
+              constants_1.TarFilename,
+              archivePath.replace(new RegExp(`\\${path8.sep}`, "g"), "/")
+            ] : [
+              "--use-compress-program",
+              IS_WINDOWS ? '"zstd -d --long=30"' : "unzstd --long=30"
+            ];
+          case constants_1.CompressionMethod.ZstdWithoutLong:
+            return BSD_TAR_ZSTD ? [
+              "zstd -d --force -o",
+              constants_1.TarFilename,
+              archivePath.replace(new RegExp(`\\${path8.sep}`, "g"), "/")
+            ] : ["--use-compress-program", IS_WINDOWS ? '"zstd -d"' : "unzstd"];
+          default:
+            return ["-z"];
+        }
+      });
+    }
+    function getCompressionProgram(tarPath, compressionMethod) {
+      return __awaiter(this, void 0, void 0, function* () {
+        const cacheFileName = utils.getCacheFileName(compressionMethod);
+        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
+        switch (compressionMethod) {
+          case constants_1.CompressionMethod.Zstd:
+            return BSD_TAR_ZSTD ? [
+              "zstd -T0 --long=30 --force -o",
+              cacheFileName.replace(new RegExp(`\\${path8.sep}`, "g"), "/"),
+              constants_1.TarFilename
+            ] : [
+              "--use-compress-program",
+              IS_WINDOWS ? '"zstd -T0 --long=30"' : "zstdmt --long=30"
+            ];
+          case constants_1.CompressionMethod.ZstdWithoutLong:
+            return BSD_TAR_ZSTD ? [
+              "zstd -T0 --force -o",
+              cacheFileName.replace(new RegExp(`\\${path8.sep}`, "g"), "/"),
+              constants_1.TarFilename
+            ] : ["--use-compress-program", IS_WINDOWS ? '"zstd -T0"' : "zstdmt"];
+          default:
+            return ["-z"];
+        }
+      });
+    }
+    function execCommands(commands, cwd) {
+      return __awaiter(this, void 0, void 0, function* () {
+        for (const command of commands) {
+          try {
+            yield exec_1.exec(command, void 0, {
+              cwd,
+              env: Object.assign(Object.assign({}, process.env), { MSYS: "winsymlinks:nativestrict" })
+            });
+          } catch (error2) {
+            throw new Error(`${command.split(" ")[0]} failed with error: ${error2 === null || error2 === void 0 ? void 0 : error2.message}`);
+          }
+        }
+      });
     }
     function listTar(archivePath, compressionMethod) {
       return __awaiter(this, void 0, void 0, function* () {
-        const args = [
-          ...getCompressionProgram(compressionMethod),
-          "-tf",
-          archivePath.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
-          "-P"
-        ];
-        yield execTar(args, compressionMethod);
+        const commands = yield getCommands(compressionMethod, "list", archivePath);
+        yield execCommands(commands);
       });
     }
     exports.listTar = listTar;
@@ -61847,51 +66269,16 @@ var require_tar = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         const workingDirectory = getWorkingDirectory();
         yield io.mkdirP(workingDirectory);
-        const args = [
-          ...getCompressionProgram(compressionMethod),
-          "-xf",
-          archivePath.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
-          "-P",
-          "-C",
-          workingDirectory.replace(new RegExp(`\\${path6.sep}`, "g"), "/")
-        ];
-        yield execTar(args, compressionMethod);
+        const commands = yield getCommands(compressionMethod, "extract", archivePath);
+        yield execCommands(commands);
       });
     }
     exports.extractTar = extractTar2;
     function createTar(archiveFolder, sourceDirectories, compressionMethod) {
       return __awaiter(this, void 0, void 0, function* () {
-        const manifestFilename = "manifest.txt";
-        const cacheFileName = utils.getCacheFileName(compressionMethod);
-        fs_1.writeFileSync(path6.join(archiveFolder, manifestFilename), sourceDirectories.join("\n"));
-        const workingDirectory = getWorkingDirectory();
-        function getCompressionProgram2() {
-          switch (compressionMethod) {
-            case constants_1.CompressionMethod.Zstd:
-              return [
-                "--use-compress-program",
-                IS_WINDOWS ? "zstd -T0 --long=30" : "zstdmt --long=30"
-              ];
-            case constants_1.CompressionMethod.ZstdWithoutLong:
-              return ["--use-compress-program", IS_WINDOWS ? "zstd -T0" : "zstdmt"];
-            default:
-              return ["-z"];
-          }
-        }
-        const args = [
-          "--posix",
-          ...getCompressionProgram2(),
-          "-cf",
-          cacheFileName.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
-          "--exclude",
-          cacheFileName.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
-          "-P",
-          "-C",
-          workingDirectory.replace(new RegExp(`\\${path6.sep}`, "g"), "/"),
-          "--files-from",
-          manifestFilename
-        ];
-        yield execTar(args, compressionMethod, archiveFolder);
+        fs_1.writeFileSync(path8.join(archiveFolder, constants_1.ManifestFilename), sourceDirectories.join("\n"));
+        const commands = yield getCommands(compressionMethod, "create");
+        yield execCommands(commands, archiveFolder);
       });
     }
     exports.createTar = createTar;
@@ -61943,7 +66330,7 @@ var require_cache = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var core3 = __importStar(require_core());
-    var path6 = __importStar(__require("path"));
+    var path8 = __importStar(__require("path"));
     var utils = __importStar(require_cacheUtils());
     var cacheHttpClient = __importStar(require_cacheHttpClient());
     var tar_1 = require_tar();
@@ -61981,7 +66368,7 @@ var require_cache = __commonJS({
       return !!process.env["ACTIONS_CACHE_URL"];
     }
     exports.isFeatureAvailable = isFeatureAvailable;
-    function restoreCache3(paths, primaryKey, restoreKeys, options) {
+    function restoreCache3(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false) {
       return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         restoreKeys = restoreKeys || [];
@@ -61998,12 +66385,13 @@ var require_cache = __commonJS({
         let archivePath = "";
         try {
           const cacheEntry = yield cacheHttpClient.getCacheEntry(keys, paths, {
-            compressionMethod
+            compressionMethod,
+            enableCrossOsArchive
           });
           if (!(cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.archiveLocation)) {
             return void 0;
           }
-          archivePath = path6.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
+          archivePath = path8.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
           core3.debug(`Archive Path: ${archivePath}`);
           yield cacheHttpClient.downloadCache(cacheEntry.archiveLocation, archivePath, options);
           if (core3.isDebug()) {
@@ -62032,8 +66420,8 @@ var require_cache = __commonJS({
       });
     }
     exports.restoreCache = restoreCache3;
-    function saveCache3(paths, key, options) {
-      var _a2, _b, _c, _d, _e;
+    function saveCache3(paths, key, options, enableCrossOsArchive = false) {
+      var _a, _b, _c, _d, _e;
       return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(key);
@@ -62046,7 +66434,7 @@ var require_cache = __commonJS({
           throw new Error(`Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.`);
         }
         const archiveFolder = yield utils.createTempDirectory();
-        const archivePath = path6.join(archiveFolder, utils.getCacheFileName(compressionMethod));
+        const archivePath = path8.join(archiveFolder, utils.getCacheFileName(compressionMethod));
         core3.debug(`Archive Path: ${archivePath}`);
         try {
           yield tar_1.createTar(archiveFolder, cachePaths, compressionMethod);
@@ -62062,9 +66450,10 @@ var require_cache = __commonJS({
           core3.debug("Reserving Cache");
           const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, paths, {
             compressionMethod,
+            enableCrossOsArchive,
             cacheSize: archiveFileSize
           });
-          if ((_a2 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a2 === void 0 ? void 0 : _a2.cacheId) {
+          if ((_a = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a === void 0 ? void 0 : _a.cacheId) {
             cacheId = (_b = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _b === void 0 ? void 0 : _b.cacheId;
           } else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) {
             throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
@@ -62093,1100 +66482,6 @@ var require_cache = __commonJS({
       });
     }
     exports.saveCache = saveCache3;
-  }
-});
-
-// node_modules/decorator-cache-getter/dist/index.js
-var require_dist = __commonJS({
-  "node_modules/decorator-cache-getter/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    function cache2(target, name, descriptor) {
-      var getter = descriptor.get;
-      if (!getter)
-        throw new TypeError("Getter property descriptor expected");
-      descriptor.get = function() {
-        var value = getter.call(this);
-        Object.defineProperty(this, name, {
-          configurable: descriptor.configurable,
-          enumerable: descriptor.enumerable,
-          writable: false,
-          value
-        });
-        return value;
-      };
-    }
-    exports.cache = cache2;
-  }
-});
-
-// node_modules/@actions/glob/lib/internal-glob-options-helper.js
-var require_internal_glob_options_helper2 = __commonJS({
-  "node_modules/@actions/glob/lib/internal-glob-options-helper.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
-      o["default"] = v;
-    });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding(result, mod, k);
-      }
-      __setModuleDefault(result, mod);
-      return result;
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getOptions = void 0;
-    var core3 = __importStar(require_core());
-    function getOptions(copy) {
-      const result = {
-        followSymbolicLinks: true,
-        implicitDescendants: true,
-        matchDirectories: true,
-        omitBrokenSymbolicLinks: true
-      };
-      if (copy) {
-        if (typeof copy.followSymbolicLinks === "boolean") {
-          result.followSymbolicLinks = copy.followSymbolicLinks;
-          core3.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
-        }
-        if (typeof copy.implicitDescendants === "boolean") {
-          result.implicitDescendants = copy.implicitDescendants;
-          core3.debug(`implicitDescendants '${result.implicitDescendants}'`);
-        }
-        if (typeof copy.matchDirectories === "boolean") {
-          result.matchDirectories = copy.matchDirectories;
-          core3.debug(`matchDirectories '${result.matchDirectories}'`);
-        }
-        if (typeof copy.omitBrokenSymbolicLinks === "boolean") {
-          result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
-          core3.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
-        }
-      }
-      return result;
-    }
-    exports.getOptions = getOptions;
-  }
-});
-
-// node_modules/@actions/glob/lib/internal-path-helper.js
-var require_internal_path_helper2 = __commonJS({
-  "node_modules/@actions/glob/lib/internal-path-helper.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
-      o["default"] = v;
-    });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding(result, mod, k);
-      }
-      __setModuleDefault(result, mod);
-      return result;
-    };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.safeTrimTrailingSeparator = exports.normalizeSeparators = exports.hasRoot = exports.hasAbsoluteRoot = exports.ensureAbsoluteRoot = exports.dirname = void 0;
-    var path6 = __importStar(__require("path"));
-    var assert_1 = __importDefault(__require("assert"));
-    var IS_WINDOWS = process.platform === "win32";
-    function dirname(p) {
-      p = safeTrimTrailingSeparator(p);
-      if (IS_WINDOWS && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
-        return p;
-      }
-      let result = path6.dirname(p);
-      if (IS_WINDOWS && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
-        result = safeTrimTrailingSeparator(result);
-      }
-      return result;
-    }
-    exports.dirname = dirname;
-    function ensureAbsoluteRoot(root, itemPath) {
-      assert_1.default(root, `ensureAbsoluteRoot parameter 'root' must not be empty`);
-      assert_1.default(itemPath, `ensureAbsoluteRoot parameter 'itemPath' must not be empty`);
-      if (hasAbsoluteRoot(itemPath)) {
-        return itemPath;
-      }
-      if (IS_WINDOWS) {
-        if (itemPath.match(/^[A-Z]:[^\\/]|^[A-Z]:$/i)) {
-          let cwd = process.cwd();
-          assert_1.default(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
-          if (itemPath[0].toUpperCase() === cwd[0].toUpperCase()) {
-            if (itemPath.length === 2) {
-              return `${itemPath[0]}:\\${cwd.substr(3)}`;
-            } else {
-              if (!cwd.endsWith("\\")) {
-                cwd += "\\";
-              }
-              return `${itemPath[0]}:\\${cwd.substr(3)}${itemPath.substr(2)}`;
-            }
-          } else {
-            return `${itemPath[0]}:\\${itemPath.substr(2)}`;
-          }
-        } else if (normalizeSeparators(itemPath).match(/^\\$|^\\[^\\]/)) {
-          const cwd = process.cwd();
-          assert_1.default(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
-          return `${cwd[0]}:\\${itemPath.substr(1)}`;
-        }
-      }
-      assert_1.default(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
-      if (root.endsWith("/") || IS_WINDOWS && root.endsWith("\\")) {
-      } else {
-        root += path6.sep;
-      }
-      return root + itemPath;
-    }
-    exports.ensureAbsoluteRoot = ensureAbsoluteRoot;
-    function hasAbsoluteRoot(itemPath) {
-      assert_1.default(itemPath, `hasAbsoluteRoot parameter 'itemPath' must not be empty`);
-      itemPath = normalizeSeparators(itemPath);
-      if (IS_WINDOWS) {
-        return itemPath.startsWith("\\\\") || /^[A-Z]:\\/i.test(itemPath);
-      }
-      return itemPath.startsWith("/");
-    }
-    exports.hasAbsoluteRoot = hasAbsoluteRoot;
-    function hasRoot(itemPath) {
-      assert_1.default(itemPath, `isRooted parameter 'itemPath' must not be empty`);
-      itemPath = normalizeSeparators(itemPath);
-      if (IS_WINDOWS) {
-        return itemPath.startsWith("\\") || /^[A-Z]:/i.test(itemPath);
-      }
-      return itemPath.startsWith("/");
-    }
-    exports.hasRoot = hasRoot;
-    function normalizeSeparators(p) {
-      p = p || "";
-      if (IS_WINDOWS) {
-        p = p.replace(/\//g, "\\");
-        const isUnc = /^\\\\+[^\\]/.test(p);
-        return (isUnc ? "\\" : "") + p.replace(/\\\\+/g, "\\");
-      }
-      return p.replace(/\/\/+/g, "/");
-    }
-    exports.normalizeSeparators = normalizeSeparators;
-    function safeTrimTrailingSeparator(p) {
-      if (!p) {
-        return "";
-      }
-      p = normalizeSeparators(p);
-      if (!p.endsWith(path6.sep)) {
-        return p;
-      }
-      if (p === path6.sep) {
-        return p;
-      }
-      if (IS_WINDOWS && /^[A-Z]:\\$/i.test(p)) {
-        return p;
-      }
-      return p.substr(0, p.length - 1);
-    }
-    exports.safeTrimTrailingSeparator = safeTrimTrailingSeparator;
-  }
-});
-
-// node_modules/@actions/glob/lib/internal-match-kind.js
-var require_internal_match_kind2 = __commonJS({
-  "node_modules/@actions/glob/lib/internal-match-kind.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.MatchKind = void 0;
-    var MatchKind;
-    (function(MatchKind2) {
-      MatchKind2[MatchKind2["None"] = 0] = "None";
-      MatchKind2[MatchKind2["Directory"] = 1] = "Directory";
-      MatchKind2[MatchKind2["File"] = 2] = "File";
-      MatchKind2[MatchKind2["All"] = 3] = "All";
-    })(MatchKind = exports.MatchKind || (exports.MatchKind = {}));
-  }
-});
-
-// node_modules/@actions/glob/lib/internal-pattern-helper.js
-var require_internal_pattern_helper2 = __commonJS({
-  "node_modules/@actions/glob/lib/internal-pattern-helper.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
-      o["default"] = v;
-    });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding(result, mod, k);
-      }
-      __setModuleDefault(result, mod);
-      return result;
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.partialMatch = exports.match = exports.getSearchPaths = void 0;
-    var pathHelper = __importStar(require_internal_path_helper2());
-    var internal_match_kind_1 = require_internal_match_kind2();
-    var IS_WINDOWS = process.platform === "win32";
-    function getSearchPaths(patterns) {
-      patterns = patterns.filter((x) => !x.negate);
-      const searchPathMap = {};
-      for (const pattern of patterns) {
-        const key = IS_WINDOWS ? pattern.searchPath.toUpperCase() : pattern.searchPath;
-        searchPathMap[key] = "candidate";
-      }
-      const result = [];
-      for (const pattern of patterns) {
-        const key = IS_WINDOWS ? pattern.searchPath.toUpperCase() : pattern.searchPath;
-        if (searchPathMap[key] === "included") {
-          continue;
-        }
-        let foundAncestor = false;
-        let tempKey = key;
-        let parent = pathHelper.dirname(tempKey);
-        while (parent !== tempKey) {
-          if (searchPathMap[parent]) {
-            foundAncestor = true;
-            break;
-          }
-          tempKey = parent;
-          parent = pathHelper.dirname(tempKey);
-        }
-        if (!foundAncestor) {
-          result.push(pattern.searchPath);
-          searchPathMap[key] = "included";
-        }
-      }
-      return result;
-    }
-    exports.getSearchPaths = getSearchPaths;
-    function match(patterns, itemPath) {
-      let result = internal_match_kind_1.MatchKind.None;
-      for (const pattern of patterns) {
-        if (pattern.negate) {
-          result &= ~pattern.match(itemPath);
-        } else {
-          result |= pattern.match(itemPath);
-        }
-      }
-      return result;
-    }
-    exports.match = match;
-    function partialMatch(patterns, itemPath) {
-      return patterns.some((x) => !x.negate && x.partialMatch(itemPath));
-    }
-    exports.partialMatch = partialMatch;
-  }
-});
-
-// node_modules/@actions/glob/lib/internal-path.js
-var require_internal_path2 = __commonJS({
-  "node_modules/@actions/glob/lib/internal-path.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
-      o["default"] = v;
-    });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding(result, mod, k);
-      }
-      __setModuleDefault(result, mod);
-      return result;
-    };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Path = void 0;
-    var path6 = __importStar(__require("path"));
-    var pathHelper = __importStar(require_internal_path_helper2());
-    var assert_1 = __importDefault(__require("assert"));
-    var IS_WINDOWS = process.platform === "win32";
-    var Path = class {
-      constructor(itemPath) {
-        this.segments = [];
-        if (typeof itemPath === "string") {
-          assert_1.default(itemPath, `Parameter 'itemPath' must not be empty`);
-          itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
-          if (!pathHelper.hasRoot(itemPath)) {
-            this.segments = itemPath.split(path6.sep);
-          } else {
-            let remaining = itemPath;
-            let dir = pathHelper.dirname(remaining);
-            while (dir !== remaining) {
-              const basename = path6.basename(remaining);
-              this.segments.unshift(basename);
-              remaining = dir;
-              dir = pathHelper.dirname(remaining);
-            }
-            this.segments.unshift(remaining);
-          }
-        } else {
-          assert_1.default(itemPath.length > 0, `Parameter 'itemPath' must not be an empty array`);
-          for (let i = 0; i < itemPath.length; i++) {
-            let segment = itemPath[i];
-            assert_1.default(segment, `Parameter 'itemPath' must not contain any empty segments`);
-            segment = pathHelper.normalizeSeparators(itemPath[i]);
-            if (i === 0 && pathHelper.hasRoot(segment)) {
-              segment = pathHelper.safeTrimTrailingSeparator(segment);
-              assert_1.default(segment === pathHelper.dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
-              this.segments.push(segment);
-            } else {
-              assert_1.default(!segment.includes(path6.sep), `Parameter 'itemPath' contains unexpected path separators`);
-              this.segments.push(segment);
-            }
-          }
-        }
-      }
-      toString() {
-        let result = this.segments[0];
-        let skipSlash = result.endsWith(path6.sep) || IS_WINDOWS && /^[A-Z]:$/i.test(result);
-        for (let i = 1; i < this.segments.length; i++) {
-          if (skipSlash) {
-            skipSlash = false;
-          } else {
-            result += path6.sep;
-          }
-          result += this.segments[i];
-        }
-        return result;
-      }
-    };
-    exports.Path = Path;
-  }
-});
-
-// node_modules/@actions/glob/lib/internal-pattern.js
-var require_internal_pattern2 = __commonJS({
-  "node_modules/@actions/glob/lib/internal-pattern.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
-      o["default"] = v;
-    });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding(result, mod, k);
-      }
-      __setModuleDefault(result, mod);
-      return result;
-    };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Pattern = void 0;
-    var os4 = __importStar(__require("os"));
-    var path6 = __importStar(__require("path"));
-    var pathHelper = __importStar(require_internal_path_helper2());
-    var assert_1 = __importDefault(__require("assert"));
-    var minimatch_1 = require_minimatch();
-    var internal_match_kind_1 = require_internal_match_kind2();
-    var internal_path_1 = require_internal_path2();
-    var IS_WINDOWS = process.platform === "win32";
-    var Pattern = class {
-      constructor(patternOrNegate, isImplicitPattern = false, segments, homedir2) {
-        this.negate = false;
-        let pattern;
-        if (typeof patternOrNegate === "string") {
-          pattern = patternOrNegate.trim();
-        } else {
-          segments = segments || [];
-          assert_1.default(segments.length, `Parameter 'segments' must not empty`);
-          const root = Pattern.getLiteral(segments[0]);
-          assert_1.default(root && pathHelper.hasAbsoluteRoot(root), `Parameter 'segments' first element must be a root path`);
-          pattern = new internal_path_1.Path(segments).toString().trim();
-          if (patternOrNegate) {
-            pattern = `!${pattern}`;
-          }
-        }
-        while (pattern.startsWith("!")) {
-          this.negate = !this.negate;
-          pattern = pattern.substr(1).trim();
-        }
-        pattern = Pattern.fixupPattern(pattern, homedir2);
-        this.segments = new internal_path_1.Path(pattern).segments;
-        this.trailingSeparator = pathHelper.normalizeSeparators(pattern).endsWith(path6.sep);
-        pattern = pathHelper.safeTrimTrailingSeparator(pattern);
-        let foundGlob = false;
-        const searchSegments = this.segments.map((x) => Pattern.getLiteral(x)).filter((x) => !foundGlob && !(foundGlob = x === ""));
-        this.searchPath = new internal_path_1.Path(searchSegments).toString();
-        this.rootRegExp = new RegExp(Pattern.regExpEscape(searchSegments[0]), IS_WINDOWS ? "i" : "");
-        this.isImplicitPattern = isImplicitPattern;
-        const minimatchOptions = {
-          dot: true,
-          nobrace: true,
-          nocase: IS_WINDOWS,
-          nocomment: true,
-          noext: true,
-          nonegate: true
-        };
-        pattern = IS_WINDOWS ? pattern.replace(/\\/g, "/") : pattern;
-        this.minimatch = new minimatch_1.Minimatch(pattern, minimatchOptions);
-      }
-      match(itemPath) {
-        if (this.segments[this.segments.length - 1] === "**") {
-          itemPath = pathHelper.normalizeSeparators(itemPath);
-          if (!itemPath.endsWith(path6.sep) && this.isImplicitPattern === false) {
-            itemPath = `${itemPath}${path6.sep}`;
-          }
-        } else {
-          itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
-        }
-        if (this.minimatch.match(itemPath)) {
-          return this.trailingSeparator ? internal_match_kind_1.MatchKind.Directory : internal_match_kind_1.MatchKind.All;
-        }
-        return internal_match_kind_1.MatchKind.None;
-      }
-      partialMatch(itemPath) {
-        itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
-        if (pathHelper.dirname(itemPath) === itemPath) {
-          return this.rootRegExp.test(itemPath);
-        }
-        return this.minimatch.matchOne(itemPath.split(IS_WINDOWS ? /\\+/ : /\/+/), this.minimatch.set[0], true);
-      }
-      static globEscape(s) {
-        return (IS_WINDOWS ? s : s.replace(/\\/g, "\\\\")).replace(/(\[)(?=[^/]+\])/g, "[[]").replace(/\?/g, "[?]").replace(/\*/g, "[*]");
-      }
-      static fixupPattern(pattern, homedir2) {
-        assert_1.default(pattern, "pattern cannot be empty");
-        const literalSegments = new internal_path_1.Path(pattern).segments.map((x) => Pattern.getLiteral(x));
-        assert_1.default(literalSegments.every((x, i) => (x !== "." || i === 0) && x !== ".."), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
-        assert_1.default(!pathHelper.hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
-        pattern = pathHelper.normalizeSeparators(pattern);
-        if (pattern === "." || pattern.startsWith(`.${path6.sep}`)) {
-          pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
-        } else if (pattern === "~" || pattern.startsWith(`~${path6.sep}`)) {
-          homedir2 = homedir2 || os4.homedir();
-          assert_1.default(homedir2, "Unable to determine HOME directory");
-          assert_1.default(pathHelper.hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
-          pattern = Pattern.globEscape(homedir2) + pattern.substr(1);
-        } else if (IS_WINDOWS && (pattern.match(/^[A-Z]:$/i) || pattern.match(/^[A-Z]:[^\\]/i))) {
-          let root = pathHelper.ensureAbsoluteRoot("C:\\dummy-root", pattern.substr(0, 2));
-          if (pattern.length > 2 && !root.endsWith("\\")) {
-            root += "\\";
-          }
-          pattern = Pattern.globEscape(root) + pattern.substr(2);
-        } else if (IS_WINDOWS && (pattern === "\\" || pattern.match(/^\\[^\\]/))) {
-          let root = pathHelper.ensureAbsoluteRoot("C:\\dummy-root", "\\");
-          if (!root.endsWith("\\")) {
-            root += "\\";
-          }
-          pattern = Pattern.globEscape(root) + pattern.substr(1);
-        } else {
-          pattern = pathHelper.ensureAbsoluteRoot(Pattern.globEscape(process.cwd()), pattern);
-        }
-        return pathHelper.normalizeSeparators(pattern);
-      }
-      static getLiteral(segment) {
-        let literal = "";
-        for (let i = 0; i < segment.length; i++) {
-          const c = segment[i];
-          if (c === "\\" && !IS_WINDOWS && i + 1 < segment.length) {
-            literal += segment[++i];
-            continue;
-          } else if (c === "*" || c === "?") {
-            return "";
-          } else if (c === "[" && i + 1 < segment.length) {
-            let set = "";
-            let closed = -1;
-            for (let i2 = i + 1; i2 < segment.length; i2++) {
-              const c2 = segment[i2];
-              if (c2 === "\\" && !IS_WINDOWS && i2 + 1 < segment.length) {
-                set += segment[++i2];
-                continue;
-              } else if (c2 === "]") {
-                closed = i2;
-                break;
-              } else {
-                set += c2;
-              }
-            }
-            if (closed >= 0) {
-              if (set.length > 1) {
-                return "";
-              }
-              if (set) {
-                literal += set;
-                i = closed;
-                continue;
-              }
-            }
-          }
-          literal += c;
-        }
-        return literal;
-      }
-      static regExpEscape(s) {
-        return s.replace(/[[\\^$.|?*+()]/g, "\\$&");
-      }
-    };
-    exports.Pattern = Pattern;
-  }
-});
-
-// node_modules/@actions/glob/lib/internal-search-state.js
-var require_internal_search_state2 = __commonJS({
-  "node_modules/@actions/glob/lib/internal-search-state.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.SearchState = void 0;
-    var SearchState = class {
-      constructor(path6, level) {
-        this.path = path6;
-        this.level = level;
-      }
-    };
-    exports.SearchState = SearchState;
-  }
-});
-
-// node_modules/@actions/glob/lib/internal-globber.js
-var require_internal_globber2 = __commonJS({
-  "node_modules/@actions/glob/lib/internal-globber.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
-      o["default"] = v;
-    });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding(result, mod, k);
-      }
-      __setModuleDefault(result, mod);
-      return result;
-    };
-    var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
-      function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve) {
-          resolve(value);
-        });
-      }
-      return new (P || (P = Promise))(function(resolve, reject) {
-        function fulfilled(value) {
-          try {
-            step(generator.next(value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function rejected(value) {
-          try {
-            step(generator["throw"](value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function step(result) {
-          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-      });
-    };
-    var __asyncValues2 = exports && exports.__asyncValues || function(o) {
-      if (!Symbol.asyncIterator)
-        throw new TypeError("Symbol.asyncIterator is not defined.");
-      var m = o[Symbol.asyncIterator], i;
-      return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-        return this;
-      }, i);
-      function verb(n) {
-        i[n] = o[n] && function(v) {
-          return new Promise(function(resolve, reject) {
-            v = o[n](v), settle(resolve, reject, v.done, v.value);
-          });
-        };
-      }
-      function settle(resolve, reject, d, v) {
-        Promise.resolve(v).then(function(v2) {
-          resolve({ value: v2, done: d });
-        }, reject);
-      }
-    };
-    var __await2 = exports && exports.__await || function(v) {
-      return this instanceof __await2 ? (this.v = v, this) : new __await2(v);
-    };
-    var __asyncGenerator2 = exports && exports.__asyncGenerator || function(thisArg, _arguments, generator) {
-      if (!Symbol.asyncIterator)
-        throw new TypeError("Symbol.asyncIterator is not defined.");
-      var g = generator.apply(thisArg, _arguments || []), i, q = [];
-      return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-        return this;
-      }, i;
-      function verb(n) {
-        if (g[n])
-          i[n] = function(v) {
-            return new Promise(function(a, b) {
-              q.push([n, v, a, b]) > 1 || resume(n, v);
-            });
-          };
-      }
-      function resume(n, v) {
-        try {
-          step(g[n](v));
-        } catch (e) {
-          settle(q[0][3], e);
-        }
-      }
-      function step(r) {
-        r.value instanceof __await2 ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
-      }
-      function fulfill(value) {
-        resume("next", value);
-      }
-      function reject(value) {
-        resume("throw", value);
-      }
-      function settle(f, v) {
-        if (f(v), q.shift(), q.length)
-          resume(q[0][0], q[0][1]);
-      }
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.DefaultGlobber = void 0;
-    var core3 = __importStar(require_core());
-    var fs3 = __importStar(__require("fs"));
-    var globOptionsHelper = __importStar(require_internal_glob_options_helper2());
-    var path6 = __importStar(__require("path"));
-    var patternHelper = __importStar(require_internal_pattern_helper2());
-    var internal_match_kind_1 = require_internal_match_kind2();
-    var internal_pattern_1 = require_internal_pattern2();
-    var internal_search_state_1 = require_internal_search_state2();
-    var IS_WINDOWS = process.platform === "win32";
-    var DefaultGlobber = class {
-      constructor(options) {
-        this.patterns = [];
-        this.searchPaths = [];
-        this.options = globOptionsHelper.getOptions(options);
-      }
-      getSearchPaths() {
-        return this.searchPaths.slice();
-      }
-      glob() {
-        var e_1, _a2;
-        return __awaiter(this, void 0, void 0, function* () {
-          const result = [];
-          try {
-            for (var _b = __asyncValues2(this.globGenerator()), _c; _c = yield _b.next(), !_c.done; ) {
-              const itemPath = _c.value;
-              result.push(itemPath);
-            }
-          } catch (e_1_1) {
-            e_1 = { error: e_1_1 };
-          } finally {
-            try {
-              if (_c && !_c.done && (_a2 = _b.return))
-                yield _a2.call(_b);
-            } finally {
-              if (e_1)
-                throw e_1.error;
-            }
-          }
-          return result;
-        });
-      }
-      globGenerator() {
-        return __asyncGenerator2(this, arguments, function* globGenerator_1() {
-          const options = globOptionsHelper.getOptions(this.options);
-          const patterns = [];
-          for (const pattern of this.patterns) {
-            patterns.push(pattern);
-            if (options.implicitDescendants && (pattern.trailingSeparator || pattern.segments[pattern.segments.length - 1] !== "**")) {
-              patterns.push(new internal_pattern_1.Pattern(pattern.negate, true, pattern.segments.concat("**")));
-            }
-          }
-          const stack = [];
-          for (const searchPath of patternHelper.getSearchPaths(patterns)) {
-            core3.debug(`Search path '${searchPath}'`);
-            try {
-              yield __await2(fs3.promises.lstat(searchPath));
-            } catch (err) {
-              if (err.code === "ENOENT") {
-                continue;
-              }
-              throw err;
-            }
-            stack.unshift(new internal_search_state_1.SearchState(searchPath, 1));
-          }
-          const traversalChain = [];
-          while (stack.length) {
-            const item = stack.pop();
-            const match = patternHelper.match(patterns, item.path);
-            const partialMatch = !!match || patternHelper.partialMatch(patterns, item.path);
-            if (!match && !partialMatch) {
-              continue;
-            }
-            const stats = yield __await2(
-              DefaultGlobber.stat(item, options, traversalChain)
-            );
-            if (!stats) {
-              continue;
-            }
-            if (stats.isDirectory()) {
-              if (match & internal_match_kind_1.MatchKind.Directory && options.matchDirectories) {
-                yield yield __await2(item.path);
-              } else if (!partialMatch) {
-                continue;
-              }
-              const childLevel = item.level + 1;
-              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path6.join(item.path, x), childLevel));
-              stack.push(...childItems.reverse());
-            } else if (match & internal_match_kind_1.MatchKind.File) {
-              yield yield __await2(item.path);
-            }
-          }
-        });
-      }
-      static create(patterns, options) {
-        return __awaiter(this, void 0, void 0, function* () {
-          const result = new DefaultGlobber(options);
-          if (IS_WINDOWS) {
-            patterns = patterns.replace(/\r\n/g, "\n");
-            patterns = patterns.replace(/\r/g, "\n");
-          }
-          const lines = patterns.split("\n").map((x) => x.trim());
-          for (const line of lines) {
-            if (!line || line.startsWith("#")) {
-              continue;
-            } else {
-              result.patterns.push(new internal_pattern_1.Pattern(line));
-            }
-          }
-          result.searchPaths.push(...patternHelper.getSearchPaths(result.patterns));
-          return result;
-        });
-      }
-      static stat(item, options, traversalChain) {
-        return __awaiter(this, void 0, void 0, function* () {
-          let stats;
-          if (options.followSymbolicLinks) {
-            try {
-              stats = yield fs3.promises.stat(item.path);
-            } catch (err) {
-              if (err.code === "ENOENT") {
-                if (options.omitBrokenSymbolicLinks) {
-                  core3.debug(`Broken symlink '${item.path}'`);
-                  return void 0;
-                }
-                throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
-              }
-              throw err;
-            }
-          } else {
-            stats = yield fs3.promises.lstat(item.path);
-          }
-          if (stats.isDirectory() && options.followSymbolicLinks) {
-            const realPath = yield fs3.promises.realpath(item.path);
-            while (traversalChain.length >= item.level) {
-              traversalChain.pop();
-            }
-            if (traversalChain.some((x) => x === realPath)) {
-              core3.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
-              return void 0;
-            }
-            traversalChain.push(realPath);
-          }
-          return stats;
-        });
-      }
-    };
-    exports.DefaultGlobber = DefaultGlobber;
-  }
-});
-
-// node_modules/@actions/glob/lib/internal-hash-files.js
-var require_internal_hash_files = __commonJS({
-  "node_modules/@actions/glob/lib/internal-hash-files.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
-      Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
-      o["default"] = v;
-    });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding(result, mod, k);
-      }
-      __setModuleDefault(result, mod);
-      return result;
-    };
-    var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
-      function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve) {
-          resolve(value);
-        });
-      }
-      return new (P || (P = Promise))(function(resolve, reject) {
-        function fulfilled(value) {
-          try {
-            step(generator.next(value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function rejected(value) {
-          try {
-            step(generator["throw"](value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function step(result) {
-          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-      });
-    };
-    var __asyncValues2 = exports && exports.__asyncValues || function(o) {
-      if (!Symbol.asyncIterator)
-        throw new TypeError("Symbol.asyncIterator is not defined.");
-      var m = o[Symbol.asyncIterator], i;
-      return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-        return this;
-      }, i);
-      function verb(n) {
-        i[n] = o[n] && function(v) {
-          return new Promise(function(resolve, reject) {
-            v = o[n](v), settle(resolve, reject, v.done, v.value);
-          });
-        };
-      }
-      function settle(resolve, reject, d, v) {
-        Promise.resolve(v).then(function(v2) {
-          resolve({ value: v2, done: d });
-        }, reject);
-      }
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.hashFiles = void 0;
-    var crypto6 = __importStar(__require("crypto"));
-    var core3 = __importStar(require_core());
-    var fs3 = __importStar(__require("fs"));
-    var stream = __importStar(__require("stream"));
-    var util3 = __importStar(__require("util"));
-    var path6 = __importStar(__require("path"));
-    function hashFiles(globber, verbose = false) {
-      var e_1, _a2;
-      var _b;
-      return __awaiter(this, void 0, void 0, function* () {
-        const writeDelegate = verbose ? core3.info : core3.debug;
-        let hasMatch = false;
-        const githubWorkspace = (_b = process.env["GITHUB_WORKSPACE"]) !== null && _b !== void 0 ? _b : process.cwd();
-        const result = crypto6.createHash("sha256");
-        let count = 0;
-        try {
-          for (var _c = __asyncValues2(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done; ) {
-            const file = _d.value;
-            writeDelegate(file);
-            if (!file.startsWith(`${githubWorkspace}${path6.sep}`)) {
-              writeDelegate(`Ignore '${file}' since it is not under GITHUB_WORKSPACE.`);
-              continue;
-            }
-            if (fs3.statSync(file).isDirectory()) {
-              writeDelegate(`Skip directory '${file}'.`);
-              continue;
-            }
-            const hash = crypto6.createHash("sha256");
-            const pipeline = util3.promisify(stream.pipeline);
-            yield pipeline(fs3.createReadStream(file), hash);
-            result.write(hash.digest());
-            count++;
-            if (!hasMatch) {
-              hasMatch = true;
-            }
-          }
-        } catch (e_1_1) {
-          e_1 = { error: e_1_1 };
-        } finally {
-          try {
-            if (_d && !_d.done && (_a2 = _c.return))
-              yield _a2.call(_c);
-          } finally {
-            if (e_1)
-              throw e_1.error;
-          }
-        }
-        result.end();
-        if (hasMatch) {
-          writeDelegate(`Found ${count} files to hash.`);
-          return result.digest("hex");
-        } else {
-          writeDelegate(`No matches found for glob`);
-          return "";
-        }
-      });
-    }
-    exports.hashFiles = hashFiles;
-  }
-});
-
-// node_modules/@actions/glob/lib/glob.js
-var require_glob2 = __commonJS({
-  "node_modules/@actions/glob/lib/glob.js"(exports) {
-    "use strict";
-    var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
-      function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve) {
-          resolve(value);
-        });
-      }
-      return new (P || (P = Promise))(function(resolve, reject) {
-        function fulfilled(value) {
-          try {
-            step(generator.next(value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function rejected(value) {
-          try {
-            step(generator["throw"](value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function step(result) {
-          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-      });
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.hashFiles = exports.create = void 0;
-    var internal_globber_1 = require_internal_globber2();
-    var internal_hash_files_1 = require_internal_hash_files();
-    function create(patterns, options) {
-      return __awaiter(this, void 0, void 0, function* () {
-        return yield internal_globber_1.DefaultGlobber.create(patterns, options);
-      });
-    }
-    exports.create = create;
-    function hashFiles(patterns, options, verbose = false) {
-      return __awaiter(this, void 0, void 0, function* () {
-        let followSymbolicLinks = true;
-        if (options && typeof options.followSymbolicLinks === "boolean") {
-          followSymbolicLinks = options.followSymbolicLinks;
-        }
-        const globber = yield create(patterns, { followSymbolicLinks });
-        return internal_hash_files_1.hashFiles(globber, verbose);
-      });
-    }
-    exports.hashFiles = hashFiles;
   }
 });
 
@@ -63253,12 +66548,12 @@ var require_manifest = __commonJS({
     exports._readLinuxVersionFile = exports._getOsVersion = exports._findMatch = void 0;
     var semver = __importStar(require_semver());
     var core_1 = require_core();
-    var os4 = __require("os");
+    var os3 = __require("os");
     var cp = __require("child_process");
     var fs3 = __require("fs");
     function _findMatch(versionSpec, stable, candidates, archFilter) {
       return __awaiter(this, void 0, void 0, function* () {
-        const platFilter = os4.platform();
+        const platFilter = os3.platform();
         let result;
         let match;
         let file;
@@ -63295,7 +66590,7 @@ var require_manifest = __commonJS({
     }
     exports._findMatch = _findMatch;
     function _getOsVersion() {
-      const plat = os4.platform();
+      const plat = os3.platform();
       let version3 = "";
       if (plat === "darwin") {
         version3 = cp.execSync("sw_vers -productVersion").toString();
@@ -63505,8 +66800,8 @@ var require_tool_cache = __commonJS({
     var io = __importStar(require_io());
     var fs3 = __importStar(__require("fs"));
     var mm = __importStar(require_manifest());
-    var os4 = __importStar(__require("os"));
-    var path6 = __importStar(__require("path"));
+    var os3 = __importStar(__require("os"));
+    var path8 = __importStar(__require("path"));
     var httpm = __importStar(require_lib());
     var semver = __importStar(require_semver());
     var stream = __importStar(__require("stream"));
@@ -63526,18 +66821,18 @@ var require_tool_cache = __commonJS({
     var IS_WINDOWS = process.platform === "win32";
     var IS_MAC = process.platform === "darwin";
     var userAgent = "actions/tool-cache";
-    function downloadTool2(url2, dest, auth, headers) {
+    function downloadTool2(url3, dest, auth, headers) {
       return __awaiter(this, void 0, void 0, function* () {
-        dest = dest || path6.join(_getTempDirectory(), v4_1.default());
-        yield io.mkdirP(path6.dirname(dest));
-        core3.debug(`Downloading ${url2}`);
+        dest = dest || path8.join(_getTempDirectory(), v4_1.default());
+        yield io.mkdirP(path8.dirname(dest));
+        core3.debug(`Downloading ${url3}`);
         core3.debug(`Destination ${dest}`);
         const maxAttempts = 3;
         const minSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MIN_SECONDS", 10);
         const maxSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MAX_SECONDS", 20);
         const retryHelper = new retry_helper_1.RetryHelper(maxAttempts, minSeconds, maxSeconds);
         return yield retryHelper.execute(() => __awaiter(this, void 0, void 0, function* () {
-          return yield downloadToolAttempt(url2, dest || "", auth, headers);
+          return yield downloadToolAttempt(url3, dest || "", auth, headers);
         }), (err) => {
           if (err instanceof HTTPError && err.httpStatusCode) {
             if (err.httpStatusCode < 500 && err.httpStatusCode !== 408 && err.httpStatusCode !== 429) {
@@ -63549,7 +66844,7 @@ var require_tool_cache = __commonJS({
       });
     }
     exports.downloadTool = downloadTool2;
-    function downloadToolAttempt(url2, dest, auth, headers) {
+    function downloadToolAttempt(url3, dest, auth, headers) {
       return __awaiter(this, void 0, void 0, function* () {
         if (fs3.existsSync(dest)) {
           throw new Error(`Destination file path ${dest} already exists`);
@@ -63564,10 +66859,10 @@ var require_tool_cache = __commonJS({
           }
           headers.authorization = auth;
         }
-        const response = yield http4.get(url2, headers);
+        const response = yield http4.get(url3, headers);
         if (response.message.statusCode !== 200) {
           const err = new HTTPError(response.message.statusCode);
-          core3.debug(`Failed to download from "${url2}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
+          core3.debug(`Failed to download from "${url3}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
           throw err;
         }
         const pipeline = util3.promisify(stream.pipeline);
@@ -63616,7 +66911,7 @@ var require_tool_cache = __commonJS({
             process.chdir(originalCwd);
           }
         } else {
-          const escapedScript = path6.join(__dirname, "..", "scripts", "Invoke-7zdec.ps1").replace(/'/g, "''").replace(/"|\n|\r/g, "");
+          const escapedScript = path8.join(__dirname, "..", "scripts", "Invoke-7zdec.ps1").replace(/'/g, "''").replace(/"|\n|\r/g, "");
           const escapedFile = file.replace(/'/g, "''").replace(/"|\n|\r/g, "");
           const escapedTarget = dest.replace(/'/g, "''").replace(/"|\n|\r/g, "");
           const command = `& '${escapedScript}' -Source '${escapedFile}' -Target '${escapedTarget}'`;
@@ -63784,7 +67079,7 @@ var require_tool_cache = __commonJS({
     function cacheDir2(sourceDir, tool, version3, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
         version3 = semver.clean(version3) || version3;
-        arch3 = arch3 || os4.arch();
+        arch3 = arch3 || os3.arch();
         core3.debug(`Caching tool ${tool} ${version3} ${arch3}`);
         core3.debug(`source dir: ${sourceDir}`);
         if (!fs3.statSync(sourceDir).isDirectory()) {
@@ -63792,7 +67087,7 @@ var require_tool_cache = __commonJS({
         }
         const destPath = yield _createToolPath(tool, version3, arch3);
         for (const itemName of fs3.readdirSync(sourceDir)) {
-          const s = path6.join(sourceDir, itemName);
+          const s = path8.join(sourceDir, itemName);
           yield io.cp(s, destPath, { recursive: true });
         }
         _completeToolPath(tool, version3, arch3);
@@ -63803,14 +67098,14 @@ var require_tool_cache = __commonJS({
     function cacheFile(sourceFile, targetFile, tool, version3, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
         version3 = semver.clean(version3) || version3;
-        arch3 = arch3 || os4.arch();
+        arch3 = arch3 || os3.arch();
         core3.debug(`Caching tool ${tool} ${version3} ${arch3}`);
         core3.debug(`source file: ${sourceFile}`);
         if (!fs3.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
         const destFolder = yield _createToolPath(tool, version3, arch3);
-        const destPath = path6.join(destFolder, targetFile);
+        const destPath = path8.join(destFolder, targetFile);
         core3.debug(`destination file ${destPath}`);
         yield io.cp(sourceFile, destPath);
         _completeToolPath(tool, version3, arch3);
@@ -63825,7 +67120,7 @@ var require_tool_cache = __commonJS({
       if (!versionSpec) {
         throw new Error("versionSpec parameter is required");
       }
-      arch3 = arch3 || os4.arch();
+      arch3 = arch3 || os3.arch();
       if (!isExplicitVersion(versionSpec)) {
         const localVersions = findAllVersions(toolName, arch3);
         const match = evaluateVersions(localVersions, versionSpec);
@@ -63834,7 +67129,7 @@ var require_tool_cache = __commonJS({
       let toolPath = "";
       if (versionSpec) {
         versionSpec = semver.clean(versionSpec) || "";
-        const cachePath = path6.join(_getCacheDirectory(), toolName, versionSpec, arch3);
+        const cachePath = path8.join(_getCacheDirectory(), toolName, versionSpec, arch3);
         core3.debug(`checking cache: ${cachePath}`);
         if (fs3.existsSync(cachePath) && fs3.existsSync(`${cachePath}.complete`)) {
           core3.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch3}`);
@@ -63848,13 +67143,13 @@ var require_tool_cache = __commonJS({
     exports.find = find2;
     function findAllVersions(toolName, arch3) {
       const versions = [];
-      arch3 = arch3 || os4.arch();
-      const toolPath = path6.join(_getCacheDirectory(), toolName);
+      arch3 = arch3 || os3.arch();
+      const toolPath = path8.join(_getCacheDirectory(), toolName);
       if (fs3.existsSync(toolPath)) {
         const children2 = fs3.readdirSync(toolPath);
         for (const child of children2) {
           if (isExplicitVersion(child)) {
-            const fullPath = path6.join(toolPath, child, arch3 || "");
+            const fullPath = path8.join(toolPath, child, arch3 || "");
             if (fs3.existsSync(fullPath) && fs3.existsSync(`${fullPath}.complete`)) {
               versions.push(child);
             }
@@ -63891,7 +67186,7 @@ var require_tool_cache = __commonJS({
           versionsRaw = versionsRaw.replace(/^\uFEFF/, "");
           try {
             releases = JSON.parse(versionsRaw);
-          } catch (_a2) {
+          } catch (_a) {
             core3.debug("Invalid json");
           }
         }
@@ -63899,7 +67194,7 @@ var require_tool_cache = __commonJS({
       });
     }
     exports.getManifestFromRepo = getManifestFromRepo;
-    function findFromManifest(versionSpec, stable, manifest, archFilter = os4.arch()) {
+    function findFromManifest(versionSpec, stable, manifest, archFilter = os3.arch()) {
       return __awaiter(this, void 0, void 0, function* () {
         const match = yield mm._findMatch(versionSpec, stable, manifest, archFilter);
         return match;
@@ -63909,7 +67204,7 @@ var require_tool_cache = __commonJS({
     function _createExtractFolder(dest) {
       return __awaiter(this, void 0, void 0, function* () {
         if (!dest) {
-          dest = path6.join(_getTempDirectory(), v4_1.default());
+          dest = path8.join(_getTempDirectory(), v4_1.default());
         }
         yield io.mkdirP(dest);
         return dest;
@@ -63917,7 +67212,7 @@ var require_tool_cache = __commonJS({
     }
     function _createToolPath(tool, version3, arch3) {
       return __awaiter(this, void 0, void 0, function* () {
-        const folderPath = path6.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
+        const folderPath = path8.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
         core3.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
         yield io.rmRF(folderPath);
@@ -63927,7 +67222,7 @@ var require_tool_cache = __commonJS({
       });
     }
     function _completeToolPath(tool, version3, arch3) {
-      const folderPath = path6.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
+      const folderPath = path8.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch3 || "");
       const markerPath = `${folderPath}.complete`;
       fs3.writeFileSync(markerPath, "");
       core3.debug("finished caching tool");
@@ -63985,6 +67280,30 @@ var require_tool_cache = __commonJS({
   }
 });
 
+// node_modules/decorator-cache-getter/dist/index.js
+var require_dist = __commonJS({
+  "node_modules/decorator-cache-getter/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function cache2(target, name, descriptor) {
+      var getter = descriptor.get;
+      if (!getter)
+        throw new TypeError("Getter property descriptor expected");
+      descriptor.get = function() {
+        var value = getter.call(this);
+        Object.defineProperty(this, name, {
+          configurable: descriptor.configurable,
+          enumerable: descriptor.enumerable,
+          writable: false,
+          value
+        });
+        return value;
+      };
+    }
+    exports.cache = cache2;
+  }
+});
+
 // node_modules/reflect-metadata/Reflect.js
 var Reflect2;
 (function(Reflect3) {
@@ -64015,6 +67334,7 @@ var Reflect2;
     var supportsProto = { __proto__: [] } instanceof Array;
     var downLevel = !supportsCreate && !supportsProto;
     var HashMap = {
+      // create an object in dictionary mode (a.k.a. "slow" mode in v8)
       create: supportsCreate ? function() {
         return MakeDictionary(/* @__PURE__ */ Object.create(null));
       } : supportsProto ? function() {
@@ -64132,7 +67452,12 @@ var Reflect2;
         throw new TypeError();
       if (!IsUndefined(propertyKey))
         propertyKey = ToPropertyKey(propertyKey);
-      var metadataMap = GetOrCreateMetadataMap(target, propertyKey, false);
+      var metadataMap = GetOrCreateMetadataMap(
+        target,
+        propertyKey,
+        /*Create*/
+        false
+      );
       if (IsUndefined(metadataMap))
         return false;
       if (!metadataMap.delete(metadataKey))
@@ -64198,7 +67523,12 @@ var Reflect2;
       return false;
     }
     function OrdinaryHasOwnMetadata(MetadataKey, O, P) {
-      var metadataMap = GetOrCreateMetadataMap(O, P, false);
+      var metadataMap = GetOrCreateMetadataMap(
+        O,
+        P,
+        /*Create*/
+        false
+      );
       if (IsUndefined(metadataMap))
         return false;
       return ToBoolean(metadataMap.has(MetadataKey));
@@ -64213,13 +67543,23 @@ var Reflect2;
       return void 0;
     }
     function OrdinaryGetOwnMetadata(MetadataKey, O, P) {
-      var metadataMap = GetOrCreateMetadataMap(O, P, false);
+      var metadataMap = GetOrCreateMetadataMap(
+        O,
+        P,
+        /*Create*/
+        false
+      );
       if (IsUndefined(metadataMap))
         return void 0;
       return metadataMap.get(MetadataKey);
     }
     function OrdinaryDefineOwnMetadata(MetadataKey, MetadataValue, O, P) {
-      var metadataMap = GetOrCreateMetadataMap(O, P, true);
+      var metadataMap = GetOrCreateMetadataMap(
+        O,
+        P,
+        /*Create*/
+        true
+      );
       metadataMap.set(MetadataKey, MetadataValue);
     }
     function OrdinaryMetadataKeys(O, P) {
@@ -64242,8 +67582,8 @@ var Reflect2;
           keys.push(key);
         }
       }
-      for (var _a2 = 0, parentKeys_1 = parentKeys; _a2 < parentKeys_1.length; _a2++) {
-        var key = parentKeys_1[_a2];
+      for (var _a = 0, parentKeys_1 = parentKeys; _a < parentKeys_1.length; _a++) {
+        var key = parentKeys_1[_a];
         var hasKey = set.has(key);
         if (!hasKey) {
           set.add(key);
@@ -64254,7 +67594,12 @@ var Reflect2;
     }
     function OrdinaryOwnMetadataKeys(O, P) {
       var keys = [];
-      var metadataMap = GetOrCreateMetadataMap(O, P, false);
+      var metadataMap = GetOrCreateMetadataMap(
+        O,
+        P,
+        /*Create*/
+        false
+      );
       if (IsUndefined(metadataMap))
         return keys;
       var keysObj = metadataMap.keys();
@@ -64373,7 +67718,11 @@ var Reflect2;
       return "" + argument;
     }
     function ToPropertyKey(argument) {
-      var key = ToPrimitive(argument, 3);
+      var key = ToPrimitive(
+        argument,
+        3
+        /* String */
+      );
       if (IsSymbol(key))
         return key;
       return ToString(key);
@@ -64446,130 +67795,152 @@ var Reflect2;
     function CreateMapPolyfill() {
       var cacheSentinel = {};
       var arraySentinel = [];
-      var MapIterator = function() {
-        function MapIterator2(keys, values, selector) {
-          this._index = 0;
-          this._keys = keys;
-          this._values = values;
-          this._selector = selector;
-        }
-        MapIterator2.prototype["@@iterator"] = function() {
-          return this;
-        };
-        MapIterator2.prototype[iteratorSymbol] = function() {
-          return this;
-        };
-        MapIterator2.prototype.next = function() {
-          var index = this._index;
-          if (index >= 0 && index < this._keys.length) {
-            var result = this._selector(this._keys[index], this._values[index]);
-            if (index + 1 >= this._keys.length) {
+      var MapIterator = (
+        /** @class */
+        function() {
+          function MapIterator2(keys, values, selector) {
+            this._index = 0;
+            this._keys = keys;
+            this._values = values;
+            this._selector = selector;
+          }
+          MapIterator2.prototype["@@iterator"] = function() {
+            return this;
+          };
+          MapIterator2.prototype[iteratorSymbol] = function() {
+            return this;
+          };
+          MapIterator2.prototype.next = function() {
+            var index = this._index;
+            if (index >= 0 && index < this._keys.length) {
+              var result = this._selector(this._keys[index], this._values[index]);
+              if (index + 1 >= this._keys.length) {
+                this._index = -1;
+                this._keys = arraySentinel;
+                this._values = arraySentinel;
+              } else {
+                this._index++;
+              }
+              return { value: result, done: false };
+            }
+            return { value: void 0, done: true };
+          };
+          MapIterator2.prototype.throw = function(error2) {
+            if (this._index >= 0) {
               this._index = -1;
               this._keys = arraySentinel;
               this._values = arraySentinel;
-            } else {
-              this._index++;
             }
-            return { value: result, done: false };
-          }
-          return { value: void 0, done: true };
-        };
-        MapIterator2.prototype.throw = function(error2) {
-          if (this._index >= 0) {
-            this._index = -1;
-            this._keys = arraySentinel;
-            this._values = arraySentinel;
-          }
-          throw error2;
-        };
-        MapIterator2.prototype.return = function(value) {
-          if (this._index >= 0) {
-            this._index = -1;
-            this._keys = arraySentinel;
-            this._values = arraySentinel;
-          }
-          return { value, done: true };
-        };
-        return MapIterator2;
-      }();
-      return function() {
-        function Map2() {
-          this._keys = [];
-          this._values = [];
-          this._cacheKey = cacheSentinel;
-          this._cacheIndex = -2;
-        }
-        Object.defineProperty(Map2.prototype, "size", {
-          get: function() {
-            return this._keys.length;
-          },
-          enumerable: true,
-          configurable: true
-        });
-        Map2.prototype.has = function(key) {
-          return this._find(key, false) >= 0;
-        };
-        Map2.prototype.get = function(key) {
-          var index = this._find(key, false);
-          return index >= 0 ? this._values[index] : void 0;
-        };
-        Map2.prototype.set = function(key, value) {
-          var index = this._find(key, true);
-          this._values[index] = value;
-          return this;
-        };
-        Map2.prototype.delete = function(key) {
-          var index = this._find(key, false);
-          if (index >= 0) {
-            var size = this._keys.length;
-            for (var i = index + 1; i < size; i++) {
-              this._keys[i - 1] = this._keys[i];
-              this._values[i - 1] = this._values[i];
+            throw error2;
+          };
+          MapIterator2.prototype.return = function(value) {
+            if (this._index >= 0) {
+              this._index = -1;
+              this._keys = arraySentinel;
+              this._values = arraySentinel;
             }
-            this._keys.length--;
-            this._values.length--;
-            if (key === this._cacheKey) {
-              this._cacheKey = cacheSentinel;
-              this._cacheIndex = -2;
+            return { value, done: true };
+          };
+          return MapIterator2;
+        }()
+      );
+      return (
+        /** @class */
+        function() {
+          function Map2() {
+            this._keys = [];
+            this._values = [];
+            this._cacheKey = cacheSentinel;
+            this._cacheIndex = -2;
+          }
+          Object.defineProperty(Map2.prototype, "size", {
+            get: function() {
+              return this._keys.length;
+            },
+            enumerable: true,
+            configurable: true
+          });
+          Map2.prototype.has = function(key) {
+            return this._find(
+              key,
+              /*insert*/
+              false
+            ) >= 0;
+          };
+          Map2.prototype.get = function(key) {
+            var index = this._find(
+              key,
+              /*insert*/
+              false
+            );
+            return index >= 0 ? this._values[index] : void 0;
+          };
+          Map2.prototype.set = function(key, value) {
+            var index = this._find(
+              key,
+              /*insert*/
+              true
+            );
+            this._values[index] = value;
+            return this;
+          };
+          Map2.prototype.delete = function(key) {
+            var index = this._find(
+              key,
+              /*insert*/
+              false
+            );
+            if (index >= 0) {
+              var size = this._keys.length;
+              for (var i = index + 1; i < size; i++) {
+                this._keys[i - 1] = this._keys[i];
+                this._values[i - 1] = this._values[i];
+              }
+              this._keys.length--;
+              this._values.length--;
+              if (key === this._cacheKey) {
+                this._cacheKey = cacheSentinel;
+                this._cacheIndex = -2;
+              }
+              return true;
             }
-            return true;
-          }
-          return false;
-        };
-        Map2.prototype.clear = function() {
-          this._keys.length = 0;
-          this._values.length = 0;
-          this._cacheKey = cacheSentinel;
-          this._cacheIndex = -2;
-        };
-        Map2.prototype.keys = function() {
-          return new MapIterator(this._keys, this._values, getKey);
-        };
-        Map2.prototype.values = function() {
-          return new MapIterator(this._keys, this._values, getValue);
-        };
-        Map2.prototype.entries = function() {
-          return new MapIterator(this._keys, this._values, getEntry);
-        };
-        Map2.prototype["@@iterator"] = function() {
-          return this.entries();
-        };
-        Map2.prototype[iteratorSymbol] = function() {
-          return this.entries();
-        };
-        Map2.prototype._find = function(key, insert) {
-          if (this._cacheKey !== key) {
-            this._cacheIndex = this._keys.indexOf(this._cacheKey = key);
-          }
-          if (this._cacheIndex < 0 && insert) {
-            this._cacheIndex = this._keys.length;
-            this._keys.push(key);
-            this._values.push(void 0);
-          }
-          return this._cacheIndex;
-        };
-        return Map2;
-      }();
+            return false;
+          };
+          Map2.prototype.clear = function() {
+            this._keys.length = 0;
+            this._values.length = 0;
+            this._cacheKey = cacheSentinel;
+            this._cacheIndex = -2;
+          };
+          Map2.prototype.keys = function() {
+            return new MapIterator(this._keys, this._values, getKey);
+          };
+          Map2.prototype.values = function() {
+            return new MapIterator(this._keys, this._values, getValue);
+          };
+          Map2.prototype.entries = function() {
+            return new MapIterator(this._keys, this._values, getEntry);
+          };
+          Map2.prototype["@@iterator"] = function() {
+            return this.entries();
+          };
+          Map2.prototype[iteratorSymbol] = function() {
+            return this.entries();
+          };
+          Map2.prototype._find = function(key, insert) {
+            if (this._cacheKey !== key) {
+              this._cacheIndex = this._keys.indexOf(this._cacheKey = key);
+            }
+            if (this._cacheIndex < 0 && insert) {
+              this._cacheIndex = this._keys.length;
+              this._keys.push(key);
+              this._values.push(void 0);
+            }
+            return this._cacheIndex;
+          };
+          return Map2;
+        }()
+      );
       function getKey(key, _) {
         return key;
       }
@@ -64581,77 +67952,99 @@ var Reflect2;
       }
     }
     function CreateSetPolyfill() {
-      return function() {
-        function Set2() {
-          this._map = new _Map();
-        }
-        Object.defineProperty(Set2.prototype, "size", {
-          get: function() {
-            return this._map.size;
-          },
-          enumerable: true,
-          configurable: true
-        });
-        Set2.prototype.has = function(value) {
-          return this._map.has(value);
-        };
-        Set2.prototype.add = function(value) {
-          return this._map.set(value, value), this;
-        };
-        Set2.prototype.delete = function(value) {
-          return this._map.delete(value);
-        };
-        Set2.prototype.clear = function() {
-          this._map.clear();
-        };
-        Set2.prototype.keys = function() {
-          return this._map.keys();
-        };
-        Set2.prototype.values = function() {
-          return this._map.values();
-        };
-        Set2.prototype.entries = function() {
-          return this._map.entries();
-        };
-        Set2.prototype["@@iterator"] = function() {
-          return this.keys();
-        };
-        Set2.prototype[iteratorSymbol] = function() {
-          return this.keys();
-        };
-        return Set2;
-      }();
+      return (
+        /** @class */
+        function() {
+          function Set2() {
+            this._map = new _Map();
+          }
+          Object.defineProperty(Set2.prototype, "size", {
+            get: function() {
+              return this._map.size;
+            },
+            enumerable: true,
+            configurable: true
+          });
+          Set2.prototype.has = function(value) {
+            return this._map.has(value);
+          };
+          Set2.prototype.add = function(value) {
+            return this._map.set(value, value), this;
+          };
+          Set2.prototype.delete = function(value) {
+            return this._map.delete(value);
+          };
+          Set2.prototype.clear = function() {
+            this._map.clear();
+          };
+          Set2.prototype.keys = function() {
+            return this._map.keys();
+          };
+          Set2.prototype.values = function() {
+            return this._map.values();
+          };
+          Set2.prototype.entries = function() {
+            return this._map.entries();
+          };
+          Set2.prototype["@@iterator"] = function() {
+            return this.keys();
+          };
+          Set2.prototype[iteratorSymbol] = function() {
+            return this.keys();
+          };
+          return Set2;
+        }()
+      );
     }
     function CreateWeakMapPolyfill() {
       var UUID_SIZE = 16;
       var keys = HashMap.create();
       var rootKey = CreateUniqueKey();
-      return function() {
-        function WeakMap2() {
-          this._key = CreateUniqueKey();
-        }
-        WeakMap2.prototype.has = function(target) {
-          var table = GetOrCreateWeakMapTable(target, false);
-          return table !== void 0 ? HashMap.has(table, this._key) : false;
-        };
-        WeakMap2.prototype.get = function(target) {
-          var table = GetOrCreateWeakMapTable(target, false);
-          return table !== void 0 ? HashMap.get(table, this._key) : void 0;
-        };
-        WeakMap2.prototype.set = function(target, value) {
-          var table = GetOrCreateWeakMapTable(target, true);
-          table[this._key] = value;
-          return this;
-        };
-        WeakMap2.prototype.delete = function(target) {
-          var table = GetOrCreateWeakMapTable(target, false);
-          return table !== void 0 ? delete table[this._key] : false;
-        };
-        WeakMap2.prototype.clear = function() {
-          this._key = CreateUniqueKey();
-        };
-        return WeakMap2;
-      }();
+      return (
+        /** @class */
+        function() {
+          function WeakMap2() {
+            this._key = CreateUniqueKey();
+          }
+          WeakMap2.prototype.has = function(target) {
+            var table = GetOrCreateWeakMapTable(
+              target,
+              /*create*/
+              false
+            );
+            return table !== void 0 ? HashMap.has(table, this._key) : false;
+          };
+          WeakMap2.prototype.get = function(target) {
+            var table = GetOrCreateWeakMapTable(
+              target,
+              /*create*/
+              false
+            );
+            return table !== void 0 ? HashMap.get(table, this._key) : void 0;
+          };
+          WeakMap2.prototype.set = function(target, value) {
+            var table = GetOrCreateWeakMapTable(
+              target,
+              /*create*/
+              true
+            );
+            table[this._key] = value;
+            return this;
+          };
+          WeakMap2.prototype.delete = function(target) {
+            var table = GetOrCreateWeakMapTable(
+              target,
+              /*create*/
+              false
+            );
+            return table !== void 0 ? delete table[this._key] : false;
+          };
+          WeakMap2.prototype.clear = function() {
+            this._key = CreateUniqueKey();
+          };
+          return WeakMap2;
+        }()
+      );
       function CreateUniqueKey() {
         var key;
         do
@@ -64707,20 +68100,256 @@ var Reflect2;
   });
 })(Reflect2 || (Reflect2 = {}));
 
-// lib/action.js
-var import_core4 = __toESM(require_core());
-import { createHash, randomUUID } from "node:crypto";
-import { arch as arch2, platform as platform3 } from "node:os";
-import { isNativeError as isNativeError2 } from "node:util/types";
+// lib/action/index.js
+var import_core6 = __toESM(require_core(), 1);
+import { createHash, randomUUID } from "crypto";
+import { arch as arch2, platform as platform5 } from "os";
+import { isNativeError as isNativeError2 } from "util/types";
 
-// lib/context.js
-init_tslib_es6();
-var import_cache2 = __toESM(require_cache());
-var import_core2 = __toESM(require_core());
-import { readFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import path2 from "node:path";
-import process3 from "node:process";
+// lib/action/inputs.js
+var import_cache2 = __toESM(require_cache(), 1);
+import { readFile as readFile3 } from "fs/promises";
+
+// lib/action/env.js
+import { homedir, tmpdir } from "os";
+import path from "path";
+import { env } from "process";
+
+// lib/log.js
+var core = __toESM(require_core(), 1);
+var import_core = __toESM(require_core(), 1);
+import { isNativeError } from "util/types";
+function log2(message, { level = "info", cause } = {}) {
+  const logger3 = core[level === "warn" ? "warning" : level];
+  if (cause === void 0) {
+    logger3(message);
+  } else {
+    logger3(`${message}: Caused by ${cause}`);
+    if (isNativeError(cause)) {
+      core.debug(cause.stack);
+    }
+  }
+}
+function debug2(message, options) {
+  log2(message, { ...options, level: "debug" });
+}
+function info(message, options) {
+  log2(message, { ...options, level: "info" });
+}
+function warn(message, options) {
+  log2(message, { ...options, level: "warn" });
+}
+
+// lib/action/env.js
+var Env;
+(function(Env2) {
+  function load(version3) {
+    if (env["RUNNER_TEMP"] === void 0) {
+      warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} will be used instead`);
+      env.RUNNER_TEMP = tmpdir();
+    }
+    env["TMPDIR"] = env.RUNNER_TEMP;
+    for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
+      if (env[key] !== void 0) {
+        warn(`\`${key}\` is set, but ignored`);
+        delete env[key];
+      }
+    }
+    for (const [key, value] of Object.entries(defaults(version3))) {
+      env[key] ??= value;
+    }
+    return env;
+  }
+  Env2.load = load;
+  function defaults(version3) {
+    const TEXUSERDIR = path.join(homedir(), ".local", "texlive", version3.toString());
+    return {
+      TEXLIVE_INSTALL_ENV_NOCHECK: "1",
+      TEXLIVE_INSTALL_NO_WELCOME: "1",
+      TEXLIVE_INSTALL_PREFIX: path.join(env.RUNNER_TEMP, "setup-texlive"),
+      TEXLIVE_INSTALL_TEXMFHOME: path.join(homedir(), "texmf"),
+      TEXLIVE_INSTALL_TEXMFCONFIG: path.join(TEXUSERDIR, "texmf-config"),
+      TEXLIVE_INSTALL_TEXMFVAR: path.join(TEXUSERDIR, "texmf-var")
+    };
+  }
+  Env2.defaults = defaults;
+})(Env || (Env = {}));
+
+// lib/texlive/depends-txt.js
+var depends_txt_exports = {};
+__export(depends_txt_exports, {
+  parse: () => parse3
+});
+var RE = {
+  comments: /\s*#.*$/gmu,
+  hardOrSoft: /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu,
+  packages: /^\s*package(?=\s|$)(.*)$/mu,
+  whitespaces: /\s+/u
+};
+function* parse3(input) {
+  const [globals = "", ...rest] = input.replaceAll(RE.comments, "").split(RE.packages);
+  yield* parseDeps(void 0, globals);
+  const iter = rest.values();
+  for (const s of iter) {
+    let packageName2 = s.trim();
+    if (packageName2 === "" || RE.whitespaces.test(packageName2)) {
+      warn("`package` directive must have exactly one argument, but given: " + JSON.stringify(packageName2));
+      packageName2 = void 0;
+    }
+    yield* parseDeps(packageName2, iter.next().value ?? "");
+  }
+}
+function* parseDeps(packageName2, input) {
+  for (const [, type3 = "hard", names = ""] of input.matchAll(RE.hardOrSoft)) {
+    for (const name of names.split(RE.whitespaces).filter(Boolean)) {
+      yield { name, type: type3, package: packageName2 };
+    }
+  }
+}
+
+// lib/texlive/install-tl.js
+var import_exec2 = __toESM(require_exec(), 1);
+var import_tool_cache2 = __toESM(require_tool_cache(), 1);
+import { Buffer as Buffer2 } from "buffer";
+import { platform as platform2 } from "os";
+import path4 from "path";
+
+// lib/texlive/tlnet.js
+var tlnet_exports = {};
+__export(tlnet_exports, {
+  CONTRIB: () => CONTRIB,
+  CTAN: () => CTAN,
+  historic: () => historic
+});
+var CTAN = new URL("https://mirror.ctan.org/systems/texlive/tlnet/");
+var CONTRIB = new URL("https://mirror.ctan.org/systems/texlive/tlcontrib/");
+function historic({ number: version3 }) {
+  return new URL(version3 < 2010 ? "tlnet/" : "tlnet-final/", `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version3}/`);
+}
+
+// lib/texlive/tlpkg.js
+var import_exec = __toESM(require_exec(), 1);
+import { readFile, writeFile } from "fs/promises";
+import { platform } from "os";
+import path2 from "path";
+function check(output) {
+  const stderr = typeof output === "string" ? output : output.stderr;
+  const result = /: checksums differ for (.*):$/mu.exec(stderr);
+  if (result !== null) {
+    const pkg2 = path2.basename(result[1] ?? "", ".tar.xz");
+    throw new Error(`The checksum of package ${pkg2} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
+  }
+}
+async function makeLocalSkeleton(texmflocal, options) {
+  await (0, import_exec.exec)("perl", [
+    `-I${path2.join(options.TEXDIR, "tlpkg")}`,
+    "-mTeXLive::TLUtils=make_local_skeleton",
+    "-e",
+    "make_local_skeleton shift",
+    texmflocal
+  ]);
+}
+async function* tlpdb(db) {
+  const nonPackage = /(?:^(?:collection|scheme)-|\.)/u;
+  const version3 = /^catalogue-version\s+(.*)$/mu;
+  const revision = /^revision\s+(\d+)\s*$/mu;
+  const iter = db.replaceAll(/\\\r?\n/gu, "").replaceAll(/#.*/gu, "").split(/^name\s(.*)$/gmu).values();
+  iter.next();
+  for (let name of iter) {
+    name = name.trimEnd();
+    const data = iter.next().value;
+    if (name === "texlive.infra" || !nonPackage.test(name)) {
+      yield {
+        name,
+        version: data?.match(version3)?.[1]?.trimEnd() ?? void 0,
+        revision: data?.match(revision)?.[1] ?? ""
+      };
+    }
+  }
+}
+var PATCHES = [{
+  description: "Fixes a syntax error.",
+  versions: { since: 2009, until: 2011 },
+  file: "tlpkg/TeXLive/TLWinGoo.pm",
+  from: [/foreach \$p qw\((.*)\)/u],
+  to: ["foreach $$p (qw($1))"]
+}, {
+  description: "Defines Code Page 65001 as an alias for UTF-8 on Windows.",
+  platforms: "win32",
+  versions: { since: 2015, until: 2016 },
+  file: "tlpkg/tlperl/lib/Encode/Alias.pm",
+  from: ["# utf8 is blessed :)\n"],
+  to: [`$&    define_alias(qr/cp65001/i => '"utf-8-strict"');
+`]
+}, {
+  description: "Makes it possible to use `\\` as a directory separator on Windows.",
+  platforms: "win32",
+  versions: { until: 2019 },
+  file: "tlpkg/TeXLive/TLUtils.pm",
+  from: ["split (/\\//, $tree)"],
+  to: ["split (/[\\/\\\\]/, $$tree)"]
+}, {
+  description: "Adds support for macOS 11 or later.",
+  platforms: "darwin",
+  versions: { since: 2017, until: 2020 },
+  file: "tlpkg/TeXLive/TLUtils.pm",
+  from: ["$os_major != 10", "$os_minor >= $mactex_darwin"],
+  to: ["$$os_major < 10", "$$os_major > 10 || $&"]
+}];
+async function patch(options) {
+  const patches = PATCHES.filter((p) => {
+    return (p.platforms === void 0 || p.platforms === platform()) && (p.versions?.since ?? -Infinity) <= options.version.number && options.version.number < (p.versions?.until ?? Infinity);
+  });
+  if (patches.length > 0) {
+    const diff = async (changed, p) => {
+      try {
+        const linePrefix = "\x1B[34m>\x1B[0m ";
+        const { exitCode, stdout, stderr } = await (0, import_exec.getExecOutput)("git", [
+          "diff",
+          "--no-index",
+          "--color",
+          `--line-prefix=${linePrefix}`,
+          "--",
+          p.file,
+          "-"
+        ], {
+          input: changed,
+          cwd: options.TEXDIR,
+          silent: true,
+          ignoreReturnCode: true
+        });
+        if (exitCode === 1) {
+          return [linePrefix + p.description + "\n" + stdout.trimEnd()];
+        }
+        if (exitCode > 1) {
+          debug2(`git-diff exited with ${exitCode}: ${stderr}`);
+        }
+      } catch (cause) {
+        debug2("Failed to exec git-diff", { cause });
+      }
+      return [];
+    };
+    const apply = async (p) => {
+      const target = path2.join(options.TEXDIR, p.file);
+      const content = Buffer.from(p.from.reduce((s, from, i) => s.replace(from, p.to[i] ?? ""), await readFile(target, "utf8")));
+      const changes = await diff(content, p);
+      await writeFile(target, content);
+      return changes;
+    };
+    info("Applying patches");
+    const diffs = await Promise.all(patches.map((p) => apply(p)));
+    info(diffs.flat().join("\n"));
+  }
+}
+
+// lib/utility.js
+var cache = __toESM(require_cache(), 1);
+var core2 = __toESM(require_core(), 1);
+var import_io = __toESM(require_io(), 1);
+var import_tool_cache = __toESM(require_tool_cache(), 1);
+import fs2 from "fs/promises";
+import path3 from "path";
+import { env as env2 } from "process";
 
 // node_modules/class-transformer/esm5/enums/transformation-type.enum.js
 var TransformationType;
@@ -64731,198 +68360,201 @@ var TransformationType;
 })(TransformationType || (TransformationType = {}));
 
 // node_modules/class-transformer/esm5/MetadataStorage.js
-var MetadataStorage = function() {
-  function MetadataStorage2() {
-    this._typeMetadatas = /* @__PURE__ */ new Map();
-    this._transformMetadatas = /* @__PURE__ */ new Map();
-    this._exposeMetadatas = /* @__PURE__ */ new Map();
-    this._excludeMetadatas = /* @__PURE__ */ new Map();
-    this._ancestorsMap = /* @__PURE__ */ new Map();
-  }
-  MetadataStorage2.prototype.addTypeMetadata = function(metadata2) {
-    if (!this._typeMetadatas.has(metadata2.target)) {
-      this._typeMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
+var MetadataStorage = (
+  /** @class */
+  function() {
+    function MetadataStorage2() {
+      this._typeMetadatas = /* @__PURE__ */ new Map();
+      this._transformMetadatas = /* @__PURE__ */ new Map();
+      this._exposeMetadatas = /* @__PURE__ */ new Map();
+      this._excludeMetadatas = /* @__PURE__ */ new Map();
+      this._ancestorsMap = /* @__PURE__ */ new Map();
     }
-    this._typeMetadatas.get(metadata2.target).set(metadata2.propertyName, metadata2);
-  };
-  MetadataStorage2.prototype.addTransformMetadata = function(metadata2) {
-    if (!this._transformMetadatas.has(metadata2.target)) {
-      this._transformMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
-    }
-    if (!this._transformMetadatas.get(metadata2.target).has(metadata2.propertyName)) {
-      this._transformMetadatas.get(metadata2.target).set(metadata2.propertyName, []);
-    }
-    this._transformMetadatas.get(metadata2.target).get(metadata2.propertyName).push(metadata2);
-  };
-  MetadataStorage2.prototype.addExposeMetadata = function(metadata2) {
-    if (!this._exposeMetadatas.has(metadata2.target)) {
-      this._exposeMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
-    }
-    this._exposeMetadatas.get(metadata2.target).set(metadata2.propertyName, metadata2);
-  };
-  MetadataStorage2.prototype.addExcludeMetadata = function(metadata2) {
-    if (!this._excludeMetadatas.has(metadata2.target)) {
-      this._excludeMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
-    }
-    this._excludeMetadatas.get(metadata2.target).set(metadata2.propertyName, metadata2);
-  };
-  MetadataStorage2.prototype.findTransformMetadatas = function(target, propertyName, transformationType) {
-    return this.findMetadatas(this._transformMetadatas, target, propertyName).filter(function(metadata2) {
-      if (!metadata2.options)
-        return true;
-      if (metadata2.options.toClassOnly === true && metadata2.options.toPlainOnly === true)
-        return true;
-      if (metadata2.options.toClassOnly === true) {
-        return transformationType === TransformationType.CLASS_TO_CLASS || transformationType === TransformationType.PLAIN_TO_CLASS;
+    MetadataStorage2.prototype.addTypeMetadata = function(metadata2) {
+      if (!this._typeMetadatas.has(metadata2.target)) {
+        this._typeMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
       }
-      if (metadata2.options.toPlainOnly === true) {
-        return transformationType === TransformationType.CLASS_TO_PLAIN;
+      this._typeMetadatas.get(metadata2.target).set(metadata2.propertyName, metadata2);
+    };
+    MetadataStorage2.prototype.addTransformMetadata = function(metadata2) {
+      if (!this._transformMetadatas.has(metadata2.target)) {
+        this._transformMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
       }
-      return true;
-    });
-  };
-  MetadataStorage2.prototype.findExcludeMetadata = function(target, propertyName) {
-    return this.findMetadata(this._excludeMetadatas, target, propertyName);
-  };
-  MetadataStorage2.prototype.findExposeMetadata = function(target, propertyName) {
-    return this.findMetadata(this._exposeMetadatas, target, propertyName);
-  };
-  MetadataStorage2.prototype.findExposeMetadataByCustomName = function(target, name) {
-    return this.getExposedMetadatas(target).find(function(metadata2) {
-      return metadata2.options && metadata2.options.name === name;
-    });
-  };
-  MetadataStorage2.prototype.findTypeMetadata = function(target, propertyName) {
-    return this.findMetadata(this._typeMetadatas, target, propertyName);
-  };
-  MetadataStorage2.prototype.getStrategy = function(target) {
-    var excludeMap = this._excludeMetadatas.get(target);
-    var exclude = excludeMap && excludeMap.get(void 0);
-    var exposeMap = this._exposeMetadatas.get(target);
-    var expose = exposeMap && exposeMap.get(void 0);
-    if (exclude && expose || !exclude && !expose)
-      return "none";
-    return exclude ? "excludeAll" : "exposeAll";
-  };
-  MetadataStorage2.prototype.getExposedMetadatas = function(target) {
-    return this.getMetadata(this._exposeMetadatas, target);
-  };
-  MetadataStorage2.prototype.getExcludedMetadatas = function(target) {
-    return this.getMetadata(this._excludeMetadatas, target);
-  };
-  MetadataStorage2.prototype.getExposedProperties = function(target, transformationType) {
-    return this.getExposedMetadatas(target).filter(function(metadata2) {
-      if (!metadata2.options)
+      if (!this._transformMetadatas.get(metadata2.target).has(metadata2.propertyName)) {
+        this._transformMetadatas.get(metadata2.target).set(metadata2.propertyName, []);
+      }
+      this._transformMetadatas.get(metadata2.target).get(metadata2.propertyName).push(metadata2);
+    };
+    MetadataStorage2.prototype.addExposeMetadata = function(metadata2) {
+      if (!this._exposeMetadatas.has(metadata2.target)) {
+        this._exposeMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
+      }
+      this._exposeMetadatas.get(metadata2.target).set(metadata2.propertyName, metadata2);
+    };
+    MetadataStorage2.prototype.addExcludeMetadata = function(metadata2) {
+      if (!this._excludeMetadatas.has(metadata2.target)) {
+        this._excludeMetadatas.set(metadata2.target, /* @__PURE__ */ new Map());
+      }
+      this._excludeMetadatas.get(metadata2.target).set(metadata2.propertyName, metadata2);
+    };
+    MetadataStorage2.prototype.findTransformMetadatas = function(target, propertyName, transformationType) {
+      return this.findMetadatas(this._transformMetadatas, target, propertyName).filter(function(metadata2) {
+        if (!metadata2.options)
+          return true;
+        if (metadata2.options.toClassOnly === true && metadata2.options.toPlainOnly === true)
+          return true;
+        if (metadata2.options.toClassOnly === true) {
+          return transformationType === TransformationType.CLASS_TO_CLASS || transformationType === TransformationType.PLAIN_TO_CLASS;
+        }
+        if (metadata2.options.toPlainOnly === true) {
+          return transformationType === TransformationType.CLASS_TO_PLAIN;
+        }
         return true;
-      if (metadata2.options.toClassOnly === true && metadata2.options.toPlainOnly === true)
-        return true;
-      if (metadata2.options.toClassOnly === true) {
-        return transformationType === TransformationType.CLASS_TO_CLASS || transformationType === TransformationType.PLAIN_TO_CLASS;
-      }
-      if (metadata2.options.toPlainOnly === true) {
-        return transformationType === TransformationType.CLASS_TO_PLAIN;
-      }
-      return true;
-    }).map(function(metadata2) {
-      return metadata2.propertyName;
-    });
-  };
-  MetadataStorage2.prototype.getExcludedProperties = function(target, transformationType) {
-    return this.getExcludedMetadatas(target).filter(function(metadata2) {
-      if (!metadata2.options)
-        return true;
-      if (metadata2.options.toClassOnly === true && metadata2.options.toPlainOnly === true)
-        return true;
-      if (metadata2.options.toClassOnly === true) {
-        return transformationType === TransformationType.CLASS_TO_CLASS || transformationType === TransformationType.PLAIN_TO_CLASS;
-      }
-      if (metadata2.options.toPlainOnly === true) {
-        return transformationType === TransformationType.CLASS_TO_PLAIN;
-      }
-      return true;
-    }).map(function(metadata2) {
-      return metadata2.propertyName;
-    });
-  };
-  MetadataStorage2.prototype.clear = function() {
-    this._typeMetadatas.clear();
-    this._exposeMetadatas.clear();
-    this._excludeMetadatas.clear();
-    this._ancestorsMap.clear();
-  };
-  MetadataStorage2.prototype.getMetadata = function(metadatas, target) {
-    var metadataFromTargetMap = metadatas.get(target);
-    var metadataFromTarget;
-    if (metadataFromTargetMap) {
-      metadataFromTarget = Array.from(metadataFromTargetMap.values()).filter(function(meta) {
-        return meta.propertyName !== void 0;
       });
-    }
-    var metadataFromAncestors = [];
-    for (var _i = 0, _a2 = this.getAncestors(target); _i < _a2.length; _i++) {
-      var ancestor = _a2[_i];
-      var ancestorMetadataMap = metadatas.get(ancestor);
-      if (ancestorMetadataMap) {
-        var metadataFromAncestor = Array.from(ancestorMetadataMap.values()).filter(function(meta) {
+    };
+    MetadataStorage2.prototype.findExcludeMetadata = function(target, propertyName) {
+      return this.findMetadata(this._excludeMetadatas, target, propertyName);
+    };
+    MetadataStorage2.prototype.findExposeMetadata = function(target, propertyName) {
+      return this.findMetadata(this._exposeMetadatas, target, propertyName);
+    };
+    MetadataStorage2.prototype.findExposeMetadataByCustomName = function(target, name) {
+      return this.getExposedMetadatas(target).find(function(metadata2) {
+        return metadata2.options && metadata2.options.name === name;
+      });
+    };
+    MetadataStorage2.prototype.findTypeMetadata = function(target, propertyName) {
+      return this.findMetadata(this._typeMetadatas, target, propertyName);
+    };
+    MetadataStorage2.prototype.getStrategy = function(target) {
+      var excludeMap = this._excludeMetadatas.get(target);
+      var exclude = excludeMap && excludeMap.get(void 0);
+      var exposeMap = this._exposeMetadatas.get(target);
+      var expose = exposeMap && exposeMap.get(void 0);
+      if (exclude && expose || !exclude && !expose)
+        return "none";
+      return exclude ? "excludeAll" : "exposeAll";
+    };
+    MetadataStorage2.prototype.getExposedMetadatas = function(target) {
+      return this.getMetadata(this._exposeMetadatas, target);
+    };
+    MetadataStorage2.prototype.getExcludedMetadatas = function(target) {
+      return this.getMetadata(this._excludeMetadatas, target);
+    };
+    MetadataStorage2.prototype.getExposedProperties = function(target, transformationType) {
+      return this.getExposedMetadatas(target).filter(function(metadata2) {
+        if (!metadata2.options)
+          return true;
+        if (metadata2.options.toClassOnly === true && metadata2.options.toPlainOnly === true)
+          return true;
+        if (metadata2.options.toClassOnly === true) {
+          return transformationType === TransformationType.CLASS_TO_CLASS || transformationType === TransformationType.PLAIN_TO_CLASS;
+        }
+        if (metadata2.options.toPlainOnly === true) {
+          return transformationType === TransformationType.CLASS_TO_PLAIN;
+        }
+        return true;
+      }).map(function(metadata2) {
+        return metadata2.propertyName;
+      });
+    };
+    MetadataStorage2.prototype.getExcludedProperties = function(target, transformationType) {
+      return this.getExcludedMetadatas(target).filter(function(metadata2) {
+        if (!metadata2.options)
+          return true;
+        if (metadata2.options.toClassOnly === true && metadata2.options.toPlainOnly === true)
+          return true;
+        if (metadata2.options.toClassOnly === true) {
+          return transformationType === TransformationType.CLASS_TO_CLASS || transformationType === TransformationType.PLAIN_TO_CLASS;
+        }
+        if (metadata2.options.toPlainOnly === true) {
+          return transformationType === TransformationType.CLASS_TO_PLAIN;
+        }
+        return true;
+      }).map(function(metadata2) {
+        return metadata2.propertyName;
+      });
+    };
+    MetadataStorage2.prototype.clear = function() {
+      this._typeMetadatas.clear();
+      this._exposeMetadatas.clear();
+      this._excludeMetadatas.clear();
+      this._ancestorsMap.clear();
+    };
+    MetadataStorage2.prototype.getMetadata = function(metadatas, target) {
+      var metadataFromTargetMap = metadatas.get(target);
+      var metadataFromTarget;
+      if (metadataFromTargetMap) {
+        metadataFromTarget = Array.from(metadataFromTargetMap.values()).filter(function(meta) {
           return meta.propertyName !== void 0;
         });
-        metadataFromAncestors.push.apply(metadataFromAncestors, metadataFromAncestor);
       }
-    }
-    return metadataFromAncestors.concat(metadataFromTarget || []);
-  };
-  MetadataStorage2.prototype.findMetadata = function(metadatas, target, propertyName) {
-    var metadataFromTargetMap = metadatas.get(target);
-    if (metadataFromTargetMap) {
-      var metadataFromTarget = metadataFromTargetMap.get(propertyName);
-      if (metadataFromTarget) {
-        return metadataFromTarget;
-      }
-    }
-    for (var _i = 0, _a2 = this.getAncestors(target); _i < _a2.length; _i++) {
-      var ancestor = _a2[_i];
-      var ancestorMetadataMap = metadatas.get(ancestor);
-      if (ancestorMetadataMap) {
-        var ancestorResult = ancestorMetadataMap.get(propertyName);
-        if (ancestorResult) {
-          return ancestorResult;
+      var metadataFromAncestors = [];
+      for (var _i = 0, _a = this.getAncestors(target); _i < _a.length; _i++) {
+        var ancestor = _a[_i];
+        var ancestorMetadataMap = metadatas.get(ancestor);
+        if (ancestorMetadataMap) {
+          var metadataFromAncestor = Array.from(ancestorMetadataMap.values()).filter(function(meta) {
+            return meta.propertyName !== void 0;
+          });
+          metadataFromAncestors.push.apply(metadataFromAncestors, metadataFromAncestor);
         }
       }
-    }
-    return void 0;
-  };
-  MetadataStorage2.prototype.findMetadatas = function(metadatas, target, propertyName) {
-    var metadataFromTargetMap = metadatas.get(target);
-    var metadataFromTarget;
-    if (metadataFromTargetMap) {
-      metadataFromTarget = metadataFromTargetMap.get(propertyName);
-    }
-    var metadataFromAncestorsTarget = [];
-    for (var _i = 0, _a2 = this.getAncestors(target); _i < _a2.length; _i++) {
-      var ancestor = _a2[_i];
-      var ancestorMetadataMap = metadatas.get(ancestor);
-      if (ancestorMetadataMap) {
-        if (ancestorMetadataMap.has(propertyName)) {
-          metadataFromAncestorsTarget.push.apply(metadataFromAncestorsTarget, ancestorMetadataMap.get(propertyName));
+      return metadataFromAncestors.concat(metadataFromTarget || []);
+    };
+    MetadataStorage2.prototype.findMetadata = function(metadatas, target, propertyName) {
+      var metadataFromTargetMap = metadatas.get(target);
+      if (metadataFromTargetMap) {
+        var metadataFromTarget = metadataFromTargetMap.get(propertyName);
+        if (metadataFromTarget) {
+          return metadataFromTarget;
         }
       }
-    }
-    return metadataFromAncestorsTarget.slice().reverse().concat((metadataFromTarget || []).slice().reverse());
-  };
-  MetadataStorage2.prototype.getAncestors = function(target) {
-    if (!target)
-      return [];
-    if (!this._ancestorsMap.has(target)) {
-      var ancestors = [];
-      for (var baseClass = Object.getPrototypeOf(target.prototype.constructor); typeof baseClass.prototype !== "undefined"; baseClass = Object.getPrototypeOf(baseClass.prototype.constructor)) {
-        ancestors.push(baseClass);
+      for (var _i = 0, _a = this.getAncestors(target); _i < _a.length; _i++) {
+        var ancestor = _a[_i];
+        var ancestorMetadataMap = metadatas.get(ancestor);
+        if (ancestorMetadataMap) {
+          var ancestorResult = ancestorMetadataMap.get(propertyName);
+          if (ancestorResult) {
+            return ancestorResult;
+          }
+        }
       }
-      this._ancestorsMap.set(target, ancestors);
-    }
-    return this._ancestorsMap.get(target);
-  };
-  return MetadataStorage2;
-}();
+      return void 0;
+    };
+    MetadataStorage2.prototype.findMetadatas = function(metadatas, target, propertyName) {
+      var metadataFromTargetMap = metadatas.get(target);
+      var metadataFromTarget;
+      if (metadataFromTargetMap) {
+        metadataFromTarget = metadataFromTargetMap.get(propertyName);
+      }
+      var metadataFromAncestorsTarget = [];
+      for (var _i = 0, _a = this.getAncestors(target); _i < _a.length; _i++) {
+        var ancestor = _a[_i];
+        var ancestorMetadataMap = metadatas.get(ancestor);
+        if (ancestorMetadataMap) {
+          if (ancestorMetadataMap.has(propertyName)) {
+            metadataFromAncestorsTarget.push.apply(metadataFromAncestorsTarget, ancestorMetadataMap.get(propertyName));
+          }
+        }
+      }
+      return metadataFromAncestorsTarget.slice().reverse().concat((metadataFromTarget || []).slice().reverse());
+    };
+    MetadataStorage2.prototype.getAncestors = function(target) {
+      if (!target)
+        return [];
+      if (!this._ancestorsMap.has(target)) {
+        var ancestors = [];
+        for (var baseClass = Object.getPrototypeOf(target.prototype.constructor); typeof baseClass.prototype !== "undefined"; baseClass = Object.getPrototypeOf(baseClass.prototype.constructor)) {
+          ancestors.push(baseClass);
+        }
+        this._ancestorsMap.set(target, ancestors);
+      }
+      return this._ancestorsMap.get(target);
+    };
+    return MetadataStorage2;
+  }()
+);
 
 // node_modules/class-transformer/esm5/storage.js
 var defaultMetadataStorage = new MetadataStorage();
@@ -64949,7 +68581,7 @@ function isPromise(p) {
 }
 
 // node_modules/class-transformer/esm5/TransformOperationExecutor.js
-var __spreadArray3 = function(to, from, pack) {
+var __spreadArray5 = function(to, from, pack) {
   if (pack || arguments.length === 2)
     for (var i = 0, l = from.length, ar; i < l; i++) {
       if (ar || !(i in from)) {
@@ -64967,382 +68599,386 @@ function instantiateArrayType(arrayType) {
   }
   return array;
 }
-var TransformOperationExecutor = function() {
-  function TransformOperationExecutor2(transformationType, options) {
-    this.transformationType = transformationType;
-    this.options = options;
-    this.recursionStack = /* @__PURE__ */ new Set();
-  }
-  TransformOperationExecutor2.prototype.transform = function(source, value, targetType, arrayType, isMap, level) {
-    var _this = this;
-    if (level === void 0) {
-      level = 0;
+var TransformOperationExecutor = (
+  /** @class */
+  function() {
+    function TransformOperationExecutor2(transformationType, options) {
+      this.transformationType = transformationType;
+      this.options = options;
+      this.recursionStack = /* @__PURE__ */ new Set();
     }
-    if (Array.isArray(value) || value instanceof Set) {
-      var newValue_1 = arrayType && this.transformationType === TransformationType.PLAIN_TO_CLASS ? instantiateArrayType(arrayType) : [];
-      value.forEach(function(subValue, index) {
-        var subSource = source ? source[index] : void 0;
-        if (!_this.options.enableCircularCheck || !_this.isCircular(subValue)) {
-          var realTargetType = void 0;
-          if (typeof targetType !== "function" && targetType && targetType.options && targetType.options.discriminator && targetType.options.discriminator.property && targetType.options.discriminator.subTypes) {
-            if (_this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-              realTargetType = targetType.options.discriminator.subTypes.find(function(subType) {
-                return subType.name === subValue[targetType.options.discriminator.property];
-              });
-              var options = { newObject: newValue_1, object: subValue, property: void 0 };
-              var newType = targetType.typeFunction(options);
-              realTargetType === void 0 ? realTargetType = newType : realTargetType = realTargetType.value;
-              if (!targetType.options.keepDiscriminatorProperty)
-                delete subValue[targetType.options.discriminator.property];
-            }
-            if (_this.transformationType === TransformationType.CLASS_TO_CLASS) {
-              realTargetType = subValue.constructor;
-            }
-            if (_this.transformationType === TransformationType.CLASS_TO_PLAIN) {
-              subValue[targetType.options.discriminator.property] = targetType.options.discriminator.subTypes.find(function(subType) {
-                return subType.value === subValue.constructor;
-              }).name;
-            }
-          } else {
-            realTargetType = targetType;
-          }
-          var value_1 = _this.transform(subSource, subValue, realTargetType, void 0, subValue instanceof Map, level + 1);
-          if (newValue_1 instanceof Set) {
-            newValue_1.add(value_1);
-          } else {
-            newValue_1.push(value_1);
-          }
-        } else if (_this.transformationType === TransformationType.CLASS_TO_CLASS) {
-          if (newValue_1 instanceof Set) {
-            newValue_1.add(subValue);
-          } else {
-            newValue_1.push(subValue);
-          }
-        }
-      });
-      return newValue_1;
-    } else if (targetType === String && !isMap) {
-      if (value === null || value === void 0)
-        return value;
-      return String(value);
-    } else if (targetType === Number && !isMap) {
-      if (value === null || value === void 0)
-        return value;
-      return Number(value);
-    } else if (targetType === Boolean && !isMap) {
-      if (value === null || value === void 0)
-        return value;
-      return Boolean(value);
-    } else if ((targetType === Date || value instanceof Date) && !isMap) {
-      if (value instanceof Date) {
-        return new Date(value.valueOf());
+    TransformOperationExecutor2.prototype.transform = function(source, value, targetType, arrayType, isMap, level) {
+      var _this = this;
+      if (level === void 0) {
+        level = 0;
       }
-      if (value === null || value === void 0)
-        return value;
-      return new Date(value);
-    } else if (!!getGlobal2().Buffer && (targetType === Buffer || value instanceof Buffer) && !isMap) {
-      if (value === null || value === void 0)
-        return value;
-      return Buffer.from(value);
-    } else if (isPromise(value) && !isMap) {
-      return new Promise(function(resolve, reject) {
-        value.then(function(data) {
-          return resolve(_this.transform(void 0, data, targetType, void 0, void 0, level + 1));
-        }, reject);
-      });
-    } else if (!isMap && value !== null && typeof value === "object" && typeof value.then === "function") {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      if (!targetType && value.constructor !== Object)
-        if (!Array.isArray(value) && value.constructor === Array) {
-        } else {
-          targetType = value.constructor;
-        }
-      if (!targetType && source)
-        targetType = source.constructor;
-      if (this.options.enableCircularCheck) {
-        this.recursionStack.add(value);
-      }
-      var keys = this.getKeys(targetType, value, isMap);
-      var newValue = source ? source : {};
-      if (!source && (this.transformationType === TransformationType.PLAIN_TO_CLASS || this.transformationType === TransformationType.CLASS_TO_CLASS)) {
-        if (isMap) {
-          newValue = /* @__PURE__ */ new Map();
-        } else if (targetType) {
-          newValue = new targetType();
-        } else {
-          newValue = {};
-        }
-      }
-      var _loop_1 = function(key2) {
-        if (key2 === "__proto__" || key2 === "constructor") {
-          return "continue";
-        }
-        var valueKey = key2;
-        var newValueKey = key2, propertyName = key2;
-        if (!this_1.options.ignoreDecorators && targetType) {
-          if (this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
-            var exposeMetadata = defaultMetadataStorage.findExposeMetadataByCustomName(targetType, key2);
-            if (exposeMetadata) {
-              propertyName = exposeMetadata.propertyName;
-              newValueKey = exposeMetadata.propertyName;
-            }
-          } else if (this_1.transformationType === TransformationType.CLASS_TO_PLAIN || this_1.transformationType === TransformationType.CLASS_TO_CLASS) {
-            var exposeMetadata = defaultMetadataStorage.findExposeMetadata(targetType, key2);
-            if (exposeMetadata && exposeMetadata.options && exposeMetadata.options.name) {
-              newValueKey = exposeMetadata.options.name;
-            }
-          }
-        }
-        var subValue = void 0;
-        if (this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
-          subValue = value[valueKey];
-        } else {
-          if (value instanceof Map) {
-            subValue = value.get(valueKey);
-          } else if (value[valueKey] instanceof Function) {
-            subValue = value[valueKey]();
-          } else {
-            subValue = value[valueKey];
-          }
-        }
-        var type3 = void 0, isSubValueMap = subValue instanceof Map;
-        if (targetType && isMap) {
-          type3 = targetType;
-        } else if (targetType) {
-          var metadata_1 = defaultMetadataStorage.findTypeMetadata(targetType, propertyName);
-          if (metadata_1) {
-            var options = { newObject: newValue, object: value, property: propertyName };
-            var newType = metadata_1.typeFunction ? metadata_1.typeFunction(options) : metadata_1.reflectedType;
-            if (metadata_1.options && metadata_1.options.discriminator && metadata_1.options.discriminator.property && metadata_1.options.discriminator.subTypes) {
-              if (!(value[valueKey] instanceof Array)) {
-                if (this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
-                  type3 = metadata_1.options.discriminator.subTypes.find(function(subType) {
-                    if (subValue && subValue instanceof Object && metadata_1.options.discriminator.property in subValue) {
-                      return subType.name === subValue[metadata_1.options.discriminator.property];
-                    }
-                  });
-                  type3 === void 0 ? type3 = newType : type3 = type3.value;
-                  if (!metadata_1.options.keepDiscriminatorProperty) {
-                    if (subValue && subValue instanceof Object && metadata_1.options.discriminator.property in subValue) {
-                      delete subValue[metadata_1.options.discriminator.property];
-                    }
-                  }
-                }
-                if (this_1.transformationType === TransformationType.CLASS_TO_CLASS) {
-                  type3 = subValue.constructor;
-                }
-                if (this_1.transformationType === TransformationType.CLASS_TO_PLAIN) {
-                  if (subValue) {
-                    subValue[metadata_1.options.discriminator.property] = metadata_1.options.discriminator.subTypes.find(function(subType) {
-                      return subType.value === subValue.constructor;
-                    }).name;
-                  }
-                }
-              } else {
-                type3 = metadata_1;
+      if (Array.isArray(value) || value instanceof Set) {
+        var newValue_1 = arrayType && this.transformationType === TransformationType.PLAIN_TO_CLASS ? instantiateArrayType(arrayType) : [];
+        value.forEach(function(subValue, index) {
+          var subSource = source ? source[index] : void 0;
+          if (!_this.options.enableCircularCheck || !_this.isCircular(subValue)) {
+            var realTargetType = void 0;
+            if (typeof targetType !== "function" && targetType && targetType.options && targetType.options.discriminator && targetType.options.discriminator.property && targetType.options.discriminator.subTypes) {
+              if (_this.transformationType === TransformationType.PLAIN_TO_CLASS) {
+                realTargetType = targetType.options.discriminator.subTypes.find(function(subType) {
+                  return subType.name === subValue[targetType.options.discriminator.property];
+                });
+                var options = { newObject: newValue_1, object: subValue, property: void 0 };
+                var newType = targetType.typeFunction(options);
+                realTargetType === void 0 ? realTargetType = newType : realTargetType = realTargetType.value;
+                if (!targetType.options.keepDiscriminatorProperty)
+                  delete subValue[targetType.options.discriminator.property];
+              }
+              if (_this.transformationType === TransformationType.CLASS_TO_CLASS) {
+                realTargetType = subValue.constructor;
+              }
+              if (_this.transformationType === TransformationType.CLASS_TO_PLAIN) {
+                subValue[targetType.options.discriminator.property] = targetType.options.discriminator.subTypes.find(function(subType) {
+                  return subType.value === subValue.constructor;
+                }).name;
               }
             } else {
-              type3 = newType;
+              realTargetType = targetType;
             }
-            isSubValueMap = isSubValueMap || metadata_1.reflectedType === Map;
-          } else if (this_1.options.targetMaps) {
-            this_1.options.targetMaps.filter(function(map2) {
-              return map2.target === targetType && !!map2.properties[propertyName];
-            }).forEach(function(map2) {
-              return type3 = map2.properties[propertyName];
-            });
-          } else if (this_1.options.enableImplicitConversion && this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
-            var reflectedType = Reflect.getMetadata("design:type", targetType.prototype, propertyName);
-            if (reflectedType) {
-              type3 = reflectedType;
+            var value_1 = _this.transform(subSource, subValue, realTargetType, void 0, subValue instanceof Map, level + 1);
+            if (newValue_1 instanceof Set) {
+              newValue_1.add(value_1);
+            } else {
+              newValue_1.push(value_1);
+            }
+          } else if (_this.transformationType === TransformationType.CLASS_TO_CLASS) {
+            if (newValue_1 instanceof Set) {
+              newValue_1.add(subValue);
+            } else {
+              newValue_1.push(subValue);
             }
           }
+        });
+        return newValue_1;
+      } else if (targetType === String && !isMap) {
+        if (value === null || value === void 0)
+          return value;
+        return String(value);
+      } else if (targetType === Number && !isMap) {
+        if (value === null || value === void 0)
+          return value;
+        return Number(value);
+      } else if (targetType === Boolean && !isMap) {
+        if (value === null || value === void 0)
+          return value;
+        return Boolean(value);
+      } else if ((targetType === Date || value instanceof Date) && !isMap) {
+        if (value instanceof Date) {
+          return new Date(value.valueOf());
         }
-        var arrayType_1 = Array.isArray(value[valueKey]) ? this_1.getReflectedType(targetType, propertyName) : void 0;
-        var subSource = source ? source[valueKey] : void 0;
-        if (newValue.constructor.prototype) {
-          var descriptor = Object.getOwnPropertyDescriptor(newValue.constructor.prototype, newValueKey);
-          if ((this_1.transformationType === TransformationType.PLAIN_TO_CLASS || this_1.transformationType === TransformationType.CLASS_TO_CLASS) && (descriptor && !descriptor.set || newValue[newValueKey] instanceof Function))
-            return "continue";
-        }
-        if (!this_1.options.enableCircularCheck || !this_1.isCircular(subValue)) {
-          var transformKey = this_1.transformationType === TransformationType.PLAIN_TO_CLASS ? newValueKey : key2;
-          var finalValue = void 0;
-          if (this_1.transformationType === TransformationType.CLASS_TO_PLAIN) {
-            finalValue = value[transformKey];
-            finalValue = this_1.applyCustomTransformations(finalValue, targetType, transformKey, value, this_1.transformationType);
-            finalValue = value[transformKey] === finalValue ? subValue : finalValue;
-            finalValue = this_1.transform(subSource, finalValue, type3, arrayType_1, isSubValueMap, level + 1);
+        if (value === null || value === void 0)
+          return value;
+        return new Date(value);
+      } else if (!!getGlobal2().Buffer && (targetType === Buffer || value instanceof Buffer) && !isMap) {
+        if (value === null || value === void 0)
+          return value;
+        return Buffer.from(value);
+      } else if (isPromise(value) && !isMap) {
+        return new Promise(function(resolve, reject) {
+          value.then(function(data) {
+            return resolve(_this.transform(void 0, data, targetType, void 0, void 0, level + 1));
+          }, reject);
+        });
+      } else if (!isMap && value !== null && typeof value === "object" && typeof value.then === "function") {
+        return value;
+      } else if (typeof value === "object" && value !== null) {
+        if (!targetType && value.constructor !== Object)
+          if (!Array.isArray(value) && value.constructor === Array) {
           } else {
-            if (subValue === void 0 && this_1.options.exposeDefaultValues) {
-              finalValue = newValue[newValueKey];
-            } else {
-              finalValue = this_1.transform(subSource, subValue, type3, arrayType_1, isSubValueMap, level + 1);
-              finalValue = this_1.applyCustomTransformations(finalValue, targetType, transformKey, value, this_1.transformationType);
-            }
+            targetType = value.constructor;
           }
-          if (finalValue !== void 0 || this_1.options.exposeUnsetFields) {
-            if (newValue instanceof Map) {
-              newValue.set(newValueKey, finalValue);
-            } else {
-              newValue[newValueKey] = finalValue;
-            }
-          }
-        } else if (this_1.transformationType === TransformationType.CLASS_TO_CLASS) {
-          var finalValue = subValue;
-          finalValue = this_1.applyCustomTransformations(finalValue, targetType, key2, value, this_1.transformationType);
-          if (finalValue !== void 0 || this_1.options.exposeUnsetFields) {
-            if (newValue instanceof Map) {
-              newValue.set(newValueKey, finalValue);
-            } else {
-              newValue[newValueKey] = finalValue;
-            }
+        if (!targetType && source)
+          targetType = source.constructor;
+        if (this.options.enableCircularCheck) {
+          this.recursionStack.add(value);
+        }
+        var keys = this.getKeys(targetType, value, isMap);
+        var newValue = source ? source : {};
+        if (!source && (this.transformationType === TransformationType.PLAIN_TO_CLASS || this.transformationType === TransformationType.CLASS_TO_CLASS)) {
+          if (isMap) {
+            newValue = /* @__PURE__ */ new Map();
+          } else if (targetType) {
+            newValue = new targetType();
+          } else {
+            newValue = {};
           }
         }
-      };
-      var this_1 = this;
-      for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
-        var key = keys_1[_i];
-        _loop_1(key);
-      }
-      if (this.options.enableCircularCheck) {
-        this.recursionStack.delete(value);
-      }
-      return newValue;
-    } else {
-      return value;
-    }
-  };
-  TransformOperationExecutor2.prototype.applyCustomTransformations = function(value, target, key, obj, transformationType) {
-    var _this = this;
-    var metadatas = defaultMetadataStorage.findTransformMetadatas(target, key, this.transformationType);
-    if (this.options.version !== void 0) {
-      metadatas = metadatas.filter(function(metadata2) {
-        if (!metadata2.options)
-          return true;
-        return _this.checkVersion(metadata2.options.since, metadata2.options.until);
-      });
-    }
-    if (this.options.groups && this.options.groups.length) {
-      metadatas = metadatas.filter(function(metadata2) {
-        if (!metadata2.options)
-          return true;
-        return _this.checkGroups(metadata2.options.groups);
-      });
-    } else {
-      metadatas = metadatas.filter(function(metadata2) {
-        return !metadata2.options || !metadata2.options.groups || !metadata2.options.groups.length;
-      });
-    }
-    metadatas.forEach(function(metadata2) {
-      value = metadata2.transformFn({ value, key, obj, type: transformationType, options: _this.options });
-    });
-    return value;
-  };
-  TransformOperationExecutor2.prototype.isCircular = function(object) {
-    return this.recursionStack.has(object);
-  };
-  TransformOperationExecutor2.prototype.getReflectedType = function(target, propertyName) {
-    if (!target)
-      return void 0;
-    var meta = defaultMetadataStorage.findTypeMetadata(target, propertyName);
-    return meta ? meta.reflectedType : void 0;
-  };
-  TransformOperationExecutor2.prototype.getKeys = function(target, object, isMap) {
-    var _this = this;
-    var strategy = defaultMetadataStorage.getStrategy(target);
-    if (strategy === "none")
-      strategy = this.options.strategy || "exposeAll";
-    var keys = [];
-    if (strategy === "exposeAll" || isMap) {
-      if (object instanceof Map) {
-        keys = Array.from(object.keys());
-      } else {
-        keys = Object.keys(object);
-      }
-    }
-    if (isMap) {
-      return keys;
-    }
-    if (this.options.ignoreDecorators && this.options.excludeExtraneousValues && target) {
-      var exposedProperties = defaultMetadataStorage.getExposedProperties(target, this.transformationType);
-      var excludedProperties = defaultMetadataStorage.getExcludedProperties(target, this.transformationType);
-      keys = __spreadArray3(__spreadArray3([], exposedProperties, true), excludedProperties, true);
-    }
-    if (!this.options.ignoreDecorators && target) {
-      var exposedProperties = defaultMetadataStorage.getExposedProperties(target, this.transformationType);
-      if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-        exposedProperties = exposedProperties.map(function(key) {
-          var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
-          if (exposeMetadata && exposeMetadata.options && exposeMetadata.options.name) {
-            return exposeMetadata.options.name;
+        var _loop_1 = function(key2) {
+          if (key2 === "__proto__" || key2 === "constructor") {
+            return "continue";
           }
-          return key;
-        });
-      }
-      if (this.options.excludeExtraneousValues) {
-        keys = exposedProperties;
+          var valueKey = key2;
+          var newValueKey = key2, propertyName = key2;
+          if (!this_1.options.ignoreDecorators && targetType) {
+            if (this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
+              var exposeMetadata = defaultMetadataStorage.findExposeMetadataByCustomName(targetType, key2);
+              if (exposeMetadata) {
+                propertyName = exposeMetadata.propertyName;
+                newValueKey = exposeMetadata.propertyName;
+              }
+            } else if (this_1.transformationType === TransformationType.CLASS_TO_PLAIN || this_1.transformationType === TransformationType.CLASS_TO_CLASS) {
+              var exposeMetadata = defaultMetadataStorage.findExposeMetadata(targetType, key2);
+              if (exposeMetadata && exposeMetadata.options && exposeMetadata.options.name) {
+                newValueKey = exposeMetadata.options.name;
+              }
+            }
+          }
+          var subValue = void 0;
+          if (this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
+            subValue = value[valueKey];
+          } else {
+            if (value instanceof Map) {
+              subValue = value.get(valueKey);
+            } else if (value[valueKey] instanceof Function) {
+              subValue = value[valueKey]();
+            } else {
+              subValue = value[valueKey];
+            }
+          }
+          var type3 = void 0, isSubValueMap = subValue instanceof Map;
+          if (targetType && isMap) {
+            type3 = targetType;
+          } else if (targetType) {
+            var metadata_1 = defaultMetadataStorage.findTypeMetadata(targetType, propertyName);
+            if (metadata_1) {
+              var options = { newObject: newValue, object: value, property: propertyName };
+              var newType = metadata_1.typeFunction ? metadata_1.typeFunction(options) : metadata_1.reflectedType;
+              if (metadata_1.options && metadata_1.options.discriminator && metadata_1.options.discriminator.property && metadata_1.options.discriminator.subTypes) {
+                if (!(value[valueKey] instanceof Array)) {
+                  if (this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
+                    type3 = metadata_1.options.discriminator.subTypes.find(function(subType) {
+                      if (subValue && subValue instanceof Object && metadata_1.options.discriminator.property in subValue) {
+                        return subType.name === subValue[metadata_1.options.discriminator.property];
+                      }
+                    });
+                    type3 === void 0 ? type3 = newType : type3 = type3.value;
+                    if (!metadata_1.options.keepDiscriminatorProperty) {
+                      if (subValue && subValue instanceof Object && metadata_1.options.discriminator.property in subValue) {
+                        delete subValue[metadata_1.options.discriminator.property];
+                      }
+                    }
+                  }
+                  if (this_1.transformationType === TransformationType.CLASS_TO_CLASS) {
+                    type3 = subValue.constructor;
+                  }
+                  if (this_1.transformationType === TransformationType.CLASS_TO_PLAIN) {
+                    if (subValue) {
+                      subValue[metadata_1.options.discriminator.property] = metadata_1.options.discriminator.subTypes.find(function(subType) {
+                        return subType.value === subValue.constructor;
+                      }).name;
+                    }
+                  }
+                } else {
+                  type3 = metadata_1;
+                }
+              } else {
+                type3 = newType;
+              }
+              isSubValueMap = isSubValueMap || metadata_1.reflectedType === Map;
+            } else if (this_1.options.targetMaps) {
+              this_1.options.targetMaps.filter(function(map2) {
+                return map2.target === targetType && !!map2.properties[propertyName];
+              }).forEach(function(map2) {
+                return type3 = map2.properties[propertyName];
+              });
+            } else if (this_1.options.enableImplicitConversion && this_1.transformationType === TransformationType.PLAIN_TO_CLASS) {
+              var reflectedType = Reflect.getMetadata("design:type", targetType.prototype, propertyName);
+              if (reflectedType) {
+                type3 = reflectedType;
+              }
+            }
+          }
+          var arrayType_1 = Array.isArray(value[valueKey]) ? this_1.getReflectedType(targetType, propertyName) : void 0;
+          var subSource = source ? source[valueKey] : void 0;
+          if (newValue.constructor.prototype) {
+            var descriptor = Object.getOwnPropertyDescriptor(newValue.constructor.prototype, newValueKey);
+            if ((this_1.transformationType === TransformationType.PLAIN_TO_CLASS || this_1.transformationType === TransformationType.CLASS_TO_CLASS) && // eslint-disable-next-line @typescript-eslint/unbound-method
+            (descriptor && !descriptor.set || newValue[newValueKey] instanceof Function))
+              return "continue";
+          }
+          if (!this_1.options.enableCircularCheck || !this_1.isCircular(subValue)) {
+            var transformKey = this_1.transformationType === TransformationType.PLAIN_TO_CLASS ? newValueKey : key2;
+            var finalValue = void 0;
+            if (this_1.transformationType === TransformationType.CLASS_TO_PLAIN) {
+              finalValue = value[transformKey];
+              finalValue = this_1.applyCustomTransformations(finalValue, targetType, transformKey, value, this_1.transformationType);
+              finalValue = value[transformKey] === finalValue ? subValue : finalValue;
+              finalValue = this_1.transform(subSource, finalValue, type3, arrayType_1, isSubValueMap, level + 1);
+            } else {
+              if (subValue === void 0 && this_1.options.exposeDefaultValues) {
+                finalValue = newValue[newValueKey];
+              } else {
+                finalValue = this_1.transform(subSource, subValue, type3, arrayType_1, isSubValueMap, level + 1);
+                finalValue = this_1.applyCustomTransformations(finalValue, targetType, transformKey, value, this_1.transformationType);
+              }
+            }
+            if (finalValue !== void 0 || this_1.options.exposeUnsetFields) {
+              if (newValue instanceof Map) {
+                newValue.set(newValueKey, finalValue);
+              } else {
+                newValue[newValueKey] = finalValue;
+              }
+            }
+          } else if (this_1.transformationType === TransformationType.CLASS_TO_CLASS) {
+            var finalValue = subValue;
+            finalValue = this_1.applyCustomTransformations(finalValue, targetType, key2, value, this_1.transformationType);
+            if (finalValue !== void 0 || this_1.options.exposeUnsetFields) {
+              if (newValue instanceof Map) {
+                newValue.set(newValueKey, finalValue);
+              } else {
+                newValue[newValueKey] = finalValue;
+              }
+            }
+          }
+        };
+        var this_1 = this;
+        for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+          var key = keys_1[_i];
+          _loop_1(key);
+        }
+        if (this.options.enableCircularCheck) {
+          this.recursionStack.delete(value);
+        }
+        return newValue;
       } else {
-        keys = keys.concat(exposedProperties);
+        return value;
       }
-      var excludedProperties_1 = defaultMetadataStorage.getExcludedProperties(target, this.transformationType);
-      if (excludedProperties_1.length > 0) {
-        keys = keys.filter(function(key) {
-          return !excludedProperties_1.includes(key);
-        });
-      }
+    };
+    TransformOperationExecutor2.prototype.applyCustomTransformations = function(value, target, key, obj, transformationType) {
+      var _this = this;
+      var metadatas = defaultMetadataStorage.findTransformMetadatas(target, key, this.transformationType);
       if (this.options.version !== void 0) {
-        keys = keys.filter(function(key) {
-          var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
-          if (!exposeMetadata || !exposeMetadata.options)
+        metadatas = metadatas.filter(function(metadata2) {
+          if (!metadata2.options)
             return true;
-          return _this.checkVersion(exposeMetadata.options.since, exposeMetadata.options.until);
+          return _this.checkVersion(metadata2.options.since, metadata2.options.until);
         });
       }
       if (this.options.groups && this.options.groups.length) {
-        keys = keys.filter(function(key) {
-          var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
-          if (!exposeMetadata || !exposeMetadata.options)
+        metadatas = metadatas.filter(function(metadata2) {
+          if (!metadata2.options)
             return true;
-          return _this.checkGroups(exposeMetadata.options.groups);
+          return _this.checkGroups(metadata2.options.groups);
         });
       } else {
-        keys = keys.filter(function(key) {
-          var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
-          return !exposeMetadata || !exposeMetadata.options || !exposeMetadata.options.groups || !exposeMetadata.options.groups.length;
+        metadatas = metadatas.filter(function(metadata2) {
+          return !metadata2.options || !metadata2.options.groups || !metadata2.options.groups.length;
         });
       }
-    }
-    if (this.options.excludePrefixes && this.options.excludePrefixes.length) {
-      keys = keys.filter(function(key) {
-        return _this.options.excludePrefixes.every(function(prefix2) {
-          return key.substr(0, prefix2.length) !== prefix2;
-        });
+      metadatas.forEach(function(metadata2) {
+        value = metadata2.transformFn({ value, key, obj, type: transformationType, options: _this.options });
       });
-    }
-    keys = keys.filter(function(key, index, self2) {
-      return self2.indexOf(key) === index;
-    });
-    return keys;
-  };
-  TransformOperationExecutor2.prototype.checkVersion = function(since, until) {
-    var decision = true;
-    if (decision && since)
-      decision = this.options.version >= since;
-    if (decision && until)
-      decision = this.options.version < until;
-    return decision;
-  };
-  TransformOperationExecutor2.prototype.checkGroups = function(groups) {
-    if (!groups)
-      return true;
-    return this.options.groups.some(function(optionGroup) {
-      return groups.includes(optionGroup);
-    });
-  };
-  return TransformOperationExecutor2;
-}();
+      return value;
+    };
+    TransformOperationExecutor2.prototype.isCircular = function(object) {
+      return this.recursionStack.has(object);
+    };
+    TransformOperationExecutor2.prototype.getReflectedType = function(target, propertyName) {
+      if (!target)
+        return void 0;
+      var meta = defaultMetadataStorage.findTypeMetadata(target, propertyName);
+      return meta ? meta.reflectedType : void 0;
+    };
+    TransformOperationExecutor2.prototype.getKeys = function(target, object, isMap) {
+      var _this = this;
+      var strategy = defaultMetadataStorage.getStrategy(target);
+      if (strategy === "none")
+        strategy = this.options.strategy || "exposeAll";
+      var keys = [];
+      if (strategy === "exposeAll" || isMap) {
+        if (object instanceof Map) {
+          keys = Array.from(object.keys());
+        } else {
+          keys = Object.keys(object);
+        }
+      }
+      if (isMap) {
+        return keys;
+      }
+      if (this.options.ignoreDecorators && this.options.excludeExtraneousValues && target) {
+        var exposedProperties = defaultMetadataStorage.getExposedProperties(target, this.transformationType);
+        var excludedProperties = defaultMetadataStorage.getExcludedProperties(target, this.transformationType);
+        keys = __spreadArray5(__spreadArray5([], exposedProperties, true), excludedProperties, true);
+      }
+      if (!this.options.ignoreDecorators && target) {
+        var exposedProperties = defaultMetadataStorage.getExposedProperties(target, this.transformationType);
+        if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
+          exposedProperties = exposedProperties.map(function(key) {
+            var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
+            if (exposeMetadata && exposeMetadata.options && exposeMetadata.options.name) {
+              return exposeMetadata.options.name;
+            }
+            return key;
+          });
+        }
+        if (this.options.excludeExtraneousValues) {
+          keys = exposedProperties;
+        } else {
+          keys = keys.concat(exposedProperties);
+        }
+        var excludedProperties_1 = defaultMetadataStorage.getExcludedProperties(target, this.transformationType);
+        if (excludedProperties_1.length > 0) {
+          keys = keys.filter(function(key) {
+            return !excludedProperties_1.includes(key);
+          });
+        }
+        if (this.options.version !== void 0) {
+          keys = keys.filter(function(key) {
+            var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
+            if (!exposeMetadata || !exposeMetadata.options)
+              return true;
+            return _this.checkVersion(exposeMetadata.options.since, exposeMetadata.options.until);
+          });
+        }
+        if (this.options.groups && this.options.groups.length) {
+          keys = keys.filter(function(key) {
+            var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
+            if (!exposeMetadata || !exposeMetadata.options)
+              return true;
+            return _this.checkGroups(exposeMetadata.options.groups);
+          });
+        } else {
+          keys = keys.filter(function(key) {
+            var exposeMetadata = defaultMetadataStorage.findExposeMetadata(target, key);
+            return !exposeMetadata || !exposeMetadata.options || !exposeMetadata.options.groups || !exposeMetadata.options.groups.length;
+          });
+        }
+      }
+      if (this.options.excludePrefixes && this.options.excludePrefixes.length) {
+        keys = keys.filter(function(key) {
+          return _this.options.excludePrefixes.every(function(prefix2) {
+            return key.substr(0, prefix2.length) !== prefix2;
+          });
+        });
+      }
+      keys = keys.filter(function(key, index, self2) {
+        return self2.indexOf(key) === index;
+      });
+      return keys;
+    };
+    TransformOperationExecutor2.prototype.checkVersion = function(since, until) {
+      var decision = true;
+      if (decision && since)
+        decision = this.options.version >= since;
+      if (decision && until)
+        decision = this.options.version < until;
+      return decision;
+    };
+    TransformOperationExecutor2.prototype.checkGroups = function(groups) {
+      if (!groups)
+        return true;
+      return this.options.groups.some(function(optionGroup) {
+        return groups.includes(optionGroup);
+      });
+    };
+    return TransformOperationExecutor2;
+  }()
+);
 
 // node_modules/class-transformer/esm5/constants/default-options.constant.js
 var defaultOptions = {
@@ -65372,60 +69008,49 @@ var __assign = function() {
   };
   return __assign.apply(this, arguments);
 };
-var ClassTransformer = function() {
-  function ClassTransformer2() {
-  }
-  ClassTransformer2.prototype.instanceToPlain = function(object, options) {
-    var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_PLAIN, __assign(__assign({}, defaultOptions), options));
-    return executor.transform(void 0, object, void 0, void 0, void 0, void 0);
-  };
-  ClassTransformer2.prototype.classToPlainFromExist = function(object, plainObject, options) {
-    var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_PLAIN, __assign(__assign({}, defaultOptions), options));
-    return executor.transform(plainObject, object, void 0, void 0, void 0, void 0);
-  };
-  ClassTransformer2.prototype.plainToInstance = function(cls, plain, options) {
-    var executor = new TransformOperationExecutor(TransformationType.PLAIN_TO_CLASS, __assign(__assign({}, defaultOptions), options));
-    return executor.transform(void 0, plain, cls, void 0, void 0, void 0);
-  };
-  ClassTransformer2.prototype.plainToClassFromExist = function(clsObject, plain, options) {
-    var executor = new TransformOperationExecutor(TransformationType.PLAIN_TO_CLASS, __assign(__assign({}, defaultOptions), options));
-    return executor.transform(clsObject, plain, void 0, void 0, void 0, void 0);
-  };
-  ClassTransformer2.prototype.instanceToInstance = function(object, options) {
-    var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_CLASS, __assign(__assign({}, defaultOptions), options));
-    return executor.transform(void 0, object, void 0, void 0, void 0, void 0);
-  };
-  ClassTransformer2.prototype.classToClassFromExist = function(object, fromObject, options) {
-    var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_CLASS, __assign(__assign({}, defaultOptions), options));
-    return executor.transform(fromObject, object, void 0, void 0, void 0, void 0);
-  };
-  ClassTransformer2.prototype.serialize = function(object, options) {
-    return JSON.stringify(this.instanceToPlain(object, options));
-  };
-  ClassTransformer2.prototype.deserialize = function(cls, json, options) {
-    var jsonObject = JSON.parse(json);
-    return this.plainToInstance(cls, jsonObject, options);
-  };
-  ClassTransformer2.prototype.deserializeArray = function(cls, json, options) {
-    var jsonObject = JSON.parse(json);
-    return this.plainToInstance(cls, jsonObject, options);
-  };
-  return ClassTransformer2;
-}();
-
-// node_modules/class-transformer/esm5/decorators/exclude.decorator.js
-function Exclude(options) {
-  if (options === void 0) {
-    options = {};
-  }
-  return function(object, propertyName) {
-    defaultMetadataStorage.addExcludeMetadata({
-      target: object instanceof Function ? object : object.constructor,
-      propertyName,
-      options
-    });
-  };
-}
+var ClassTransformer = (
+  /** @class */
+  function() {
+    function ClassTransformer2() {
+    }
+    ClassTransformer2.prototype.instanceToPlain = function(object, options) {
+      var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_PLAIN, __assign(__assign({}, defaultOptions), options));
+      return executor.transform(void 0, object, void 0, void 0, void 0, void 0);
+    };
+    ClassTransformer2.prototype.classToPlainFromExist = function(object, plainObject, options) {
+      var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_PLAIN, __assign(__assign({}, defaultOptions), options));
+      return executor.transform(plainObject, object, void 0, void 0, void 0, void 0);
+    };
+    ClassTransformer2.prototype.plainToInstance = function(cls, plain, options) {
+      var executor = new TransformOperationExecutor(TransformationType.PLAIN_TO_CLASS, __assign(__assign({}, defaultOptions), options));
+      return executor.transform(void 0, plain, cls, void 0, void 0, void 0);
+    };
+    ClassTransformer2.prototype.plainToClassFromExist = function(clsObject, plain, options) {
+      var executor = new TransformOperationExecutor(TransformationType.PLAIN_TO_CLASS, __assign(__assign({}, defaultOptions), options));
+      return executor.transform(clsObject, plain, void 0, void 0, void 0, void 0);
+    };
+    ClassTransformer2.prototype.instanceToInstance = function(object, options) {
+      var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_CLASS, __assign(__assign({}, defaultOptions), options));
+      return executor.transform(void 0, object, void 0, void 0, void 0, void 0);
+    };
+    ClassTransformer2.prototype.classToClassFromExist = function(object, fromObject, options) {
+      var executor = new TransformOperationExecutor(TransformationType.CLASS_TO_CLASS, __assign(__assign({}, defaultOptions), options));
+      return executor.transform(fromObject, object, void 0, void 0, void 0, void 0);
+    };
+    ClassTransformer2.prototype.serialize = function(object, options) {
+      return JSON.stringify(this.instanceToPlain(object, options));
+    };
+    ClassTransformer2.prototype.deserialize = function(cls, json, options) {
+      var jsonObject = JSON.parse(json);
+      return this.plainToInstance(cls, jsonObject, options);
+    };
+    ClassTransformer2.prototype.deserializeArray = function(cls, json, options) {
+      var jsonObject = JSON.parse(json);
+      return this.plainToInstance(cls, jsonObject, options);
+    };
+    return ClassTransformer2;
+  }()
+);
 
 // node_modules/class-transformer/esm5/decorators/expose.decorator.js
 function Expose(options) {
@@ -65467,177 +69092,10 @@ function plainToClassFromExist(clsObject, plain, options) {
   return classTransformer.plainToClassFromExist(clsObject, plain, options);
 }
 
-// lib/log.js
-var core = __toESM(require_core());
-var import_core = __toESM(require_core());
-import { isNativeError } from "node:util/types";
-function log2(message, { level = "info", cause } = {}) {
-  const logger3 = core[level === "warn" ? "warning" : level];
-  if (cause === void 0) {
-    logger3(message);
-  } else {
-    logger3(`${message}: Caused by ${cause}`);
-    if (isNativeError(cause)) {
-      core.debug(cause.stack);
-    }
-  }
-}
-function debug2(message, options) {
-  log2(message, { ...options, level: "debug" });
-}
-function info(message, options) {
-  log2(message, { ...options, level: "info" });
-}
-function warn(message, options) {
-  log2(message, { ...options, level: "warn" });
-}
-
-// lib/texlive.js
-init_tslib_es6();
-var import_decorator_cache_getter = __toESM(require_dist());
-import { platform } from "node:os";
-
-// lib/ctan.js
-var import_http_client = __toESM(require_lib());
-var http3;
-async function pkg(name) {
-  http3 ??= new import_http_client.HttpClient();
-  const endpoint = `https://ctan.org/json/2.0/pkg/${name}`;
-  const { result, statusCode } = await http3.getJson(endpoint);
-  if (statusCode === import_http_client.HttpCodes.NotFound) {
-    throw new Error(`${endpoint} returned ${import_http_client.HttpCodes.NotFound}`);
-  }
-  return result ?? {};
-}
-
-// lib/texlive.js
-var Version = class {
-  constructor(spec) {
-    this.spec = spec;
-    if (/^199[6-9]|200[0-7]$/u.test(spec)) {
-      throw new RangeError("Versions prior to 2008 are not supported");
-    } else if (/^20\d\d$/u.test(spec) && spec <= Version.LATEST) {
-      if (platform() === "darwin" && spec < "2013") {
-        throw new RangeError("Versions prior to 2013 does not work on 64-bit macOS");
-      }
-    } else if (spec !== "latest") {
-      throw new TypeError(`'${spec}' is not a valid version spec`);
-    }
-  }
-  get number() {
-    return Number.parseInt(this.toString());
-  }
-  isLatest() {
-    return this.spec === "latest" || this.toString() === Version.LATEST;
-  }
-  toString() {
-    return this.spec === "latest" ? Version.LATEST : this.spec;
-  }
-  toJSON() {
-    return this.toString();
-  }
-  [Symbol.toPrimitive](hint) {
-    return hint === "number" ? this.number : this.toString();
-  }
-  static get LATEST() {
-    return this.latest;
-  }
-  static async checkLatest() {
-    const pkg2 = await pkg("texlive");
-    const latest = pkg2.version?.number ?? "";
-    if (!/^20\d\d$/u.test(latest)) {
-      throw new TypeError(`Invalid response: ${JSON.stringify(pkg2)}`);
-    }
-    return Version.latest = latest;
-  }
-  static async resolve(spec) {
-    if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 4, 1)) {
-      try {
-        info("Checking for the latest version of TeX Live");
-        info(`Latest version: ${await Version.checkLatest()}`);
-      } catch (cause) {
-        info("Failed to check for the latest version", { cause });
-        info(`Instead ${Version.LATEST} will be used as the latest version`);
-      }
-    }
-    return new Version(spec);
-  }
-};
-Version.latest = "2022";
-__decorate([
-  import_decorator_cache_getter.cache,
-  __metadata("design:type", Number),
-  __metadata("design:paramtypes", [])
-], Version.prototype, "number", null);
-var tlnet;
-(function(tlnet2) {
-  tlnet2.CTAN = new URL("https://mirror.ctan.org/systems/texlive/tlnet/");
-  tlnet2.CONTRIB = new URL("https://mirror.ctan.org/systems/texlive/tlcontrib/");
-  function historic({ number: version3 }) {
-    return new URL(version3 < 2010 ? "tlnet/" : "tlnet-final/", `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version3}/`);
-  }
-  tlnet2.historic = historic;
-})(tlnet || (tlnet = {}));
-var DependsTxt = class {
-  constructor(txt) {
-    this.bundle = /* @__PURE__ */ new Map();
-    txt = txt.replaceAll(/\s*#.*$/gmu, "");
-    for (const [name, deps] of DependsTxt.unbundle(txt)) {
-      let module = this.bundle.get(name);
-      if (module === void 0) {
-        module = {};
-        this.bundle.set(name, module);
-      }
-      for (const [type3, dep] of deps) {
-        (module[type3] ??= /* @__PURE__ */ new Set()).add(dep);
-      }
-    }
-  }
-  get(name) {
-    return this.bundle.get(name);
-  }
-  [Symbol.iterator]() {
-    return this.bundle.entries();
-  }
-  static *unbundle(txt) {
-    const [globals, ...rest] = txt.split(/^\s*package(?=\s|$)(.*)$/mu);
-    yield ["", this.parse(globals)];
-    const iter = rest.values();
-    for (let name of iter) {
-      name = name.trim();
-      if (name === "" || /\s/u.test(name)) {
-        warn("`package` directive must have exactly one argument, but given: " + name);
-        name = "";
-      }
-      yield [name, this.parse(iter.next().value)];
-    }
-  }
-  static *parse(txt) {
-    const hardOrSoft = /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu;
-    for (const [, type3 = "hard", deps] of txt?.matchAll(hardOrSoft) ?? []) {
-      for (const dep of deps?.split(/\s+/u).filter(Boolean) ?? []) {
-        yield [type3, dep];
-      }
-    }
-  }
-};
-
 // lib/utility.js
-var cache = __toESM(require_cache());
-var core2 = __toESM(require_core());
-var import_glob = __toESM(require_glob2());
-var import_io = __toESM(require_io());
-var import_tool_cache = __toESM(require_tool_cache());
-import fs2 from "node:fs/promises";
-import os3 from "node:os";
-import path from "node:path";
-import process2 from "node:process";
 var Serializable = class {
-  constructor() {
-    Exclude()(this.constructor);
-  }
   toPlain(options) {
-    return instanceToPlain(this, options);
+    return instanceToPlain(this, { strategy: "excludeAll", ...options });
   }
   toJSON() {
     return this.toPlain();
@@ -65649,21 +69107,24 @@ async function extract(archive, kind) {
       return await (0, import_tool_cache.extractTar)(archive, void 0, ["xz", "--strip=1"]);
     }
     case "zip": {
+      const parent = await (0, import_tool_cache.extractZip)(archive);
       try {
-        return await determine(path.join(await (0, import_tool_cache.extractZip)(archive), "*"));
+        return await uniqueChild(parent);
       } catch (cause) {
-        throw new Error("Unable to locate subdirectory", { cause });
+        throw new Error("Unable to locate unzipped subdirectory", { cause });
       }
     }
   }
 }
-async function determine(pattern) {
-  const globber = await (0, import_glob.create)(pattern, { implicitDescendants: false });
-  const matched = await globber.glob();
-  if (matched.length === 1) {
-    return matched[0] ?? "";
+async function uniqueChild(parent) {
+  const [child, ...rest] = await fs2.readdir(parent);
+  if (child === void 0) {
+    throw new Error(`${parent} has no entries`);
   }
-  throw new Error(matched.length === 0 ? `No matches to pattern \`${pattern}\` found` : `Multiple matches to pattern \`${pattern}\` found: ${matched.join("; ")}`);
+  if (rest.length > 0) {
+    throw new Error(`${parent} has multiple entries`);
+  }
+  return path3.join(parent, child);
 }
 function getInput2(name, options) {
   switch (options?.type) {
@@ -65702,11 +69163,11 @@ async function restoreCache2(target, primaryKey, restoreKeys) {
   }
   return key;
 }
-function tmpdir() {
-  return process2.env["RUNNER_TEMP"] ?? os3.tmpdir();
+function tmpdir2() {
+  return env2.RUNNER_TEMP;
 }
 async function* mkdtemp() {
-  const tmp = await fs2.mkdtemp(path.join(tmpdir(), "setup-texlive-"));
+  const tmp = await fs2.mkdtemp(path3.join(tmpdir2(), "setup-texlive-"));
   try {
     yield tmp;
   } finally {
@@ -65714,284 +69175,76 @@ async function* mkdtemp() {
   }
 }
 
-// lib/context.js
-var Inputs;
-(function(Inputs2) {
-  async function load() {
-    const version3 = await Version.resolve(getInput2("version", { default: "latest" }));
-    const env = Env.load(version3);
-    const inputs = {
-      cache: getInput2("cache", { type: Boolean }),
-      forceUpdateCache: (env.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? "0") !== "0",
-      packages: await loadPackageList(),
-      texmf: loadTexmf(env),
-      tlcontrib: getInput2("tlcontrib", { type: Boolean }),
-      updateAllPackages: getInput2("update-all-packages", { type: Boolean }),
-      version: version3
-    };
-    validate3(inputs);
-    return inputs;
-  }
-  Inputs2.load = load;
-  function validate3(inputs) {
-    if (inputs.cache && !(0, import_cache2.isFeatureAvailable)()) {
-      warn("Caching is disabled because cache service is not available");
-      inputs.cache = false;
-    }
-    if (!inputs.version.isLatest()) {
-      if (inputs.tlcontrib) {
-        warn("`tlcontrib` is currently ignored for older versions");
-        inputs.tlcontrib = false;
-      }
-      if (inputs.updateAllPackages) {
-        info("`update-all-packages` is ignored for older versions");
-        inputs.updateAllPackages = false;
-      }
-    }
-  }
-  function loadTexmf(env) {
-    const texmf = {
-      TEX_PREFIX: path2.normalize(getInput2("prefix", { default: env.TEXLIVE_INSTALL_PREFIX }))
-    };
-    const texdir = getInput2("texdir");
-    if (texdir !== void 0) {
-      texmf.TEXDIR = path2.normalize(texdir);
-    }
-    if (env.TEXLIVE_INSTALL_TEXMFLOCAL !== void 0) {
-      texmf.TEXMFLOCAL = path2.normalize(env.TEXLIVE_INSTALL_TEXMFLOCAL);
-    }
-    for (const key of ["TEXMFCONFIG", "TEXMFVAR", "TEXMFHOME"]) {
-      texmf[key] = path2.normalize(env[`TEXLIVE_INSTALL_${key}`]);
-    }
-    return texmf;
-  }
-  async function loadPackageList() {
-    const packages = [];
-    for await (const [, { hard = [], soft = [] }] of loadDependsTxt()) {
-      packages.push(...hard, ...soft);
-    }
-    return new Set(packages.sort());
-  }
-  async function* loadDependsTxt() {
-    const inline = getInput2("packages");
-    if (inline !== void 0) {
-      yield* new DependsTxt(inline);
-    }
-    const file = getInput2("package-file");
-    if (file !== void 0) {
-      yield* new DependsTxt(await readFile(file, "utf8"));
-    }
-  }
-})(Inputs || (Inputs = {}));
-var Outputs = class extends Serializable {
-  constructor() {
-    super(...arguments);
-    this.cacheHit = false;
-  }
-  emit() {
-    for (const [key, value] of Object.entries(this.toJSON())) {
-      (0, import_core2.setOutput)(key, value);
-    }
-  }
-};
-__decorate([
-  Expose({ name: "cache-hit" }),
-  __metadata("design:type", Boolean)
-], Outputs.prototype, "cacheHit", void 0);
-__decorate([
-  Expose(),
-  Type(() => String),
-  __metadata("design:type", Version)
-], Outputs.prototype, "version", void 0);
-var Env;
-(function(Env2) {
-  function load(version3) {
-    if (process3.env["RUNNER_TEMP"] === void 0) {
-      warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} will be used instead`);
-      process3.env["RUNNER_TEMP"] = tmpdir();
-    }
-    process3.env["TMPDIR"] = process3.env["RUNNER_TEMP"];
-    for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
-      if (key in process3.env) {
-        warn(`\`${key}\` is set, but ignored`);
-        delete process3.env[key];
-      }
-    }
-    for (const [key, value] of Object.entries(defaults(version3))) {
-      process3.env[key] ??= value;
-    }
-    return process3.env;
-  }
-  Env2.load = load;
-  function defaults(version3) {
-    const TEXUSERDIR = path2.join(homedir(), ".local", "texlive", version3.toString());
-    return {
-      TEXLIVE_INSTALL_ENV_NOCHECK: "1",
-      TEXLIVE_INSTALL_NO_WELCOME: "1",
-      TEXLIVE_INSTALL_PREFIX: path2.join(tmpdir(), "setup-texlive"),
-      TEXLIVE_INSTALL_TEXMFHOME: path2.join(homedir(), "texmf"),
-      TEXLIVE_INSTALL_TEXMFCONFIG: path2.join(TEXUSERDIR, "texmf-config"),
-      TEXLIVE_INSTALL_TEXMFVAR: path2.join(TEXUSERDIR, "texmf-var")
-    };
-  }
-  Env2.defaults = defaults;
-})(Env || (Env = {}));
-var State = class extends Serializable {
-  constructor() {
-    super();
-    this.post = false;
-    const state = (0, import_core2.getState)(State.NAME);
-    if (state !== "") {
-      plainToClassFromExist(this, JSON.parse(state));
-      this.post = true;
-    }
-  }
-  save() {
-    (0, import_core2.saveState)(State.NAME, JSON.stringify(this));
-  }
-};
-State.NAME = "post";
-__decorate([
-  Expose(),
-  __metadata("design:type", String)
-], State.prototype, "key", void 0);
-__decorate([
-  Expose(),
-  __metadata("design:type", String)
-], State.prototype, "texdir", void 0);
-
-// lib/install-tl.js
-init_tslib_es6();
-var import_exec2 = __toESM(require_exec());
-var import_tool_cache2 = __toESM(require_tool_cache());
-import { Buffer as Buffer2 } from "node:buffer";
-import { readFile as readFile3, writeFile } from "node:fs/promises";
-import { platform as platform2 } from "node:os";
-import path4 from "node:path";
-
-// lib/tlpkg.js
-var import_exec = __toESM(require_exec());
-import { readFile as readFile2 } from "node:fs/promises";
-import path3 from "node:path";
-function check(output) {
-  const stderr = typeof output === "string" ? output : output.stderr;
-  const result = /: checksums differ for (.*):$/mu.exec(stderr);
-  if (result !== null) {
-    const pkg2 = path3.basename(result[1] ?? "", ".tar.xz");
-    throw new Error(`The checksum of package ${pkg2} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
-  }
-}
-async function makeLocalSkeleton(texmflocal, options) {
-  await (0, import_exec.exec)("perl", [
-    `-I${path3.join(options.TEXDIR, "tlpkg")}`,
-    "-mTeXLive::TLUtils=make_local_skeleton",
-    "-e",
-    "make_local_skeleton shift",
-    texmflocal
-  ]);
-}
-async function* tlpdb(tlpdbPath) {
-  let db;
-  try {
-    db = await readFile2(tlpdbPath, "utf8");
-  } catch (cause) {
-    debug2(`Failed to read ${tlpdbPath}`, { cause });
-    return;
-  }
-  const nonPackage = /(?:^(?:collection|scheme)-|\.)/u;
-  const version3 = /^catalogue-version\s+(.*)$/mu;
-  const revision = /^revision\s+(\d+)\s*$/mu;
-  const iter = db.replaceAll(/\\\r?\n/gu, "").replaceAll(/#.*/gu, "").split(/^name\s(.*)$/gmu).values();
-  iter.next();
-  for (let name of iter) {
-    name = name.trimEnd();
-    const data = iter.next().value;
-    if (name === "texlive.infra" || !nonPackage.test(name)) {
-      yield {
-        name,
-        version: data?.match(version3)?.[1]?.trimEnd() ?? void 0,
-        revision: data?.match(revision)?.[1] ?? ""
-      };
-    }
-  }
-}
-
-// lib/install-tl.js
-var _a;
+// lib/texlive/install-tl.js
 var devNull = Buffer2.alloc(0);
-var InstallTL = class {
-  constructor(tlversion, directory, patch = new Patch(tlversion)) {
-    this.tlversion = tlversion;
-    this.patch = patch;
-    this.path = path4.join(directory, InstallTL.executable(tlversion));
-  }
-  async run(profile) {
-    for await (const dest of profile.open()) {
-      const options = ["-profile", dest];
-      if (!this.tlversion.isLatest()) {
-        const repo = tlnet.historic(this.tlversion);
-        if (this.tlversion.number < 2018) {
-          repo.protocol = "http";
-        }
-        options.push(this.tlversion.number === 2008 ? "-location" : "-repository", repo.href);
+async function installTL(profile) {
+  const dir = restore(profile.version) ?? await download(profile.version);
+  const installer = path4.join(dir, executable(profile.version));
+  await (0, import_exec2.exec)(installer, ["-version"], { input: devNull });
+  for await (const dest of profile.open()) {
+    const options = ["-profile", dest];
+    if (!profile.version.isLatest()) {
+      const repo = historic(profile.version);
+      if (profile.version.number < 2018) {
+        repo.protocol = "http";
       }
-      check(await (0, import_exec2.getExecOutput)(this.path, options, { input: devNull }));
+      options.push(profile.version.number === 2008 ? "-location" : "-repository", repo.href);
     }
-    await this.patch.apply(profile.TEXDIR);
+    check(await (0, import_exec2.getExecOutput)(installer, options, { input: devNull }));
   }
-  async version() {
-    await (0, import_exec2.exec)(this.path, ["-version"], { input: devNull });
+  await patch(profile);
+}
+function restore(version3) {
+  let dest = "";
+  try {
+    dest = (0, import_tool_cache2.find)(executable(version3), version3.toString());
+  } catch (cause) {
+    info("Failed to restore installer", { cause });
   }
-  static restore(version3) {
-    let dest = "";
-    try {
-      dest = (0, import_tool_cache2.find)(this.executable(version3), version3.toString());
-    } catch (cause) {
-      info("Failed to restore installer", { cause });
-    }
-    if (dest === "") {
-      return void 0;
-    } else {
-      info("Found in tool cache");
-      return new this(version3, dest);
-    }
+  if (dest === "") {
+    return void 0;
+  } else {
+    info("Found in tool cache");
+    return dest;
   }
-  static async download(version3) {
-    const { href: url2 } = this.url(version3);
-    info(`Downloading ${url2}`);
-    const archive = await (0, import_tool_cache2.downloadTool)(url2);
-    info(`Extracting installer from ${archive}`);
-    const dest = await extract(archive, platform2() === "win32" ? "zip" : "tgz");
-    const patch = new Patch(version3);
-    await patch.apply(dest);
-    try {
-      info("Adding to tool cache");
-      await (0, import_tool_cache2.cacheDir)(dest, this.executable(version3), version3.toString());
-    } catch (cause) {
-      info("Failed to cache installer", { cause });
-    }
-    return new this(version3, dest, patch);
+}
+async function download(version3) {
+  const { href } = url2(version3);
+  info(`Downloading ${href}`);
+  const archive = await (0, import_tool_cache2.downloadTool)(href);
+  info(`Extracting installer from ${archive}`);
+  const dest = await extract(archive, platform2() === "win32" ? "zip" : "tgz");
+  await patch({ TEXDIR: dest, version: version3 });
+  try {
+    info("Adding to tool cache");
+    await (0, import_tool_cache2.cacheDir)(dest, executable(version3), version3.toString());
+  } catch (cause) {
+    info("Failed to cache installer", { cause });
   }
-  static async acquire(version3) {
-    return this.restore(version3) ?? await this.download(version3);
+  return dest;
+}
+function executable({ number: version3 }) {
+  if (platform2() !== "win32") {
+    return "install-tl";
+  } else if (version3 < 2013) {
+    return "install-tl.bat";
+  } else {
+    return "install-tl-windows.bat";
   }
-  static executable({ number: version3 }) {
-    if (platform2() !== "win32") {
-      return "install-tl";
-    } else if (version3 < 2013) {
-      return "install-tl.bat";
-    } else {
-      return "install-tl-windows.bat";
-    }
-  }
-  static url(version3) {
-    return new URL(platform2() === "win32" ? "install-tl.zip" : "install-tl-unx.tar.gz", version3.isLatest() ? tlnet.CTAN : tlnet.historic(version3));
-  }
-};
+}
+function url2(version3) {
+  return new URL(platform2() === "win32" ? "install-tl.zip" : "install-tl-unx.tar.gz", version3.isLatest() ? CTAN : historic(version3));
+}
+
+// lib/texlive/profile.js
+init_tslib_es6();
+import { writeFile as writeFile2 } from "fs/promises";
+import { platform as platform3 } from "os";
+import path5 from "path";
+import { env as env3 } from "process";
 var Profile = class extends Serializable {
-  constructor(version3, texmf) {
+  constructor(options) {
     super();
-    this.version = version3;
     this.instopt_adjustpath = false;
     this.tlpdbopt_autobackup = false;
     this.tlpdbopt_install_docfiles = false;
@@ -66000,40 +69253,51 @@ var Profile = class extends Serializable {
     this.tlpdbopt_file_assocs = false;
     this.tlpdbopt_w32_multi_user = false;
     this.option_menu_integration = false;
-    this.selected_scheme = `scheme-${version3.number < 2016 ? "minimal" : "infraonly"}`;
-    if (texmf.TEXDIR !== void 0) {
-      this.TEXDIR = texmf.TEXDIR;
-      this.TEXMFLOCAL = path4.join(this.TEXDIR, "texmf-local");
-      this.TEXMFSYSCONFIG = path4.join(this.TEXDIR, "texmf-config");
-      this.TEXMFSYSVAR = path4.join(this.TEXDIR, "texmf-var");
+    this.version = options.version;
+    this.selected_scheme = `scheme-${this.version.number < 2016 ? "minimal" : "infraonly"}`;
+    if (options.texdir !== void 0) {
+      this.withTexdir(options.texdir);
     } else {
-      this.TEXDIR = path4.join(texmf.TEX_PREFIX, version3.toString());
-      this.TEXMFLOCAL = texmf.TEXMFLOCAL ?? path4.join(texmf.TEX_PREFIX, "texmf-local");
-      this.TEXMFSYSCONFIG = texmf.TEXMFSYSCONFIG ?? path4.join(this.TEXDIR, "texmf-config");
-      this.TEXMFSYSVAR = texmf.TEXMFSYSVAR ?? path4.join(this.TEXDIR, "texmf-var");
+      this.withPrefix(options.prefix);
     }
-    if (texmf.TEXUSERDIR !== void 0) {
-      this.TEXMFHOME = path4.join(texmf.TEXUSERDIR, "texmf");
-      this.TEXMFCONFIG = path4.join(texmf.TEXUSERDIR, "texmf-config");
-      this.TEXMFVAR = path4.join(texmf.TEXUSERDIR, "texmf-var");
+    if (options.texuserdir !== void 0) {
+      this.withTexuserdir(options.texuserdir);
     } else {
-      this.TEXMFHOME = texmf.TEXMFHOME ?? this.TEXMFLOCAL;
-      this.TEXMFCONFIG = texmf.TEXMFCONFIG ?? this.TEXMFSYSCONFIG;
-      this.TEXMFVAR = texmf.TEXMFVAR ?? this.TEXMFSYSVAR;
+      this.withPortable();
     }
     this.instopt_adjustrepo = this.version.isLatest();
   }
+  withPrefix(prefix2) {
+    this.withTexdir(path5.join(prefix2, this.version.toString()));
+    this.TEXMFLOCAL = env3["TEXLIVE_INSTALL_TEXMFLOCAL"] ?? path5.join(prefix2, "texmf-local");
+  }
+  withTexdir(texdir) {
+    this.TEXDIR = texdir;
+    this.TEXMFLOCAL = path5.join(texdir, "texmf-local");
+    this.TEXMFSYSCONFIG = path5.join(texdir, "texmf-config");
+    this.TEXMFSYSVAR = path5.join(texdir, "texmf-var");
+  }
+  withTexuserdir(texuserdir) {
+    this.TEXMFHOME = path5.join(texuserdir, "texmf");
+    this.TEXMFCONFIG = path5.join(texuserdir, "texmf-config");
+    this.TEXMFVAR = path5.join(texuserdir, "texmf-var");
+  }
+  withPortable() {
+    this.TEXMFHOME = env3["TEXLIVE_INSTALL_TEXMFHOME"] ?? this.TEXMFLOCAL;
+    this.TEXMFCONFIG = env3["TEXLIVE_INSTALL_TEXMFCONFIG"] ?? this.TEXMFSYSCONFIG;
+    this.TEXMFVAR = env3["TEXLIVE_INSTALL_TEXMFVAR"] ?? this.TEXMFSYSVAR;
+  }
   async *open() {
     for await (const tmp of mkdtemp()) {
-      const target = path4.join(tmp, "texlive.profile");
-      await writeFile(target, this.toString());
+      const target = path5.join(tmp, "texlive.profile");
+      await writeFile2(target, this.toString());
       yield target;
     }
   }
   toString() {
     const plain = this.toPlain({
       version: this.version.number,
-      groups: [platform2()]
+      groups: [platform3()]
     });
     return Object.entries(plain).map((entry) => entry.join(" ")).join("\n");
   }
@@ -66065,10 +69329,9 @@ var Profile = class extends Serializable {
     return this.tlpdbopt_w32_multi_user;
   }
 };
-_a = Profile;
 (() => {
   for (const key of ["instopt_adjustpath", "instopt_adjustrepo", "tlpdbopt_autobackup", "tlpdbopt_install_docfiles", "tlpdbopt_install_srcfiles", "tlpdbopt_desktop_integration", "tlpdbopt_file_assocs", "tlpdbopt_w32_multi_user", "option_menu_integration", "option_symlinks", "option_path", "option_adjustrepo", "option_autobackup", "option_doc", "option_src", "option_desktop_integration", "option_file_assocs", "option_w32_multi_user"]) {
-    Type(() => Number)(_a.prototype, key);
+    Type(() => Number)(Profile.prototype, key);
   }
 })();
 __decorate([
@@ -66184,97 +69447,122 @@ __decorate([
   __metadata("design:type", Boolean),
   __metadata("design:paramtypes", [])
 ], Profile.prototype, "option_w32_multi_user", null);
-var Patch = class {
-  constructor({ number: version3 }) {
-    this.hunks = Patch.HUNKS.filter(({ platforms = platform2(), versions: { since = -Infinity, until = Infinity } = {} }) => platforms === platform2() && since <= version3 && version3 < until);
+
+// lib/texlive/tlmgr/index.js
+init_tslib_es6();
+var import_exec6 = __toESM(require_exec(), 1);
+var import_decorator_cache_getter = __toESM(require_dist(), 1);
+import { readFile as readFile2 } from "fs/promises";
+import path7 from "path";
+
+// lib/ctan.js
+var import_http_client = __toESM(require_lib(), 1);
+var http3;
+async function pkg(name) {
+  http3 ??= new import_http_client.HttpClient();
+  const endpoint = `https://ctan.org/json/2.0/pkg/${name}`;
+  const { result, statusCode } = await http3.getJson(endpoint);
+  if (statusCode === import_http_client.HttpCodes.NotFound) {
+    throw new Error(`${endpoint} returned ${import_http_client.HttpCodes.NotFound}`);
   }
-  async apply(texdir) {
-    if (this.hunks.length > 0) {
-      info("Applying patches");
-      const changes = await Promise.all(this.hunks.map(async (hunk) => {
-        const target = path4.join(texdir, hunk.file);
-        const content = Buffer2.from(hunk.from.reduce((s, from, i) => s.replace(from, hunk.to[i] ?? ""), await readFile3(target, "utf8")));
-        const diff = await this.diff(hunk, content, texdir);
-        await writeFile(target, content);
-        return diff;
-      }));
-      info(changes.filter(Boolean).join("\n"));
+  return result ?? {};
+}
+
+// lib/texlive/tlmgr/conf.js
+var import_core2 = __toESM(require_core(), 1);
+var import_exec3 = __toESM(require_exec(), 1);
+var Conf = class {
+  constructor(options) {
+    this.options = options;
+  }
+  async texmf(key, value) {
+    if (value === void 0) {
+      const { stdout } = await (0, import_exec3.getExecOutput)("kpsewhich", ["-var-value", key], { silent: true });
+      return stdout.trim();
     }
-  }
-  async diff({ description, file }, input, cwd) {
-    try {
-      const linePrefix = "\x1B[34m>\x1B[0m ";
-      const { exitCode, stdout, stderr } = await (0, import_exec2.getExecOutput)("git", [
-        "diff",
-        "--no-index",
-        "--color",
-        `--line-prefix=${linePrefix}`,
-        "--",
-        file,
-        "-"
-      ], { input, cwd, silent: true, ignoreReturnCode: true });
-      switch (exitCode) {
-        case 0:
-          break;
-        case 1:
-          return linePrefix + description + "\n" + stdout.trimEnd();
-        default:
-          debug2(`git-diff exited with ${exitCode}: ${stderr}`);
+    if (this.options.version.number < 2010) {
+      (0, import_core2.exportVariable)(key, value);
+    } else {
+      await (0, import_exec3.exec)("tlmgr", ["conf", "texmf", key, value]);
+    }
+    if (key === "TEXMFLOCAL") {
+      try {
+        await makeLocalSkeleton(value, { TEXDIR: this.options.TEXDIR });
+        await (0, import_exec3.exec)("mktexlsr", [value]);
+      } catch (cause) {
+        info("Failed to initialize TEXMFLOCAL", { cause });
       }
-    } catch (cause) {
-      debug2("Failed to exec git-diff", { cause });
     }
-    return "";
   }
 };
-Patch.HUNKS = [{
-  description: "Fixes a syntax error.",
-  versions: { since: 2009, until: 2011 },
-  file: "tlpkg/TeXLive/TLWinGoo.pm",
-  from: [/foreach \$p qw\((.*)\)/u],
-  to: ["foreach $$p (qw($1))"]
-}, {
-  description: "Defines Code Page 65001 as an alias for UTF-8 on Windows.",
-  platforms: "win32",
-  versions: { since: 2015, until: 2016 },
-  file: "tlpkg/tlperl/lib/Encode/Alias.pm",
-  from: ["# utf8 is blessed :)\n"],
-  to: [`$&    define_alias(qr/cp65001/i => '"utf-8-strict"');
-`]
-}, {
-  description: "Makes it possible to use `\\` as a directory separator on Windows.",
-  platforms: "win32",
-  versions: { until: 2019 },
-  file: "tlpkg/TeXLive/TLUtils.pm",
-  from: ["split (/\\//, $tree)"],
-  to: ["split (/[\\/\\\\]/, $$tree)"]
-}, {
-  description: "Adds support for macOS 11 or later.",
-  platforms: "darwin",
-  versions: { since: 2017, until: 2020 },
-  file: "tlpkg/TeXLive/TLUtils.pm",
-  from: ["$os_major != 10", "$os_minor >= $mactex_darwin"],
-  to: ["$$os_major < 10", "$$os_major > 10 || $&"]
-}];
 
-// lib/tlmgr.js
-init_tslib_es6();
-var import_core3 = __toESM(require_core());
-var import_exec3 = __toESM(require_exec());
-var import_decorator_cache_getter2 = __toESM(require_dist());
-import path5 from "node:path";
+// lib/texlive/tlmgr/path.js
+var import_core3 = __toESM(require_core(), 1);
+import path6 from "path";
+var Path = class {
+  constructor(options) {
+    this.options = options;
+  }
+  async add() {
+    let dir;
+    try {
+      dir = await uniqueChild(path6.join(this.options.TEXDIR, "bin"));
+    } catch (cause) {
+      throw new Error("Unable to locate TeX Live's binary directory", {
+        cause
+      });
+    }
+    (0, import_core3.addPath)(dir);
+  }
+};
+
+// lib/texlive/tlmgr/pinning.js
+var import_exec4 = __toESM(require_exec(), 1);
+var Pinning = class {
+  constructor({ version: version3 }) {
+    if (version3.number < 2013) {
+      throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${version3}`);
+    }
+  }
+  async add(repo, ...globs) {
+    await (0, import_exec4.exec)("tlmgr", ["pinning", "add", repo, ...globs]);
+  }
+};
+
+// lib/texlive/tlmgr/repository.js
+var import_exec5 = __toESM(require_exec(), 1);
+var Repository = class {
+  constructor({ version: version3 }) {
+    if (version3.number < 2012) {
+      throw new RangeError(`\`repository\` action is not implemented in TeX Live ${version3}`);
+    }
+  }
+  async add(repo, tag) {
+    const args = ["repository", "add", repo];
+    if (tag !== void 0) {
+      args.push(tag);
+    }
+    const { exitCode, stderr } = await (0, import_exec5.getExecOutput)("tlmgr", args, {
+      ignoreReturnCode: true
+    });
+    if (exitCode !== 0 && !stderr.includes("repository or its tag already defined")) {
+      throw new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
+    }
+  }
+};
+
+// lib/texlive/tlmgr/index.js
 var Tlmgr = class {
-  constructor(tlversion, TEXDIR) {
-    this.tlversion = tlversion;
-    this.TEXDIR = TEXDIR;
+  constructor(options) {
+    this.options = options;
   }
   get conf() {
-    return new Tlmgr.Conf(this.tlversion, this.TEXDIR);
+    return new Conf(this.options);
   }
   async install(packages) {
     const args = ["install", ...packages];
     if (args.length > 1) {
-      const { exitCode, stderr } = await (0, import_exec3.getExecOutput)("tlmgr", args, {
+      const { exitCode, stderr } = await (0, import_exec6.getExecOutput)("tlmgr", args, {
         ignoreReturnCode: true
       });
       check(stderr);
@@ -66298,135 +69586,239 @@ var Tlmgr = class {
           info(`  ${name} (in CTAN) => ${pkg2.texlive} (in TeX Live)`);
           return pkg2.texlive;
         }));
-        check(await (0, import_exec3.getExecOutput)("tlmgr", ["install", ...tlnames]));
+        check(await (0, import_exec6.getExecOutput)("tlmgr", ["install", ...tlnames]));
       }
     }
   }
   async *list() {
-    const tlpdbPath = path5.join(this.TEXDIR, "tlpkg", "texlive.tlpdb");
-    yield* tlpdb(tlpdbPath);
+    const tlpdbPath = path7.join(this.options.TEXDIR, "tlpkg", "texlive.tlpdb");
+    let db;
+    try {
+      db = await readFile2(tlpdbPath, "utf8");
+    } catch (cause) {
+      info(`Failed to read ${tlpdbPath}`, { cause });
+      return;
+    }
+    try {
+      yield* tlpdb(db);
+    } catch (cause) {
+      info(`Failed to parse ${tlpdbPath}`, { cause });
+    }
   }
   get path() {
-    return new Tlmgr.Path(this.TEXDIR);
+    return new Path(this.options);
   }
   get pinning() {
-    return new Tlmgr.Pinning(this.tlversion);
+    return new Pinning(this.options);
   }
   get repository() {
-    return new Tlmgr.Repository(this.tlversion);
+    return new Repository(this.options);
   }
   async update(packages = [], options = {}) {
     const args = options.all ?? false ? ["--all"] : [...packages];
     if (options.self ?? false) {
-      args.push(this.tlversion.number > 2008 ? "--self" : "texlive.infra");
+      args.push(this.options.version.number > 2008 ? "--self" : "texlive.infra");
     }
-    if ((options.reinstallForciblyRemoved ?? false) && this.tlversion.number >= 2009) {
+    if ((options.reinstallForciblyRemoved ?? false) && this.options.version.number >= 2009) {
       args.unshift("--reinstall-forcibly-removed");
     }
-    await (0, import_exec3.exec)("tlmgr", ["update", ...args]);
+    await (0, import_exec6.exec)("tlmgr", ["update", ...args]);
   }
   async version() {
-    await (0, import_exec3.exec)("tlmgr", ["--version"]);
+    await (0, import_exec6.exec)("tlmgr", ["--version"]);
   }
 };
 __decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", Tlmgr.Conf),
+  import_decorator_cache_getter.cache,
+  __metadata("design:type", Conf),
   __metadata("design:paramtypes", [])
 ], Tlmgr.prototype, "conf", null);
 __decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", Tlmgr.Path),
+  import_decorator_cache_getter.cache,
+  __metadata("design:type", Path),
   __metadata("design:paramtypes", [])
 ], Tlmgr.prototype, "path", null);
 __decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", Tlmgr.Pinning),
+  import_decorator_cache_getter.cache,
+  __metadata("design:type", Pinning),
   __metadata("design:paramtypes", [])
 ], Tlmgr.prototype, "pinning", null);
 __decorate([
-  import_decorator_cache_getter2.cache,
-  __metadata("design:type", Tlmgr.Repository),
+  import_decorator_cache_getter.cache,
+  __metadata("design:type", Repository),
   __metadata("design:paramtypes", [])
 ], Tlmgr.prototype, "repository", null);
-(function(Tlmgr2) {
-  class Conf {
-    constructor(tlversion, TEXDIR) {
-      this.tlversion = tlversion;
-      this.TEXDIR = TEXDIR;
-    }
-    async texmf(key, value) {
-      if (value === void 0) {
-        const { stdout } = await (0, import_exec3.getExecOutput)("kpsewhich", ["-var-value", key], { silent: true });
-        return stdout.trim();
-      }
-      if (this.tlversion.number < 2010) {
-        (0, import_core3.exportVariable)(key, value);
-      } else {
-        await (0, import_exec3.exec)("tlmgr", ["conf", "texmf", key, value]);
-      }
-      if (key === "TEXMFLOCAL") {
-        try {
-          await makeLocalSkeleton(value, { TEXDIR: this.TEXDIR });
-          await (0, import_exec3.exec)("mktexlsr", [value]);
-        } catch (cause) {
-          info("Failed to initialize TEXMFLOCAL", { cause });
-        }
-      }
-    }
-  }
-  Tlmgr2.Conf = Conf;
-  class Path {
-    constructor(TEXDIR) {
-      this.TEXDIR = TEXDIR;
-    }
-    async add() {
-      let dir;
-      try {
-        dir = await determine(path5.join(this.TEXDIR, "bin", "*"));
-      } catch (cause) {
-        throw new Error("Unable to locate TeX Live's binary directory", {
-          cause
-        });
-      }
-      (0, import_core3.addPath)(dir);
-    }
-  }
-  Tlmgr2.Path = Path;
-  class Pinning {
-    constructor({ number: tlversion }) {
-      if (tlversion < 2013) {
-        throw new RangeError(`\`pinning\` action is not implemented in TeX Live ${tlversion}`);
-      }
-    }
-    async add(repo, ...globs) {
-      await (0, import_exec3.exec)("tlmgr", ["pinning", "add", repo, ...globs]);
-    }
-  }
-  Tlmgr2.Pinning = Pinning;
-  class Repository {
-    constructor({ number: tlversion }) {
-      if (tlversion < 2012) {
-        throw new RangeError(`\`repository\` action is not implemented in TeX Live ${tlversion}`);
-      }
-    }
-    async add(repo, tag) {
-      const args = ["repository", "add", repo];
-      if (tag !== void 0) {
-        args.push(tag);
-      }
-      const { exitCode, stderr } = await (0, import_exec3.getExecOutput)("tlmgr", args, {
-        ignoreReturnCode: true
-      });
-      if (exitCode !== 0 && !stderr.includes("repository or its tag already defined")) {
-        throw new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
-      }
-    }
-  }
-  Tlmgr2.Repository = Repository;
-})(Tlmgr || (Tlmgr = {}));
 
-// lib/action.js
+// lib/texlive/version.js
+init_tslib_es6();
+var import_decorator_cache_getter2 = __toESM(require_dist(), 1);
+import { platform as platform4 } from "os";
+var Version = class {
+  constructor(spec) {
+    this.spec = spec;
+    if (/^199[6-9]|200[0-7]$/u.test(spec)) {
+      throw new RangeError("Versions prior to 2008 are not supported");
+    } else if (/^20\d\d$/u.test(spec) && spec <= Version.LATEST) {
+      if (platform4() === "darwin" && spec < "2013") {
+        throw new RangeError("Versions prior to 2013 does not work on 64-bit macOS");
+      }
+    } else if (spec !== "latest") {
+      throw new TypeError(`'${spec}' is not a valid version spec`);
+    }
+  }
+  get number() {
+    return Number.parseInt(this.toString());
+  }
+  isLatest() {
+    return this.spec === "latest" || this.toString() === Version.LATEST;
+  }
+  toString() {
+    return this.spec === "latest" ? Version.LATEST : this.spec;
+  }
+  toJSON() {
+    return this.toString();
+  }
+  [Symbol.toPrimitive](hint) {
+    return hint === "number" ? this.number : this.toString();
+  }
+  static get LATEST() {
+    return this.latest;
+  }
+  static async checkLatest() {
+    const pkg2 = await pkg("texlive");
+    const latest = pkg2.version?.number ?? "";
+    if (!/^20\d\d$/u.test(latest)) {
+      throw new TypeError(`Invalid response: ${JSON.stringify(pkg2)}`);
+    }
+    return Version.latest = latest;
+  }
+  static async resolve(spec) {
+    if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 3, 18)) {
+      try {
+        info("Checking for the latest version of TeX Live");
+        info(`Latest version: ${await Version.checkLatest()}`);
+      } catch (cause) {
+        info("Failed to check for the latest version", { cause });
+        info(`Instead ${Version.LATEST} will be used as the latest version`);
+      }
+    }
+    return new Version(spec);
+  }
+};
+Version.latest = "2022";
+__decorate([
+  import_decorator_cache_getter2.cache,
+  __metadata("design:type", Number),
+  __metadata("design:paramtypes", [])
+], Version.prototype, "number", null);
+
+// lib/action/inputs.js
+var Inputs;
+(function(Inputs2) {
+  async function load() {
+    const version3 = await Version.resolve(getInput2("version", { default: "latest" }));
+    const env4 = Env.load(version3);
+    const inputs = {
+      cache: getInput2("cache", { type: Boolean }),
+      forceUpdateCache: (env4.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? "0") !== "0",
+      packages: await loadPackageList(),
+      prefix: getInput2("prefix", { default: env4.TEXLIVE_INSTALL_PREFIX }),
+      texdir: getInput2("texdir"),
+      tlcontrib: getInput2("tlcontrib", { type: Boolean }),
+      updateAllPackages: getInput2("update-all-packages", { type: Boolean }),
+      version: version3
+    };
+    validate3(inputs);
+    return inputs;
+  }
+  Inputs2.load = load;
+  function validate3(inputs) {
+    if (inputs.cache && !(0, import_cache2.isFeatureAvailable)()) {
+      warn("Caching is disabled because cache service is not available");
+      inputs.cache = false;
+    }
+    if (!inputs.version.isLatest()) {
+      if (inputs.tlcontrib) {
+        warn("`tlcontrib` is currently ignored for older versions");
+        inputs.tlcontrib = false;
+      }
+      if (inputs.updateAllPackages) {
+        info("`update-all-packages` is ignored for older versions");
+        inputs.updateAllPackages = false;
+      }
+    }
+  }
+  async function loadPackageList() {
+    const packages = [];
+    for await (const { name } of loadDependsTxt()) {
+      packages.push(name);
+    }
+    return new Set(packages.sort());
+  }
+  async function* loadDependsTxt() {
+    const inline = getInput2("packages");
+    if (inline !== void 0) {
+      yield* depends_txt_exports.parse(inline);
+    }
+    const file = getInput2("package-file");
+    if (file !== void 0) {
+      yield* depends_txt_exports.parse(await readFile3(file, "utf8"));
+    }
+  }
+})(Inputs || (Inputs = {}));
+
+// lib/action/outputs.js
+init_tslib_es6();
+var import_core4 = __toESM(require_core(), 1);
+var Outputs = class extends Serializable {
+  constructor() {
+    super(...arguments);
+    this.cacheHit = false;
+  }
+  emit() {
+    for (const [key, value] of Object.entries(this.toJSON())) {
+      (0, import_core4.setOutput)(key, value);
+    }
+  }
+};
+__decorate([
+  Expose({ name: "cache-hit" }),
+  __metadata("design:type", Boolean)
+], Outputs.prototype, "cacheHit", void 0);
+__decorate([
+  Expose(),
+  Type(() => String),
+  __metadata("design:type", Version)
+], Outputs.prototype, "version", void 0);
+
+// lib/action/state.js
+init_tslib_es6();
+var import_core5 = __toESM(require_core(), 1);
+var State = class extends Serializable {
+  constructor() {
+    super();
+    this.post = false;
+    const state = (0, import_core5.getState)(State.NAME);
+    if (state !== "") {
+      plainToClassFromExist(this, JSON.parse(state));
+      this.post = true;
+    }
+  }
+  save() {
+    (0, import_core5.saveState)(State.NAME, JSON.stringify(this));
+  }
+};
+State.NAME = "post";
+__decorate([
+  Expose(),
+  __metadata("design:type", String)
+], State.prototype, "key", void 0);
+__decorate([
+  Expose(),
+  __metadata("design:type", String)
+], State.prototype, "texdir", void 0);
+
+// lib/action/index.js
 async function run() {
   try {
     const state = new State();
@@ -66438,9 +69830,9 @@ async function run() {
   } catch (error2) {
     if (isNativeError2(error2)) {
       debug2(error2.stack);
-      (0, import_core4.setFailed)(error2.message);
+      (0, import_core6.setFailed)(error2.message);
     } else {
-      (0, import_core4.setFailed)(`${error2}`);
+      (0, import_core6.setFailed)(`${error2}`);
     }
   }
 }
@@ -66448,7 +69840,7 @@ async function main(state = new State()) {
   const inputs = await Inputs.load();
   const outputs = new Outputs();
   outputs.version = inputs.version;
-  const profile = new Profile(inputs.version, inputs.texmf);
+  const profile = new Profile(inputs);
   let installPackages = inputs.packages.size > 0;
   if (inputs.cache) {
     await import_core.group("Restoring cache", async () => {
@@ -66467,19 +69859,14 @@ async function main(state = new State()) {
     });
   }
   if (!outputs.cacheHit) {
-    let installtl;
-    await import_core.group("Acquiring install-tl", async () => {
-      installtl = await InstallTL.acquire(inputs.version);
-      await installtl.version();
-    });
     await import_core.group("Installation profile", async () => {
       info(profile.toString());
     });
     await import_core.group("Installing TeX Live", async () => {
-      await installtl.run(profile);
+      await installTL(profile);
     });
   }
-  const tlmgr = new Tlmgr(inputs.version, profile.TEXDIR);
+  const tlmgr = new Tlmgr(profile);
   await tlmgr.path.add();
   if (outputs.cacheHit) {
     if (inputs.version.isLatest()) {
@@ -66491,7 +69878,7 @@ async function main(state = new State()) {
         }
       });
     }
-    const entries = await Promise.all(["TEXMFLOCAL", ...["TEXMFCONFIG", "TEXMFVAR", "TEXMFHOME"]].map(async (key) => {
+    const entries = await Promise.all(["TEXMFLOCAL", ...["TEXMFHOME", "TEXMFCONFIG", "TEXMFVAR"]].map(async (key) => {
       const value = profile[key];
       const old = await tlmgr.conf.texmf(key);
       return old === value ? [] : [[key, value]];
@@ -66506,7 +69893,7 @@ async function main(state = new State()) {
   }
   if (inputs.tlcontrib) {
     await import_core.group("Setting up TLContrib", async () => {
-      await tlmgr.repository.add(tlnet.CONTRIB.href, "tlcontrib");
+      await tlmgr.repository.add(tlnet_exports.CONTRIB.href, "tlcontrib");
       await tlmgr.pinning.add("tlcontrib", "*");
     });
   }
@@ -66535,7 +69922,7 @@ async function post({ key, texdir }) {
   }
 }
 function getCacheKeys({ version: version3, packages }) {
-  const secondary = `setup-texlive-${platform3()}-${arch2()}-${version3}-`;
+  const secondary = `setup-texlive-${platform5()}-${arch2()}-${version3}-`;
   const primary = secondary + createHash("sha256").update(JSON.stringify([...packages])).digest("hex");
   const unique = `${primary}-${randomUUID().replaceAll("-", "")}`;
   return [unique, primary, secondary];
