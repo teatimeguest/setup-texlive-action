@@ -104,12 +104,13 @@ because its hash will be used as part of the cache key.
 
 All inputs are optional.
 
+<!-- dprint-ignore -->
 | Name                  | Type   | Description                                                                                                                                                                                     |
 | --------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `cache`               | Bool   | <p>Enable caching for [`TEXDIR`][texdir].</p> **Default:**&ensp;`true`                                                                                                                          |
 | `package-file`        | String | File containing the names of TeX packages to be installed, delimited by whitespaces. Everything after a `#` is treated as a comment. The [`DEPENDS.txt`][depends-txt] format is also supported. |
 | `packages`            | String | Whitespace-delimited TeX package names to be installed. Schemes and collections are also acceptable.                                                                                            |
-| `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p> **Default:**&ensp;<code> [$RUNNER_TEMP][actions-env]/setup-texlive</code>          |
+| `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p> **Default:**&ensp;<code>[$RUNNER_TEMP][actions-env]/setup-texlive</code>           |
 | `texdir`              | String | TeX Live system directory. This has the same effect as the installer's [`-texdir`][install-tl-texdir] option and takes precedence over the `prefix` input and related environment variables.    |
 | `tlcontrib`           | Bool   | <p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                          |
 | `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                     |
@@ -141,23 +142,24 @@ Setting this to anything other than `0`, the action will use
 In addition,
 the following [official environment variables][install-tl-env] are supported:
 
-| Name                               | Default                                                 |
-| ---------------------------------- | ------------------------------------------------------- |
-| `TEXLIVE_DOWNLOADER`               |                                                         |
-| `TL_DOWNLOAD_PROGRAM`              |                                                         |
-| `TL_DOWNLOAD_ARGS`                 |                                                         |
-| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                                     |
-| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                         |
-| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                         |
-| `TEXLIVE_INSTALL_NO_RESUME`        |                                                         |
-| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                                     |
-| `TEXLIVE_INSTALL_PAPER`            |                                                         |
-| `TEXLIVE_INSTALL_PREFIX`           | <code> [$RUNNER_TEMP][actions-env]/setup-texlive</code> |
-| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                         |
-| `TEXLIVE_INSTALL_TEXMFHOME`        | `~/texmf`                                               |
-| `TEXLIVE_INSTALL_TEXMFCONFIG`      | `~/.local/texlive/<version>/texmf-config`               |
-| `TEXLIVE_INSTALL_TEXMFVAR`         | `~/.local/texlive/<version>/texmf-var`                  |
-| `NOPERLDOC`                        |                                                         |
+<!-- dprint-ignore -->
+| Name                               | Default                                                |
+| ---------------------------------- | ------------------------------------------------------ |
+| `TEXLIVE_DOWNLOADER`               |                                                        |
+| `TL_DOWNLOAD_PROGRAM`              |                                                        |
+| `TL_DOWNLOAD_ARGS`                 |                                                        |
+| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                                    |
+| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                        |
+| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                        |
+| `TEXLIVE_INSTALL_NO_RESUME`        |                                                        |
+| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                                    |
+| `TEXLIVE_INSTALL_PAPER`            |                                                        |
+| `TEXLIVE_INSTALL_PREFIX`           | <code>[$RUNNER_TEMP][actions-env]/setup-texlive</code> |
+| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                        |
+| `TEXLIVE_INSTALL_TEXMFHOME`        | `~/texmf`                                              |
+| `TEXLIVE_INSTALL_TEXMFCONFIG`      | `~/.local/texlive/<version>/texmf-config`              |
+| `TEXLIVE_INSTALL_TEXMFVAR`         | `~/.local/texlive/<version>/texmf-var`                 |
+| `NOPERLDOC`                        |                                                        |
 
 If `prefix` and `TEXLIVE_INSTALL_PREFIX` are both set, `prefix` will be used.
 
