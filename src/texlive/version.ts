@@ -57,7 +57,11 @@ export class Version {
   }
 
   static async resolve(this: void, spec: string): Promise<Version> {
-    if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 4, 1)) {
+    // TeX Live 2023 is scheduled for release on 19 March.
+    // See: https://www.tug.org/texlive/
+    //
+    // if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 4, 1)) {
+    if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 3, 18)) {
       try {
         log.info('Checking for the latest version of TeX Live');
         log.info(`Latest version: ${await Version.checkLatest()}`);
