@@ -73,8 +73,8 @@ You can use an older version of TeX Live by setting `version`:
 ```
 
 The action will install it by using [historic archive][historic].
-Supported versions are `2008` to `2022` for Linux and Windows,
-and `2013` to `2022` for macOS.
+Supported versions are `2008` to `2023` for Linux and Windows,
+and `2013` to `2023` for macOS.
 
 > **Note**:&ensp;Versions `2008`–`2012` do not work on `macos-latest`
 > because the `kpsewhich` for those versions is a 32-bit executable
@@ -114,7 +114,7 @@ All inputs are optional.
 | `texdir`              | String | TeX Live system directory. This has the same effect as the installer's [`-texdir`][install-tl-texdir] option and takes precedence over the `prefix` input and related environment variables.    |
 | `tlcontrib`           | Bool   | <p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                          |
 | `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                     |
-| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2022`, and `latest`.</p> **Default:**&ensp;`latest`                                                                             |
+| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2023`, and `latest`.</p> **Default:**&ensp;`latest`                                                                             |
 
 ## Outputs
 

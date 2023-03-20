@@ -41,7 +41,7 @@ export class Version {
     return hint === 'number' ? this.number : this.toString();
   }
 
-  private static latest: string = '2022';
+  private static latest: string = '2023';
 
   static get LATEST(): string {
     return this.latest;
