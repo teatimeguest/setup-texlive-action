@@ -17,7 +17,8 @@ const devNull: Buffer = Buffer.alloc(0);
 
 export async function installTL(profile: Profile): Promise<void> {
   const dir = restore(profile.version) ?? await download(profile.version);
-  const installer = path.join(dir, executable(profile.version));
+  const base = executable(profile.version);
+  const installer = path.format({ dir, base });
   // Print version info.
   await exec(installer, ['-version'], { input: devNull });
 
@@ -36,7 +37,20 @@ export async function installTL(profile: Profile): Promise<void> {
         repo.href,
       );
     }
-    tlpkg.check(await getExecOutput(installer, options, { input: devNull }));
+    const { exitCode, stderr } = await getExecOutput(installer, options, {
+      input: devNull,
+      ignoreReturnCode: true,
+    });
+    if (exitCode !== 0) {
+      throw new Error(
+        stderr.includes('and the repository being accessed are not compatible')
+          ? 'It seems that the CTAN mirrors have not completed synchronisation'
+            + ' against a release of new version of TeX Live.'
+            + ' Please try re-running the workflow after some time.'
+          : `${base} exited with ${exitCode}: ${stderr}`,
+      );
+    }
+    tlpkg.check(stderr);
   }
 
   await tlpkg.patch(profile);
