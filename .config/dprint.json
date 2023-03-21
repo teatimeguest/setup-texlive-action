@@ -27,7 +27,7 @@
     "**/*.md"
   ],
   "plugins": [
-    "https://plugins.dprint.dev/typescript-0.83.0.wasm",
+    "https://plugins.dprint.dev/typescript-0.84.0.wasm",
     "https://plugins.dprint.dev/markdown-0.15.2.wasm"
   ]
 }
