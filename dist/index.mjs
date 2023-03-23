@@ -57697,7 +57697,7 @@ var Version = class {
     return Version.latest = latest;
   }
   static async resolve(spec) {
-    if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 3, 18)) {
+    if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 3, 17)) {
       try {
         info("Checking for the latest version of TeX Live");
         info(`Latest version: ${await Version.checkLatest()}`);
