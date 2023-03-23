@@ -1,16 +1,17 @@
+import { env } from 'node:process';
+
 import * as core from '@actions/core';
 import type { DeepWritable } from 'ts-essentials';
 
 import * as action from '#/action';
+import { CacheClient } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
 import { Outputs } from '#/action/outputs';
-import { State } from '#/action/state';
 import { Profile, Tlmgr, Version, installTL } from '#/texlive';
 import { Conf } from '#/texlive/tlmgr/conf';
 import { Path } from '#/texlive/tlmgr/path';
 import { Pinning } from '#/texlive/tlmgr/pinning';
 import { Repository } from '#/texlive/tlmgr/repository';
-import * as util from '#/utility';
 
 jest.unmock('#/action');
 
@@ -27,7 +28,6 @@ describe('main', () => {
     inputs.tlcontrib = false;
     inputs.updateAllPackages = false;
     inputs.version = v`latest`;
-    inputs.forceUpdateCache = Math.random() < 0.5;
   });
 
   const cacheTypes = [
@@ -38,24 +38,26 @@ describe('main', () => {
   ] as const;
 
   const setCacheType = ([type, keyType]: typeof cacheTypes[number]) => {
-    jest.mocked(util.restoreCache).mockImplementationOnce(
-      async (target, unique, [primary = '', secondary = '']) => {
-        return (type === 'primary' ? primary : (secondary + '-<hash>'))
-          + (keyType === 'unique' ? '-<uuid>' : '');
-      },
-    );
+    // eslint-disable-next-line jest/unbound-method
+    jest.mocked(CacheClient.prototype.restore).mockResolvedValueOnce({
+      hit: type === 'primary'
+        && (env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] === '0'
+          || keyType === 'unique'),
+      full: type === 'primary',
+      restored: true,
+    });
   };
 
   it('installs TeX Live if cache not found', async () => {
     await expect(action.main()).toResolve();
-    expect(util.restoreCache).toHaveBeenCalled();
+    expect(CacheClient.prototype.restore).toHaveBeenCalled();
     expect(installTL).toHaveBeenCalled();
   });
 
   it('does not use cache if input cache is false', async () => {
     inputs.cache = false;
     await expect(action.main()).toResolve();
-    expect(util.restoreCache).not.toHaveBeenCalled();
+    expect(CacheClient.prototype.restore).not.toHaveBeenCalled();
   });
 
   it.each(cacheTypes)(
@@ -64,38 +66,6 @@ describe('main', () => {
       setCacheType(kind);
       await expect(action.main()).toResolve();
       expect(installTL).not.toHaveBeenCalled();
-    },
-  );
-
-  it.each<[boolean, typeof cacheTypes[number]]>([
-    [true, cacheTypes[0]],
-    [true, cacheTypes[1]],
-    [true, cacheTypes[2]],
-    [true, cacheTypes[3]],
-    [false, cacheTypes[2]],
-    [false, cacheTypes[3]],
-  ])('saves info if primary cache not found (case %s)', async (force, kind) => {
-    setCacheType(kind);
-    inputs.forceUpdateCache = force;
-    await expect(action.main()).toResolve();
-    expect(State.prototype.save).toHaveBeenCalled();
-    const mock = jest.mocked(State).mock;
-    expect(mock.instances).toHaveLength(1);
-    expect(mock.instances[0]).toHaveProperty('key');
-    expect(mock.instances[0]).toHaveProperty('texdir');
-  });
-
-  it.each([cacheTypes[0], cacheTypes[1]] as const)(
-    'does not save TEXDIR if primary cache found',
-    async (...kind) => {
-      setCacheType(kind);
-      inputs.forceUpdateCache = false;
-      await expect(action.main()).toResolve();
-      expect(State.prototype.save).toHaveBeenCalled();
-      const mock = jest.mocked(State).mock;
-      expect(mock.instances).toHaveLength(1);
-      expect(mock.instances[0]).toHaveProperty('key');
-      expect(mock.instances[0]).not.toHaveProperty('texdir');
     },
   );
 
@@ -136,7 +106,9 @@ describe('main', () => {
       setCacheType(kind);
       await expect(action.main()).toResolve();
       expect(Path.prototype.add).not.toHaveBeenCalledBefore(
-        jest.mocked<(...args: Array<any>) => unknown>(util.restoreCache),
+        jest.mocked<(...args: Array<any>) => unknown>(
+          CacheClient.prototype.restore,
+        ),
       );
       expect(Path.prototype.add).toHaveBeenCalled();
     },
@@ -258,7 +230,7 @@ describe('main', () => {
 
   describe.each([[true], [false]])('%p', (force) => {
     beforeEach(() => {
-      inputs.forceUpdateCache = force;
+      env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = force ? '1' : '0';
     });
 
     it('does not install any packages by default', async () => {
@@ -285,13 +257,5 @@ describe('main', () => {
         expect(Tlmgr.prototype.install).toHaveBeenCalled();
       },
     );
-  });
-});
-
-describe('post', () => {
-  it('saves TEXDIR to cache if cache key and texdir are set', async () => {
-    await expect(action.post({ key: '<key>', texdir: '<texdir>' } as State))
-      .toResolve();
-    expect(util.saveCache).toHaveBeenCalled();
   });
 });

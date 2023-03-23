@@ -74,6 +74,22 @@ jest.mock('@actions/tool-cache', () => {
   };
 });
 
+jest.mock('#/action/cache', () => {
+  class CacheClient {
+    async restore(): Promise<void> {}
+    update(): void {}
+    saveState(): void {}
+  }
+  CacheClient.prototype.restore = jest.fn().mockResolvedValue({
+    hit: false,
+    full: false,
+    restored: false,
+  });
+  CacheClient.prototype.update = jest.fn();
+  CacheClient.prototype.saveState = jest.fn();
+  return { CacheClient, save: jest.fn().mockResolvedValue(undefined) };
+});
+
 jest.unmock('#/action/env');
 
 jest.mock('#/action/inputs', () => {
@@ -84,10 +100,6 @@ jest.mock('#/action/outputs', () => {
   const { Outputs } = jest.requireActual('#/action/outputs');
   jest.spyOn(Outputs.prototype, 'emit');
   return { Outputs };
-});
-
-jest.mock('#/action/state', () => {
-  return jest.createMockFromModule('#/action/state');
 });
 
 jest.mock('#/ctan', () => {

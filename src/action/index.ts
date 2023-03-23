@@ -1,25 +1,23 @@
-import { createHash, randomUUID } from 'node:crypto';
-import { arch, platform } from 'node:os';
 import { isNativeError } from 'node:util/types';
 
-import { setFailed } from '@actions/core';
+import { getState, saveState, setFailed } from '@actions/core';
 import { keys } from 'ts-transformer-keys';
 
+import { CacheClient, save as saveCache } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
 import { Outputs } from '#/action/outputs';
-import { State } from '#/action/state';
 import * as log from '#/log';
 import { Profile, Tlmgr, installTL, tlnet } from '#/texlive';
 import type { UserTrees } from '#/texmf';
-import { restoreCache, saveCache } from '#/utility';
 
 export async function run(): Promise<void> {
+  const state = 'POST';
   try {
-    const state = new State();
-    if (!state.post) {
-      await main(state);
+    if (getState(state) === '') {
+      await main();
+      saveState(state, '1');
     } else {
-      await post(state);
+      await post();
     }
   } catch (error) {
     if (isNativeError(error)) {
@@ -31,38 +29,27 @@ export async function run(): Promise<void> {
   }
 }
 
-export async function main(state: State = new State()): Promise<void> {
+export async function main(): Promise<void> {
   const inputs = await Inputs.load();
   const outputs = new Outputs();
   outputs.version = inputs.version;
 
   const profile = new Profile(inputs);
-  let installPackages = inputs.packages.size > 0;
+  const cache = new CacheClient({
+    TEXDIR: profile.TEXDIR,
+    packages: inputs.packages,
+    version: inputs.version,
+  });
+  let cacheInfo = { hit: false, full: false, restored: false };
 
   if (inputs.cache) {
     await log.group('Restoring cache', async () => {
-      const [unique, primary, secondary] = getCacheKeys(inputs);
-      state.key = inputs.forceUpdateCache ? unique : primary;
-      const restored = await restoreCache(
-        profile.TEXDIR,
-        unique,
-        [primary, secondary],
-      );
-      if (restored?.startsWith(state.key) === true) {
-        state.key = restored;
-      } else {
-        state.texdir = profile.TEXDIR;
-        log.info(
-          'After the job completes, TEXDIR will be saved to cache with key:',
-        );
-        log.info('  ' + state.key);
-      }
-      outputs.cacheHit = restored !== undefined;
-      installPackages &&= restored?.startsWith(primary) !== true;
+      cacheInfo = await cache.restore();
     });
+    outputs.cacheHit = cacheInfo.restored;
   }
 
-  if (!outputs.cacheHit) {
+  if (!cacheInfo.restored) {
     await log.group('Installation profile', async () => {
       log.info(profile.toString());
     });
@@ -74,7 +61,7 @@ export async function main(state: State = new State()): Promise<void> {
   const tlmgr = new Tlmgr(profile);
   await tlmgr.path.add();
 
-  if (outputs.cacheHit) {
+  if (cacheInfo.restored) {
     if (inputs.version.isLatest()) {
       const target = inputs.updateAllPackages ? 'all packages' : 'tlmgr';
       await log.group(`Updating ${target}`, async () => {
@@ -108,7 +95,7 @@ export async function main(state: State = new State()): Promise<void> {
     });
   }
 
-  if (installPackages) {
+  if (!cacheInfo.full && inputs.packages.size > 0) {
     await log.group('Installing packages', async () => {
       await tlmgr.install(inputs.packages);
     });
@@ -122,26 +109,10 @@ export async function main(state: State = new State()): Promise<void> {
     }
   });
 
-  state.save();
+  cache.saveState();
   outputs.emit();
 }
 
-export async function post({ key, texdir }: Readonly<State>): Promise<void> {
-  if (key !== undefined) {
-    if (texdir !== undefined) {
-      await saveCache(texdir, key);
-    } else {
-      log.info(
-        `Cache hit occurred on the primary key ${key}, not saving cache`,
-      );
-    }
-  }
-}
-
-function getCacheKeys({ version, packages }: Inputs): [string, string, string] {
-  const secondary = `setup-texlive-${platform()}-${arch()}-${version}-`;
-  const primary = secondary
-    + createHash('sha256').update(JSON.stringify([...packages])).digest('hex');
-  const unique = `${primary}-${randomUUID().replaceAll('-', '')}`;
-  return [unique, primary, secondary];
+export async function post(): Promise<void> {
+  await saveCache();
 }

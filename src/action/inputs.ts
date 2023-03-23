@@ -10,7 +10,6 @@ import { getInput } from '#/utility';
 
 export interface Inputs {
   readonly cache: boolean;
-  readonly forceUpdateCache: boolean;
   readonly packages: ReadonlySet<string>;
   readonly prefix: string;
   readonly texdir?: string | undefined;
@@ -27,7 +26,6 @@ export namespace Inputs {
     const env = Env.load(version);
     const inputs = {
       cache: getInput('cache', { type: Boolean }),
-      forceUpdateCache: (env.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? '0') !== '0',
       packages: await loadPackageList(),
       prefix: getInput('prefix', { default: env.TEXLIVE_INSTALL_PREFIX }),
       texdir: getInput('texdir'),
