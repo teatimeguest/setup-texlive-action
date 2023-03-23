@@ -49,7 +49,7 @@ inputs:
   version:
     description: >-
       TeX Live version to install.
-      Supported values are `2008` to `2022`, and `latest`.
+      Supported values are `2008` to `2023`, and `latest`.
     default: latest
     required: false
 outputs:

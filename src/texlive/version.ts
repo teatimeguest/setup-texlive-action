@@ -41,7 +41,7 @@ export class Version {
     return hint === 'number' ? this.number : this.toString();
   }
 
-  private static latest: string = '2022';
+  private static latest: string = '2023';
 
   static get LATEST(): string {
     return this.latest;
@@ -61,7 +61,7 @@ export class Version {
     // See: https://www.tug.org/texlive/
     //
     // if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 4, 1)) {
-    if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 3, 18)) {
+    if (Date.now() > Date.UTC(Number.parseInt(Version.LATEST) + 1, 3, 17)) {
       try {
         log.info('Checking for the latest version of TeX Live');
         log.info(`Latest version: ${await Version.checkLatest()}`);

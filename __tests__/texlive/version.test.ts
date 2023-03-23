@@ -6,7 +6,7 @@ import { Version } from '#/texlive/version';
 jest.unmock('#/texlive/version');
 
 describe('constructor', () => {
-  it.each(['2008', '2013', '2021', 'latest'])('accepts %p', (spec) => {
+  it.each(['2008', '2013', '2022', 'latest'])('accepts %p', (spec) => {
     expect(() => new Version(spec)).not.toThrow();
   });
 
