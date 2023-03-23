@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { exec, getExecOutput } from '@actions/exec';
+import { type ExecOutput, exec, getExecOutput } from '@actions/exec';
 import { cache as Cache } from 'decorator-cache-getter';
 
 import * as ctan from '#/ctan';
@@ -120,7 +120,20 @@ export class Tlmgr {
     ) {
       args.unshift('--reinstall-forcibly-removed');
     }
-    await exec('tlmgr', ['update', ...args]);
+    const { exitCode, stderr, stdout } = await getExecOutput(
+      'tlmgr',
+      ['update', ...args],
+      { ignoreReturnCode: true },
+    );
+    if (exitCode !== 0) {
+      const error = new Error(
+        `tlmgr exited with ${exitCode}: ${stderr}`,
+      ) as Error & ExecOutput;
+      error.exitCode = exitCode;
+      error.stderr = stderr;
+      error.stdout = stdout;
+      throw error;
+    }
   }
 
   async version(this: void): Promise<void> {

@@ -148,13 +148,30 @@ describe('main', () => {
   );
 
   it.each(cacheTypes)(
+    'updates tlmgr even for older versions',
+    async (...kind) => {
+      setCacheType(kind);
+      inputs.updateAllPackages = true;
+      inputs.version = v`2020`;
+      await expect(action.main()).toResolve();
+      expect(Tlmgr.prototype.update).toHaveBeenCalledWith(
+        [],
+        expect.objectContaining({ self: true }),
+      );
+    },
+  );
+
+  it.each(cacheTypes)(
     'does not attempt to update packages for older versions',
     async (...kind) => {
       setCacheType(kind);
       inputs.updateAllPackages = true;
       inputs.version = v`2020`;
       await expect(action.main()).toResolve();
-      expect(Tlmgr.prototype.update).not.toHaveBeenCalled();
+      expect(Tlmgr.prototype.update).not.toHaveBeenCalledWith(
+        [],
+        expect.objectContaining({ all: true }),
+      );
     },
   );
 

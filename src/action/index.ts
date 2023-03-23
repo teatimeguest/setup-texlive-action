@@ -62,13 +62,31 @@ export async function main(): Promise<void> {
   await tlmgr.path.add();
 
   if (cacheInfo.restored) {
-    if (inputs.version.isLatest()) {
-      const target = inputs.updateAllPackages ? 'all packages' : 'tlmgr';
-      await log.group(`Updating ${target}`, async () => {
+    await log.group('Updating tlmgr', async () => {
+      try {
         await tlmgr.update([], { self: true });
-        if (inputs.updateAllPackages) {
-          await tlmgr.update([], { all: true, reinstallForciblyRemoved: true });
+      } catch (error) {
+        const { stderr } = (error ?? {}) as Record<string, unknown>;
+        if (
+          cacheInfo.restored
+          && typeof stderr === 'string'
+          && stderr.includes('is older than remote repository')
+        ) {
+          const tag = 'main';
+          const historic = tlnet.historic(inputs.version, { master: true });
+          log.info(`Changing the ${tag} repository to ${historic}`);
+          await tlmgr.repository.remove(tag);
+          await tlmgr.repository.add(historic, tag);
+          await tlmgr.update([], { self: true });
+          cache.update();
+        } else {
+          throw error;
         }
+      }
+    });
+    if (inputs.version.isLatest() && inputs.updateAllPackages) {
+      await log.group(`Updating packages`, async () => {
+        await tlmgr.update([], { all: true, reinstallForciblyRemoved: true });
       });
     }
     const entries = await Promise
@@ -90,7 +108,7 @@ export async function main(): Promise<void> {
 
   if (inputs.tlcontrib) {
     await log.group('Setting up TLContrib', async () => {
-      await tlmgr.repository.add(tlnet.CONTRIB.href, 'tlcontrib');
+      await tlmgr.repository.add(tlnet.CONTRIB, 'tlcontrib');
       await tlmgr.pinning.add('tlcontrib', '*');
     });
   }

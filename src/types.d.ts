@@ -1,6 +1,12 @@
 declare global {
+  interface ErrorOptions {
+    cause?: unknown;
+  }
+
   interface ErrorConstructor {
-    new(message: string, options: { readonly cause: unknown }): Error;
+    /* eslint-disable-next-line
+       @typescript-eslint/prefer-readonly-parameter-types */
+    new(message: string, options: ErrorOptions): Error;
   }
 
   namespace NodeJS {

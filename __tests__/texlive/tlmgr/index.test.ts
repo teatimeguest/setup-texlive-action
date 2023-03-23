@@ -46,33 +46,41 @@ describe('Tlmgr', () => {
     it('updates packages', async () => {
       const tlmgr = new Tlmgr({ version: v`latest`, TEXDIR: '' });
       await expect(tlmgr.update(['foo', 'bar', 'baz'])).toResolve();
-      expect(exec).toHaveBeenCalledWith('tlmgr', [
-        'update',
-        'foo',
-        'bar',
-        'baz',
-      ]);
+      expect(getExecOutput).toHaveBeenCalledWith(
+        'tlmgr',
+        ['update', 'foo', 'bar', 'baz'],
+        expect.anything(),
+      );
     });
 
     it('updates tlmgr itself', async () => {
       const tlmgr = new Tlmgr({ version: v`latest`, TEXDIR: '' });
       await expect(tlmgr.update(undefined, { self: true })).toResolve();
-      expect(exec).toHaveBeenCalledWith('tlmgr', ['update', '--self']);
+      expect(getExecOutput).toHaveBeenCalledWith(
+        'tlmgr',
+        ['update', '--self'],
+        expect.anything(),
+      );
     });
 
     it('updates tlmgr itself by updating texlive.infra', async () => {
       const tlmgr = new Tlmgr({ version: v`2008`, TEXDIR: '' });
       await expect(tlmgr.update(undefined, { self: true })).toResolve();
-      expect(exec).toHaveBeenCalledWith('tlmgr', [
-        'update',
-        'texlive.infra',
-      ]);
+      expect(getExecOutput).toHaveBeenCalledWith(
+        'tlmgr',
+        ['update', 'texlive.infra'],
+        expect.anything(),
+      );
     });
 
     it('updates all packages', async () => {
       const tlmgr = new Tlmgr({ version: v`latest`, TEXDIR: '' });
       await expect(tlmgr.update(undefined, { all: true })).toResolve();
-      expect(exec).toHaveBeenCalledWith('tlmgr', ['update', '--all']);
+      expect(getExecOutput).toHaveBeenCalledWith(
+        'tlmgr',
+        ['update', '--all'],
+        expect.anything(),
+      );
     });
 
     it('updates packages with `--reinstall-forcibly-removed`', async () => {
@@ -81,13 +89,11 @@ describe('Tlmgr', () => {
         tlmgr.update(['foo', 'bar', 'baz'], { reinstallForciblyRemoved: true }),
       )
         .toResolve();
-      expect(exec).toHaveBeenCalledWith('tlmgr', [
-        'update',
-        '--reinstall-forcibly-removed',
-        'foo',
-        'bar',
-        'baz',
-      ]);
+      expect(getExecOutput).toHaveBeenCalledWith(
+        'tlmgr',
+        ['update', '--reinstall-forcibly-removed', 'foo', 'bar', 'baz'],
+        expect.anything(),
+      );
     });
   });
 });

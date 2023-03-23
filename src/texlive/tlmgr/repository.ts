@@ -1,4 +1,4 @@
-import { getExecOutput } from '@actions/exec';
+import { exec, getExecOutput } from '@actions/exec';
 
 import type { Version } from '#/texlive/version';
 
@@ -11,8 +11,12 @@ export class Repository {
     }
   }
 
-  async add(this: void, repo: string, tag?: string): Promise<void> {
-    const args = ['repository', 'add', repo];
+  async add(
+    this: void,
+    repo: string | Readonly<URL>,
+    tag?: string,
+  ): Promise<void> {
+    const args = ['repository', 'add', repo.toString()];
     if (tag !== undefined) {
       args.push(tag);
     }
@@ -28,5 +32,9 @@ export class Repository {
     ) {
       throw new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
     }
+  }
+
+  async remove(this: void, repo: string | Readonly<URL>): Promise<void> {
+    await exec('tlmgr', ['repository', 'remove', repo.toString()]);
   }
 }

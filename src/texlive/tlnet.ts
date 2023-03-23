@@ -6,9 +6,15 @@ export const CONTRIB = new URL(
   'https://mirror.ctan.org/systems/texlive/tlcontrib/',
 );
 
-export function historic({ number: version }: Version): URL {
-  return new URL(
-    version < 2010 ? 'tlnet/' : 'tlnet-final/',
-    `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version}/`,
+export function historic(
+  version: Version,
+  options?: { readonly master?: boolean },
+): URL {
+  const base = new URL(
+    `historic/systems/texlive/${version}/`,
+    (options?.master ?? false)
+      ? 'ftp://tug.org/'
+      : 'https://ftp.math.utah.edu/pub/tex/',
   );
+  return new URL(version.number < 2010 ? 'tlnet/' : 'tlnet-final/', base);
 }

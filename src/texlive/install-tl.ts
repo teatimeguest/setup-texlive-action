@@ -28,7 +28,7 @@ export async function installTL(profile: Profile): Promise<void> {
       const repo = tlnet.historic(profile.version);
       // `install-tl` of versions prior to 2017 does not support HTTPS, and
       // that of version 2017 supports HTTPS but does not work properly.
-      if (profile.version.number < 2018) {
+      if (profile.version.number < 2018 && repo.protocol === 'https') {
         repo.protocol = 'http';
       }
       options.push(
