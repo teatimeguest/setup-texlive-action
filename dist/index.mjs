@@ -2176,18 +2176,18 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       });
     }
     exports.group = group2;
-    function saveState2(name, value) {
+    function saveState3(name, value) {
       const filePath = process.env["GITHUB_STATE"] || "";
       if (filePath) {
         return file_command_1.issueFileCommand("STATE", file_command_1.prepareKeyValueMessage(name, value));
       }
       command_1.issueCommand("save-state", { name }, utils_1.toCommandValue(value));
     }
-    exports.saveState = saveState2;
-    function getState2(name) {
+    exports.saveState = saveState3;
+    function getState3(name) {
       return process.env[`STATE_${name}`] || "";
     }
-    exports.getState = getState2;
+    exports.getState = getState3;
     function getIDToken(aud) {
       return __awaiter(this, void 0, void 0, function* () {
         return yield oidc_utils_1.OidcClient.getIDToken(aud);
@@ -2212,6 +2212,124 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     Object.defineProperty(exports, "toPlatformPath", { enumerable: true, get: function() {
       return path_utils_1.toPlatformPath;
     } });
+  }
+});
+
+// node_modules/tslib/tslib.es6.js
+function __rest(s, e) {
+  var t = {};
+  for (var p in s)
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+  if (s != null && typeof Object.getOwnPropertySymbols === "function")
+    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+        t[p[i]] = s[p[i]];
+    }
+  return t;
+}
+function __decorate(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+function __metadata(metadataKey, metadataValue) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+    return Reflect.metadata(metadataKey, metadataValue);
+}
+function __values2(o) {
+  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+  if (m)
+    return m.call(o);
+  if (o && typeof o.length === "number")
+    return {
+      next: function() {
+        if (o && i >= o.length)
+          o = void 0;
+        return { value: o && o[i++], done: !o };
+      }
+    };
+  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+function __await(v) {
+  return this instanceof __await ? (this.v = v, this) : new __await(v);
+}
+function __asyncGenerator(thisArg, _arguments, generator) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var g = generator.apply(thisArg, _arguments || []), i, q = [];
+  return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i;
+  function verb(n) {
+    if (g[n])
+      i[n] = function(v) {
+        return new Promise(function(a, b) {
+          q.push([n, v, a, b]) > 1 || resume(n, v);
+        });
+      };
+  }
+  function resume(n, v) {
+    try {
+      step(g[n](v));
+    } catch (e) {
+      settle(q[0][3], e);
+    }
+  }
+  function step(r) {
+    r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+  }
+  function fulfill(value) {
+    resume("next", value);
+  }
+  function reject(value) {
+    resume("throw", value);
+  }
+  function settle(f, v) {
+    if (f(v), q.shift(), q.length)
+      resume(q[0][0], q[0][1]);
+  }
+}
+function __asyncDelegator(o) {
+  var i, p;
+  return i = {}, verb("next"), verb("throw", function(e) {
+    throw e;
+  }), verb("return"), i[Symbol.iterator] = function() {
+    return this;
+  }, i;
+  function verb(n, f) {
+    i[n] = o[n] ? function(v) {
+      return (p = !p) ? { value: __await(o[n](v)), done: false } : f ? f(v) : v;
+    } : f;
+  }
+}
+function __asyncValues(o) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var m = o[Symbol.asyncIterator], i;
+  return m ? m.call(o) : (o = typeof __values2 === "function" ? __values2(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i);
+  function verb(n) {
+    i[n] = o[n] && function(v) {
+      return new Promise(function(resolve, reject) {
+        v = o[n](v), settle(resolve, reject, v.done, v.value);
+      });
+    };
+  }
+  function settle(resolve, reject, d, v) {
+    Promise.resolve(v).then(function(v2) {
+      resolve({ value: v2, done: d });
+    }, reject);
+  }
+}
+var init_tslib_es6 = __esm({
+  "node_modules/tslib/tslib.es6.js"() {
   }
 });
 
@@ -3198,7 +3316,7 @@ var require_exec = __commonJS({
     exports.getExecOutput = exports.exec = void 0;
     var string_decoder_1 = __require("string_decoder");
     var tr = __importStar(require_toolrunner());
-    function exec6(commandLine, args, options) {
+    function exec7(commandLine, args, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
@@ -3210,7 +3328,7 @@ var require_exec = __commonJS({
         return runner.exec();
       });
     }
-    exports.exec = exec6;
+    exports.exec = exec7;
     function getExecOutput6(commandLine, args, options) {
       var _a, _b;
       return __awaiter(this, void 0, void 0, function* () {
@@ -3233,7 +3351,7 @@ var require_exec = __commonJS({
           }
         };
         const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec6(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        const exitCode = yield exec7(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
         stdout += stdoutDecoder.end();
         stderr += stderrDecoder.end();
         return {
@@ -6405,7 +6523,7 @@ var require_cacheUtils = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.isGhes = exports.assertDefined = exports.getGnuTarPathOnWindows = exports.getCacheFileName = exports.getCompressionMethod = exports.unlinkFile = exports.resolvePaths = exports.getArchiveFileSizeInBytes = exports.createTempDirectory = void 0;
     var core3 = __importStar(require_core());
-    var exec6 = __importStar(require_exec());
+    var exec7 = __importStar(require_exec());
     var glob = __importStar(require_glob());
     var io = __importStar(require_io());
     var fs3 = __importStar(__require("fs"));
@@ -6488,7 +6606,7 @@ var require_cacheUtils = __commonJS({
         additionalArgs.push("--version");
         core3.debug(`Checking ${app} ${additionalArgs.join(" ")}`);
         try {
-          yield exec6.exec(`${app}`, additionalArgs, {
+          yield exec7.exec(`${app}`, additionalArgs, {
             ignoreReturnCode: true,
             silent: true,
             listeners: {
@@ -18186,7 +18304,7 @@ var init_restError = __esm({
 // node_modules/@azure/logger/dist-esm/src/log.js
 import { EOL } from "os";
 import util from "util";
-function log(message, ...args) {
+function log2(message, ...args) {
   process.stderr.write(`${util.format(message, ...args)}${EOL}`);
 }
 var init_log = __esm({
@@ -18283,7 +18401,7 @@ var init_debug = __esm({
       enable,
       enabled,
       disable,
-      log
+      log: log2
     });
     debug_default = debugObj;
   }
@@ -19885,124 +20003,6 @@ var init_httpPipelineLogLevel = __esm({
       HttpPipelineLogLevel2[HttpPipelineLogLevel2["WARNING"] = 2] = "WARNING";
       HttpPipelineLogLevel2[HttpPipelineLogLevel2["INFO"] = 3] = "INFO";
     })(HttpPipelineLogLevel || (HttpPipelineLogLevel = {}));
-  }
-});
-
-// node_modules/tslib/tslib.es6.js
-function __rest(s, e) {
-  var t = {};
-  for (var p in s)
-    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-      t[p] = s[p];
-  if (s != null && typeof Object.getOwnPropertySymbols === "function")
-    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-        t[p[i]] = s[p[i]];
-    }
-  return t;
-}
-function __decorate(decorators, target, key, desc) {
-  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-    r = Reflect.decorate(decorators, target, key, desc);
-  else
-    for (var i = decorators.length - 1; i >= 0; i--)
-      if (d = decorators[i])
-        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-  return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-function __metadata(metadataKey, metadataValue) {
-  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
-    return Reflect.metadata(metadataKey, metadataValue);
-}
-function __values2(o) {
-  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-  if (m)
-    return m.call(o);
-  if (o && typeof o.length === "number")
-    return {
-      next: function() {
-        if (o && i >= o.length)
-          o = void 0;
-        return { value: o && o[i++], done: !o };
-      }
-    };
-  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-}
-function __await(v) {
-  return this instanceof __await ? (this.v = v, this) : new __await(v);
-}
-function __asyncGenerator(thisArg, _arguments, generator) {
-  if (!Symbol.asyncIterator)
-    throw new TypeError("Symbol.asyncIterator is not defined.");
-  var g = generator.apply(thisArg, _arguments || []), i, q = [];
-  return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-    return this;
-  }, i;
-  function verb(n) {
-    if (g[n])
-      i[n] = function(v) {
-        return new Promise(function(a, b) {
-          q.push([n, v, a, b]) > 1 || resume(n, v);
-        });
-      };
-  }
-  function resume(n, v) {
-    try {
-      step(g[n](v));
-    } catch (e) {
-      settle(q[0][3], e);
-    }
-  }
-  function step(r) {
-    r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
-  }
-  function fulfill(value) {
-    resume("next", value);
-  }
-  function reject(value) {
-    resume("throw", value);
-  }
-  function settle(f, v) {
-    if (f(v), q.shift(), q.length)
-      resume(q[0][0], q[0][1]);
-  }
-}
-function __asyncDelegator(o) {
-  var i, p;
-  return i = {}, verb("next"), verb("throw", function(e) {
-    throw e;
-  }), verb("return"), i[Symbol.iterator] = function() {
-    return this;
-  }, i;
-  function verb(n, f) {
-    i[n] = o[n] ? function(v) {
-      return (p = !p) ? { value: __await(o[n](v)), done: false } : f ? f(v) : v;
-    } : f;
-  }
-}
-function __asyncValues(o) {
-  if (!Symbol.asyncIterator)
-    throw new TypeError("Symbol.asyncIterator is not defined.");
-  var m = o[Symbol.asyncIterator], i;
-  return m ? m.call(o) : (o = typeof __values2 === "function" ? __values2(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-    return this;
-  }, i);
-  function verb(n) {
-    i[n] = o[n] && function(v) {
-      return new Promise(function(resolve, reject) {
-        v = o[n](v), settle(resolve, reject, v.done, v.value);
-      });
-    };
-  }
-  function settle(resolve, reject, d, v) {
-    Promise.resolve(v).then(function(v2) {
-      resolve({ value: v2, done: d });
-    }, reject);
-  }
-}
-var init_tslib_es6 = __esm({
-  "node_modules/tslib/tslib.es6.js"() {
   }
 });
 
@@ -27465,7 +27465,7 @@ function registerGlobal(type3, instance, diag, allowOverride) {
   diag.debug("@opentelemetry/api: Registered a global for " + type3 + " v" + VERSION + ".");
   return true;
 }
-function getGlobal(type3) {
+function getGlobal2(type3) {
   var _a, _b;
   var globalVersion = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a === void 0 ? void 0 : _a.version;
   if (!globalVersion || !isCompatible(globalVersion)) {
@@ -27494,14 +27494,14 @@ var init_global_utils = __esm({
 
 // node_modules/@opentelemetry/api/build/esm/diag/ComponentLogger.js
 function logProxy(funcName, namespace, args) {
-  var logger3 = getGlobal("diag");
+  var logger3 = getGlobal2("diag");
   if (!logger3) {
     return;
   }
   args.unshift(namespace);
-  return logger3[funcName].apply(logger3, __spreadArray([], __read(args), false));
+  return logger3[funcName].apply(logger3, __spreadArray2([], __read(args), false));
 }
-var __read, __spreadArray, DiagComponentLogger;
+var __read, __spreadArray2, DiagComponentLogger;
 var init_ComponentLogger = __esm({
   "node_modules/@opentelemetry/api/build/esm/diag/ComponentLogger.js"() {
     init_global_utils();
@@ -27526,7 +27526,7 @@ var init_ComponentLogger = __esm({
       }
       return ar;
     };
-    __spreadArray = function(to, from, pack) {
+    __spreadArray2 = function(to, from, pack) {
       if (pack || arguments.length === 2)
         for (var i = 0, l = from.length, ar; i < l; i++) {
           if (ar || !(i in from)) {
@@ -27629,7 +27629,7 @@ var init_logLevelLogger = __esm({
 });
 
 // node_modules/@opentelemetry/api/build/esm/api/diag.js
-var __read2, __spreadArray2, API_NAME, DiagAPI;
+var __read2, __spreadArray3, API_NAME, DiagAPI;
 var init_diag = __esm({
   "node_modules/@opentelemetry/api/build/esm/api/diag.js"() {
     init_ComponentLogger();
@@ -27657,7 +27657,7 @@ var init_diag = __esm({
       }
       return ar;
     };
-    __spreadArray2 = function(to, from, pack) {
+    __spreadArray3 = function(to, from, pack) {
       if (pack || arguments.length === 2)
         for (var i = 0, l = from.length, ar; i < l; i++) {
           if (ar || !(i in from)) {
@@ -27678,10 +27678,10 @@ var init_diag = __esm({
             for (var _i = 0; _i < arguments.length; _i++) {
               args[_i] = arguments[_i];
             }
-            var logger3 = getGlobal("diag");
+            var logger3 = getGlobal2("diag");
             if (!logger3)
               return;
-            return logger3[funcName].apply(logger3, __spreadArray2([], __read2(args), false));
+            return logger3[funcName].apply(logger3, __spreadArray3([], __read2(args), false));
           };
         }
         var self2 = this;
@@ -27700,7 +27700,7 @@ var init_diag = __esm({
               logLevel: optionsOrLogLevel
             };
           }
-          var oldLogger = getGlobal("diag");
+          var oldLogger = getGlobal2("diag");
           var newLogger = createLogLevelDiagLogger((_b = optionsOrLogLevel.logLevel) !== null && _b !== void 0 ? _b : DiagLogLevel.INFO, logger3);
           if (oldLogger && !optionsOrLogLevel.suppressOverrideMessage) {
             var stack = (_c = new Error().stack) !== null && _c !== void 0 ? _c : "<failed to generate stacktrace>";
@@ -27766,7 +27766,7 @@ var init_context = __esm({
 });
 
 // node_modules/@opentelemetry/api/build/esm/context/NoopContextManager.js
-var __read3, __spreadArray3, NoopContextManager;
+var __read3, __spreadArray4, NoopContextManager;
 var init_NoopContextManager = __esm({
   "node_modules/@opentelemetry/api/build/esm/context/NoopContextManager.js"() {
     init_context();
@@ -27791,7 +27791,7 @@ var init_NoopContextManager = __esm({
       }
       return ar;
     };
-    __spreadArray3 = function(to, from, pack) {
+    __spreadArray4 = function(to, from, pack) {
       if (pack || arguments.length === 2)
         for (var i = 0, l = from.length, ar; i < l; i++) {
           if (ar || !(i in from)) {
@@ -27814,7 +27814,7 @@ var init_NoopContextManager = __esm({
         for (var _i = 3; _i < arguments.length; _i++) {
           args[_i - 3] = arguments[_i];
         }
-        return fn.call.apply(fn, __spreadArray3([thisArg], __read3(args), false));
+        return fn.call.apply(fn, __spreadArray4([thisArg], __read3(args), false));
       };
       NoopContextManager2.prototype.bind = function(_context, target) {
         return target;
@@ -27831,7 +27831,7 @@ var init_NoopContextManager = __esm({
 });
 
 // node_modules/@opentelemetry/api/build/esm/api/context.js
-var __read4, __spreadArray4, API_NAME2, NOOP_CONTEXT_MANAGER, ContextAPI;
+var __read4, __spreadArray5, API_NAME2, NOOP_CONTEXT_MANAGER, ContextAPI;
 var init_context2 = __esm({
   "node_modules/@opentelemetry/api/build/esm/api/context.js"() {
     init_NoopContextManager();
@@ -27858,7 +27858,7 @@ var init_context2 = __esm({
       }
       return ar;
     };
-    __spreadArray4 = function(to, from, pack) {
+    __spreadArray5 = function(to, from, pack) {
       if (pack || arguments.length === 2)
         for (var i = 0, l = from.length, ar; i < l; i++) {
           if (ar || !(i in from)) {
@@ -27893,13 +27893,13 @@ var init_context2 = __esm({
         for (var _i = 3; _i < arguments.length; _i++) {
           args[_i - 3] = arguments[_i];
         }
-        return (_a = this._getContextManager()).with.apply(_a, __spreadArray4([context3, fn, thisArg], __read4(args), false));
+        return (_a = this._getContextManager()).with.apply(_a, __spreadArray5([context3, fn, thisArg], __read4(args), false));
       };
       ContextAPI2.prototype.bind = function(context3, target) {
         return this._getContextManager().bind(context3, target);
       };
       ContextAPI2.prototype._getContextManager = function() {
-        return getGlobal(API_NAME2) || NOOP_CONTEXT_MANAGER;
+        return getGlobal2(API_NAME2) || NOOP_CONTEXT_MANAGER;
       };
       ContextAPI2.prototype.disable = function() {
         this._getContextManager().disable();
@@ -28220,7 +28220,7 @@ var init_trace = __esm({
         return success;
       };
       TraceAPI2.prototype.getTracerProvider = function() {
-        return getGlobal(API_NAME3) || this._proxyTracerProvider;
+        return getGlobal2(API_NAME3) || this._proxyTracerProvider;
       };
       TraceAPI2.prototype.getTracer = function(name, version3) {
         return this.getTracerProvider().getTracer(name, version3);
@@ -56106,253 +56106,13 @@ var Reflect2;
 
 // lib/action/index.js
 var import_core6 = __toESM(require_core(), 1);
-import { createHash, randomUUID } from "crypto";
-import { arch as arch2, platform as platform5 } from "os";
 import { isNativeError as isNativeError2 } from "util/types";
 
-// lib/action/inputs.js
-var import_cache2 = __toESM(require_cache(), 1);
-import { readFile as readFile3 } from "fs/promises";
-
-// lib/action/env.js
-import { homedir, tmpdir } from "os";
-import path from "path";
-import { env } from "process";
-
-// lib/log.js
-var core = __toESM(require_core(), 1);
-var import_core = __toESM(require_core(), 1);
-import { isNativeError } from "util/types";
-function log2(message, { level = "info", cause } = {}) {
-  const logger3 = core[level === "warn" ? "warning" : level];
-  if (cause === void 0) {
-    logger3(message);
-  } else {
-    logger3(`${message}: Caused by ${cause}`);
-    if (isNativeError(cause)) {
-      core.debug(cause.stack);
-    }
-  }
-}
-function debug2(message, options) {
-  log2(message, { ...options, level: "debug" });
-}
-function info(message, options) {
-  log2(message, { ...options, level: "info" });
-}
-function warn(message, options) {
-  log2(message, { ...options, level: "warn" });
-}
-
-// lib/action/env.js
-var Env;
-(function(Env2) {
-  function load(version3) {
-    if (env["RUNNER_TEMP"] === void 0) {
-      warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} will be used instead`);
-      env.RUNNER_TEMP = tmpdir();
-    }
-    env["TMPDIR"] = env.RUNNER_TEMP;
-    for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
-      if (env[key] !== void 0) {
-        warn(`\`${key}\` is set, but ignored`);
-        delete env[key];
-      }
-    }
-    for (const [key, value] of Object.entries(defaults(version3))) {
-      env[key] ??= value;
-    }
-    return env;
-  }
-  Env2.load = load;
-  function defaults(version3) {
-    const TEXUSERDIR = path.join(homedir(), ".local", "texlive", version3.toString());
-    return {
-      TEXLIVE_INSTALL_ENV_NOCHECK: "1",
-      TEXLIVE_INSTALL_NO_WELCOME: "1",
-      TEXLIVE_INSTALL_PREFIX: path.join(env.RUNNER_TEMP, "setup-texlive"),
-      TEXLIVE_INSTALL_TEXMFHOME: path.join(homedir(), "texmf"),
-      TEXLIVE_INSTALL_TEXMFCONFIG: path.join(TEXUSERDIR, "texmf-config"),
-      TEXLIVE_INSTALL_TEXMFVAR: path.join(TEXUSERDIR, "texmf-var")
-    };
-  }
-  Env2.defaults = defaults;
-})(Env || (Env = {}));
-
-// lib/texlive/depends-txt.js
-var depends_txt_exports = {};
-__export(depends_txt_exports, {
-  parse: () => parse3
-});
-var RE = {
-  comments: /\s*#.*$/gmu,
-  hardOrSoft: /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu,
-  packages: /^\s*package(?=\s|$)(.*)$/mu,
-  whitespaces: /\s+/u
-};
-function* parse3(input) {
-  const [globals = "", ...rest] = input.replaceAll(RE.comments, "").split(RE.packages);
-  yield* parseDeps(void 0, globals);
-  const iter = rest.values();
-  for (const s of iter) {
-    let packageName2 = s.trim();
-    if (packageName2 === "" || RE.whitespaces.test(packageName2)) {
-      warn("`package` directive must have exactly one argument, but given: " + JSON.stringify(packageName2));
-      packageName2 = void 0;
-    }
-    yield* parseDeps(packageName2, iter.next().value ?? "");
-  }
-}
-function* parseDeps(packageName2, input) {
-  for (const [, type3 = "hard", names = ""] of input.matchAll(RE.hardOrSoft)) {
-    for (const name of names.split(RE.whitespaces).filter(Boolean)) {
-      yield { name, type: type3, package: packageName2 };
-    }
-  }
-}
-
-// lib/texlive/install-tl.js
-var import_exec2 = __toESM(require_exec(), 1);
-var import_tool_cache2 = __toESM(require_tool_cache(), 1);
-import { Buffer as Buffer2 } from "buffer";
-import { platform as platform2 } from "os";
-import path4 from "path";
-
-// lib/texlive/tlnet.js
-var tlnet_exports = {};
-__export(tlnet_exports, {
-  CONTRIB: () => CONTRIB,
-  CTAN: () => CTAN,
-  historic: () => historic
-});
-var CTAN = new URL("https://mirror.ctan.org/systems/texlive/tlnet/");
-var CONTRIB = new URL("https://mirror.ctan.org/systems/texlive/tlcontrib/");
-function historic({ number: version3 }) {
-  return new URL(version3 < 2010 ? "tlnet/" : "tlnet-final/", `https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${version3}/`);
-}
-
-// lib/texlive/tlpkg.js
-var import_exec = __toESM(require_exec(), 1);
-import { readFile, writeFile } from "fs/promises";
-import { platform } from "os";
-import path2 from "path";
-function check(output) {
-  const stderr = typeof output === "string" ? output : output.stderr;
-  const result = /: checksums differ for (.*):$/mu.exec(stderr);
-  if (result !== null) {
-    const pkg2 = path2.basename(result[1] ?? "", ".tar.xz");
-    throw new Error(`The checksum of package ${pkg2} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
-  }
-}
-async function makeLocalSkeleton(texmflocal, options) {
-  await (0, import_exec.exec)("perl", [
-    `-I${path2.join(options.TEXDIR, "tlpkg")}`,
-    "-mTeXLive::TLUtils=make_local_skeleton",
-    "-e",
-    "make_local_skeleton shift",
-    texmflocal
-  ]);
-}
-async function* tlpdb(db) {
-  const nonPackage = /(?:^(?:collection|scheme)-|\.)/u;
-  const version3 = /^catalogue-version\s+(.*)$/mu;
-  const revision = /^revision\s+(\d+)\s*$/mu;
-  const iter = db.replaceAll(/\\\r?\n/gu, "").replaceAll(/#.*/gu, "").split(/^name\s(.*)$/gmu).values();
-  iter.next();
-  for (let name of iter) {
-    name = name.trimEnd();
-    const data = iter.next().value;
-    if (name === "texlive.infra" || !nonPackage.test(name)) {
-      yield {
-        name,
-        version: data?.match(version3)?.[1]?.trimEnd() ?? void 0,
-        revision: data?.match(revision)?.[1] ?? ""
-      };
-    }
-  }
-}
-var PATCHES = [{
-  description: "Fixes a syntax error.",
-  versions: { since: 2009, until: 2011 },
-  file: "tlpkg/TeXLive/TLWinGoo.pm",
-  from: [/foreach \$p qw\((.*)\)/u],
-  to: ["foreach $$p (qw($1))"]
-}, {
-  description: "Defines Code Page 65001 as an alias for UTF-8 on Windows.",
-  platforms: "win32",
-  versions: { since: 2015, until: 2016 },
-  file: "tlpkg/tlperl/lib/Encode/Alias.pm",
-  from: ["# utf8 is blessed :)\n"],
-  to: [`$&    define_alias(qr/cp65001/i => '"utf-8-strict"');
-`]
-}, {
-  description: "Makes it possible to use `\\` as a directory separator on Windows.",
-  platforms: "win32",
-  versions: { until: 2019 },
-  file: "tlpkg/TeXLive/TLUtils.pm",
-  from: ["split (/\\//, $tree)"],
-  to: ["split (/[\\/\\\\]/, $$tree)"]
-}, {
-  description: "Adds support for macOS 11 or later.",
-  platforms: "darwin",
-  versions: { since: 2017, until: 2020 },
-  file: "tlpkg/TeXLive/TLUtils.pm",
-  from: ["$os_major != 10", "$os_minor >= $mactex_darwin"],
-  to: ["$$os_major < 10", "$$os_major > 10 || $&"]
-}];
-async function patch(options) {
-  const patches = PATCHES.filter((p) => {
-    return (p.platforms === void 0 || p.platforms === platform()) && (p.versions?.since ?? -Infinity) <= options.version.number && options.version.number < (p.versions?.until ?? Infinity);
-  });
-  if (patches.length > 0) {
-    const diff = async (changed, p) => {
-      try {
-        const linePrefix = "\x1B[34m>\x1B[0m ";
-        const { exitCode, stdout, stderr } = await (0, import_exec.getExecOutput)("git", [
-          "diff",
-          "--no-index",
-          "--color",
-          `--line-prefix=${linePrefix}`,
-          "--",
-          p.file,
-          "-"
-        ], {
-          input: changed,
-          cwd: options.TEXDIR,
-          silent: true,
-          ignoreReturnCode: true
-        });
-        if (exitCode === 1) {
-          return [linePrefix + p.description + "\n" + stdout.trimEnd()];
-        }
-        if (exitCode > 1) {
-          debug2(`git-diff exited with ${exitCode}: ${stderr}`);
-        }
-      } catch (cause) {
-        debug2("Failed to exec git-diff", { cause });
-      }
-      return [];
-    };
-    const apply = async (p) => {
-      const target = path2.join(options.TEXDIR, p.file);
-      const content = Buffer.from(p.from.reduce((s, from, i) => s.replace(from, p.to[i] ?? ""), await readFile(target, "utf8")));
-      const changes = await diff(content, p);
-      await writeFile(target, content);
-      return changes;
-    };
-    info("Applying patches");
-    const diffs = await Promise.all(patches.map((p) => apply(p)));
-    info(diffs.flat().join("\n"));
-  }
-}
-
-// lib/utility.js
-var cache = __toESM(require_cache(), 1);
-var core2 = __toESM(require_core(), 1);
-var import_io = __toESM(require_io(), 1);
-var import_tool_cache = __toESM(require_tool_cache(), 1);
-import fs2 from "fs/promises";
-import path3 from "path";
+// lib/action/cache.js
+init_tslib_es6();
+var import_core2 = __toESM(require_core(), 1);
+import { createHash, randomUUID } from "crypto";
+import { arch as arch2, platform } from "os";
 import { env as env2 } from "process";
 
 // node_modules/class-transformer/esm5/enums/transformation-type.enum.js
@@ -56564,7 +56324,7 @@ var MetadataStorage = (
 var defaultMetadataStorage = new MetadataStorage();
 
 // node_modules/class-transformer/esm5/utils/get-global.util.js
-function getGlobal2() {
+function getGlobal() {
   if (typeof globalThis !== "undefined") {
     return globalThis;
   }
@@ -56585,7 +56345,7 @@ function isPromise(p) {
 }
 
 // node_modules/class-transformer/esm5/TransformOperationExecutor.js
-var __spreadArray5 = function(to, from, pack) {
+var __spreadArray = function(to, from, pack) {
   if (pack || arguments.length === 2)
     for (var i = 0, l = from.length, ar; i < l; i++) {
       if (ar || !(i in from)) {
@@ -56678,7 +56438,7 @@ var TransformOperationExecutor = (
         if (value === null || value === void 0)
           return value;
         return new Date(value);
-      } else if (!!getGlobal2().Buffer && (targetType === Buffer || value instanceof Buffer) && !isMap) {
+      } else if (!!getGlobal().Buffer && (targetType === Buffer || value instanceof Buffer) && !isMap) {
         if (value === null || value === void 0)
           return value;
         return Buffer.from(value);
@@ -56907,7 +56667,7 @@ var TransformOperationExecutor = (
       if (this.options.ignoreDecorators && this.options.excludeExtraneousValues && target) {
         var exposedProperties = defaultMetadataStorage.getExposedProperties(target, this.transformationType);
         var excludedProperties = defaultMetadataStorage.getExcludedProperties(target, this.transformationType);
-        keys = __spreadArray5(__spreadArray5([], exposedProperties, true), excludedProperties, true);
+        keys = __spreadArray(__spreadArray([], exposedProperties, true), excludedProperties, true);
       }
       if (!this.options.ignoreDecorators && target) {
         var exposedProperties = defaultMetadataStorage.getExposedProperties(target, this.transformationType);
@@ -57092,11 +56852,43 @@ var classTransformer = new ClassTransformer();
 function instanceToPlain(object, options) {
   return classTransformer.instanceToPlain(object, options);
 }
-function plainToClassFromExist(clsObject, plain, options) {
-  return classTransformer.plainToClassFromExist(clsObject, plain, options);
+function plainToInstance(cls, plain, options) {
+  return classTransformer.plainToInstance(cls, plain, options);
+}
+
+// lib/log.js
+var core = __toESM(require_core(), 1);
+var import_core = __toESM(require_core(), 1);
+import { isNativeError } from "util/types";
+function log(message, { level = "info", cause } = {}) {
+  const logger3 = core[level === "warn" ? "warning" : level];
+  if (cause === void 0) {
+    logger3(message);
+  } else {
+    logger3(`${message}: Caused by ${cause}`);
+    if (isNativeError(cause)) {
+      core.debug(cause.stack);
+    }
+  }
+}
+function debug2(message, options) {
+  log(message, { ...options, level: "debug" });
+}
+function info(message, options) {
+  log(message, { ...options, level: "info" });
+}
+function warn(message, options) {
+  log(message, { ...options, level: "warn" });
 }
 
 // lib/utility.js
+var cache = __toESM(require_cache(), 1);
+var core2 = __toESM(require_core(), 1);
+var import_io = __toESM(require_io(), 1);
+var import_tool_cache = __toESM(require_tool_cache(), 1);
+import fs2 from "fs/promises";
+import path from "path";
+import { env } from "process";
 var Serializable = class {
   toPlain(options) {
     return instanceToPlain(this, { strategy: "excludeAll", ...options });
@@ -57128,7 +56920,7 @@ async function uniqueChild(parent) {
   if (rest.length > 0) {
     throw new Error(`${parent} has multiple entries`);
   }
-  return path3.join(parent, child);
+  return path.join(parent, child);
 }
 function getInput2(name, options) {
   switch (options?.type) {
@@ -57167,11 +56959,11 @@ async function restoreCache2(target, primaryKey, restoreKeys) {
   }
   return key;
 }
-function tmpdir2() {
-  return env2.RUNNER_TEMP;
+function tmpdir() {
+  return env.RUNNER_TEMP;
 }
 async function* mkdtemp() {
-  const tmp = await fs2.mkdtemp(path3.join(tmpdir2(), "setup-texlive-"));
+  const tmp = await fs2.mkdtemp(path.join(tmpdir(), "setup-texlive-"));
   try {
     yield tmp;
   } finally {
@@ -57179,22 +56971,317 @@ async function* mkdtemp() {
   }
 }
 
+// lib/action/cache.js
+var CacheClient = class {
+  constructor(entry) {
+    this.state = new CacheState();
+    this.info = {
+      hit: false,
+      full: false,
+      restored: false
+    };
+    this.TEXDIR = entry.TEXDIR;
+    this.keys = getCacheKeys(entry);
+  }
+  async restore() {
+    this.state.key = await restoreCache2(this.TEXDIR, this.keys.unique, [this.keys.primary, this.keys.secondary]);
+    this.info.restored = this.state.key !== void 0;
+    this.info.full = this.state.key?.startsWith(this.keys.primary) === true;
+    this.info.hit = !forceUpdate() && this.info.full;
+    if (!this.info.hit) {
+      this.update();
+    }
+    return this.info;
+  }
+  update() {
+    if (this.state.target === void 0) {
+      this.state.key = this.info.full ? this.keys.unique : this.keys.primary;
+      this.state.target = this.TEXDIR;
+      info("After the job completes, TEXDIR will be saved to cache with key: " + this.state.key);
+    }
+  }
+  saveState() {
+    this.state.save();
+  }
+};
+async function save() {
+  const state = CacheState.restore();
+  if (state?.key !== void 0) {
+    if (state.target !== void 0) {
+      await saveCache2(state.target, state.key);
+    } else {
+      info(`Cache hit occurred on the primary key ${state.key}, not saving cache`);
+    }
+  }
+}
+var CacheState = class extends Serializable {
+  static restore() {
+    const state = (0, import_core2.getState)(CacheState.STATE_NAME);
+    return state !== "" ? plainToInstance(CacheState, JSON.parse(state)) : void 0;
+  }
+  save() {
+    (0, import_core2.saveState)(CacheState.STATE_NAME, JSON.stringify(this));
+  }
+};
+CacheState.STATE_NAME = "CACHE";
+__decorate([
+  Expose(),
+  __metadata("design:type", Object)
+], CacheState.prototype, "key", void 0);
+__decorate([
+  Expose(),
+  __metadata("design:type", String)
+], CacheState.prototype, "target", void 0);
+function forceUpdate() {
+  return (env2["SETUP_TEXLIVE_FORCE_UPDATE_CACHE"] ?? "0") !== "0";
+}
+function getCacheKeys(entry) {
+  const secondary = `setup-texlive-${platform()}-${arch2()}-${entry.version}-`;
+  const primary = secondary + digest([...entry.packages]);
+  const unique = `${primary}-${randomString()}`;
+  return { unique, primary, secondary };
+}
+function digest(obj) {
+  return createHash("sha256").update(JSON.stringify(obj)).digest("hex");
+}
+function randomString() {
+  return randomUUID().replaceAll("-", "");
+}
+
+// lib/action/inputs.js
+var import_cache2 = __toESM(require_cache(), 1);
+import { readFile as readFile3 } from "fs/promises";
+
+// lib/action/env.js
+import { homedir, tmpdir as tmpdir2 } from "os";
+import path2 from "path";
+import { env as env3 } from "process";
+var Env;
+(function(Env2) {
+  function load(version3) {
+    if (env3["RUNNER_TEMP"] === void 0) {
+      warn(`\`RUNNER_TEMP\` not defined, ${tmpdir2()} will be used instead`);
+      env3.RUNNER_TEMP = tmpdir2();
+    }
+    env3["TMPDIR"] = env3.RUNNER_TEMP;
+    for (const key of ["TEXLIVE_INSTALL_TEXDIR", "TEXLIVE_INSTALL_TEXMFSYSCONFIG", "TEXLIVE_INSTALL_TEXMFSYSVAR"]) {
+      if (env3[key] !== void 0) {
+        warn(`\`${key}\` is set, but ignored`);
+        delete env3[key];
+      }
+    }
+    for (const [key, value] of Object.entries(defaults(version3))) {
+      env3[key] ??= value;
+    }
+    return env3;
+  }
+  Env2.load = load;
+  function defaults(version3) {
+    const TEXUSERDIR = path2.join(homedir(), ".local", "texlive", version3.toString());
+    return {
+      TEXLIVE_INSTALL_ENV_NOCHECK: "1",
+      TEXLIVE_INSTALL_NO_WELCOME: "1",
+      TEXLIVE_INSTALL_PREFIX: path2.join(env3.RUNNER_TEMP, "setup-texlive"),
+      TEXLIVE_INSTALL_TEXMFHOME: path2.join(homedir(), "texmf"),
+      TEXLIVE_INSTALL_TEXMFCONFIG: path2.join(TEXUSERDIR, "texmf-config"),
+      TEXLIVE_INSTALL_TEXMFVAR: path2.join(TEXUSERDIR, "texmf-var")
+    };
+  }
+  Env2.defaults = defaults;
+})(Env || (Env = {}));
+
+// lib/texlive/depends-txt.js
+var depends_txt_exports = {};
+__export(depends_txt_exports, {
+  parse: () => parse3
+});
+var RE = {
+  comments: /\s*#.*$/gmu,
+  hardOrSoft: /^\s*(?:(soft|hard)(?=\s|$))?(.*)$/gmu,
+  packages: /^\s*package(?=\s|$)(.*)$/mu,
+  whitespaces: /\s+/u
+};
+function* parse3(input) {
+  const [globals = "", ...rest] = input.replaceAll(RE.comments, "").split(RE.packages);
+  yield* parseDeps(void 0, globals);
+  const iter = rest.values();
+  for (const s of iter) {
+    let packageName2 = s.trim();
+    if (packageName2 === "" || RE.whitespaces.test(packageName2)) {
+      warn("`package` directive must have exactly one argument, but given: " + JSON.stringify(packageName2));
+      packageName2 = void 0;
+    }
+    yield* parseDeps(packageName2, iter.next().value ?? "");
+  }
+}
+function* parseDeps(packageName2, input) {
+  for (const [, type3 = "hard", names = ""] of input.matchAll(RE.hardOrSoft)) {
+    for (const name of names.split(RE.whitespaces).filter(Boolean)) {
+      yield { name, type: type3, package: packageName2 };
+    }
+  }
+}
+
+// lib/texlive/install-tl.js
+var import_exec2 = __toESM(require_exec(), 1);
+var import_tool_cache2 = __toESM(require_tool_cache(), 1);
+import { Buffer as Buffer2 } from "buffer";
+import { platform as platform3 } from "os";
+import path4 from "path";
+
+// lib/texlive/tlnet.js
+var tlnet_exports = {};
+__export(tlnet_exports, {
+  CONTRIB: () => CONTRIB,
+  CTAN: () => CTAN,
+  historic: () => historic
+});
+var CTAN = new URL("https://mirror.ctan.org/systems/texlive/tlnet/");
+var CONTRIB = new URL("https://mirror.ctan.org/systems/texlive/tlcontrib/");
+function historic(version3, options) {
+  const base = new URL(`historic/systems/texlive/${version3}/`, options?.master ?? false ? "ftp://tug.org/" : "https://ftp.math.utah.edu/pub/tex/");
+  return new URL(version3.number < 2010 ? "tlnet/" : "tlnet-final/", base);
+}
+
+// lib/texlive/tlpkg.js
+var import_exec = __toESM(require_exec(), 1);
+import { readFile, writeFile } from "fs/promises";
+import { platform as platform2 } from "os";
+import path3 from "path";
+function check(output) {
+  const stderr = typeof output === "string" ? output : output.stderr;
+  const result = /: checksums differ for (.*):$/mu.exec(stderr);
+  if (result !== null) {
+    const pkg2 = path3.basename(result[1] ?? "", ".tar.xz");
+    throw new Error(`The checksum of package ${pkg2} did not match. The CTAN mirror may be in the process of synchronization, please rerun the job after some time.`);
+  }
+}
+async function makeLocalSkeleton(texmflocal, options) {
+  await (0, import_exec.exec)("perl", [
+    `-I${path3.join(options.TEXDIR, "tlpkg")}`,
+    "-mTeXLive::TLUtils=make_local_skeleton",
+    "-e",
+    "make_local_skeleton shift",
+    texmflocal
+  ]);
+}
+async function* tlpdb(db) {
+  const nonPackage = /(?:^(?:collection|scheme)-|\.)/u;
+  const version3 = /^catalogue-version\s+(.*)$/mu;
+  const revision = /^revision\s+(\d+)\s*$/mu;
+  const iter = db.replaceAll(/\\\r?\n/gu, "").replaceAll(/#.*/gu, "").split(/^name\s(.*)$/gmu).values();
+  iter.next();
+  for (let name of iter) {
+    name = name.trimEnd();
+    const data = iter.next().value;
+    if (name === "texlive.infra" || !nonPackage.test(name)) {
+      yield {
+        name,
+        version: data?.match(version3)?.[1]?.trimEnd() ?? void 0,
+        revision: data?.match(revision)?.[1] ?? ""
+      };
+    }
+  }
+}
+var PATCHES = [{
+  description: "Fixes a syntax error.",
+  versions: { since: 2009, until: 2011 },
+  file: "tlpkg/TeXLive/TLWinGoo.pm",
+  from: [/foreach \$p qw\((.*)\)/u],
+  to: ["foreach $$p (qw($1))"]
+}, {
+  description: "Defines Code Page 65001 as an alias for UTF-8 on Windows.",
+  platforms: "win32",
+  versions: { since: 2015, until: 2016 },
+  file: "tlpkg/tlperl/lib/Encode/Alias.pm",
+  from: ["# utf8 is blessed :)\n"],
+  to: [`$&    define_alias(qr/cp65001/i => '"utf-8-strict"');
+`]
+}, {
+  description: "Makes it possible to use `\\` as a directory separator on Windows.",
+  platforms: "win32",
+  versions: { until: 2019 },
+  file: "tlpkg/TeXLive/TLUtils.pm",
+  from: ["split (/\\//, $tree)"],
+  to: ["split (/[\\/\\\\]/, $$tree)"]
+}, {
+  description: "Adds support for macOS 11 or later.",
+  platforms: "darwin",
+  versions: { since: 2017, until: 2020 },
+  file: "tlpkg/TeXLive/TLUtils.pm",
+  from: ["$os_major != 10", "$os_minor >= $mactex_darwin"],
+  to: ["$$os_major < 10", "$$os_major > 10 || $&"]
+}];
+async function patch(options) {
+  const patches = PATCHES.filter((p) => {
+    return (p.platforms === void 0 || p.platforms === platform2()) && (p.versions?.since ?? -Infinity) <= options.version.number && options.version.number < (p.versions?.until ?? Infinity);
+  });
+  if (patches.length > 0) {
+    const diff = async (changed, p) => {
+      try {
+        const linePrefix = "\x1B[34m>\x1B[0m ";
+        const { exitCode, stdout, stderr } = await (0, import_exec.getExecOutput)("git", [
+          "diff",
+          "--no-index",
+          "--color",
+          `--line-prefix=${linePrefix}`,
+          "--",
+          p.file,
+          "-"
+        ], {
+          input: changed,
+          cwd: options.TEXDIR,
+          silent: true,
+          ignoreReturnCode: true
+        });
+        if (exitCode === 1) {
+          return [linePrefix + p.description + "\n" + stdout.trimEnd()];
+        }
+        if (exitCode > 1) {
+          debug2(`git-diff exited with ${exitCode}: ${stderr}`);
+        }
+      } catch (cause) {
+        debug2("Failed to exec git-diff", { cause });
+      }
+      return [];
+    };
+    const apply = async (p) => {
+      const target = path3.join(options.TEXDIR, p.file);
+      const content = Buffer.from(p.from.reduce((s, from, i) => s.replace(from, p.to[i] ?? ""), await readFile(target, "utf8")));
+      const changes = await diff(content, p);
+      await writeFile(target, content);
+      return changes;
+    };
+    info("Applying patches");
+    const diffs = await Promise.all(patches.map((p) => apply(p)));
+    info(diffs.flat().join("\n"));
+  }
+}
+
 // lib/texlive/install-tl.js
 var devNull = Buffer2.alloc(0);
 async function installTL(profile) {
   const dir = restore(profile.version) ?? await download(profile.version);
-  const installer = path4.join(dir, executable(profile.version));
+  const base = executable(profile.version);
+  const installer = path4.format({ dir, base });
   await (0, import_exec2.exec)(installer, ["-version"], { input: devNull });
   for await (const dest of profile.open()) {
     const options = ["-profile", dest];
     if (!profile.version.isLatest()) {
       const repo = historic(profile.version);
-      if (profile.version.number < 2018) {
+      if (profile.version.number < 2018 && repo.protocol === "https") {
         repo.protocol = "http";
       }
       options.push(profile.version.number === 2008 ? "-location" : "-repository", repo.href);
     }
-    check(await (0, import_exec2.getExecOutput)(installer, options, { input: devNull }));
+    const { exitCode, stderr } = await (0, import_exec2.getExecOutput)(installer, options, {
+      input: devNull,
+      ignoreReturnCode: true
+    });
+    if (exitCode !== 0) {
+      throw new Error(stderr.includes("and the repository being accessed are not compatible") ? "It seems that the CTAN mirrors have not completed synchronisation against a release of new version of TeX Live. Please try re-running the workflow after some time." : `${base} exited with ${exitCode}: ${stderr}`);
+    }
+    check(stderr);
   }
   await patch(profile);
 }
@@ -57217,7 +57304,7 @@ async function download(version3) {
   info(`Downloading ${href}`);
   const archive = await (0, import_tool_cache2.downloadTool)(href);
   info(`Extracting installer from ${archive}`);
-  const dest = await extract(archive, platform2() === "win32" ? "zip" : "tgz");
+  const dest = await extract(archive, platform3() === "win32" ? "zip" : "tgz");
   await patch({ TEXDIR: dest, version: version3 });
   try {
     info("Adding to tool cache");
@@ -57228,7 +57315,7 @@ async function download(version3) {
   return dest;
 }
 function executable({ number: version3 }) {
-  if (platform2() !== "win32") {
+  if (platform3() !== "win32") {
     return "install-tl";
   } else if (version3 < 2013) {
     return "install-tl.bat";
@@ -57237,15 +57324,15 @@ function executable({ number: version3 }) {
   }
 }
 function url2(version3) {
-  return new URL(platform2() === "win32" ? "install-tl.zip" : "install-tl-unx.tar.gz", version3.isLatest() ? CTAN : historic(version3));
+  return new URL(platform3() === "win32" ? "install-tl.zip" : "install-tl-unx.tar.gz", version3.isLatest() ? CTAN : historic(version3));
 }
 
 // lib/texlive/profile.js
 init_tslib_es6();
 import { writeFile as writeFile2 } from "fs/promises";
-import { platform as platform3 } from "os";
+import { platform as platform4 } from "os";
 import path5 from "path";
-import { env as env3 } from "process";
+import { env as env4 } from "process";
 var Profile = class extends Serializable {
   constructor(options) {
     super();
@@ -57273,7 +57360,7 @@ var Profile = class extends Serializable {
   }
   withPrefix(prefix2) {
     this.withTexdir(path5.join(prefix2, this.version.toString()));
-    this.TEXMFLOCAL = env3["TEXLIVE_INSTALL_TEXMFLOCAL"] ?? path5.join(prefix2, "texmf-local");
+    this.TEXMFLOCAL = env4["TEXLIVE_INSTALL_TEXMFLOCAL"] ?? path5.join(prefix2, "texmf-local");
   }
   withTexdir(texdir) {
     this.TEXDIR = texdir;
@@ -57287,9 +57374,9 @@ var Profile = class extends Serializable {
     this.TEXMFVAR = path5.join(texuserdir, "texmf-var");
   }
   withPortable() {
-    this.TEXMFHOME = env3["TEXLIVE_INSTALL_TEXMFHOME"] ?? this.TEXMFLOCAL;
-    this.TEXMFCONFIG = env3["TEXLIVE_INSTALL_TEXMFCONFIG"] ?? this.TEXMFSYSCONFIG;
-    this.TEXMFVAR = env3["TEXLIVE_INSTALL_TEXMFVAR"] ?? this.TEXMFSYSVAR;
+    this.TEXMFHOME = env4["TEXLIVE_INSTALL_TEXMFHOME"] ?? this.TEXMFLOCAL;
+    this.TEXMFCONFIG = env4["TEXLIVE_INSTALL_TEXMFCONFIG"] ?? this.TEXMFSYSCONFIG;
+    this.TEXMFVAR = env4["TEXLIVE_INSTALL_TEXMFVAR"] ?? this.TEXMFSYSVAR;
   }
   async *open() {
     for await (const tmp of mkdtemp()) {
@@ -57301,7 +57388,7 @@ var Profile = class extends Serializable {
   toString() {
     const plain = this.toPlain({
       version: this.version.number,
-      groups: [platform3()]
+      groups: [platform4()]
     });
     return Object.entries(plain).map((entry) => entry.join(" ")).join("\n");
   }
@@ -57473,7 +57560,7 @@ async function pkg(name) {
 }
 
 // lib/texlive/tlmgr/conf.js
-var import_core2 = __toESM(require_core(), 1);
+var import_core3 = __toESM(require_core(), 1);
 var import_exec3 = __toESM(require_exec(), 1);
 var Conf = class {
   constructor(options) {
@@ -57485,7 +57572,7 @@ var Conf = class {
       return stdout.trim();
     }
     if (this.options.version.number < 2010) {
-      (0, import_core2.exportVariable)(key, value);
+      (0, import_core3.exportVariable)(key, value);
     } else {
       await (0, import_exec3.exec)("tlmgr", ["conf", "texmf", key, value]);
     }
@@ -57501,7 +57588,7 @@ var Conf = class {
 };
 
 // lib/texlive/tlmgr/path.js
-var import_core3 = __toESM(require_core(), 1);
+var import_core4 = __toESM(require_core(), 1);
 import path6 from "path";
 var Path = class {
   constructor(options) {
@@ -57516,7 +57603,7 @@ var Path = class {
         cause
       });
     }
-    (0, import_core3.addPath)(dir);
+    (0, import_core4.addPath)(dir);
   }
 };
 
@@ -57542,7 +57629,7 @@ var Repository = class {
     }
   }
   async add(repo, tag) {
-    const args = ["repository", "add", repo];
+    const args = ["repository", "add", repo.toString()];
     if (tag !== void 0) {
       args.push(tag);
     }
@@ -57552,6 +57639,9 @@ var Repository = class {
     if (exitCode !== 0 && !stderr.includes("repository or its tag already defined")) {
       throw new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
     }
+  }
+  async remove(repo) {
+    await (0, import_exec5.exec)("tlmgr", ["repository", "remove", repo.toString()]);
   }
 };
 
@@ -57626,7 +57716,14 @@ var Tlmgr = class {
     if ((options.reinstallForciblyRemoved ?? false) && this.options.version.number >= 2009) {
       args.unshift("--reinstall-forcibly-removed");
     }
-    await (0, import_exec6.exec)("tlmgr", ["update", ...args]);
+    const { exitCode, stderr, stdout } = await (0, import_exec6.getExecOutput)("tlmgr", ["update", ...args], { ignoreReturnCode: true });
+    if (exitCode !== 0) {
+      const error = new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
+      error.exitCode = exitCode;
+      error.stderr = stderr;
+      error.stdout = stdout;
+      throw error;
+    }
   }
   async version() {
     await (0, import_exec6.exec)("tlmgr", ["--version"]);
@@ -57656,14 +57753,14 @@ __decorate([
 // lib/texlive/version.js
 init_tslib_es6();
 var import_decorator_cache_getter2 = __toESM(require_dist(), 1);
-import { platform as platform4 } from "os";
+import { platform as platform5 } from "os";
 var Version = class {
   constructor(spec) {
     this.spec = spec;
     if (/^199[6-9]|200[0-7]$/u.test(spec)) {
       throw new RangeError("Versions prior to 2008 are not supported");
     } else if (/^20\d\d$/u.test(spec) && spec <= Version.LATEST) {
-      if (platform4() === "darwin" && spec < "2013") {
+      if (platform5() === "darwin" && spec < "2013") {
         throw new RangeError("Versions prior to 2013 does not work on 64-bit macOS");
       }
     } else if (spec !== "latest") {
@@ -57721,12 +57818,11 @@ var Inputs;
 (function(Inputs2) {
   async function load() {
     const version3 = await Version.resolve(getInput2("version", { default: "latest" }));
-    const env4 = Env.load(version3);
+    const env5 = Env.load(version3);
     const inputs = {
       cache: getInput2("cache", { type: Boolean }),
-      forceUpdateCache: (env4.SETUP_TEXLIVE_FORCE_UPDATE_CACHE ?? "0") !== "0",
       packages: await loadPackageList(),
-      prefix: getInput2("prefix", { default: env4.TEXLIVE_INSTALL_PREFIX }),
+      prefix: getInput2("prefix", { default: env5.TEXLIVE_INSTALL_PREFIX }),
       texdir: getInput2("texdir"),
       tlcontrib: getInput2("tlcontrib", { type: Boolean }),
       updateAllPackages: getInput2("update-all-packages", { type: Boolean }),
@@ -57773,7 +57869,7 @@ var Inputs;
 
 // lib/action/outputs.js
 init_tslib_es6();
-var import_core4 = __toESM(require_core(), 1);
+var import_core5 = __toESM(require_core(), 1);
 var Outputs = class extends Serializable {
   constructor() {
     super(...arguments);
@@ -57781,7 +57877,7 @@ var Outputs = class extends Serializable {
   }
   emit() {
     for (const [key, value] of Object.entries(this.toJSON())) {
-      (0, import_core4.setOutput)(key, value);
+      (0, import_core5.setOutput)(key, value);
     }
   }
 };
@@ -57795,41 +57891,15 @@ __decorate([
   __metadata("design:type", Version)
 ], Outputs.prototype, "version", void 0);
 
-// lib/action/state.js
-init_tslib_es6();
-var import_core5 = __toESM(require_core(), 1);
-var State = class extends Serializable {
-  constructor() {
-    super();
-    this.post = false;
-    const state = (0, import_core5.getState)(State.NAME);
-    if (state !== "") {
-      plainToClassFromExist(this, JSON.parse(state));
-      this.post = true;
-    }
-  }
-  save() {
-    (0, import_core5.saveState)(State.NAME, JSON.stringify(this));
-  }
-};
-State.NAME = "post";
-__decorate([
-  Expose(),
-  __metadata("design:type", String)
-], State.prototype, "key", void 0);
-__decorate([
-  Expose(),
-  __metadata("design:type", String)
-], State.prototype, "texdir", void 0);
-
 // lib/action/index.js
 async function run() {
+  const state = "POST";
   try {
-    const state = new State();
-    if (!state.post) {
-      await main(state);
+    if ((0, import_core6.getState)(state) === "") {
+      await main();
+      (0, import_core6.saveState)(state, "1");
     } else {
-      await post(state);
+      await post();
     }
   } catch (error) {
     if (isNativeError2(error)) {
@@ -57840,29 +57910,24 @@ async function run() {
     }
   }
 }
-async function main(state = new State()) {
+async function main() {
   const inputs = await Inputs.load();
   const outputs = new Outputs();
   outputs.version = inputs.version;
   const profile = new Profile(inputs);
-  let installPackages = inputs.packages.size > 0;
+  const cache2 = new CacheClient({
+    TEXDIR: profile.TEXDIR,
+    packages: inputs.packages,
+    version: inputs.version
+  });
+  let cacheInfo = { hit: false, full: false, restored: false };
   if (inputs.cache) {
     await import_core.group("Restoring cache", async () => {
-      const [unique, primary, secondary] = getCacheKeys(inputs);
-      state.key = inputs.forceUpdateCache ? unique : primary;
-      const restored = await restoreCache2(profile.TEXDIR, unique, [primary, secondary]);
-      if (restored?.startsWith(state.key) === true) {
-        state.key = restored;
-      } else {
-        state.texdir = profile.TEXDIR;
-        info("After the job completes, TEXDIR will be saved to cache with key:");
-        info("  " + state.key);
-      }
-      outputs.cacheHit = restored !== void 0;
-      installPackages &&= restored?.startsWith(primary) !== true;
+      cacheInfo = await cache2.restore();
     });
+    outputs.cacheHit = cacheInfo.restored;
   }
-  if (!outputs.cacheHit) {
+  if (!cacheInfo.restored) {
     await import_core.group("Installation profile", async () => {
       info(profile.toString());
     });
@@ -57872,14 +57937,28 @@ async function main(state = new State()) {
   }
   const tlmgr = new Tlmgr(profile);
   await tlmgr.path.add();
-  if (outputs.cacheHit) {
-    if (inputs.version.isLatest()) {
-      const target = inputs.updateAllPackages ? "all packages" : "tlmgr";
-      await import_core.group(`Updating ${target}`, async () => {
+  if (cacheInfo.restored) {
+    await import_core.group("Updating tlmgr", async () => {
+      try {
         await tlmgr.update([], { self: true });
-        if (inputs.updateAllPackages) {
-          await tlmgr.update([], { all: true, reinstallForciblyRemoved: true });
+      } catch (error) {
+        const { stderr } = error ?? {};
+        if (cacheInfo.restored && typeof stderr === "string" && stderr.includes("is older than remote repository")) {
+          const tag = "main";
+          const historic2 = tlnet_exports.historic(inputs.version, { master: true });
+          info(`Changing the ${tag} repository to ${historic2}`);
+          await tlmgr.repository.remove(tag);
+          await tlmgr.repository.add(historic2, tag);
+          await tlmgr.update([], { self: true });
+          cache2.update();
+        } else {
+          throw error;
         }
+      }
+    });
+    if (inputs.version.isLatest() && inputs.updateAllPackages) {
+      await import_core.group(`Updating packages`, async () => {
+        await tlmgr.update([], { all: true, reinstallForciblyRemoved: true });
       });
     }
     const entries = await Promise.all(["TEXMFLOCAL", ...["TEXMFHOME", "TEXMFCONFIG", "TEXMFVAR"]].map(async (key) => {
@@ -57897,11 +57976,11 @@ async function main(state = new State()) {
   }
   if (inputs.tlcontrib) {
     await import_core.group("Setting up TLContrib", async () => {
-      await tlmgr.repository.add(tlnet_exports.CONTRIB.href, "tlcontrib");
+      await tlmgr.repository.add(tlnet_exports.CONTRIB, "tlcontrib");
       await tlmgr.pinning.add("tlcontrib", "*");
     });
   }
-  if (installPackages) {
+  if (!cacheInfo.full && inputs.packages.size > 0) {
     await import_core.group("Installing packages", async () => {
       await tlmgr.install(inputs.packages);
     });
@@ -57913,24 +57992,1084 @@ async function main(state = new State()) {
       info(`  ${name}: ${version3 ?? `rev${revision}`}`);
     }
   });
-  state.save();
+  cache2.saveState();
   outputs.emit();
 }
-async function post({ key, texdir }) {
-  if (key !== void 0) {
-    if (texdir !== void 0) {
-      await saveCache2(texdir, key);
-    } else {
-      info(`Cache hit occurred on the primary key ${key}, not saving cache`);
-    }
-  }
-}
-function getCacheKeys({ version: version3, packages }) {
-  const secondary = `setup-texlive-${platform5()}-${arch2()}-${version3}-`;
-  const primary = secondary + createHash("sha256").update(JSON.stringify([...packages])).digest("hex");
-  const unique = `${primary}-${randomUUID().replaceAll("-", "")}`;
-  return [unique, primary, secondary];
+async function post() {
+  await save();
 }
 
 // lib/index.js
 run();
+/*!
+ * @actions/cache
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright 2019 GitHub
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * @actions/core
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright 2019 GitHub
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * @actions/exec
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright 2019 GitHub
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * @actions/glob
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright 2019 GitHub
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * @actions/http-client
+ *
+ * Actions Http Client for Node.js
+ *
+ * Copyright (c) GitHub, Inc.
+ *
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+ * LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * @actions/io
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright 2019 GitHub
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * @actions/tool-cache
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright 2019 GitHub
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * @azure/abort-controller - Copyright (c) Microsoft Corporation
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Microsoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * @azure/core-auth - Copyright (c) Microsoft Corporation
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Microsoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * @azure/core-http - Copyright (c) Microsoft Corporation
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Microsoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * @azure/core-lro - Copyright (c) Microsoft Corporation
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Microsoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * @azure/core-paging - Copyright (c) Microsoft Corporation
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Microsoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * @azure/core-tracing - Copyright (c) Microsoft Corporation
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Microsoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * @azure/core-util - Copyright (c) Microsoft Corporation
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Microsoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * @azure/logger - Copyright (c) Microsoft Corporation
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Microsoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * @azure/storage-blob - Copyright (c) Microsoft Corporation
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Microsoft
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * @opentelemetry/api - Copyright (c) OpenTelemetry Authors
+ *
+ *                                  Apache License
+ *                            Version 2.0, January 2004
+ *                         http://www.apache.org/licenses/
+ *
+ *    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+ *
+ *    1. Definitions.
+ *
+ *       "License" shall mean the terms and conditions for use, reproduction,
+ *       and distribution as defined by Sections 1 through 9 of this document.
+ *
+ *       "Licensor" shall mean the copyright owner or entity authorized by
+ *       the copyright owner that is granting the License.
+ *
+ *       "Legal Entity" shall mean the union of the acting entity and all
+ *       other entities that control, are controlled by, or are under common
+ *       control with that entity. For the purposes of this definition,
+ *       "control" means (i) the power, direct or indirect, to cause the
+ *       direction or management of such entity, whether by contract or
+ *       otherwise, or (ii) ownership of fifty percent (50%) or more of the
+ *       outstanding shares, or (iii) beneficial ownership of such entity.
+ *
+ *       "You" (or "Your") shall mean an individual or Legal Entity
+ *       exercising permissions granted by this License.
+ *
+ *       "Source" form shall mean the preferred form for making modifications,
+ *       including but not limited to software source code, documentation
+ *       source, and configuration files.
+ *
+ *       "Object" form shall mean any form resulting from mechanical
+ *       transformation or translation of a Source form, including but
+ *       not limited to compiled object code, generated documentation,
+ *       and conversions to other media types.
+ *
+ *       "Work" shall mean the work of authorship, whether in Source or
+ *       Object form, made available under the License, as indicated by a
+ *       copyright notice that is included in or attached to the work
+ *       (an example is provided in the Appendix below).
+ *
+ *       "Derivative Works" shall mean any work, whether in Source or Object
+ *       form, that is based on (or derived from) the Work and for which the
+ *       editorial revisions, annotations, elaborations, or other modifications
+ *       represent, as a whole, an original work of authorship. For the purposes
+ *       of this License, Derivative Works shall not include works that remain
+ *       separable from, or merely link (or bind by name) to the interfaces of,
+ *       the Work and Derivative Works thereof.
+ *
+ *       "Contribution" shall mean any work of authorship, including
+ *       the original version of the Work and any modifications or additions
+ *       to that Work or Derivative Works thereof, that is intentionally
+ *       submitted to Licensor for inclusion in the Work by the copyright owner
+ *       or by an individual or Legal Entity authorized to submit on behalf of
+ *       the copyright owner. For the purposes of this definition, "submitted"
+ *       means any form of electronic, verbal, or written communication sent
+ *       to the Licensor or its representatives, including but not limited to
+ *       communication on electronic mailing lists, source code control systems,
+ *       and issue tracking systems that are managed by, or on behalf of, the
+ *       Licensor for the purpose of discussing and improving the Work, but
+ *       excluding communication that is conspicuously marked or otherwise
+ *       designated in writing by the copyright owner as "Not a Contribution."
+ *
+ *       "Contributor" shall mean Licensor and any individual or Legal Entity
+ *       on behalf of whom a Contribution has been received by Licensor and
+ *       subsequently incorporated within the Work.
+ *
+ *    2. Grant of Copyright License. Subject to the terms and conditions of
+ *       this License, each Contributor hereby grants to You a perpetual,
+ *       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+ *       copyright license to reproduce, prepare Derivative Works of,
+ *       publicly display, publicly perform, sublicense, and distribute the
+ *       Work and such Derivative Works in Source or Object form.
+ *
+ *    3. Grant of Patent License. Subject to the terms and conditions of
+ *       this License, each Contributor hereby grants to You a perpetual,
+ *       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+ *       (except as stated in this section) patent license to make, have made,
+ *       use, offer to sell, sell, import, and otherwise transfer the Work,
+ *       where such license applies only to those patent claims licensable
+ *       by such Contributor that are necessarily infringed by their
+ *       Contribution(s) alone or by combination of their Contribution(s)
+ *       with the Work to which such Contribution(s) was submitted. If You
+ *       institute patent litigation against any entity (including a
+ *       cross-claim or counterclaim in a lawsuit) alleging that the Work
+ *       or a Contribution incorporated within the Work constitutes direct
+ *       or contributory patent infringement, then any patent licenses
+ *       granted to You under this License for that Work shall terminate
+ *       as of the date such litigation is filed.
+ *
+ *    4. Redistribution. You may reproduce and distribute copies of the
+ *       Work or Derivative Works thereof in any medium, with or without
+ *       modifications, and in Source or Object form, provided that You
+ *       meet the following conditions:
+ *
+ *       (a) You must give any other recipients of the Work or
+ *           Derivative Works a copy of this License; and
+ *
+ *       (b) You must cause any modified files to carry prominent notices
+ *           stating that You changed the files; and
+ *
+ *       (c) You must retain, in the Source form of any Derivative Works
+ *           that You distribute, all copyright, patent, trademark, and
+ *           attribution notices from the Source form of the Work,
+ *           excluding those notices that do not pertain to any part of
+ *           the Derivative Works; and
+ *
+ *       (d) If the Work includes a "NOTICE" text file as part of its
+ *           distribution, then any Derivative Works that You distribute must
+ *           include a readable copy of the attribution notices contained
+ *           within such NOTICE file, excluding those notices that do not
+ *           pertain to any part of the Derivative Works, in at least one
+ *           of the following places: within a NOTICE text file distributed
+ *           as part of the Derivative Works; within the Source form or
+ *           documentation, if provided along with the Derivative Works; or,
+ *           within a display generated by the Derivative Works, if and
+ *           wherever such third-party notices normally appear. The contents
+ *           of the NOTICE file are for informational purposes only and
+ *           do not modify the License. You may add Your own attribution
+ *           notices within Derivative Works that You distribute, alongside
+ *           or as an addendum to the NOTICE text from the Work, provided
+ *           that such additional attribution notices cannot be construed
+ *           as modifying the License.
+ *
+ *       You may add Your own copyright statement to Your modifications and
+ *       may provide additional or different license terms and conditions
+ *       for use, reproduction, or distribution of Your modifications, or
+ *       for any such Derivative Works as a whole, provided Your use,
+ *       reproduction, and distribution of the Work otherwise complies with
+ *       the conditions stated in this License.
+ *
+ *    5. Submission of Contributions. Unless You explicitly state otherwise,
+ *       any Contribution intentionally submitted for inclusion in the Work
+ *       by You to the Licensor shall be under the terms and conditions of
+ *       this License, without any additional terms or conditions.
+ *       Notwithstanding the above, nothing herein shall supersede or modify
+ *       the terms of any separate license agreement you may have executed
+ *       with Licensor regarding such Contributions.
+ *
+ *    6. Trademarks. This License does not grant permission to use the trade
+ *       names, trademarks, service marks, or product names of the Licensor,
+ *       except as required for reasonable and customary use in describing the
+ *       origin of the Work and reproducing the content of the NOTICE file.
+ *
+ *    7. Disclaimer of Warranty. Unless required by applicable law or
+ *       agreed to in writing, Licensor provides the Work (and each
+ *       Contributor provides its Contributions) on an "AS IS" BASIS,
+ *       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ *       implied, including, without limitation, any warranties or conditions
+ *       of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+ *       PARTICULAR PURPOSE. You are solely responsible for determining the
+ *       appropriateness of using or redistributing the Work and assume any
+ *       risks associated with Your exercise of permissions under this License.
+ *
+ *    8. Limitation of Liability. In no event and under no legal theory,
+ *       whether in tort (including negligence), contract, or otherwise,
+ *       unless required by applicable law (such as deliberate and grossly
+ *       negligent acts) or agreed to in writing, shall any Contributor be
+ *       liable to You for damages, including any direct, indirect, special,
+ *       incidental, or consequential damages of any character arising as a
+ *       result of this License or out of the use or inability to use the
+ *       Work (including but not limited to damages for loss of goodwill,
+ *       work stoppage, computer failure or malfunction, or any and all
+ *       other commercial damages or losses), even if such Contributor
+ *       has been advised of the possibility of such damages.
+ *
+ *    9. Accepting Warranty or Additional Liability. While redistributing
+ *       the Work or Derivative Works thereof, You may choose to offer,
+ *       and charge a fee for, acceptance of support, warranty, indemnity,
+ *       or other liability obligations and/or rights consistent with this
+ *       License. However, in accepting such obligations, You may act only
+ *       on Your own behalf and on Your sole responsibility, not on behalf
+ *       of any other Contributor, and only if You agree to indemnify,
+ *       defend, and hold each Contributor harmless for any liability
+ *       incurred by, or claims asserted against, such Contributor by reason
+ *       of your accepting any such warranty or additional liability.
+ *
+ *    END OF TERMS AND CONDITIONS
+ *
+ *    APPENDIX: How to apply the Apache License to your work.
+ *
+ *       To apply the Apache License to your work, attach the following
+ *       boilerplate notice, with the fields enclosed by brackets "[]"
+ *       replaced with your own identifying information. (Don't include
+ *       the brackets!)  The text should be enclosed in the appropriate
+ *       comment syntax for the file format. We also recommend that a
+ *       file or class name and description of purpose be included on the
+ *       same "printed page" as the copyright notice for easier
+ *       identification within third-party archives.
+ *
+ *    Copyright [yyyy] [name of copyright owner]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+/*!
+ * asynckit - Copyright (c) Alex Indigo <iam@alexindigo.com>
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016 Alex Indigo
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * balanced-match - Copyright (c) Julian Gruber <mail@juliangruber.com> (http://juliangruber.com)
+ *
+ * (MIT)
+ *
+ * Copyright (c) 2013 Julian Gruber &lt;julian@juliangruber.com&gt;
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * brace-expansion - Copyright (c) Julian Gruber <mail@juliangruber.com> (http://juliangruber.com)
+ *
+ * MIT License
+ *
+ * Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * class-transformer - Copyright (c) TypeStack contributors
+ *
+ * The MIT License
+ *
+ * Copyright (c) 2015-2020 TypeStack
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+/*!
+ * combined-stream - Copyright (c) Felix Geisendörfer <felix@debuggable.com> (http://debuggable.com/)
+ *
+ * Copyright (c) 2011 Debuggable Limited <felix@debuggable.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+/*!
+ * concat-map - Copyright (c) James Halliday <mail@substack.net> (http://substack.net)
+ *
+ * This software is released under the MIT license:
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * decorator-cache-getter - Copyright (c) Blake Embrey <hello@blakeembrey.com> (http://blakeembrey.me)
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 Blake Embrey (hello@blakeembrey.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+/*!
+ * delayed-stream - Copyright (c) Felix Geisendörfer <felix@debuggable.com> (http://debuggable.com/)
+ *
+ * Copyright (c) 2011 Debuggable Limited <felix@debuggable.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+/*!
+ * form-data - Copyright (c) Felix Geisendörfer <felix@debuggable.com> (http://debuggable.com/)
+ *
+ * Copyright (c) 2012 Felix Geisendörfer (felix@debuggable.com) and contributors
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ */
+/*!
+ * mime-db
+ *
+ * (The MIT License)
+ *
+ * Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+ * Copyright (c) 2015-2022 Douglas Christopher Wilson <doug@somethingdoug.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * 'Software'), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * mime-types
+ *
+ * (The MIT License)
+ *
+ * Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+ * Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * 'Software'), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * minimatch - Copyright (c) Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me)
+ *
+ * The ISC License
+ *
+ * Copyright (c) Isaac Z. Schlueter and Contributors
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+/*!
+ * node-fetch - Copyright (c) David Frank
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016 David Frank
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*!
+ * reflect-metadata - Copyright (c) Ron Buckton <ron.buckton@microsoft.com> (http://github.com/rbuckton)
+ *
+ * Apache License
+ *
+ * Version 2.0, January 2004
+ *
+ * http://www.apache.org/licenses/
+ *
+ * TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+ *
+ * 1. Definitions.
+ *
+ * "License" shall mean the terms and conditions for use, reproduction, and distribution as defined by Sections 1 through 9 of this document.
+ *
+ * "Licensor" shall mean the copyright owner or entity authorized by the copyright owner that is granting the License.
+ *
+ * "Legal Entity" shall mean the union of the acting entity and all other entities that control, are controlled by, or are under common control with that entity. For the purposes of this definition, "control" means (i) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (ii) ownership of fifty percent (50%) or more of the outstanding shares, or (iii) beneficial ownership of such entity.
+ *
+ * "You" (or "Your") shall mean an individual or Legal Entity exercising permissions granted by this License.
+ *
+ * "Source" form shall mean the preferred form for making modifications, including but not limited to software source code, documentation source, and configuration files.
+ *
+ * "Object" form shall mean any form resulting from mechanical transformation or translation of a Source form, including but not limited to compiled object code, generated documentation, and conversions to other media types.
+ *
+ * "Work" shall mean the work of authorship, whether in Source or Object form, made available under the License, as indicated by a copyright notice that is included in or attached to the work (an example is provided in the Appendix below).
+ *
+ * "Derivative Works" shall mean any work, whether in Source or Object form, that is based on (or derived from) the Work and for which the editorial revisions, annotations, elaborations, or other modifications represent, as a whole, an original work of authorship. For the purposes of this License, Derivative Works shall not include works that remain separable from, or merely link (or bind by name) to the interfaces of, the Work and Derivative Works thereof.
+ *
+ * "Contribution" shall mean any work of authorship, including the original version of the Work and any modifications or additions to that Work or Derivative Works thereof, that is intentionally submitted to Licensor for inclusion in the Work by the copyright owner or by an individual or Legal Entity authorized to submit on behalf of the copyright owner. For the purposes of this definition, "submitted" means any form of electronic, verbal, or written communication sent to the Licensor or its representatives, including but not limited to communication on electronic mailing lists, source code control systems, and issue tracking systems that are managed by, or on behalf of, the Licensor for the purpose of discussing and improving the Work, but excluding communication that is conspicuously marked or otherwise designated in writing by the copyright owner as "Not a Contribution."
+ *
+ * "Contributor" shall mean Licensor and any individual or Legal Entity on behalf of whom a Contribution has been received by Licensor and subsequently incorporated within the Work.
+ *
+ * 2. Grant of Copyright License. Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of, publicly display, publicly perform, sublicense, and distribute the Work and such Derivative Works in Source or Object form.
+ *
+ * 3. Grant of Patent License. Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable (except as stated in this section) patent license to make, have made, use, offer to sell, sell, import, and otherwise transfer the Work, where such license applies only to those patent claims licensable by such Contributor that are necessarily infringed by their Contribution(s) alone or by combination of their Contribution(s) with the Work to which such Contribution(s) was submitted. If You institute patent litigation against any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Work or a Contribution incorporated within the Work constitutes direct or contributory patent infringement, then any patent licenses granted to You under this License for that Work shall terminate as of the date such litigation is filed.
+ *
+ * 4. Redistribution. You may reproduce and distribute copies of the Work or Derivative Works thereof in any medium, with or without modifications, and in Source or Object form, provided that You meet the following conditions:
+ *
+ * You must give any other recipients of the Work or Derivative Works a copy of this License; and
+ *
+ * You must cause any modified files to carry prominent notices stating that You changed the files; and
+ *
+ * You must retain, in the Source form of any Derivative Works that You distribute, all copyright, patent, trademark, and attribution notices from the Source form of the Work, excluding those notices that do not pertain to any part of the Derivative Works; and
+ *
+ * If the Work includes a "NOTICE" text file as part of its distribution, then any Derivative Works that You distribute must include a readable copy of the attribution notices contained within such NOTICE file, excluding those notices that do not pertain to any part of the Derivative Works, in at least one of the following places: within a NOTICE text file distributed as part of the Derivative Works; within the Source form or documentation, if provided along with the Derivative Works; or, within a display generated by the Derivative Works, if and wherever such third-party notices normally appear. The contents of the NOTICE file are for informational purposes only and do not modify the License. You may add Your own attribution notices within Derivative Works that You distribute, alongside or as an addendum to the NOTICE text from the Work, provided that such additional attribution notices cannot be construed as modifying the License. You may add Your own copyright statement to Your modifications and may provide additional or different license terms and conditions for use, reproduction, or distribution of Your modifications, or for any such Derivative Works as a whole, provided Your use, reproduction, and distribution of the Work otherwise complies with the conditions stated in this License.
+ *
+ * 5. Submission of Contributions. Unless You explicitly state otherwise, any Contribution intentionally submitted for inclusion in the Work by You to the Licensor shall be under the terms and conditions of this License, without any additional terms or conditions. Notwithstanding the above, nothing herein shall supersede or modify the terms of any separate license agreement you may have executed with Licensor regarding such Contributions.
+ *
+ * 6. Trademarks. This License does not grant permission to use the trade names, trademarks, service marks, or product names of the Licensor, except as required for reasonable and customary use in describing the origin of the Work and reproducing the content of the NOTICE file.
+ *
+ * 7. Disclaimer of Warranty. Unless required by applicable law or agreed to in writing, Licensor provides the Work (and each Contributor provides its Contributions) on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for determining the appropriateness of using or redistributing the Work and assume any risks associated with Your exercise of permissions under this License.
+ *
+ * 8. Limitation of Liability. In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as deliberate and grossly negligent acts) or agreed to in writing, shall any Contributor be liable to You for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising as a result of this License or out of the use or inability to use the Work (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if such Contributor has been advised of the possibility of such damages.
+ *
+ * 9. Accepting Warranty or Additional Liability. While redistributing the Work or Derivative Works thereof, You may choose to offer, and charge a fee for, acceptance of support, warranty, indemnity, or other liability obligations and/or rights consistent with this License. However, in accepting such obligations, You may act only on Your own behalf and on Your sole responsibility, not on behalf of any other Contributor, and only if You agree to indemnify, defend, and hold each Contributor harmless for any liability incurred by, or claims asserted against, such Contributor by reason of your accepting any such warranty or additional liability.
+ *
+ * END OF TERMS AND CONDITIONS
+ */
+/*!
+ * sax - Copyright (c) Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)
+ *
+ * The ISC License
+ *
+ * Copyright (c) Isaac Z. Schlueter and Contributors
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * ====
+ *
+ * `String.fromCodePoint` by Mathias Bynens used according to terms of MIT
+ * License, as follows:
+ *
+ *     Copyright Mathias Bynens <https://mathiasbynens.be/>
+ *
+ *     Permission is hereby granted, free of charge, to any person obtaining
+ *     a copy of this software and associated documentation files (the
+ *     "Software"), to deal in the Software without restriction, including
+ *     without limitation the rights to use, copy, modify, merge, publish,
+ *     distribute, sublicense, and/or sell copies of the Software, and to
+ *     permit persons to whom the Software is furnished to do so, subject to
+ *     the following conditions:
+ *
+ *     The above copyright notice and this permission notice shall be
+ *     included in all copies or substantial portions of the Software.
+ *
+ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ *     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ *     LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ *     OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ *     WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * semver
+ *
+ * The ISC License
+ *
+ * Copyright (c) Isaac Z. Schlueter and Contributors
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+/*!
+ * tslib - Copyright (c) Microsoft Corp.
+ *
+ * Copyright (c) Microsoft Corporation.
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ */
+/*!
+ * tunnel - Copyright (c) Koichi Kobayashi <koichik@improvement.jp>
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2012 Koichi Kobayashi
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+/*!
+ * uuid
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2010-2020 Robert Kieffer and other contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/*!
+ * xml2js - Copyright (c) Marek Kubica <marek@xivilization.net> (https://xivilization.net)
+ *
+ * Copyright 2010, 2011, 2012, 2013. All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ */
+/*!
+ * xmlbuilder - Copyright (c) Ozgur Ozcitak <oozcitak@gmail.com>
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2013 Ozgur Ozcitak
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
