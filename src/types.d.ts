@@ -5,7 +5,7 @@ declare global {
 
   interface ErrorConstructor {
     /* eslint-disable-next-line
-       @typescript-eslint/prefer-readonly-parameter-types */
+      @typescript-eslint/prefer-readonly-parameter-types */
     new(message: string, options: ErrorOptions): Error;
   }
 
