@@ -57269,8 +57269,8 @@ async function installTL(profile) {
     const options = ["-profile", dest];
     if (!profile.version.isLatest()) {
       const repo = historic(profile.version);
-      if (profile.version.number < 2018 && repo.protocol === "https") {
-        repo.protocol = "http";
+      if (profile.version.number < 2018 && repo.protocol === "https:") {
+        repo.protocol = "http:";
       }
       options.push(profile.version.number === 2008 ? "-location" : "-repository", repo.href);
     }
