@@ -1,12 +1,10 @@
 import { env } from 'node:process';
 
-import * as core from '@actions/core';
 import type { DeepWritable } from 'ts-essentials';
 
 import * as action from '#/action';
 import { CacheClient } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
-import { Outputs } from '#/action/outputs';
 import { Profile, Tlmgr, Version, installTL } from '#/texlive';
 import { Conf } from '#/texlive/tlmgr/conf';
 import { Path } from '#/texlive/tlmgr/path';
@@ -70,16 +68,12 @@ describe('main', () => {
   );
 
   it('sets cache-hit to false', async () => {
-    await expect(action.main()).toResolve();
-    expect(Outputs.prototype.emit).toHaveBeenCalledOnce();
-    expect(core.setOutput).toHaveBeenCalledWith('cache-hit', false);
+    await expect(action.main()).resolves.toHaveProperty('cacheHit', false);
   });
 
   it.each(cacheTypes)('sets cache-hit to true (case %p)', async (...kind) => {
     setCacheType(kind);
-    await expect(action.main()).toResolve();
-    expect(Outputs.prototype.emit).toHaveBeenCalledOnce();
-    expect(core.setOutput).toHaveBeenCalledWith('cache-hit', true);
+    await expect(action.main()).resolves.toHaveProperty('cacheHit', true);
   });
 
   it.each([
@@ -88,9 +82,7 @@ describe('main', () => {
     ['2014', v`2014`],
   ])('sets version to %p if input version is %p', async (output, input) => {
     inputs.version = input;
-    await expect(action.main()).toResolve();
-    expect(Outputs.prototype.emit).toHaveBeenCalledOnce();
-    expect(core.setOutput).toHaveBeenCalledWith('version', input.toString());
+    await expect(action.main()).resolves.toHaveProperty('version', input);
   });
 
   it('adds TeX Live to path after installation', async () => {

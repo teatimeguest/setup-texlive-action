@@ -5,10 +5,12 @@ import * as core from '@actions/core';
 import * as tool from '@actions/tool-cache';
 
 import * as log from '#/log';
-import { extract, getInput, restoreCache, saveCache } from '#/utility';
+import { extract, getInput, restoreCache, saveCache } from '#/util';
 
 jest.mock('node:path', () => jest.requireActual('path').posix);
-jest.unmock('#/utility');
+jest.unmock('#/util');
+jest.unmock('#/util/actions');
+jest.unmock('#/util/fs');
 
 describe('extract', () => {
   it('extracts files from a tarball', async () => {

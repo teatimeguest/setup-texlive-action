@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { addPath } from '@actions/core';
 
-import { uniqueChild } from '#/utility';
+import { uniqueChild } from '#/util';
 
 export class Path {
   constructor(private readonly options: { readonly TEXDIR: string }) {}

@@ -1,5 +1,5 @@
 import * as log from '#/log';
-import type { IterableIterator } from '#/utility';
+import type { IterableIterator } from '#/util';
 
 const RE = {
   comments: /\s*#.*$/gmu,

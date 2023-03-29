@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
-import { exec, getExecOutput } from '@actions/exec';
 
 import { Version, tlpkg } from '#/texlive';
 import { Conf } from '#/texlive/tlmgr/conf';
+import { ExecResult, exec } from '#/util';
 
 jest.unmock('#/texlive/tlmgr/conf');
 
@@ -10,11 +10,14 @@ const v = (spec: unknown) => new Version(`${spec}`);
 
 describe('texmf', () => {
   it('returns the value of the given key by using `kpsewhich`', async () => {
-    jest.mocked(getExecOutput).mockResolvedValueOnce({
-      exitCode: 0,
-      stdout: '/usr/local/texlive/2021/texmf-config\n',
-      stderr: '',
-    });
+    jest.mocked(exec).mockResolvedValueOnce(
+      new ExecResult({
+        command: '',
+        exitCode: 0,
+        stdout: '/usr/local/texlive/2021/texmf-config\n',
+        stderr: '',
+      }),
+    );
     const conf = new Conf({ version: v`2021`, TEXDIR: '' });
     await expect(conf.texmf('TEXMFCONFIG')).resolves.toBe(
       '/usr/local/texlive/2021/texmf-config',

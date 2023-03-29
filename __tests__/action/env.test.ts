@@ -1,6 +1,6 @@
 import process from 'node:process';
 
-import { Env } from '#/action/env';
+import { init } from '#/action/env';
 import * as log from '#/log';
 import { Version } from '#/texlive';
 
@@ -13,9 +13,10 @@ beforeEach(() => {
 });
 jest.unmock('#/action/env');
 
-describe('Env', () => {
+describe('init', () => {
   it('has some default values', () => {
-    expect(Env.load(v`latest`)).toMatchObject({
+    init(v`latest`);
+    expect(process.env).toMatchObject({
       TEXLIVE_INSTALL_ENV_NOCHECK: '1',
       TEXLIVE_INSTALL_NO_WELCOME: '1',
       TEXLIVE_INSTALL_TEXMFCONFIG: `~/.local/texlive/${v`latest`}/texmf-config`,
@@ -26,9 +27,7 @@ describe('Env', () => {
 
   it('ignores some environment variables', () => {
     process.env['TEXLIVE_INSTALL_TEXDIR'] = '<texdir>';
-    expect(Env.load(v`latest`)).not.toHaveProperty(
-      'TEXLIVE_INSTALL_TEXDIR',
-    );
+    init(v`latest`);
     expect(process.env).not.toHaveProperty('TEXLIVE_INSTALL_TEXDIR');
     expect(log.warn).toHaveBeenCalledWith(
       '`TEXLIVE_INSTALL_TEXDIR` is set, but ignored',
@@ -38,7 +37,8 @@ describe('Env', () => {
   it('favors user settings over default values', () => {
     process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
     process.env['NOPERLDOC'] = 'true';
-    expect(Env.load(v`latest`)).toMatchObject({
+    init(v`latest`);
+    expect(process.env).toMatchObject({
       ['TEXLIVE_INSTALL_PREFIX']: '<PREFIX>',
       ['NOPERLDOC']: 'true',
     });

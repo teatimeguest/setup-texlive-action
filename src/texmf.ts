@@ -1,14 +1,22 @@
 export interface Texmf extends SystemTrees, UserTrees {}
 
-export interface SystemTrees {
-  readonly TEXDIR: string;
-  readonly TEXMFLOCAL: string;
-  readonly TEXMFSYSCONFIG: string;
-  readonly TEXMFSYSVAR: string;
-}
+export const SYSTEM_TREES = [
+  'TEXDIR',
+  'TEXMFLOCAL',
+  'TEXMFSYSCONFIG',
+  'TEXMFSYSVAR',
+] as const;
 
-export interface UserTrees {
-  readonly TEXMFHOME: string;
-  readonly TEXMFCONFIG: string;
-  readonly TEXMFVAR: string;
-}
+export const USER_TREES = [
+  'TEXMFHOME',
+  'TEXMFCONFIG',
+  'TEXMFVAR',
+] as const;
+
+export type SystemTrees = {
+  readonly [Key in typeof SYSTEM_TREES[number]]: string;
+};
+
+export type UserTrees = {
+  readonly [Key in typeof USER_TREES[number]]: string;
+};

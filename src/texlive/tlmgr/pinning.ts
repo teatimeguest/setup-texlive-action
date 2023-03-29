@@ -1,6 +1,5 @@
-import { exec } from '@actions/exec';
-
 import type { Version } from '#/texlive/version';
+import { exec } from '#/util';
 
 export class Pinning {
   constructor({ version }: { readonly version: Version }) {

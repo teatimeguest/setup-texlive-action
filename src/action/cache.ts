@@ -7,7 +7,7 @@ import { Expose, plainToInstance } from 'class-transformer';
 
 import * as log from '#/log';
 import type { Version } from '#/texlive';
-import { Serializable, restoreCache, saveCache } from '#/utility';
+import { Serializable, restoreCache, saveCache } from '#/util';
 
 export interface CacheInfo {
   hit: boolean;

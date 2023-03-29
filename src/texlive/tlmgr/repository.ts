@@ -1,6 +1,5 @@
-import { exec, getExecOutput } from '@actions/exec';
-
 import type { Version } from '#/texlive/version';
+import { ExecError, exec } from '#/util';
 
 export class Repository {
   constructor({ version }: { readonly version: Version }) {
@@ -20,17 +19,20 @@ export class Repository {
     if (tag !== undefined) {
       args.push(tag);
     }
-    const { exitCode, stderr } = await getExecOutput('tlmgr', args, {
-      ignoreReturnCode: true,
-    });
-    if (
-      // `tlmgr repository add` returns non-zero status code
-      // if the same repository or tag is added again.
-      // (todo:  make sure that the tagged repo is really tlcontrib)
-      exitCode !== 0
-      && !stderr.includes('repository or its tag already defined')
-    ) {
-      throw new Error(`tlmgr exited with ${exitCode}: ${stderr}`);
+    try {
+      await exec('tlmgr', args);
+    } catch (error) {
+      if (
+        !(
+          // `tlmgr repository add` returns non-zero status code
+          // if the same repository or tag is added again.
+          // (todo:  make sure that the tagged repo is really tlcontrib)
+          error instanceof ExecError
+          && error.stderr.includes('repository or its tag already defined')
+        )
+      ) {
+        throw error;
+      }
     }
   }
 

@@ -1,7 +1,7 @@
 import { addPath } from '@actions/core';
 
 import { Path } from '#/texlive/tlmgr/path';
-import { uniqueChild } from '#/utility';
+import { uniqueChild } from '#/util';
 
 jest.unmock('#/texlive/tlmgr/path');
 

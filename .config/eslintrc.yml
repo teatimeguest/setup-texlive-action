@@ -90,6 +90,7 @@ overrides:
         - selector: typeLike
           format: [PascalCase]
       '@typescript-eslint/no-confusing-void-expression': error
+      '@typescript-eslint/no-empty-interface': off
       '@typescript-eslint/no-implied-eval': error
       '@typescript-eslint/no-invalid-this': error
       '@typescript-eslint/no-loop-func': error
@@ -101,6 +102,9 @@ overrides:
       '@typescript-eslint/no-unnecessary-boolean-literal-compare': error
       '@typescript-eslint/no-unnecessary-condition': error
       '@typescript-eslint/no-unused-expressions': error
+      '@typescript-eslint/no-unused-vars':
+        - error
+        - ignoreRestSiblings: true
       '@typescript-eslint/noinferrable-types': off
       '@typescript-eslint/non-nullable-type-assertion-style': error
       '@typescript-eslint/prefer-namespace-keyword': error
@@ -153,6 +157,7 @@ overrides:
       unicorn/no-array-for-each: off
       unicorn/no-array-reduce: off
       unicorn/no-negated-condition: off
+      unicorn/prefer-export-from: off
       unicorn/prefer-number-properties:
         - error
         - checkInfinity: false

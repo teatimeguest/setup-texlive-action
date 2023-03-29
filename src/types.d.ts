@@ -6,7 +6,7 @@ declare global {
   interface ErrorConstructor {
     /* eslint-disable-next-line
       @typescript-eslint/prefer-readonly-parameter-types */
-    new(message: string, options: ErrorOptions): Error;
+    new(message: string, options?: ErrorOptions | undefined): Error;
   }
 
   namespace NodeJS {

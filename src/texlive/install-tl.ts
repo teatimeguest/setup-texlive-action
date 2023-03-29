@@ -1,8 +1,6 @@
-import { Buffer } from 'node:buffer';
 import { platform } from 'node:os';
 import path from 'node:path';
 
-import { exec, getExecOutput } from '@actions/exec';
 import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
 
 import * as log from '#/log';
@@ -10,17 +8,15 @@ import type { Profile } from '#/texlive/profile';
 import * as tlnet from '#/texlive/tlnet';
 import * as tlpkg from '#/texlive/tlpkg';
 import type { Version } from '#/texlive/version';
-import { extract } from '#/utility';
-
-// Prevents `install-tl(-windows).bat` from being stopped by `pause`.
-const devNull: Buffer = Buffer.alloc(0);
+import { exec, extract } from '#/util';
 
 export async function installTL(profile: Profile): Promise<void> {
   const dir = restore(profile.version) ?? await download(profile.version);
   const base = executable(profile.version);
   const installer = path.format({ dir, base });
   // Print version info.
-  await exec(installer, ['-version'], { input: devNull });
+  // eslint-disable-next-line unicorn/no-null
+  await exec(installer, ['-version'], { stdin: null });
 
   for await (const dest of profile.open()) {
     const options = ['-profile', dest];
@@ -37,20 +33,22 @@ export async function installTL(profile: Profile): Promise<void> {
         repo.href,
       );
     }
-    const { exitCode, stderr } = await getExecOutput(installer, options, {
-      input: devNull,
+    const result = await exec(installer, options, {
+      // eslint-disable-next-line unicorn/no-null
+      stdin: null,
       ignoreReturnCode: true,
     });
-    if (exitCode !== 0) {
+    if (
+      result.stderr.includes('the repository being accessed are not compatible')
+    ) {
       throw new Error(
-        stderr.includes('and the repository being accessed are not compatible')
-          ? 'It seems that the CTAN mirrors have not completed synchronisation'
-            + ' against a release of new version of TeX Live.'
-            + ' Please try re-running the workflow after some time.'
-          : `${base} exited with ${exitCode}: ${stderr}`,
+        'It seems that the CTAN mirrors have not completed synchronisation'
+          + ' against a release of new version of TeX Live.'
+          + ' Please try re-running the workflow after some time.',
       );
     }
-    tlpkg.check(stderr);
+    result.check();
+    tlpkg.check(result);
   }
 
   await tlpkg.patch(profile);

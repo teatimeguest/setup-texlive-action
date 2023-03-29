@@ -1,13 +1,14 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { type ExecOutput, exec, getExecOutput } from '@actions/exec';
 import { cache as Cache } from 'decorator-cache-getter';
 
 import * as ctan from '#/ctan';
 import * as log from '#/log';
+import * as tlpdb from '#/texlive/tlpdb';
 import * as tlpkg from '#/texlive/tlpkg';
 import type { Version } from '#/texlive/version';
+import { exec } from '#/util';
 
 import { Conf } from '#/texlive/tlmgr/conf';
 import { Path } from '#/texlive/tlmgr/path';
@@ -30,17 +31,12 @@ export class Tlmgr {
   async install(this: void, packages: Iterable<string>): Promise<void> {
     const args = ['install', ...packages];
     if (args.length > 1) {
-      const { exitCode, stderr } = await getExecOutput('tlmgr', args, {
-        ignoreReturnCode: true,
-      });
-      tlpkg.check(stderr);
-      if (exitCode !== 0) {
-        const names = Array.from(
-          stderr.matchAll(/^tlmgr install: package (\S+) not present/gmu),
-          ([, name = '']) => name,
-        );
+      const result = await exec('tlmgr', args, { ignoreReturnCode: true });
+      tlpkg.check(result);
+      if (result.exitCode !== 0) {
+        const names = [...collectInvalidPackageNames(result.stderr)];
         if (names.length === 0) {
-          throw new Error(`\`tlmgr\` exited with ${exitCode}`);
+          result.check();
         }
         // Some packages have different names in TeX Live and CTAN, and
         // the DEPENDS.txt format requires a CTAN name, while
@@ -48,21 +44,10 @@ export class Tlmgr {
         // To install such packages with tlmgr,
         // the action uses the CTAN API to look up thier names in TeX Live.
         log.info(`Trying to resolve package names: (${names.join(', ')})`);
-        const tlnames = await Promise.all(names.map(async (name) => {
-          let pkg;
-          try {
-            pkg = await ctan.pkg(name);
-          } catch (cause) {
-            throw new Error(`Package ${name} not found`, { cause });
-          }
-          if (pkg.texlive === undefined) {
-            log.debug(`Unexpected response data: ${JSON.stringify(pkg)}`);
-            throw new Error(`Failed to install ${name}`);
-          }
-          log.info(`  ${name} (in CTAN) => ${pkg.texlive} (in TeX Live)`);
-          return pkg.texlive;
+        const tlnames = await Promise.all(names.map((name) => {
+          return resolvePackageName(name);
         }));
-        tlpkg.check(await getExecOutput('tlmgr', ['install', ...tlnames]));
+        tlpkg.check(await exec('tlmgr', ['install', ...tlnames]));
       }
     }
   }
@@ -71,7 +56,7 @@ export class Tlmgr {
    * Lists packages by reading `texlive.tlpdb` directly
    * instead of running `tlmgr list`.
    */
-  async *list(): AsyncGenerator<tlpkg.Tlpobj, void, void> {
+  async *list(): AsyncGenerator<tlpdb.Tlpobj, void, void> {
     const tlpdbPath = path.join(this.options.TEXDIR, 'tlpkg', 'texlive.tlpdb');
     let db: string;
     try {
@@ -81,7 +66,7 @@ export class Tlmgr {
       return;
     }
     try {
-      yield* tlpkg.tlpdb(db);
+      yield* tlpdb.parse(db);
     } catch (cause) {
       log.info(`Failed to parse ${tlpdbPath}`, { cause });
     }
@@ -120,25 +105,34 @@ export class Tlmgr {
     ) {
       args.unshift('--reinstall-forcibly-removed');
     }
-    const { exitCode, stderr, stdout } = await getExecOutput(
-      'tlmgr',
-      ['update', ...args],
-      { ignoreReturnCode: true },
-    );
-    if (exitCode !== 0) {
-      const error = new Error(
-        `tlmgr exited with ${exitCode}: ${stderr}`,
-      ) as Error & ExecOutput;
-      error.exitCode = exitCode;
-      error.stderr = stderr;
-      error.stdout = stdout;
-      throw error;
-    }
+    await exec('tlmgr', ['update', ...args]);
   }
 
   async version(this: void): Promise<void> {
     await exec('tlmgr', ['--version']);
   }
+}
+
+function* collectInvalidPackageNames(stderr: string): Iterable<string> {
+  const re = /^tlmgr install: package (\S+) not present/gmu;
+  for (const [, name] of stderr.matchAll(re)) {
+    yield name ?? '';
+  }
+}
+
+async function resolvePackageName(name: string): Promise<string> {
+  let pkg;
+  try {
+    pkg = await ctan.pkg(name);
+  } catch (cause) {
+    throw new Error(`Package ${name} not found`, { cause });
+  }
+  if (pkg.texlive === undefined) {
+    log.debug(`Unexpected response data: ${JSON.stringify(pkg)}`);
+    throw new Error(`Failed to install ${name}`);
+  }
+  log.info(`  ${name} (in CTAN) => ${pkg.texlive} (in TeX Live)`);
+  return pkg.texlive;
 }
 
 export interface UpdateOptions {

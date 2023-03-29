@@ -5,7 +5,7 @@ import * as tool from '@actions/tool-cache';
 import * as log from '#/log';
 import { download, restore } from '#/texlive/install-tl';
 import { Version } from '#/texlive/version';
-import * as util from '#/utility';
+import * as util from '#/util';
 
 const v = (spec: unknown) => new Version(`${spec}`);
 

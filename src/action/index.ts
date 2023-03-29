@@ -1,21 +1,23 @@
 import { isNativeError } from 'node:util/types';
 
-import { getState, saveState, setFailed } from '@actions/core';
-import { keys } from 'ts-transformer-keys';
+import { getState, saveState, setFailed, setOutput } from '@actions/core';
 
 import { CacheClient, save as saveCache } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
-import { Outputs } from '#/action/outputs';
+import type { Outputs } from '#/action/outputs';
 import * as log from '#/log';
-import { Profile, Tlmgr, installTL, tlnet } from '#/texlive';
-import type { UserTrees } from '#/texmf';
+import { Profile, Tlmgr, Version, installTL, tlnet } from '#/texlive';
+import { USER_TREES } from '#/texmf';
+import { ExecError } from '#/util/exec';
 
 export async function run(): Promise<void> {
   const state = 'POST';
   try {
     if (getState(state) === '') {
-      await main();
+      const { cacheHit, version } = await main();
       saveState(state, '1');
+      setOutput('cache-hit', cacheHit);
+      setOutput('version', version);
     } else {
       await post();
     }
@@ -29,24 +31,20 @@ export async function run(): Promise<void> {
   }
 }
 
-export async function main(): Promise<void> {
+export async function main(): Promise<Outputs> {
   const inputs = await Inputs.load();
-  const outputs = new Outputs();
-  outputs.version = inputs.version;
-
   const profile = new Profile(inputs);
   const cache = new CacheClient({
     TEXDIR: profile.TEXDIR,
     packages: inputs.packages,
     version: inputs.version,
   });
-  let cacheInfo = { hit: false, full: false, restored: false };
+  let cacheInfo = { full: false, restored: false };
 
   if (inputs.cache) {
     await log.group('Restoring cache', async () => {
       cacheInfo = await cache.restore();
     });
-    outputs.cacheHit = cacheInfo.restored;
   }
 
   if (!cacheInfo.restored) {
@@ -66,18 +64,11 @@ export async function main(): Promise<void> {
       try {
         await tlmgr.update([], { self: true });
       } catch (error) {
-        const { stderr } = (error ?? {}) as Record<string, unknown>;
         if (
-          cacheInfo.restored
-          && typeof stderr === 'string'
-          && stderr.includes('is older than remote repository')
+          error instanceof ExecError
+          && error.stderr.includes('is older than remote repository')
         ) {
-          const tag = 'main';
-          const historic = tlnet.historic(inputs.version, { master: true });
-          log.info(`Changing the ${tag} repository to ${historic}`);
-          await tlmgr.repository.remove(tag);
-          await tlmgr.repository.add(historic, tag);
-          await tlmgr.update([], { self: true });
+          await updateRepository(tlmgr, inputs.version);
           cache.update();
         } else {
           throw error;
@@ -89,21 +80,7 @@ export async function main(): Promise<void> {
         await tlmgr.update([], { all: true, reinstallForciblyRemoved: true });
       });
     }
-    const entries = await Promise
-      .all((['TEXMFLOCAL', ...keys<UserTrees>()] as const).map(async (key) => {
-        const value = profile[key];
-        const old = await tlmgr.conf.texmf(key);
-        return old === value ? [] : [[key, value]] as const;
-      }))
-      .then((e) => e.flat());
-    if (entries.length > 0) {
-      await log.group('Adjusting TEXMF', async () => {
-        for (const [key, value] of entries) {
-          // eslint-disable-next-line no-await-in-loop
-          await tlmgr.conf.texmf(key, value);
-        }
-      });
-    }
+    await adjustTexmf(tlmgr, profile);
   }
 
   if (inputs.tlcontrib) {
@@ -128,9 +105,37 @@ export async function main(): Promise<void> {
   });
 
   cache.saveState();
-  outputs.emit();
+  return { cacheHit: cacheInfo.restored, version: inputs.version };
 }
 
 export async function post(): Promise<void> {
   await saveCache();
+}
+
+async function updateRepository(tlmgr: Tlmgr, version: Version): Promise<void> {
+  const tag = 'main';
+  const historic = tlnet.historic(version, { master: true });
+  log.info(`Changing the ${tag} repository to ${historic}`);
+  await tlmgr.repository.remove(tag);
+  await tlmgr.repository.add(historic, tag);
+  await tlmgr.update([], { self: true });
+}
+
+async function adjustTexmf(tlmgr: Tlmgr, profile: Profile): Promise<void> {
+  const entries = await Promise
+    .all((['TEXMFLOCAL', ...USER_TREES] as const).map(async (key) => {
+      const value = profile[key];
+      const old = await tlmgr.conf.texmf(key);
+      return old === value ? [] : [[key, value]] as const;
+    }))
+    .then((e) => e.flat());
+
+  if (entries.length > 0) {
+    await log.group('Adjusting TEXMF', async () => {
+      for (const [key, value] of entries) {
+        // eslint-disable-next-line no-await-in-loop
+        await tlmgr.conf.texmf(key, value);
+      }
+    });
+  }
 }

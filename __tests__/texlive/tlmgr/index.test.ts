@@ -1,8 +1,7 @@
-import { exec, getExecOutput } from '@actions/exec';
-
 import * as ctan from '#/ctan';
 import { Tlmgr } from '#/texlive/tlmgr';
 import { Version } from '#/texlive/version';
+import { ExecResult, exec } from '#/util';
 
 jest.unmock('#/texlive/tlmgr');
 
@@ -20,7 +19,7 @@ describe('Tlmgr', () => {
     it('installs packages by invoking `tlmgr install`', async () => {
       const packages = ['foo', 'bar', 'baz'];
       await tlmgr.install(packages);
-      expect(getExecOutput).toHaveBeenCalledWith(
+      expect(exec).toHaveBeenCalledWith(
         'tlmgr',
         ['install', ...packages],
         expect.anything(),
@@ -28,14 +27,17 @@ describe('Tlmgr', () => {
     });
 
     it('tries to determine the TL name', async () => {
-      jest.mocked(getExecOutput).mockResolvedValueOnce({
-        exitCode: 1,
-        stdout: '',
-        stderr: 'tlmgr install: package foo not present in repository.',
-      });
+      jest.mocked(exec).mockResolvedValueOnce(
+        new ExecResult({
+          command: '',
+          exitCode: 1,
+          stdout: '',
+          stderr: 'tlmgr install: package foo not present in repository.',
+        }),
+      );
       jest.mocked(ctan.pkg).mockResolvedValueOnce({ texlive: 'Foo' });
       await expect(tlmgr.install(['foo', 'bar', 'baz'])).toResolve();
-      expect(getExecOutput).toHaveBeenCalledWith('tlmgr', [
+      expect(exec).toHaveBeenCalledWith('tlmgr', [
         'install',
         'Foo',
       ]);
@@ -46,40 +48,36 @@ describe('Tlmgr', () => {
     it('updates packages', async () => {
       const tlmgr = new Tlmgr({ version: v`latest`, TEXDIR: '' });
       await expect(tlmgr.update(['foo', 'bar', 'baz'])).toResolve();
-      expect(getExecOutput).toHaveBeenCalledWith(
+      expect(exec).toHaveBeenCalledWith(
         'tlmgr',
         ['update', 'foo', 'bar', 'baz'],
-        expect.anything(),
       );
     });
 
     it('updates tlmgr itself', async () => {
       const tlmgr = new Tlmgr({ version: v`latest`, TEXDIR: '' });
       await expect(tlmgr.update(undefined, { self: true })).toResolve();
-      expect(getExecOutput).toHaveBeenCalledWith(
+      expect(exec).toHaveBeenCalledWith(
         'tlmgr',
         ['update', '--self'],
-        expect.anything(),
       );
     });
 
     it('updates tlmgr itself by updating texlive.infra', async () => {
       const tlmgr = new Tlmgr({ version: v`2008`, TEXDIR: '' });
       await expect(tlmgr.update(undefined, { self: true })).toResolve();
-      expect(getExecOutput).toHaveBeenCalledWith(
+      expect(exec).toHaveBeenCalledWith(
         'tlmgr',
         ['update', 'texlive.infra'],
-        expect.anything(),
       );
     });
 
     it('updates all packages', async () => {
       const tlmgr = new Tlmgr({ version: v`latest`, TEXDIR: '' });
       await expect(tlmgr.update(undefined, { all: true })).toResolve();
-      expect(getExecOutput).toHaveBeenCalledWith(
+      expect(exec).toHaveBeenCalledWith(
         'tlmgr',
         ['update', '--all'],
-        expect.anything(),
       );
     });
 
@@ -89,10 +87,9 @@ describe('Tlmgr', () => {
         tlmgr.update(['foo', 'bar', 'baz'], { reinstallForciblyRemoved: true }),
       )
         .toResolve();
-      expect(getExecOutput).toHaveBeenCalledWith(
+      expect(exec).toHaveBeenCalledWith(
         'tlmgr',
         ['update', '--reinstall-forcibly-removed', 'foo', 'bar', 'baz'],
-        expect.anything(),
       );
     });
   });

@@ -1,7 +1,6 @@
-import { exec } from '@actions/exec';
-
 import { Pinning } from '#/texlive/tlmgr/pinning';
 import { Version } from '#/texlive/version';
+import { exec } from '#/util';
 
 jest.unmock('#/texlive/tlmgr/pinning');
 

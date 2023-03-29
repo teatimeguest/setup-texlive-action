@@ -90,16 +90,10 @@ jest.mock('#/action/cache', () => {
   return { CacheClient, save: jest.fn().mockResolvedValue(undefined) };
 });
 
-jest.unmock('#/action/env');
+jest.mock('#/action/env', () => ({ init: jest.fn() }));
 
 jest.mock('#/action/inputs', () => {
   return jest.createMockFromModule('#/action/inputs');
-});
-
-jest.mock('#/action/outputs', () => {
-  const { Outputs } = jest.requireActual('#/action/outputs');
-  jest.spyOn(Outputs.prototype, 'emit');
-  return { Outputs };
 });
 
 jest.mock('#/ctan', () => {
@@ -120,10 +114,7 @@ jest.mock('#/texlive/tlmgr', () => {
   Tlmgr.prototype.path = new Path();
   Tlmgr.prototype.pinning = new Pinning();
   Tlmgr.prototype.repository = new Repository();
-  // eslint-disable-next-line require-yield
-  Tlmgr.prototype.list = jest.fn(async function*() {
-    return;
-  });
+  Tlmgr.prototype.list = jest.fn(async function*() {});
   return { Tlmgr };
 });
 
@@ -135,16 +126,35 @@ jest.mock('#/texlive/version', () => {
 
 jest.unmock('#/texmf');
 
-jest.mock('#/utility', () => {
-  const { Serializable } = jest.requireActual('#/utility');
+jest.unmock('#/util');
+
+jest.mock('#/util/exec', () => {
+  const { ExecError, ExecResult } = jest.requireActual('#/util/exec');
   return {
-    ...jest.createMockFromModule<object>('#/utility'),
-    Serializable,
+    ExecError,
+    ExecResult,
+    exec: jest.fn(async (command, args) => {
+      return new ExecResult({
+        command,
+        args,
+        exitCode: 0,
+        stderr: '',
+        stdout: '',
+      });
+    }),
+  };
+});
+
+jest.mock(
+  '#/util/fs',
+  () => ({
     extract: jest.fn().mockResolvedValue('<extract>'),
     mkdtemp: jest.fn(async function*() {
       yield '<mkdtemp>';
     }),
     tmpdir: jest.fn().mockReturnValue('<tmpdir>'),
     uniqueChild: jest.fn().mockResolvedValue('<uniqueChild>'),
-  };
-});
+  }),
+);
+
+jest.unmock('#/util/serializable');

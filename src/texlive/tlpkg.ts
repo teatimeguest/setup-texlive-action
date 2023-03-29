@@ -2,11 +2,9 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import path from 'node:path';
 
-import { type ExecOutput, exec, getExecOutput } from '@actions/exec';
-
 import * as log from '#/log';
 import type { Version } from '#/texlive/version';
-import type { IterableIterator } from '#/utility';
+import { type ExecOutput, exec } from '#/util';
 
 /**
  * Check tlpkg's logs to find problems.
@@ -39,36 +37,6 @@ export async function makeLocalSkeleton(
     'make_local_skeleton shift',
     texmflocal,
   ]);
-}
-
-export interface Tlpobj {
-  readonly name: string;
-  readonly version?: string | undefined;
-  readonly revision: string;
-}
-
-export async function* tlpdb(db: string): AsyncGenerator<Tlpobj, void, void> {
-  const nonPackage = /(?:^(?:collection|scheme)-|\.)/u;
-  const version = /^catalogue-version\s+(.*)$/mu;
-  const revision = /^revision\s+(\d+)\s*$/mu;
-  // dprint-ignore
-  const iter: IterableIterator<string, undefined> = db
-    .replaceAll(/\\\r?\n/gu, '') // Remove escaped line breaks
-    .replaceAll(/#.*/gu, '')     // Remove comments
-    .split(/^name\s(.*)$/gmu)    // Split into individual packages
-    .values();
-  iter.next(); // The first chunk should contain nothing.
-  for (let name of iter) {
-    name = name.trimEnd();
-    const data = iter.next().value;
-    if (name === 'texlive.infra' || !nonPackage.test(name)) {
-      yield {
-        name,
-        version: data?.match(version)?.[1]?.trimEnd() ?? undefined,
-        revision: data?.match(revision)?.[1] ?? '',
-      };
-    }
-  }
 }
 
 interface Patch {
@@ -123,12 +91,12 @@ export async function patch(options: {
 
   if (patches.length > 0) {
     const diff = async (
-      changed: Readonly<Buffer>,
+      changed: Readonly<Buffer> | string,
       p: Patch,
     ): Promise<ReadonlyArray<string>> => {
       try {
         const linePrefix = '\u001B[34m>\u001B[0m '; // chalk.blue('> ')
-        const { exitCode, stdout, stderr } = await getExecOutput('git', [
+        const { exitCode, stdout, stderr } = await exec('git', [
           'diff',
           '--no-index',
           '--color',
@@ -137,7 +105,7 @@ export async function patch(options: {
           p.file,
           '-',
         ], {
-          input: changed,
+          stdin: changed,
           cwd: options.TEXDIR,
           silent: true,
           ignoreReturnCode: true,
@@ -156,10 +124,10 @@ export async function patch(options: {
 
     const apply = async (p: Patch): Promise<ReadonlyArray<string>> => {
       const target = path.join(options.TEXDIR, p.file);
-      const content = Buffer.from(p.from.reduce<string>(
+      const content = p.from.reduce<string>(
         (s, from, i) => s.replace(from, p.to[i] ?? ''),
         await readFile(target, 'utf8'),
-      ));
+      );
       const changes = await diff(content, p);
       await writeFile(target, content);
       return changes;

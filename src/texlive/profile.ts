@@ -3,13 +3,12 @@ import { platform } from 'node:os';
 import path from 'node:path';
 import { env } from 'node:process';
 
-import { Expose, Type } from 'class-transformer';
-import type { PickProperties, Writable } from 'ts-essentials';
-import { keys } from 'ts-transformer-keys';
+import { Expose } from 'class-transformer';
+import type { Writable } from 'ts-essentials';
 
 import type { Version } from '#/texlive';
 import type { Texmf } from '#/texmf';
-import { Serializable, mkdtemp } from '#/utility';
+import { Serializable, mkdtemp } from '#/util';
 
 export class Profile extends Serializable implements Texmf {
   readonly version: Version;
@@ -76,11 +75,24 @@ export class Profile extends Serializable implements Texmf {
   }
 
   override toString(): string {
+    return Object
+      .entries(this.toJSON())
+      .map((entry) => entry.join(' '))
+      .join('\n');
+  }
+
+  override toJSON(): object {
     const plain = this.toPlain({
       version: this.version.number,
       groups: [platform()],
-    });
-    return Object.entries(plain).map((entry) => entry.join(' ')).join('\n');
+    }) as Record<string, unknown>;
+
+    for (const [key, value] of Object.entries(plain)) {
+      if (typeof value === 'boolean') {
+        plain[key] = Number(value);
+      }
+    }
+    return plain;
   }
 
   @Expose()
@@ -160,11 +172,5 @@ export class Profile extends Serializable implements Texmf {
   @Expose({ since: 2009, until: 2017, groups: ['win32'] })
   get option_w32_multi_user(): boolean {
     return this.tlpdbopt_w32_multi_user;
-  }
-
-  static {
-    for (const key of keys<PickProperties<Profile, boolean>>()) {
-      Type(() => Number)(Profile.prototype, key);
-    }
   }
 }

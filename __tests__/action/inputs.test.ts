@@ -5,7 +5,7 @@ import { isFeatureAvailable } from '@actions/cache';
 import { Inputs } from '#/action/inputs';
 import * as log from '#/log';
 import { Version } from '#/texlive';
-import { getInput } from '#/utility';
+import { getInput } from '#/util';
 
 const v = (spec: unknown) => new Version(`${spec}`);
 

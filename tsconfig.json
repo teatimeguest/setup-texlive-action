@@ -23,7 +23,6 @@
     "experimentalDecorators": true,
     "target": "es2021",
     "plugins": [
-      { "transform": "ts-transformer-keys/transformer" },
       { "transform": "typescript-transform-paths", "useRootDirs": true },
       {
         "transform": "typescript-transform-extensions",

@@ -1,12 +1,13 @@
 import { readFile } from 'node:fs/promises';
+import { env } from 'node:process';
 
 import { isFeatureAvailable as isCacheAvailable } from '@actions/cache';
 import type { MarkWritable } from 'ts-essentials';
 
-import { Env } from '#/action/env';
+import { init as initEnv } from '#/action/env';
 import * as log from '#/log';
 import { Version, dependsTxt } from '#/texlive';
-import { getInput } from '#/utility';
+import { getInput } from '#/util';
 
 export interface Inputs {
   readonly cache: boolean;
@@ -23,11 +24,13 @@ export namespace Inputs {
     const version = await Version.resolve(
       getInput('version', { default: 'latest' }),
     );
-    const env = Env.load(version);
+    initEnv(version);
     const inputs = {
       cache: getInput('cache', { type: Boolean }),
       packages: await loadPackageList(),
-      prefix: getInput('prefix', { default: env.TEXLIVE_INSTALL_PREFIX }),
+      /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        -- `TEXLIVE_INSTALL_PREFIX` should be set by `initEnv`. */
+      prefix: getInput('prefix', { default: env['TEXLIVE_INSTALL_PREFIX']! }),
       texdir: getInput('texdir'),
       tlcontrib: getInput('tlcontrib', { type: Boolean }),
       updateAllPackages: getInput('update-all-packages', { type: Boolean }),
