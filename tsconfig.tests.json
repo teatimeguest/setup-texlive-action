@@ -4,7 +4,7 @@
     "importHelpers": false,
     "noEmit": true,
     "rootDirs": ["./src", "./__tests__"],
-    "plugins": []
+    "verbatimModuleSyntax": false
   },
   "files": ["./src/types.d.ts"],
   "include": ["./__tests__/**/*.ts"]

@@ -11,7 +11,7 @@
     "baseUrl": "./src",
     "module": "es2020",
     "moduleResolution": "node16",
-    "paths": { "#/*": ["*.js", "*/index.js"] },
+    "paths": { "#/*": ["*.js", "*/index.js", "*", "*/index"] },
     "rootDirs": ["./src"],
     "importHelpers": true,
     "newLine": "lf",
@@ -19,16 +19,11 @@
     "removeComments": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es2021",
-    "plugins": [
-      { "transform": "typescript-transform-paths", "useRootDirs": true },
-      {
-        "transform": "typescript-transform-extensions",
-        "extensions": { ".ts": ".js" }
-      }
-    ]
+    "target": "es2021"
   },
   "include": ["./src/**/*.ts"]
 }

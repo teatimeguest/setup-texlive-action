@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        script: [build, format-check, lint, test]
+        script: [check, format-check, lint, test]
       fail-fast: false
     steps:
       - uses: actions/checkout@v3

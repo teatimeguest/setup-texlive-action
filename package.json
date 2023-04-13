@@ -5,19 +5,13 @@
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "// Tasks": "",
-    "build": "npm run compile && npm run bundle",
-    "build-release": "npm run build",
-    "postbuild-release": "webpack -c .config/webpack.config.mjs",
-    "prebundle": "rm -rf dist",
-    "bundle": "node scripts/bundle.mjs",
+    "build": "tsx scripts/build.ts",
+    "build-release": "tsx scripts/build.ts",
     "check": "tsc --noEmit",
-    "precompile": "rm -rf lib",
-    "compile": "tsc",
     "format": "npm run dprint fmt",
     "format-check": "npm run dprint check && npm run ec",
     "link-check": "markdown-link-check README.md",
     "lint": "eslint -c .config/eslintrc.yml --ext .ts __tests__ src",
-    "prepare": "ts-patch install -s",
     "test": "jest -c .config/jest.config.mjs --coverage",
     "preversion": "npm run build-release",
     "version": "bash scripts/bump-version.sh",
@@ -32,6 +26,9 @@
   "engines": {
     "node": ">=16"
   },
+  "imports": {
+    "##/*": "./*"
+  },
   "dependencies": {
     "@actions/cache": "3.2.1",
     "@actions/core": "1.10.0",
@@ -41,18 +38,19 @@
     "@actions/tool-cache": "2.0.1",
     "class-transformer": "0.5.1",
     "decorator-cache-getter": "1.0.0",
-    "reflect-metadata": "0.1.13",
-    "tslib": "2.5.0"
+    "reflect-metadata": "0.1.13"
   },
   "devDependencies": {
     "@types/jest": "29.5.0",
-    "@types/node": "18.15.5",
-    "@typescript-eslint/eslint-plugin": "5.56.0",
-    "@typescript-eslint/parser": "5.56.0",
-    "dprint": "0.35.3",
+    "@types/node": "18.15.11",
+    "@typescript-eslint/eslint-plugin": "5.58.0",
+    "@typescript-eslint/parser": "5.58.0",
+    "dprint": "0.35.4",
     "editorconfig-checker": "5.0.1",
-    "esbuild": "0.17.12",
-    "eslint": "8.36.0",
+    "es-main": "1.2.0",
+    "esbuild": "0.17.16",
+    "esbuild-loader": "3.0.1",
+    "eslint": "8.38.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-jest": "27.2.1",
@@ -65,13 +63,11 @@
     "markdown-link-check": "3.11.0",
     "ts-dedent": "2.2.0",
     "ts-essentials": "9.3.1",
-    "ts-jest": "29.0.5",
-    "ts-patch": "2.1.0",
-    "typescript": "4.9.4",
-    "typescript-transform-extensions": "1.0.1",
-    "typescript-transform-paths": "3.4.6",
-    "webpack": "5.76.2",
-    "webpack-cli": "5.0.1"
+    "ts-jest": "29.1.0",
+    "tsconfig-paths-webpack-plugin": "4.0.1",
+    "tsx": "3.12.6",
+    "typescript": "5.0.4",
+    "webpack": "5.79.0"
   },
   "overrides": {
     "eslint-plugin-import": {

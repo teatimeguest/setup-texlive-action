@@ -23,7 +23,7 @@
     "importDeclaration.sortNamedImports": "caseSensitive"
   },
   "includes": [
-    "./{src,__tests__}/**/*.ts",
+    "./{src,__tests__,.config,scripts}/**/*.{ts,mjs}",
     "**/*.md"
   ],
   "plugins": [
