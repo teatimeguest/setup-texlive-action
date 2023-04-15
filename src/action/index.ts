@@ -52,7 +52,11 @@ export async function main(): Promise<Outputs> {
       log.info(profile.toString());
     });
     await log.group('Installing TeX Live', async () => {
-      await installTL(profile);
+      const repository = inputs.version.isLatest()
+        ? await tlnet.ctan()
+        : tlnet.historic(profile.version);
+      log.info(`Main repository: ${repository}`);
+      await installTL({ profile, repository });
     });
   }
 
@@ -85,7 +89,7 @@ export async function main(): Promise<Outputs> {
 
   if (inputs.tlcontrib) {
     await log.group('Setting up TLContrib', async () => {
-      await tlmgr.repository.add(tlnet.CONTRIB, 'tlcontrib');
+      await tlmgr.repository.add(await tlnet.contrib(), 'tlcontrib');
       await tlmgr.pinning.add('tlcontrib', '*');
     });
   }

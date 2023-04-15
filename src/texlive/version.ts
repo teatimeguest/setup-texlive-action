@@ -48,7 +48,7 @@ export class Version {
   }
 
   static async checkLatest(this: void): Promise<string> {
-    const pkg = await ctan.pkg('texlive');
+    const pkg = await ctan.api.pkg('texlive');
     const latest = pkg.version?.number ?? '';
     if (!/^20\d\d$/u.test(latest)) {
       throw new TypeError(`Invalid response: ${JSON.stringify(pkg)}`);

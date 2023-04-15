@@ -50,7 +50,7 @@ describe('checkLatest', () => {
   });
 
   it('checks the latest version', async () => {
-    jest.mocked(ctan.pkg).mockResolvedValueOnce({
+    jest.mocked(ctan.api.pkg).mockResolvedValueOnce({
       version: { number: '2050' },
     });
     await expect(Version.checkLatest()).resolves.toBe('2050');
