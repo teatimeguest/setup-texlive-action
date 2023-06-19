@@ -2,9 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 
 import * as tlpkg from '#/texlive/tlpkg';
-import { Version } from '#/texlive/version';
-
-const v = (spec: unknown) => new Version(`${spec}`);
+import type { Version } from '#/texlive/version';
 
 jest.unmock('#/texlive/tlpkg');
 
@@ -25,10 +23,10 @@ describe('patch', () => {
   const TEXDIR = '<TEXDIR>';
 
   it.each<[NodeJS.Platform, Version]>([
-    ['linux', v`2009`],
-    ['linux', v`2010`],
-    ['win32', v`2009`],
-    ['win32', v`2010`],
+    ['linux', `2009`],
+    ['linux', `2010`],
+    ['win32', `2009`],
+    ['win32', `2010`],
   ])(
     'applies a patch for tlpkg/TeXLive/TLWinGoo.pm on (%s %s)',
     async (platform, version) => {
@@ -43,7 +41,7 @@ describe('patch', () => {
 
   it('applies a patch for tlpkg/tlperl/lib/Encode/Alias.pm', async () => {
     jest.mocked(os.platform).mockReturnValue('win32');
-    await expect(tlpkg.patch({ TEXDIR, version: v`2015` })).toResolve();
+    await expect(tlpkg.patch({ TEXDIR, version: `2015` })).toResolve();
     expect(fs.readFile).toHaveBeenCalledWith(
       expect.stringContaining('Alias.pm'),
       'utf8',
@@ -51,13 +49,13 @@ describe('patch', () => {
   });
 
   it.each<[NodeJS.Platform, Version]>([
-    ['win32', v`2008`],
-    ['win32', v`2011`],
-    ['win32', v`2014`],
-    ['win32', v`2017`],
-    ['darwin', v`2017`],
-    ['darwin', v`2018`],
-    ['darwin', v`2019`],
+    ['win32', `2008`],
+    ['win32', `2011`],
+    ['win32', `2014`],
+    ['win32', `2017`],
+    ['darwin', `2017`],
+    ['darwin', `2018`],
+    ['darwin', `2019`],
   ])(
     'applies a patch tlpkg/TeXLive/TLUtils.pm (%s %s)',
     async (platform, version) => {

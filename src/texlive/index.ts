@@ -4,4 +4,4 @@ export { Profile } from '#/texlive/profile';
 export { Tlmgr } from '#/texlive/tlmgr';
 export * as tlnet from '#/texlive/tlnet';
 export * as tlpkg from '#/texlive/tlpkg';
-export { Version } from '#/texlive/version';
+export * from '#/texlive/version';

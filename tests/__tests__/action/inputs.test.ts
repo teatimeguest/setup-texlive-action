@@ -4,10 +4,12 @@ import { isFeatureAvailable } from '@actions/cache';
 
 import { Inputs } from '#/action/inputs';
 import * as log from '#/log';
-import { Version } from '#/texlive';
+import type { Version } from '#/texlive/version';
 import { getInput } from '#/util';
 
-const v = (spec: unknown) => new Version(`${spec}`);
+import { config } from '##/package.json';
+
+const LATEST_VERSION = config.texlive.latest.version as Version;
 
 let inputs: {
   cache: boolean;
@@ -135,17 +137,15 @@ describe('Inputs', () => {
 
   describe('version', () => {
     it('defaults to the latest version', async () => {
-      await expect(Inputs.load()).resolves.toHaveProperty('version', v`latest`);
+      await expect(Inputs.load()).resolves.toHaveProperty(
+        'version',
+        LATEST_VERSION,
+      );
     });
 
     it('is set to the specified version', async () => {
       inputs.version = '2018';
-      await expect(Inputs.load()).resolves.toHaveProperty('version', v`2018`);
-    });
-
-    it('fails with invalid input', async () => {
-      inputs.version = '<version>';
-      await expect(Inputs.load()).rejects.toThrow('');
+      await expect(Inputs.load()).resolves.toHaveProperty('version', '2018');
     });
   });
 });

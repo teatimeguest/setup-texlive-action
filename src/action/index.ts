@@ -6,7 +6,7 @@ import { CacheClient, save as saveCache } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
 import type { Outputs } from '#/action/outputs';
 import * as log from '#/log';
-import { Profile, Tlmgr, Version, installTL, tlnet } from '#/texlive';
+import { Profile, Tlmgr, type Version, installTL, latest, tlnet } from '#/texlive';
 import { USER_TREES } from '#/texmf';
 import { ExecError } from '#/util/exec';
 
@@ -52,7 +52,7 @@ export async function main(): Promise<Outputs> {
       log.info(profile.toString());
     });
     await log.group('Installing TeX Live', async () => {
-      const repository = inputs.version.isLatest()
+      const repository = await latest.isLatest(inputs.version)
         ? await tlnet.ctan()
         : tlnet.historic(profile.version);
       log.info(`Main repository: ${repository}`);
@@ -79,7 +79,7 @@ export async function main(): Promise<Outputs> {
         }
       }
     });
-    if (inputs.version.isLatest() && inputs.updateAllPackages) {
+    if (await latest.isLatest(inputs.version) && inputs.updateAllPackages) {
       await log.group(`Updating packages`, async () => {
         await tlmgr.update([], { all: true, reinstallForciblyRemoved: true });
       });

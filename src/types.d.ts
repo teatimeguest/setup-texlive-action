@@ -1,3 +1,5 @@
+/// <reference types="temporal-polyfill/global" />
+
 declare namespace NodeJS {
   interface ErrnoException {
     /**

@@ -22,12 +22,7 @@ export function init(version: Version): void {
     }
   }
 
-  const TEXUSERDIR = path.join(
-    homedir(),
-    '.local',
-    'texlive',
-    version.toString(),
-  );
+  const TEXUSERDIR = path.join(homedir(), '.local', 'texlive', version);
   const defaults = {
     TEXLIVE_INSTALL_ENV_NOCHECK: '1',
     TEXLIVE_INSTALL_NO_WELCOME: '1',

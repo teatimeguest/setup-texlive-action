@@ -4,12 +4,14 @@ import * as tool from '@actions/tool-cache';
 
 import * as log from '#/log';
 import { download, restore } from '#/texlive/install-tl';
-import { Version } from '#/texlive/version';
+import type { Version } from '#/texlive/version';
 import * as util from '#/util';
 
-const v = (spec: unknown) => new Version(`${spec}`);
+import { config } from '##/package.json';
 
 jest.unmock('#/texlive/install-tl');
+
+const LATEST_VERSION = config.texlive.latest.version as Version;
 
 const fail = (): any => {
   throw new Error();
@@ -19,25 +21,25 @@ describe('restore', () => {
   it('uses cache if available', () => {
     jest.mocked(os.platform).mockReturnValue('linux');
     jest.mocked(tool.find).mockReturnValueOnce('<cache>');
-    expect(restore(v`latest`)).toBeDefined();
+    expect(restore(LATEST_VERSION)).toBeDefined();
   });
 
   it('returns undefined if cache not found', () => {
     jest.mocked(os.platform).mockReturnValue('linux');
-    expect(restore(v`latest`)).toBeUndefined();
+    expect(restore(LATEST_VERSION)).toBeUndefined();
   });
 
   it('does not fail even if tool.find fails', () => {
     jest.mocked(os.platform).mockReturnValue('linux');
     jest.mocked(tool.find).mockImplementationOnce(fail);
-    expect(restore(v`latest`)).toBeUndefined();
+    expect(restore(LATEST_VERSION)).toBeUndefined();
     expect(log.info).toHaveBeenCalled();
   });
 });
 
 describe('download', () => {
   const options = {
-    version: v`latest`,
+    version: LATEST_VERSION,
     repository: new URL('https://example.com/'),
   };
   it('downloads installer', async () => {

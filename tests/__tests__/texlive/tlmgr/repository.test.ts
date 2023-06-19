@@ -1,16 +1,13 @@
 import { dedent } from 'ts-dedent';
 
 import { Repository } from '#/texlive/tlmgr/repository';
-import { Version } from '#/texlive/version';
 import { ExecError, ExecResult, exec } from '#/util';
 
 jest.unmock('#/texlive/tlmgr/repository');
 
-const v = (spec: unknown) => new Version(`${spec}`);
-
 describe('add', () => {
   it('adds a repository with a tag', async () => {
-    const repository = new Repository({ version: v`2019` });
+    const repository = new Repository({ version: '2019' });
     await expect(repository.add('<repository>', '<tag>')).toResolve();
     expect(exec).toHaveBeenCalledWith(
       'tlmgr',
@@ -19,7 +16,7 @@ describe('add', () => {
   });
 
   it('adds a repository with the empty tag', async () => {
-    const repository = new Repository({ version: v`2019` });
+    const repository = new Repository({ version: '2019' });
     await expect(repository.add('<repository>', '')).toResolve();
     expect(exec).toHaveBeenCalledWith(
       'tlmgr',
@@ -28,7 +25,7 @@ describe('add', () => {
   });
 
   it('adds a repository with no tags', async () => {
-    const repository = new Repository({ version: v`2019` });
+    const repository = new Repository({ version: '2019' });
     await expect(repository.add('<repository>')).toResolve();
     expect(exec).toHaveBeenCalledWith(
       'tlmgr',
@@ -48,7 +45,7 @@ describe('add', () => {
       `,
       }),
     );
-    const repository = new Repository({ version: v`2019` });
+    const repository = new Repository({ version: '2019' });
     await expect(repository.add('<repository>', '<tag>')).toResolve();
   });
 
@@ -66,14 +63,14 @@ describe('add', () => {
         `,
       }),
     );
-    const repository = new Repository({ version: v`2019` });
+    const repository = new Repository({ version: '2019' });
     await expect(repository.add('<repository>', '<tag>'))
       .rejects
       .toThrow('`tlmgr` exited with status 2');
   });
 
   it('fails since the `repository` action is not implemented', () => {
-    expect(() => new Repository({ version: v`2011` }))
+    expect(() => new Repository({ version: '2011' }))
       .toThrow('`repository` action is not implemented in TeX Live 2011');
   });
 });

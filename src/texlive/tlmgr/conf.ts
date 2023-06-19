@@ -29,7 +29,7 @@ export class Conf {
       return stdout.trim();
     }
     // `tlmgr conf` is not implemented prior to 2010.
-    if (this.options.version.number < 2010) {
+    if (this.options.version < '2010') {
       exportVariable(key, value);
     } else {
       await exec('tlmgr', ['conf', 'texmf', key, value]);

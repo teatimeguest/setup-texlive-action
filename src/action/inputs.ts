@@ -6,7 +6,7 @@ import type { MarkWritable } from 'ts-essentials';
 
 import { init as initEnv } from '#/action/env';
 import * as log from '#/log';
-import { Version, dependsTxt } from '#/texlive';
+import { Version, dependsTxt, latest, validateReleaseYear } from '#/texlive';
 import { getInput } from '#/util';
 
 export interface Inputs {
@@ -21,9 +21,13 @@ export interface Inputs {
 
 export namespace Inputs {
   export async function load(): Promise<Inputs> {
-    const version = await Version.resolve(
-      getInput('version', { default: 'latest' }),
-    );
+    const spec = getInput('version', { default: 'latest' })
+      .trim()
+      .toLowerCase();
+    const version = spec === 'latest'
+      ? await latest.getVersion()
+      : Version.parse(spec);
+    await validateReleaseYear(version);
     initEnv(version);
     const inputs = {
       cache: getInput('cache', { type: Boolean }),
@@ -36,21 +40,21 @@ export namespace Inputs {
       updateAllPackages: getInput('update-all-packages', { type: Boolean }),
       version,
     };
-    validate(inputs);
+    await validate(inputs);
     return inputs;
   }
 
-  function validate(
+  async function validate(
     this: void,
     /* eslint-disable-next-line
       @typescript-eslint/prefer-readonly-parameter-types */
     inputs: MarkWritable<Inputs, 'cache' | 'tlcontrib' | 'updateAllPackages'>,
-  ): void {
+  ): Promise<void> {
     if (inputs.cache && !isCacheAvailable()) {
       log.warn('Caching is disabled because cache service is not available');
       inputs.cache = false;
     }
-    if (!inputs.version.isLatest()) {
+    if (!await latest.isLatest(inputs.version)) {
       if (inputs.tlcontrib) {
         log.warn('`tlcontrib` is currently ignored for older versions');
         inputs.tlcontrib = false;

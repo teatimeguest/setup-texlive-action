@@ -146,7 +146,7 @@ overrides:
         - error
         - groups: [builtin, external, internal, object]
           pathGroups:
-            - pattern: "#/*/*/*"
+            - pattern: "#/texlive/tlmgr/*"
               group: internal
               position: after
           newlines-between: always

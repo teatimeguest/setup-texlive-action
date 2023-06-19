@@ -23,7 +23,7 @@ export class Profile extends Serializable implements Texmf {
     this.version = options.version;
     // `scheme-infraonly` was first introduced in TeX Live 2016.
     this.selected_scheme = `scheme-${
-      this.version.number < 2016 ? 'minimal' : 'infraonly'
+      this.version < '2016' ? 'minimal' : 'infraonly'
     }`;
     if (options.texdir !== undefined) {
       this.withTexdir(options.texdir);
@@ -39,7 +39,7 @@ export class Profile extends Serializable implements Texmf {
 
   /* eslint-disable @typescript-eslint/prefer-readonly-parameter-types */
   private withPrefix(this: Writable<this>, prefix: string): void {
-    (this as this).withTexdir(path.join(prefix, this.version.toString()));
+    (this as this).withTexdir(path.join(prefix, this.version));
     this.TEXMFLOCAL = env['TEXLIVE_INSTALL_TEXMFLOCAL']
       ?? path.join(prefix, 'texmf-local');
   }
@@ -82,7 +82,7 @@ export class Profile extends Serializable implements Texmf {
 
   override toJSON(): object {
     const plain = this.toPlain({
-      version: this.version.number,
+      version: Number.parseInt(this.version),
       groups: [platform()],
     }) as Record<string, unknown>;
 

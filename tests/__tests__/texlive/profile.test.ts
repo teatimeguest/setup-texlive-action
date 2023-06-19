@@ -2,13 +2,14 @@ import os from 'node:os';
 import process from 'node:process';
 
 import { Profile } from '#/texlive/profile';
-import { Version } from '#/texlive/version';
+import type { Version } from '#/texlive/version';
+
+import { config } from '##/package.json';
 
 jest.unmock('#/texlive/profile');
 
-const v = (spec: unknown) => new Version(`${spec}`);
-
-const defaultOpts = { version: v`latest`, prefix: '<prefix>' };
+const LATEST_VERSION = config.texlive.latest.version as Version;
+const defaultOpts = { version: LATEST_VERSION, prefix: '<prefix>' };
 
 beforeEach(() => {
   process.env = {} as NodeJS.ProcessEnv;
@@ -20,7 +21,7 @@ describe('selected_scheme', () => {
     expect(profile.selected_scheme).toBe('scheme-infraonly');
   });
 
-  it.each([v`2008`, v`2011`, v`2014`])(
+  it.each(['2008', '2011', '2014'] as const)(
     'uses scheme-minimal for versions prior to 2016',
     (version) => {
       const profile = new Profile({ ...defaultOpts, version });
@@ -100,7 +101,7 @@ describe('instopt_adjustrepo', () => {
     expect(profile.instopt_adjustrepo).toBe(false);
   });
 
-  it.each([v`2008`, v`2012`, v`2016`, v`2020`])(
+  it.each(['2008', '2012', '2016', '2020'] as const)(
     'is set to false for an older version',
     (version) => {
       const profile = new Profile({ ...defaultOpts, version });
@@ -124,7 +125,7 @@ describe('toString', () => {
     expect(profile).toMatch(/^tlpdbopt_w32_multi_user 0$/mu);
   });
 
-  it.each([v`2009`, v`2012`, v`2015`])(
+  it.each(['2009', '2012', '2015'] as const)(
     'uses old option names for an older version',
     (version) => {
       jest.mocked(os.platform).mockReturnValue('linux');

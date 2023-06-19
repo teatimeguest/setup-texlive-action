@@ -1,7 +1,7 @@
 import { getLocation } from '#/util/http';
 
 const CTAN_MASTER = 'http://ftp.dante.de/tex-archive/';
-const CTAN_MIRROR = 'https://mirror.ctan.org/';
+const CTAN_MIRROR = 'https://mirrors.ctan.org/';
 
 let resolvedMirrorLocation: Readonly<URL> | undefined;
 

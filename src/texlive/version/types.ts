@@ -1,0 +1,18 @@
+export type Version =
+  | `200${8 | 9}`
+  | `20${1 | 2}${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
+
+export namespace Version {
+  const RE = /^199[6-9]|20[0-2]\d$/u;
+
+  export function isVersion(spec: string): spec is Version {
+    return RE.test(spec);
+  }
+
+  export function parse(spec: string): Version {
+    if (!isVersion(spec)) {
+      throw new TypeError(`\`${spec}\` is not a valid version spec`);
+    }
+    return spec;
+  }
+}

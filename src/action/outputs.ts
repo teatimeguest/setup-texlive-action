@@ -1,4 +1,4 @@
-import { Version } from '#/texlive';
+import type { Version } from '#/texlive';
 
 export interface Outputs {
   readonly cacheHit: boolean;

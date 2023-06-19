@@ -7,4 +7,5 @@ export {
   exec,
 } from '#/util/exec';
 export { extract, mkdtemp, tmpdir, uniqueChild } from '#/util/fs';
+export * as http from '#/util/http';
 export { Serializable } from '#/util/serializable';

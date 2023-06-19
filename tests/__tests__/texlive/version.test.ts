@@ -1,90 +1,81 @@
 import { platform } from 'node:os';
 
 import * as ctan from '#/ctan';
-import { Version } from '#/texlive/version';
+import * as log from '#/log';
+import { type Version, latest, validateReleaseYear } from '#/texlive/version';
 
-jest.unmock('#/texlive/version');
+import { config } from '##/package.json';
 
-describe('constructor', () => {
-  it.each(['2008', '2013', '2022', 'latest'])('accepts %p', (spec) => {
-    expect(() => new Version(spec)).not.toThrow();
+jest.unmock('#/texlive/version/latest');
+jest.unmock('#/texlive/version/validate');
+
+const LATEST_VERSION = config.texlive.latest.version as Version;
+
+describe('latest.checkVersion', () => {
+  it('returns `2023`', async () => {
+    await expect(latest.checkVersion()).resolves.toBe('2023');
   });
 
-  it.each(['2007', '2099', '', 'version'])('rejects %p', (spec) => {
-    expect(() => new Version(spec)).toThrow('');
-  });
-
-  it.each(['2008', '2010', '2012'])('rejects %p on macOS', (spec) => {
-    jest.mocked(platform).mockReturnValueOnce('darwin');
-    expect(() => new Version(spec)).toThrow('does not work on 64-bit macOS');
+  it('throws no exception', async () => {
+    jest.mocked(ctan.api.pkg).mockResolvedValueOnce({});
+    await expect(latest.checkVersion()).toResolve();
+    expect(log.info).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to check'),
+      expect.anything(),
+    );
   });
 });
 
-describe('number', () => {
-  it.each([
-    ['2008', 2008],
-    ['2013', 2013],
-    ['2018', 2018],
-    ['latest', Number.parseInt(Version.LATEST)],
-  ])('returns the version number for %p', (spec, n) => {
-    expect(new Version(spec)).toHaveProperty('number', n);
+describe('getLatest', () => {
+  jest.spyOn(latest, 'checkVersion');
+
+  it('does not usually check for the latest version', async () => {
+    await expect(latest.getVersion()).toResolve();
+    expect(latest.checkVersion).not.toHaveBeenCalled();
+  });
+
+  it('checks for the latest version if needed', async () => {
+    jest.spyOn(Temporal.Now, 'instant').mockReturnValueOnce(
+      Temporal
+        .PlainDateTime
+        .from(config.texlive.next.releaseDate)
+        .toZonedDateTime('UTC')
+        .toInstant()
+        .add({ hours: 1 }),
+    );
+    await expect(latest.getVersion()).toResolve();
+    expect(latest.checkVersion).toHaveBeenCalled();
   });
 });
 
 describe('isLatest', () => {
-  it.each([
-    [false, '2008'],
-    [false, '2020'],
-    [true, 'latest'],
-    [true, Version.LATEST],
-  ])('returns %p for %p', (bool, spec) => {
-    expect(new Version(spec).isLatest()).toBe(bool);
+  it.each(
+    [
+      [false, '2008'],
+      [false, '2020'],
+      [true, LATEST_VERSION],
+    ] as const,
+  )('returns %p for %p', async (bool, spec) => {
+    await expect(latest.isLatest(spec)).resolves.toBe(bool);
   });
 });
 
-describe('checkLatest', () => {
-  const latest = Version.LATEST;
-
-  afterEach(() => {
-    (Version as any).latest = latest;
+describe('validateReleaseYear', () => {
+  it.each(['2008', '2013', '2022'] as const)('accepts %p', async (spec) => {
+    await expect(validateReleaseYear(spec)).toResolve();
   });
 
-  it('checks the latest version', async () => {
-    jest.mocked(ctan.api.pkg).mockResolvedValueOnce({
-      version: { number: '2050' },
-    });
-    await expect(Version.checkLatest()).resolves.toBe('2050');
-    expect(Version.LATEST).toBe('2050');
-  });
-});
-
-describe('resolve', () => {
-  const { checkLatest } = Version;
-
-  beforeEach(() => {
-    Version.checkLatest = jest.fn().mockResolvedValue('2050');
+  it.each(['2029'] as const)('rejects %p', async (spec) => {
+    await expect(validateReleaseYear(spec)).toReject();
   });
 
-  afterEach(() => {
-    Version.checkLatest = checkLatest;
-  });
-
-  it.each(['2019', 'latest'])('does not call checkLatest', async (spec) => {
-    jest.spyOn(globalThis.Date, 'now').mockReturnValueOnce(Date.UTC(2020, 1));
-    await expect(Version.resolve(spec)).toResolve();
-    expect(Version.checkLatest).not.toHaveBeenCalled();
-  });
-
-  it.each(['2012', '2021', 'latest'])('calls checkLatest', async (spec) => {
-    jest.spyOn(globalThis.Date, 'now').mockReturnValueOnce(Date.UTC(2050, 1));
-    await expect(Version.resolve(spec)).toResolve();
-    expect(Version.checkLatest).toHaveBeenCalled();
-  });
-
-  it('does not fail even if checkLatest fails', async () => {
-    jest.spyOn(globalThis.Date, 'now').mockReturnValueOnce(Date.UTC(2050, 1));
-    jest.mocked(Version.checkLatest).mockRejectedValueOnce(new Error());
-    await expect(Version.resolve('latest')).toResolve();
-    expect(Version.checkLatest).toHaveBeenCalled();
-  });
+  it.each(['2008', '2010', '2012'] as const)(
+    'rejects %p on macOS',
+    async (spec) => {
+      jest.mocked(platform).mockReturnValueOnce('darwin');
+      await expect(validateReleaseYear(spec)).rejects.toThrow(
+        'does not work on 64-bit macOS',
+      );
+    },
+  );
 });

@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { cache as Cache } from 'decorator-cache-getter';
+import { Memoize } from 'typescript-memoize';
 
 import * as ctan from '#/ctan';
 import * as log from '#/log';
@@ -23,7 +23,7 @@ export class Tlmgr {
     },
   ) {}
 
-  @Cache
+  @Memoize()
   get conf(): Conf {
     return new Conf(this.options);
   }
@@ -72,17 +72,17 @@ export class Tlmgr {
     }
   }
 
-  @Cache
+  @Memoize()
   get path(): Path {
     return new Path(this.options);
   }
 
-  @Cache
+  @Memoize()
   get pinning(): Pinning {
     return new Pinning(this.options);
   }
 
-  @Cache
+  @Memoize()
   get repository(): Repository {
     return new Repository(this.options);
   }
@@ -95,13 +95,13 @@ export class Tlmgr {
     if (options.self ?? false) {
       // tlmgr for TeX Live 2008 does not have `self` option
       args.push(
-        this.options.version.number > 2008 ? '--self' : 'texlive.infra',
+        this.options.version > '2008' ? '--self' : 'texlive.infra',
       );
     }
     if (
       (options.reinstallForciblyRemoved ?? false)
       // `--reinstall-forcibly-removed` was first implemented in TeX Live 2009.
-      && this.options.version.number >= 2009
+      && this.options.version >= '2009'
     ) {
       args.unshift('--reinstall-forcibly-removed');
     }

@@ -3,7 +3,7 @@ import { ExecError, exec } from '#/util';
 
 export class Repository {
   constructor({ version }: { readonly version: Version }) {
-    if (version.number < 2012) {
+    if (version < '2012') {
       throw new RangeError(
         `\`repository\` action is not implemented in TeX Live ${version}`,
       );

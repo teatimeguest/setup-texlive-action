@@ -21,8 +21,8 @@ const HISTORIC_MIRROR = 'https://ftp.math.utah.edu/pub/tex/';
 export function historic(version: Version, options?: TlnetOptions): URL {
   const tlnetPath = posixPath.join(
     'historic/systems/texlive',
-    version.toString(),
-    version.number < 2010 ? 'tlnet' : 'tlnet-final',
+    version,
+    version < '2010' ? 'tlnet' : 'tlnet-final',
     '/',
   );
   const base = (options?.master ?? false) ? HISTORIC_MASTER : HISTORIC_MIRROR;

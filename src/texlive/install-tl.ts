@@ -29,7 +29,7 @@ export async function installTL(options: InstallTLOptions): Promise<void> {
 
   // `install-tl` of versions prior to 2017 does not support HTTPS, and
   // that of version 2017 supports HTTPS but does not work properly.
-  if (version.number < 2018 && repository.protocol === 'https:') {
+  if (version < '2018' && repository.protocol === 'https:') {
     repository.protocol = 'http:';
   }
 
@@ -38,7 +38,7 @@ export async function installTL(options: InstallTLOptions): Promise<void> {
       '-profile',
       profilePath,
       // Only version 2008 uses `-location` instead of `-repository`.
-      version.number === 2008 ? '-location' : '-repository',
+      version === '2008' ? '-location' : '-repository',
       repository.href,
     ], {
       stdin: null, // eslint-disable-line unicorn/no-null
@@ -67,7 +67,7 @@ function check(result: ExecResult): void {
 export function restore(version: Version): string | undefined {
   let dest = '';
   try {
-    dest = findTool(executable(version), version.toString());
+    dest = findTool(executable(version), version);
   } catch (cause) {
     log.info(`Failed to restore ${executable(version)}`, { cause });
   }
@@ -95,7 +95,7 @@ export async function download(options: {
 
   try {
     log.info('Adding to tool cache');
-    await cacheDir(dest, executable(version), version.toString());
+    await cacheDir(dest, executable(version), version);
   } catch (cause) {
     log.info(`Failed to cache ${executable(version)}`, { cause });
   }
@@ -103,10 +103,10 @@ export async function download(options: {
   return dest;
 }
 
-function executable({ number: version }: Version): string {
+function executable(version: Version): string {
   if (platform() !== 'win32') {
     return 'install-tl';
-  } else if (version < 2013) {
+  } else if (version < '2013') {
     return 'install-tl.bat';
   } else {
     return 'install-tl-windows.bat';

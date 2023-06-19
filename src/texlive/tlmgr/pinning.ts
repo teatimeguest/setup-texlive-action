@@ -3,7 +3,7 @@ import { exec } from '#/util';
 
 export class Pinning {
   constructor({ version }: { readonly version: Version }) {
-    if (version.number < 2013) {
+    if (version < '2013') {
       throw new RangeError(
         `\`pinning\` action is not implemented in TeX Live ${version}`,
       );

@@ -5,17 +5,19 @@ import type { DeepWritable } from 'ts-essentials';
 import * as action from '#/action';
 import { CacheClient } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
-import { Profile, Tlmgr, Version, installTL } from '#/texlive';
+import { Profile, Tlmgr, type Version, installTL } from '#/texlive';
 import { Conf } from '#/texlive/tlmgr/conf';
 import { Path } from '#/texlive/tlmgr/path';
 import { Pinning } from '#/texlive/tlmgr/pinning';
 import { Repository } from '#/texlive/tlmgr/repository';
 
+import { config } from '##/package.json';
+
 jest.unmock('#/action');
 
-describe('main', () => {
-  const v = (spec: unknown) => new Version(`${spec}`);
+const LATEST_VERSION = config.texlive.latest.version as Version;
 
+describe('main', () => {
   const inputs = {} as DeepWritable<Inputs>;
   jest.mocked(Inputs.load).mockResolvedValue(inputs as unknown as Inputs);
 
@@ -25,7 +27,7 @@ describe('main', () => {
     inputs.prefix = '<prefix>';
     inputs.tlcontrib = false;
     inputs.updateAllPackages = false;
-    inputs.version = v`latest`;
+    inputs.version = LATEST_VERSION;
   });
 
   const cacheTypes = [
@@ -76,14 +78,13 @@ describe('main', () => {
     await expect(action.main()).resolves.toHaveProperty('cacheHit', true);
   });
 
-  it.each([
-    [Version.LATEST, v`latest`],
-    ['2009', v`2009`],
-    ['2014', v`2014`],
-  ])('sets version to %p if input version is %p', async (output, input) => {
-    inputs.version = input;
-    await expect(action.main()).resolves.toHaveProperty('version', input);
-  });
+  it.each([LATEST_VERSION, '2009', '2014'] as const)(
+    'sets version to %p if input version is %p',
+    async (version) => {
+      inputs.version = version;
+      await expect(action.main()).resolves.toHaveProperty('version', version);
+    },
+  );
 
   it('adds TeX Live to path after installation', async () => {
     await expect(action.main()).toResolve();
@@ -144,7 +145,7 @@ describe('main', () => {
     async (...kind) => {
       setCacheType(kind);
       inputs.updateAllPackages = true;
-      inputs.version = v`2020`;
+      inputs.version = '2020';
       await expect(action.main()).toResolve();
       expect(Tlmgr.prototype.update).toHaveBeenCalledWith(
         [],
@@ -158,7 +159,7 @@ describe('main', () => {
     async (...kind) => {
       setCacheType(kind);
       inputs.updateAllPackages = true;
-      inputs.version = v`2020`;
+      inputs.version = '2020';
       await expect(action.main()).toResolve();
       expect(Tlmgr.prototype.update).not.toHaveBeenCalledWith(
         [],
