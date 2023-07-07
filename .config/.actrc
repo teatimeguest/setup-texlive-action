@@ -1,4 +1,6 @@
 --workflows .github/workflows/test.yml
 --job latest
+--matrix os:ubuntu-latest
 --platform ubuntu-latest=node:16
+--pull=false
 --rm

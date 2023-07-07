@@ -5,6 +5,7 @@
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "// Tasks": "",
+    "act": "XDG_CONFIG_DIRS=\"${PWD}/.config:${XDG_CONFIG_DIRS}\" act",
     "build": "tsx scripts/build.ts",
     "build-release": "tsx scripts/build.ts",
     "check": "tsc --noEmit",
