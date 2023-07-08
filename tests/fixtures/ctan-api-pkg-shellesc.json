@@ -1,0 +1,46 @@
+{
+  "id": "shellesc",
+  "name": "shellesc",
+  "aliases": [],
+  "caption": "Unified shell escape interface for LaTeX",
+  "authors": [
+    {
+      "id": "latex",
+      "active": true
+    }
+  ],
+  "copyright": [
+    {
+      "owner": "The LaTeX3 project",
+      "year": "2015-2023"
+    }
+  ],
+  "license": "lppl1.3c",
+  "version": {
+    "number": "1.0d",
+    "date": "2023-04-15"
+  },
+  "descriptions": [
+    {
+      "language": null,
+      "text": "<p>\n      This package provides a cross-engine interface,\n      <tt>\\ShellEscape</tt>, to running system commands,\n      traditionally made available using <tt>\\write18</tt>.\n      It also makes <tt>\\write18</tt> access system commands\n      (via Lua os.exec) on new LuaTeX, where <tt>\\write18</tt>\n      does not have this feature by default.\n    </p>\n  <p>\n      This package is part of the <ref refid=\"latex-tools\">latex-tools</ref>\n      bundle in the LaTeX <ref refid=\"required\">required</ref>\n      distribution.\n    </p>"
+    }
+  ],
+  "documentation": [
+    {
+      "language": null,
+      "details": "Package documentation",
+      "href": "ctan:/macros/latex/required/tools/shellesc.pdf"
+    }
+  ],
+  "ctan": {
+    "path": "/macros/latex/required/tools",
+    "file": true
+  },
+  "install": "/macros/latex/required/latex-tools.tds.zip",
+  "miktex": "latex-tools",
+  "texlive": "tools",
+  "topics": [
+    "sys-supp"
+  ]
+}

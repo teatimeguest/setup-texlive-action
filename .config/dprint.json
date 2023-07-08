@@ -8,7 +8,6 @@
     "computed.preferSingleLine": true,
     "exportDeclaration.preferSingleLine": true,
     "importDeclaration.preferSingleLine": true,
-    "objectExpression.preferSingleLine": true,
     "objectPattern.preferSingleLine": true,
     "parameters.preferSingleLine": true,
     "variableStatement.preferSingleLine": true,
@@ -23,8 +22,11 @@
     "importDeclaration.sortNamedImports": "caseSensitive"
   },
   "includes": [
-    "./{src,__tests__,.config,scripts}/**/*.{ts,mjs}",
+    "./{src,tests,.config,scripts}/**/*.{ts,mjs}",
     "**/*.md"
+  ],
+  "excludes": [
+    "./tests/fixtures"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.84.0.wasm",

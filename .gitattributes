@@ -1,3 +1,12 @@
 .actrc linguist-language=opts
-/dist/** linguist-generated=true -diff -merge
-package-lock.json -diff
+package-lock.json -diff -merge
+
+/dist/** -diff -merge linguist-generated
+
+/tests/fixtures/** -text -merge linguist-generated
+*.DEPENDS.txt linguist-language=ignore
+*.log linguist-language=shellsession
+*.stderr linguist-language=shellsession
+*.stdout linguist-language=shellsession
+*.tlpdb linguist-language=gitattributes
+release-texlive.txt linguist-vendored

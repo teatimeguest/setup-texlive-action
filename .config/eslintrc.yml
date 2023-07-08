@@ -6,8 +6,6 @@ extends:
   - plugin:@typescript-eslint/recommended-requiring-type-checking
   - plugin:node/recommended
   - prettier
-parserOptions:
-  project: ./tsconfig.tests.json
 rules:
   '@typescript-eslint/no-inferrable-types': off
   '@typescript-eslint/require-await': off
@@ -19,6 +17,8 @@ ignorePatterns: /src/index.ts
 reportUnusedDisableDirectives: true
 overrides:
   - files: "./src/**/*.ts"
+    parserOptions:
+      project: ./tsconfig.json
     extends:
       - plugin:import/recommended
       - plugin:import/typescript
@@ -165,7 +165,9 @@ overrides:
       unicorn/prefer-ternary: off
       unicorn/prevent-abbreviations: off
       unicorn/switch-case-braces: off
-  - files: "./__tests__/**/*.ts"
+  - files: "./tests/__tests__/**/*.ts"
+    parserOptions:
+      project: ./tests/tsconfig.json
     extends:
       - plugin:jest/recommended
       - plugin:jest/style

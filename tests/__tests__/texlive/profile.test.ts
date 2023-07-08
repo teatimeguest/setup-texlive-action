@@ -12,7 +12,6 @@ const defaultOpts = { version: v`latest`, prefix: '<prefix>' };
 
 beforeEach(() => {
   process.env = {} as NodeJS.ProcessEnv;
-  jest.mocked(os.platform).mockReturnValue('linux');
 });
 
 describe('selected_scheme', () => {

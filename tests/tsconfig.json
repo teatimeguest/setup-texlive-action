@@ -1,0 +1,10 @@
+{
+  "extends": "##/tsconfig.json",
+  "compilerOptions": {
+    "importHelpers": false,
+    "noEmit": true,
+    "verbatimModuleSyntax": false
+  },
+  "files": ["../src/types.d.ts"],
+  "include": ["./**/*.ts"]
+}

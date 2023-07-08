@@ -1,0 +1,13 @@
+TeX Live 2022 is frozen
+and will no longer be routinely updated.  This happens when a new
+release is made, or will be made shortly.
+
+For general status information about TeX Live, see its home page:
+https://tug.org/texlive
+
+
+tlmgr: The TeX Live versions supported by the repository
+http://ftp.dante.de/tex-archive/systems/texlive/tlcontrib
+  (2023--2100)
+do not include the version of the local installation
+  (2022).

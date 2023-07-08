@@ -1,0 +1,10 @@
+
+=============================================================================
+./install-tl: The TeX Live versions of the local installation
+and the repository being accessed are not compatible:
+      local: 2022
+ repository: 2023
+Perhaps you need to use a different CTAN mirror?
+(For more, see the output of install-tl --help, especially the
+ -repository option.  Online via https://tug.org/texlive/doc.)
+=============================================================================

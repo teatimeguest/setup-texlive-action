@@ -1,0 +1,45 @@
+{
+  "id": "texlive",
+  "name": "texlive",
+  "aliases": [],
+  "caption": "A comprehensive distribution of TeX and friends",
+  "authors": [
+    {
+      "id": "texlive",
+      "active": true
+    }
+  ],
+  "copyright": [],
+  "license": "other-free",
+  "version": {
+    "number": "2023",
+    "date": ""
+  },
+  "descriptions": [
+    {
+      "language": null,
+      "text": "<p>\n       A comprehensive TeX system that you can install on your hard disk.  It\n       includes support for most Unix system architectures, including\n       GNU/Linux and MacOS, and for Windows.  The <ref refid=\"mactex\">MacTeX</ref>\n       distribution is an unchanged TeX Live plus some Mac-specific\n       software, but is distributed in a separate archive.\n    </p>\n  <p>\n       The TeX, PDF(e)TeX, XeTeX, LuaTeX, and other engines are provided in the\n       distribution, with several different running formats each; a wide\n       range of support programs and macro packages is also included.\n    </p>\n  <p>\n       Beware: the download from CTAN is large (several GB); it comes\n       in the form of an ISO image, and is available from CTAN mirrors\n       through the `Sources' link below.\n    </p>\n  <p>\n    <a href=\"https://tug.org/texlive/acquire.html\">Other ways to\n      acquire TeX Live</ref> include network installation, tarballs, and\n      mirroring.\n    </p>"
+    }
+  ],
+  "documentation": [
+    {
+      "language": null,
+      "details": "Readme",
+      "href": "ctan:/systems/texlive/Images/README.md"
+    }
+  ],
+  "home": "https://tug.org/texlive/",
+  "support": "https://tug.org/texlive/lists.html",
+  "bugs": "https://lists.tug.org/tex-live",
+  "repository": "https://tug.org/texlive/svn/",
+  "ctan": {
+    "path": "/systems/texlive/Images",
+    "file": true
+  },
+  "topics": [
+    "distribution"
+  ],
+  "also": [
+    "texlive-source"
+  ]
+}

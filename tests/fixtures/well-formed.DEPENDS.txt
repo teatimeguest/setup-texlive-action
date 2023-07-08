@@ -1,0 +1,11 @@
+foo bar  baz
+hard		qux
+ soft quux# this is a comment
+
+package corge	# this is a comment
+#
+  package  grault    
+soft garply#
+ waldo
+package 	corge
+  	baz

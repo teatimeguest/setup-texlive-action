@@ -1,0 +1,4 @@
+
+/usr/local/texlive/2023/bin/x86_64-linux/tlmgr: TLPDB::from_file could not initialize from: https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2024/tlnet-final/tlpkg/texlive.tlpdb
+/usr/local/texlive/2023/bin/x86_64-linux/tlmgr: Maybe the repository setting should be changed.
+/usr/local/texlive/2023/bin/x86_64-linux/tlmgr: More info: https://tug.org/texlive/acquire.html

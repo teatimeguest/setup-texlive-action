@@ -1,0 +1,13 @@
+TeXLive::TLUtils::check_file_and_remove: checksums differ for /tmp/lMXGyR8gDe/UkZgdaw6pk/babel.tar.xz:
+TeXLive::TLUtils::check_file_and_remove:   tlchecksum=e616c6d12a6f0648309e63044b342bd5cf09a0950e062960f47daec364ffa9e8d33df2851ed5bfc03d66e7e264046475fcad5fbc2d553fb21bc37279eabaa5d6, arg=3863ba77af35af465d47accdcc59f57c2f8a1d522b12a34d036444e0851e9e6b5020ef94452ecde206deaa3420824897289e60093db2f88973ce47774d6958b5
+TeXLive::TLUtils::check_file_and_remove: backtrace:
+ -> /home/runner/work/_temp/setup-texlive/2022/tlpkg/TeXLive/TLUtils.pm:2590: TeXLive::TLUtils::check_file_and_remove
+ -> /home/runner/work/_temp/setup-texlive/2022/tlpkg/TeXLive/TLPDB.pm:1983: TeXLive::TLUtils::unpack
+ -> /home/runner/work/_temp/setup-texlive/2022/tlpkg/TeXLive/TLPDB.pm:1818: TeXLive::TLPDB::_install_data
+ -> /home/runner/work/_temp/setup-texlive/2022/tlpkg/TeXLive/TLPDB.pm:1734: TeXLive::TLPDB::not_virtual_install_package
+ -> /home/runner/work/_temp/setup-texlive/2022/bin/x86_64-linux/tlmgr:3921: TeXLive::TLPDB::install_package
+ -> /home/runner/work/_temp/setup-texlive/2022/bin/x86_64-linux/tlmgr:797: main::action_install
+ -> /home/runner/work/_temp/setup-texlive/2022/bin/x86_64-linux/tlmgr:703: main::execute_action
+ -> /home/runner/work/_temp/setup-texlive/2022/bin/x86_64-linux/tlmgr:366: main::main
+TeXLive::TLUtils::check_file_and_remove:   removing /tmp/lMXGyR8gDe/UkZgdaw6pk/babel.tar.xz, but saving copy in /tmp/qAuQC6KJf3
+TLPDB::_install_data: downloading did not succeed (check_file_and_remove failed) for https://mirror.mwt.me/ctan/systems/texlive/tlnet/archive/babel.tar.xz

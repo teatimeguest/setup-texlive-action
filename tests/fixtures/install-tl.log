@@ -1,0 +1,196 @@
+TeX Live installer invocation: ./install-tl -profile texlive.profile -repository http://ftp.dante.de/tex-archive/systems/texlive/tlnet 
+Automated TeX Live installation using profile: texlive.profile
+Loading http://ftp.dante.de/tex-archive/systems/texlive/tlnet/tlpkg/texlive.tlpdb
+Installing TeX Live 2023 from: http://ftp.dante.de/tex-archive/systems/texlive/tlnet (not verified)
+Platform: x86_64-linux => 'GNU/Linux on x86_64'
+Distribution: net  (downloading)
+Using URL: http://ftp.dante.de/tex-archive/systems/texlive/tlnet
+Directory for temporary files: /tmp/L0ADM4gJMB
+Installer revision: 66578
+Database revision: 67605
+Settings:
+  TEXDIR: "/usr/local/texlive/2023"
+  TEXMFCONFIG: "~/.texlive2023/texmf-config"
+  TEXMFHOME: "~/texmf"
+  TEXMFLOCAL: "/usr/local/texlive/texmf-local"
+  TEXMFSYSCONFIG: "/usr/local/texlive/2023/texmf-config"
+  TEXMFSYSVAR: "/usr/local/texlive/2023/texmf-var"
+  TEXMFVAR: "~/.texlive2023/texmf-var"
+  binary_aarch64-linux: ""
+  binary_amd64-freebsd: ""
+  binary_amd64-netbsd: ""
+  binary_armhf-linux: ""
+  binary_i386-freebsd: ""
+  binary_i386-linux: ""
+  binary_i386-netbsd: ""
+  binary_i386-solaris: ""
+  binary_universal-darwin: ""
+  binary_windows: ""
+  binary_x86_64-cygwin: ""
+  binary_x86_64-darwinlegacy: ""
+  binary_x86_64-linux: "1"
+  binary_x86_64-linuxmusl: ""
+  binary_x86_64-solaris: ""
+  collection-basic: ""
+  collection-bibtexextra: ""
+  collection-binextra: ""
+  collection-context: ""
+  collection-fontsextra: ""
+  collection-fontsrecommended: ""
+  collection-fontutils: ""
+  collection-formatsextra: ""
+  collection-games: ""
+  collection-humanities: ""
+  collection-langarabic: ""
+  collection-langchinese: ""
+  collection-langcjk: ""
+  collection-langcyrillic: ""
+  collection-langczechslovak: ""
+  collection-langenglish: ""
+  collection-langeuropean: ""
+  collection-langfrench: ""
+  collection-langgerman: ""
+  collection-langgreek: ""
+  collection-langitalian: ""
+  collection-langjapanese: ""
+  collection-langkorean: ""
+  collection-langother: ""
+  collection-langpolish: ""
+  collection-langportuguese: ""
+  collection-langspanish: ""
+  collection-latex: ""
+  collection-latexextra: ""
+  collection-latexrecommended: ""
+  collection-luatex: ""
+  collection-mathscience: ""
+  collection-metapost: ""
+  collection-music: ""
+  collection-pictures: ""
+  collection-plaingeneric: ""
+  collection-pstricks: ""
+  collection-publishers: ""
+  collection-texworks: ""
+  collection-wintools: ""
+  collection-xetex: ""
+  doc_splitting_supported: "1"
+  free_size: "31628"
+  inst_platform: "x86_64-linux"
+  instopt_adjustpath: ""
+  instopt_adjustrepo: ""
+  instopt_letter: ""
+  instopt_portable: ""
+  instopt_write18_restricted: "1"
+  n_collections_available: "41"
+  n_collections_selected: "40"
+  n_systems_available: "15"
+  n_systems_selected: "1"
+  selected_scheme: "scheme-infraonly"
+  src_splitting_supported: "1"
+  this_platform: "x86_64-linux"
+  tlpdbopt_autobackup: ""
+  tlpdbopt_backupdir: "tlpkg/backups"
+  tlpdbopt_create_formats: "1"
+  tlpdbopt_desktop_integration: "1"
+  tlpdbopt_file_assocs: "1"
+  tlpdbopt_generate_updmap: ""
+  tlpdbopt_install_docfiles: ""
+  tlpdbopt_install_srcfiles: ""
+  tlpdbopt_location: "http://ftp.dante.de/tex-archive/systems/texlive/tlnet"
+  tlpdbopt_post_code: "1"
+  tlpdbopt_sys_bin: "/usr/local/bin"
+  tlpdbopt_sys_info: "/usr/local/share/info"
+  tlpdbopt_sys_man: "/usr/local/share/man"
+  tlpdbopt_w32_multi_user: "1"
+  total_size: ""
+Installing to: /usr/local/texlive/2023
+Installing [1/4, time/total: ??:??/??:??]: hyphen-base [22k]
+Installing [2/4, time/total: 00:01/00:23]: kpathsea [32k]
+Installing [3/4, time/total: 00:02/00:18]: texlive-scripts [112k]
+Installing [4/4, time/total: 00:04/00:12]: texlive.infra [345k]
+Time used for installing the packages: 00:12
+Installing [1/3, time/total: ??:??/??:??]: kpathsea.x86_64-linux [40k]
+Installing [2/3, time/total: 00:01/00:04]: texlive-scripts.x86_64-linux [1k]
+Installing [3/3, time/total: 00:02/00:09]: texlive.infra.x86_64-linux [143k]
+Time used for installing the packages: 00:05
+running mktexlsr /usr/local/texlive/2023/texmf-dist ...
+writing fmtutil.cnf to /usr/local/texlive/2023/texmf-dist/web2c/fmtutil.cnf
+writing updmap.cfg to /usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg
+writing language.dat to /usr/local/texlive/2023/texmf-var/tex/generic/config/language.dat
+writing language.def to /usr/local/texlive/2023/texmf-var/tex/generic/config/language.def
+writing language.dat.lua to /usr/local/texlive/2023/texmf-var/tex/generic/config/language.dat.lua
+running mktexlsr /usr/local/texlive/2023/texmf-var /usr/local/texlive/2023/texmf-config /usr/local/texlive/2023/texmf-dist ...
+running updmap-sys --nohash ...done
+updmap will read the following updmap.cfg files (in precedence order):
+  /usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg
+updmap may write changes to the following updmap.cfg file:
+  /usr/local/texlive/2023/texmf-config/web2c/updmap.cfg
+dvips output dir: "/usr/local/texlive/2023/texmf-var/fonts/map/dvips/updmap"
+pdftex output dir: "/usr/local/texlive/2023/texmf-var/fonts/map/pdftex/updmap"
+dvipdfmx output dir: "/usr/local/texlive/2023/texmf-var/fonts/map/dvipdfmx/updmap"
+
+updmap is creating new map files
+using the following configuration:
+  LW35 font names                  : URWkb (/usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg)
+  prefer outlines                  : true (/usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg)
+  texhash enabled                  : false
+  download standard fonts (dvips)  : true (/usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg)
+  download standard fonts (pdftex) : true (/usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg)
+  jaEmbed replacement string       : haranoaji (/usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg)
+  jaVariant replacement string     : -04 (/usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg)
+  scEmbed replacement string       : arphic (/usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg)
+  tcEmbed replacement string       : arphic (/usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg)
+  koEmbed replacement string       : baekmuk (/usr/local/texlive/2023/texmf-dist/web2c/updmap.cfg)
+  create a mapfile for pxdvi       : false (default)
+
+Scanning for LW35 support files  [  3 files]
+Scanning for MixedMap entries    [  0 files]
+Scanning for KanjiMap entries    [  0 files]
+Scanning for Map entries         [  1 files]
+
+Generating output for dvipdfmx...
+Generating output for ps2pk...
+Generating output for dvips...
+Generating output for pdftex...
+
+Files generated:
+  /usr/local/texlive/2023/texmf-var/fonts/map/dvips/updmap:
+       15796 2023-07-11 20:26:50 builtin35.map
+       21269 2023-07-11 20:26:50 download35.map
+       21376 2023-07-11 20:26:50 psfonts_pk.map
+       21376 2023-07-11 20:26:50 psfonts_t1.map
+       21371 2023-07-11 20:26:50 ps2pk.map
+          14 2023-07-11 20:26:50 psfonts.map -> psfonts_t1.map
+  /usr/local/texlive/2023/texmf-var/fonts/map/pdftex/updmap:
+       21378 2023-07-11 20:26:50 pdftex_dl14.map
+       19713 2023-07-11 20:26:50 pdftex_ndl14.map
+          15 2023-07-11 20:26:50 pdftex.map -> pdftex_dl14.map
+  /usr/local/texlive/2023/texmf-var/fonts/map/dvipdfmx/updmap:
+         319 2023-07-11 20:26:50 kanjix.map
+
+Transcript written on: /usr/local/texlive/2023/texmf-var/web2c/updmap.log
+re-running mktexlsr /usr/local/texlive/2023/texmf-var /usr/local/texlive/2023/texmf-config ...
+pre-generating all format files, be patient...
+running fmtutil-sys --no-error-if-no-engine=luametatex,luajithbtex,luajittex,mfluajit --no-strict --all ...done
+fmtutil: fmtutil is using the following fmtutil.cnf files (in precedence order):
+fmtutil:   /usr/local/texlive/2023/texmf-dist/web2c/fmtutil.cnf
+fmtutil: fmtutil is using the following fmtutil.cnf file for writing changes:
+fmtutil:   /usr/local/texlive/2023/texmf-config/web2c/fmtutil.cnf
+fmtutil [INFO]: writing formats under /usr/local/texlive/2023/texmf-var/web2c
+fmtutil [WARNING]: You seem to have no formats defined in your fmtutil.cnf files!
+fmtutil [INFO]: total formats: 0
+fmtutil [INFO]: exiting with status 0
+running package-specific postactions
+finished with package-specific postactions
+
+
+Welcome to TeX Live!
+
+
+See /usr/local/texlive/2023/index.html for links to documentation.
+The TeX Live web site (https://tug.org/texlive/) contains any updates and corrections. TeX Live is a joint project of the TeX user groups around the world; please consider supporting it by joining the group best for you. The list of groups is available on the web at https://tug.org/usergroups.html.
+
+
+Add /usr/local/texlive/2023/texmf-dist/doc/man to MANPATH.
+Add /usr/local/texlive/2023/texmf-dist/doc/info to INFOPATH.
+Most importantly, add /usr/local/texlive/2023/bin/x86_64-linux
+to your PATH for current and future sessions.
