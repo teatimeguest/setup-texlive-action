@@ -1,32 +1,27 @@
-declare global {
-  interface ErrorOptions {
-    cause?: unknown;
+declare namespace NodeJS {
+  interface ErrnoException {
+    /**
+     * @privateRemarks Node.js error objects must have the `stack` property.
+     * @see {@link https://nodejs.org/docs/latest-v16.x/api/errors.html#errorstack}
+     */
+    stack: string;
   }
 
-  interface ErrorConstructor {
-    /* eslint-disable-next-line
-      @typescript-eslint/prefer-readonly-parameter-types */
-    new(message: string, options?: ErrorOptions | undefined): Error;
-  }
-
-  namespace NodeJS {
-    interface ErrnoException {
-      stack: string;
-    }
-
-    interface ProcessEnv {
-      RUNNER_TEMP: string;
-    }
+  interface ProcessEnv {
+    RUNNER_TEMP: string;
   }
 }
 
-declare module 'util/types' {
-  // A type-guard for the error type of Node.js.
-  // Since `NodeJS.ErrnoException` is defined as an interface,
-  // we cannot write `error instanceof NodeJS.ErrnoException`, but
-  // `util.types.isNativeError` is sufficient
-  // because all properties of `NodeJS.ErrnoException` are optional.
+declare module 'node:util/types' {
+  /**
+   * A type-guard for the error type of Node.js.
+   *
+   * @privateRemarks
+   *
+   * Since `NodeJS.ErrnoException` is defined as an interface,
+   * we cannot write `error instanceof NodeJS.ErrnoException`, but
+   * `util.types.isNativeError` is sufficient
+   * because all properties of `NodeJS.ErrnoException` are optional.
+   */
   function isNativeError(error: unknown): error is NodeJS.ErrnoException;
 }
-
-export {};

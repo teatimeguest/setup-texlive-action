@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           cache: npm
-          node-version-file: .nvmrc
+          node-version-file: .node-version
       - run: npm ci
       - run: npm run ${{ matrix.script }}
       - if: github.event_name == 'push' && matrix.script == 'test'

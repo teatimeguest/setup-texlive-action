@@ -9,10 +9,10 @@
     "noUnusedLocals": true,
     "strict": true,
     "baseUrl": "./src",
-    "module": "es2020",
-    "moduleResolution": "node16",
-    "paths": { "#/*": ["*.js", "*/index.js", "*", "*/index"] },
-    "rootDirs": ["./src"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "paths": { "#/*": ["*"] },
+    "rootDir": "./src",
     "importHelpers": true,
     "newLine": "lf",
     "outDir": "./lib",
@@ -21,9 +21,9 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es2021"
+    "lib": ["es2021", "es2022.error"],
+    "target": "esnext"
   },
   "include": ["./src/**/*.ts"]
 }

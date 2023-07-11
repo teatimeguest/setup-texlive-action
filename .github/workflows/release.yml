@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           cache: npm
-          node-version-file: .nvmrc
+          node-version-file: .node-version
       - run: npm ci
       - run: npm run build-release
       - run: git diff --exit-code dist

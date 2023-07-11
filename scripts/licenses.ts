@@ -31,6 +31,14 @@ export function pluginListLicenses(
         data = modules;
         return '';
       },
+      handleMissingLicenseText: (name, license) => {
+        switch (license) {
+          case 'MIT':
+            return 'The MIT License (https://opensource.org/license/mit/)';
+          default:
+            throw new Error(`Missing license file: ${name}`);
+        }
+      },
     }) as unknown as webpack.WebpackPluginInstance;
     pluginLicense.apply(compiler);
 
@@ -53,10 +61,10 @@ export async function compile(config: webpack.Configuration) {
         } else {
           const info = stats?.toJson();
           for (const warning of info?.warnings ?? []) {
-            console.warn(warning);
+            console.warn(warning.message ?? warning);
           }
           if (stats?.hasErrors()) {
-            reject(new AggregationError(info?.errors));
+            reject(new AggregateError(info?.errors));
           } else {
             resolve();
           }

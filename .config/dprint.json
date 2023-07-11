@@ -3,12 +3,12 @@
   "incremental": false,
   "typescript": {
     "quoteStyle": "preferSingle",
+    "quoteProps": "asNeeded",
     "useBraces": "always",
     "singleBodyPosition": "nextLine",
     "computed.preferSingleLine": true,
     "exportDeclaration.preferSingleLine": true,
     "importDeclaration.preferSingleLine": true,
-    "objectPattern.preferSingleLine": true,
     "parameters.preferSingleLine": true,
     "variableStatement.preferSingleLine": true,
     "arrowFunction.useParentheses": "force",
@@ -29,7 +29,7 @@
     "./tests/fixtures"
   ],
   "plugins": [
-    "https://plugins.dprint.dev/typescript-0.84.0.wasm",
-    "https://plugins.dprint.dev/markdown-0.15.2.wasm"
+    "https://plugins.dprint.dev/typescript-0.85.1.wasm",
+    "https://plugins.dprint.dev/markdown-0.15.3.wasm"
   ]
 }

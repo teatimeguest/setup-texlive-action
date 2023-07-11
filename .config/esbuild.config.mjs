@@ -1,12 +1,8 @@
 import { dedent } from 'ts-dedent';
 
-import tsconfig from '##/tsconfig.json' assert { type: 'json' };
-
-const { target } = tsconfig.compilerOptions;
-
 export default {
   bundle: true,
-  target,
+  target: 'node16',
   format: 'esm',
   platform: 'node',
   mainFields: ['module', 'main'],

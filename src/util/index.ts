@@ -8,4 +8,3 @@ export {
 } from '#/util/exec';
 export { extract, mkdtemp, tmpdir, uniqueChild } from '#/util/fs';
 export { Serializable } from '#/util/serializable';
-export type { IterableIterator } from '#/util/types';

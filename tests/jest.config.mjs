@@ -30,9 +30,9 @@ export default {
     ],
   },
   unmockedModulePathPatterns: [
+    '/node_modules/@abraham/reflection/',
     '/node_modules/class-transformer/',
     '/node_modules/decorator-cache-getter/',
-    '/node_modules/reflect-metadata/',
     ...Object
       .keys(packageJson.devDependencies)
       .map((module) => `/node_modules/${module}/`),

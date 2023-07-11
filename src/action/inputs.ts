@@ -72,7 +72,7 @@ export namespace Inputs {
 
   async function* loadDependsTxt(
     this: void,
-  ): AsyncIterable<dependsTxt.Dependency> {
+  ): AsyncGenerator<dependsTxt.Dependency, void> {
     const inline = getInput('packages');
     if (inline !== undefined) {
       yield* dependsTxt.parse(inline);

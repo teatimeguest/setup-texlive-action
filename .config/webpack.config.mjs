@@ -2,7 +2,17 @@ import path from 'node:path';
 
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin';
 
+import esbuildConfig from '##/.config/esbuild.config.mjs';
 import tsconfig from '##/tsconfig.json' assert { type: 'json' };
+
+const {
+  bundle,
+  mainFields,
+  conditions,
+  banner,
+  alias,
+  ...transformOptions
+} = esbuildConfig;
 
 export function pluginNoEmit(compiler) {
   compiler.hooks.afterCompile.tap('NoEmit', (compilation) => {
@@ -27,9 +37,13 @@ export default {
       {
         test: /\.ts/u,
         loader: 'esbuild-loader',
-        options: { target: tsconfig.compilerOptions.target },
+        options: transformOptions,
       },
     ],
   },
+  experiments: { topLevelAwait: true },
   stats: 'minimal',
+  ignoreWarnings: [
+    { message: /Should not import the named export/u },
+  ],
 };

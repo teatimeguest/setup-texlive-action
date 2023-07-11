@@ -68,16 +68,9 @@ describe('parse', () => {
     catalogue-version 7.00n
   `;
   // editorconfig-checker-enable
-  const collect = async <T>(gen: AsyncGenerator<T>): Promise<Array<T>> => {
-    const a = [];
-    for await (const item of gen) {
-      a.push(item);
-    }
-    return a;
-  };
 
-  it('strips comments and escaped line breaks', async () => {
-    await expect(collect(tlpdb.parse(db))).resolves.toContainEqual(
+  it('strips comments and escaped line breaks', () => {
+    expect([...tlpdb.parse(db)]).toContainEqual(
       expect.objectContaining({
         name: 'latex',
         version: '2021-11-15 PL1',
@@ -86,8 +79,8 @@ describe('parse', () => {
     );
   });
 
-  it('lists texlive.infra', async () => {
-    await expect(collect(tlpdb.parse(db))).resolves.toContainEqual(
+  it('lists texlive.infra', () => {
+    expect([...tlpdb.parse(db)]).toContainEqual(
       expect.objectContaining({
         name: 'texlive.infra',
         version: undefined,
@@ -96,26 +89,26 @@ describe('parse', () => {
     );
   });
 
-  it('does not list schemes and collections', async () => {
-    await expect(collect(tlpdb.parse(db))).resolves.not.toContainEqual(
+  it('does not list schemes and collections', () => {
+    expect([...tlpdb.parse(db)]).not.toContainEqual(
       expect.objectContaining({ name: 'scheme-basic' }),
     );
   });
 
-  it('does not list architecture-specific packages', async () => {
-    await expect(collect(tlpdb.parse(db))).resolves.not.toContainEqual(
+  it('does not list architecture-specific packages', () => {
+    expect([...tlpdb.parse(db)]).not.toContainEqual(
       expect.objectContaining({ name: 'texlive.infra.universal-darwin' }),
     );
   });
 
-  it('does not list texlive metadata', async () => {
-    await expect(collect(tlpdb.parse(db))).resolves.not.toContainEqual(
+  it('does not list texlive metadata', () => {
+    expect([...tlpdb.parse(db)]).not.toContainEqual(
       expect.objectContaining({ name: '00texlive.config' }),
     );
   });
 
-  it('lists normal packages', async () => {
-    await expect(collect(tlpdb.parse(db))).resolves.toContainEqual(
+  it('lists normal packages', () => {
+    expect([...tlpdb.parse(db)]).toContainEqual(
       expect.objectContaining({
         name: 'hyperref',
         version: '7.00n',

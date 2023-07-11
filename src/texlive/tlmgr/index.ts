@@ -113,7 +113,7 @@ export class Tlmgr {
   }
 }
 
-function* collectInvalidPackageNames(stderr: string): Iterable<string> {
+function* collectInvalidPackageNames(stderr: string): Generator<string, void> {
   const re = /^tlmgr install: package (\S+) not present/gmu;
   for (const [, name] of stderr.matchAll(re)) {
     yield name ?? '';

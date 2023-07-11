@@ -118,7 +118,7 @@ function getCacheKeys(entry: CacheEntry): CacheKeys {
 }
 
 function digest(obj: unknown): string {
-  return createHash('sha256').update(JSON.stringify(obj)).digest('hex');
+  return createHash('sha256').update(JSON.stringify(obj) ?? '').digest('hex');
 }
 
 function randomString(): string {

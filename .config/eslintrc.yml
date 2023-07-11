@@ -72,11 +72,15 @@ overrides:
       '@typescript-eslint/naming-convention':
         - error
         - selector: default
-          format: [camelCase]
-        - selector: [
-            accessor, classProperty, objectLiteralProperty, typeProperty,
-            parameter, parameterProperty, typeParameter,
-          ]
+          format: [camelCase, PascalCase]
+        - selector:
+            - accessor
+            - classProperty
+            - objectLiteralProperty
+            - typeProperty
+            - parameter
+            - parameterProperty
+            - typeParameter
           format: null
           filter: '^(?:RUNNER_TEMP$|NOPERLDOC$|TEX|TL_|instopt_|option_|tlpdbopt_|selected_scheme$)'
         - selector: variable
@@ -156,6 +160,7 @@ overrides:
       unicorn/consistent-function-scoping: off
       unicorn/no-array-for-each: off
       unicorn/no-array-reduce: off
+      unicorn/no-keyword-prefix: off
       unicorn/no-negated-condition: off
       unicorn/prefer-export-from: off
       unicorn/prefer-number-properties:

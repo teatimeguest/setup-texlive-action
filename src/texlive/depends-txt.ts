@@ -1,5 +1,4 @@
 import * as log from '#/log';
-import type { IterableIterator } from '#/util';
 
 const RE = {
   comments: /\s*#.*$/gmu,
@@ -14,13 +13,13 @@ export interface Dependency {
   readonly package?: string | undefined;
 }
 
-export function* parse(input: string): Iterable<Dependency> {
+export function* parse(input: string): Generator<Dependency, void> {
   const [globals = '', ...rest] = input
     .replaceAll(RE.comments, '')
     .split(RE.packages);
   yield* parseDeps(undefined, globals);
 
-  const iter: IterableIterator<string, undefined> = rest.values();
+  const iter = rest.values();
   for (const s of iter) {
     let packageName: string | undefined = s.trim();
     if (packageName === '' || RE.whitespaces.test(packageName)) {
@@ -37,7 +36,7 @@ export function* parse(input: string): Iterable<Dependency> {
 function* parseDeps(
   packageName: string | undefined,
   input: string,
-): Iterable<Dependency> {
+): Generator<Dependency, void> {
   for (const [, type = 'hard', names = ''] of input.matchAll(RE.hardOrSoft)) {
     for (const name of names.split(RE.whitespaces).filter(Boolean)) {
       yield { name, type, package: packageName } as Dependency;
