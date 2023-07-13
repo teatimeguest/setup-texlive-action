@@ -95,9 +95,9 @@ describe('user trees', () => {
 });
 
 describe('instopt_adjustrepo', () => {
-  it('is set to true for the latest version', () => {
+  it('is set to false even for the latest version', () => {
     const profile = new Profile(defaultOpts);
-    expect(profile.instopt_adjustrepo).toBe(true);
+    expect(profile.instopt_adjustrepo).toBe(false);
   });
 
   it.each([v`2008`, v`2012`, v`2016`, v`2020`])(

@@ -3,6 +3,9 @@ import 'jest-extended/all';
 
 import '#/globals';
 
+// https://www.rfc-editor.org/rfc/rfc2606.html
+const mockUrl = 'https://example.com/';
+
 for (const mod of ['fs/promises', 'os', 'path', 'process']) {
   jest.mock(`node:${mod}`, () => jest.requireMock(mod));
 }
@@ -23,13 +26,24 @@ jest.mock('#/action/cache', () => {
   return { CacheClient, save: jest.fn().mockResolvedValue(undefined) };
 });
 
-jest.mock('#/ctan', () => ({
+jest.unmock('#/ctan');
+
+jest.mock('#/ctan/api', () => ({
   pkg: jest.fn().mockResolvedValue({}),
+}));
+
+jest.mock('#/ctan/mirrors', () => ({
+  resolve: jest.fn().mockResolvedValue(new URL(mockUrl)),
 }));
 
 jest.unmock('#/texlive');
 jest.unmock('#/texlive/depends-txt');
-jest.unmock('#/texlive/tlnet');
+
+jest.mock('#/texlive/tlnet', () => ({
+  ctan: jest.fn().mockResolvedValue(new URL(mockUrl)),
+  contrib: jest.fn().mockResolvedValue(new URL(mockUrl)),
+  historic: jest.fn().mockReturnValue(new URL(mockUrl)),
+}));
 
 jest.mock('#/texlive/tlmgr', () => {
   const { Conf } = jest.requireMock('#/texlive/tlmgr/conf');

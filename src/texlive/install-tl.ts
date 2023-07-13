@@ -5,53 +5,63 @@ import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
 
 import * as log from '#/log';
 import type { Profile } from '#/texlive/profile';
-import * as tlnet from '#/texlive/tlnet';
 import * as tlpkg from '#/texlive/tlpkg';
 import type { Version } from '#/texlive/version';
-import { exec, extract } from '#/util';
+import { type ExecResult, exec, extract } from '#/util';
 
-export async function installTL(profile: Profile): Promise<void> {
-  const dir = restore(profile.version) ?? await download(profile.version);
-  const base = executable(profile.version);
-  const installer = path.format({ dir, base });
+export interface InstallTLOptions {
+  readonly profile: Profile;
+  readonly repository: Readonly<URL>;
+}
+
+export async function installTL(options: InstallTLOptions): Promise<void> {
+  const { profile } = options;
+  const repository = new URL(options.repository.href);
+  const { version } = profile;
+
+  const installTLPath = path.format({
+    dir: restore(version) ?? await download({ repository, version }),
+    base: executable(version),
+  });
   // Print version info.
   // eslint-disable-next-line unicorn/no-null
-  await exec(installer, ['-version'], { stdin: null });
+  await exec(installTLPath, ['-version'], { stdin: null });
 
-  for await (const dest of profile.open()) {
-    const options = ['-profile', dest];
-    if (!profile.version.isLatest()) {
-      const repo = tlnet.historic(profile.version);
-      // `install-tl` of versions prior to 2017 does not support HTTPS, and
-      // that of version 2017 supports HTTPS but does not work properly.
-      if (profile.version.number < 2018 && repo.protocol === 'https:') {
-        repo.protocol = 'http:';
-      }
-      options.push(
-        // Only version 2008 uses `-location` instead of `-repository`.
-        profile.version.number === 2008 ? '-location' : '-repository',
-        repo.href,
-      );
-    }
-    const result = await exec(installer, options, {
-      // eslint-disable-next-line unicorn/no-null
-      stdin: null,
+  // `install-tl` of versions prior to 2017 does not support HTTPS, and
+  // that of version 2017 supports HTTPS but does not work properly.
+  if (version.number < 2018 && repository.protocol === 'https:') {
+    repository.protocol = 'http:';
+  }
+
+  for await (const profilePath of profile.open()) {
+    const result = await exec(installTLPath, [
+      '-profile',
+      profilePath,
+      // Only version 2008 uses `-location` instead of `-repository`.
+      version.number === 2008 ? '-location' : '-repository',
+      repository.href,
+    ], {
+      stdin: null, // eslint-disable-line unicorn/no-null
       ignoreReturnCode: true,
     });
-    if (
-      result.stderr.includes('the repository being accessed are not compatible')
-    ) {
-      throw new Error(
-        'It seems that the CTAN mirrors have not completed synchronisation'
-          + ' against a release of new version of TeX Live.'
-          + ' Please try re-running the workflow after some time.',
-      );
-    }
-    result.check();
-    tlpkg.check(result);
+    check(result);
   }
 
   await tlpkg.patch(profile);
+}
+
+function check(result: ExecResult): void {
+  if (
+    result.stderr.includes('the repository being accessed are not compatible')
+  ) {
+    throw new Error(
+      'It seems that the CTAN mirrors have not completed synchronisation'
+        + ' against a release of new version of TeX Live.'
+        + ' Please try re-running the workflow after some time.',
+    );
+  }
+  result.check();
+  tlpkg.check(result);
 }
 
 export function restore(version: Version): string | undefined {
@@ -59,7 +69,7 @@ export function restore(version: Version): string | undefined {
   try {
     dest = findTool(executable(version), version.toString());
   } catch (cause) {
-    log.info('Failed to restore installer', { cause });
+    log.info(`Failed to restore ${executable(version)}`, { cause });
   }
   if (dest === '') {
     return undefined;
@@ -69,12 +79,17 @@ export function restore(version: Version): string | undefined {
   }
 }
 
-export async function download(version: Version): Promise<string> {
-  const { href } = url(version);
-  log.info(`Downloading ${href}`);
-  const archive = await downloadTool(href);
+export async function download(options: {
+  readonly repository: Readonly<URL>;
+  readonly version: Version;
+}): Promise<string> {
+  const { repository, version } = options;
+  const name = archiveName();
+  const url = new URL(name, repository);
+  log.info(`Downloading ${name} from ${repository}`);
+  const archive = await downloadTool(url.href);
 
-  log.info(`Extracting installer from ${archive}`);
+  log.info(`Extracting ${executable(version)} from ${archive}`);
   const dest = await extract(archive, platform() === 'win32' ? 'zip' : 'tgz');
   await tlpkg.patch({ TEXDIR: dest, version });
 
@@ -82,7 +97,7 @@ export async function download(version: Version): Promise<string> {
     log.info('Adding to tool cache');
     await cacheDir(dest, executable(version), version.toString());
   } catch (cause) {
-    log.info('Failed to cache installer', { cause });
+    log.info(`Failed to cache ${executable(version)}`, { cause });
   }
 
   return dest;
@@ -98,9 +113,6 @@ function executable({ number: version }: Version): string {
   }
 }
 
-function url(version: Version): URL {
-  return new URL(
-    platform() === 'win32' ? 'install-tl.zip' : 'install-tl-unx.tar.gz',
-    version.isLatest() ? tlnet.CTAN : tlnet.historic(version),
-  );
+function archiveName(): string {
+  return platform() === 'win32' ? 'install-tl.zip' : 'install-tl-unx.tar.gz';
 }

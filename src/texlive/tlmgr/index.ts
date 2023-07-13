@@ -123,7 +123,7 @@ function* collectInvalidPackageNames(stderr: string): Generator<string, void> {
 async function resolvePackageName(name: string): Promise<string> {
   let pkg;
   try {
-    pkg = await ctan.pkg(name);
+    pkg = await ctan.api.pkg(name);
   } catch (cause) {
     throw new Error(`Package ${name} not found`, { cause });
   }

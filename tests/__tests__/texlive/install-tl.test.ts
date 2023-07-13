@@ -36,23 +36,27 @@ describe('restore', () => {
 });
 
 describe('download', () => {
+  const options = {
+    version: v`latest`,
+    repository: new URL('https://example.com/'),
+  };
   it('downloads installer', async () => {
     jest.mocked(os.platform).mockReturnValue('linux');
-    await download(v`latest`);
+    await download(options);
     expect(tool.downloadTool).toHaveBeenCalled();
     expect(util.extract).toHaveBeenCalled();
   });
 
   it('saves installer to cache', async () => {
     jest.mocked(os.platform).mockReturnValue('linux');
-    await download(v`latest`);
+    await download(options);
     expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('does not fail even if tool.cacheDir fails', async () => {
     jest.mocked(os.platform).mockReturnValue('linux');
     jest.mocked(tool.cacheDir).mockImplementationOnce(fail);
-    await expect(download(v`latest`)).toResolve();
+    await expect(download(options)).toResolve();
     expect(log.info).toHaveBeenCalled();
   });
 });

@@ -35,7 +35,6 @@ export class Profile extends Serializable implements Texmf {
     } else {
       this.withPortable();
     }
-    this.instopt_adjustrepo = this.version.isLatest();
   }
 
   /* eslint-disable @typescript-eslint/prefer-readonly-parameter-types */
@@ -116,7 +115,7 @@ export class Profile extends Serializable implements Texmf {
   @Expose({ since: 2017 })
   readonly instopt_adjustpath: boolean = false;
   @Expose({ since: 2017 })
-  readonly instopt_adjustrepo: boolean;
+  readonly instopt_adjustrepo: boolean = false;
   @Expose({ since: 2017 })
   readonly tlpdbopt_autobackup: boolean = false;
   @Expose({ since: 2017 })

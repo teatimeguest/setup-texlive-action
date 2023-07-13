@@ -35,7 +35,7 @@ describe('Tlmgr', () => {
           stderr: 'tlmgr install: package foo not present in repository.',
         }),
       );
-      jest.mocked(ctan.pkg).mockResolvedValueOnce({ texlive: 'Foo' });
+      jest.mocked(ctan.api.pkg).mockResolvedValueOnce({ texlive: 'Foo' });
       await expect(tlmgr.install(['foo', 'bar', 'baz'])).toResolve();
       expect(exec).toHaveBeenCalledWith('tlmgr', [
         'install',
