@@ -1,10 +1,16 @@
 import { dedent } from 'ts-dedent';
 
-export default {
-  bundle: true,
+export const transformOptions = {
   target: 'node16',
   format: 'esm',
   platform: 'node',
+  legalComments: 'none',
+  logLevel: 'info',
+};
+
+export default {
+  ...transformOptions,
+  bundle: true,
   mainFields: ['module', 'main'],
   conditions: ['module', 'import'],
   banner: {
@@ -14,7 +20,5 @@ export default {
       const require = createRequire(import.meta.url);
     `,
   },
-  legalComments: 'none',
   alias: { 'whatwg-url': 'node:url' }, // This reduces the script size by 10%.
-  logLevel: 'info',
 };

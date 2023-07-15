@@ -4,6 +4,7 @@ on:
     branches: main
     paths:
       - 'dist/**'
+      - '!**/*.md'
       - action.yml
   workflow_dispatch:
 permissions:

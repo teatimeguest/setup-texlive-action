@@ -26,7 +26,8 @@
     "**/*.md"
   ],
   "excludes": [
-    "./tests/fixtures"
+    "./tests/fixtures/**",
+    "./dist/**"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.85.1.wasm",

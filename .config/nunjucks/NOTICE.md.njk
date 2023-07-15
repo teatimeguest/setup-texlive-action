@@ -1,0 +1,28 @@
+# Third-Party Software Licenses
+
+This software incorporates the following third-party software components.
+{% for m in modules %}
+
+## `{{ m.name }}`
+{% set author =  m.packageJson.author %}
+{% if author %}
+
+Copyright (c) {{ author.name or author | escape }}
+{%- if author.email %} \<<{{ author.email }}>\>{% endif %}
+{%- if author.url %} (<{{ author.url }}>){% endif %}
+
+{% endif %}
+{% if m.packageJson.homepage %}
+
+URL: <{{ m.packageJson.homepage }}>
+{% else %}
+
+URL: <https://www.npmjs.com/package/{{ m.name }}>
+{% endif %}
+
+License: {{ m.licenseId }}
+
+```
+{{ m.licenseText.trimEnd() }}
+```
+{% endfor %}

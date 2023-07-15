@@ -5,16 +5,21 @@
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "act": "XDG_CONFIG_DIRS=\"${PWD}/.config:${XDG_CONFIG_DIRS}\" act",
-    "build": "tsx scripts/build.ts",
-    "build-release": "tsx scripts/build.ts",
+    "build": "npm run build:script",
+    "build:script": "node scripts/build.mjs",
+    "build:licenses": "webpack -c .config/webpack.config.mjs",
+    "clean": "rm -rf coverage dist lib *.tgz",
     "check": "tsc --noEmit",
     "dprint": "dprint -c .config/dprint.json",
-    "format": "npm run dprint fmt",
-    "format-check": "npm run dprint check && git ls-files -z | xargs -0 ec",
+    "fmt": "npm run dprint fmt",
+    "fmt-check": "run-s -c 'fmt-check:*'",
+    "fmt-check:dprint": "npm run dprint check",
+    "fmt-check:ec": "git ls-files -z | xargs -0 ec",
     "link-check": "markdown-link-check README.md",
     "lint": "eslint -c .config/eslintrc.yml --ext .ts src tests/__tests__",
     "test": "jest -c tests/jest.config.mjs --coverage",
-    "preversion": "npm run build-release",
+    "prepack": "run-s clean 'build:*'",
+    "preversion": "npm run prepack && markdown-link-check dist/NOTICE.md",
     "version": "bash scripts/bump-version.sh"
   },
   "author": "@teatimeguest",
@@ -27,6 +32,10 @@
   "imports": {
     "##/*": "./*"
   },
+  "files": [
+    "action.yml",
+    "dist"
+  ],
   "dependencies": {
     "@abraham/reflection": "0.12.0",
     "@actions/cache": "3.2.1",
@@ -50,7 +59,6 @@
     "better-typescript-lib": "2.4.0",
     "dprint": "0.39.0",
     "editorconfig-checker": "5.1.1",
-    "es-main": "1.2.0",
     "esbuild": "0.18.11",
     "esbuild-loader": "3.0.1",
     "eslint": "8.44.0",
@@ -64,13 +72,16 @@
     "jest-extended": "4.0.0",
     "license-webpack-plugin": "4.0.2",
     "markdown-link-check": "3.11.2",
+    "npm-run-all2": "6.0.6",
+    "nunjucks": "3.2.4",
     "ts-dedent": "2.2.0",
     "ts-essentials": "9.3.2",
     "ts-jest": "29.1.1",
     "tsconfig-paths-webpack-plugin": "4.0.1",
     "tsx": "3.12.7",
     "typescript": "5.1.6",
-    "webpack": "5.88.1"
+    "webpack": "5.88.1",
+    "webpack-cli": "5.1.4"
   },
   "overrides": {
     "eslint-plugin-import": {

@@ -14,7 +14,7 @@ jobs:
           cache: npm
           node-version-file: .node-version
       - run: npm ci
-      - run: npm run build-release
+      - run: npm run prepack
       - run: git diff --exit-code dist
   release:
     needs: check-dist
@@ -25,12 +25,14 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.ref_name }}
+      - run: npm pack --ignore-scripts
       - name: Generate release notes
         run: >-
-          git for-each-ref '${{ github.ref }}' --format='%(contents:body)' |
+          git for-each-ref "${GITHUB_REF}" --format='%(contents:body)' |
             tee RELEASENOTES.md
       - name: Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-        run: gh release create ${{ github.ref_name }} -F RELEASENOTES.md
+        run: >-
+          gh release create -F RELEASENOTES.md -- "${GITHUB_REF_NAME}" *.tgz

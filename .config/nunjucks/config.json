@@ -1,0 +1,6 @@
+{
+  "autoescape": false,
+  "throwOnUndefined": true,
+  "trimBlocks": true,
+  "lstripBlocks": true
+}
