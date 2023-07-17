@@ -4,12 +4,7 @@ import { isFeatureAvailable } from '@actions/cache';
 
 import { Inputs } from '#/action/inputs';
 import * as log from '#/log';
-import type { Version } from '#/texlive/version';
 import { getInput } from '#/util';
-
-import { config } from '##/package.json';
-
-const LATEST_VERSION = config.texlive.latest.version as Version;
 
 let inputs: {
   cache: boolean;

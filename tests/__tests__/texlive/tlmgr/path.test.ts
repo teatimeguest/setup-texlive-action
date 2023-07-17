@@ -1,12 +1,15 @@
 import { addPath } from '@actions/core';
 
-import { Path } from '#/texlive/tlmgr/path';
-import { uniqueChild } from '#/util';
+import * as path from '#/texlive/tlmgr/actions/path';
+import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
+import { uniqueChild } from '#/util/fs';
 
-jest.unmock('#/texlive/tlmgr/path');
+jest.unmock('#/texlive/tlmgr/actions/path');
 
 describe('add', () => {
-  const path = new Path({ TEXDIR: '<TEXDIR>' });
+  beforeEach(() => {
+    set(new TlmgrInternals({ TEXDIR: '<TEXDIR>', version: LATEST_VERSION }));
+  });
 
   it('adds the bin directory to the PATH', async () => {
     jest.mocked(uniqueChild).mockResolvedValueOnce('<path>');

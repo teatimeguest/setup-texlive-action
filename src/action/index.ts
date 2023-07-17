@@ -6,9 +6,17 @@ import { CacheClient, save as saveCache } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
 import type { Outputs } from '#/action/outputs';
 import * as log from '#/log';
-import { Profile, Tlmgr, type Version, installTL, latest, tlnet } from '#/texlive';
-import { USER_TREES } from '#/texmf';
-import { ExecError } from '#/util/exec';
+import { USER_TREES } from '#/tex/texmf';
+import {
+  Profile,
+  RepositoryVersionConflicts,
+  type Tlmgr,
+  type Version,
+  installTL,
+  latest,
+  tlnet,
+  useTlmgr,
+} from '#/texlive';
 
 export async function run(): Promise<void> {
   const state = 'POST';
@@ -60,18 +68,15 @@ export async function main(): Promise<Outputs> {
     });
   }
 
-  const tlmgr = new Tlmgr(profile);
+  const tlmgr = useTlmgr(profile);
   await tlmgr.path.add();
 
   if (cacheInfo.restored) {
     await log.group('Updating tlmgr', async () => {
       try {
-        await tlmgr.update([], { self: true });
+        await tlmgr.update({ self: true });
       } catch (error) {
-        if (
-          error instanceof ExecError
-          && error.stderr.includes('is older than remote repository')
-        ) {
+        if (error instanceof RepositoryVersionConflicts) {
           await updateRepository(tlmgr, inputs.version);
           cache.update();
         } else {
@@ -81,7 +86,7 @@ export async function main(): Promise<Outputs> {
     });
     if (await latest.isLatest(inputs.version) && inputs.updateAllPackages) {
       await log.group(`Updating packages`, async () => {
-        await tlmgr.update([], { all: true, reinstallForciblyRemoved: true });
+        await tlmgr.update({ all: true, reinstallForciblyRemoved: true });
       });
     }
     await adjustTexmf(tlmgr, profile);
@@ -122,7 +127,7 @@ async function updateRepository(tlmgr: Tlmgr, version: Version): Promise<void> {
   log.info(`Changing the ${tag} repository to ${historic}`);
   await tlmgr.repository.remove(tag);
   await tlmgr.repository.add(historic, tag);
-  await tlmgr.update([], { self: true });
+  await tlmgr.update({ self: true });
 }
 
 async function adjustTexmf(tlmgr: Tlmgr, profile: Profile): Promise<void> {

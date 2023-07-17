@@ -33,6 +33,7 @@ export default {
   unmockedModulePathPatterns: [
     '/node_modules/@abraham/reflection/',
     '/node_modules/class-transformer/',
+    '/node_modules/semver/',
     '/node_modules/temporal-polyfill/',
     ...Object
       .keys(packageJson.devDependencies)

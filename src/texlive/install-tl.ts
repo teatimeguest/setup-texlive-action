@@ -61,7 +61,7 @@ function check(result: ExecResult): void {
     );
   }
   result.check();
-  tlpkg.check(result);
+  tlpkg.PackageChecksumMismatch.check(result);
 }
 
 export function restore(version: Version): string | undefined {

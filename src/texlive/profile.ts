@@ -6,8 +6,8 @@ import { env } from 'node:process';
 import { Expose } from 'class-transformer';
 import type { Writable } from 'ts-essentials';
 
+import type { Texmf } from '#/tex/texmf';
 import type { Version } from '#/texlive';
-import type { Texmf } from '#/texmf';
 import { Serializable, mkdtemp } from '#/util';
 
 export class Profile extends Serializable implements Texmf {

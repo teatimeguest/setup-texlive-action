@@ -4,40 +4,7 @@ import path from 'node:path';
 
 import * as log from '#/log';
 import type { Version } from '#/texlive/version';
-import { type ExecOutput, exec } from '#/util';
-
-/**
- * Check tlpkg's logs to find problems.
- */
-export function check(output: string | Readonly<ExecOutput>): void {
-  const stderr = typeof output === 'string' ? output : output.stderr;
-  // tlpkg/TeXLive/TLUtils.pm
-  const result = /: checksums differ for (.*):$/mu.exec(stderr);
-  if (result !== null) {
-    const pkg = path.basename(result[1] ?? '', '.tar.xz');
-    throw new Error(
-      `The checksum of package ${pkg} did not match. `
-        + 'The CTAN mirror may be in the process of synchronization, '
-        + 'please rerun the job after some time.',
-    );
-  }
-}
-
-/**
- * Initialize TEXMFLOCAL just as the installer does.
- */
-export async function makeLocalSkeleton(
-  texmflocal: string,
-  options: { readonly TEXDIR: string },
-): Promise<void> {
-  await exec('perl', [
-    `-I${path.join(options.TEXDIR, 'tlpkg')}`,
-    '-mTeXLive::TLUtils=make_local_skeleton',
-    '-e',
-    'make_local_skeleton shift',
-    texmflocal,
-  ]);
-}
+import { exec } from '#/util';
 
 interface Patch {
   readonly description: string;

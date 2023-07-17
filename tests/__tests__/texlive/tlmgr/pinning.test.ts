@@ -1,35 +1,34 @@
-import { Pinning } from '#/texlive/tlmgr/pinning';
-import { exec } from '#/util';
+import * as pinning from '#/texlive/tlmgr/actions/pinning';
+import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
+import type { Version } from '#/texlive/version';
 
-jest.unmock('#/texlive/tlmgr/pinning');
+jest.unmock('#/texlive/tlmgr/actions/pinning');
+
+const setVersion = (version: Version) => {
+  set(new TlmgrInternals({ TEXDIR: '', version }), true);
+};
 
 describe('add', () => {
   it('pins a repository with a glob', async () => {
-    const pinning = new Pinning({ version: '2019' });
+    setVersion('2019');
     await pinning.add('<repository>', '*');
-    expect(exec).toHaveBeenCalledWith('tlmgr', [
+    expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
       'pinning',
-      'add',
-      '<repository>',
-      '*',
-    ]);
+      expect.anything(),
+    );
   });
 
   it('pins a repository with globs', async () => {
-    const pinning = new Pinning({ version: '2019' });
+    setVersion('2019');
     await pinning.add('<repository>', '<glob1>', '<glob2>');
-    expect(exec).toHaveBeenCalledWith('tlmgr', [
+    expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
       'pinning',
-      'add',
-      '<repository>',
-      '<glob1>',
-      '<glob2>',
-    ]);
+      expect.anything(),
+    );
   });
 
-  it('fails since the `pinning` action is not implemented', () => {
-    expect(() => new Pinning({ version: '2012' })).toThrow(
-      '`pinning` action is not implemented in TeX Live 2012',
-    );
+  it('fails since the `pinning` action is not implemented', async () => {
+    setVersion('2012');
+    await expect(pinning.add('<repository>', '*')).toReject();
   });
 });

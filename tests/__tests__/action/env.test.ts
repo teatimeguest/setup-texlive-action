@@ -2,13 +2,8 @@ import process from 'node:process';
 
 import { init } from '#/action/env';
 import * as log from '#/log';
-import type { Version } from '#/texlive/version';
-
-import { config } from '##/package.json';
 
 jest.mock('node:process', () => globalThis.process);
-
-const LATEST_VERSION = config.texlive.latest.version as Version;
 
 beforeEach(() => {
   process.env = {} as NodeJS.ProcessEnv;

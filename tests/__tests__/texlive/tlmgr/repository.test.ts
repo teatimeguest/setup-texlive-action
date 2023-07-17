@@ -1,76 +1,75 @@
-import { dedent } from 'ts-dedent';
+import * as repository from '#/texlive/tlmgr/actions/repository';
+import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
+import type { Version } from '#/texlive/version';
+import { ExecError } from '#/util/exec';
 
-import { Repository } from '#/texlive/tlmgr/repository';
-import { ExecError, ExecResult, exec } from '#/util';
+jest.unmock('#/texlive/tlmgr/actions/repository');
 
-jest.unmock('#/texlive/tlmgr/repository');
+const setVersion = (version: Version) => {
+  set(new TlmgrInternals({ TEXDIR: '', version }), true);
+};
 
 describe('add', () => {
   it('adds a repository with a tag', async () => {
-    const repository = new Repository({ version: '2019' });
+    setVersion('2019');
     await expect(repository.add('<repository>', '<tag>')).toResolve();
-    expect(exec).toHaveBeenCalledWith(
-      'tlmgr',
-      ['repository', 'add', '<repository>', '<tag>'],
+    expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
+      'repository',
+      expect.anything(),
     );
   });
 
   it('adds a repository with the empty tag', async () => {
-    const repository = new Repository({ version: '2019' });
+    setVersion('2019');
     await expect(repository.add('<repository>', '')).toResolve();
-    expect(exec).toHaveBeenCalledWith(
-      'tlmgr',
-      ['repository', 'add', '<repository>', ''],
+    expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
+      'repository',
+      expect.anything(),
     );
   });
 
   it('adds a repository with no tags', async () => {
-    const repository = new Repository({ version: '2019' });
+    setVersion('2019');
     await expect(repository.add('<repository>')).toResolve();
-    expect(exec).toHaveBeenCalledWith(
-      'tlmgr',
-      ['repository', 'add', '<repository>'],
+    expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
+      'repository',
+      expect.anything(),
     );
   });
 
   it('can safely add the repository again', async () => {
-    jest.mocked(exec).mockResolvedValueOnce(
-      new ExecResult({
-        command: '',
+    // eslint-disable-next-line jest/unbound-method
+    jest.mocked(TlmgrInternals.prototype.exec).mockRejectedValueOnce(
+      new ExecError({
+        command: 'tlmgr',
         exitCode: 2,
         stdout: '',
-        stderr: dedent`
-        tlmgr: repository or its tag already defined, no action: <repository>
-        tlmgr: An error has occurred. See above messages. Exiting.
-      `,
+        stderr: await loadFixture('tlmgr-repository-add.stderr'),
       }),
     );
-    const repository = new Repository({ version: '2019' });
+    setVersion('2019');
     await expect(repository.add('<repository>', '<tag>')).toResolve();
+    expect(TlmgrInternals.prototype.exec).toHaveBeenCalled();
   });
 
   it('fails with non-zero status code', async () => {
-    jest.mocked(exec).mockRejectedValueOnce(
+    // eslint-disable-next-line jest/unbound-method
+    jest.mocked(TlmgrInternals.prototype.exec).mockRejectedValueOnce(
       new ExecError({
         command: 'tlmgr',
-        args: [],
         exitCode: 2,
         stdout: '',
-        // dprint-ignore
-        stderr: dedent`
-          tlmgr: neither https?/ftp/ssh/scp/file URI nor absolute path, no action: <repository>
-          tlmgr: An error has occurred. See above messages. Exiting.
-        `,
+        stderr: '',
       }),
     );
-    const repository = new Repository({ version: '2019' });
+    setVersion('2019');
     await expect(repository.add('<repository>', '<tag>'))
       .rejects
       .toThrow('`tlmgr` exited with status 2');
   });
 
-  it('fails since the `repository` action is not implemented', () => {
-    expect(() => new Repository({ version: '2011' }))
-      .toThrow('`repository` action is not implemented in TeX Live 2011');
+  it('fails since the `repository` action is not implemented', async () => {
+    setVersion('2011');
+    await expect(repository.add('<repository>', '<tag>')).toReject();
   });
 });

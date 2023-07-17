@@ -1,53 +1,44 @@
-import * as core from '@actions/core';
+import { exportVariable } from '@actions/core';
 
-import { type Version, tlpkg } from '#/texlive';
-import { Conf } from '#/texlive/tlmgr/conf';
-import { ExecResult, exec } from '#/util';
+import * as conf from '#/texlive/tlmgr/actions/conf';
+import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
+import { makeLocalSkeleton } from '#/texlive/tlpkg';
+import type { Version } from '#/texlive/version';
+import { exec } from '#/util/exec';
 
-import { config } from '##/package.json';
+jest.unmock('#/texlive/tlmgr/actions/conf');
 
-jest.unmock('#/texlive/tlmgr/conf');
-
-const LATEST_VERSION = config.texlive.latest.version as Version;
+const setVersion = (version: Version) => {
+  set(new TlmgrInternals({ TEXDIR: '', version }), true);
+};
 
 describe('texmf', () => {
   it('returns the value of the given key by using `kpsewhich`', async () => {
-    jest.mocked(exec).mockResolvedValueOnce(
-      new ExecResult({
-        command: '',
-        exitCode: 0,
-        stdout: '/usr/local/texlive/2021/texmf-config\n',
-        stderr: '',
-      }),
-    );
-    const conf = new Conf({ version: '2021', TEXDIR: '' });
-    await expect(conf.texmf('TEXMFCONFIG')).resolves.toBe(
-      '/usr/local/texlive/2021/texmf-config',
-    );
+    setVersion('2021');
+    await expect(conf.texmf('TEXMFCONFIG')).resolves.toBe('<TEXMFCONFIG>');
   });
 
   it('sets the value to the given key with `tlmgr`', async () => {
-    const conf = new Conf({ version: '2021', TEXDIR: '' });
+    setVersion('2021');
     await conf.texmf('TEXMFVAR', '~/.local/texlive/2021/texmf-var');
-    expect(exec).toHaveBeenCalledWith('tlmgr', [
+    expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
       'conf',
-      'texmf',
-      'TEXMFVAR',
-      '~/.local/texlive/2021/texmf-var',
-    ]);
+      expect.anything(),
+    );
+    expect(exportVariable).not.toHaveBeenCalled();
   });
 
   it('sets the value to the given key by environment variable', async () => {
-    const conf = new Conf({ version: '2008', TEXDIR: '' });
+    setVersion('2008');
     await conf.texmf('TEXMFHOME', '~/.texmf');
-    expect(core.exportVariable).toHaveBeenCalledWith('TEXMFHOME', '~/.texmf');
+    expect(TlmgrInternals.prototype.exec).not.toHaveBeenCalled();
+    expect(exportVariable).toHaveBeenCalledWith('TEXMFHOME', '~/.texmf');
   });
 
   it('initializes TEXMFLOCAL if it is changed', async () => {
-    const conf = new Conf({ version: LATEST_VERSION, TEXDIR: '' });
+    setVersion(LATEST_VERSION);
     await conf.texmf('TEXMFLOCAL', '<TEXMFLOCAL>');
-    expect(exec).toHaveBeenCalledWith('tlmgr', expect.anything());
-    expect(tlpkg.makeLocalSkeleton).toHaveBeenCalledWith(
+    expect(makeLocalSkeleton).toHaveBeenCalledWith(
       '<TEXMFLOCAL>',
       expect.anything(),
     );

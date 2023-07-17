@@ -3,8 +3,8 @@ import path from 'node:path';
 import { env } from 'node:process';
 
 import * as log from '#/log';
+import { SYSTEM_TREES } from '#/tex/texmf';
 import type { Version } from '#/texlive/version';
-import { SYSTEM_TREES } from '#/texmf';
 
 export function init(version: Version): void {
   if (!('RUNNER_TEMP' in env)) {

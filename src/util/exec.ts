@@ -1,17 +1,19 @@
 import { Buffer } from 'node:buffer';
 
-import {
-  type ExecOptions as ActionsExecOptions,
-  type ExecOutput,
-  getExecOutput,
-} from '@actions/exec';
+import * as actions from '@actions/exec';
 
-export interface ExecOptions extends Omit<ActionsExecOptions, 'input'> {
-  stdin?: Buffer | string | null;
+import { Exception, isIterable } from '#/util';
+
+export interface ExecOptions
+  extends Readonly<Omit<actions.ExecOptions, 'input'>>
+{
+  readonly stdin?: Buffer | string | null;
 }
 
+export type ExecOutput = actions.ExecOutput;
+
 export interface ExecResultConfig
-  extends Omit<ExecResult, 'config' | 'args' | 'check'>
+  extends Omit<ExecResult, 'args' | 'check' | 'config'>
 {
   args?: ReadonlyArray<string> | undefined;
 }
@@ -48,21 +50,12 @@ export class ExecResult implements Readonly<ExecOutput> {
 
 export interface ExecError extends ExecResultConfig {}
 
+@Exception
 export class ExecError extends Error {
   constructor(private readonly config: Readonly<ExecResultConfig>) {
     const { command, exitCode, stderr } = config;
     super(`\`${command}\` exited with status ${exitCode}: ${stderr}`);
     void this.config;
-  }
-
-  override readonly name = 'ExecError';
-
-  get [Symbol.toStringTag](): string {
-    return this.name;
-  }
-
-  toJSON(this: void): object {
-    return {};
   }
 
   static {
@@ -78,10 +71,10 @@ export async function exec(
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
   args?: Array<string>,
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-  options?: Readonly<ExecOptions>,
+  options?: ExecOptions,
 ): Promise<ExecResult> {
   const { stdin, ...rest } = options ?? {};
-  const execOptions: ActionsExecOptions = { ...rest, ignoreReturnCode: true };
+  const execOptions: actions.ExecOptions = { ...rest, ignoreReturnCode: true };
   if (stdin !== undefined) {
     if (stdin === null) {
       execOptions.input = Buffer.alloc(0);
@@ -94,7 +87,7 @@ export async function exec(
   const result = new ExecResult({
     command,
     args,
-    ...await getExecOutput(command, args, execOptions),
+    ...await actions.getExecOutput(command, args, execOptions),
   });
   if (options?.ignoreReturnCode !== true) {
     result.check();
@@ -102,4 +95,13 @@ export async function exec(
   return result;
 }
 
-export type { ExecOutput };
+export function processArgsAndOptions<T extends object>(
+  argsOrOptions?: Iterable<string> | T,
+  options?: T,
+): [args: Iterable<string> | undefined, options: T | undefined] {
+  if (isIterable(argsOrOptions)) {
+    return [argsOrOptions, options];
+  } else {
+    return [undefined, options ?? argsOrOptions];
+  }
+}

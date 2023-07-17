@@ -38,6 +38,14 @@ jest.mock('#/ctan/mirrors', () => ({
   resolve: jest.fn().mockResolvedValue(new URL(mockUrl)),
 }));
 
+jest.unmock('#/tex');
+
+jest.mock('#/tex/kpse', () => ({
+  varValue: jest.fn(async (key) => `<${key}>`),
+}));
+
+jest.unmock('#/tex/texmf');
+
 jest.unmock('#/texlive');
 jest.unmock('#/texlive/depends-txt');
 
@@ -47,24 +55,38 @@ jest.mock('#/texlive/tlnet', () => ({
   historic: jest.fn().mockReturnValue(new URL(mockUrl)),
 }));
 
-jest.mock('#/texlive/tlmgr', () => {
-  const { Conf } = jest.requireMock('#/texlive/tlmgr/conf');
-  const { Path } = jest.requireMock('#/texlive/tlmgr/path');
-  const { Pinning } = jest.requireMock('#/texlive/tlmgr/pinning');
-  const { Repository } = jest.requireMock('#/texlive/tlmgr/repository');
-  const { Tlmgr } = jest.createMockFromModule<any>('#/texlive/tlmgr');
-  Tlmgr.prototype.conf = new Conf();
-  Tlmgr.prototype.path = new Path();
-  Tlmgr.prototype.pinning = new Pinning();
-  Tlmgr.prototype.repository = new Repository();
-  Tlmgr.prototype.list = jest.fn(async function*() {});
-  return { Tlmgr };
+jest.unmock('#/texlive/tlmgr');
+jest.unmock('#/texlive/tlmgr/action');
+jest.unmock('#/texlive/tlmgr/actions');
+jest.unmock('#/texlive/tlmgr/cli');
+jest.unmock('#/texlive/tlmgr/errors');
+
+jest.mock('#/texlive/tlmgr/internals', () => {
+  const actual = jest.requireActual('#/texlive/tlmgr/internals');
+  jest.spyOn(actual.TlmgrInternals.prototype, 'exec');
+  return actual;
 });
+
+jest.mock('#/texlive/tlmgr/actions/conf', () => {
+  const actual = jest.requireActual('#/texlive/tlmgr/actions/conf');
+  jest.spyOn(actual, 'texmf');
+  return actual;
+});
+
+jest.mock('#/texlive/tlmgr/actions/list', () => ({
+  list: jest.fn(function*() {}),
+}));
+
+jest.unmock('#/texlive/tlpkg');
+jest.unmock('#/texlive/tlpkg/errors');
+jest.unmock('#/texlive/tlpkg/tlpdb');
 
 jest.unmock('#/texlive/version');
 jest.unmock('#/texlive/version/types');
 
 jest.mock('#/texlive/version/latest', () => {
+  const { config } = jest.requireActual('##/package.json');
+  const LATEST_VERSION = config.texlive.latest.version;
   return {
     __esModule: true,
     default: {
@@ -77,25 +99,21 @@ jest.mock('#/texlive/version/latest', () => {
   };
 });
 
-jest.unmock('#/texmf');
-
 jest.unmock('#/util');
+jest.unmock('#/util/decorators');
 
 jest.mock('#/util/exec', () => {
-  const { ExecError, ExecResult } = jest.requireActual('#/util/exec');
-  return {
-    ExecError,
-    ExecResult,
-    exec: jest.fn(async (command, args) => {
-      return new ExecResult({
-        command,
-        args,
-        exitCode: 0,
-        stderr: '',
-        stdout: '',
-      });
-    }),
-  };
+  const exec = jest.requireActual('#/util/exec');
+  jest.spyOn(exec, 'exec').mockImplementation(async (command, args) => {
+    return new exec.ExecResult({
+      command,
+      args,
+      exitCode: 0,
+      stderr: '',
+      stdout: '',
+    });
+  });
+  return exec;
 });
 
 jest.mock('#/util/fs', () => ({
@@ -108,3 +126,4 @@ jest.mock('#/util/fs', () => ({
 }));
 
 jest.unmock('#/util/serializable');
+jest.unmock('#/util/types');

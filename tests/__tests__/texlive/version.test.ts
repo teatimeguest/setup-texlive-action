@@ -2,14 +2,12 @@ import { platform } from 'node:os';
 
 import * as ctan from '#/ctan';
 import * as log from '#/log';
-import { type Version, latest, validateReleaseYear } from '#/texlive/version';
+import { latest, validateReleaseYear } from '#/texlive/version';
 
 import { config } from '##/package.json';
 
 jest.unmock('#/texlive/version/latest');
 jest.unmock('#/texlive/version/validate');
-
-const LATEST_VERSION = config.texlive.latest.version as Version;
 
 describe('latest.checkVersion', () => {
   it('returns `2023`', async () => {

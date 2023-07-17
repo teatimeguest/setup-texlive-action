@@ -4,18 +4,20 @@ import os from 'node:os';
 import * as tlpkg from '#/texlive/tlpkg';
 import type { Version } from '#/texlive/version';
 
-jest.unmock('#/texlive/tlpkg');
+jest.unmock('#/texlive/tlpkg/errors');
+jest.unmock('#/texlive/tlpkg/patch');
 
 describe('check', () => {
-  it('detects forcible removal of packages', () => {
-    expect(() =>
-      tlpkg.check(
-        'TeXLive::TLUtils::check_file_and_remove: '
-          + 'checksums differ for /tmp/path/to/foo.tar.xz:\n'
-          + 'TeXLive::TLUtils::check_file_and_remove: ...',
-      )
-    )
-      .toThrow('The checksum of package foo did not match.');
+  it('detects forcible removal of packages', async () => {
+    const stderr = await loadFixture('tlpkg-check_file_and_remove.stderr');
+    const output = { exitCode: 0, stderr, stdout: '' };
+    const result = (async () => tlpkg.PackageChecksumMismatch.check(output))();
+    await expect(result).rejects.toThrow(
+      'The checksums of some packages did not match',
+    );
+    await expect(result).rejects.toMatchObject({
+      packages: ['babel'],
+    });
   });
 });
 

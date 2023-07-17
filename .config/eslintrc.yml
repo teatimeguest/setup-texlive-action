@@ -82,7 +82,7 @@ overrides:
             - parameterProperty
             - typeParameter
           format: null
-          filter: '^(?:RUNNER_TEMP$|NOPERLDOC$|TEX|TL_|instopt_|option_|tlpdbopt_|selected_scheme$)'
+          filter: '^(?:_$|RUNNER_TEMP$|NOPERLDOC$|TEX|TL_|instopt_|option_|tlpdbopt_|selected_scheme$)'
         - selector: variable
           modifiers: [const]
           format: [camelCase, UPPER_CASE]
@@ -145,10 +145,6 @@ overrides:
       import/order:
         - error
         - groups: [builtin, external, internal, object]
-          pathGroups:
-            - pattern: "#/texlive/tlmgr/*"
-              group: internal
-              position: after
           newlines-between: always
           alphabetize:
             order: asc
@@ -158,6 +154,7 @@ overrides:
       node/prefer-global/url: error
       unicorn/catch-error-name: off
       unicorn/consistent-function-scoping: off
+      unicorn/custom-error-definition: off
       unicorn/no-array-for-each: off
       unicorn/no-array-reduce: off
       unicorn/no-keyword-prefix: off
@@ -170,6 +167,9 @@ overrides:
       unicorn/prefer-ternary: off
       unicorn/prevent-abbreviations: off
       unicorn/switch-case-braces: off
+  - files: "./src/types.d.ts"
+    rules:
+      '@typescript-eslint/no-unused-vars': off
   - files: "./tests/__tests__/**/*.ts"
     parserOptions:
       project: ./tests/tsconfig.json

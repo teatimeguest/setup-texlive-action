@@ -5,17 +5,10 @@ import type { DeepWritable } from 'ts-essentials';
 import * as action from '#/action';
 import { CacheClient } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
-import { Profile, Tlmgr, type Version, installTL } from '#/texlive';
-import { Conf } from '#/texlive/tlmgr/conf';
-import { Path } from '#/texlive/tlmgr/path';
-import { Pinning } from '#/texlive/tlmgr/pinning';
-import { Repository } from '#/texlive/tlmgr/repository';
-
-import { config } from '##/package.json';
+import { Profile, installTL } from '#/texlive';
+import * as tlmgr from '#/texlive/tlmgr/actions';
 
 jest.unmock('#/action');
-
-const LATEST_VERSION = config.texlive.latest.version as Version;
 
 describe('main', () => {
   const inputs = {} as DeepWritable<Inputs>;
@@ -88,7 +81,7 @@ describe('main', () => {
 
   it('adds TeX Live to path after installation', async () => {
     await expect(action.main()).toResolve();
-    expect(Path.prototype.add).toHaveBeenCalledAfter(
+    expect(tlmgr.path.add).toHaveBeenCalledAfter(
       jest.mocked<(_: any) => unknown>(installTL),
     );
   });
@@ -98,12 +91,12 @@ describe('main', () => {
     async (...kind) => {
       setCacheType(kind);
       await expect(action.main()).toResolve();
-      expect(Path.prototype.add).not.toHaveBeenCalledBefore(
+      expect(tlmgr.path.add).not.toHaveBeenCalledBefore(
         jest.mocked<(...args: Array<any>) => unknown>(
           CacheClient.prototype.restore,
         ),
       );
-      expect(Path.prototype.add).toHaveBeenCalled();
+      expect(tlmgr.path.add).toHaveBeenCalled();
     },
   );
 
@@ -112,7 +105,7 @@ describe('main', () => {
     async (input) => {
       inputs.updateAllPackages = input;
       await expect(action.main()).toResolve();
-      expect(Tlmgr.prototype.update).not.toHaveBeenCalled();
+      expect(tlmgr.update).not.toHaveBeenCalled();
     },
   );
 
@@ -121,8 +114,8 @@ describe('main', () => {
     async (...kind) => {
       setCacheType(kind);
       await expect(action.main()).toResolve();
-      expect(Tlmgr.prototype.update).toHaveBeenCalledOnce();
-      expect(Tlmgr.prototype.update).toHaveBeenCalledWith([], { self: true });
+      expect(tlmgr.update).toHaveBeenCalledOnce();
+      expect(tlmgr.update).toHaveBeenCalledWith({ self: true });
     },
   );
 
@@ -132,8 +125,8 @@ describe('main', () => {
       setCacheType(kind);
       inputs.updateAllPackages = true;
       await expect(action.main()).toResolve();
-      expect(Tlmgr.prototype.update).toHaveBeenCalledTimes(2);
-      expect(Tlmgr.prototype.update).toHaveBeenCalledWith([], {
+      expect(tlmgr.update).toHaveBeenCalledTimes(2);
+      expect(tlmgr.update).toHaveBeenCalledWith({
         all: true,
         reinstallForciblyRemoved: true,
       });
@@ -147,8 +140,7 @@ describe('main', () => {
       inputs.updateAllPackages = true;
       inputs.version = '2020';
       await expect(action.main()).toResolve();
-      expect(Tlmgr.prototype.update).toHaveBeenCalledWith(
-        [],
+      expect(tlmgr.update).toHaveBeenCalledWith(
         expect.objectContaining({ self: true }),
       );
     },
@@ -161,8 +153,7 @@ describe('main', () => {
       inputs.updateAllPackages = true;
       inputs.version = '2020';
       await expect(action.main()).toResolve();
-      expect(Tlmgr.prototype.update).not.toHaveBeenCalledWith(
-        [],
+      expect(tlmgr.update).not.toHaveBeenCalledWith(
         expect.objectContaining({ all: true }),
       );
     },
@@ -170,7 +161,7 @@ describe('main', () => {
 
   it('does nothing about TEXMF for new installation', async () => {
     await expect(action.main()).toResolve();
-    expect(Conf.prototype.texmf).not.toHaveBeenCalled();
+    expect(tlmgr.conf.texmf).not.toHaveBeenCalled();
   });
 
   it.each(cacheTypes)(
@@ -178,8 +169,8 @@ describe('main', () => {
     async (...kind) => {
       setCacheType(kind);
       await expect(action.main()).toResolve();
-      expect(Conf.prototype.texmf).not.toHaveBeenCalledBefore(
-        jest.mocked(Path.prototype.add),
+      expect(tlmgr.conf.texmf).not.toHaveBeenCalledBefore(
+        jest.mocked(tlmgr.path.add),
       );
     },
   );
@@ -191,12 +182,12 @@ describe('main', () => {
       jest.mocked(Profile).mockReturnValueOnce(
         { TEXMFHOME: '<new>' } as Profile,
       );
-      // eslint-disable-next-line jest/unbound-method
-      const tlmgr = jest.mocked<any>(Conf.prototype.texmf);
-      tlmgr.mockResolvedValue('<old>');
+      jest.mocked(tlmgr.conf.texmf).mockResolvedValue(
+        '<old>' as unknown as void,
+      );
       await expect(action.main()).toResolve();
-      expect(tlmgr).toHaveBeenCalledWith('TEXMFHOME', '<new>');
-      tlmgr.mockReset();
+      expect(tlmgr.conf.texmf).toHaveBeenCalledWith('TEXMFHOME', '<new>');
+      jest.mocked(tlmgr.conf.texmf).mockReset();
     },
   );
 
@@ -207,35 +198,38 @@ describe('main', () => {
       jest.mocked(Profile).mockReturnValueOnce(
         { TEXMFHOME: '<old>' } as Profile,
       );
-      // eslint-disable-next-line jest/unbound-method
-      const tlmgr = jest.mocked<any>(Conf.prototype.texmf);
-      tlmgr.mockResolvedValue('<old>');
+      jest.mocked(tlmgr.conf.texmf).mockResolvedValue(
+        '<old>' as unknown as void,
+      );
       await expect(action.main()).toResolve();
-      expect(tlmgr).not.toHaveBeenCalledWith('TEXMFHOME', expect.anything());
-      tlmgr.mockReset();
+      expect(tlmgr.conf.texmf).not.toHaveBeenCalledWith(
+        'TEXMFHOME',
+        expect.anything(),
+      );
+      jest.mocked(tlmgr.conf.texmf).mockReset();
     },
   );
 
   it('does not setup tlcontrib by default', async () => {
     await expect(action.main()).toResolve();
-    expect(Repository.prototype.add).not.toHaveBeenCalled();
-    expect(Pinning.prototype.add).not.toHaveBeenCalled();
+    expect(tlmgr.repository.add).not.toHaveBeenCalled();
+    expect(tlmgr.pinning.add).not.toHaveBeenCalled();
   });
 
   it('sets up tlcontrib if input tlcontrib is true', async () => {
     inputs.tlcontrib = true;
     await expect(action.main()).toResolve();
-    expect(Repository.prototype.add).not.toHaveBeenCalledBefore(
-      jest.mocked(Path.prototype.add),
+    expect(tlmgr.repository.add).not.toHaveBeenCalledBefore(
+      jest.mocked(tlmgr.path.add),
     );
-    expect(Repository.prototype.add).toHaveBeenCalledWith(
+    expect(tlmgr.repository.add).toHaveBeenCalledWith(
       expect.anything(),
       'tlcontrib',
     );
-    expect(Pinning.prototype.add).not.toHaveBeenCalledBefore(
-      jest.mocked<(x: any) => unknown>(Repository.prototype.add),
+    expect(tlmgr.pinning.add).not.toHaveBeenCalledBefore(
+      jest.mocked<(x: any) => unknown>(tlmgr.repository.add),
     );
-    expect(Pinning.prototype.add).toHaveBeenCalledWith('tlcontrib', '*');
+    expect(tlmgr.pinning.add).toHaveBeenCalledWith('tlcontrib', '*');
   });
 
   describe.each([[true], [false]])('%p', (force) => {
@@ -245,7 +239,7 @@ describe('main', () => {
 
     it('does not install any packages by default', async () => {
       await expect(action.main()).toResolve();
-      expect(Tlmgr.prototype.install).not.toHaveBeenCalled();
+      expect(tlmgr.install).not.toHaveBeenCalled();
     });
 
     it.each([cacheTypes[0], cacheTypes[1]] as const)(
@@ -254,7 +248,7 @@ describe('main', () => {
         setCacheType(kind);
         inputs.packages = new Set(['foo', 'bar', 'baz']);
         await expect(action.main()).toResolve();
-        expect(Tlmgr.prototype.install).not.toHaveBeenCalled();
+        expect(tlmgr.install).not.toHaveBeenCalled();
       },
     );
 
@@ -264,7 +258,7 @@ describe('main', () => {
         setCacheType(kind);
         inputs.packages = new Set(['foo', 'bar', 'baz']);
         await expect(action.main()).toResolve();
-        expect(Tlmgr.prototype.install).toHaveBeenCalled();
+        expect(tlmgr.install).toHaveBeenCalled();
       },
     );
   });

@@ -2,13 +2,9 @@ import os from 'node:os';
 import process from 'node:process';
 
 import { Profile } from '#/texlive/profile';
-import type { Version } from '#/texlive/version';
-
-import { config } from '##/package.json';
 
 jest.unmock('#/texlive/profile');
 
-const LATEST_VERSION = config.texlive.latest.version as Version;
 const defaultOpts = { version: LATEST_VERSION, prefix: '<prefix>' };
 
 beforeEach(() => {

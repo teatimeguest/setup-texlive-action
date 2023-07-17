@@ -4,14 +4,9 @@ import * as tool from '@actions/tool-cache';
 
 import * as log from '#/log';
 import { download, restore } from '#/texlive/install-tl';
-import type { Version } from '#/texlive/version';
 import * as util from '#/util';
 
-import { config } from '##/package.json';
-
 jest.unmock('#/texlive/install-tl');
-
-const LATEST_VERSION = config.texlive.latest.version as Version;
 
 const fail = (): any => {
   throw new Error();
