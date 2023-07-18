@@ -6,7 +6,7 @@ import * as tlpkg from '#/texlive/tlpkg';
 
 export async function install(packages: Iterable<string>): Promise<void> {
   try {
-    await tryToInstall(packages);
+    await tryToInstall(new Set(packages));
   } catch (error) {
     if (!(error instanceof PackageNotFound)) {
       throw error;
@@ -37,17 +37,23 @@ export async function install(packages: Iterable<string>): Promise<void> {
   }
 }
 
-async function tryToInstall(packages: Iterable<string>): Promise<void> {
-  const args = new Set<string>(packages);
-  if (args.size > 0) {
+async function tryToInstall(packages: ReadonlySet<string>): Promise<void> {
+  if (packages.size > 0) {
     const internals = use();
     const action = 'install';
     const result = await internals.exec(action, packages, {
       ignoreReturnCode: true,
     });
     tlpkg.PackageChecksumMismatch.check(result);
-    PackageNotFound.check(result, { action });
-    result.check();
+    // In versions prior to 2015, missing packages did not cause an error,
+    // so a non-zero status code indicates a more severe error has occurred.
+    if (internals.version < '2015') {
+      result.check();
+    }
+    PackageNotFound.check(result, { action, version: internals.version });
+    if (internals.version >= '2015') {
+      result.check();
+    }
   }
 }
 

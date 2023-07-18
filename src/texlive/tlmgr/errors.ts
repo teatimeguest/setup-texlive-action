@@ -1,5 +1,8 @@
+import { Range } from 'semver';
+import type { MarkRequired } from 'ts-essentials';
+
 import type { TlmgrAction } from '#/texlive/tlmgr/action';
-import type { Version } from '#/texlive/version';
+import { Version } from '#/texlive/version';
 import type { ExecOutput } from '#/util';
 import { Exception } from '#/util/decorators';
 
@@ -9,7 +12,6 @@ export interface TlmgrErrorOptions extends ErrorOptions {
   version?: Version;
 }
 
-@Exception
 export class TlmgrError extends Error implements TlmgrErrorOptions {
   readonly action: TlmgrAction;
   declare readonly subaction?: string;
@@ -36,21 +38,36 @@ export class PackageNotFound extends TlmgrError {
     super('Some packages not found in the repository', options);
   }
 
-  private static readonly RE = /^tlmgr install: package (\S+) not present/gmu;
+  private static readonly PATTERNS = [
+    {
+      versions: new Range('2008'),
+      re: /: Cannot find package (.+)$/gmu,
+    },
+    {
+      versions: new Range('>=2009 <2015'),
+      re: /^package (.+) not present in package repository/gmu,
+    },
+    {
+      versions: new Range('>=2015'),
+      re: /^tlmgr install: package (\S+) not present/gmu,
+    },
+  ] as const;
 
   static check(
     output: Readonly<ExecOutput>,
-    options: Readonly<TlmgrErrorOptions>,
+    options: Readonly<MarkRequired<TlmgrErrorOptions, 'version'>>,
   ): void {
-    if (output.exitCode !== 0) {
-      const packages = Array.from(
-        output.stderr.matchAll(this.RE),
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ([, found]) => found!,
-      );
-      if (packages.length > 0) {
-        throw new this(packages, options);
-      }
+    const pattern = this.PATTERNS.find(({ versions }) => {
+      return Version.satisfies(options.version, versions);
+    });
+    /* eslint-disable @typescript-eslint/no-non-null-assertion */
+    const packages = Array.from(
+      output.stderr.matchAll(pattern!.re),
+      ([, found]) => found!,
+    );
+    /* eslint-enable */
+    if (packages.length > 0) {
+      throw new this(packages, options);
     }
   }
 }
