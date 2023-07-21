@@ -41,6 +41,8 @@ Linux, Windows, and macOS are supported.
 ```yaml
 - name: Setup TeX Live
   uses: teatimeguest/setup-texlive-action@v2
+  with:
+    packages: scheme-basic
 
 - name: Check `tlmgr` version
   run: tlmgr --version
@@ -81,7 +83,8 @@ The action will install it by using [historic archive][historic].
 Supported versions are `2008` to `2023` for Linux and Windows,
 and `2013` to `2023` for macOS.
 
-> **Note**:&ensp;Versions `2008`–`2012` do not work on `macos-latest`
+> [!NOTE]\
+> Versions `2008`–`2012` do not work on `macos-latest`
 > because the `kpsewhich` for those versions is a 32-bit executable
 > and crashes with _<q>Bad CPU type in executable.</q>_
 
@@ -101,7 +104,8 @@ If you want to disable caching, you can use `cache` input:
 The `packages` input will affect which cache will be restored
 because its hash will be used as part of the cache key.
 
-> **Note**:&ensp;If you have problems due to a corrupt cache entry,
+> [!NOTE]\
+> If you have problems due to a corrupt cache entry,
 > you can delete it from the [web interface][deleting-cache-entries],
 > [GitHub CLI][gh-actions-cache], or [REST API][cache-api].
 
@@ -138,7 +142,8 @@ The action reads the following environment variable:
 Setting this to anything other than `0`, the action will use
 [a unique cache key each time][update-cache] to keep the cache up-to-date.
 
-> **Warning**:&ensp;Enabling this will consume more [cache space][cache-limits].
+> [!WARNING]\
+> Enabling this will consume more [cache space][cache-limits].
 
 </div><strong>Default:&ensp;</strong><var>unset</var></td></tr>
 </table>
