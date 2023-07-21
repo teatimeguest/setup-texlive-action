@@ -59,12 +59,18 @@ describe('isLatest', () => {
 });
 
 describe('validateReleaseYear', () => {
-  it.each(['2008', '2013', '2022'] as const)('accepts %p', async (spec) => {
-    await expect(validateReleaseYear(spec)).toResolve();
+  describe.each(['linux', 'win32'] as const)('on %s', (os) => {
+    it.each(['2013', '2017', '2022'] as const)('accepts %p', async (spec) => {
+      jest.mocked(platform).mockReturnValueOnce(os);
+      await expect(validateReleaseYear(spec)).toResolve();
+    });
   });
 
-  it.each(['2029'] as const)('rejects %p', async (spec) => {
-    await expect(validateReleaseYear(spec)).toReject();
+  describe.each(['darwin', 'linux', 'win32'] as const)('on %s', (os) => {
+    it.each(['2029'] as const)('rejects %p', async (spec) => {
+      jest.mocked(platform).mockReturnValueOnce(os);
+      await expect(validateReleaseYear(spec)).toReject();
+    });
   });
 
   it.each(['2008', '2010', '2012'] as const)(

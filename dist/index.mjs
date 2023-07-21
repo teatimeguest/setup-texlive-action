@@ -63458,7 +63458,7 @@ async function validateReleaseYear(version4) {
   if (version4 < "2008") {
     throw new RangeError("Versions prior to 2008 are not supported");
   }
-  if (platform5() === "darwin" && version4 <= "2013") {
+  if (platform5() === "darwin" && version4 < "2013") {
     throw new RangeError(
       "Versions prior to 2013 does not work on 64-bit macOS"
     );

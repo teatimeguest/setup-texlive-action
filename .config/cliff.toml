@@ -51,6 +51,7 @@ commit_preprocessors = [
 ]
 commit_parsers = [
   { message = "^feat", group = "Features", default_scope = "" },
+  { message = "^fix\\(unreleased\\)", skip = true },
   { message = "^fix", group = "Bug Fixes", default_scope = "" },
   { message = "^perf", group = "Performance Improvements", default_scope = "" },
   { message = "^build\\(deps\\)", group = "Dependency Updates", scope = "" },
