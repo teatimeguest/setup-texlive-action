@@ -7,6 +7,7 @@ export default {
   moduleFileExtensions: ['js', 'ts'],
   moduleNameMapper: {
     '^#/(.*)': '<rootDir>/src/$1',
+    '^class-transformer/esm5/(.*)': 'class-transformer/cjs/$1',
   },
   resetModules: true,
   rootDir: env.npm_config_local_prefix,
@@ -22,10 +23,8 @@ export default {
     '<rootDir>/tests/__tests__/**/*.test.ts',
   ],
   transform: {
-    '.+\\.ts$': [
-      'ts-jest',
-      { tsconfig: '<rootDir>/tests/tsconfig.json' },
-    ],
+    '/action/index\\.ts$': '##/tests/esbuild-transformer.mjs',
+    '.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tests/tsconfig.json' }],
   },
   verbose: false,
 };

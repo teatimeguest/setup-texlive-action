@@ -7,6 +7,7 @@ function getPath() {
 
 module.exports = {
   basename: jest.fn((...args) => getPath().basename(...args)),
+  format: jest.fn((...args) => getPath().format(...args)),
   join: jest.fn((...args) => getPath().join(...args)),
   normalize: jest.fn((...args) => getPath().normalize(...args)),
   posix,

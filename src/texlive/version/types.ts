@@ -7,8 +7,8 @@ export type Version =
 export namespace Version {
   const RE = /^199[6-9]|20[0-2]\d$/u;
 
-  export function isVersion(spec: string): spec is Version {
-    return RE.test(spec);
+  export function isVersion(spec: unknown): spec is Version {
+    return typeof spec === 'string' && RE.test(spec);
   }
 
   export function parse(spec: string): Version {

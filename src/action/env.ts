@@ -3,7 +3,7 @@ import path from 'node:path';
 import { env } from 'node:process';
 
 import * as log from '#/log';
-import { SYSTEM_TREES } from '#/tex/texmf';
+import { Texmf } from '#/tex/texmf';
 import type { Version } from '#/texlive/version';
 
 export function init(version: Version): void {
@@ -14,7 +14,7 @@ export function init(version: Version): void {
   // Use RUNNER_TEMP as a temporary directory during setup.
   env['TMPDIR'] = env.RUNNER_TEMP;
 
-  for (const tree of SYSTEM_TREES) {
+  for (const tree of Texmf.SYSTEM_TREES) {
     const key = `TEXLIVE_INSTALL_${tree}`;
     if (tree !== 'TEXMFLOCAL' && key in env) {
       log.warn(`\`${key}\` is set, but ignored`);

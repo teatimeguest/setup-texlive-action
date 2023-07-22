@@ -34,7 +34,7 @@ export namespace Inputs {
       packages: await loadPackageList(),
       /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         -- `TEXLIVE_INSTALL_PREFIX` should be set by `initEnv`. */
-      prefix: getInput('prefix', { default: env['TEXLIVE_INSTALL_PREFIX']! }),
+      prefix: getInput('prefix', { default: env.TEXLIVE_INSTALL_PREFIX! }),
       texdir: getInput('texdir'),
       tlcontrib: getInput('tlcontrib', { type: Boolean }),
       updateAllPackages: getInput('update-all-packages', { type: Boolean }),

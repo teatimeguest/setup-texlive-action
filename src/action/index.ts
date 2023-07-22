@@ -6,10 +6,10 @@ import { CacheClient, save as saveCache } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
 import type { Outputs } from '#/action/outputs';
 import * as log from '#/log';
-import { USER_TREES } from '#/tex/texmf';
+import { Texmf } from '#/tex/texmf';
 import {
   Profile,
-  RepositoryVersionConflicts,
+  TLVersionOutdated,
   type Tlmgr,
   type Version,
   installTL,
@@ -41,7 +41,7 @@ export async function run(): Promise<void> {
 
 export async function main(): Promise<Outputs> {
   const inputs = await Inputs.load();
-  const profile = new Profile(inputs);
+  await using profile = new Profile(inputs.version, inputs);
   const cache = new CacheClient({
     TEXDIR: profile.TEXDIR,
     packages: inputs.packages,
@@ -76,7 +76,7 @@ export async function main(): Promise<Outputs> {
       try {
         await tlmgr.update({ self: true });
       } catch (error) {
-        if (error instanceof RepositoryVersionConflicts) {
+        if (error instanceof TLVersionOutdated) {
           await updateRepository(tlmgr, inputs.version);
           cache.update();
         } else {
@@ -131,8 +131,12 @@ async function updateRepository(tlmgr: Tlmgr, version: Version): Promise<void> {
 }
 
 async function adjustTexmf(tlmgr: Tlmgr, profile: Profile): Promise<void> {
+  const keys = [
+    'TEXMFLOCAL',
+    ...Texmf.USER_TREES,
+  ] as const satisfies ReadonlyArray<keyof Texmf>;
   const entries = await Promise
-    .all((['TEXMFLOCAL', ...USER_TREES] as const).map(async (key) => {
+    .all(keys.map(async (key) => {
       const value = profile[key];
       const old = await tlmgr.conf.texmf(key);
       return old === value ? [] : [[key, value]] as const;

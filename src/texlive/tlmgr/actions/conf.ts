@@ -1,12 +1,15 @@
 import { exportVariable } from '@actions/core';
 
 import * as log from '#/log';
-import { type UserTrees, kpse } from '#/tex';
+import { type Texmf, kpse } from '#/tex';
 import { use } from '#/texlive/tlmgr/internals';
 import * as tlpkg from '#/texlive/tlpkg';
 import { exec } from '#/util';
 
-export type KpseVar = keyof UserTrees | 'TEXMFLOCAL';
+export type KpseVar = Exclude<
+  keyof Texmf,
+  'TEXDIR' | 'TEXMFSYSCONFIG' | 'TEXMFSYSVAR'
+>;
 
 export function texmf(key: KpseVar): Promise<string | undefined>;
 export function texmf(key: KpseVar, value: string): Promise<void>;

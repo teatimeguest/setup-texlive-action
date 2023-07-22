@@ -3,11 +3,16 @@ import { arch, platform } from 'node:os';
 import { env } from 'node:process';
 
 import { getState, saveState } from '@actions/core';
-import { Expose, plainToInstance } from 'class-transformer';
+import {
+  Exclude,
+  Expose,
+  instanceToPlain,
+  plainToInstance,
+} from 'class-transformer';
 
 import * as log from '#/log';
 import type { Version } from '#/texlive';
-import { Serializable, restoreCache, saveCache } from '#/util';
+import { restoreCache, saveCache } from '#/util';
 
 export interface CacheInfo {
   hit: boolean;
@@ -86,7 +91,8 @@ export async function save(): Promise<void> {
   }
 }
 
-class CacheState extends Serializable {
+@Exclude()
+class CacheState {
   static readonly STATE_NAME = 'CACHE';
 
   @Expose()
@@ -102,7 +108,7 @@ class CacheState extends Serializable {
   }
 
   save(): void {
-    saveState(CacheState.STATE_NAME, JSON.stringify(this));
+    saveState(CacheState.STATE_NAME, JSON.stringify(instanceToPlain(this)));
   }
 }
 

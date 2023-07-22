@@ -1,4 +1,4 @@
-import { RepositoryVersionConflicts, TlmgrError } from '#/texlive/tlmgr/errors';
+import { TLVersionOutdated } from '#/texlive/tlmgr/errors';
 import { use } from '#/texlive/tlmgr/internals';
 import { ExecError, processArgsAndOptions } from '#/util/exec';
 
@@ -41,12 +41,12 @@ export async function update(
     await internals.exec(action, [...args]);
   } catch (cause) {
     if (cause instanceof ExecError) {
-      RepositoryVersionConflicts.check(cause, {
+      TLVersionOutdated.check(cause, {
         action,
         cause,
         version: internals.version,
       });
     }
-    throw new TlmgrError('Failed to update', { action, cause });
+    throw cause;
   }
 }

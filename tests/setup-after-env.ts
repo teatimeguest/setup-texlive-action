@@ -19,7 +19,7 @@ jest.mock('#/action/env');
 jest.mock('#/action/inputs');
 jest.mock('#/action/outputs');
 jest.mock('#/log');
-jest.mock('#/texlive/install-tl');
+jest.mock('#/texlive/install-tl/cli');
 jest.mock('#/texlive/tlmgr/actions/install');
 jest.mock('#/texlive/tlmgr/actions/path');
 jest.mock('#/texlive/tlmgr/actions/pinning');
@@ -38,7 +38,7 @@ for (
     '#/ctan/api',
     '#/ctan/mirrors',
     '#/tex/kpse',
-    '#/texlive/profile',
+    '#/texlive/install-tl/profile',
     '#/texlive/tlmgr/actions/conf',
     '#/texlive/tlmgr/actions/list',
     '#/texlive/tlmgr/internals',

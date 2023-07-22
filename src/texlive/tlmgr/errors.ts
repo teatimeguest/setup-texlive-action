@@ -1,30 +1,25 @@
 import { Range } from 'semver';
-import type { MarkRequired } from 'ts-essentials';
 
+import { TLError, type TLErrorOptions } from '#/texlive/errors';
 import type { TlmgrAction } from '#/texlive/tlmgr/action';
 import { Version } from '#/texlive/version';
-import type { ExecOutput } from '#/util';
-import { Exception } from '#/util/decorators';
+import { Exception, type ExecOutput, type MarkNonNullable } from '#/util';
 
-export interface TlmgrErrorOptions extends ErrorOptions {
+export interface TlmgrErrorOptions extends TLErrorOptions {
   action: TlmgrAction;
-  subaction?: string;
-  version?: Version;
+  subaction?: string | undefined;
 }
 
-export class TlmgrError extends Error implements TlmgrErrorOptions {
+@Exception
+export class TlmgrError extends TLError implements TlmgrErrorOptions {
   readonly action: TlmgrAction;
   declare readonly subaction?: string;
-  declare readonly version?: Version;
 
   constructor(message: string, options: Readonly<TlmgrErrorOptions>) {
     super(message, options);
     this.action = options.action;
     if (options.subaction !== undefined) {
       this.subaction = options.subaction;
-    }
-    if (options.version !== undefined) {
-      this.version = options.version;
     }
   }
 }
@@ -55,34 +50,30 @@ export class PackageNotFound extends TlmgrError {
 
   static check(
     output: Readonly<ExecOutput>,
-    options: Readonly<MarkRequired<TlmgrErrorOptions, 'version'>>,
+    options: Readonly<MarkNonNullable<TlmgrErrorOptions, 'version'>>,
   ): void {
-    const pattern = this.PATTERNS.find(({ versions }) => {
-      return Version.satisfies(options.version, versions);
-    });
-    /* eslint-disable @typescript-eslint/no-non-null-assertion */
-    const packages = Array.from(
-      output.stderr.matchAll(pattern!.re),
-      ([, found]) => found!,
-    );
-    /* eslint-enable */
-    if (packages.length > 0) {
-      throw new this(packages, options);
+    // Missing packages is not an error in versions prior to 2015.
+    if (options.version < '2015' || output.exitCode !== 0) {
+      const pattern = this.PATTERNS.find(({ versions }) => {
+        return Version.satisfies(options.version, versions);
+      });
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
+      const packages = Array.from(
+        output.stderr.matchAll(pattern!.re),
+        ([, found]) => found!,
+      );
+      /* eslint-enable */
+      if (packages.length > 0) {
+        throw new this(packages, options);
+      }
     }
   }
 }
 
 @Exception
-export class RepositoryVersionConflicts extends TlmgrError {
-  declare local?: Version;
-  repository: string | undefined;
-
-  constructor(options: Readonly<TlmgrErrorOptions>) {
-    const { version, ...rest } = options;
-    super('Conflicting local and remote TeX Live versions', rest);
-    if (version !== undefined) {
-      this.local = version;
-    }
+export class TLVersionOutdated extends TlmgrError {
+  private constructor(options: Readonly<TlmgrErrorOptions>) {
+    super('The TeX Live version is outdated', options);
   }
 
   private static readonly RE =
@@ -93,11 +84,9 @@ export class RepositoryVersionConflicts extends TlmgrError {
     options: Readonly<TlmgrErrorOptions>,
   ): void {
     if (output.exitCode !== 0) {
-      const found = this.RE.exec(output.stderr);
-      if (found !== null) {
-        const error = new this(options);
-        error.repository = found.groups?.['remote'];
-        throw error;
+      const remoteVersion = this.RE.exec(output.stderr)?.groups?.['remote'];
+      if (remoteVersion !== undefined) {
+        throw new this({ ...options, remoteVersion });
       }
     }
   }

@@ -47,7 +47,7 @@ const PATCHES: ReadonlyArray<Patch> = [{
 }];
 
 export async function patch(options: {
-  readonly TEXDIR: string;
+  readonly TEXMFROOT: string;
   readonly version: Version;
 }): Promise<void> {
   const patches = PATCHES.filter((p) => {
@@ -73,7 +73,7 @@ export async function patch(options: {
           '-',
         ], {
           stdin: changed,
-          cwd: options.TEXDIR,
+          cwd: options.TEXMFROOT,
           silent: true,
           ignoreReturnCode: true,
         });
@@ -90,7 +90,7 @@ export async function patch(options: {
     };
 
     const apply = async (p: Patch): Promise<ReadonlyArray<string>> => {
-      const target = path.join(options.TEXDIR, p.file);
+      const target = path.join(options.TEXMFROOT, p.file);
       const content = p.from.reduce<string>(
         (s, from, i) => s.replace(from, p.to[i] ?? ''),
         await readFile(target, 'utf8'),

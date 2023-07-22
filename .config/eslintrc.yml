@@ -87,7 +87,7 @@ overrides:
             - parameterProperty
             - typeParameter
           format: null
-          filter: '^(?:_$|RUNNER_TEMP$|NOPERLDOC$|TEX|TL_|instopt_|option_|tlpdbopt_|selected_scheme$)'
+          filter: '^(?:_$|RUNNER_TEMP$|NOPERLDOC$|TEX|TL_)'
         - selector: variable
           modifiers: [const]
           format: [camelCase, PascalCase, UPPER_CASE]

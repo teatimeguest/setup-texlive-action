@@ -44,11 +44,15 @@ export function tmpdir(): string {
   return env.RUNNER_TEMP;
 }
 
-export async function* mkdtemp(): AsyncGenerator<string, void, void> {
-  const tmp = await fs.mkdtemp(path.join(tmpdir(), 'setup-texlive-'));
-  try {
-    yield tmp;
-  } finally {
-    await rmRF(tmp);
-  }
+export interface Tmpdir extends AsyncDisposable {
+  readonly path: string;
+}
+
+export async function mkdtemp(): Promise<Tmpdir> {
+  return {
+    path: await fs.mkdtemp(path.join(tmpdir(), 'setup-texlive-')),
+    async [Symbol.asyncDispose](this: Tmpdir): Promise<void> {
+      await rmRF(this.path);
+    },
+  };
 }

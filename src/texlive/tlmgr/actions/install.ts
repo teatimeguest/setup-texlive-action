@@ -45,7 +45,7 @@ async function tryToInstall(packages: ReadonlySet<string>): Promise<void> {
       ignoreReturnCode: true,
     });
     tlpkg.PackageChecksumMismatch.check(result);
-    // In versions prior to 2015, missing packages did not cause an error,
+    // Missing packages is not an error in versions prior to 2015,
     // so a non-zero status code indicates a more severe error has occurred.
     if (internals.version < '2015') {
       result.check();
