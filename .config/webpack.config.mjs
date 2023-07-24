@@ -4,7 +4,7 @@ import { LicenseWebpackPlugin } from 'license-webpack-plugin';
 import nunjucks from 'nunjucks';
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin';
 
-import { transformOptions } from '##/.config/esbuild.config.mjs';
+import esbuildConfig, { transformOptions } from '##/.config/esbuild.config.mjs';
 import nunjucksConfig from '##/.config/nunjucks/config.json' assert {
   type: 'json',
 };
@@ -61,8 +61,6 @@ export class PluginLicenses extends LicenseWebpackPlugin {
   }
 }
 
-const resolvedExtensions = ['.ts', '.js'];
-
 const allowList = new Set([
   '0BSD',
   'Apache-2.0',
@@ -78,14 +76,16 @@ export default {
     path: path.resolve(path.dirname(packageJson.main)),
   },
   resolve: {
-    extensions: resolvedExtensions,
+    extensions: esbuildConfig.resolveExtensions,
     plugins: [
-      new TsconfigPathsPlugin({ extensions: resolvedExtensions }),
+      new TsconfigPathsPlugin({
+        extensions: esbuildConfig.resolveExtensions,
+      }),
     ],
   },
   mode: 'development',
-  target: 'node',
-  externals: 'whatwg-url',
+  target: transformOptions.target,
+  externals: Object.keys(esbuildConfig.alias),
   module: {
     rules: [
       {

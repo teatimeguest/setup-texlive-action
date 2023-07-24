@@ -4,7 +4,6 @@ export const transformOptions = {
   target: 'node16',
   format: 'esm',
   platform: 'node',
-  keepNames: true,
   legalComments: 'none',
   logLevel: 'info',
 };
@@ -21,5 +20,11 @@ export default {
       const require = createRequire(import.meta.url);
     `,
   },
-  alias: { 'whatwg-url': 'node:url' }, // This reduces the script size by 10%.
+  alias: {
+    // See: teatimeguest/setup-texlive-action#255
+    '@azure/abort-controller': '#/shim/abort-controller',
+    // This reduces the script size by 10%.
+    'whatwg-url': 'node:url',
+  },
+  resolveExtensions: ['.ts', '.mjs', '.js', '.json'],
 };

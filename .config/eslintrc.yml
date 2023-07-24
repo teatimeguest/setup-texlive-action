@@ -85,12 +85,12 @@ overrides:
           filter: '^(?:_$|RUNNER_TEMP$|NOPERLDOC$|TEX|TL_|instopt_|option_|tlpdbopt_|selected_scheme$)'
         - selector: variable
           modifiers: [const]
-          format: [camelCase, UPPER_CASE]
+          format: [camelCase, PascalCase, UPPER_CASE]
         - selector: memberLike
           modifiers: [readonly]
-          format: [camelCase, UPPER_CASE]
+          format: [camelCase, PascalCase, UPPER_CASE]
         - selector: accessor
-          format: [camelCase, UPPER_CASE]
+          format: [camelCase, PascalCase, UPPER_CASE]
         - selector: typeLike
           format: [PascalCase]
       '@typescript-eslint/no-confusing-void-expression': error
