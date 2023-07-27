@@ -6,6 +6,8 @@ extends:
   - plugin:@typescript-eslint/recommended-requiring-type-checking
   - plugin:node/recommended
   - prettier
+parserOptions:
+  warnOnUnsupportedTypeScriptVersion: false
 rules:
   '@typescript-eslint/no-inferrable-types': off
   '@typescript-eslint/require-await': off
@@ -13,7 +15,10 @@ rules:
   node/no-missing-import: off
   node/no-unpublished-import: off
   node/no-unsupported-features/es-syntax: off
-ignorePatterns: /src/index.ts
+ignorePatterns:
+  - /src/index.ts
+  - /src/types.d.ts
+  - /tests/setup.ts
 reportUnusedDisableDirectives: true
 overrides:
   - files: "./src/**/*.ts"
@@ -167,10 +172,7 @@ overrides:
       unicorn/prefer-ternary: off
       unicorn/prevent-abbreviations: off
       unicorn/switch-case-braces: off
-  - files: "./src/types.d.ts"
-    rules:
-      '@typescript-eslint/no-unused-vars': off
-  - files: "./tests/__tests__/**/*.ts"
+  - files: "./tests/**/*.ts"
     parserOptions:
       project: ./tests/tsconfig.json
     extends:

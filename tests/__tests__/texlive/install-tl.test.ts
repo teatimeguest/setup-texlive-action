@@ -35,7 +35,7 @@ describe('restore', () => {
 describe('download', () => {
   const options = {
     version: LATEST_VERSION,
-    repository: new URL('https://example.com/'),
+    repository: new URL(MOCK_URL),
   };
   it('downloads installer', async () => {
     jest.mocked(os.platform).mockReturnValue('linux');

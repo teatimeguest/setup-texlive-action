@@ -25,5 +25,6 @@
     "lib": ["es2021", "es2022.error"],
     "target": "esnext"
   },
+  "files": ["./src/types.d.ts"],
   "include": ["./src/**/*.ts"]
 }

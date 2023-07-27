@@ -16,7 +16,7 @@
     "fmt-check:dprint": "npm run dprint check",
     "fmt-check:ec": "git ls-files -z | xargs -0 ec",
     "link-check": "markdown-link-check README.md",
-    "lint": "eslint -c .config/eslintrc.yml --ext .ts src tests/__tests__",
+    "lint": "eslint -c .config/eslintrc.yml --ext .ts src tests",
     "test": "jest -c tests/jest.config.mjs --coverage",
     "prepack": "run-s clean 'build:*'",
     "preversion": "npm run prepack && markdown-link-check dist/NOTICE.md",

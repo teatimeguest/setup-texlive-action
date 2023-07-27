@@ -7,10 +7,6 @@ jest.unmock('#/texlive/profile');
 
 const defaultOpts = { version: LATEST_VERSION, prefix: '<prefix>' };
 
-beforeEach(() => {
-  process.env = {} as NodeJS.ProcessEnv;
-});
-
 describe('selected_scheme', () => {
   it('uses scheme-infraonly by default', () => {
     const profile = new Profile(defaultOpts);

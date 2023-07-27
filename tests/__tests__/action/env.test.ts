@@ -3,11 +3,6 @@ import process from 'node:process';
 import { init } from '#/action/env';
 import * as log from '#/log';
 
-jest.mock('node:process', () => globalThis.process);
-
-beforeEach(() => {
-  process.env = {} as NodeJS.ProcessEnv;
-});
 jest.unmock('#/action/env');
 
 describe('init', () => {

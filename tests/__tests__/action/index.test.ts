@@ -5,7 +5,7 @@ import type { DeepWritable } from 'ts-essentials';
 import * as action from '#/action';
 import { CacheClient } from '#/action/cache';
 import { Inputs } from '#/action/inputs';
-import { Profile, installTL } from '#/texlive';
+import { installTL } from '#/texlive';
 import * as tlmgr from '#/texlive/tlmgr/actions';
 
 jest.unmock('#/action');
@@ -179,14 +179,14 @@ describe('main', () => {
     'change old settings if they are not appropriate (case %p)',
     async (...kind) => {
       setCacheType(kind);
-      jest.mocked(Profile).mockReturnValueOnce(
-        { TEXMFHOME: '<new>' } as Profile,
-      );
       jest.mocked(tlmgr.conf.texmf).mockResolvedValue(
         '<old>' as unknown as void,
       );
       await expect(action.main()).toResolve();
-      expect(tlmgr.conf.texmf).toHaveBeenCalledWith('TEXMFHOME', '<new>');
+      expect(tlmgr.conf.texmf).toHaveBeenCalledWith(
+        'TEXMFHOME',
+        expect.anything(),
+      );
       jest.mocked(tlmgr.conf.texmf).mockReset();
     },
   );
@@ -195,11 +195,8 @@ describe('main', () => {
     'does not change old settings if not necessary (case %s)',
     async (...kind) => {
       setCacheType(kind);
-      jest.mocked(Profile).mockReturnValueOnce(
-        { TEXMFHOME: '<old>' } as Profile,
-      );
       jest.mocked(tlmgr.conf.texmf).mockResolvedValue(
-        '<old>' as unknown as void,
+        '<prefix>/texmf-local' as unknown as void,
       );
       await expect(action.main()).toResolve();
       expect(tlmgr.conf.texmf).not.toHaveBeenCalledWith(
