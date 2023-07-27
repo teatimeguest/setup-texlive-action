@@ -4,9 +4,10 @@ package-lock.json -diff -merge
 /dist/** -diff -merge linguist-generated
 
 /tests/fixtures/** -text -merge linguist-generated
-*.DEPENDS.txt linguist-language=ignore
+*.DEPENDS.txt linguist-language=ignore !linguist-generated
 *.log linguist-language=shellsession
 *.stderr linguist-language=shellsession
 *.stdout linguist-language=shellsession
 *.tlpdb linguist-language=gitattributes
-release-texlive.txt linguist-vendored
+release-texlive.txt linguist-vendored !linguist-generated
+tl_packages text !merge linguist-language=ignore !linguist-generated

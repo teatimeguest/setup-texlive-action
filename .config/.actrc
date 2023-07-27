@@ -1,6 +1,6 @@
 --workflows .github/workflows/test.yml
---job latest
---matrix os:ubuntu-latest
+--matrix os:ubuntu
 --platform ubuntu-latest=node:16
+--cache-server-path .cache/act
 --pull=false
 --rm

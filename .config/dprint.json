@@ -22,7 +22,7 @@
     "importDeclaration.sortNamedImports": "caseSensitive"
   },
   "includes": [
-    "./{src,tests,.config,scripts}/**/*.{ts,mjs}",
+    "./{.config,scripts,src,tests}/**/*.{ts,cjs,mjs}",
     "**/*.md"
   ],
   "excludes": [

@@ -10,41 +10,83 @@ on:
 permissions:
   contents: read
 jobs:
-  latest:
+  non-latest-runners:
+    if: github.actor != 'nektos/act'
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        runner:
+          - ubuntu-20.04
+          - windows-2019
+          - macos-13
+          - macos-11
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup TeX Live
         uses: ./
         with:
           cache: false
-  historic:
-    if: github.event_name == 'workflow_dispatch'
+      - run: tlmgr version
+  save-cache:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        version:
-          [
-                                                            2008, 2009,
-            2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
-            2020, 2021, 2022
-          ]
-        exclude:
-          - { os: macos-latest, version: 2008 }
-          - { os: macos-latest, version: 2009 }
-          - { os: macos-latest, version: 2010 }
-          - { os: macos-latest, version: 2011 }
-          - { os: macos-latest, version: 2012 }
+        os: [ubuntu, windows, macos]
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup TeX Live
+        uses: ./
+        continue-on-error: true
+  restore-cache:
+    needs: save-cache
+    if: '!cancelled()'
+    strategy:
+      matrix:
+        os: [ubuntu, windows, macos]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup TeX Live
+        id: texlive
+        uses: ./
+      - shell: bash
+        run: |
+          [[ "${CACHE_HIT}" == true ]]
+        env:
+          CACHE_HIT: ${{ fromJSON(steps.texlive.outputs.cache-hit) }}
+  delete-caches:
+    needs: restore-cache
+    if: github.actor != 'nektos/act'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            await require('./tests/delete-caches.cjs')({
+              context,
+              core,
+              github,
+            });
+  install-packages:
+    strategy:
+      matrix:
+        os: [ubuntu, windows, macos]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v3
       - name: Setup TeX Live
         uses: ./
         with:
           cache: false
-          version: ${{ matrix.version }}
+          package-file: tests/fixtures/tl_packages
+          packages: latex-bin
+      - run: latex -version
