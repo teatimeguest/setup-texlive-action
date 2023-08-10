@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { arch, platform } from 'node:os';
 import { env } from 'node:process';
 
+import * as cache from '@actions/cache';
 import { getState, saveState } from '@actions/core';
 import {
   Exclude,
@@ -10,13 +11,12 @@ import {
   plainToInstance,
 } from 'class-transformer';
 
+import { ID } from '#/action/id';
 import * as log from '#/log';
 import type { Version } from '#/texlive';
-import { restoreCache, saveCache } from '#/util';
 
 export interface CacheInfo {
   hit: boolean;
-  full: boolean;
   restored: boolean;
 }
 
@@ -26,55 +26,69 @@ export interface CacheEntry {
   readonly version: Version;
 }
 
-interface CacheKeys {
-  readonly unique: string;
-  readonly primary: string;
-  readonly secondary: string;
+export interface CacheServiceConfig {
+  /** @defaultValue `false` */
+  readonly disable?: boolean;
 }
 
-export class CacheClient {
+export class CacheService implements CacheInfo {
+  readonly disabled: boolean;
+
   private readonly TEXDIR: string;
   private readonly keys: CacheKeys;
   private readonly state: CacheState = new CacheState();
-  private readonly info: CacheInfo = {
-    hit: false,
-    full: false,
-    restored: false,
-  };
+  private readonly info: CacheInfo = { hit: false, restored: false };
 
-  constructor(entry: CacheEntry) {
+  constructor(entry: CacheEntry, config?: CacheServiceConfig) {
     this.TEXDIR = entry.TEXDIR;
-    this.keys = getCacheKeys(entry);
+    this.keys = new CacheKeys(entry);
+    this.disabled = config?.disable ?? false;
+    if (!this.disabled && !cache.isFeatureAvailable()) {
+      log.warn('Caching is disabled since cache service is not available');
+      this.disabled = true;
+    }
   }
 
   async restore(): Promise<CacheInfo> {
-    this.state.key = await restoreCache(
-      this.TEXDIR,
-      this.keys.unique,
-      [this.keys.primary, this.keys.secondary],
-    );
-    this.info.restored = this.state.key !== undefined;
-    this.info.full = this.state.key?.startsWith(this.keys.primary) === true;
-    this.info.hit = !forceUpdate() && this.info.full;
-    if (!this.info.hit) {
-      this.update();
+    if (!this.disabled) {
+      const restoreKey = await restoreCache(this.TEXDIR, ...this.keys.get());
+      if (restoreKey !== undefined) {
+        this.state.key = restoreKey;
+        this.info.restored = true;
+        this.info.hit = this.keys.isPrimary(this.state.key);
+      }
+      if (forceUpdate() || !this.info.hit) {
+        this.update();
+      }
     }
-    return this.info;
+    return this;
   }
 
   update(): void {
-    if (this.state.target === undefined) {
-      this.state.key = this.info.full ? this.keys.unique : this.keys.primary;
+    if (!this.disabled && this.state.target === undefined) {
+      this.state.key = this.hit ? this.keys.unique : this.keys.primary;
       this.state.target = this.TEXDIR;
-      log.info(
-        'After the job completes, TEXDIR will be saved to cache with key: '
-          + this.state.key,
-      );
     }
   }
 
   saveState(): void {
-    this.state.save();
+    if (!this.disabled) {
+      if (this.state.target !== undefined && this.state.key !== undefined) {
+        log.info(
+          'After the job completes, TEXDIR will be saved to cache with key: '
+            + this.state.key,
+        );
+      }
+      this.state.save();
+    }
+  }
+
+  get hit(): boolean {
+    return this.info.hit;
+  }
+
+  get restored(): boolean {
+    return this.info.restored;
   }
 }
 
@@ -113,14 +127,34 @@ class CacheState {
 }
 
 function forceUpdate(): boolean {
-  return (env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] ?? '0') !== '0';
+  const key = `${ID.SCREAMING_SNAKE_CASE}_FORCE_UPDATE_CACHE`;
+  return (env[key] ?? '0') !== '0';
 }
 
-function getCacheKeys(entry: CacheEntry): CacheKeys {
-  const secondary = `setup-texlive-${platform()}-${arch()}-${entry.version}-`;
-  const primary = secondary + digest([...entry.packages]);
-  const unique = `${primary}-${randomString()}`;
-  return { unique, primary, secondary };
+class CacheKeys {
+  readonly primary: string;
+  readonly secondary: string;
+
+  #unique: string | undefined;
+
+  constructor(entry: CacheEntry) {
+    this.secondary = `${
+      ID['kebab-case']
+    }-${platform()}-${arch()}-${entry.version}-`;
+    this.primary = this.secondary + digest([...entry.packages]);
+  }
+
+  get unique(): string {
+    return this.#unique ??= `${this.primary}-${randomString()}`;
+  }
+
+  get(): [primaryKey: string, restoreKeys: Array<string>] {
+    return [this.unique, [this.primary, this.secondary]];
+  }
+
+  isPrimary(key: string): boolean {
+    return key.startsWith(this.primary);
+  }
 }
 
 function digest(obj: unknown): string {
@@ -129,4 +163,42 @@ function digest(obj: unknown): string {
 
 function randomString(): string {
   return randomUUID().replaceAll('-', '');
+}
+
+/** @internal */
+export async function saveCache(
+  target: string,
+  primaryKey: string,
+): Promise<void> {
+  try {
+    await cache.saveCache([target], primaryKey);
+    log.info(`${target} saved with cache key: ${primaryKey}`);
+  } catch (error) {
+    if (error instanceof cache.ReserveCacheError) {
+      log.info(error.message);
+    } else {
+      log.warn('Failed to save to cache', { cause: error });
+    }
+  }
+}
+
+/** @internal */
+export async function restoreCache(
+  target: string,
+  primaryKey: string,
+  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+  restoreKeys: Array<string>,
+): Promise<string | undefined> {
+  let key: string | undefined;
+  try {
+    key = await cache.restoreCache([target], primaryKey, restoreKeys);
+    if (key !== undefined) {
+      log.info(`${target} restored from cache with key: ${key}`);
+    } else {
+      log.info('Cache not found');
+    }
+  } catch (cause) {
+    log.warn('Failed to restore cache', { cause });
+  }
+  return key;
 }

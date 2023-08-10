@@ -1,4 +1,3 @@
-export * from '#/util/actions';
 export * from '#/util/decorators';
 export * from '#/util/exec';
 export * from '#/util/fs';

@@ -1,66 +1,43 @@
-import { isNativeError } from 'node:util/types';
-
-import { getState, saveState, setFailed, setOutput } from '@actions/core';
-
-import { CacheClient, save as saveCache } from '#/action/cache';
-import { Inputs } from '#/action/inputs';
+import { CacheService } from '#/action/cache';
+import { Config } from '#/action/config';
 import type { Outputs } from '#/action/outputs';
 import * as log from '#/log';
 import { Texmf } from '#/tex/texmf';
 import {
   Profile,
+  ReleaseData,
   TLVersionOutdated,
-  type Tlmgr,
-  type Version,
+  Tlmgr,
+  Version,
   installTL,
-  latest,
   tlnet,
-  useTlmgr,
 } from '#/texlive';
 
-export async function run(): Promise<void> {
-  const state = 'POST';
-  try {
-    if (getState(state) === '') {
-      const { cacheHit, version } = await main();
-      saveState(state, '1');
-      setOutput('cache-hit', cacheHit);
-      setOutput('version', version);
-    } else {
-      await post();
-    }
-  } catch (error) {
-    if (isNativeError(error)) {
-      log.debug(error.stack);
-      setFailed(error.message);
-    } else {
-      setFailed(`${error}`);
-    }
-  }
-}
-
 export async function main(): Promise<Outputs> {
-  const inputs = await Inputs.load();
-  await using profile = new Profile(inputs.version, inputs);
-  const cache = new CacheClient({
-    TEXDIR: profile.TEXDIR,
-    packages: inputs.packages,
-    version: inputs.version,
-  });
-  let cacheInfo = { full: false, restored: false };
+  const config = await Config.load();
+  const { isLatest } = ReleaseData.use();
+  await using profile = new Profile(config.version, config);
 
-  if (inputs.cache) {
+  const cache = new CacheService({
+    TEXDIR: profile.TEXDIR,
+    packages: config.packages,
+    version: config.version,
+  }, {
+    disable: !config.cache,
+  });
+
+  if (!cache.disabled) {
     await log.group('Restoring cache', async () => {
-      cacheInfo = await cache.restore();
+      await cache.restore();
     });
   }
 
-  if (!cacheInfo.restored) {
+  if (!cache.restored) {
     await log.group('Installation profile', async () => {
       log.info(profile.toString());
     });
     await log.group('Installing TeX Live', async () => {
-      const repository = await latest.isLatest(inputs.version)
+      const repository = isLatest(profile.version)
         ? await tlnet.ctan()
         : tlnet.historic(profile.version);
       log.info(`Main repository: ${repository}`);
@@ -68,40 +45,40 @@ export async function main(): Promise<Outputs> {
     });
   }
 
-  const tlmgr = useTlmgr(profile);
+  const tlmgr = Tlmgr.setup(profile);
   await tlmgr.path.add();
 
-  if (cacheInfo.restored) {
+  if (cache.restored) {
     await log.group('Updating tlmgr', async () => {
       try {
         await tlmgr.update({ self: true });
       } catch (error) {
         if (error instanceof TLVersionOutdated) {
-          await updateRepository(tlmgr, inputs.version);
+          await updateRepository(profile.version);
           cache.update();
         } else {
           throw error;
         }
       }
     });
-    if (await latest.isLatest(inputs.version) && inputs.updateAllPackages) {
+    if (config.updateAllPackages) {
       await log.group(`Updating packages`, async () => {
         await tlmgr.update({ all: true, reinstallForciblyRemoved: true });
       });
     }
-    await adjustTexmf(tlmgr, profile);
+    await adjustTexmf(profile);
   }
 
-  if (inputs.tlcontrib) {
+  if (config.tlcontrib) {
     await log.group('Setting up TLContrib', async () => {
       await tlmgr.repository.add(await tlnet.contrib(), 'tlcontrib');
       await tlmgr.pinning.add('tlcontrib', '*');
     });
   }
 
-  if (!cacheInfo.full && inputs.packages.size > 0) {
+  if (!cache.hit && config.packages.size > 0) {
     await log.group('Installing packages', async () => {
-      await tlmgr.install(inputs.packages);
+      await tlmgr.install(config.packages);
     });
   }
 
@@ -114,14 +91,11 @@ export async function main(): Promise<Outputs> {
   });
 
   cache.saveState();
-  return { cacheHit: cacheInfo.restored, version: inputs.version };
+  return { cacheHit: cache.restored, version: config.version };
 }
 
-export async function post(): Promise<void> {
-  await saveCache();
-}
-
-async function updateRepository(tlmgr: Tlmgr, version: Version): Promise<void> {
+async function updateRepository(version: Version): Promise<void> {
+  const tlmgr = Tlmgr.use();
   const tag = 'main';
   const historic = tlnet.historic(version, { master: true });
   log.info(`Changing the ${tag} repository to ${historic}`);
@@ -130,7 +104,8 @@ async function updateRepository(tlmgr: Tlmgr, version: Version): Promise<void> {
   await tlmgr.update({ self: true });
 }
 
-async function adjustTexmf(tlmgr: Tlmgr, profile: Profile): Promise<void> {
+async function adjustTexmf(profile: Profile): Promise<void> {
+  const tlmgr = Tlmgr.use();
   const keys = [
     'TEXMFLOCAL',
     ...Texmf.USER_TREES,

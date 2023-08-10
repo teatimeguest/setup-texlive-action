@@ -23,7 +23,7 @@ export default {
     '<rootDir>/tests/__tests__/**/*.test.ts',
   ],
   transform: {
-    '/action/index\\.ts$': '##/tests/esbuild-transformer.mjs',
+    '/action/run/main\\.ts$': '##/tests/esbuild-transformer.mjs',
     '.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tests/tsconfig.json' }],
   },
   verbose: false,

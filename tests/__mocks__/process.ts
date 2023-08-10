@@ -1,9 +1,14 @@
 beforeEach(() => {
-  process.env = {
+  globalThis.process.env = {
     RUNNER_TEMP: '<RUNNER_TEMP>',
   };
 });
 
 module.exports = {
-  env: process.env,
+  get env(): NodeJS.ProcessEnv {
+    return globalThis.process.env;
+  },
+  set env(e: NodeJS.ProcessEnv) {
+    globalThis.process.env = e;
+  },
 };

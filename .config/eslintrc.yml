@@ -10,6 +10,7 @@ parserOptions:
   warnOnUnsupportedTypeScriptVersion: false
 rules:
   '@typescript-eslint/no-inferrable-types': off
+  '@typescript-eslint/no-namespace': off
   '@typescript-eslint/require-await': off
   '@typescript-eslint/restrict-template-expressions': off
   node/no-missing-import: off
@@ -103,7 +104,6 @@ overrides:
       '@typescript-eslint/no-implied-eval': error
       '@typescript-eslint/no-invalid-this': error
       '@typescript-eslint/no-loop-func': error
-      '@typescript-eslint/no-namespace': off
       '@typescript-eslint/no-non-null-asserted-nullish-coalescing': error
       '@typescript-eslint/no-require-imports': error
       '@typescript-eslint/no-shadow': error
@@ -150,6 +150,10 @@ overrides:
       import/order:
         - error
         - groups: [builtin, external, internal, object]
+          pathGroups:
+            - pattern: "#/**/*.json"
+              group: internal
+              position: after
           newlines-between: always
           alphabetize:
             order: asc

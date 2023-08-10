@@ -1,5 +1,3 @@
-import { isNativeError } from 'node:util/types';
-
 import * as core from '@actions/core';
 
 export interface LogOptions {
@@ -18,7 +16,7 @@ export function log(
     logger(message);
   } else {
     logger(`${message}: Caused by ${cause}`);
-    if (isNativeError(cause)) {
+    if (cause instanceof Error && 'stack' in cause) {
       core.debug(cause.stack);
     }
   }

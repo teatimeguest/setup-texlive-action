@@ -5,6 +5,8 @@ import { env } from 'node:process';
 import { rmRF } from '@actions/io';
 import { extractTar, extractZip } from '@actions/tool-cache';
 
+import { ID } from '#/action/id';
+
 /**
  * Extracts files from an archive.
  *
@@ -50,7 +52,7 @@ export interface Tmpdir extends AsyncDisposable {
 
 export async function mkdtemp(): Promise<Tmpdir> {
   return {
-    path: await fs.mkdtemp(path.join(tmpdir(), 'setup-texlive-')),
+    path: await fs.mkdtemp(path.join(tmpdir(), `${ID['kebab-case']}-`)),
     async [Symbol.asyncDispose](this: Tmpdir): Promise<void> {
       await rmRF(this.path);
     },

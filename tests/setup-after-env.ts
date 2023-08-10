@@ -15,8 +15,8 @@ for (
 jest.mock('@actions/http-client');
 jest.mock('@actions/io');
 
+jest.mock('#/action/config');
 jest.mock('#/action/env');
-jest.mock('#/action/inputs');
 jest.mock('#/action/outputs');
 jest.mock('#/log');
 jest.mock('#/texlive/install-tl/cli');
@@ -28,22 +28,21 @@ jest.mock('#/texlive/tlmgr/actions/update');
 jest.mock('#/texlive/tlmgr/actions/version');
 jest.mock('#/texlive/tlpkg/patch');
 jest.mock('#/texlive/tlpkg/util');
-jest.mock('#/texlive/version/validate');
-jest.mock('#/util/actions');
 jest.mock('#/util/http');
 
 for (
   const mod of [
     '#/action/cache',
+    '#/action/inputs',
     '#/ctan/api',
     '#/ctan/mirrors',
     '#/tex/kpse',
     '#/texlive/install-tl/profile',
+    '#/texlive/releases',
     '#/texlive/tlmgr/actions/conf',
     '#/texlive/tlmgr/actions/list',
     '#/texlive/tlmgr/internals',
     '#/texlive/tlnet',
-    '#/texlive/version/latest',
     '#/util/exec',
     '#/util/fs',
   ]

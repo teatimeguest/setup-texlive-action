@@ -1,3 +1,3 @@
 import '#/globals';
-import * as action from '#/action';
-action.run();
+import { run } from '#/action/run';
+await run();

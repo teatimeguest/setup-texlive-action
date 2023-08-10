@@ -1,89 +1,73 @@
-import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { env } from 'node:process';
 
-import { isFeatureAvailable as isCacheAvailable } from '@actions/cache';
-import type { MarkWritable } from 'ts-essentials';
+import { getBooleanInput, getInput } from '@actions/core';
+import { Transform, instanceToInstance } from 'class-transformer';
+import { defaultMetadataStorage } from 'class-transformer/esm5/storage';
 
-import { init as initEnv } from '#/action/env';
-import * as log from '#/log';
-import { Version, dependsTxt, latest, validateReleaseYear } from '#/texlive';
-import { getInput } from '#/util';
+import { ID } from '#/action/id';
+import type { Env } from '#/texlive/install-tl/env';
+import { Case, FromEnv } from '#/util/decorators';
 
-export interface Inputs {
-  readonly cache: boolean;
-  readonly packages: ReadonlySet<string>;
-  readonly prefix: string;
-  readonly texdir?: string | undefined;
-  readonly tlcontrib: boolean;
-  readonly updateAllPackages: boolean;
-  readonly version: Version;
+export class Inputs {
+  @BooleanInput
+  readonly cache: boolean = true;
+
+  @Input
+  readonly packageFile: string | undefined;
+
+  @Input
+  readonly packages: string | undefined;
+
+  @Transform(() => path.join(env.RUNNER_TEMP, ID['kebab-case']))
+  @FromEnv('TEXLIVE_INSTALL_PREFIX' satisfies keyof Env)
+  @Input
+  readonly prefix!: string;
+
+  @Input
+  readonly texdir: string | undefined;
+
+  @BooleanInput
+  readonly tlcontrib: boolean = false;
+
+  @BooleanInput
+  readonly updateAllPackages: boolean = false;
+
+  @Input
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  @Transform<Probably<String>>(({ value }) => value?.toLowerCase?.())
+  readonly version: string = 'latest';
+
+  static load(this: void): Inputs {
+    return instanceToInstance(new Inputs(), { ignoreDecorators: true });
+  }
 }
 
-export namespace Inputs {
-  export async function load(): Promise<Inputs> {
-    const spec = getInput('version', { default: 'latest' })
-      .trim()
-      .toLowerCase();
-    const version = spec === 'latest'
-      ? await latest.getVersion()
-      : Version.parse(spec);
-    await validateReleaseYear(version);
-    initEnv(version);
-    const inputs = {
-      cache: getInput('cache', { type: Boolean }),
-      packages: await loadPackageList(),
-      /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        -- `TEXLIVE_INSTALL_PREFIX` should be set by `initEnv`. */
-      prefix: getInput('prefix', { default: env.TEXLIVE_INSTALL_PREFIX! }),
-      texdir: getInput('texdir'),
-      tlcontrib: getInput('tlcontrib', { type: Boolean }),
-      updateAllPackages: getInput('update-all-packages', { type: Boolean }),
-      version,
-    };
-    await validate(inputs);
-    return inputs;
-  }
+type Probably<T> = Partial<T> | null | undefined;
 
-  async function validate(
-    this: void,
-    /* eslint-disable-next-line
-      @typescript-eslint/prefer-readonly-parameter-types */
-    inputs: MarkWritable<Inputs, 'cache' | 'tlcontrib' | 'updateAllPackages'>,
-  ): Promise<void> {
-    if (inputs.cache && !isCacheAvailable()) {
-      log.warn('Caching is disabled because cache service is not available');
-      inputs.cache = false;
-    }
-    if (!await latest.isLatest(inputs.version)) {
-      if (inputs.tlcontrib) {
-        log.warn('`tlcontrib` is currently ignored for older versions');
-        inputs.tlcontrib = false;
-      }
-      if (inputs.updateAllPackages) {
-        log.info('`update-all-packages` is ignored for older versions');
-        inputs.updateAllPackages = false;
-      }
-    }
-  }
+function getExposedName(target: object, key: string | symbol): string {
+  return defaultMetadataStorage
+    .getExposedMetadatas(target.constructor)
+    .find((data) => data.propertyName === key)
+    ?.options
+    .name ?? (key as string);
+}
 
-  async function loadPackageList(this: void): Promise<Set<string>> {
-    const packages = [];
-    for await (const { name } of loadDependsTxt()) {
-      packages.push(name);
-    }
-    return new Set(packages.sort());
-  }
+function Input(target: object, key: string | symbol): void {
+  Case('kebab')(target, key);
+  Transform(({ value }) => {
+    const raw = getInput(getExposedName(target, key));
+    return raw === '' ? (value as string) : raw;
+  })(target, key);
+}
 
-  async function* loadDependsTxt(
-    this: void,
-  ): AsyncGenerator<dependsTxt.Dependency, void> {
-    const inline = getInput('packages');
-    if (inline !== undefined) {
-      yield* dependsTxt.parse(inline);
+function BooleanInput(target: object, key: string | symbol): void {
+  Case('kebab')(target, key);
+  Transform(({ value }) => {
+    try {
+      return getBooleanInput(getExposedName(target, key));
+    } catch {
+      return value as boolean;
     }
-    const file = getInput('package-file');
-    if (file !== undefined) {
-      yield* dependsTxt.parse(await readFile(file, 'utf8'));
-    }
-  }
+  })(target, key);
 }
