@@ -40,7 +40,7 @@
   "dependencies": {
     "@abraham/reflection": "0.12.0",
     "@actions/cache": "3.2.2",
-    "@actions/core": "1.10.0",
+    "@actions/core": "1.10.1",
     "@actions/exec": "1.1.1",
     "@actions/http-client": "2.1.1",
     "@actions/io": "1.1.3",
