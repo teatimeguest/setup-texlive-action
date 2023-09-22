@@ -8,11 +8,12 @@ import type { Env } from '#/texlive/install-tl/env';
 import type { Version } from '#/texlive/version';
 import { AsPath, FromEnv } from '#/util/decorators';
 
-export interface TexmfOptions {
-  readonly prefix: string;
-  readonly texdir?: string | undefined;
-  readonly texuserdir?: string | undefined;
-}
+export type TexmfOptions =
+  & (
+    | { readonly prefix: string; readonly texdir?: undefined }
+    | { readonly prefix?: string | undefined; readonly texdir: string }
+  )
+  & { readonly texuserdir?: string | undefined };
 
 @Exclude()
 export class SystemTrees implements Texmf.SystemTrees {
@@ -35,24 +36,25 @@ export class SystemTrees implements Texmf.SystemTrees {
   declare readonly TEXMFSYSVAR: string;
 
   constructor(readonly version: Version, options: TexmfOptions) {
+    if (options.texdir === undefined) {
+      this.#withPrefix(options.prefix);
+    }
+    Object.assign(this, instanceToPlain(this));
     if (options.texdir !== undefined) {
       this.#withTexdir(options.texdir);
-    } else {
-      this.#withPrefix(options.prefix);
-      Object.assign(this, instanceToPlain(this));
     }
   }
 
   #withPrefix(this: Writable<this>, prefix: string): void {
-    (this as this).#withTexdir(path.join(prefix, this.version));
     this.TEXMFLOCAL = path.join(prefix, 'texmf-local');
+    (this as this).#withTexdir(path.join(prefix, this.version));
   }
 
-  #withTexdir(this: Writable<this>, texdir: string): void {
+  #withTexdir(this: Writable<Partial<this>>, texdir: string): void {
     this.TEXDIR = texdir;
-    this.TEXMFLOCAL = path.join(texdir, 'texmf-local');
     this.TEXMFSYSCONFIG = path.join(texdir, 'texmf-config');
     this.TEXMFSYSVAR = path.join(texdir, 'texmf-var');
+    this.TEXMFLOCAL ??= path.join(texdir, 'texmf-local');
   }
 
   get TEXMFROOT(): string {

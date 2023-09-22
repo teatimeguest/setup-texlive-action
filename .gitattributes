@@ -1,3 +1,5 @@
+* text=auto
+
 .actrc linguist-language=opts
 package-lock.json -diff -merge
 tl_packages linguist-language=ignore
@@ -10,3 +12,5 @@ tl_packages linguist-language=ignore
 *.stdout linguist-language=shellsession
 *.tlpdb linguist-language=gitattributes
 release-texlive.txt linguist-vendored !linguist-generated
+
+*.snap text eof=lf linguist-language=javascript linguist-generated

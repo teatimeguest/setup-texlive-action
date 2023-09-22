@@ -1,7 +1,8 @@
+import os from 'node:os';
+
 const { posix, win32 } = jest.requireActual('node:path');
 
 function getPath() {
-  const os = jest.requireMock('node:os');
   return os.platform() === 'win32' ? win32 : posix;
 }
 

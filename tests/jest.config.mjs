@@ -24,6 +24,7 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/tests/jest/setup-after-env.ts',
   ],
+  snapshotResolver: '<rootDir>/tests/jest/snapshot-resolver.cjs',
   testEnvironment: '<rootDir>/tests/jest/environment.ts',
   testMatch: [
     '<rootDir>/tests/__tests__/**/*.test.ts',

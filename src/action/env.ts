@@ -5,6 +5,7 @@ import { env } from 'node:process';
 import * as log from '#/log';
 import { Texmf } from '#/tex/texmf';
 import type { Env } from '#/texlive/install-tl/env';
+import { UserTrees } from '#/texlive/install-tl/texmf';
 import type { Version } from '#/texlive/version';
 
 export function init(): void {
@@ -15,12 +16,8 @@ export function init(): void {
   // Use RUNNER_TEMP as a temporary directory during setup.
   env['TMPDIR'] = env.RUNNER_TEMP;
 
-  /* eslint-disable @typescript-eslint/no-unnecessary-condition --
-   * See: https://github.com/typescript-eslint/typescript-eslint/pull/6762
-   */
   env.TEXLIVE_INSTALL_ENV_NOCHECK ??= '1';
   env.TEXLIVE_INSTALL_NO_WELCOME ??= '1';
-  /* eslint-enable */
 
   for (const tree of Texmf.SYSTEM_TREES) {
     const key = `TEXLIVE_INSTALL_${tree}` satisfies keyof Env;
@@ -33,13 +30,10 @@ export function init(): void {
 
 export function setDefaultTexmfUserTrees(version: Version): void {
   const TEXUSERDIR = path.join(homedir(), '.local', 'texlive', version);
-  const defaults = {
-    TEXMFHOME: path.join(homedir(), 'texmf'),
-    TEXMFCONFIG: path.join(TEXUSERDIR, 'texmf-config'),
-    TEXMFVAR: path.join(TEXUSERDIR, 'texmf-var'),
-  } as const satisfies Record<keyof Texmf.UserTrees, string>;
+  env.TEXLIVE_INSTALL_TEXMFHOME ??= path.join(homedir(), 'texmf');
+  const trees = new UserTrees(version, { texdir: TEXUSERDIR });
 
-  for (const tree of Texmf.USER_TREES) {
-    env[`TEXLIVE_INSTALL_${tree}` satisfies keyof Env] ??= defaults[tree];
+  for (const key of Texmf.USER_TREES) {
+    env[`TEXLIVE_INSTALL_${key}` satisfies keyof Env] ??= trees[key];
   }
 }
