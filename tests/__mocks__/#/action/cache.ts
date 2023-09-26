@@ -1,29 +1,25 @@
-import type { CacheEntry, CacheInfo, CacheServiceConfig } from '#/action/cache';
+import { createContext } from 'unctx';
 
-export class CacheService {
-  readonly disabled: boolean;
-  hit: boolean = false;
-  restored: boolean = false;
+import type { CacheEntryConfig, CacheServiceConfig } from '#/action/cache';
 
-  constructor(entry: CacheEntry, config?: CacheServiceConfig) {
-    this.disabled = config?.disable ?? false;
-  }
+export const { CacheService, DefaultCacheService } = jest.requireActual<
+  Awaited<typeof import('#/action/cache')>
+>('#/action/cache');
 
-  async restore(): Promise<CacheInfo> {
-    return this;
-  }
-  update(): void {}
-  saveState(): void {}
+jest.spyOn(DefaultCacheService.prototype, 'restore');
+jest.spyOn(DefaultCacheService.prototype, 'update');
+jest.spyOn(DefaultCacheService.prototype, Symbol.dispose);
 
-  static {
-    this.prototype.restore = jest.fn().mockImplementation(
-      function(this: CacheService) {
-        return this;
-      },
-    );
-    this.prototype.update = jest.fn();
-    this.prototype.saveState = jest.fn();
-  }
-}
+const ctx = createContext<InstanceType<typeof CacheService>>();
+
+jest.spyOn(CacheService, 'setup').mockImplementation(
+  (_: CacheEntryConfig, config?: CacheServiceConfig) => {
+    const service = new DefaultCacheService();
+    (service as Writable<typeof service>).enabled = config?.enable ?? true;
+    ctx.set(service);
+    return service;
+  },
+);
+jest.spyOn(CacheService, 'use');
 
 export const save = jest.fn().mockResolvedValue(undefined);

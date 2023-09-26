@@ -1,5 +1,6 @@
 import { env } from 'node:process';
 
+import { setOutput } from '@actions/core';
 import type { DeepWritable } from 'ts-essentials';
 
 import { CacheService } from '#/action/cache';
@@ -22,6 +23,24 @@ beforeEach(() => {
   config.version = LATEST_VERSION;
 });
 
+class MockCacheService extends CacheService {
+  override enabled = true;
+  override hit = false;
+  override restored = false;
+
+  override async restore() {
+    return this;
+  }
+  override update() {}
+  override [Symbol.dispose]() {}
+
+  static {
+    jest.spyOn(this.prototype, 'restore');
+    jest.spyOn(this.prototype, 'update');
+    jest.spyOn(this.prototype, Symbol.dispose);
+  }
+}
+
 const cacheTypes = [
   ['primary', 'unique'],
   ['primary', 'primary'],
@@ -29,27 +48,32 @@ const cacheTypes = [
   ['secondary', 'primary'],
 ] as const;
 
+jest.mocked(CacheService.setup).mockImplementation((_, config) => {
+  const service = new MockCacheService();
+  service.enabled = config?.enable ?? true;
+  return service;
+});
+
 const setCacheType = ([type]: typeof cacheTypes[number]) => {
-  // eslint-disable-next-line jest/unbound-method
-  jest.mocked(CacheService.prototype.restore).mockImplementationOnce(
-    async function(this: CacheService) {
-      (this as any).hit = type === 'primary';
-      (this as any).restored = true;
-      return this;
-    },
-  );
+  jest.mocked(CacheService.setup).mockImplementationOnce((_, config) => {
+    const service = new MockCacheService();
+    service.enabled = config?.enable ?? true;
+    service.hit = type === 'primary';
+    service.restored = true;
+    return service;
+  });
 };
 
 it('installs TeX Live if cache not found', async () => {
   await expect(main()).toResolve();
-  expect(CacheService.prototype.restore).toHaveBeenCalled();
+  expect(MockCacheService.prototype.restore).toHaveBeenCalled();
   expect(installTL).toHaveBeenCalled();
 });
 
 it('does not use cache if input cache is false', async () => {
   config.cache = false;
   await expect(main()).toResolve();
-  expect(CacheService.prototype.restore).not.toHaveBeenCalled();
+  expect(MockCacheService.prototype.restore).not.toHaveBeenCalled();
 });
 
 it.each(cacheTypes)(
@@ -61,20 +85,12 @@ it.each(cacheTypes)(
   },
 );
 
-it('sets cache-hit to false', async () => {
-  await expect(main()).resolves.toHaveProperty('cacheHit', false);
-});
-
-it.each(cacheTypes)('sets cache-hit to true (case %p)', async (...kind) => {
-  setCacheType(kind);
-  await expect(main()).resolves.toHaveProperty('cacheHit', true);
-});
-
 it.each([LATEST_VERSION, '2009', '2014'] as const)(
   'sets version to %p if input version is %p',
   async (version) => {
     config.version = version;
-    await expect(main()).resolves.toHaveProperty('version', version);
+    await expect(main()).toResolve();
+    expect(setOutput).toHaveBeenCalledWith('version', version);
   },
 );
 
@@ -92,7 +108,7 @@ it.each(cacheTypes)(
     await expect(main()).toResolve();
     expect(tlmgr.path.add).not.toHaveBeenCalledBefore(
       jest.mocked<(...args: Array<any>) => unknown>(
-        CacheService.prototype.restore,
+        MockCacheService.prototype.restore,
       ),
     );
     expect(tlmgr.path.add).toHaveBeenCalled();

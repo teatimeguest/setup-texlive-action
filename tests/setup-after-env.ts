@@ -17,7 +17,6 @@ jest.mock('@actions/io');
 
 jest.mock('#/action/config');
 jest.mock('#/action/env');
-jest.mock('#/action/outputs');
 jest.mock('#/log');
 jest.mock('#/texlive/install-tl/cli');
 jest.mock('#/texlive/tlmgr/actions/install');

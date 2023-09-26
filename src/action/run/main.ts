@@ -1,6 +1,7 @@
+import { setOutput } from '@actions/core';
+
 import { CacheService } from '#/action/cache';
 import { Config } from '#/action/config';
-import type { Outputs } from '#/action/outputs';
 import * as log from '#/log';
 import { Texmf } from '#/tex/texmf';
 import {
@@ -13,20 +14,20 @@ import {
   tlnet,
 } from '#/texlive';
 
-export async function main(): Promise<Outputs> {
+export async function main(): Promise<void> {
   const config = await Config.load();
   const { isLatest } = ReleaseData.use();
   await using profile = new Profile(config.version, config);
 
-  const cache = new CacheService({
+  using cache = CacheService.setup({
     TEXDIR: profile.TEXDIR,
     packages: config.packages,
     version: config.version,
   }, {
-    disable: !config.cache,
+    enable: config.cache,
   });
 
-  if (!cache.disabled) {
+  if (cache.enabled) {
     await log.group('Restoring cache', async () => {
       await cache.restore();
     });
@@ -90,8 +91,7 @@ export async function main(): Promise<Outputs> {
     }
   });
 
-  cache.saveState();
-  return { cacheHit: cache.restored, version: config.version };
+  setOutput('version', config.version);
 }
 
 async function updateRepository(version: Version): Promise<void> {

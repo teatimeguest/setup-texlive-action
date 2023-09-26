@@ -1,65 +1,217 @@
 import * as cache from '@actions/cache';
+import * as core from '@actions/core';
 
-import { restoreCache, saveCache } from '#/action/cache';
+import {
+  ActionsCacheService,
+  CacheService,
+  DefaultCacheService,
+  save,
+} from '#/action/cache';
 import * as log from '#/log';
 
 jest.unmock('#/action/cache');
 
-describe('saveCache', () => {
-  it('saves directory to cache', async () => {
-    await expect(saveCache('<target>', '<key>')).toResolve();
-    expect(cache.saveCache).toHaveBeenCalledOnce();
+const entry = {
+  TEXDIR: '<TEXDIR>',
+  version: LATEST_VERSION,
+  packages: new Set<string>(),
+} as const;
+
+describe('CacheService.setup', () => {
+  beforeEach(() => {
+    jest.mocked(cache.isFeatureAvailable).mockReturnValue(true);
   });
 
-  it("doesn't itself fail even if cache.saveCache fails", async () => {
-    jest.mocked(cache.saveCache).mockRejectedValueOnce(new Error(''));
-    await expect(saveCache('<target>', '<key>')).resolves.not.toThrow();
-    expect(log.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to save to cache'),
-      expect.any(Object),
-    );
+  it.each([
+    undefined,
+    { enable: true },
+  ])('is enabled', (config) => {
+    const service = CacheService.setup(entry, config);
+    expect(service).toBeInstanceOf(ActionsCacheService);
+    expect(service).toHaveProperty('enabled', true);
+    expect(service).toHaveProperty('disabled', false);
+  });
+
+  it('is disabled', () => {
+    const service = CacheService.setup(entry, { enable: false });
+    expect(service).toBeInstanceOf(DefaultCacheService);
+    expect(service).toHaveProperty('enabled', false);
+    expect(service).toHaveProperty('disabled', true);
+  });
+
+  it.each([
+    undefined,
+    { enable: true },
+    { enable: false },
+  ])('is disabled if cache feature not available', (config) => {
+    jest.mocked(cache.isFeatureAvailable).mockReturnValue(false);
+    expect(CacheService.setup(entry, config)).toHaveProperty('enabled', false);
   });
 });
 
-describe('restoreCache', () => {
-  it('returns undefined if cache not found', async () => {
-    await expect(
-      restoreCache('<target>', '<key>', []),
-    )
-      .resolves
-      .toBeUndefined();
+describe('DefaultCacheService', () => {
+  const service = new DefaultCacheService();
+
+  it('does nothing', async () => {
+    await expect(service.restore()).toResolve();
+    expect(cache.restoreCache).not.toHaveBeenCalled();
   });
 
-  it("returns 'primary' if primary cache restored", async () => {
-    jest
-      .mocked(cache.restoreCache)
-      .mockImplementationOnce(async (target, key) => key);
-    await expect(restoreCache('<target>', '<key>', [])).resolves.toBe(
-      '<key>',
+  it('sets `cache-hit` to `false`', () => {
+    expect(() => service[Symbol.dispose]()).not.toThrow();
+    expect(core.setOutput).toHaveBeenCalledWith('cache-hit', false);
+  });
+});
+
+describe('ActionsCacheService', () => {
+  const cacheTypes = [
+    'unique',
+    'primary',
+    'secondary',
+    'none',
+    'fail',
+  ] as const;
+
+  const restore: Record<
+    typeof cacheTypes[number],
+    typeof cache.restoreCache
+  > = {
+    unique: async (_, uniqueKey) => uniqueKey,
+    primary: async (_, __, restoreKeys) => restoreKeys?.[0],
+    secondary: async (_, __, restoreKeys) => restoreKeys?.[1],
+    none: async () => undefined,
+    fail: async () => {
+      throw new Error();
+    },
+  };
+
+  describe('restore', () => {
+    it('restores cache', async () => {
+      await expect(new ActionsCacheService(entry).restore()).toResolve();
+      expect(cache.restoreCache).toHaveBeenCalled();
+    });
+
+    it('never throws', async () => {
+      jest.mocked(cache.restoreCache).mockImplementationOnce(restore.fail);
+      await expect(new ActionsCacheService(entry).restore()).toResolve();
+      expect(log.warn).toHaveBeenCalled();
+    });
+  });
+
+  describe.each(
+    [
+      [true, ['unique', 'primary']],
+      [false, ['secondary', 'none', 'fail']],
+    ] as const,
+  )('hit', (value, types) => {
+    it.each(types)(`is set to ${value} (%p)`, async (type) => {
+      jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+      const service = new ActionsCacheService(entry);
+      await expect(service.restore()).toResolve();
+      expect(service).toHaveProperty('hit', value);
+    });
+  });
+
+  describe.each(
+    [
+      [true, ['unique', 'primary', 'secondary']],
+      [false, ['none', 'fail']],
+    ] as const,
+  )('restored', (value, types) => {
+    it.each(types)(`is set to ${value} (%p)`, async (type) => {
+      jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+      const service = new ActionsCacheService(entry);
+      await expect(service.restore()).toResolve();
+      expect(service).toHaveProperty('restored', value);
+    });
+  });
+
+  describe('@@dispose', () => {
+    const run = async () => {
+      const service = new ActionsCacheService(entry);
+      await service.restore();
+      service[Symbol.dispose]();
+    };
+
+    it.each(
+      ['secondary', 'none', 'fail'] as const,
+    )('sets `target` (%p)', async (type) => {
+      jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+      await expect(run()).toResolve();
+      expect(core.saveState).toHaveBeenCalledWith('CACHE', {
+        key: expect.stringContaining('setup-texlive-'),
+        target: entry.TEXDIR,
+      });
+    });
+
+    it.each(
+      ['unique', 'primary'] as const,
+    )('does not set `target` (%p)', async (type) => {
+      jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+      await expect(run()).toResolve();
+      expect(core.saveState).toHaveBeenCalledWith('CACHE', {
+        key: expect.stringContaining('setup-texlive-'),
+      });
+    });
+
+    it.each(cacheTypes)(
+      'sets `target` if `SETUP_TEXLIVE_FORCE_UPDATE_CACHE` is set (%p)',
+      async (type) => {
+        process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '1';
+        jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+        await expect(run()).toResolve();
+        expect(core.saveState).toHaveBeenCalledWith('CACHE', {
+          key: expect.stringContaining('setup-texlive-'),
+          target: entry.TEXDIR,
+        });
+      },
     );
+
+    describe.each(
+      [
+        [true, ['unique', 'primary', 'secondary']],
+        [false, ['none', 'fail']],
+      ] as const,
+    )('sets `cache-hit` to `%p`', (value, types) => {
+      it.each(types)('%p', async (type) => {
+        jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+        await expect(run()).toResolve();
+        expect(core.setOutput).toHaveBeenCalledWith('cache-hit', value);
+      });
+    });
+  });
+});
+
+describe('save', () => {
+  it('does nothing if state is not saved', async () => {
+    await expect(save()).toResolve();
+    expect(cache.saveCache).not.toHaveBeenCalled();
   });
 
-  it("returns 'secondary' if secondary cache restored", async () => {
-    jest
-      .mocked(cache.restoreCache)
-      .mockImplementationOnce(async (target, key, keys) => keys?.[0]);
-    await expect(
-      restoreCache('<target>', '<key>', ['<another key>']),
-    )
-      .resolves
-      .toBe('<another key>');
-  });
-
-  it('returns undefined if cache.restoreCache fails', async () => {
-    jest.mocked(cache.restoreCache).mockRejectedValueOnce(new Error(''));
-    await expect(
-      restoreCache('<target>', '<key>', []),
-    )
-      .resolves
-      .toBeUndefined();
-    expect(log.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to restore cache'),
-      expect.any(Object),
+  it('saves `target` as cache', async () => {
+    jest.mocked(core.getState).mockReturnValueOnce(
+      JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
     );
+    await expect(save()).toResolve();
+    expect(cache.saveCache).toHaveBeenCalled();
+  });
+
+  it('does nothing if `target` is not set', async () => {
+    jest.mocked(core.getState).mockReturnValueOnce(
+      JSON.stringify({ key: '<key>' }),
+    );
+    await expect(save()).toResolve();
+    expect(cache.saveCache).not.toHaveBeenCalled();
+  });
+
+  it('never throws', async () => {
+    jest.mocked(cache.saveCache).mockImplementationOnce(async () => {
+      throw new Error();
+    });
+    jest.mocked(core.getState).mockReturnValueOnce(
+      JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
+    );
+    await expect(save()).toResolve();
+    expect(log.warn).toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
-import { getState, saveState, setFailed, setOutput } from '@actions/core';
+import { getState, saveState, setFailed } from '@actions/core';
 
 import { main } from '#/action/run/main';
 import { post } from '#/action/run/post';
@@ -8,10 +8,8 @@ export async function run(): Promise<void> {
   const state = 'POST';
   try {
     if (getState(state) === '') {
-      const { cacheHit, version } = await main();
+      await main();
       saveState(state, '1');
-      setOutput('cache-hit', cacheHit);
-      setOutput('version', version);
     } else {
       await post();
     }

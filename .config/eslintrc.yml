@@ -9,6 +9,7 @@ extends:
 parserOptions:
   warnOnUnsupportedTypeScriptVersion: false
 rules:
+  '@typescript-eslint/no-empty-function': off
   '@typescript-eslint/no-inferrable-types': off
   '@typescript-eslint/no-namespace': off
   '@typescript-eslint/require-await': off
@@ -183,7 +184,6 @@ overrides:
       - plugin:jest/recommended
       - plugin:jest/style
     rules:
-      '@typescript-eslint/no-empty-function': off
       '@typescript-eslint/no-explicit-any': off
       '@typescript-eslint/no-non-null-assertion': off
       '@typescript-eslint/no-unsafe-assignment': off

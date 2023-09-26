@@ -2,25 +2,28 @@ import { createHash, randomUUID } from 'node:crypto';
 import { arch, platform } from 'node:os';
 import { env } from 'node:process';
 
-import * as cache from '@actions/cache';
-import { getState, saveState } from '@actions/core';
+import {
+  ReserveCacheError,
+  isFeatureAvailable as isCacheFeatureAvailable,
+  restoreCache,
+  saveCache,
+} from '@actions/cache';
+import { getState, saveState, setOutput } from '@actions/core';
 import {
   Exclude,
   Expose,
   instanceToPlain,
   plainToInstance,
 } from 'class-transformer';
+import { createContext } from 'unctx';
 
 import { ID } from '#/action/id';
 import * as log from '#/log';
 import type { Version } from '#/texlive';
 
-export interface CacheInfo {
-  hit: boolean;
-  restored: boolean;
-}
+const STATE_NAME = 'CACHE' as const;
 
-export interface CacheEntry {
+export interface CacheEntryConfig {
   readonly TEXDIR: string;
   readonly packages: Iterable<string>;
   readonly version: Version;
@@ -28,132 +31,202 @@ export interface CacheEntry {
 
 export interface CacheServiceConfig {
   /** @defaultValue `false` */
-  readonly disable?: boolean;
+  readonly enable?: boolean;
 }
 
-export class CacheService implements CacheInfo {
-  readonly disabled: boolean;
+export abstract class CacheInfo {
+  abstract readonly hit: boolean;
+  abstract readonly restored: boolean;
+}
 
-  private readonly TEXDIR: string;
-  private readonly keys: CacheKeys;
-  private readonly state: CacheState = new CacheState();
-  private readonly info: CacheInfo = { hit: false, restored: false };
+export abstract class CacheService extends CacheInfo implements Disposable {
+  abstract readonly enabled: boolean;
 
-  constructor(entry: CacheEntry, config?: CacheServiceConfig) {
-    this.TEXDIR = entry.TEXDIR;
-    this.keys = new CacheKeys(entry);
-    this.disabled = config?.disable ?? false;
-    if (!this.disabled && !cache.isFeatureAvailable()) {
-      log.warn('Caching is disabled since cache service is not available');
-      this.disabled = true;
-    }
+  abstract restore(): Promise<CacheInfo>;
+  abstract update(): void;
+
+  get disabled(): boolean {
+    return !this.enabled;
   }
 
-  async restore(): Promise<CacheInfo> {
-    if (!this.disabled) {
-      const restoreKey = await restoreCache(this.TEXDIR, ...this.keys.get());
-      if (restoreKey !== undefined) {
-        this.state.key = restoreKey;
-        this.info.restored = true;
-        this.info.hit = this.keys.isPrimary(this.state.key);
+  [Symbol.dispose](): void {
+    setOutput('cache-hit', this.restored);
+  }
+}
+
+export namespace CacheService {
+  const ctx = createContext<CacheService>();
+  export const { use } = ctx;
+
+  export function setup(
+    this: void,
+    entry: CacheEntryConfig,
+    config?: CacheServiceConfig,
+  ): CacheService {
+    let service: CacheService | undefined;
+    if (config?.enable ?? true) {
+      if (isCacheFeatureAvailable()) {
+        service = new ActionsCacheService(entry);
+      } else {
+        log.warn('Caching is disabled as cache service is not available');
       }
-      if (forceUpdate() || !this.info.hit) {
-        this.update();
-      }
+    }
+    ctx.set(service ??= new DefaultCacheService());
+    return service;
+  }
+}
+
+/** @internal */
+export class DefaultCacheService extends CacheService {
+  override readonly enabled: boolean = false;
+  override readonly hit: boolean = false;
+  override readonly restored: boolean = false;
+
+  override async restore(): Promise<CacheInfo> {
+    return this;
+  }
+  override update(): void {}
+}
+
+interface CacheEntry {
+  readonly target?: string;
+  readonly key?: string;
+}
+
+/** @internal */
+@Exclude()
+export class ActionsCacheService extends CacheService implements CacheEntry {
+  override readonly enabled: boolean = true;
+
+  @Expose({ groups: ['update'] })
+  readonly target: string;
+
+  readonly #keys: CacheKeys;
+  #matchedKey: string | undefined;
+  #forceUpdate: boolean;
+
+  constructor(entry: CacheEntryConfig) {
+    super();
+    this.target = entry.TEXDIR;
+    this.#keys = new CacheKeys(entry);
+    this.#forceUpdate =
+      (env[`${ID.SCREAMING_SNAKE_CASE}_FORCE_UPDATE_CACHE`] ?? '0') !== '0';
+  }
+
+  override async restore(): Promise<CacheInfo> {
+    try {
+      this.#matchedKey = await restoreCache(
+        [this.target],
+        this.#keys.uniqueKey,
+        this.#keys.restoreKeys,
+      );
+      log.info(
+        this.#matchedKey !== undefined
+          ? `${this.target} restored from cache with key: ${this.#matchedKey}`
+          : 'Cache not found',
+      );
+    } catch (cause) {
+      log.warn('Failed to restore cache', { cause });
     }
     return this;
   }
 
-  update(): void {
-    if (!this.disabled && this.state.target === undefined) {
-      this.state.key = this.hit ? this.keys.unique : this.keys.primary;
-      this.state.target = this.TEXDIR;
-    }
+  override update(): void {
+    this.#forceUpdate = true;
   }
 
-  saveState(): void {
-    if (!this.disabled) {
-      if (this.state.target !== undefined && this.state.key !== undefined) {
-        log.info(
-          'After the job completes, TEXDIR will be saved to cache with key: '
-            + this.state.key,
-        );
-      }
-      this.state.save();
-    }
+  override get hit(): boolean {
+    return this.#matchedKey?.startsWith(this.#keys.primaryKey) ?? false;
   }
 
-  get hit(): boolean {
-    return this.info.hit;
+  override get restored(): boolean {
+    return this.#matchedKey !== undefined;
   }
 
-  get restored(): boolean {
-    return this.info.restored;
-  }
-}
-
-export async function save(): Promise<void> {
-  const state = CacheState.restore();
-  if (state?.key !== undefined) {
-    if (state.target !== undefined) {
-      await saveCache(state.target, state.key);
+  @Expose()
+  get key(): string {
+    if (!this.hit) {
+      return this.#keys.primaryKey;
+    } else if (this.#forceUpdate) {
+      return this.#keys.uniqueKey;
     } else {
+      return this.#matchedKey!;
+    }
+  }
+
+  override [Symbol.dispose](): void {
+    super[Symbol.dispose]();
+    const state = instanceToPlain<CacheEntry>(this, {
+      groups: (this.#forceUpdate || !this.hit) ? ['update'] : [],
+    });
+    saveState(STATE_NAME, state);
+    if ('target' in state) {
       log.info(
-        `Cache hit occurred on the primary key ${state.key}, not saving cache`,
+        'After the job completes, TEXDIR will be saved to cache with key: '
+          + state.key,
       );
     }
   }
 }
 
-@Exclude()
-class CacheState {
-  static readonly STATE_NAME = 'CACHE';
-
-  @Expose()
-  key?: string | undefined;
-  @Expose()
-  target?: string;
-
-  static restore(): CacheState | undefined {
-    const state = getState(CacheState.STATE_NAME);
-    return state !== ''
-      ? plainToInstance(CacheState, JSON.parse(state))
-      : undefined;
-  }
-
-  save(): void {
-    saveState(CacheState.STATE_NAME, JSON.stringify(instanceToPlain(this)));
+export async function save(): Promise<void> {
+  try {
+    const state = getState(STATE_NAME);
+    if (state !== '') {
+      await plainToInstance(SaveCacheEntry, JSON.parse(state)).save();
+    }
+  } catch (error) {
+    if (error instanceof ReserveCacheError) {
+      log.info(error.message);
+    } else {
+      log.warn('Failed to save to cache', { cause: error });
+    }
   }
 }
 
-function forceUpdate(): boolean {
-  const key = `${ID.SCREAMING_SNAKE_CASE}_FORCE_UPDATE_CACHE`;
-  return (env[key] ?? '0') !== '0';
+class SaveCacheEntry implements CacheEntry {
+  readonly target?: string;
+  readonly key?: string;
+
+  async save(): Promise<void> {
+    if (this.key !== undefined) {
+      if (this.target === undefined) {
+        log.info(
+          `Cache hit occurred on the primary key ${this.key}, not saving cache`,
+        );
+      } else {
+        await saveCache([this.target], this.key);
+        log.info(`${this.target} saved with cache key: ${this.key}`);
+      }
+    }
+  }
 }
 
 class CacheKeys {
-  readonly primary: string;
-  readonly secondary: string;
+  readonly #distribution: `${NodeJS.Platform}-${string}-${Version}`;
+  readonly #digest: string;
+  readonly #id: string;
 
-  #unique: string | undefined;
-
-  constructor(entry: CacheEntry) {
-    this.secondary = `${
-      ID['kebab-case']
-    }-${platform()}-${arch()}-${entry.version}-`;
-    this.primary = this.secondary + digest([...entry.packages]);
+  constructor(entry: Omit<CacheEntryConfig, 'TEXDIR'>) {
+    this.#distribution = `${platform()}-${arch()}-${entry.version}`;
+    this.#digest = digest([...entry.packages]);
+    this.#id = randomString().replaceAll('-', '');
   }
 
-  get unique(): string {
-    return this.#unique ??= `${this.primary}-${randomString()}`;
+  get uniqueKey(): string {
+    return `${this.primaryKey}-${this.#id}`;
   }
 
-  get(): [primaryKey: string, restoreKeys: Array<string>] {
-    return [this.unique, [this.primary, this.secondary]];
+  get primaryKey(): string {
+    return `${this.secondaryKey}${this.#digest}`;
   }
 
-  isPrimary(key: string): boolean {
-    return key.startsWith(this.primary);
+  private get secondaryKey(): string {
+    return `${ID['kebab-case']}-${this.#distribution}-`;
+  }
+
+  get restoreKeys(): [primaryKey: string, ...Array<string>] {
+    return [this.primaryKey, this.secondaryKey];
   }
 }
 
@@ -163,42 +236,4 @@ function digest(obj: unknown): string {
 
 function randomString(): string {
   return randomUUID().replaceAll('-', '');
-}
-
-/** @internal */
-export async function saveCache(
-  target: string,
-  primaryKey: string,
-): Promise<void> {
-  try {
-    await cache.saveCache([target], primaryKey);
-    log.info(`${target} saved with cache key: ${primaryKey}`);
-  } catch (error) {
-    if (error instanceof cache.ReserveCacheError) {
-      log.info(error.message);
-    } else {
-      log.warn('Failed to save to cache', { cause: error });
-    }
-  }
-}
-
-/** @internal */
-export async function restoreCache(
-  target: string,
-  primaryKey: string,
-  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-  restoreKeys: Array<string>,
-): Promise<string | undefined> {
-  let key: string | undefined;
-  try {
-    key = await cache.restoreCache([target], primaryKey, restoreKeys);
-    if (key !== undefined) {
-      log.info(`${target} restored from cache with key: ${key}`);
-    } else {
-      log.info('Cache not found');
-    }
-  } catch (cause) {
-    log.warn('Failed to restore cache', { cause });
-  }
-  return key;
 }
