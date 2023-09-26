@@ -12,6 +12,7 @@ rules:
   '@typescript-eslint/no-empty-function': off
   '@typescript-eslint/no-inferrable-types': off
   '@typescript-eslint/no-namespace': off
+  '@typescript-eslint/no-unsafe-declaration-merging': off
   '@typescript-eslint/require-await': off
   '@typescript-eslint/restrict-template-expressions': off
   node/no-missing-import: off

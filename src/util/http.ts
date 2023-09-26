@@ -10,8 +10,7 @@ export async function getJson<T>(url: string | Readonly<URL>): Promise<T> {
   if (statusCode !== HttpCodes.OK) {
     throw newClientError(statusCode, url);
   }
-  /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    -- `result` should be non-null unless the status is 404. */
+  // `result` should be non-null unless the status is 404.
   return result!;
 }
 
@@ -44,7 +43,6 @@ export async function getLocation(url: string | Readonly<URL>): Promise<URL> {
   if (!REDIRECT_CODES.has(statusCode as HttpCodes)) {
     throw newClientError(statusCode, url);
   }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return new URL(headers.location!);
 }
 
@@ -64,3 +62,5 @@ function newClientError(
   Error.captureStackTrace(error, newClientError);
   return error;
 }
+
+/* eslint @typescript-eslint/no-unsafe-enum-comparison: off */

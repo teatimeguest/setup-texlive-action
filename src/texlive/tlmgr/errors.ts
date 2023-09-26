@@ -57,12 +57,10 @@ export class PackageNotFound extends TlmgrError {
       const pattern = this.PATTERNS.find(({ versions }) => {
         return Version.satisfies(options.version, versions);
       });
-      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       const packages = Array.from(
         output.stderr.matchAll(pattern!.re),
         ([, found]) => found!,
       );
-      /* eslint-enable */
       if (packages.length > 0) {
         throw new this(packages, options);
       }

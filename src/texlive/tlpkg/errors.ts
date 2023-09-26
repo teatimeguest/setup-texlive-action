@@ -30,10 +30,7 @@ export class PackageChecksumMismatch extends TLError {
   ): void {
     const packages = Array.from(
       output.stderr.matchAll(this.RE),
-      ([, found]) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return path.basename(found!, '.tar.xz');
-      },
+      ([, found]) => path.basename(found!, '.tar.xz'),
     );
     if (packages.length > 0) {
       throw new this(packages, options);
