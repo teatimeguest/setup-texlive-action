@@ -1,9 +1,22 @@
+import nock from 'nock';
+
 import { install } from '#/texlive/tlmgr/actions/install';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
 import { ExecResult } from '#/util/exec';
 
+jest.unmock('@actions/http-client');
 jest.unmock('#/texlive/tlmgr/actions/install');
+
+beforeAll(async () => {
+  const shellesc = await fixtures('ctan-api-pkg-shellesc.json');
+  nock('https://ctan.org')
+    .persist()
+    .get('/json/2.0/pkg/shellesc')
+    .reply(200, shellesc);
+});
+
+afterAll(nock.restore);
 
 const setVersion = (version: Version) => {
   set(new TlmgrInternals({ TEXDIR: '', version }), true);
@@ -41,7 +54,7 @@ it.each(
       command: '',
       exitCode,
       stdout: '',
-      stderr: await loadFixture(`tlmgr-install.${version}.stderr`),
+      stderr: await fixtures(`tlmgr-install.${version}.stderr`),
     }),
   );
   await expect(install(['shellesc'])).toResolve();
@@ -50,4 +63,5 @@ it.each(
     new Set(['tools']),
     expect.anything(),
   );
+  expect(nock.isDone()).toBeTrue();
 });

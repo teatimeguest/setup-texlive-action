@@ -6,28 +6,33 @@ import type { Tlpobj } from '#/texlive/tlpkg';
 
 jest.unmock('#/texlive/tlmgr/actions/list');
 
-const tlpdb: Array<Tlpobj> = [];
+const years = ['2008', '2023'] as const;
+const tlpdb = {
+  '2008': new Set<Tlpobj>(),
+  '2023': new Set<Tlpobj>(),
+} as const;
 
 beforeAll(async () => {
-  set(new TlmgrInternals({ TEXDIR: '', version: LATEST_VERSION }));
-  jest.mocked(readFile).mockResolvedValue(await loadFixture('texlive.tlpdb'));
-  for await (const tlpobj of list()) {
-    tlpdb.push(tlpobj);
+  for (const year of years) {
+    set(new TlmgrInternals({ TEXDIR: '', version: year }), true);
+    jest.mocked(readFile).mockResolvedValueOnce(
+      await fixtures(`texlive.${year}.tlpdb`),
+    );
+    for await (const tlpobj of list()) {
+      tlpdb[year].add(tlpobj);
+    }
   }
 });
 
-it.skip('strips comments and escaped line breaks', () => {
-  expect(tlpdb).toContainEqual(
+it('lists texlive.infra', () => {
+  expect(tlpdb['2008']).toContainEqual(
     expect.objectContaining({
-      name: 'latex',
-      version: '2021-11-15 PL1',
-      revision: '61232',
+      name: 'texlive.infra',
+      version: undefined,
+      revision: '12186',
     }),
   );
-});
-
-it('lists texlive.infra', () => {
-  expect(tlpdb).toContainEqual(
+  expect(tlpdb['2023']).toContainEqual(
     expect.objectContaining({
       name: 'texlive.infra',
       version: undefined,
@@ -37,29 +42,48 @@ it('lists texlive.infra', () => {
 });
 
 it('does not list schemes and collections', () => {
-  expect(tlpdb).not.toContainEqual(
+  expect(tlpdb['2008']).not.toContainEqual(
+    expect.objectContaining({ name: 'scheme-minimal' }),
+  );
+  expect(tlpdb['2008']).not.toContainEqual(
+    expect.objectContaining({ name: 'collection-basic' }),
+  );
+  expect(tlpdb['2023']).not.toContainEqual(
     expect.objectContaining({ name: 'scheme-infraonly' }),
   );
 });
 
-it('does not list architecture-specific packages', () => {
-  expect(tlpdb).not.toContainEqual(
+it.each(years)('does not list architecture-specific packages (%s)', (year) => {
+  expect(tlpdb[year]).not.toContainEqual(
     expect.objectContaining({ name: 'kpathsea.x86_64-linux' }),
+  );
+  expect(tlpdb[year]).not.toContainEqual(
+    expect.objectContaining({ name: 'texlive.infra.x86_64-linux' }),
   );
 });
 
 it('does not list texlive metadata', () => {
-  expect(tlpdb).not.toContainEqual(
+  expect(tlpdb['2008']).not.toContainEqual(
+    expect.objectContaining({ name: '00texlive-installation.config' }),
+  );
+  expect(tlpdb['2023']).not.toContainEqual(
     expect.objectContaining({ name: '00texlive.config' }),
   );
 });
 
-it.skip('lists normal packages', () => {
-  expect(tlpdb).toContainEqual(
+it('lists normal packages', () => {
+  expect(tlpdb['2008']).toContainEqual(
+    expect.objectContaining({
+      name: 'pdftex',
+      version: '1.40.9',
+      revision: '12898',
+    }),
+  );
+  expect(tlpdb['2023']).toContainEqual(
     expect.objectContaining({
       name: 'hyphen-base',
-      version: '7.00n',
-      revision: '62142',
+      version: undefined,
+      revision: '66413',
     }),
   );
 });

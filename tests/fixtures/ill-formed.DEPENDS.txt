@@ -1,6 +1,0 @@
-package
-package#
-hard
-soft#
-package foo bar
-soft

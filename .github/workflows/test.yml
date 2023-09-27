@@ -70,7 +70,7 @@ jobs:
       - uses: actions/github-script@v6
         with:
           script: |
-            await require('./tests/delete-caches.cjs')({
+            await require('./tests/e2e/delete-caches.cjs')({
               context,
               core,
               github,
@@ -87,6 +87,6 @@ jobs:
         uses: ./
         with:
           cache: false
-          package-file: tests/fixtures/tl_packages
+          package-file: tests/e2e/tl_packages
           packages: latex-bin
       - run: latex -version

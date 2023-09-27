@@ -1,9 +1,18 @@
 import { env } from 'node:process';
 
 env['TS_JEST_DISABLE_VER_CHECKER'] = true;
+const r = String.raw;
 
 export default {
   clearMocks: true,
+  collectCoverageFrom: [
+    '<rootDir>/src/**/*.ts',
+    '!<rootDir>/**/*.d.ts',
+    '!<rootDir>/src/index.ts',
+    '!<rootDir>/src/globals.ts',
+    '!<rootDir>/src/shim/**',
+  ],
+  coverageProvider: 'v8',
   moduleFileExtensions: ['js', 'ts'],
   moduleNameMapper: {
     '^#/(.*)': '<rootDir>/src/$1',
@@ -12,19 +21,16 @@ export default {
   resetModules: true,
   rootDir: env.npm_config_local_prefix,
   roots: ['<rootDir>/tests', '<rootDir>'],
-  setupFiles: [
-    '<rootDir>/tests/setup.ts',
-  ],
   setupFilesAfterEnv: [
-    '<rootDir>/tests/setup-after-env.ts',
+    '<rootDir>/tests/jest/setup-after-env.ts',
   ],
-  testEnvironment: 'node',
+  testEnvironment: '<rootDir>/tests/jest/environment.ts',
   testMatch: [
     '<rootDir>/tests/__tests__/**/*.test.ts',
   ],
   transform: {
-    '/action/run/main\\.ts$': '##/tests/esbuild-transformer.mjs',
-    '.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tests/tsconfig.json' }],
+    [r`/action/run/main\.ts$`]: '<rootDir>/tests/jest/esbuild-transformer.mjs',
+    [r`.+\.ts$`]: ['ts-jest', { tsconfig: '<rootDir>/tests/tsconfig.json' }],
   },
   verbose: false,
 };

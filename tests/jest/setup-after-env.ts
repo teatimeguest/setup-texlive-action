@@ -1,6 +1,8 @@
 import type {} from 'jest-extended';
 import 'jest-extended/all';
 
+import '#/globals';
+
 for (
   const mod of [
     'fs/promises',
@@ -27,13 +29,11 @@ jest.mock('#/texlive/tlmgr/actions/update');
 jest.mock('#/texlive/tlmgr/actions/version');
 jest.mock('#/texlive/tlpkg/patch');
 jest.mock('#/texlive/tlpkg/util');
-jest.mock('#/util/http');
 
 for (
   const mod of [
     '#/action/cache',
     '#/action/inputs',
-    '#/ctan/api',
     '#/ctan/mirrors',
     '#/tex/kpse',
     '#/texlive/install-tl/profile',
@@ -46,5 +46,5 @@ for (
     '#/util/fs',
   ]
 ) {
-  jest.mock(mod, () => jest.requireActual(`./__mocks__/${mod}`));
+  jest.mock(mod, () => jest.requireActual(`##/tests/__mocks__/${mod}`));
 }

@@ -9,7 +9,7 @@ jest.unmock('#/texlive/tlpkg/patch');
 
 describe('check', () => {
   it('detects forcible removal of packages', async () => {
-    const stderr = await loadFixture('tlpkg-check_file_and_remove.stderr');
+    const stderr = await fixtures('tlpkg-check_file_and_remove.stderr');
     const output = { exitCode: 0, stderr, stdout: '' };
     const result = (async () => tlpkg.PackageChecksumMismatch.check(output))();
     await expect(result).rejects.toThrow(

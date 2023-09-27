@@ -1,0 +1,6 @@
+HTTP/1.1 302 Found
+Date: Thu, 13 Jul 2023 05:18:26 GMT
+Server: Apache
+Location: https://ctan.math.washington.edu/tex-archive/
+Content-Type: text/html; charset=iso-8859-1
+

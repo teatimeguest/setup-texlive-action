@@ -44,7 +44,7 @@ describe('add', () => {
         command: 'tlmgr',
         exitCode: 2,
         stdout: '',
-        stderr: await loadFixture('tlmgr-repository-add.stderr'),
+        stderr: await fixtures('tlmgr-repository-add.stderr'),
       }),
     );
     setVersion('2019');

@@ -19,7 +19,7 @@ const options = {
 };
 
 beforeAll(async () => {
-  const releaseText = await loadFixture('release-texlive.txt');
+  const releaseText = await fixtures('release-texlive.txt');
   jest.mocked(readFile).mockResolvedValue(releaseText);
 });
 
