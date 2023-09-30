@@ -214,4 +214,15 @@ describe('save', () => {
     await expect(save()).toResolve();
     expect(log.warn).toHaveBeenCalled();
   });
+
+  it('checks the return value of saveCache', async () => {
+    jest.mocked(cache.saveCache).mockResolvedValueOnce(-1);
+    jest.mocked(core.getState).mockReturnValueOnce(
+      JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
+    );
+    await expect(save()).toResolve();
+    expect(log.info).not.toHaveBeenCalledWith(
+      expect.stringContaining('saved with cache key:'),
+    );
+  });
 });

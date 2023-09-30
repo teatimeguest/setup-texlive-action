@@ -195,8 +195,9 @@ class SaveCacheEntry implements CacheEntry {
           `Cache hit occurred on the primary key ${this.key}, not saving cache`,
         );
       } else {
-        await saveCache([this.target], this.key);
-        log.info(`${this.target} saved with cache key: ${this.key}`);
+        if (await saveCache([this.target], this.key) !== -1) {
+          log.info(`${this.target} saved with cache key: ${this.key}`);
+        }
       }
     }
   }
