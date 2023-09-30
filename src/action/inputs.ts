@@ -7,7 +7,7 @@ import { defaultMetadataStorage } from 'class-transformer/esm5/storage';
 
 import { ID } from '#/action/id';
 import type { Env } from '#/texlive/install-tl/env';
-import { Case, FromEnv } from '#/util/decorators';
+import { AsPath, Case, FromEnv } from '#/util/decorators';
 
 export class Inputs {
   @BooleanInput
@@ -22,9 +22,11 @@ export class Inputs {
   @Transform(() => path.join(env.RUNNER_TEMP, ID['kebab-case']))
   @FromEnv('TEXLIVE_INSTALL_PREFIX' satisfies keyof Env)
   @Input
+  @AsPath
   readonly prefix!: string;
 
   @Input
+  @AsPath
   readonly texdir: string | undefined;
 
   @BooleanInput

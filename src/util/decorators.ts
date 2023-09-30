@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { env } from 'node:process';
 
 import { Expose, Transform } from 'class-transformer';
@@ -61,6 +62,11 @@ export function Case(
 export function FromEnv(key: string): PropertyDecorator {
   return Transform(({ value }) => env[key] ?? value);
 }
+
+/** Read a string value as path. */
+export const AsPath: PropertyDecorator = Transform<string | undefined>(
+  ({ value }) => value === undefined ? undefined : path.normalize(value),
+);
 
 /* eslint
   @typescript-eslint/ban-types: ["error", { types: { Function: false } }] */

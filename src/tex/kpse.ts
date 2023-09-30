@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import type { Texmf } from '#/tex/texmf';
 import { exec } from '#/util/exec';
 
@@ -10,5 +12,7 @@ export async function varValue(
     ignoreReturnCode: true,
     silent: true,
   });
-  return exitCode === 0 ? stdout.replace(/\r?\n$/u, '') : undefined;
+  return exitCode === 0
+    ? path.normalize(stdout.replace(/\r?\n$/u, ''))
+    : undefined;
 }
