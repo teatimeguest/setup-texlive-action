@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup TeX Live
         uses: ./
         with:
@@ -35,7 +35,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup TeX Live
         uses: ./
         continue-on-error: true
@@ -48,7 +48,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup TeX Live
         id: texlive
         uses: ./
@@ -66,7 +66,7 @@ jobs:
       contents: read
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/github-script@v6
         with:
           script: |
@@ -82,7 +82,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup TeX Live
         uses: ./
         with:
