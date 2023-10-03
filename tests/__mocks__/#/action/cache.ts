@@ -8,6 +8,7 @@ export const { CacheService, DefaultCacheService } = jest.requireActual<
 
 jest.spyOn(DefaultCacheService.prototype, 'restore');
 jest.spyOn(DefaultCacheService.prototype, 'update');
+jest.spyOn(DefaultCacheService.prototype, 'register');
 jest.spyOn(DefaultCacheService.prototype, Symbol.dispose);
 
 const ctx = createContext<InstanceType<typeof CacheService>>();

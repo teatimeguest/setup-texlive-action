@@ -32,11 +32,13 @@ class MockCacheService extends CacheService {
     return this;
   }
   override update() {}
+  override register() {}
   override [Symbol.dispose]() {}
 
   static {
     jest.spyOn(this.prototype, 'restore');
     jest.spyOn(this.prototype, 'update');
+    jest.spyOn(this.prototype, 'register');
     jest.spyOn(this.prototype, Symbol.dispose);
   }
 }

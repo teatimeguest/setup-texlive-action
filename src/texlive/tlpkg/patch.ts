@@ -82,10 +82,10 @@ export async function patch(options: {
           return [linePrefix + p.description + '\n' + stdout.trimEnd()];
         }
         if (exitCode > 1) {
-          log.debug(`git-diff exited with ${exitCode}: ${stderr}`);
+          log.debug('git-diff exited with %d: %s', exitCode, stderr);
         }
-      } catch (cause) {
-        log.debug('Failed to exec git-diff', { cause });
+      } catch (error) {
+        log.debug({ error }, 'Failed to exec git-diff');
       }
       return [];
     };

@@ -10,10 +10,7 @@ export async function add(): Promise<void> {
   try {
     dir = await uniqueChild(path.join(use().TEXDIR, 'bin'));
   } catch (cause) {
-    throw new Error(
-      "Unable to locate TeX Live's binary directory",
-      { cause },
-    );
+    throw new Error("Unable to locate TeX Live's binary directory", { cause });
   }
   addPath(dir);
 }

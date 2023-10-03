@@ -16,7 +16,7 @@ export async function install(packages: Iterable<string>): Promise<void> {
     // `tlmgr install` requires a TeX Live one.
     // To install such packages with tlmgr,
     // the action uses the CTAN API to look up thier names in TeX Live.
-    log.info(`Trying to resolve package names: ${error.packages.join(', ')}`);
+    log.info('Trying to resolve package names: ', error.packages.join(', '));
     const result = await Promise.all(error.packages.map((name) => {
       return resolvePackageName(name);
     }));
@@ -28,7 +28,7 @@ export async function install(packages: Iterable<string>): Promise<void> {
       } else {
         notFound.push(ctanName);
       }
-      log.info(`  ${ctanName} (in CTAN) => ${tlName ?? '???'} (in TeX Live)`);
+      log.info('  %s (in CTAN) => %s (in TeX Live)', ctanName, tlName ?? '???');
     }
     if (notFound.length > 0) {
       throw new PackageNotFound(notFound, { action: 'install' });
@@ -65,9 +65,9 @@ async function resolvePackageName(
     if (pkg.texlive !== undefined) {
       return [name, pkg.texlive];
     }
-    log.info(`Unexpected response: ${JSON.stringify(pkg)}`);
-  } catch (cause) {
-    log.info(`Failed to request package data`, { cause });
+    log.info('Unexpected response: %j', pkg);
+  } catch (error) {
+    log.info({ error }, 'Failed to request package data');
   }
   return [name];
 }

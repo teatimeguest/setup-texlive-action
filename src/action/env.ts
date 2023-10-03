@@ -10,7 +10,7 @@ import type { Version } from '#/texlive/version';
 
 export function init(): void {
   if (!('RUNNER_TEMP' in env)) {
-    log.warn(`\`RUNNER_TEMP\` not defined, ${tmpdir()} will be used instead`);
+    log.warn('`RUNNER_TEMP` not defined, %s will be used instead', tmpdir());
     (env as Record<string, string>)['RUNNER_TEMP'] = tmpdir();
   }
   // Use RUNNER_TEMP as a temporary directory during setup.
@@ -22,7 +22,7 @@ export function init(): void {
   for (const tree of Texmf.SYSTEM_TREES) {
     const key = `TEXLIVE_INSTALL_${tree}` satisfies keyof Env;
     if (tree !== 'TEXMFLOCAL' && key in env) {
-      log.warn(`\`${key}\` is set, but ignored`);
+      log.warn('`%s` is set, but ignored', key);
       delete env[key];
     }
   }

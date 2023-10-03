@@ -9,6 +9,7 @@ import {
   UnexpectedVersion,
 } from '#/texlive/install-tl/errors';
 import type { Profile } from '#/texlive/install-tl/profile';
+import { ReleaseData } from '#/texlive/releases';
 import { PackageChecksumMismatch, TlpdbNotFound, patch } from '#/texlive/tlpkg';
 import { Version } from '#/texlive/version';
 import { exec, extract } from '#/util';
@@ -19,6 +20,7 @@ export interface InstallTLOptions {
 }
 
 export async function installTL(options: InstallTLOptions): Promise<void> {
+  const { isLatest } = ReleaseData.use();
   const { profile } = options;
   const { version } = profile;
   const repository = new URL(options.repository.href);
@@ -45,10 +47,10 @@ export async function installTL(options: InstallTLOptions): Promise<void> {
   });
 
   const errorOptions = { version, repository };
-  if (isHistoric(repository)) {
-    TlpdbNotFound.check(result, errorOptions);
-  } else {
+  if (isLatest(version)) {
     RepositoryVersionIncompatible.check(result, errorOptions);
+  } else {
+    TlpdbNotFound.check(result, errorOptions);
   }
   result.check();
   PackageChecksumMismatch.check(result, errorOptions);
@@ -73,28 +75,29 @@ export function restoreCache(options: InstallTLOptions): string | undefined {
       log.info('Found in tool cache');
       return TEXMFROOT;
     }
-  } catch (cause) {
-    log.info(`Failed to restore ${executable}`, { cause });
+  } catch (error) {
+    log.info({ error }, 'Failed to restore %s', executable);
   }
   return undefined;
 }
 
 /** @internal */
 export async function download(options: InstallTLOptions): Promise<string> {
+  const { isLatest } = ReleaseData.use();
   const { profile: { version }, repository } = options;
   const archive = archiveName();
   const executable = executableName(version);
 
   const url = new URL(archive, repository);
-  log.info(`Downloading ${archive} from ${repository}`);
+  log.info('Downloading %s from %s', archive, url.href);
   const archivePath = await downloadTool(url.href);
 
-  log.info(`Extracting ${executable} from ${archivePath}`);
+  log.info('Extracting %s from %s', executable, archivePath);
   const TEXMFROOT = await extract(
     archivePath,
     platform() === 'win32' ? 'zip' : 'tgz',
   );
-  if (!isHistoric(repository)) {
+  if (isLatest(version)) {
     try {
       await UnexpectedVersion.check(TEXMFROOT, { version, repository });
     } catch (error) {
@@ -118,13 +121,9 @@ async function saveCache(TEXMFROOT: string, version: Version): Promise<void> {
   try {
     log.info('Adding to tool cache');
     await cacheDir(TEXMFROOT, executable, version);
-  } catch (cause) {
-    log.info(`Failed to cache ${executable}`, { cause });
+  } catch (error) {
+    log.info({ error }, 'Failed to cache %s', executable);
   }
-}
-
-function isHistoric(url: Readonly<URL>): boolean {
-  return url.href.includes('historic/systems/texlive');
 }
 
 function executableName(version: Version): string {

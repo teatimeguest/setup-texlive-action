@@ -51,6 +51,9 @@ export class Latest implements Release {
     if (this.#version !== latest) {
       this.#version = latest;
       this.releaseDate = undefined;
+      log.info('A new version of TeX Live has been released: %s', latest);
+    } else {
+      log.info('Latest version: %s', this.version);
     }
   }
 
@@ -59,12 +62,9 @@ export class Latest implements Release {
     try {
       const { version } = await ctan.api.pkg('texlive');
       this.version = Version.parse(version?.number ?? '');
-      log.info(`Latest version: ${this.version}`);
-    } catch (cause) {
-      log.info('Failed to check for latest version', { cause });
-      log.info(
-        `Use \`${this.version}\` as the latest version`,
-      );
+    } catch (error) {
+      log.info({ error }, 'Failed to check for latest version');
+      log.info('Use `%s` as latest version', this.version);
     }
     return this.version;
   }

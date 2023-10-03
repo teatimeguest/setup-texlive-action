@@ -33,8 +33,8 @@ export async function texmf(
       // Minimal initialisation.
       await tlpkg.makeLocalSkeleton(value, internals);
       await exec('mktexlsr', [value]);
-    } catch (cause) {
-      log.info('Failed to initialize TEXMFLOCAL', { cause });
+    } catch (error) {
+      log.info({ error }, 'Failed to initialize %s', key);
     }
   }
 }

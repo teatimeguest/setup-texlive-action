@@ -1,8 +1,9 @@
 import { homedir } from 'node:os';
 import process from 'node:process';
 
+import * as core from '@actions/core';
+
 import { init, setDefaultTexmfUserTrees } from '#/action/env';
-import * as log from '#/log';
 
 jest.unmock('#/action/env');
 
@@ -19,8 +20,9 @@ describe('init', () => {
     process.env.TEXLIVE_INSTALL_TEXDIR = '<texdir>';
     init();
     expect(process.env).not.toHaveProperty('TEXLIVE_INSTALL_TEXDIR');
-    expect(log.warn).toHaveBeenCalledWith(
-      '`TEXLIVE_INSTALL_TEXDIR` is set, but ignored',
+    expect(core.warning).toHaveBeenCalledOnce();
+    expect(jest.mocked(core.warning).mock.calls[0]?.[0]).toMatchInlineSnapshot(
+      `"\`TEXLIVE_INSTALL_TEXDIR\` is set, but ignored"`,
     );
   });
 

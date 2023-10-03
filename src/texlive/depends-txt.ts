@@ -24,8 +24,8 @@ export function* parse(input: string): Generator<Dependency, void> {
     let packageName: string | undefined = s.trim();
     if (packageName === '' || RE.whitespaces.test(packageName)) {
       log.warn(
-        '`package` directive must have exactly one argument, but given: '
-          + JSON.stringify(packageName),
+        '`package` directive must have exactly one argument, but given: %j',
+        packageName,
       );
       packageName = undefined;
     }

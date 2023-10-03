@@ -1,4 +1,4 @@
-import { getState, saveState, setFailed } from '@actions/core';
+import { getState, saveState } from '@actions/core';
 
 import { main } from '#/action/run/main';
 import { post } from '#/action/run/post';
@@ -8,17 +8,12 @@ export async function run(): Promise<void> {
   const state = 'POST';
   try {
     if (getState(state) === '') {
-      await main();
       saveState(state, '1');
+      await main();
     } else {
       await post();
     }
   } catch (error) {
-    if (error instanceof Error) {
-      log.info(error.stack ?? `${error}`);
-      setFailed(error.message);
-    } else {
-      setFailed(`${error}`);
-    }
+    log.fatal({ error }, 'Failed to setup TeX Live');
   }
 }

@@ -44,6 +44,7 @@ export abstract class CacheService extends CacheInfo implements Disposable {
 
   abstract restore(): Promise<CacheInfo>;
   abstract update(): void;
+  abstract register(): void;
 
   get disabled(): boolean {
     return !this.enabled;
@@ -86,6 +87,7 @@ export class DefaultCacheService extends CacheService {
     return this;
   }
   override update(): void {}
+  override register(): void {}
 }
 
 interface CacheEntry {
@@ -120,13 +122,13 @@ export class ActionsCacheService extends CacheService implements CacheEntry {
         this.#keys.uniqueKey,
         this.#keys.restoreKeys,
       );
-      log.info(
-        this.#matchedKey !== undefined
-          ? `${this.target} restored from cache with key: ${this.#matchedKey}`
-          : 'Cache not found',
-      );
-    } catch (cause) {
-      log.warn('Failed to restore cache', { cause });
+      if (this.#matchedKey === undefined) {
+        log.info('Cache not found');
+      } else {
+        log.info('%s restored from cache with key: %s', this.target, this.key);
+      }
+    } catch (error) {
+      log.warn({ error }, 'Failed to restore cache');
     }
     return this;
   }
@@ -154,16 +156,16 @@ export class ActionsCacheService extends CacheService implements CacheEntry {
     }
   }
 
-  override [Symbol.dispose](): void {
-    super[Symbol.dispose]();
+  override register(): void {
     const state = instanceToPlain<CacheEntry>(this, {
       groups: (this.#forceUpdate || !this.hit) ? ['update'] : [],
     });
     saveState(STATE_NAME, state);
     if ('target' in state) {
       log.info(
-        'After the job completes, TEXDIR will be saved to cache with key: '
-          + state.key,
+        'After the job completes, %s will be saved to cache with key: %s',
+        state.target,
+        state.key,
       );
     }
   }
@@ -179,7 +181,7 @@ export async function save(): Promise<void> {
     if (error instanceof ReserveCacheError) {
       log.info(error.message);
     } else {
-      log.warn('Failed to save to cache', { cause: error });
+      log.warn({ error }, 'Failed to save to cache');
     }
   }
 }
@@ -192,11 +194,12 @@ class SaveCacheEntry implements CacheEntry {
     if (this.key !== undefined) {
       if (this.target === undefined) {
         log.info(
-          `Cache hit occurred on the primary key ${this.key}, not saving cache`,
+          'Cache hit occurred on the primary key %s, not saving cache',
+          this.key,
         );
       } else {
         if (await saveCache([this.target], this.key) !== -1) {
-          log.info(`${this.target} saved with cache key: ${this.key}`);
+          log.info('%s saved with cache key: %s', this.target, this.key);
         }
       }
     }

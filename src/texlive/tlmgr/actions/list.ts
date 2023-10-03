@@ -20,8 +20,8 @@ export async function* list(): AsyncGenerator<Tlpobj, void, void> {
   let db: string;
   try {
     db = await readFile(tlpdbPath, 'utf8');
-  } catch (cause) {
-    log.info(`Failed to read ${tlpdbPath}`, { cause });
+  } catch (error) {
+    log.info({ error }, 'Failed to read %s', tlpdbPath);
     return;
   }
   try {
@@ -32,7 +32,7 @@ export async function* list(): AsyncGenerator<Tlpobj, void, void> {
         yield { name, version, revision };
       }
     }
-  } catch (cause) {
-    log.info(`Failed to parse ${tlpdbPath}`, { cause });
+  } catch (error) {
+    log.info({ error }, 'Failed to parse %s', tlpdbPath);
   }
 }

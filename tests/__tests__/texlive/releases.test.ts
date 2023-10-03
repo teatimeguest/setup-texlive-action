@@ -1,6 +1,6 @@
+import * as core from '@actions/core';
 import nock from 'nock';
 
-import * as log from '#/log';
 import { Latest, ReleaseData } from '#/texlive/releases';
 
 jest.unmock('@actions/http-client');
@@ -31,9 +31,8 @@ describe('LatestRelease', () => {
 
     it('throws no exception', async () => {
       await expect(new Latest().checkVersion()).toResolve();
-      expect(log.info).toHaveBeenCalledWith(
+      expect(core.info).toHaveBeenCalledWith(
         expect.stringContaining('Failed to check'),
-        expect.anything(),
       );
     });
   });

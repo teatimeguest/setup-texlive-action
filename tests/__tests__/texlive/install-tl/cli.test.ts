@@ -1,9 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import os from 'node:os';
 
+import * as core from '@actions/core';
 import * as tool from '@actions/tool-cache';
 
-import * as log from '#/log';
 import { download, restoreCache } from '#/texlive/install-tl/cli';
 import { Profile } from '#/texlive/install-tl/profile';
 import * as util from '#/util';
@@ -39,7 +39,10 @@ describe('restore', () => {
     jest.mocked(os.platform).mockReturnValue('linux');
     jest.mocked(tool.find).mockImplementationOnce(fail);
     expect(restoreCache(options)).toBeUndefined();
-    expect(log.info).toHaveBeenCalled();
+    expect(core.info).toHaveBeenCalledOnce();
+    expect(jest.mocked(core.info).mock.calls[0]?.[0]).toMatchInlineSnapshot(
+      `"Failed to restore install-tl: Error"`,
+    );
   });
 });
 
@@ -61,6 +64,18 @@ describe('download', () => {
     jest.mocked(os.platform).mockReturnValue('linux');
     jest.mocked(tool.cacheDir).mockImplementationOnce(fail);
     await expect(download(options)).toResolve();
-    expect(log.info).toHaveBeenCalled();
+    expect(core.info).toHaveBeenCalledTimes(4);
+    expect(jest.mocked(core.info).mock.calls[0]?.[0]).toMatchInlineSnapshot(
+      `"Downloading install-tl-unx.tar.gz from https://example.com/install-tl-unx.tar.gz"`,
+    );
+    expect(jest.mocked(core.info).mock.calls[1]?.[0]).toMatchInlineSnapshot(
+      `"Extracting install-tl from <downloadTool>"`,
+    );
+    expect(jest.mocked(core.info).mock.calls[2]?.[0]).toMatchInlineSnapshot(
+      `"Adding to tool cache"`,
+    );
+    expect(jest.mocked(core.info).mock.calls[3]?.[0]).toMatchInlineSnapshot(
+      `"Failed to cache install-tl: Error"`,
+    );
   });
 });

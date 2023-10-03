@@ -41,7 +41,7 @@ export async function main(): Promise<void> {
       const repository = isLatest(profile.version)
         ? await tlnet.ctan()
         : tlnet.historic(profile.version);
-      log.info(`Main repository: ${repository}`);
+      log.info('Main repository: %s', repository);
       await installTL({ profile, repository });
     });
   }
@@ -50,18 +50,23 @@ export async function main(): Promise<void> {
   await tlmgr.path.add();
 
   if (cache.restored) {
-    await log.group('Updating tlmgr', async () => {
-      try {
-        await tlmgr.update({ self: true });
-      } catch (error) {
-        if (error instanceof TLVersionOutdated) {
-          await updateRepository(profile.version);
-          cache.update();
-        } else {
-          throw error;
+    await log.group(
+      isLatest(profile.version)
+        ? 'Updating tlmgr'
+        : 'Checking the package repository status',
+      async () => {
+        try {
+          await tlmgr.update({ self: true });
+        } catch (error) {
+          if (error instanceof TLVersionOutdated) {
+            await updateRepository(profile.version);
+            cache.update();
+          } else {
+            throw error;
+          }
         }
-      }
-    });
+      },
+    );
     if (config.updateAllPackages) {
       await log.group(`Updating packages`, async () => {
         await tlmgr.update({ all: true, reinstallForciblyRemoved: true });
@@ -87,10 +92,11 @@ export async function main(): Promise<void> {
     await tlmgr.version();
     log.info('Package version:');
     for await (const { name, version, revision } of tlmgr.list()) {
-      log.info(`  ${name}: ${version ?? `rev${revision}`}`);
+      log.info('  %s: %s', name, version ?? `rev${revision}`);
     }
   });
 
+  cache.register();
   setOutput('version', config.version);
 }
 
@@ -98,7 +104,7 @@ async function updateRepository(version: Version): Promise<void> {
   const tlmgr = Tlmgr.use();
   const tag = 'main';
   const historic = tlnet.historic(version, { master: true });
-  log.info(`Changing the ${tag} repository to ${historic}`);
+  log.info('Changing the %s repository to %s', tag, historic.href);
   await tlmgr.repository.remove(tag);
   await tlmgr.repository.add(historic, tag);
   await tlmgr.update({ self: true });

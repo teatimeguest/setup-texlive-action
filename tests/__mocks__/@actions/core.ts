@@ -9,4 +9,5 @@ module.exports = {
   setFailed: jest.fn((error) => {
     throw new Error(`${error}`);
   }),
+  isDebug: jest.fn().mockReturnValue(true),
 };

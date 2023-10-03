@@ -7,7 +7,6 @@ import {
   DefaultCacheService,
   save,
 } from '#/action/cache';
-import * as log from '#/log';
 
 jest.unmock('#/action/cache');
 
@@ -94,7 +93,9 @@ describe('ActionsCacheService', () => {
     it('never throws', async () => {
       jest.mocked(cache.restoreCache).mockImplementationOnce(restore.fail);
       await expect(new ActionsCacheService(entry).restore()).toResolve();
-      expect(log.warn).toHaveBeenCalled();
+      expect(core.warning).toHaveBeenCalledOnce();
+      expect(jest.mocked(core.warning).mock.lastCall?.[0])
+        .toMatchInlineSnapshot(`"Failed to restore cache: Error"`);
     });
   });
 
@@ -130,6 +131,7 @@ describe('ActionsCacheService', () => {
     const run = async () => {
       const service = new ActionsCacheService(entry);
       await service.restore();
+      service.register();
       service[Symbol.dispose]();
     };
 
@@ -212,7 +214,10 @@ describe('save', () => {
       JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
     );
     await expect(save()).toResolve();
-    expect(log.warn).toHaveBeenCalled();
+    expect(core.warning).toHaveBeenCalledOnce();
+    expect(jest.mocked(core.warning).mock.lastCall?.[0]).toMatchInlineSnapshot(
+      `"Failed to save to cache: Error"`,
+    );
   });
 
   it('checks the return value of saveCache', async () => {
@@ -221,7 +226,7 @@ describe('save', () => {
       JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
     );
     await expect(save()).toResolve();
-    expect(log.info).not.toHaveBeenCalledWith(
+    expect(core.info).not.toHaveBeenCalledWith(
       expect.stringContaining('saved with cache key:'),
     );
   });

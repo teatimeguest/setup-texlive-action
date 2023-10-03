@@ -1,10 +1,11 @@
 import fs from 'node:fs/promises';
 import { platform } from 'node:os';
 
+import * as core from '@actions/core';
+
 import { Config } from '#/action/config';
 import * as env from '#/action/env';
 import { Inputs } from '#/action/inputs';
-import * as log from '#/log';
 import { ReleaseData } from '#/texlive/releases';
 
 jest.unmock('#/action/config');
@@ -89,7 +90,10 @@ describe('tlcontrib', () => {
       version: '2020',
     });
     await expect(Config.load()).resolves.toHaveProperty('tlcontrib', false);
-    expect(log.warn).toHaveBeenCalled();
+    expect(core.warning).toHaveBeenCalledOnce();
+    expect(jest.mocked(core.warning).mock.calls[0]?.[0]).toMatchInlineSnapshot(
+      `"TLContrib cannot be used with an older version of TeX Live"`,
+    );
   });
 });
 
@@ -104,7 +108,10 @@ describe('updateAllPackages', () => {
       'updateAllPackages',
       false,
     );
-    expect(log.info).toHaveBeenCalled();
+    expect(core.info).toHaveBeenCalledOnce();
+    expect(jest.mocked(core.info).mock.calls[0]?.[0]).toMatchInlineSnapshot(
+      `"\`update-all-packages\` is ignored for older versions"`,
+    );
   });
 });
 
