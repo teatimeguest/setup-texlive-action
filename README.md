@@ -136,8 +136,18 @@ All inputs are optional.
 The action reads the following environment variable:
 
 <table>
-<tr><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><code>SETUP_TEXLIVE_&#x200B;FORCE_UPDATE_CACHE</code></td><td>String</td><td><div>
+  <tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>
+      <code>SETUP_TEXLIVE_&#x200B;FORCE_UPDATE_CACHE</code>
+    </td>
+    <td>String</td>
+    <td>
+      <div>
 
 Setting this to anything other than `0`, the action will use
 [a unique cache key each time][update-cache] to keep the cache up-to-date.
@@ -145,7 +155,10 @@ Setting this to anything other than `0`, the action will use
 > [!WARNING]\
 > Enabling this will consume more [cache space][cache-limits].
 
-</div><strong>Default:&ensp;</strong><var>unset</var></td></tr>
+</div>
+      <strong>Default:&ensp;</strong><var>unset</var>
+    </td>
+  </tr>
 </table>
 
 In addition,

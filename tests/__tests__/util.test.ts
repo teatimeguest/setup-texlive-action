@@ -25,10 +25,10 @@ describe('extract', () => {
     expect(tool.extractZip).toHaveBeenCalledWith('<zipfile>');
   });
 
-  it.each<[Array<string>]>([[[]], [['', '']]])(
+  it.each<[string[]]>([[[]], [['', '']]])(
     'throws an exception if the directory cannot be located',
     async (files) => {
-      jest.spyOn(fs, 'readdir').mockResolvedValueOnce(files as Array<any>);
+      jest.spyOn(fs, 'readdir').mockResolvedValueOnce(files as any[]);
       jest.spyOn(tool, 'extractZip').mockResolvedValueOnce('<extractZip>');
       await expect(extract('<zipfile>', 'zip')).rejects.toThrow(
         'Unable to locate unzipped subdirectory',

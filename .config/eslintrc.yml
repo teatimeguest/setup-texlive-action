@@ -4,37 +4,76 @@ extends:
   - plugin:@typescript-eslint/eslint-recommended
   - plugin:@typescript-eslint/recommended
   - plugin:@typescript-eslint/recommended-requiring-type-checking
+  - plugin:import/recommended
+  - plugin:import/typescript
   - plugin:node/recommended
-  - prettier
 parserOptions:
   warnOnUnsupportedTypeScriptVersion: false
-rules:
-  '@typescript-eslint/no-empty-function': off
-  '@typescript-eslint/no-inferrable-types': off
-  '@typescript-eslint/no-namespace': off
-  '@typescript-eslint/no-unsafe-declaration-merging': off
-  '@typescript-eslint/require-await': off
-  '@typescript-eslint/restrict-template-expressions': off
-  node/no-missing-import: off
-  node/no-unpublished-import: off
-  node/no-unsupported-features/es-syntax: off
+reportUnusedDisableDirectives: true
 ignorePatterns:
   - /src/index.ts
   - /src/types.d.ts
-  - /tests/setup.ts
-reportUnusedDisableDirectives: true
+settings:
+  import/internal-regex: ^#/
+rules:
+  eqeqeq: error
+  no-extra-boolean-cast: off
+  no-implicit-coercion: error
+  no-inner-declarations: off
+  no-mixed-operators: error
+  no-new-object: error
+  no-new-wrappers: error
+  no-useless-return: error
+  prefer-const: error
+  prefer-exponentiation-operator: error
+  prefer-numeric-literals: error
+  prefer-object-spread: error
+  prefer-promise-reject-errors: error
+  prefer-regex-literals: error
+  require-unicode-regexp: error
+  '@typescript-eslint/array-type':
+    - error
+    - default: array
+  '@typescript-eslint/consistent-type-assertions':
+    - error
+    - assertionStyle: as
+  '@typescript-eslint/consistent-type-definitions':
+    - error
+    - interface
+  '@typescript-eslint/dot-notation': error
+  '@typescript-eslint/no-empty-function': off
+  '@typescript-eslint/no-empty-interface': off
+  '@typescript-eslint/no-inferrable-types': off
+  '@typescript-eslint/no-namespace': off
+  '@typescript-eslint/no-unsafe-declaration-merging': off
+  '@typescript-eslint/prefer-namespace-keyword': error
+  '@typescript-eslint/prefer-nullish-coalescing': error
+  '@typescript-eslint/prefer-optional-chain': error
+  '@typescript-eslint/require-await': off
+  '@typescript-eslint/restrict-template-expressions': off
+  import/first: error
+  import/newline-after-import: error
+  import/no-unresolved: off
+  import/order:
+    - error
+    - groups: [builtin, external, internal, object]
+      pathGroups:
+        - pattern: "#/**/*.json"
+          group: internal
+          position: after
+      newlines-between: always
+      alphabetize:
+        order: asc
+  node/no-missing-import: off
+  node/no-unpublished-import: off
+  node/no-unsupported-features/es-syntax: off
 overrides:
   - files: "./src/**/*.ts"
     parserOptions:
       project: ./tsconfig.json
     extends:
-      - plugin:import/recommended
-      - plugin:import/typescript
-      - plugin:unicorn/all
-    settings:
-      import/internal-regex: ^#/
+      - plugin:unicorn/recommended
     rules:
-      eqeqeq: error
       func-style:
         - error
         - declaration
@@ -42,35 +81,11 @@ overrides:
       no-await-in-loop: error
       no-constructor-return: error
       no-eval: error
-      no-extra-boolean-cast: off
-      no-implicit-coercion: error
-      no-inner-declarations: off
-      no-mixed-operators: error
-      no-new-object: error
-      no-new-wrappers: error
       no-underscore-dangle: error
       no-useless-rename: error
-      no-useless-return: error
       one-var:
         - error
         - never
-      prefer-const: error
-      prefer-exponentiation-operator: error
-      prefer-numeric-literals: error
-      prefer-object-spread: error
-      prefer-promise-reject-errors: error
-      prefer-regex-literals: error
-      require-unicode-regexp: error
-      '@typescript-eslint/array-type':
-        - error
-        - default: generic
-      '@typescript-eslint/consistent-type-assertions':
-        - error
-        - assertionStyle: as
-      '@typescript-eslint/consistent-type-definitions':
-        - error
-        - interface
-      '@typescript-eslint/dot-notation': error
       '@typescript-eslint/explicit-function-return-type':
         - error
         - allowExpressions: true
@@ -102,7 +117,6 @@ overrides:
         - selector: typeLike
           format: [PascalCase]
       '@typescript-eslint/no-confusing-void-expression': error
-      '@typescript-eslint/no-empty-interface': off
       '@typescript-eslint/no-implied-eval': error
       '@typescript-eslint/no-invalid-this': error
       '@typescript-eslint/no-loop-func': error
@@ -117,11 +131,7 @@ overrides:
       '@typescript-eslint/no-unused-vars':
         - error
         - ignoreRestSiblings: true
-      '@typescript-eslint/noinferrable-types': off
       '@typescript-eslint/non-nullable-type-assertion-style': error
-      '@typescript-eslint/prefer-namespace-keyword': error
-      '@typescript-eslint/prefer-nullish-coalescing': error
-      '@typescript-eslint/prefer-optional-chain': error
       '@typescript-eslint/prefer-readonly-parameter-types':
         - error
         - ignoreInferredTypes: true
@@ -140,8 +150,6 @@ overrides:
           allowNumber: false
           allowString: false
       '@typescript-eslint/switch-exhaustiveness-check': error
-      import/first: error
-      import/newline-after-import: error
       import/no-commonjs: error
       import/no-duplicates: error
       import/no-namespace:
@@ -149,27 +157,19 @@ overrides:
         - ignore: ["*#/**", "@actions/*"]
       import/no-import-module-exports: error
       import/no-relative-packages: error
-      import/no-unresolved: off
-      import/order:
+      node/prefer-global/buffer:
         - error
-        - groups: [builtin, external, internal, object]
-          pathGroups:
-            - pattern: "#/**/*.json"
-              group: internal
-              position: after
-          newlines-between: always
-          alphabetize:
-            order: asc
+        - never
       node/prefer-global/process:
         - error
         - never
       node/prefer-global/url: error
+      node/prefer-global/url-search-params: error
       unicorn/catch-error-name: off
       unicorn/consistent-function-scoping: off
       unicorn/custom-error-definition: off
       unicorn/no-array-for-each: off
       unicorn/no-array-reduce: off
-      unicorn/no-keyword-prefix: off
       unicorn/no-negated-condition: off
       unicorn/prefer-export-from: off
       unicorn/prefer-number-properties:

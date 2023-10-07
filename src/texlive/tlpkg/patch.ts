@@ -1,3 +1,4 @@
+import type { Buffer } from 'node:buffer';
 import { readFile, writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import path from 'node:path';
@@ -11,11 +12,11 @@ interface Patch {
   readonly platforms?: NodeJS.Platform;
   readonly versions?: { readonly since?: Version; readonly until?: Version };
   readonly file: string;
-  readonly from: ReadonlyArray<string | Readonly<RegExp>>;
-  readonly to: ReadonlyArray<string>;
+  readonly from: readonly (string | Readonly<RegExp>)[];
+  readonly to: readonly string[];
 }
 
-const PATCHES: ReadonlyArray<Patch> = [{
+const PATCHES: readonly Patch[] = [{
   description: 'Fixes a syntax error.',
   versions: { since: '2009', until: '2011' },
   file: 'tlpkg/TeXLive/TLWinGoo.pm',
@@ -60,7 +61,7 @@ export async function patch(options: {
     const diff = async (
       changed: Readonly<Buffer> | string,
       p: Patch,
-    ): Promise<ReadonlyArray<string>> => {
+    ): Promise<string[]> => {
       try {
         const linePrefix = '\u001B[34m>\u001B[0m '; // chalk.blue('> ')
         const { exitCode, stdout, stderr } = await exec('git', [
@@ -89,7 +90,7 @@ export async function patch(options: {
       return [];
     };
 
-    const apply = async (p: Patch): Promise<ReadonlyArray<string>> => {
+    const apply = async (p: Patch): Promise<string[]> => {
       const target = path.join(options.TEXMFROOT, p.file);
       const content = p.from.reduce<string>(
         (s, from, i) => s.replace(from, p.to[i] ?? ''),

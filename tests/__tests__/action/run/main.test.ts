@@ -107,7 +107,7 @@ it.each(cacheTypes)(
     setCacheType(kind);
     await expect(main()).toResolve();
     expect(tlmgr.path.add).not.toHaveBeenCalledBefore(
-      jest.mocked<(...args: Array<any>) => unknown>(
+      jest.mocked<(...args: any[]) => unknown>(
         MockCacheService.prototype.restore,
       ),
     );

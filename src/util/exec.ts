@@ -15,7 +15,7 @@ export type ExecOutput = actions.ExecOutput;
 export interface ExecResultConfig
   extends Omit<ExecResult, 'args' | 'check' | 'config'>
 {
-  args?: ReadonlyArray<string> | undefined;
+  args?: readonly string[] | undefined;
 }
 
 export class ExecResult implements Readonly<ExecOutput> {
@@ -25,7 +25,7 @@ export class ExecResult implements Readonly<ExecOutput> {
     return this.config.command;
   }
 
-  get args(): ReadonlyArray<string> | undefined {
+  get args(): readonly string[] | undefined {
     return this.config.args;
   }
 
@@ -69,7 +69,7 @@ export class ExecError extends Error {
 export async function exec(
   command: string,
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
-  args?: Array<string>,
+  args?: string[],
   // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
   options?: ExecOptions,
 ): Promise<ExecResult> {

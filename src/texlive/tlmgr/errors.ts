@@ -27,7 +27,7 @@ export class TlmgrError extends TLError implements TlmgrErrorOptions {
 @Exception
 export class PackageNotFound extends TlmgrError {
   constructor(
-    readonly packages: ReadonlyArray<string>,
+    readonly packages: readonly string[],
     options: Readonly<TlmgrErrorOptions>,
   ) {
     super('Some packages not found in the repository', options);

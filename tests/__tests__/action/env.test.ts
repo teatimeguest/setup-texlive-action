@@ -25,8 +25,8 @@ describe('init', () => {
   });
 
   it('favors user settings over default values', () => {
-    process.env['TEXLIVE_INSTALL_PREFIX'] = '<PREFIX>';
-    process.env['NOPERLDOC'] = 'true';
+    process.env.TEXLIVE_INSTALL_PREFIX = '<PREFIX>';
+    process.env.NOPERLDOC = 'true';
     init();
     expect(process.env).toMatchObject({
       TEXLIVE_INSTALL_PREFIX: '<PREFIX>',

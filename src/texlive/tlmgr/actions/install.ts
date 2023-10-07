@@ -20,7 +20,7 @@ export async function install(packages: Iterable<string>): Promise<void> {
     const result = await Promise.all(error.packages.map((name) => {
       return resolvePackageName(name);
     }));
-    const notFound = [] as Array<string>;
+    const notFound = [] as string[];
     const resolved = new Set<string>();
     for (const [ctanName, tlName] of result) {
       if (tlName !== undefined) {

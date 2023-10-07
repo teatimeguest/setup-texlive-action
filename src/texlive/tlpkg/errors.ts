@@ -11,7 +11,7 @@ import { Exception, type ExecOutput } from '#/util';
 @Exception
 export class PackageChecksumMismatch extends TLError {
   private constructor(
-    readonly packages: ReadonlyArray<string>,
+    readonly packages: readonly string[],
     options?: Readonly<TLErrorOptions>,
   ) {
     super('The checksums of some packages did not match', options);

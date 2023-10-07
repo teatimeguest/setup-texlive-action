@@ -109,7 +109,7 @@ async function adjustTexmf(profile: Profile): Promise<void> {
   const keys = [
     'TEXMFLOCAL',
     ...Texmf.USER_TREES,
-  ] as const satisfies ReadonlyArray<keyof Texmf>;
+  ] as const satisfies readonly (keyof Texmf)[];
   const entries = await Promise
     .all(keys.map(async (key) => {
       const value = profile[key];

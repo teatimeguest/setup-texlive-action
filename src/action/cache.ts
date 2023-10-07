@@ -30,7 +30,7 @@ export interface CacheEntryConfig {
 }
 
 export interface CacheServiceConfig {
-  /** @defaultValue `false` */
+  /** @defaultValue `true` */
   readonly enable?: boolean;
 }
 
@@ -226,7 +226,7 @@ class CacheKeys {
     return `${ID['kebab-case']}-${this.#distribution}-`;
   }
 
-  get restoreKeys(): [primaryKey: string, ...Array<string>] {
+  get restoreKeys(): [primaryKey: string, ...string[]] {
     return [this.primaryKey, this.secondaryKey];
   }
 }
