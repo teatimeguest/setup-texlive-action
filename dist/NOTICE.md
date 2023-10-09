@@ -1,14 +1,61 @@
 # Third-Party Software Licenses
 
-This software incorporates the following third-party software components.
+This software incorporates the following third-party software components:
+
+- [`@abraham/reflection`](#abrahamreflection)
+- [`@actions/cache`](#actionscache)
+- [`@actions/core`](#actionscore)
+- [`@actions/exec`](#actionsexec)
+- [`@actions/glob`](#actionsglob)
+- [`@actions/http-client`](#actionshttp-client)
+- [`@actions/io`](#actionsio)
+- [`@actions/tool-cache`](#actionstool-cache)
+- [`@azure/core-auth`](#azurecore-auth)
+- [`@azure/core-http`](#azurecore-http)
+- [`@azure/core-lro`](#azurecore-lro)
+- [`@azure/core-paging`](#azurecore-paging)
+- [`@azure/core-tracing`](#azurecore-tracing)
+- [`@azure/core-util`](#azurecore-util)
+- [`@azure/logger`](#azurelogger)
+- [`@azure/storage-blob`](#azurestorage-blob)
+- [`@opentelemetry/api`](#opentelemetryapi)
+- [`asynckit`](#asynckit)
+- [`balanced-match`](#balanced-match)
+- [`brace-expansion`](#brace-expansion)
+- [`class-transformer`](#class-transformer)
+- [`combined-stream`](#combined-stream)
+- [`concat-map`](#concat-map)
+- [`core-js`](#core-js)
+- [`delayed-stream`](#delayed-stream)
+- [`deline`](#deline)
+- [`form-data`](#form-data)
+- [`lru-cache`](#lru-cache)
+- [`mime-db`](#mime-db)
+- [`mime-types`](#mime-types)
+- [`minimatch`](#minimatch)
+- [`node-fetch`](#node-fetch)
+- [`sax`](#sax)
+- [`scule`](#scule)
+- [`semver`](#semver)
+- [`temporal-polyfill`](#temporal-polyfill)
+- [`ts-mixer`](#ts-mixer)
+- [`tslib`](#tslib)
+- [`tunnel`](#tunnel)
+- [`unctx`](#unctx)
+- [`uuid`](#uuid)
+- [`xml2js`](#xml2js)
+- [`xmlbuilder`](#xmlbuilder)
+- [`yallist`](#yallist)
+
+------
 
 ## `@abraham/reflection`
 
-Copyright (c) Abraham Williams &lt;4braham@gmail.com&gt;
+Copyright (c) Abraham Williams \<4braham@gmail.com\>
 
 URL: <https://github.com/abraham/reflection#readme>
 
-License: MIT
+License: `MIT`
 
 ```
 Copyright 2018 Abraham Williams
@@ -24,7 +71,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 URL: <https://github.com/actions/toolkit/tree/main/packages/cache>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -42,7 +89,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 URL: <https://github.com/actions/toolkit/tree/main/packages/core>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -60,7 +107,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 URL: <https://github.com/actions/toolkit/tree/main/packages/exec>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -78,7 +125,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 URL: <https://github.com/actions/toolkit/tree/main/packages/glob>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -96,7 +143,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 URL: <https://github.com/actions/toolkit/tree/main/packages/http-client>
 
-License: MIT
+License: `MIT`
 
 ```
 Actions Http Client for Node.js
@@ -126,7 +173,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 URL: <https://github.com/actions/toolkit/tree/main/packages/io>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -144,7 +191,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 URL: <https://github.com/actions/toolkit/tree/main/packages/tool-cache>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -158,45 +205,13 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-## `@azure/abort-controller`
-
-Copyright (c) Microsoft Corporation
-
-URL: <https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/core/abort-controller/README.md>
-
-License: MIT
-
-```
-The MIT License (MIT)
-
-Copyright (c) 2020 Microsoft
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
 ## `@azure/core-auth`
 
 Copyright (c) Microsoft Corporation
 
 URL: <https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/core/core-auth/README.md>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -228,7 +243,7 @@ Copyright (c) Microsoft Corporation
 
 URL: <https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/core/core-http/README.md>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -260,7 +275,7 @@ Copyright (c) Microsoft Corporation
 
 URL: <https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/core/core-lro/README.md>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -292,7 +307,7 @@ Copyright (c) Microsoft Corporation
 
 URL: <https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/core/core-paging/README.md>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -324,7 +339,7 @@ Copyright (c) Microsoft Corporation
 
 URL: <https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/core/core-tracing/README.md>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -356,7 +371,7 @@ Copyright (c) Microsoft Corporation
 
 URL: <https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/core/core-util/>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -388,7 +403,7 @@ Copyright (c) Microsoft Corporation
 
 URL: <https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/core/logger/README.md>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -420,7 +435,7 @@ Copyright (c) Microsoft Corporation
 
 URL: <https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/storage/storage-blob/>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -452,7 +467,7 @@ Copyright (c) OpenTelemetry Authors
 
 URL: <https://github.com/open-telemetry/opentelemetry-js/tree/main/api>
 
-License: Apache-2.0
+License: `Apache-2.0`
 
 ```
                                  Apache License
@@ -660,11 +675,11 @@ License: Apache-2.0
 
 ## `asynckit`
 
-Copyright (c) Alex Indigo &lt;iam@alexindigo.com&gt;
+Copyright (c) Alex Indigo \<iam@alexindigo.com\>
 
 URL: <https://github.com/alexindigo/asynckit#readme>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -696,7 +711,7 @@ Copyright (c) Julian Gruber \<<mail@juliangruber.com>\> (<http://juliangruber.co
 
 URL: <https://github.com/juliangruber/balanced-match>
 
-License: MIT
+License: `MIT`
 
 ```
 (MIT)
@@ -728,7 +743,7 @@ Copyright (c) Julian Gruber \<<mail@juliangruber.com>\> (<http://juliangruber.co
 
 URL: <https://github.com/juliangruber/brace-expansion>
 
-License: MIT
+License: `MIT`
 
 ```
 MIT License
@@ -760,7 +775,7 @@ Copyright (c) TypeStack contributors
 
 URL: <https://www.npmjs.com/package/class-transformer>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License
@@ -788,11 +803,11 @@ THE SOFTWARE.
 
 ## `combined-stream`
 
-Copyright (c) Felix Geisendörfer &lt;felix@debuggable.com&gt; (http://debuggable.com/)
+Copyright (c) Felix Geisendörfer \<felix@debuggable.com\> (http://debuggable.com/)
 
 URL: <https://github.com/felixge/node-combined-stream>
 
-License: MIT
+License: `MIT`
 
 ```
 Copyright (c) 2011 Debuggable Limited <felix@debuggable.com>
@@ -822,7 +837,7 @@ Copyright (c) James Halliday \<<mail@substack.net>\> (<http://substack.net>)
 
 URL: <https://www.npmjs.com/package/concat-map>
 
-License: MIT
+License: `MIT`
 
 ```
 This software is released under the MIT license:
@@ -845,13 +860,43 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
+## `core-js`
+
+Copyright (c) Denis Pushkarev \<<zloirock@zloirock.ru>\> (<http://zloirock.ru>)
+
+URL: <https://www.npmjs.com/package/core-js>
+
+License: `MIT`
+
+```
+Copyright (c) 2014-2023 Denis Pushkarev
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
 ## `delayed-stream`
 
-Copyright (c) Felix Geisendörfer &lt;felix@debuggable.com&gt; (http://debuggable.com/)
+Copyright (c) Felix Geisendörfer \<felix@debuggable.com\> (http://debuggable.com/)
 
 URL: <https://github.com/felixge/node-delayed-stream>
 
-License: MIT
+License: `MIT`
 
 ```
 Copyright (c) 2011 Debuggable Limited <felix@debuggable.com>
@@ -875,13 +920,45 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
+## `deline`
+
+Copyright (c) Ian Sibner \<sibnerian@gmail.com\>
+
+URL: <https://github.com/airbnb/deline#readme>
+
+License: `MIT`
+
+```
+MIT License
+
+Copyright (c) 2016 Airbnb
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## `form-data`
 
-Copyright (c) Felix Geisendörfer &lt;felix@debuggable.com&gt; (http://debuggable.com/)
+Copyright (c) Felix Geisendörfer \<felix@debuggable.com\> (http://debuggable.com/)
 
 URL: <https://www.npmjs.com/package/form-data>
 
-License: MIT
+License: `MIT`
 
 ```
 Copyright (c) 2012 Felix Geisendörfer (felix@debuggable.com) and contributors
@@ -907,11 +984,11 @@ Copyright (c) 2012 Felix Geisendörfer (felix@debuggable.com) and contributors
 
 ## `lru-cache`
 
-Copyright (c) Isaac Z. Schlueter &lt;i@izs.me&gt;
+Copyright (c) Isaac Z. Schlueter \<i@izs.me\>
 
 URL: <https://www.npmjs.com/package/lru-cache>
 
-License: ISC
+License: `ISC`
 
 ```
 The ISC License
@@ -935,7 +1012,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 URL: <https://www.npmjs.com/package/mime-db>
 
-License: MIT
+License: `MIT`
 
 ```
 (The MIT License)
@@ -967,7 +1044,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 URL: <https://www.npmjs.com/package/mime-types>
 
-License: MIT
+License: `MIT`
 
 ```
 (The MIT License)
@@ -997,11 +1074,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## `minimatch`
 
-Copyright (c) Isaac Z. Schlueter &lt;i@izs.me&gt; (http://blog.izs.me)
+Copyright (c) Isaac Z. Schlueter \<i@izs.me\> (http://blog.izs.me)
 
 URL: <https://www.npmjs.com/package/minimatch>
 
-License: ISC
+License: `ISC`
 
 ```
 The ISC License
@@ -1027,7 +1104,7 @@ Copyright (c) David Frank
 
 URL: <https://github.com/bitinn/node-fetch>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -1055,11 +1132,11 @@ SOFTWARE.
 
 ## `sax`
 
-Copyright (c) Isaac Z. Schlueter &lt;i@izs.me&gt; (http://blog.izs.me/)
+Copyright (c) Isaac Z. Schlueter \<i@izs.me\> (http://blog.izs.me/)
 
 URL: <https://www.npmjs.com/package/sax>
 
-License: ISC
+License: `ISC`
 
 ```
 The ISC License
@@ -1105,13 +1182,43 @@ License, as follows:
     WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
+## `scule`
+
+URL: <https://www.npmjs.com/package/scule>
+
+License: `MIT`
+
+```
+MIT License
+
+Copyright (c) Pooya Parsa <pooya@pi0.io>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## `semver`
 
 Copyright (c) GitHub Inc.
 
 URL: <https://www.npmjs.com/package/semver>
 
-License: ISC
+License: `ISC`
 
 ```
 The ISC License
@@ -1137,10 +1244,42 @@ Copyright (c) Adam Shaw \<<arshaw@users.noreply.github.com>\> (<http://arshaw.co
 
 URL: <https://www.npmjs.com/package/temporal-polyfill>
 
-License: MIT
+License: `MIT`
 
 ```
-The MIT License (https://opensource.org/license/mit/)
+MIT License (https://opensource.org/licenses/MIT)
+```
+
+## `ts-mixer`
+
+Copyright (c) Tanner Nielsen
+
+URL: <https://github.com/tannerntannern/ts-mixer#readme>
+
+License: `MIT`
+
+```
+MIT License
+
+Copyright (c) 2023 Tanner Nielsen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```
 
 ## `tslib`
@@ -1149,7 +1288,7 @@ Copyright (c) Microsoft Corp.
 
 URL: <https://www.typescriptlang.org/>
 
-License: 0BSD
+License: `0BSD`
 
 ```
 Copyright (c) Microsoft Corporation.
@@ -1168,11 +1307,11 @@ PERFORMANCE OF THIS SOFTWARE.
 
 ## `tunnel`
 
-Copyright (c) Koichi Kobayashi &lt;koichik@improvement.jp&gt;
+Copyright (c) Koichi Kobayashi \<koichik@improvement.jp\>
 
 URL: <https://github.com/koichik/node-tunnel/>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -1198,23 +1337,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-## `typescript-memoize`
-
-Copyright (c) Darryl Hodgins &lt;darrylh@darryh.ca&gt;
-
-URL: <https://github.com/darrylhodgins/typescript-memoize#readme>
-
-License: MIT
-
-```
-The MIT License (https://opensource.org/license/mit/)
-```
-
 ## `unctx`
 
 URL: <https://www.npmjs.com/package/unctx>
 
-License: MIT
+License: `MIT`
 
 ```
 MIT License
@@ -1244,7 +1371,7 @@ SOFTWARE.
 
 URL: <https://www.npmjs.com/package/uuid>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -1260,11 +1387,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## `xml2js`
 
-Copyright (c) Marek Kubica &lt;marek@xivilization.net&gt; (https://xivilization.net)
+Copyright (c) Marek Kubica \<marek@xivilization.net\> (https://xivilization.net)
 
 URL: <https://github.com/Leonidas-from-XIV/node-xml2js>
 
-License: MIT
+License: `MIT`
 
 ```
 Copyright 2010, 2011, 2012, 2013. All rights reserved.
@@ -1290,11 +1417,11 @@ IN THE SOFTWARE.
 
 ## `xmlbuilder`
 
-Copyright (c) Ozgur Ozcitak &lt;oozcitak@gmail.com&gt;
+Copyright (c) Ozgur Ozcitak \<oozcitak@gmail.com\>
 
 URL: <http://github.com/oozcitak/xmlbuilder-js>
 
-License: MIT
+License: `MIT`
 
 ```
 The MIT License (MIT)
@@ -1322,11 +1449,11 @@ THE SOFTWARE.
 
 ## `yallist`
 
-Copyright (c) Isaac Z. Schlueter &lt;i@izs.me&gt; (http://blog.izs.me/)
+Copyright (c) Isaac Z. Schlueter \<i@izs.me\> (http://blog.izs.me/)
 
 URL: <https://www.npmjs.com/package/yallist>
 
-License: ISC
+License: `ISC`
 
 ```
 The ISC License
