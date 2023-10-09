@@ -1,7 +1,7 @@
 import { dedent } from 'ts-dedent';
 
 export const transformOptions = {
-  target: 'node16',
+  target: 'node20',
   format: 'esm',
   platform: 'node',
   legalComments: 'inline',

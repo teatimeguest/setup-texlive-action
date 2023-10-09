@@ -14,6 +14,7 @@
     "fmt-check": "run-s -c 'fmt-check:*'",
     "fmt-check:dprint": "npm run dprint check",
     "fmt-check:ec": "git ls-files -z | xargs -0 ec",
+    "postinstall": "patch-package",
     "link-check": "markdown-link-check README.md",
     "lint": "eslint -c .config/eslintrc.yml --ext .ts src tests",
     "test": "jest -c tests/jest.config.mjs --coverage",
@@ -29,7 +30,7 @@
   "type": "module",
   "main": "dist/index.mjs",
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "imports": {
     "##/*": "./*"
@@ -60,7 +61,7 @@
     "@types/deline": "1.0.2",
     "@types/http-headers": "3.0.1",
     "@types/jest": "29.5.5",
-    "@types/node": "^16.18.38",
+    "@types/node": "20.8.5",
     "@types/semver": "7.5.0",
     "@typescript-eslint/eslint-plugin": "6.7.4",
     "@typescript-eslint/parser": "6.7.4",
@@ -83,8 +84,10 @@
     "license-webpack-plugin": "4.0.2",
     "markdown-link-check": "3.11.2",
     "nock": "13.3.3",
+    "node-fetch": "2.7.0",
     "npm-run-all2": "6.1.1",
     "nunjucks": "3.2.4",
+    "patch-package": "8.0.0",
     "rimraf": "5.0.5",
     "slugify": "1.6.6",
     "spdx-license-list": "6.7.0",

@@ -33,3 +33,7 @@ declare module 'class-transformer' {
 declare module 'class-transformer/esm5/storage' {
   export * from 'class-transformer/types/storage';
 }
+
+declare module 'node-fetch' {
+  export var AbortError: ErrorConstructor;
+}

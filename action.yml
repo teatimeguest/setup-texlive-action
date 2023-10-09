@@ -58,7 +58,7 @@ outputs:
   version:
     description: The installed TeX Live version.
 runs:
-  using: node16
+  using: node20
   main: dist/index.mjs
   post: dist/index.mjs
   post-if: success()

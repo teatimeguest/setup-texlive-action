@@ -22,7 +22,7 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "experimentalDecorators": true,
-    "lib": ["es2021", "es2022.error"],
+    "lib": ["es2023"],
     "target": "esnext"
   },
   "files": ["./src/types.d.ts"],

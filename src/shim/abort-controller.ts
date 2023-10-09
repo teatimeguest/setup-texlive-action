@@ -1,8 +1,3 @@
-import { Exception } from '#/util/decorators';
-
-@Exception
-export class AbortError extends Error {
-  type = 'aborted';
-}
+export { AbortError } from 'node-fetch';
 
 export const { AbortController, AbortSignal } = globalThis;
