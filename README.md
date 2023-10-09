@@ -21,6 +21,14 @@ This action provides the following functionality:
 
 Linux, Windows, and macOS are supported.
 
+## Breaking Changes in V3
+
+- Use Node.js v20 as runtime.
+
+  With Node.js v16 having reached its [end-of-life][node16-eol] and
+  GitHub Actions beginning the [transition to Node.js v20][actions-node20],
+  the action has upgraded its default runtime to Node.js v20.
+
 ## Table of Contents
 
 - [Usage](#usage)
@@ -40,7 +48,7 @@ Linux, Windows, and macOS are supported.
 
 ```yaml
 - name: Setup TeX Live
-  uses: teatimeguest/setup-texlive-action@v2
+  uses: teatimeguest/setup-texlive-action@v3
   with:
     packages: scheme-basic
 
@@ -54,7 +62,7 @@ If you want to install additional packages, you can use `packages` input:
 
 ```yaml
 - name: Setup TeX Live
-  uses: teatimeguest/setup-texlive-action@v2
+  uses: teatimeguest/setup-texlive-action@v3
   with:
     packages: >-
       scheme-basic
@@ -74,7 +82,7 @@ You can use an older version of TeX Live by setting `version`:
 
 ```yaml
 - name: Setup TeX Live 2008
-  uses: teatimeguest/setup-texlive-action@v2
+  uses: teatimeguest/setup-texlive-action@v3
   with:
     version: 2008
 ```
@@ -96,7 +104,7 @@ If you want to disable caching, you can use `cache` input:
 
 ```yaml
 - name: Setup TeX Live
-  uses: teatimeguest/setup-texlive-action@v2
+  uses: teatimeguest/setup-texlive-action@v3
   with:
     cache: false
 ```
@@ -198,6 +206,7 @@ See the [releases page][releases].
 
 [actions-cache]: https://github.com/actions/toolkit/tree/main/packages/cache
 [actions-env]: https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+[actions-node20]: https://github.blog/changelog/2023-09-22-github-actions-transitioning-from-node-16-to-node-20/
 [cache-api]: https://docs.github.com/en/rest/actions/cache?apiVersion=2022-11-28#delete-github-actions-caches-for-a-repository-using-a-cache-key
 [cache-limits]: https://github.com/actions/cache#cache-limits
 [ci-badge]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml/badge.svg
@@ -212,6 +221,7 @@ See the [releases page][releases].
 [install-tl-texdir]: https://tug.org/texlive/doc/install-tl.html#texdir-dir
 [marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action
+[node16-eol]: https://nodejs.org/en/blog/announcements/nodejs16-eol
 [releases]: https://github.com/teatimeguest/setup-texlive-action/releases
 [texdir]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#x1-250003.2.3
 [texlive]: https://tug.org/texlive/
