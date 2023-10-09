@@ -55,7 +55,7 @@ commit_parsers = [
   { message = "^fix", group = "Bug Fixes", default_scope = "" },
   { message = "^perf", group = "Performance Improvements", default_scope = "" },
   { message = "^build\\(deps\\)", group = "Dependency Updates", scope = "" },
+  { skip = true },
 ]
 protect_breaking_commits = true
-filter_commits = true
 tag_pattern = "v*.*.*"

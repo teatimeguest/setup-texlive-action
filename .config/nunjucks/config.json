@@ -2,5 +2,6 @@
   "autoescape": false,
   "throwOnUndefined": true,
   "trimBlocks": true,
-  "lstripBlocks": true
+  "lstripBlocks": true,
+  "noCache": true
 }

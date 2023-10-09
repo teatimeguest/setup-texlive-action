@@ -1,6 +1,12 @@
 # Third-Party Software Licenses
 
-This software incorporates the following third-party software components.
+This software incorporates the following third-party software components:
+
+{% for m in modules %}
+- [`{{ m.name }}`](#{{ m.name |  slugify }})
+{% endfor %}
+
+------
 {% for m in modules %}
 
 ## `{{ m.name }}`
@@ -12,15 +18,14 @@ Copyright (c) {{ author.name or author | escape }}
 {%- if author.url %} (<{{ author.url }}>){% endif %}
 
 {% endif %}
-{% if m.packageJson.homepage %}
 
+{% if m.packageJson.homepage %}
 URL: <{{ m.packageJson.homepage }}>
 {% else %}
-
 URL: <https://www.npmjs.com/package/{{ m.name }}>
 {% endif %}
 
-License: {{ m.licenseId }}
+License: `{{ m.licenseId }}`
 
 ```
 {{ m.licenseText.trimEnd() }}

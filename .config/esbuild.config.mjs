@@ -4,7 +4,7 @@ export const transformOptions = {
   target: 'node16',
   format: 'esm',
   platform: 'node',
-  legalComments: 'none',
+  legalComments: 'inline',
   logLevel: 'info',
 };
 

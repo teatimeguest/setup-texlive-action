@@ -2,6 +2,8 @@ import path from 'node:path';
 
 import { LicenseWebpackPlugin } from 'license-webpack-plugin';
 import nunjucks from 'nunjucks';
+import slugify from 'slugify';
+import spdx from 'spdx-license-list';
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin';
 
 import esbuildConfig, { transformOptions } from '##/.config/esbuild.config.mjs';
@@ -44,31 +46,24 @@ export class PluginLicenses extends LicenseWebpackPlugin {
         console.table(
           Object.fromEntries(modules.map((m) => [m.name, m.licenseId])),
         );
-        return nunjucks.configure(nunjucksConfig).render(
-          options.templatePath,
-          { modules },
-        );
+        const env = nunjucks.configure(nunjucksConfig);
+        env.addFilter('slugify', (s) => slugify(s, {
+          remove: /[!-/:-@[-`{-~]/gu,
+          lower: true,
+        }));
+        env.addFilter('escape', (s) => s.replaceAll(/[<>]/gu, '\\$&'));
+        return env.render(options.templatePath, { modules });
       },
       handleMissingLicenseText: (name, license) => {
-        switch (license) {
-          case 'MIT':
-            return 'The MIT License (https://opensource.org/license/mit/)';
-          default:
-            throw new Error(`Missing license file: ${name}`);
+        if (options.allowList.has(license)) {
+          return `${spdx[license].name} (${spdx[license].url})`;
+        } else {
+          throw new Error(`Missing license file: ${name} (${license})`);
         }
       },
     });
   }
 }
-
-const allowList = new Set([
-  '0BSD',
-  'Apache-2.0',
-  'BSD-3-Clause',
-  'ISC',
-  'MIT',
-]);
-const templatePath = './.config/nunjucks/NOTICE.md.njk';
 
 export default {
   entry: path.resolve(tsconfig.compilerOptions.baseUrl),
@@ -102,6 +97,15 @@ export default {
   ],
   plugins: [
     pluginNoEmit,
-    new PluginLicenses({ allowList, templatePath }),
+    new PluginLicenses({
+      allowList: new Set([
+        '0BSD',
+        'Apache-2.0',
+        'BSD-3-Clause',
+        'ISC',
+        'MIT',
+      ]),
+      templatePath: './.config/nunjucks/NOTICE.md.njk',
+    }),
   ],
 };
