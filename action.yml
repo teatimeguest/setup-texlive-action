@@ -55,7 +55,11 @@ inputs:
     required: false
 outputs:
   cache-hit:
-    description: A boolean value to indicate if a cache was hit.
+    description: >-
+      A boolean value to indicate if an exact match cache was found.
+  cache-restored:
+    description: >-
+      A boolean value to indicate if a cache was found.
   version:
     description: The installed TeX Live version.
 runs:

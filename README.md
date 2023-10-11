@@ -29,6 +29,23 @@ Linux, Windows, and macOS are supported.
   GitHub Actions beginning the [transition to Node.js v20][actions-node20],
   the action has upgraded its default runtime to Node.js v20.
 
+- Change the condition under which `cache-hit` is set to `true`.
+
+  To be more consistent with official actions
+  such as [`actions/cache`][cache-hits],
+  the `cache-hit` output is now set to `true` only if
+  a cache is found that exactly matches the specified version and packages.
+  To simply check if a cache was found, use `cache-restored` instead:
+
+  ```yaml
+  - name: Setup TeX Live
+    id: setup
+    uses: teatimeguest/setup-texlive-action@v3
+
+  - if: fromJSON(steps.setup.outputs.cache-restored)
+    run: echo 'A cache has been found'
+  ```
+
 - Change the default installation prefix to `$RUNNER_TEMP/setup-texlive-action`.
 - Change the environment variable for updating cache to
   `SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE`.
@@ -191,10 +208,11 @@ All inputs are optional.
 
 ## Outputs
 
-| Name        | Type   | Description                                     |
-| ----------- | ------ | ----------------------------------------------- |
-| `cache-hit` | Bool   | A boolean value to indicate if a cache was hit. |
-| `version`   | String | The installed TeX Live version.                 |
+| Name             | Type   | Description                                                    |
+| ---------------- | ------ | -------------------------------------------------------------- |
+| `cache-hit`      | Bool   | A boolean value to indicate if an exact cache match was found. |
+| `cache-restored` | Bool   | A boolean value to indicate if a cache was found.              |
+| `version`        | String | The installed TeX Live version.                                |
 
 ## Environment Variables
 
@@ -266,6 +284,7 @@ See the [releases page][releases].
 [actions-node20]: https://github.blog/changelog/2023-09-22-github-actions-transitioning-from-node-16-to-node-20/
 [cache-api]: https://docs.github.com/en/rest/actions/cache?apiVersion=2022-11-28#delete-github-actions-caches-for-a-repository-using-a-cache-key
 [cache-limits]: https://github.com/actions/cache#cache-limits
+[cache-hits]: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#cache-hits-and-misses
 [ci-badge]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml/badge.svg
 [ci]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml
 [codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF

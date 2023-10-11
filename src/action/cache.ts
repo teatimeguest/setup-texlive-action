@@ -51,7 +51,8 @@ export abstract class CacheService extends CacheInfo implements Disposable {
   }
 
   [Symbol.dispose](): void {
-    setOutput('cache-hit', this.restored);
+    setOutput('cache-hit', this.hit);
+    setOutput('cache-restored', this.restored);
   }
 }
 

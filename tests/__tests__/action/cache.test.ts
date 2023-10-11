@@ -64,6 +64,11 @@ describe('DefaultCacheService', () => {
     expect(() => service[Symbol.dispose]()).not.toThrow();
     expect(core.setOutput).toHaveBeenCalledWith('cache-hit', false);
   });
+
+  it('sets `cache-restored` to `false`', () => {
+    expect(() => service[Symbol.dispose]()).not.toThrow();
+    expect(core.setOutput).toHaveBeenCalledWith('cache-restored', false);
+  });
 });
 
 describe('ActionsCacheService', () => {
@@ -239,16 +244,39 @@ describe('ActionsCacheService', () => {
           'oldunique',
           'primary',
           'oldprimary',
+        ]],
+        [false, [
           'secondary',
           'oldsecondary',
+          'none',
+          'fail',
         ]],
-        [false, ['none', 'fail']],
       ] as const,
     )('sets `cache-hit` to `%p`', (value, types) => {
       it.each(types)('%p', async (type) => {
         jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
         await expect(run()).toResolve();
         expect(core.setOutput).toHaveBeenCalledWith('cache-hit', value);
+      });
+    });
+
+    describe.each(
+      [
+        [true, [
+          'unique',
+          'oldunique',
+          'primary',
+          'oldprimary',
+          'secondary',
+          'oldsecondary',
+        ]],
+        [false, ['none', 'fail']],
+      ] as const,
+    )('sets `cache-restored` to `%p`', (value, types) => {
+      it.each(types)('%p', async (type) => {
+        jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+        await expect(run()).toResolve();
+        expect(core.setOutput).toHaveBeenCalledWith('cache-restored', value);
       });
     });
   });
