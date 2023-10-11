@@ -25,7 +25,7 @@ inputs:
     description: >-
       TeX Live installation prefix.
       This has the same effect as `TEXLIVE_INSTALL_PREFIX`.
-      Defaults to `$RUNNER_TEMP/setup-texlive`.
+      Defaults to `$RUNNER_TEMP/setup-texlive-action`.
     required: false
   texdir:
     description: >-

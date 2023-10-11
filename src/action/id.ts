@@ -1,9 +1,8 @@
 import { snakeCase } from 'scule';
 
-const name = 'setup-texlive';
-// const name = 'setup-texlive-action';
+const name = 'setup-texlive-action';
 
-export const ID = {
+export default {
   'kebab-case': name,
   SCREAMING_SNAKE_CASE: toUpperCase(snakeCase(name)),
 } as const;

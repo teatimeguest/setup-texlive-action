@@ -17,7 +17,7 @@ import {
 } from 'class-transformer';
 import { createContext } from 'unctx';
 
-import { ID } from '#/action/id';
+import id from '#/action/id';
 import * as log from '#/log';
 import type { Version } from '#/texlive';
 
@@ -105,14 +105,29 @@ export class ActionsCacheService extends CacheService implements CacheEntry {
 
   readonly #keys: CacheKeys;
   #matchedKey: string | undefined;
-  #forceUpdate: boolean;
+  #forceUpdate: boolean = false;
 
   constructor(entry: CacheEntryConfig) {
     super();
     this.target = entry.TEXDIR;
     this.#keys = new CacheKeys(entry);
-    this.#forceUpdate =
-      (env[`${ID.SCREAMING_SNAKE_CASE}_FORCE_UPDATE_CACHE`] ?? '0') !== '0';
+    const envvars = [
+      `${id.SCREAMING_SNAKE_CASE}_FORCE_UPDATE_CACHE`,
+      'SETUP_TEXLIVE_FORCE_UPDATE_CACHE',
+    ];
+    for (const envvar of envvars) {
+      if (envvar in env) {
+        this.#forceUpdate = env[envvar] !== '0';
+        if (envvar === envvars[1]) {
+          log.notify(
+            '`%s` is deprecated; Use `%s` instead',
+            envvar,
+            envvars[0],
+          );
+        }
+        break;
+      }
+    }
   }
 
   override async restore(): Promise<CacheInfo> {
@@ -120,12 +135,20 @@ export class ActionsCacheService extends CacheService implements CacheEntry {
       this.#matchedKey = await restoreCache(
         [this.target],
         this.#keys.uniqueKey,
-        this.#keys.restoreKeys,
+        [
+          this.#keys.primaryKey,
+          this.#keys.oldPrimaryKey,
+          this.#keys.secondaryKey,
+          this.#keys.oldSecondaryKey,
+        ],
       );
       if (this.#matchedKey === undefined) {
         log.info('Cache not found');
       } else {
         log.info('%s restored from cache with key: %s', this.target, this.key);
+        if (this.#matchedKey.startsWith(this.#keys.oldPrimaryKey)) {
+          this.update();
+        }
       }
     } catch (error) {
       log.warn({ error }, 'Failed to restore cache');
@@ -138,7 +161,17 @@ export class ActionsCacheService extends CacheService implements CacheEntry {
   }
 
   override get hit(): boolean {
-    return this.#matchedKey?.startsWith(this.#keys.primaryKey) ?? false;
+    for (
+      const primaryKey of [
+        this.#keys.primaryKey,
+        this.#keys.oldPrimaryKey,
+      ]
+    ) {
+      if (this.#matchedKey?.startsWith(primaryKey) ?? false) {
+        return true;
+      }
+    }
+    return false;
   }
 
   override get restored(): boolean {
@@ -225,12 +258,16 @@ class CacheKeys {
     return `${this.secondaryKey}${this.#digest}`;
   }
 
-  private get secondaryKey(): string {
-    return `${ID['kebab-case']}-${this.#distribution}-`;
+  get secondaryKey(): string {
+    return `${id['kebab-case']}-${this.#distribution}-`;
   }
 
-  get restoreKeys(): [primaryKey: string, ...string[]] {
-    return [this.primaryKey, this.secondaryKey];
+  get oldPrimaryKey(): string {
+    return `${this.oldSecondaryKey}${this.#digest}`;
+  }
+
+  get oldSecondaryKey(): string {
+    return `setup-texlive-${this.#distribution}-`;
   }
 }
 

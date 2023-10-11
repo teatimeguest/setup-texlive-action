@@ -3,7 +3,7 @@ module.exports = async ({ context, core, github }) => {
   const paginator = github.paginate.iterator(getActionsCacheList, {
     ...context.repo,
     per_page: 100,
-    key: 'setup-texlive-',
+    key: 'setup-texlive-action-',
   });
   for await (const { data: caches } of paginator) {
     await Promise.all(caches.map(async ({ key }) => {
