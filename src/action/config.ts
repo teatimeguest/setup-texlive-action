@@ -27,7 +27,6 @@ export namespace Config {
       version: await resolveVersion({ version }),
       packages: await collectPackages({ packageFile, packages }),
     };
-    env.setDefaultTexmfUserTrees(config.version);
 
     if (!isLatest(config.version)) {
       if (config.tlcontrib) {

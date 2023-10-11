@@ -23,11 +23,6 @@ it('calls `ReleaseData.setup`', async () => {
   expect(ReleaseData.setup).toHaveBeenCalledBefore(jest.mocked(Inputs.load));
 });
 
-it('calls `env.setDefaultTexmfUserTrees`', async () => {
-  await expect(Config.load()).toResolve();
-  expect(env.setDefaultTexmfUserTrees).toHaveBeenCalled();
-});
-
 describe('packages', () => {
   it('defaults to empty', async () => {
     await expect(Config.load()).resolves.toHaveProperty('packages', new Set());

@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`2008 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2008
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2008/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2008/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2008/texmf-config
-TEXMFVAR ~/.local/texlive/2008/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2008
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2008/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2008/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2008/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2008/texmf-var
 selected_scheme scheme-minimal
 option_symlinks 0
 option_autobackup 0
@@ -16,13 +16,13 @@ option_src 0
 `;
 
 exports[`2008 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2008
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2008\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2008\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2008\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2008\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2008
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2008\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2008\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2008\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2008\\texmf-var
 selected_scheme scheme-minimal
 option_symlinks 0
 option_autobackup 0
@@ -32,13 +32,13 @@ option_src 0
 `;
 
 exports[`2009 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2009
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2009/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2009/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2009/texmf-config
-TEXMFVAR ~/.local/texlive/2009/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2009
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2009/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2009/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2009/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2009/texmf-var
 selected_scheme scheme-minimal
 option_autobackup 0
 option_doc 0
@@ -46,13 +46,13 @@ option_src 0
 `;
 
 exports[`2009 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2009
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2009\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2009\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2009\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2009\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2009
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2009\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2009\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2009\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2009\\texmf-var
 selected_scheme scheme-minimal
 option_autobackup 0
 option_desktop_integration 0
@@ -63,13 +63,13 @@ option_src 0
 `;
 
 exports[`2010 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2010
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2010/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2010/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2010/texmf-config
-TEXMFVAR ~/.local/texlive/2010/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2010
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2010/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2010/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2010/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2010/texmf-var
 selected_scheme scheme-minimal
 option_autobackup 0
 option_doc 0
@@ -77,13 +77,13 @@ option_src 0
 `;
 
 exports[`2010 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2010
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2010\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2010\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2010\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2010\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2010
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2010\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2010\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2010\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2010\\texmf-var
 selected_scheme scheme-minimal
 option_autobackup 0
 option_desktop_integration 0
@@ -94,13 +94,13 @@ option_src 0
 `;
 
 exports[`2011 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2011
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2011/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2011/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2011/texmf-config
-TEXMFVAR ~/.local/texlive/2011/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2011
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2011/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2011/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2011/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2011/texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -109,13 +109,13 @@ option_src 0
 `;
 
 exports[`2011 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2011
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2011\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2011\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2011\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2011\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2011
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2011\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2011\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2011\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2011\\texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -127,13 +127,13 @@ option_src 0
 `;
 
 exports[`2012 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2012
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2012/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2012/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2012/texmf-config
-TEXMFVAR ~/.local/texlive/2012/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2012
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2012/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2012/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2012/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2012/texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -142,13 +142,13 @@ option_src 0
 `;
 
 exports[`2012 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2012
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2012\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2012\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2012\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2012\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2012
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2012\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2012\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2012\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2012\\texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -161,13 +161,13 @@ option_src 0
 `;
 
 exports[`2013 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2013
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2013/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2013/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2013/texmf-config
-TEXMFVAR ~/.local/texlive/2013/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2013
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2013/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2013/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2013/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2013/texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -176,13 +176,13 @@ option_src 0
 `;
 
 exports[`2013 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2013
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2013\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2013\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2013\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2013\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2013
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2013\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2013\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2013\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2013\\texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -195,13 +195,13 @@ option_src 0
 `;
 
 exports[`2014 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2014
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2014/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2014/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2014/texmf-config
-TEXMFVAR ~/.local/texlive/2014/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2014
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2014/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2014/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2014/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2014/texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -210,13 +210,13 @@ option_src 0
 `;
 
 exports[`2014 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2014
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2014\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2014\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2014\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2014\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2014
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2014\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2014\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2014\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2014\\texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -229,13 +229,13 @@ option_src 0
 `;
 
 exports[`2015 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2015
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2015/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2015/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2015/texmf-config
-TEXMFVAR ~/.local/texlive/2015/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2015
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2015/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2015/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2015/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2015/texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -244,13 +244,13 @@ option_src 0
 `;
 
 exports[`2015 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2015
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2015\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2015\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2015\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2015\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2015
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2015\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2015\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2015\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2015\\texmf-var
 selected_scheme scheme-minimal
 option_adjustrepo 0
 option_autobackup 0
@@ -263,13 +263,13 @@ option_src 0
 `;
 
 exports[`2016 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2016
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2016/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2016/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2016/texmf-config
-TEXMFVAR ~/.local/texlive/2016/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2016
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2016/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2016/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2016/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2016/texmf-var
 selected_scheme scheme-infraonly
 option_adjustrepo 0
 option_autobackup 0
@@ -278,13 +278,13 @@ option_src 0
 `;
 
 exports[`2016 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2016
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2016\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2016\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2016\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2016\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2016
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2016\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2016\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2016\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2016\\texmf-var
 selected_scheme scheme-infraonly
 option_adjustrepo 0
 option_autobackup 0
@@ -297,13 +297,13 @@ option_src 0
 `;
 
 exports[`2017 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2017
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2017/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2017/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2017/texmf-config
-TEXMFVAR ~/.local/texlive/2017/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2017
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2017/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2017/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2017/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2017/texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustrepo 0
 tlpdbopt_autobackup 0
@@ -312,13 +312,13 @@ tlpdbopt_install_srcfiles 0
 `;
 
 exports[`2017 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2017
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2017\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2017\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2017\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2017\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2017
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2017\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2017\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2017\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2017\\texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustrepo 0
 tlpdbopt_autobackup 0
@@ -330,13 +330,13 @@ tlpdbopt_w32_multi_user 0
 `;
 
 exports[`2018 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2018
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2018/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2018/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2018/texmf-config
-TEXMFVAR ~/.local/texlive/2018/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2018
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2018/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2018/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2018/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2018/texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustrepo 0
 tlpdbopt_autobackup 0
@@ -345,13 +345,13 @@ tlpdbopt_install_srcfiles 0
 `;
 
 exports[`2018 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2018
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2018\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2018\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2018\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2018\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2018
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2018\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2018\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2018\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2018\\texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustrepo 0
 tlpdbopt_autobackup 0
@@ -363,13 +363,13 @@ tlpdbopt_w32_multi_user 0
 `;
 
 exports[`2019 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2019
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2019/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2019/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2019/texmf-config
-TEXMFVAR ~/.local/texlive/2019/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2019
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2019/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2019/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2019/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2019/texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
@@ -379,13 +379,13 @@ tlpdbopt_install_srcfiles 0
 `;
 
 exports[`2019 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2019
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2019\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2019\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2019\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2019\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2019
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2019\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2019\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2019\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2019\\texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
@@ -398,13 +398,13 @@ tlpdbopt_w32_multi_user 0
 `;
 
 exports[`2020 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2020
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2020/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2020/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2020/texmf-config
-TEXMFVAR ~/.local/texlive/2020/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2020
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2020/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2020/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2020/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2020/texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
@@ -414,13 +414,13 @@ tlpdbopt_install_srcfiles 0
 `;
 
 exports[`2020 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2020
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2020\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2020\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2020\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2020\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2020
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2020\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2020\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2020\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2020\\texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
@@ -433,13 +433,13 @@ tlpdbopt_w32_multi_user 0
 `;
 
 exports[`2021 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2021
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2021/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2021/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2021/texmf-config
-TEXMFVAR ~/.local/texlive/2021/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2021
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2021/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2021/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2021/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2021/texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
@@ -449,13 +449,13 @@ tlpdbopt_install_srcfiles 0
 `;
 
 exports[`2021 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2021
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2021\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2021\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2021\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2021\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2021
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2021\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2021\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2021\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2021\\texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
@@ -468,13 +468,13 @@ tlpdbopt_w32_multi_user 0
 `;
 
 exports[`2022 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2022
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2022/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2022/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2022/texmf-config
-TEXMFVAR ~/.local/texlive/2022/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2022
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2022/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2022/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2022/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2022/texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
@@ -484,13 +484,13 @@ tlpdbopt_install_srcfiles 0
 `;
 
 exports[`2022 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2022
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2022\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2022\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2022\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2022\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2022
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2022\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2022\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2022\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2022\\texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
@@ -503,13 +503,13 @@ tlpdbopt_w32_multi_user 0
 `;
 
 exports[`2023 linux texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP/setup-texlive/2023
-TEXMFLOCAL $RUNNER_TEMP/setup-texlive/texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive/2023/texmf-config
-TEXMFSYSVAR $RUNNER_TEMP/setup-texlive/2023/texmf-var
-TEXMFHOME ~/texmf
-TEXMFCONFIG ~/.local/texlive/2023/texmf-config
-TEXMFVAR ~/.local/texlive/2023/texmf-var
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2023
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2023/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2023/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2023/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2023/texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
@@ -519,13 +519,13 @@ tlpdbopt_install_srcfiles 0
 `;
 
 exports[`2023 win32 texlive.profile 1`] = `
-TEXDIR $RUNNER_TEMP\\setup-texlive\\2023
-TEXMFLOCAL $RUNNER_TEMP\\setup-texlive\\texmf-local
-TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive\\2023\\texmf-config
-TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive\\2023\\texmf-var
-TEXMFHOME ~\\texmf
-TEXMFCONFIG ~\\.local\\texlive\\2023\\texmf-config
-TEXMFVAR ~\\.local\\texlive\\2023\\texmf-var
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2023
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2023\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2023\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2023\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2023\\texmf-var
 selected_scheme scheme-infraonly
 instopt_adjustpath 0
 instopt_adjustrepo 0
