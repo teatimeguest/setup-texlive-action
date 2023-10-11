@@ -14,6 +14,7 @@ for (
   jest.mock(`node:${mod}`, () => jest.requireMock(mod));
 }
 
+jest.mock('@actions/glob');
 jest.mock('@actions/http-client');
 jest.mock('@actions/io');
 
