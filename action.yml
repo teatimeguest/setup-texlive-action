@@ -29,7 +29,7 @@ inputs:
     required: false
   texdir:
     description: >-
-      TeX Live system directory.
+      TeX Live system installation directory.
       This has the same effect as the installer's `-texdir` option and
       takes precedence
       over the `prefix` input and related environment variables.

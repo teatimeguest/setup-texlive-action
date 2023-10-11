@@ -1,12 +1,9 @@
-import { homedir, tmpdir } from 'node:os';
-import path from 'node:path';
+import { tmpdir } from 'node:os';
 import { env } from 'node:process';
 
 import * as log from '#/log';
 import { Texmf } from '#/tex/texmf';
 import type { Env } from '#/texlive/install-tl/env';
-import { UserTrees } from '#/texlive/install-tl/texmf';
-import type { Version } from '#/texlive/version';
 
 export function init(): void {
   if (!('RUNNER_TEMP' in env)) {
@@ -25,15 +22,5 @@ export function init(): void {
       log.warn('`%s` is set, but ignored', key);
       delete env[key];
     }
-  }
-}
-
-export function setDefaultTexmfUserTrees(version: Version): void {
-  const TEXUSERDIR = path.join(homedir(), '.local', 'texlive', version);
-  env.TEXLIVE_INSTALL_TEXMFHOME ??= path.join(homedir(), 'texmf');
-  const trees = new UserTrees(version, { texdir: TEXUSERDIR });
-
-  for (const key of Texmf.USER_TREES) {
-    env[`TEXLIVE_INSTALL_${key}` satisfies keyof Env] ??= trees[key];
   }
 }

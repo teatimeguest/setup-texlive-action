@@ -1,9 +1,8 @@
-import { homedir } from 'node:os';
 import process from 'node:process';
 
 import * as core from '@actions/core';
 
-import { init, setDefaultTexmfUserTrees } from '#/action/env';
+import { init } from '#/action/env';
 
 jest.unmock('#/action/env');
 
@@ -33,18 +32,6 @@ describe('init', () => {
     expect(process.env).toMatchObject({
       TEXLIVE_INSTALL_PREFIX: '<PREFIX>',
       NOPERLDOC: 'true',
-    });
-  });
-});
-
-describe('setDefaultTexmfUserTrees', () => {
-  it('sets default values', () => {
-    const home = homedir();
-    setDefaultTexmfUserTrees('2016');
-    expect(process.env).toMatchObject({
-      TEXLIVE_INSTALL_TEXMFHOME: `${home}/texmf`,
-      TEXLIVE_INSTALL_TEXMFCONFIG: `${home}/.local/texlive/2016/texmf-config`,
-      TEXLIVE_INSTALL_TEXMFVAR: `${home}/.local/texlive/2016/texmf-var`,
     });
   });
 });

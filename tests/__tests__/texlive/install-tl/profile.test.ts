@@ -44,10 +44,6 @@ describe.each([
     }
   })(),
 ])('%s', (version) => {
-  const env = jest.requireActual<
-    Awaited<typeof import('#/action/env')>
-  >('#/action/env');
-
   beforeAll(() => {
     expect.addSnapshotSerializer({
       serialize: (val) => val,
@@ -57,9 +53,8 @@ describe.each([
 
   describe.each(['linux', 'win32'] as const)('%s', (platform) => {
     test('texlive.profile', () => {
-      const prefix = '$RUNNER_TEMP/setup-texlive';
+      const prefix = '$RUNNER_TEMP/setup-texlive-action';
       jest.mocked(os.platform).mockReturnValue(platform);
-      env.setDefaultTexmfUserTrees(version);
       expect(new Profile(version, { prefix }).toString()).toMatchSnapshot();
     });
   });
