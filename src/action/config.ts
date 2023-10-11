@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 
+import { create as createGlobber } from '@actions/glob';
 import type { DeepUndefinable } from 'ts-essentials';
 
 import * as env from '#/action/env';
@@ -51,7 +52,13 @@ async function collectPackages(
       yield* dependsTxt.parse(inputs.packages);
     }
     if (inputs.packageFile !== undefined) {
-      yield* dependsTxt.parse(await readFile(inputs.packageFile, 'utf8'));
+      const globber = await createGlobber(inputs.packageFile, {
+        implicitDescendants: false,
+        matchDirectories: false,
+      });
+      for await (const packageFile of globber.globGenerator()) {
+        yield* dependsTxt.parse(await readFile(packageFile, 'utf8'));
+      }
     }
   }
   const packages = [];

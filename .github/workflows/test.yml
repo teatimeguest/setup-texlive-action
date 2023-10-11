@@ -87,6 +87,8 @@ jobs:
         uses: ./
         with:
           cache: false
-          package-file: tests/e2e/tl_packages
+          package-file: |
+            **/tl_packages
+            **/DEPENDS.txt
           packages: latex-bin
       - run: latex -version

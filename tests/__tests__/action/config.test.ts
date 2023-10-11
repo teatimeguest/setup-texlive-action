@@ -1,13 +1,16 @@
-import fs from 'node:fs/promises';
 import { platform } from 'node:os';
 
 import * as core from '@actions/core';
+import mockFs from 'mock-fs';
+import { dedent } from 'ts-dedent';
 
 import { Config } from '#/action/config';
 import * as env from '#/action/env';
 import { Inputs } from '#/action/inputs';
 import { ReleaseData } from '#/texlive/releases';
 
+jest.unmock('node:fs/promises');
+jest.unmock('@actions/glob');
 jest.unmock('#/action/config');
 
 const defaultInputs = Inputs.load();
@@ -24,6 +27,61 @@ it('calls `ReleaseData.setup`', async () => {
 });
 
 describe('packages', () => {
+  beforeAll(() => {
+    mockFs({
+      '.github': {
+        tl_packages: dedent`
+          foo
+          bar
+          baz
+        `,
+        workflows: {
+          'ci.yml': dedent`
+            name: CI
+            on: push
+            jobs: ...
+          `,
+        },
+      },
+      bundle: {
+        'package-1': {
+          'package-1.sty': String.raw`\ProvidesPackage{package-1}`,
+          'DEPENDS.txt': dedent`
+            foo qux
+          `,
+          'README.md': dedent`
+            # package-1
+
+            > A latex package.
+          `,
+        },
+        'package-2': {
+          src: {
+            'package-2.sty': String.raw`\ProvidesPackage{package-2}`,
+          },
+          'DEPENDS.txt': dedent`
+            quux
+            soft package-1
+          `,
+          'README.md': dedent`
+            # package-2
+
+            > Another latex package.
+          `,
+        },
+        'package-3': {
+          'package-3.tex': '% package-3.tex',
+        },
+      },
+      'DEPENDS.txt': dedent`
+        package package-3
+        foo waldo
+      `,
+    });
+  });
+
+  afterAll(mockFs.restore);
+
   it('defaults to empty', async () => {
     await expect(Config.load()).resolves.toHaveProperty('packages', new Set());
   });
@@ -39,36 +97,25 @@ describe('packages', () => {
     );
   });
 
-  it('is set to the set of packages defined by package file', async () => {
+  it('is set to the set of packages defined by `package-file`', async () => {
     jest.mocked(Inputs.load).mockReturnValueOnce({
       ...defaultInputs,
-      packageFile: '<package-file>',
+      packageFile: `
+        .github/tl_packages
+        **/DEPENDS.txt
+      `,
     });
-    jest.mocked(fs.readFile).mockResolvedValueOnce('foo bar baz');
     await expect(Config.load()).resolves.toHaveProperty(
       'packages',
-      new Set(['bar', 'baz', 'foo']),
+      new Set(['bar', 'baz', 'foo', 'package-1', 'quux', 'qux', 'waldo']),
     );
-    expect(fs.readFile).toHaveBeenCalledWith('<package-file>', 'utf8');
   });
 
   it('contains packages specified by both input and file', async () => {
     jest.mocked(Inputs.load).mockReturnValueOnce({
       ...defaultInputs,
-      packageFile: '<package-file>',
+      packageFile: 'bundle/package-1/DEPENDS.txt',
       packages: 'foo bar baz',
-    });
-    jest.mocked(fs.readFile).mockResolvedValueOnce('qux foo');
-    await expect(Config.load()).resolves.toHaveProperty(
-      'packages',
-      new Set(['bar', 'baz', 'foo', 'qux']),
-    );
-  });
-
-  it('does not contain comments or whitespaces', async () => {
-    jest.mocked(Inputs.load).mockReturnValueOnce({
-      ...defaultInputs,
-      packages: '\n  foo\t# this is a comment\nbar  baz \n# \nqux#',
     });
     await expect(Config.load()).resolves.toHaveProperty(
       'packages',

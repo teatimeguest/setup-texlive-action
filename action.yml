@@ -9,16 +9,17 @@ inputs:
     required: false
   package-file:
     description: >-
-      File containing the names of TeX packages to be installed,
-      delimited by whitespaces.
-      Everything after a `#` is treated as a comment.
+      Glob patterns for specifying files
+      containing the names of TeX packages to be installed.
+      The file format should be the same as the syntax for the `packages` input.
       The `DEPENDS.txt` format is also supported.
     default: ''
     required: false
   packages:
     description: >-
-      Whitespace-separated TeX package names to be installed.
+      Specify the names of TeX packages to install, separated by whitespaces.
       Schemes and collections are also acceptable.
+      Everything after `#` will be treated as a comment.
     default: ''
     required: false
   prefix:
