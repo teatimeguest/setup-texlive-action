@@ -55,7 +55,7 @@ describe('prefix', () => {
   it('uses $RUNNRE_TEMP by default', () => {
     expect(Inputs.load()).toHaveProperty(
       'prefix',
-      path.join(process.env.RUNNER_TEMP, 'setup-texlive'),
+      path.join(process.env.RUNNER_TEMP, 'setup-texlive-action'),
     );
   });
 
@@ -74,7 +74,7 @@ describe('prefix', () => {
     process.env['INPUT_PREFIX'] = input;
     expect(Inputs.load()).toHaveProperty(
       'prefix',
-      path.join(process.env.RUNNER_TEMP, 'setup-texlive'),
+      path.join(process.env.RUNNER_TEMP, 'setup-texlive-action'),
     );
   });
 

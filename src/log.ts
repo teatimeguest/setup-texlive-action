@@ -20,6 +20,8 @@ export interface LogFn {
   (options: LogOptions, format: string, ...values: readonly unknown[]): void;
 }
 
+export const notify = setLogFn('info', core.notice);
+
 export const debug = setLogFn('debug', core.debug);
 export const info = setLogFn('info', core.info);
 export const warn = setLogFn('warn', core.warning);

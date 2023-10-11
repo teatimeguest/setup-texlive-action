@@ -9,6 +9,10 @@ import {
 } from '#/action/cache';
 
 jest.unmock('#/action/cache');
+jest.mock('node:crypto', () => ({
+  ...jest.requireActual('node:crypto'),
+  randomUUID: jest.fn().mockReturnValue('<random_string>'),
+}));
 
 const entry = {
   TEXDIR: '<TEXDIR>',
@@ -65,8 +69,11 @@ describe('DefaultCacheService', () => {
 describe('ActionsCacheService', () => {
   const cacheTypes = [
     'unique',
+    'oldunique',
     'primary',
+    'oldprimary',
     'secondary',
+    'oldsecondary',
     'none',
     'fail',
   ] as const;
@@ -76,8 +83,13 @@ describe('ActionsCacheService', () => {
     typeof cache.restoreCache
   > = {
     unique: async (_, uniqueKey) => uniqueKey,
+    oldunique: async (_, __, restoreKeys) => {
+      return `${restoreKeys?.[0]}-<random_string>}`;
+    },
     primary: async (_, __, restoreKeys) => restoreKeys?.[0],
-    secondary: async (_, __, restoreKeys) => restoreKeys?.[1],
+    oldprimary: async (_, __, restoreKeys) => restoreKeys?.[1],
+    secondary: async (_, __, restoreKeys) => restoreKeys?.[2],
+    oldsecondary: async (_, __, restoreKeys) => restoreKeys?.[3],
     none: async () => undefined,
     fail: async () => {
       throw new Error();
@@ -85,9 +97,14 @@ describe('ActionsCacheService', () => {
   };
 
   describe('restore', () => {
-    it('restores cache', async () => {
-      await expect(new ActionsCacheService(entry).restore()).toResolve();
-      expect(cache.restoreCache).toHaveBeenCalled();
+    it.each([
+      new Set<string>(),
+      new Set(['foo', 'bar', 'baz']),
+    ])('restores cache', async (packages) => {
+      await expect(new ActionsCacheService({ ...entry, packages }).restore())
+        .toResolve();
+      expect(cache.restoreCache).toHaveBeenCalledOnce();
+      expect(jest.mocked(cache.restoreCache).mock.lastCall).toMatchSnapshot();
     });
 
     it('never throws', async () => {
@@ -101,8 +118,8 @@ describe('ActionsCacheService', () => {
 
   describe.each(
     [
-      [true, ['unique', 'primary']],
-      [false, ['secondary', 'none', 'fail']],
+      [true, ['unique', 'oldunique', 'primary', 'oldprimary']],
+      [false, ['secondary', 'oldsecondary', 'none', 'fail']],
     ] as const,
   )('hit', (value, types) => {
     it.each(types)(`is set to ${value} (%p)`, async (type) => {
@@ -115,7 +132,14 @@ describe('ActionsCacheService', () => {
 
   describe.each(
     [
-      [true, ['unique', 'primary', 'secondary']],
+      [true, [
+        'unique',
+        'oldunique',
+        'primary',
+        'oldprimary',
+        'secondary',
+        'oldsecondary',
+      ]],
       [false, ['none', 'fail']],
     ] as const,
   )('restored', (value, types) => {
@@ -136,14 +160,19 @@ describe('ActionsCacheService', () => {
     };
 
     it.each(
-      ['secondary', 'none', 'fail'] as const,
+      [
+        'oldunique',
+        'oldprimary',
+        'secondary',
+        'oldsecondary',
+        'none',
+        'fail',
+      ] as const,
     )('sets `target` (%p)', async (type) => {
       jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
       await expect(run()).toResolve();
-      expect(core.saveState).toHaveBeenCalledWith('CACHE', {
-        key: expect.stringContaining('setup-texlive-'),
-        target: entry.TEXDIR,
-      });
+      expect(core.saveState).toHaveBeenCalledOnce();
+      expect(jest.mocked(core.saveState).mock.lastCall).toMatchSnapshot();
     });
 
     it.each(
@@ -151,10 +180,19 @@ describe('ActionsCacheService', () => {
     )('does not set `target` (%p)', async (type) => {
       jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
       await expect(run()).toResolve();
-      expect(core.saveState).toHaveBeenCalledWith('CACHE', {
-        key: expect.stringContaining('setup-texlive-'),
-      });
+      expect(core.saveState).toHaveBeenCalledOnce();
+      expect(jest.mocked(core.saveState).mock.lastCall).toMatchSnapshot();
     });
+
+    it.each(cacheTypes)(
+      'sets `target` if `SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE` is set (%p)',
+      async (type) => {
+        process.env['SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE'] = '1';
+        jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+        await expect(run()).toResolve();
+        expect(core.saveState).toHaveBeenCalledOnce();
+      },
+    );
 
     it.each(cacheTypes)(
       'sets `target` if `SETUP_TEXLIVE_FORCE_UPDATE_CACHE` is set (%p)',
@@ -162,16 +200,48 @@ describe('ActionsCacheService', () => {
         process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '1';
         jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
         await expect(run()).toResolve();
-        expect(core.saveState).toHaveBeenCalledWith('CACHE', {
-          key: expect.stringContaining('setup-texlive-'),
-          target: entry.TEXDIR,
-        });
+        expect(core.saveState).toHaveBeenCalledOnce();
+        expect(core.notice).toHaveBeenCalledOnce();
       },
     );
 
+    describe('prefer `SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE`', () => {
+      beforeEach(() => {
+        jest.mocked(cache.restoreCache).mockImplementationOnce(restore.primary);
+      });
+
+      it('updates cache', async () => {
+        process.env['SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE'] = '1';
+        process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '0';
+        await expect(run()).toResolve();
+        expect(core.saveState).toHaveBeenCalledOnce();
+        expect(jest.mocked(core.saveState).mock.lastCall?.[1])
+          .toHaveProperty('target');
+        expect(core.notice).not.toHaveBeenCalledOnce();
+      });
+
+      it('does not update cache', async () => {
+        process.env['SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE'] = '0';
+        process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '1';
+        await expect(run()).toResolve();
+        expect(core.saveState).toHaveBeenCalledOnce();
+        expect(jest.mocked(core.saveState).mock.lastCall?.[1])
+          .not
+          .toHaveProperty('target');
+        expect(core.notice).not.toHaveBeenCalledOnce();
+      });
+    });
+
     describe.each(
       [
-        [true, ['unique', 'primary', 'secondary']],
+        [true, [
+          'unique',
+          'oldunique',
+          'primary',
+          'oldprimary',
+          'secondary',
+          'oldsecondary',
+        ]],
         [false, ['none', 'fail']],
       ] as const,
     )('sets `cache-hit` to `%p`', (value, types) => {
