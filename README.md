@@ -29,6 +29,10 @@ Linux, Windows, and macOS are supported.
   GitHub Actions beginning the [transition to Node.js v20][actions-node20],
   the action has upgraded its default runtime to Node.js v20.
 
+  If you are using a self-hosted runner,
+  update it to [v2.308.0][runner-node20] or later
+  to ensure `node20` runtime functionality.
+
 - Change the condition under which `cache-hit` is set to `true`.
 
   To be more consistent with official actions
@@ -302,6 +306,7 @@ See the [releases page][releases].
 [node16-eol]: https://nodejs.org/en/blog/announcements/nodejs16-eol
 [portable]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#tlportable
 [releases]: https://github.com/teatimeguest/setup-texlive-action/releases
+[runner-node20]: https://github.com/actions/runner/releases/tag/v2.308.0
 [texdir]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#x1-250003.2.3
 [texlive]: https://tug.org/texlive/
 [tlcontrib]: https://contrib.texlive.info
