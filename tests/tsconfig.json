@@ -3,7 +3,8 @@
   "compilerOptions": {
     "importHelpers": false,
     "noEmit": true,
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "target": "es2022",
   },
-  "include": ["./**/*.ts"]
+  "include": ["./**/*.ts"],
 }

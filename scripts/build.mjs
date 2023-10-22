@@ -9,26 +9,18 @@ import packageJson from '##/package.json' assert { type: 'json' };
 import tsconfig from '##/tsconfig.json' assert { type: 'json' };
 
 const { baseUrl, outDir } = tsconfig.compilerOptions;
-const { values } = parseArgs({
+const { values: { release } } = parseArgs({
   options: {
-    input: {
-      type: 'string',
-      short: 'i',
-      default: baseUrl,
-    },
-    output: {
-      type: 'string',
-      short: 'o',
-      default: packageJson.main,
-    },
+    release: { type: 'boolean', default: false },
   },
 });
 
 const { metafile } = await esbuild.build({
   ...esbuildConfig,
-  entryPoints: [values.input],
-  outfile: values.output,
-  metafile: values.input === baseUrl,
+  entryPoints: [baseUrl],
+  outfile: packageJson.main,
+  metafile: !release,
+  sourcemap: release ? false : 'inline',
 });
 
 if (metafile != undefined) {

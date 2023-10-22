@@ -1,8 +1,3 @@
-<!--
-  Zero-width spaces (`#x200B;`) are used for word breaks
-  or for workarounds against `dprint`.
--->
-
 # setup-texlive-action
 
 > A GitHub Action to set up TeX Live
@@ -38,19 +33,18 @@ Linux, Windows, and macOS are supported.
   To be more consistent with official actions
   such as [`actions/cache`][cache-hits],
   the `cache-hit` output is now set to `true` only if
-  a cache is found that exactly matches the specified version and packages.
+  a cache is found that exactly matches the specified version and package set.
   To simply check if a cache was found, use `cache-restored` instead:
 
   ```yaml
-  - name: Setup TeX Live
+  - uses: teatimeguest/setup-texlive-action@v3
     id: setup
-    uses: teatimeguest/setup-texlive-action@v3
 
   - if: fromJSON(steps.setup.outputs.cache-restored)
     run: echo 'A cache has been found'
   ```
 
-- Change the default installation prefix to `$RUNNER_TEMP/setup-texlive-action`.
+- Change the default installation prefix to `$RUNNER_TEMP/setup-texlive-action`;
 - Change the environment variable for updating cache to
   `SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE`.
 
@@ -84,8 +78,7 @@ Linux, Windows, and macOS are supported.
   use environment variables to explicitly specify the user directories:
 
   ```yaml
-  - name: Setup TeX Live
-    uses: teatimeguest/setup-texlive-action@v3
+  - uses: teatimeguest/setup-texlive-action@v3
     env:
       TEXLIVE_INSTALL_TEXMFHOME: >-
         ~/texmf
@@ -130,11 +123,10 @@ Linux, Windows, and macOS are supported.
 
 By default,
 the action will only set up `tlmgr` and will not install any packages.
-If you want to install additional packages, you can use `packages` input:
+If you want to install additional packages, you can use the `packages` input:
 
 ```yaml
-- name: Setup TeX Live
-  uses: teatimeguest/setup-texlive-action@v3
+- uses: teatimeguest/setup-texlive-action@v3
   with:
     packages: >-
       scheme-basic
@@ -149,8 +141,8 @@ which contains fundamental packages such as `latex` and `amsmath`.
 You can also specify packages by file using the [`package-file`](#inputs) input:
 
 ```yaml
-- name: Setup TeX Live
-  uses: teatimeguest/setup-texlive-action@v3
+- uses: actins/checkout@v4
+- uses: teatimeguest/setup-texlive-action@v3
   with:
     package-file: |
       .github/tl_packages
@@ -159,11 +151,10 @@ You can also specify packages by file using the [`package-file`](#inputs) input:
 
 ### Historic Versions
 
-You can use an older version of TeX Live by setting `version`:
+You can use an older version of TeX Live by setting the `version` input:
 
 ```yaml
-- name: Setup TeX Live 2008
-  uses: teatimeguest/setup-texlive-action@v3
+- uses: teatimeguest/setup-texlive-action@v3
   with:
     version: 2008
 ```
@@ -181,11 +172,10 @@ and `2013` to `2023` for macOS.
 
 By default, the action will save `TEXDIR` to cache
 using [`@actions/cache`][actions-cache] after the workflow job completes.
-If you want to disable caching, you can use `cache` input:
+If you want to disable caching, set the `cache` input to `false`:
 
 ```yaml
-- name: Setup TeX Live
-  uses: teatimeguest/setup-texlive-action@v3
+- uses: teatimeguest/setup-texlive-action@v3
   with:
     cache: false
 ```
@@ -199,16 +189,16 @@ If you want to disable caching, you can use `cache` input:
 
 All inputs are optional.
 
-| Name                  | Type   | Description                                                                                                                                                                                                                                     |
-| --------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cache`               | Bool   | <p>Enable caching for [`TEXDIR`][texdir].</p> **Default:**&ensp;`true`                                                                                                                                                                          |
-| `package-file`        | String | [Glob patterns][glob-patterns] for specifying files containing the names of TeX packages to be installed. The file format should be the same as the syntax for the `packages` input. The [`DEPENDS.txt`][depends-txt] format is also supported. |
-| `packages`            | String | Specify the names of TeX packages to install, separated by whitespaces. Schemes and collections are also acceptable. Everything after `#` will be treated as a comment.                                                                         |
-| `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p> **Default:**&ensp;<code>&#x200B;[$RUNNER_TEMP][actions-env]/setup-texlive-action</code>                                            |
-| `texdir`              | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`][install-tl-texdir] option and takes precedence over the `prefix` input and related environment variables.                                       |
-| `tlcontrib`           | Bool   | <p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                                                                          |
-| `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                                                                     |
-| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2023`, and `latest`.</p> **Default:**&ensp;`latest`                                                                                                                             |
+| Name                  | Type   | Description                                                                                                                                                                                                                                        |
+| --------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cache`               | Bool   | <p>Enable caching for [`TEXDIR`][texdir].</p> **Default:**&ensp;`true`                                                                                                                                                                             |
+| `package-file`        | String | [Glob patterns][glob-patterns] for specifying files containing the names of TeX packages to be installed. The file format should be the same as the syntax for the `packages` input. The [`DEPENDS.txt`][depends-txt] format is also supported.    |
+| `packages`            | String | Specify the names of TeX packages to install, separated by whitespaces. Schemes and collections are also acceptable. Everything after `#` will be treated as a comment.                                                                            |
+| `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p> **Default:**&ensp;<!-- dprint-ignore-start --><code>[$RUNNER_TEMP][actions-env]/setup-texlive-action</code><!-- dprint-ignore-end --> |
+| `texdir`              | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`][install-tl-texdir] option and takes precedence over the `prefix` input and related environment variables.                                          |
+| `tlcontrib`           | Bool   | <p>Set up [TLContrib][tlcontrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                                                                             |
+| `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                                                                        |
+| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2023`, and `latest`.</p> **Default:**&ensp;`latest`                                                                                                                                |
 
 ## Outputs
 
@@ -251,23 +241,23 @@ Setting this to anything other than `0`, the action will use
 In addition,
 the following [official environment variables][install-tl-env] are supported:
 
-| Name                               | Default                                                               |
-| ---------------------------------- | --------------------------------------------------------------------- |
-| `TEXLIVE_DOWNLOADER`               |                                                                       |
-| `TL_DOWNLOAD_PROGRAM`              |                                                                       |
-| `TL_DOWNLOAD_ARGS`                 |                                                                       |
-| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                                                   |
-| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                                       |
-| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                                       |
-| `TEXLIVE_INSTALL_NO_RESUME`        |                                                                       |
-| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                                                   |
-| `TEXLIVE_INSTALL_PAPER`            |                                                                       |
-| `TEXLIVE_INSTALL_PREFIX`           | <code>&#x200B;[$RUNNER_TEMP][actions-env]/setup-texlive-action</code> |
-| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                                       |
-| `TEXLIVE_INSTALL_TEXMFHOME`        | Same as `TEXMFLOCAL`                                                  |
-| `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                                              |
-| `TEXLIVE_INSTALL_TEXMFVAR`         | Same as `TEXMFSYSVAR`                                                 |
-| `NOPERLDOC`                        |                                                                       |
+| Name                               | Default                                                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `TEXLIVE_DOWNLOADER`               |                                                                                                                     |
+| `TL_DOWNLOAD_PROGRAM`              |                                                                                                                     |
+| `TL_DOWNLOAD_ARGS`                 |                                                                                                                     |
+| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                                                                                                 |
+| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                                                                                     |
+| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                                                                                     |
+| `TEXLIVE_INSTALL_NO_RESUME`        |                                                                                                                     |
+| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                                                                                                 |
+| `TEXLIVE_INSTALL_PAPER`            |                                                                                                                     |
+| `TEXLIVE_INSTALL_PREFIX`           | <!-- dprint-ignore-start --><code>[$RUNNER_TEMP][actions-env]/setup-texlive-action</code><!-- dprint-ignore-end --> |
+| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                                                                                     |
+| `TEXLIVE_INSTALL_TEXMFHOME`        | Same as `TEXMFLOCAL`                                                                                                |
+| `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                                                                                            |
+| `TEXLIVE_INSTALL_TEXMFVAR`         | Same as `TEXMFSYSVAR`                                                                                               |
+| `NOPERLDOC`                        |                                                                                                                     |
 
 If `prefix` and `TEXLIVE_INSTALL_PREFIX` are both set, `prefix` will be used.
 

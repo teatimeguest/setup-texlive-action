@@ -30,7 +30,6 @@ export default {
     '<rootDir>/tests/__tests__/**/*.test.ts',
   ],
   transform: {
-    [r`/action/run/main\.ts$`]: '<rootDir>/tests/jest/esbuild-transformer.mjs',
     [r`.+\.ts$`]: ['ts-jest', { tsconfig: '<rootDir>/tests/tsconfig.json' }],
   },
   verbose: false,

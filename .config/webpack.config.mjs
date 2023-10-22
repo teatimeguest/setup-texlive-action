@@ -13,6 +13,7 @@ import nunjucksConfig from '##/.config/nunjucks/config.json' assert {
 import packageJson from '##/package.json' assert { type: 'json' };
 import tsconfig from '##/tsconfig.json' assert { type: 'json' };
 
+/** @type {import('webpack').WebpackPluginFunction} */
 export function pluginNoEmit(compiler) {
   compiler.hooks.compilation.tap('NoEmit', (compilation) => {
     compilation.hooks.processAssets.tap('NoEmit', (assets) => {
@@ -23,6 +24,7 @@ export function pluginNoEmit(compiler) {
   });
 }
 
+/** @type {import('webpack').WebpackPluginFunction} */
 export function pluginNoOutput(compiler) {
   compiler.hooks.afterCompile.tap('NoOutput', (compilation) => {
     compilation.assets = [];
@@ -38,9 +40,21 @@ export class PluginLicenses extends LicenseWebpackPlugin {
   constructor(options) {
     super({
       outputFilename: path.basename(options.templatePath, '.njk'),
+      /**
+       * @param {string} license
+       * @returns {boolean}
+       */
       unacceptableLicenseTest: (license) => {
         return !options.allowList.has(license);
       },
+      /**
+       * @param {object[]} data
+       * @param {string} data[].name
+       * @param {string} data[].licenseId
+       * @param {string | undefined} data[].licenseText
+       * @param {object} data[].packageJson
+       * @returns {string}
+       */
       renderLicenses: (data) => {
         const modules = data.sort((lhs, rhs) => lhs.name < rhs.name ? -1 : 1);
         console.table(
@@ -54,6 +68,11 @@ export class PluginLicenses extends LicenseWebpackPlugin {
         env.addFilter('escape', (s) => s.replaceAll(/[<>]/gu, '\\$&'));
         return env.render(options.templatePath, { modules });
       },
+      /**
+       * @param {string} name
+       * @param {string} license
+       * @returns {string}
+       */
       handleMissingLicenseText: (name, license) => {
         if (options.allowList.has(license)) {
           return `${spdx[license].name} (${spdx[license].url})`;

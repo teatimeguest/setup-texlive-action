@@ -15,7 +15,8 @@ jobs:
           node-version-file: .node-version
       - run: npm ci
       - run: npm run prepack
-      - run: git diff --exit-code dist
+      - name: Check dist
+        run: git diff --text --ignore-all-space --exit-code -- dist
   release:
     needs: check-dist
     runs-on: ubuntu-latest
@@ -35,4 +36,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: >-
-          gh release create -F RELEASENOTES.md -- "${GITHUB_REF_NAME}" *.tgz
+          gh release create --draft -F RELEASENOTES.md -- "${GITHUB_REF_NAME}" *.tgz

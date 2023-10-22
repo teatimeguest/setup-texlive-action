@@ -13,16 +13,19 @@ case "${npm_lifecycle_event}" in
 
   version)
     git ls-files -z dist |
-      xargs -0 git update-index --no-skip-worktree --
+      xargs -0 git update-index --no-assume-unchanged --
     git add dist package-lock.json package.json
     git commit -m "chore(release): prepare for ${version}"
     ;;
 
   postversion)
     git ls-files -z dist |
-      xargs -0 git update-index --skip-worktree --
+      xargs -0 git update-index --assume-unchanged --
 
-    git cliff --config .config/cliff.toml --unreleased --tag "${version}" |
+    git cliff \
+      --config .config/git-cliff/cliff.toml \
+      --unreleased \
+      --tag "${version}" |
       git tag "${version}" --cleanup=whitespace -F -
     git tag -f "${version%%.*}" -m "${version}"
 

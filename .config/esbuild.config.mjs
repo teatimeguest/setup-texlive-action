@@ -1,4 +1,4 @@
-import { dedent } from 'ts-dedent';
+import { readFileSync } from 'node:fs';
 
 export const transformOptions = {
   target: 'node20',
@@ -14,16 +14,18 @@ export default {
   mainFields: ['module', 'main'],
   conditions: ['module', 'import'],
   banner: {
-    // https://github.com/evanw/esbuild/issues/1921#issuecomment-1152991694
-    js: dedent`
-      import { createRequire } from 'node:module';
-      const require = createRequire(import.meta.url);
-    `,
+    // See: https://github.com/evanw/esbuild/issues/1921#issuecomment-1152991694
+    get js() {
+      return readFileSync(
+        new URL(import.meta.resolve('##/src/shim/require.mjs')),
+        'utf8',
+      );
+    },
   },
   alias: {
     // See: teatimeguest/setup-texlive-action#255
     '@azure/abort-controller': '#/shim/abort-controller',
-    // This reduces the script size by 10%.
+    // This reduces the script size by about 350kb.
     'whatwg-url': 'node:url',
   },
   resolveExtensions: ['.ts', '.mjs', '.js', '.json'],
