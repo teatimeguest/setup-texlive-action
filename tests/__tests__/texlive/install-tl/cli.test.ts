@@ -39,8 +39,8 @@ describe('restore', () => {
     jest.mocked(os.platform).mockReturnValue('linux');
     jest.mocked(tool.find).mockImplementationOnce(fail);
     expect(restoreCache(options)).toBeUndefined();
-    expect(core.info).toHaveBeenCalledOnce();
-    expect(jest.mocked(core.info).mock.calls[0]?.[0]).toMatchInlineSnapshot(
+    expect(core.info).toHaveBeenCalledTimes(2);
+    expect(jest.mocked(core.info).mock.calls[1]?.[0]).toMatchInlineSnapshot(
       `"Failed to restore install-tl: Error"`,
     );
   });
@@ -64,7 +64,7 @@ describe('download', () => {
     jest.mocked(os.platform).mockReturnValue('linux');
     jest.mocked(tool.cacheDir).mockImplementationOnce(fail);
     await expect(download(options)).toResolve();
-    expect(core.info).toHaveBeenCalledTimes(4);
+    expect(core.info).toHaveBeenCalledTimes(5);
     expect(jest.mocked(core.info).mock.calls[0]?.[0]).toMatchInlineSnapshot(
       `"Downloading install-tl-unx.tar.gz from https://example.com/install-tl-unx.tar.gz"`,
     );
@@ -74,7 +74,7 @@ describe('download', () => {
     expect(jest.mocked(core.info).mock.calls[2]?.[0]).toMatchInlineSnapshot(
       `"Adding to tool cache"`,
     );
-    expect(jest.mocked(core.info).mock.calls[3]?.[0]).toMatchInlineSnapshot(
+    expect(jest.mocked(core.info).mock.calls[4]?.[0]).toMatchInlineSnapshot(
       `"Failed to cache install-tl: Error"`,
     );
   });

@@ -31,6 +31,10 @@ export default {
   ],
   transform: {
     [r`.+\.ts$`]: ['ts-jest', { tsconfig: '<rootDir>/tests/tsconfig.json' }],
+    [r`.+\.js$`]: '<rootDir>/tests/jest/esbuild-transformer.mjs',
   },
+  transformIgnorePatterns: [
+    '/node_modules/(?!ansi-styles|clean-stack|escape-string-regexp)',
+  ],
   verbose: false,
 };

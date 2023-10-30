@@ -3,7 +3,7 @@ import { Range } from 'semver';
 import { TLError, type TLErrorOptions } from '#/texlive/errors';
 import type { TlmgrAction } from '#/texlive/tlmgr/action';
 import { Version } from '#/texlive/version';
-import { Exception, type ExecOutput, type MarkNonNullable } from '#/util';
+import { Exception, type ExecOutput, type Strict } from '#/util';
 
 export interface TlmgrErrorOptions extends TLErrorOptions {
   action: TlmgrAction;
@@ -50,7 +50,7 @@ export class PackageNotFound extends TlmgrError {
 
   static check(
     output: Readonly<ExecOutput>,
-    options: Readonly<MarkNonNullable<TlmgrErrorOptions, 'version'>>,
+    options: Readonly<Strict<TlmgrErrorOptions, 'version'>>,
   ): void {
     // Missing packages is not an error in versions prior to 2015.
     if (options.version < '2015' || output.exitCode !== 0) {

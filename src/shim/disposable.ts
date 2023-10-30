@@ -14,4 +14,9 @@ declare global {
   interface AsyncDisposable {
     [Symbol.asyncDispose](): Promise<void>;
   }
+
+  interface SuppressedError extends Error {
+    error: unknown;
+    suppressed: unknown;
+  }
 }

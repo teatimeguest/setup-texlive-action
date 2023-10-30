@@ -1,4 +1,3 @@
-import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -11,9 +10,7 @@ import esbuild from 'esbuild';
 
 import esbuildConfig from '##/.config/esbuild.config.mjs';
 
-const scriptPath = fileURLToPath(import.meta.url);
-const script = path.basename(scriptPath, '');
-const localPrefix = path.normalize(path.join(path.dirname(scriptPath), '..'));
+const script = path.basename(fileURLToPath(import.meta.url), '');
 
 /** @yields {string} */
 const mkdtemp = async function*() {
@@ -32,39 +29,48 @@ const mkdtemp = async function*() {
  * @return {Promise<number>}
  */
 const node = async (main, args) => {
+  const dotenv = fileURLToPath(import.meta.resolve('##/tests/e2e/.env'));
   const { status, signal } = spawnSync('node', [
-    `--env-file=${path.join(localPrefix, 'tests', 'e2e', '.env')}`,
+    `--env-file=${path.relative('.', dotenv)}`,
     '--',
     main,
     ...args,
   ], {
     stdio: 'inherit',
   });
-  return process.exitCode = status ?? (signal + 128);
+  return status ?? (signal + 128);
 };
 
-const { positionals } = parseArgs({ allowPositionals: true });
-assert.notEqual(positionals.length, 0, `USAGE: ${script} main.ts [...]`);
-const [input, ...args] = positionals;
-
-for await (const tmpdir of mkdtemp()) {
-  const outfile = path.format({
-    dir: tmpdir,
-    name: path.basename(input),
-    ext: '.mjs',
-  });
-  try {
-    await esbuild.build({
-      ...esbuildConfig,
-      entryPoints: [input],
-      outfile,
-      minify: true,
-      keepNames: true,
-      sourcemap: 'inline',
-      logLevel: 'warning',
-    });
-  } catch {
-    process.exit(1);
+/** @returns {Promise<number>} */
+const run = async () => {
+  const { positionals } = parseArgs({ allowPositionals: true });
+  if (positionals.length === 0) {
+    console.error(`USAGE: ${script} main.ts [...]`);
+    return 1;
   }
-  await node(outfile, args);
-}
+  const [input, ...args] = positionals;
+
+  for await (const tmpdir of mkdtemp()) {
+    const outfile = path.format({
+      dir: tmpdir,
+      name: path.basename(input),
+      ext: '.mjs',
+    });
+    try {
+      await esbuild.build({
+        ...esbuildConfig,
+        entryPoints: [input],
+        outfile,
+        minify: true,
+        keepNames: true,
+        sourcemap: 'inline',
+        logLevel: 'warning',
+      });
+    } catch {
+      return 1;
+    }
+    return await node(outfile, args);
+  }
+};
+
+process.exit(await run());

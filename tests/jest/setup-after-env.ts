@@ -1,5 +1,6 @@
 import type {} from 'jest-extended';
 import 'jest-extended/all';
+import 'regenerator-runtime/runtime';
 
 import '#/globals';
 

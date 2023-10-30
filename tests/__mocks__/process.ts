@@ -11,4 +11,7 @@ module.exports = {
   set env(e: NodeJS.ProcessEnv) {
     globalThis.process.env = e;
   },
+  stdout: {
+    hasColors: jest.fn().mockReturnValue(false),
+  },
 };

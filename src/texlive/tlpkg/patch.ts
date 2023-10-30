@@ -1,6 +1,6 @@
 import type { Buffer } from 'node:buffer';
 import { readFile, writeFile } from 'node:fs/promises';
-import { platform } from 'node:os';
+import { EOL, platform } from 'node:os';
 import path from 'node:path';
 
 import * as log from '#/log';
@@ -63,12 +63,10 @@ export async function patch(options: {
       p: Patch,
     ): Promise<string[]> => {
       try {
-        const linePrefix = '\u001B[34m>\u001B[0m '; // chalk.blue('> ')
         const { exitCode, stdout, stderr } = await exec('git', [
           'diff',
           '--no-index',
-          '--color',
-          `--line-prefix=${linePrefix}`,
+          `--color=${log.hasColors() ? 'always' : 'never'}`,
           '--',
           p.file,
           '-',
@@ -79,7 +77,7 @@ export async function patch(options: {
           ignoreReturnCode: true,
         });
         if (exitCode === 1) {
-          return [linePrefix + p.description + '\n' + stdout.trimEnd()];
+          return [log.styles.blue(p.description), stdout.trimEnd()];
         }
         if (exitCode > 1) {
           log.debug('git-diff exited with %d: %s', exitCode, stderr);
@@ -103,6 +101,6 @@ export async function patch(options: {
 
     log.info('Applying patches');
     const diffs = await Promise.all(patches.map((p) => apply(p)));
-    log.info(diffs.flat().join('\n'));
+    log.info({ linePrefix: log.styles.blue`|` + ' ' }, diffs.flat().join(EOL));
   }
 }

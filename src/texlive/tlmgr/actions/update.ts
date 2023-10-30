@@ -1,6 +1,8 @@
+import { P, match } from 'ts-pattern';
+
 import { TLVersionOutdated } from '#/texlive/tlmgr/errors';
 import { use } from '#/texlive/tlmgr/internals';
-import { ExecError, processArgsAndOptions } from '#/util/exec';
+import { ExecError, isIterable } from '#/util';
 
 export interface UpdateOptions {
   readonly all?: boolean;
@@ -8,32 +10,42 @@ export interface UpdateOptions {
   readonly reinstallForciblyRemoved?: boolean;
 }
 
-export function update(options?: UpdateOptions): Promise<void>;
+export function update(): Promise<void>;
+export function update(options: UpdateOptions): Promise<void>;
+export function update(packages: Iterable<string>): Promise<void>;
 export function update(
   packages: Iterable<string>,
-  options?: UpdateOptions,
+  options: UpdateOptions,
 ): Promise<void>;
-
 export async function update(
-  packagesOrOptions?: Iterable<string> | UpdateOptions,
-  options?: UpdateOptions,
+  ...inputs:
+    | readonly []
+    | readonly [UpdateOptions]
+    | readonly [Iterable<string>]
+    | readonly [Iterable<string>, UpdateOptions]
 ): Promise<void> {
   const internals = use();
-  let packages: Iterable<string>;
-  [packages = [], options] = processArgsAndOptions(
-    packagesOrOptions,
-    options,
-  );
-  const args = (options?.all ?? false) ? ['--all'] : [...packages];
-  if (options?.self ?? false) {
+  const [packages, options] = match(inputs)
+    .returnType<[Iterable<string>, UpdateOptions | undefined]>()
+    .with(
+      [P._, P._],
+      [P.when(isIterable)],
+      ([packages, options]) => [packages, options],
+    )
+    .with(P._, ([options]) => [[], options])
+    .exhaustive();
+  const {
+    all = false,
+    reinstallForciblyRemoved = false,
+    self = false,
+  } = options ?? {};
+  const args = all ? ['--all'] : [...packages];
+  if (self) {
     // tlmgr for TeX Live 2008 does not have `self` option
     args.push(internals.version > '2008' ? '--self' : 'texlive.infra');
   }
-  if (
-    (options?.reinstallForciblyRemoved ?? false)
-    // `--reinstall-forcibly-removed` was first implemented in TeX Live 2009.
-    && internals.version >= '2009'
-  ) {
+  // `--reinstall-forcibly-removed` was first implemented in TeX Live 2009.
+  if (reinstallForciblyRemoved && internals.version >= '2009') {
     args.unshift('--reinstall-forcibly-removed');
   }
   const action = 'update';

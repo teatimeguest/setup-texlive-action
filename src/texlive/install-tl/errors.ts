@@ -3,8 +3,9 @@ import path from 'node:path';
 
 import deline from 'deline';
 
+import { symbols } from '#/log';
 import { TLError, type TLErrorOptions } from '#/texlive/errors';
-import { Exception, type ExecOutput, type MarkNonNullable } from '#/util';
+import { Exception, type ExecOutput, type Strict } from '#/util';
 
 @Exception
 export abstract class InstallTLError extends TLError {}
@@ -16,7 +17,7 @@ export class RepositoryVersionIncompatible extends InstallTLError {
       'The repository is not compatible with this version of install-tl',
       options,
     );
-    this['note'] = deline`
+    this[symbols.note] = deline`
       The CTAN mirrors may not have completed synchronisation
       against a release of new version of TeX Live.
       Please try re-running the workflow after a while.
@@ -53,7 +54,7 @@ export class UnexpectedVersion extends InstallTLError {
 
   static async check(
     TEXMFROOT: string,
-    options: Readonly<MarkNonNullable<TLErrorOptions, 'version'>>,
+    options: Readonly<Strict<TLErrorOptions, 'version'>>,
   ): Promise<void> {
     const opts = { ...options };
     try {

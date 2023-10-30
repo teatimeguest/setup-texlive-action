@@ -14,6 +14,6 @@ export async function run(): Promise<void> {
       await post();
     }
   } catch (error) {
-    log.fatal({ error }, 'Failed to setup TeX Live');
+    log.fatal({ error });
   }
 }

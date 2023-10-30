@@ -2,6 +2,7 @@ import path from 'node:path';
 
 import deline from 'deline';
 
+import { symbols } from '#/log';
 import { TLError, type TLErrorOptions } from '#/texlive/errors';
 import { Exception, type ExecOutput } from '#/util';
 
@@ -15,7 +16,7 @@ export class PackageChecksumMismatch extends TLError {
     options?: Readonly<TLErrorOptions>,
   ) {
     super('The checksums of some packages did not match', options);
-    this['note'] = deline`
+    this[symbols.note] = deline`
       The CTAN mirror may be in the process of synchronisation.
       Please try re-running the workflow after a while.
     `;
@@ -45,7 +46,7 @@ export class TlpdbNotFound extends TLError {
     options?: Readonly<TLErrorOptions>,
   ) {
     super('Repository initialization failed', options);
-    this['note'] = deline`
+    this[symbols.note] = deline`
       The repository may not have been synchronized yet.
       Please try re-running the workflow after a while.
     `;

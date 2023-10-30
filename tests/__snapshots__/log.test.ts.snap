@@ -1,0 +1,118 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`info logs exception 1`] = `
+"[2m|[22m [31mAggregateError:[39m Error 8
+[2m|[22m     at ...
+[2m|[22m     at ... {
+[2m|[22m   [errors]: [
+[2m|[22m     [31mError [SuppressedError]:[39m Error 4
+[2m|[22m         at ...
+[2m|[22m         at ... {
+[2m|[22m       suppressed: [31mTypeError:[39m Error 2
+[2m|[22m           at ...
+[2m|[22m           at ... {
+[2m|[22m         [[32mSymbol(note)[39m]: [32m'Note 2'[39m,
+[2m|[22m         [cause]: [31mError:[39m Error 1
+[2m|[22m             at ...
+[2m|[22m             at ... {
+[2m|[22m           info1: [32m'Info 1'[39m,
+[2m|[22m           info2: [33m2[39m,
+[2m|[22m           [[32mSymbol(note)[39m]: [32m'Note 1'[39m
+[2m|[22m         }
+[2m|[22m       },
+[2m|[22m       error: [31mError[39m
+[2m|[22m           at ...
+[2m|[22m           at ... {
+[2m|[22m         info3: [32m'Info 3'[39m
+[2m|[22m       }
+[2m|[22m     },
+[2m|[22m     [31mRangeError:[39m Error 5
+[2m|[22m         at ...
+[2m|[22m         at ... {
+[2m|[22m       [[32mSymbol(note)[39m]: [32m'Note 1'[39m,
+[2m|[22m       [cause]: [32m'Error 6'[39m
+[2m|[22m     },
+[2m|[22m     [32m'Error 7'[39m,
+[2m|[22m     [1mnull[22m,
+[2m|[22m     [90mundefined[39m
+[2m|[22m   ]
+[2m|[22m }"
+`;
+
+exports[`info logs exception 2`] = `
+"| AggregateError: Error 8
+|     at ...
+|     at ... {
+|   [errors]: [
+|     Error [SuppressedError]: Error 4
+|         at ...
+|         at ... {
+|       suppressed: TypeError: Error 2
+|           at ...
+|           at ... {
+|         [Symbol(note)]: 'Note 2',
+|         [cause]: Error: Error 1
+|             at ...
+|             at ... {
+|           info1: 'Info 1',
+|           info2: 2,
+|           [Symbol(note)]: 'Note 1'
+|         }
+|       },
+|       error: Error
+|           at ...
+|           at ... {
+|         info3: 'Info 3'
+|       }
+|     },
+|     RangeError: Error 5
+|         at ...
+|         at ... {
+|       [Symbol(note)]: 'Note 1',
+|       [cause]: 'Error 6'
+|     },
+|     'Error 7',
+|     null,
+|     undefined
+|   ]
+| }"
+`;
+
+exports[`warn logs exception 1`] = `
+"[31m|[39m [31mAggregateError:[39m Error 8
+[31m|[39m     at ...
+[31m|[39m     at ... {
+[31m|[39m   [errors]: [
+[31m|[39m     [31mError [SuppressedError]:[39m Error 4
+[31m|[39m         at ...
+[31m|[39m         at ... {
+[31m|[39m       suppressed: [31mTypeError:[39m Error 2
+[31m|[39m           at ...
+[31m|[39m           at ... {
+[31m|[39m         [[32mSymbol(note)[39m]: [32m'Note 2'[39m,
+[31m|[39m         [cause]: [31mError:[39m Error 1
+[31m|[39m             at ...
+[31m|[39m             at ... {
+[31m|[39m           info1: [32m'Info 1'[39m,
+[31m|[39m           info2: [33m2[39m,
+[31m|[39m           [[32mSymbol(note)[39m]: [32m'Note 1'[39m
+[31m|[39m         }
+[31m|[39m       },
+[31m|[39m       error: [31mError[39m
+[31m|[39m           at ...
+[31m|[39m           at ... {
+[31m|[39m         info3: [32m'Info 3'[39m
+[31m|[39m       }
+[31m|[39m     },
+[31m|[39m     [31mRangeError:[39m Error 5
+[31m|[39m         at ...
+[31m|[39m         at ... {
+[31m|[39m       [[32mSymbol(note)[39m]: [32m'Note 1'[39m,
+[31m|[39m       [cause]: [32m'Error 6'[39m
+[31m|[39m     },
+[31m|[39m     [32m'Error 7'[39m,
+[31m|[39m     [1mnull[22m,
+[31m|[39m     [90mundefined[39m
+[31m|[39m   ]
+[31m|[39m }"
+`;

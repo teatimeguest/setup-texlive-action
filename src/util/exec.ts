@@ -1,44 +1,44 @@
 import { Buffer } from 'node:buffer';
 
-import * as actions from '@actions/exec';
+import {
+  type ExecOptions as ActionsExecOptions,
+  type ExecOutput,
+  getExecOutput,
+} from '@actions/exec';
+import { P, match } from 'ts-pattern';
 
-import { Exception, isIterable } from '#/util';
+import { Exception, type Lax } from '#/util';
 
 export interface ExecOptions
-  extends Readonly<Omit<actions.ExecOptions, 'input'>>
+  extends Readonly<Omit<ActionsExecOptions, 'input'>>
 {
   readonly stdin?: Buffer | string | null;
 }
 
-export type ExecOutput = actions.ExecOutput;
+export type ExecResultConfig =
+  & Omit<ExecResult, 'args' | 'check' | 'silenced'>
+  & Lax<Pick<ExecResult, 'args' | 'silenced'>>;
 
-export interface ExecResultConfig
-  extends Omit<ExecResult, 'args' | 'check' | 'config'>
-{
-  args?: readonly string[] | undefined;
-}
+export class ExecResult implements ExecOutput {
+  readonly command: string;
+  declare readonly args?: readonly string[];
+  readonly exitCode: number;
+  readonly stderr: string;
+  readonly stdout: string;
+  declare readonly silenced: boolean;
 
-export class ExecResult implements Readonly<ExecOutput> {
-  constructor(private readonly config: Readonly<ExecResultConfig>) {}
-
-  get command(): string {
-    return this.config.command;
-  }
-
-  get args(): readonly string[] | undefined {
-    return this.config.args;
-  }
-
-  get exitCode(): number {
-    return this.config.exitCode;
-  }
-
-  get stderr(): string {
-    return this.config.stderr;
-  }
-
-  get stdout(): string {
-    return this.config.stdout;
+  constructor(config: ExecResultConfig) {
+    this.command = config.command;
+    if (config.args !== undefined) {
+      this.args = config.args;
+    }
+    this.exitCode = config.exitCode;
+    this.stderr = config.stderr;
+    this.stdout = config.stdout;
+    Object.defineProperty(this, 'silenced', {
+      value: config.silenced ?? false,
+      enumerable: false,
+    });
   }
 
   check(): void {
@@ -48,21 +48,20 @@ export class ExecResult implements Readonly<ExecOutput> {
   }
 }
 
-export interface ExecError extends ExecResultConfig {}
+export interface ExecError extends Omit<ExecResult, 'check' | 'silenced'> {}
 
 @Exception
 export class ExecError extends Error {
-  constructor(private readonly config: Readonly<ExecResultConfig>) {
-    const { command, exitCode, stderr } = config;
+  constructor(config: Lax<ExecResultConfig, 'silenced'>) {
+    const { command, exitCode, stderr, silenced = false } = config;
     super(`\`${command}\` exited with status ${exitCode}: ${stderr}`);
-    void this.config;
-  }
-
-  static {
-    const { check, ...descriptors } = Object.getOwnPropertyDescriptors(
-      ExecResult.prototype,
-    );
-    Object.defineProperties(this.prototype, descriptors);
+    Object.assign(this, config);
+    // Prevents `stderr` from inspecting as it is included in the error message.
+    Object.defineProperty(this, 'stderr', { enumerable: false });
+    if (!silenced) {
+      // Prevents `stdout` from inspecting as it is output to the log.
+      Object.defineProperty(this, 'stdout', { enumerable: false });
+    }
   }
 }
 
@@ -74,20 +73,20 @@ export async function exec(
   options?: ExecOptions,
 ): Promise<ExecResult> {
   const { stdin, ...rest } = options ?? {};
-  const execOptions: actions.ExecOptions = { ...rest, ignoreReturnCode: true };
+  const execOptions: ActionsExecOptions = { ...rest, ignoreReturnCode: true };
   if (stdin !== undefined) {
-    if (stdin === null) {
-      execOptions.input = Buffer.alloc(0);
-    } else if (typeof stdin === 'string') {
-      execOptions.input = Buffer.from(stdin);
-    } else {
-      execOptions.input = stdin;
-    }
+    execOptions.input = match(stdin)
+      .with(null, () => Buffer.alloc(0)) // eslint-disable-line unicorn/no-null
+      .with(P.string, (input) => Buffer.from(input))
+      .with(P.instanceOf(Buffer), (input) => input)
+      .exhaustive();
   }
+  const outputs = await getExecOutput(command, args, execOptions);
   const result = new ExecResult({
     command,
     args,
-    ...await actions.getExecOutput(command, args, execOptions),
+    ...outputs,
+    silenced: options?.silent,
   });
   if (options?.ignoreReturnCode !== true) {
     result.check();
@@ -95,13 +94,4 @@ export async function exec(
   return result;
 }
 
-export function processArgsAndOptions<T extends object>(
-  argsOrOptions?: Iterable<string> | T,
-  options?: T,
-): [args: Iterable<string> | undefined, options: T | undefined] {
-  if (isIterable(argsOrOptions)) {
-    return [argsOrOptions, options];
-  } else {
-    return [undefined, options ?? argsOrOptions];
-  }
-}
+export type { ExecOutput };
