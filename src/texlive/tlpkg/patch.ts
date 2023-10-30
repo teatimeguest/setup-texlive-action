@@ -20,7 +20,7 @@ const PATCHES: readonly Patch[] = [{
   description: 'Fixes a syntax error.',
   versions: { since: '2009', until: '2011' },
   file: 'tlpkg/TeXLive/TLWinGoo.pm',
-  from: [/foreach \$p qw\((.*)\)/u],
+  from: [/foreach \$p qw\((.*)\)/v],
   to: ['foreach $$p (qw($1))'],
 }, {
   // See: https://github.com/dankogai/p5-encode/issues/37

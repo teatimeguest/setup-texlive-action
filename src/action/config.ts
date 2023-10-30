@@ -47,7 +47,7 @@ async function collectPackages(
   inputs: DeepUndefinable<Pick<Inputs, 'packageFile' | 'packages'>>,
 ): Promise<Set<string>> {
   type Dependency = dependsTxt.Dependency;
-  async function* loadDependsTxts(): AsyncGenerator<Dependency, void> {
+  async function* loadDependsTxts(): AsyncGenerator<Dependency, void, void> {
     if (inputs.packages !== undefined) {
       yield* dependsTxt.parse(inputs.packages);
     }

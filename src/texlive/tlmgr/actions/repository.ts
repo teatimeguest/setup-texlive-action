@@ -37,8 +37,8 @@ export async function remove(repo: string | Readonly<URL>): Promise<void> {
 
 export async function* list(): AsyncGenerator<RepositoryConfig, void, void> {
   const { stdout } = await use().exec('repository', ['list']);
-  const re = /^\t(?<path>.+) \((?<tag>.+)\)$/u;
-  for (const line of stdout.split(/\r?\n/gu).slice(1)) {
+  const re = /^\t(?<path>.+) \((?<tag>.+)\)$/v;
+  for (const line of stdout.split(/\r?\n/v).slice(1)) {
     const found = re.exec(line)?.groups ?? {};
     yield {
       path: found['path'] ?? line.trim(),

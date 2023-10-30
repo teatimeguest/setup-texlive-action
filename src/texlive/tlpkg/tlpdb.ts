@@ -9,9 +9,9 @@ export function* parse(
 ): Generator<[name: string, data: string], void, void> {
   // dprint-ignore
   const iter = db
-    .replaceAll(/\\\r?\n/gu, '') // Remove escaped line breaks
-    .replaceAll(/#.*/gu, '')     // Remove comments
-    .split(/^name\s(.*)$/gmu)    // Split into individual packages
+    .replaceAll(/\\\r?\n/gv, '') // Remove escaped line breaks
+    .replaceAll(/#.*/gv, '')     // Remove comments
+    .split(/^name\s(.*)$/mv)     // Split into individual packages
     .values();
   iter.next(); // The first chunk should contain nothing.
   for (const name of iter) {

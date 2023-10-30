@@ -75,7 +75,17 @@ function inspectNoCustom(
   return inspect(target, { ...options, customInspect: false });
 }
 
-const reStack = /^.*(?:\r?\n(?:.\[[0-9;]+m)* {4}at.*)*/v;
+/**
+ * ```regex
+ * ^.*                # error message
+ * (?:
+ *   \r?\n            # newline
+ *   (?:.\[[\d;]+m)*  # ansi escapes
+ *   \ {4}at.*        # callsite
+ * )*
+ * ```
+ */
+const reStack = /^.*(?:\r?\n(?:.\[[\d;]+m)* {4}at.*)*/v;
 
 function formatStack(text: string): string {
   let stack = reStack.exec(text)?.[0];
@@ -96,7 +106,7 @@ function formatStack(text: string): string {
 
 /**
  * @returns Same value as `$GITHUB_ACTION_PATH/../../..`.
- * @remarks
+ * @example
  *   On Linux:
  *   ```env
  *   GITHUB_ACTION_PATH = /home/runner/work/_actions/<owner>/<repository>/<ref>

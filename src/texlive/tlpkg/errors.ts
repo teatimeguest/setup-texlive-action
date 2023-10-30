@@ -23,7 +23,7 @@ export class PackageChecksumMismatch extends TLError {
   }
 
   /** @see `tlpkg/TeXLive/TLUtils.pm` */
-  private static readonly RE = /: checksums differ for (.+):$/gmu;
+  private static readonly RE = /: checksums differ for (.+):$/gmv;
 
   static check(
     output: Readonly<ExecOutput>,
@@ -54,7 +54,7 @@ export class TlpdbNotFound extends TLError {
 
   /** @see `tlpkg/TeXLive/TLPDB.pm` */
   private static readonly RE =
-    /TLPDB::from_file could not initialize from: (.*)$/mu;
+    /TLPDB::from_file could not initialize from: (.*)$/mv;
 
   static check(
     output: Readonly<ExecOutput>,

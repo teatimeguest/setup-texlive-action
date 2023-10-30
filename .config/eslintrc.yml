@@ -7,6 +7,7 @@ extends:
   - plugin:import/recommended
   - plugin:import/typescript
   - plugin:node/recommended
+  - plugin:regexp/recommended
 parserOptions:
   warnOnUnsupportedTypeScriptVersion: false
 reportUnusedDisableDirectives: true
@@ -167,6 +168,10 @@ overrides:
         - never
       node/prefer-global/url: error
       node/prefer-global/url-search-params: error
+      regexp/no-super-linear-move: warn
+      regexp/no-useless-flag: error
+      regexp/prefer-escape-replacement-dollar-char: error
+      regexp/require-unicode-sets-regexp: error
       unicorn/catch-error-name: off
       unicorn/consistent-function-scoping: off
       unicorn/custom-error-definition: off

@@ -6,9 +6,9 @@ import { use } from '#/texlive/tlmgr/internals';
 import { type Tlpobj, tlpdb } from '#/texlive/tlpkg';
 
 const RE = {
-  nonPackage: /(?:^(?:collection|scheme)-|\.)/u,
-  version: /^catalogue-version\s+(.*)$/mu,
-  revision: /^revision\s+(\d+)\s*$/mu,
+  nonPackage: /(?:^(?:collection|scheme)-|\.)/v,
+  version: /^catalogue-version\s+(\S.*)$/mv,
+  revision: /^revision\s+(\d+)\s*$/mv,
 } as const;
 
 /**

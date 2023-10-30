@@ -36,15 +36,15 @@ export class PackageNotFound extends TlmgrError {
   private static readonly PATTERNS = [
     {
       versions: new Range('2008'),
-      re: /: Cannot find package (.+)$/gmu,
+      re: /: Cannot find package (.+)$/gmv,
     },
     {
       versions: new Range('>=2009 <2015'),
-      re: /^package (.+) not present in package repository/gmu,
+      re: /^package (.+) not present in package repository/gmv,
     },
     {
       versions: new Range('>=2015'),
-      re: /^tlmgr install: package (\S+) not present/gmu,
+      re: /^tlmgr install: package (\S+) not present/gmv,
     },
   ] as const;
 
@@ -75,7 +75,7 @@ export class TLVersionOutdated extends TlmgrError {
   }
 
   private static readonly RE =
-    /is older than remote repository(?: \((?<remote>\d{4})\))/u;
+    /is older than remote repository(?: \((?<remote>\d{4})\))?/v;
 
   static check(
     output: Readonly<ExecOutput>,

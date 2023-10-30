@@ -24,14 +24,15 @@ export class RepositoryVersionIncompatible extends InstallTLError {
     `;
   }
 
-  private static readonly TAG = 'repository being accessed are not compatible';
-  private static readonly RE = /^\s*repository:\s*(?<remote>20\d{2})/mu;
+  private static readonly MSG = 'repository being accessed are not compatible';
+  // eslint-disable-next-line regexp/no-super-linear-move
+  private static readonly RE = /^\s*repository:\s*(?<remote>20\d{2})/mv;
 
   static check(
     output: Readonly<ExecOutput>,
     options?: Readonly<TLErrorOptions>,
   ): void {
-    if (output.exitCode !== 0 && output.stderr.includes(this.TAG)) {
+    if (output.exitCode !== 0 && output.stderr.includes(this.MSG)) {
       throw new this({
         ...options,
         remoteVersion: this.RE.exec(output.stderr)?.groups?.['remote'],
@@ -50,7 +51,7 @@ export class UnexpectedVersion extends InstallTLError {
   }
 
   private static readonly RELEASE_TEXT_FILE = 'release-texlive.txt';
-  private static readonly RE = /^TeX Live .+ version (20\d{2})/u;
+  private static readonly RE = /^TeX Live .+ version (20\d{2})/v;
 
   static async check(
     TEXMFROOT: string,

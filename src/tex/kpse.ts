@@ -13,6 +13,6 @@ export async function varValue(
     silent: true,
   });
   return exitCode === 0
-    ? path.normalize(stdout.replace(/\r?\n$/u, ''))
+    ? path.normalize(stdout.replace(/\r?\n$/v, ''))
     : undefined;
 }
