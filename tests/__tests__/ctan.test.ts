@@ -15,8 +15,8 @@ beforeAll(async () => {
 
 afterAll(nock.restore);
 
-jest.unmock('@actions/http-client');
-jest.unmock('#/ctan/mirrors');
+vi.unmock('@actions/http-client');
+vi.unmock('#/ctan/mirrors');
 
 describe('mirrors.resolve', () => {
   const mirror = new URL('https://ctan.math.washington.edu/tex-archive/');

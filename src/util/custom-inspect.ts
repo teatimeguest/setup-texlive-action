@@ -1,5 +1,5 @@
 import { platform } from 'node:os';
-import path from 'node:path';
+import * as path from 'node:path';
 import { env } from 'node:process';
 import type { InspectOptions, InspectOptionsStylized } from 'node:util';
 

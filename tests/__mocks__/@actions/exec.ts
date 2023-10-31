@@ -1,8 +1,6 @@
-module.exports = {
-  exec: jest.fn(),
-  getExecOutput: jest.fn().mockResolvedValue({
-    exitCode: 0,
-    stdout: '',
-    stderr: '',
-  }),
-};
+export const exec = vi.fn();
+export const getExecOutput = vi.fn().mockResolvedValue({
+  exitCode: 0,
+  stdout: '',
+  stderr: '',
+});

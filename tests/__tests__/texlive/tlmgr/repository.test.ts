@@ -3,7 +3,7 @@ import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
 import { ExecError } from '#/util/exec';
 
-jest.unmock('#/texlive/tlmgr/actions/repository');
+vi.unmock('#/texlive/tlmgr/actions/repository');
 
 const setVersion = (version: Version) => {
   set(new TlmgrInternals({ TEXDIR: '', version }), true);
@@ -39,7 +39,7 @@ describe('add', () => {
 
   it('can safely add the repository again', async () => {
     // eslint-disable-next-line jest/unbound-method
-    jest.mocked(TlmgrInternals.prototype.exec).mockRejectedValueOnce(
+    vi.mocked(TlmgrInternals.prototype.exec).mockRejectedValueOnce(
       new ExecError({
         command: 'tlmgr',
         exitCode: 2,
@@ -54,7 +54,7 @@ describe('add', () => {
 
   it('fails with non-zero status code', async () => {
     // eslint-disable-next-line jest/unbound-method
-    jest.mocked(TlmgrInternals.prototype.exec).mockRejectedValueOnce(
+    vi.mocked(TlmgrInternals.prototype.exec).mockRejectedValueOnce(
       new ExecError({
         command: 'tlmgr',
         exitCode: 2,

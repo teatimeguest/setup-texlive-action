@@ -1,4 +1,4 @@
-import path from 'node:path';
+import * as path from 'node:path';
 
 import { Exclude, Expose, instanceToPlain } from 'class-transformer';
 import { decorate as Decorate } from 'ts-mixer';

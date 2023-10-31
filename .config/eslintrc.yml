@@ -155,10 +155,8 @@ overrides:
       '@typescript-eslint/switch-exhaustiveness-check': error
       import/no-commonjs: error
       import/no-duplicates: error
-      import/no-namespace:
-        - error
-        - ignore: ["*#/**", "@actions/*"]
       import/no-import-module-exports: error
+      import/no-named-default: error
       import/no-relative-packages: error
       node/prefer-global/buffer:
         - error
@@ -192,6 +190,9 @@ overrides:
     extends:
       - plugin:jest/recommended
       - plugin:jest/style
+    settings:
+      jest:
+        version: 29
     rules:
       '@typescript-eslint/no-explicit-any': off
       '@typescript-eslint/no-non-null-assertion': off

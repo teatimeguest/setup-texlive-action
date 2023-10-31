@@ -2,7 +2,7 @@ import * as pinning from '#/texlive/tlmgr/actions/pinning';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
 
-jest.unmock('#/texlive/tlmgr/actions/pinning');
+vi.unmock('#/texlive/tlmgr/actions/pinning');
 
 const setVersion = (version: Version) => {
   set(new TlmgrInternals({ TEXDIR: '', version }), true);

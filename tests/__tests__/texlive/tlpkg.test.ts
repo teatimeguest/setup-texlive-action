@@ -1,11 +1,11 @@
-import fs from 'node:fs/promises';
-import os from 'node:os';
+import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
 
 import * as tlpkg from '#/texlive/tlpkg';
 import type { Version } from '#/texlive/version';
 
-jest.unmock('#/texlive/tlpkg/errors');
-jest.unmock('#/texlive/tlpkg/patch');
+// vi.unmock('#/texlive/tlpkg/errors');
+vi.unmock('#/texlive/tlpkg/patch');
 
 describe('check', () => {
   it('detects forcible removal of packages', async () => {
@@ -32,7 +32,7 @@ describe('patch', () => {
   ])(
     'applies a patch for tlpkg/TeXLive/TLWinGoo.pm on (%s %s)',
     async (platform, version) => {
-      jest.mocked(os.platform).mockReturnValue(platform);
+      vi.mocked(os.platform).mockReturnValue(platform);
       await expect(tlpkg.patch({ TEXMFROOT, version })).toResolve();
       expect(fs.readFile).toHaveBeenCalledWith(
         expect.stringContaining('TLWinGoo.pm'),
@@ -42,7 +42,7 @@ describe('patch', () => {
   );
 
   it('applies a patch for tlpkg/tlperl/lib/Encode/Alias.pm', async () => {
-    jest.mocked(os.platform).mockReturnValue('win32');
+    vi.mocked(os.platform).mockReturnValue('win32');
     await expect(tlpkg.patch({ TEXMFROOT, version: `2015` })).toResolve();
     expect(fs.readFile).toHaveBeenCalledWith(
       expect.stringContaining('Alias.pm'),
@@ -61,7 +61,7 @@ describe('patch', () => {
   ])(
     'applies a patch tlpkg/TeXLive/TLUtils.pm (%s %s)',
     async (platform, version) => {
-      jest.mocked(os.platform).mockReturnValue(platform);
+      vi.mocked(os.platform).mockReturnValue(platform);
       await expect(tlpkg.patch({ TEXMFROOT, version })).toResolve();
       expect(fs.readFile).toHaveBeenCalledWith(
         expect.stringContaining('TLUtils.pm'),

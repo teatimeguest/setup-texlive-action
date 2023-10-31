@@ -1,4 +1,4 @@
-import path from 'node:path';
+import * as path from 'node:path';
 
 import type { Texmf } from '#/tex/texmf';
 import { exec } from '#/util/exec';

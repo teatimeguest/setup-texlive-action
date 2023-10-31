@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`2008 linux texlive.profile 1`] = `
+exports[`2008 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2008
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2008/texmf-config
@@ -15,7 +15,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2008 win32 texlive.profile 1`] = `
+exports[`2008 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2008
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2008\\texmf-config
@@ -31,7 +31,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2009 linux texlive.profile 1`] = `
+exports[`2009 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2009
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2009/texmf-config
@@ -45,7 +45,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2009 win32 texlive.profile 1`] = `
+exports[`2009 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2009
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2009\\texmf-config
@@ -62,7 +62,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2010 linux texlive.profile 1`] = `
+exports[`2010 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2010
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2010/texmf-config
@@ -76,7 +76,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2010 win32 texlive.profile 1`] = `
+exports[`2010 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2010
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2010\\texmf-config
@@ -93,7 +93,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2011 linux texlive.profile 1`] = `
+exports[`2011 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2011
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2011/texmf-config
@@ -108,7 +108,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2011 win32 texlive.profile 1`] = `
+exports[`2011 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2011
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2011\\texmf-config
@@ -126,7 +126,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2012 linux texlive.profile 1`] = `
+exports[`2012 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2012
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2012/texmf-config
@@ -141,7 +141,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2012 win32 texlive.profile 1`] = `
+exports[`2012 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2012
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2012\\texmf-config
@@ -160,7 +160,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2013 linux texlive.profile 1`] = `
+exports[`2013 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2013
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2013/texmf-config
@@ -175,7 +175,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2013 win32 texlive.profile 1`] = `
+exports[`2013 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2013
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2013\\texmf-config
@@ -194,7 +194,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2014 linux texlive.profile 1`] = `
+exports[`2014 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2014
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2014/texmf-config
@@ -209,7 +209,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2014 win32 texlive.profile 1`] = `
+exports[`2014 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2014
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2014\\texmf-config
@@ -228,7 +228,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2015 linux texlive.profile 1`] = `
+exports[`2015 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2015
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2015/texmf-config
@@ -243,7 +243,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2015 win32 texlive.profile 1`] = `
+exports[`2015 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2015
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2015\\texmf-config
@@ -262,7 +262,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2016 linux texlive.profile 1`] = `
+exports[`2016 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2016
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2016/texmf-config
@@ -277,7 +277,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2016 win32 texlive.profile 1`] = `
+exports[`2016 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2016
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2016\\texmf-config
@@ -296,7 +296,7 @@ option_doc 0
 option_src 0
 `;
 
-exports[`2017 linux texlive.profile 1`] = `
+exports[`2017 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2017
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2017/texmf-config
@@ -311,7 +311,7 @@ tlpdbopt_install_docfiles 0
 tlpdbopt_install_srcfiles 0
 `;
 
-exports[`2017 win32 texlive.profile 1`] = `
+exports[`2017 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2017
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2017\\texmf-config
@@ -329,7 +329,7 @@ tlpdbopt_file_assocs 0
 tlpdbopt_w32_multi_user 0
 `;
 
-exports[`2018 linux texlive.profile 1`] = `
+exports[`2018 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2018
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2018/texmf-config
@@ -344,7 +344,7 @@ tlpdbopt_install_docfiles 0
 tlpdbopt_install_srcfiles 0
 `;
 
-exports[`2018 win32 texlive.profile 1`] = `
+exports[`2018 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2018
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2018\\texmf-config
@@ -362,7 +362,7 @@ tlpdbopt_file_assocs 0
 tlpdbopt_w32_multi_user 0
 `;
 
-exports[`2019 linux texlive.profile 1`] = `
+exports[`2019 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2019
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2019/texmf-config
@@ -378,7 +378,7 @@ tlpdbopt_install_docfiles 0
 tlpdbopt_install_srcfiles 0
 `;
 
-exports[`2019 win32 texlive.profile 1`] = `
+exports[`2019 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2019
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2019\\texmf-config
@@ -397,7 +397,7 @@ tlpdbopt_file_assocs 0
 tlpdbopt_w32_multi_user 0
 `;
 
-exports[`2020 linux texlive.profile 1`] = `
+exports[`2020 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2020
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2020/texmf-config
@@ -413,7 +413,7 @@ tlpdbopt_install_docfiles 0
 tlpdbopt_install_srcfiles 0
 `;
 
-exports[`2020 win32 texlive.profile 1`] = `
+exports[`2020 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2020
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2020\\texmf-config
@@ -432,7 +432,7 @@ tlpdbopt_file_assocs 0
 tlpdbopt_w32_multi_user 0
 `;
 
-exports[`2021 linux texlive.profile 1`] = `
+exports[`2021 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2021
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2021/texmf-config
@@ -448,7 +448,7 @@ tlpdbopt_install_docfiles 0
 tlpdbopt_install_srcfiles 0
 `;
 
-exports[`2021 win32 texlive.profile 1`] = `
+exports[`2021 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2021
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2021\\texmf-config
@@ -467,7 +467,7 @@ tlpdbopt_file_assocs 0
 tlpdbopt_w32_multi_user 0
 `;
 
-exports[`2022 linux texlive.profile 1`] = `
+exports[`2022 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2022
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2022/texmf-config
@@ -483,7 +483,7 @@ tlpdbopt_install_docfiles 0
 tlpdbopt_install_srcfiles 0
 `;
 
-exports[`2022 win32 texlive.profile 1`] = `
+exports[`2022 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2022
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2022\\texmf-config
@@ -502,7 +502,7 @@ tlpdbopt_file_assocs 0
 tlpdbopt_w32_multi_user 0
 `;
 
-exports[`2023 linux texlive.profile 1`] = `
+exports[`2023 > linux > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP/setup-texlive-action/2023
 TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2023/texmf-config
@@ -518,7 +518,7 @@ tlpdbopt_install_docfiles 0
 tlpdbopt_install_srcfiles 0
 `;
 
-exports[`2023 win32 texlive.profile 1`] = `
+exports[`2023 > win32 > texlive.profile 1`] = `
 TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2023
 TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
 TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2023\\texmf-config

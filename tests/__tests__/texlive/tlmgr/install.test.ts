@@ -5,8 +5,8 @@ import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
 import { ExecResult } from '#/util/exec';
 
-jest.unmock('@actions/http-client');
-jest.unmock('#/texlive/tlmgr/actions/install');
+vi.unmock('@actions/http-client');
+vi.unmock('#/texlive/tlmgr/actions/install');
 
 beforeAll(async () => {
   const shellesc = await fixtures('ctan-api-pkg-shellesc.json');
@@ -49,7 +49,7 @@ it.each(
 )('tries to determine the TL name (%s)', async (version, exitCode) => {
   setVersion(version);
   // eslint-disable-next-line jest/unbound-method
-  jest.mocked(TlmgrInternals.prototype.exec).mockResolvedValueOnce(
+  vi.mocked(TlmgrInternals.prototype.exec).mockResolvedValueOnce(
     new ExecResult({
       command: '',
       exitCode,

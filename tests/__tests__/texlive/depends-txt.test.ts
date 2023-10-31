@@ -3,7 +3,7 @@ import { dedent } from 'ts-dedent';
 
 import { parse } from '#/texlive/depends-txt';
 
-jest.unmock('#/texlive/depends-txt');
+vi.unmock('#/texlive/depends-txt');
 
 describe('parse', () => {
   it('parses DEPENDS.txt', async () => {
@@ -82,14 +82,14 @@ describe('parse', () => {
     )];
     expect(deps).toHaveLength(0);
     expect(core.warning).toHaveBeenCalledTimes(3);
-    expect(jest.mocked(core.warning).mock.calls[0]?.[0]).toMatchInlineSnapshot(
-      `"\`package\` directive must have exactly one argument, but given: """`,
+    expect(vi.mocked(core.warning).mock.calls[0]?.[0]).toMatchInlineSnapshot(
+      '"`package` directive must have exactly one argument, but given: \\"\\""',
     );
-    expect(jest.mocked(core.warning).mock.calls[1]?.[0]).toMatchInlineSnapshot(
-      `"\`package\` directive must have exactly one argument, but given: """`,
+    expect(vi.mocked(core.warning).mock.calls[1]?.[0]).toMatchInlineSnapshot(
+      '"`package` directive must have exactly one argument, but given: \\"\\""',
     );
-    expect(jest.mocked(core.warning).mock.calls[2]?.[0]).toMatchInlineSnapshot(
-      `"\`package\` directive must have exactly one argument, but given: "foo bar""`,
+    expect(vi.mocked(core.warning).mock.calls[2]?.[0]).toMatchInlineSnapshot(
+      '"`package` directive must have exactly one argument, but given: \\"foo bar\\""',
     );
   });
 });

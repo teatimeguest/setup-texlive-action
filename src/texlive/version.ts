@@ -1,4 +1,4 @@
-import semver from 'semver';
+import { type Range, satisfies as semverSatisfies } from 'semver';
 
 export type Version =
   | `200${8 | 9}`
@@ -26,8 +26,8 @@ export namespace Version {
     version: Version,
     /* eslint-disable-next-line
       @typescript-eslint/prefer-readonly-parameter-types */
-    range: string | Readonly<semver.Range>,
+    range: string | Readonly<Range>,
   ): boolean {
-    return semver.satisfies(coerce(version), range);
+    return semverSatisfies(coerce(version), range);
   }
 }

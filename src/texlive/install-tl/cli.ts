@@ -1,5 +1,5 @@
 import { platform } from 'node:os';
-import path from 'node:path';
+import * as path from 'node:path';
 
 import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
 

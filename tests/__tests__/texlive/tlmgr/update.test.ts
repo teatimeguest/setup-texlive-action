@@ -2,7 +2,7 @@ import { update } from '#/texlive/tlmgr/actions/update';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
 
-jest.unmock('#/texlive/tlmgr/actions/update');
+vi.unmock('#/texlive/tlmgr/actions/update');
 
 const setVersion = (version: Version) => {
   set(new TlmgrInternals({ TEXDIR: '', version }), true);

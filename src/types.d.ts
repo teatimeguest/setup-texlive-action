@@ -31,7 +31,7 @@ declare module 'class-transformer' {
 }
 
 declare module 'class-transformer/esm5/storage' {
-  export * from 'class-transformer/types/storage';
+  export * from 'class-transformer/types/storage.js';
 }
 
 declare module 'node-fetch' {

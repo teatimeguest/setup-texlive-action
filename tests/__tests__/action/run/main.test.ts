@@ -9,10 +9,10 @@ import { main } from '#/action/run/main';
 import { installTL } from '#/texlive';
 import * as tlmgr from '#/texlive/tlmgr/actions';
 
-jest.unmock('#/action/run/main');
+vi.unmock('#/action/run/main');
 
 const config = {} as DeepWritable<Config>;
-jest.mocked(Config.load).mockResolvedValue(config);
+vi.mocked(Config.load).mockResolvedValue(config);
 
 beforeEach(() => {
   config.cache = true;
@@ -36,10 +36,10 @@ class MockCacheService extends CacheService {
   override [Symbol.dispose]() {}
 
   static {
-    jest.spyOn(this.prototype, 'restore');
-    jest.spyOn(this.prototype, 'update');
-    jest.spyOn(this.prototype, 'register');
-    jest.spyOn(this.prototype, Symbol.dispose);
+    vi.spyOn(this.prototype, 'restore');
+    vi.spyOn(this.prototype, 'update');
+    vi.spyOn(this.prototype, 'register');
+    vi.spyOn(this.prototype, Symbol.dispose);
   }
 }
 
@@ -50,14 +50,14 @@ const cacheTypes = [
   ['secondary', 'primary'],
 ] as const;
 
-jest.mocked(CacheService.setup).mockImplementation((_, config) => {
+vi.mocked(CacheService.setup).mockImplementation((_, config) => {
   const service = new MockCacheService();
   service.enabled = config?.enable ?? true;
   return service;
 });
 
 const setCacheType = ([type]: typeof cacheTypes[number]) => {
-  jest.mocked(CacheService.setup).mockImplementationOnce((_, config) => {
+  vi.mocked(CacheService.setup).mockImplementationOnce((_, config) => {
     const service = new MockCacheService();
     service.enabled = config?.enable ?? true;
     service.hit = type === 'primary';
@@ -79,7 +79,7 @@ it('does not use cache if input cache is false', async () => {
 });
 
 it.each(cacheTypes)(
-  'does not install TeX Live if cache found (case %p)',
+  'does not install TeX Live if cache found (%s)',
   async (...kind) => {
     setCacheType(kind);
     await expect(main()).toResolve();
@@ -88,7 +88,7 @@ it.each(cacheTypes)(
 );
 
 it.each([LATEST_VERSION, '2009', '2014'] as const)(
-  'sets version to %p if input version is %p',
+  'sets version to %o with input %o',
   async (version) => {
     config.version = version;
     await expect(main()).toResolve();
@@ -98,20 +98,16 @@ it.each([LATEST_VERSION, '2009', '2014'] as const)(
 
 it('adds TeX Live to path after installation', async () => {
   await expect(main()).toResolve();
-  expect(tlmgr.path.add).toHaveBeenCalledAfter(
-    jest.mocked<(_: any) => unknown>(installTL),
-  );
+  expect(tlmgr.path.add).toHaveBeenCalledAfter(installTL);
 });
 
 it.each(cacheTypes)(
-  'adds TeX Live to path after cache restoration (case %p)',
+  'adds TeX Live to path after cache restoration (%s)',
   async (...kind) => {
     setCacheType(kind);
     await expect(main()).toResolve();
     expect(tlmgr.path.add).not.toHaveBeenCalledBefore(
-      jest.mocked<(...args: any[]) => unknown>(
-        MockCacheService.prototype.restore,
-      ),
+      MockCacheService.prototype.restore,
     );
     expect(tlmgr.path.add).toHaveBeenCalled();
   },
@@ -127,7 +123,7 @@ it.each([[true], [false]])(
 );
 
 it.each(cacheTypes)(
-  'updates `tlmgr` when cache restored (case %p)',
+  'updates `tlmgr` when cache restored (%s)',
   async (...kind) => {
     setCacheType(kind);
     await expect(main()).toResolve();
@@ -137,7 +133,7 @@ it.each(cacheTypes)(
 );
 
 it.each(cacheTypes)(
-  'updates all packages if `update-all-packages` is true (case %p)',
+  'updates all packages if `update-all-packages` is true (%s)',
   async (...kind) => {
     setCacheType(kind);
     config.updateAllPackages = true;
@@ -169,29 +165,25 @@ it('does nothing about TEXMF for new installation', async () => {
 });
 
 it.each(cacheTypes)(
-  'may change TEXMF after adding TeX Live to path (case %p)',
+  'may change TEXMF after adding TeX Live to path (%s)',
   async (...kind) => {
     setCacheType(kind);
     await expect(main()).toResolve();
-    expect(tlmgr.conf.texmf).not.toHaveBeenCalledBefore(
-      jest.mocked(tlmgr.path.add),
-    );
+    expect(tlmgr.conf.texmf).not.toHaveBeenCalledBefore(tlmgr.path.add);
   },
 );
 
 it.each(cacheTypes)(
-  'change old settings if they are not appropriate (case %p)',
+  'change old settings if they are not appropriate (%s)',
   async (...kind) => {
     setCacheType(kind);
-    jest.mocked(tlmgr.conf.texmf).mockResolvedValue(
-      '<old>' as unknown as void,
-    );
+    vi.mocked(tlmgr.conf.texmf).mockResolvedValue('<old>' as unknown as void);
     await expect(main()).toResolve();
     expect(tlmgr.conf.texmf).toHaveBeenCalledWith(
       'TEXMFHOME',
       expect.anything(),
     );
-    jest.mocked(tlmgr.conf.texmf).mockReset();
+    vi.mocked(tlmgr.conf.texmf).mockReset();
   },
 );
 
@@ -199,7 +191,7 @@ it.each(cacheTypes)(
   'does not change old settings if not necessary (case %s)',
   async (...kind) => {
     setCacheType(kind);
-    jest.mocked(tlmgr.conf.texmf).mockResolvedValue(
+    vi.mocked(tlmgr.conf.texmf).mockResolvedValue(
       '<prefix>/texmf-local' as unknown as void,
     );
     await expect(main()).toResolve();
@@ -207,7 +199,7 @@ it.each(cacheTypes)(
       'TEXMFHOME',
       expect.anything(),
     );
-    jest.mocked(tlmgr.conf.texmf).mockReset();
+    vi.mocked(tlmgr.conf.texmf).mockReset();
   },
 );
 
@@ -220,20 +212,16 @@ it('does not setup tlcontrib by default', async () => {
 it('sets up tlcontrib if input tlcontrib is true', async () => {
   config.tlcontrib = true;
   await expect(main()).toResolve();
-  expect(tlmgr.repository.add).not.toHaveBeenCalledBefore(
-    jest.mocked(tlmgr.path.add),
-  );
+  expect(tlmgr.repository.add).not.toHaveBeenCalledBefore(tlmgr.path.add);
   expect(tlmgr.repository.add).toHaveBeenCalledWith(
     expect.anything(),
     'tlcontrib',
   );
-  expect(tlmgr.pinning.add).not.toHaveBeenCalledBefore(
-    jest.mocked<(x: any) => unknown>(tlmgr.repository.add),
-  );
+  expect(tlmgr.pinning.add).not.toHaveBeenCalledBefore(tlmgr.repository.add);
   expect(tlmgr.pinning.add).toHaveBeenCalledWith('tlcontrib', '*');
 });
 
-describe.each([[true], [false]])('%p', (force) => {
+describe.each([[true], [false]])('%j', (force) => {
   beforeEach(() => {
     env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = force ? '1' : '0';
   });
@@ -244,7 +232,7 @@ describe.each([[true], [false]])('%p', (force) => {
   });
 
   it.each([cacheTypes[0], cacheTypes[1]] as const)(
-    'does not install any package if full cache found (%p, %p)',
+    'does not install any package if full cache found (%s, %s)',
     async (...kind) => {
       setCacheType(kind);
       config.packages = new Set(['foo', 'bar', 'baz']);
@@ -254,7 +242,7 @@ describe.each([[true], [false]])('%p', (force) => {
   );
 
   it.each([cacheTypes[2], cacheTypes[3]] as const)(
-    'installs specified packages if full cache not found (case %s)',
+    'installs specified packages if full cache not found (%s)',
     async (...kind) => {
       setCacheType(kind);
       config.packages = new Set(['foo', 'bar', 'baz']);

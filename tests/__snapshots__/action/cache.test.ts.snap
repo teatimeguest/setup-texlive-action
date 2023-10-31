@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ActionsCacheService @@dispose does not set \`target\` ("primary") 1`] = `
+exports[`ActionsCacheService > @@dispose > does not set \`target\` (primary) 1`] = `
 [
   "CACHE",
   {
@@ -9,7 +9,7 @@ exports[`ActionsCacheService @@dispose does not set \`target\` ("primary") 1`] =
 ]
 `;
 
-exports[`ActionsCacheService @@dispose does not set \`target\` ("unique") 1`] = `
+exports[`ActionsCacheService > @@dispose > does not set \`target\` (unique) 1`] = `
 [
   "CACHE",
   {
@@ -18,7 +18,7 @@ exports[`ActionsCacheService @@dispose does not set \`target\` ("unique") 1`] = 
 ]
 `;
 
-exports[`ActionsCacheService @@dispose sets \`target\` ("fail") 1`] = `
+exports[`ActionsCacheService > @@dispose > sets \`target\` (fail) 1`] = `
 [
   "CACHE",
   {
@@ -28,7 +28,7 @@ exports[`ActionsCacheService @@dispose sets \`target\` ("fail") 1`] = `
 ]
 `;
 
-exports[`ActionsCacheService @@dispose sets \`target\` ("none") 1`] = `
+exports[`ActionsCacheService > @@dispose > sets \`target\` (none) 1`] = `
 [
   "CACHE",
   {
@@ -38,7 +38,7 @@ exports[`ActionsCacheService @@dispose sets \`target\` ("none") 1`] = `
 ]
 `;
 
-exports[`ActionsCacheService @@dispose sets \`target\` ("oldprimary") 1`] = `
+exports[`ActionsCacheService > @@dispose > sets \`target\` (oldprimary) 1`] = `
 [
   "CACHE",
   {
@@ -48,7 +48,7 @@ exports[`ActionsCacheService @@dispose sets \`target\` ("oldprimary") 1`] = `
 ]
 `;
 
-exports[`ActionsCacheService @@dispose sets \`target\` ("oldsecondary") 1`] = `
+exports[`ActionsCacheService > @@dispose > sets \`target\` (oldsecondary) 1`] = `
 [
   "CACHE",
   {
@@ -58,7 +58,7 @@ exports[`ActionsCacheService @@dispose sets \`target\` ("oldsecondary") 1`] = `
 ]
 `;
 
-exports[`ActionsCacheService @@dispose sets \`target\` ("oldunique") 1`] = `
+exports[`ActionsCacheService > @@dispose > sets \`target\` (oldunique) 1`] = `
 [
   "CACHE",
   {
@@ -67,7 +67,7 @@ exports[`ActionsCacheService @@dispose sets \`target\` ("oldunique") 1`] = `
 ]
 `;
 
-exports[`ActionsCacheService @@dispose sets \`target\` ("secondary") 1`] = `
+exports[`ActionsCacheService > @@dispose > sets \`target\` (secondary) 1`] = `
 [
   "CACHE",
   {
@@ -77,7 +77,7 @@ exports[`ActionsCacheService @@dispose sets \`target\` ("secondary") 1`] = `
 ]
 `;
 
-exports[`ActionsCacheService restore restores cache 1`] = `
+exports[`ActionsCacheService > restore > restores cache 1`] = `
 [
   [
     "<TEXDIR>",
@@ -92,7 +92,7 @@ exports[`ActionsCacheService restore restores cache 1`] = `
 ]
 `;
 
-exports[`ActionsCacheService restore restores cache 2`] = `
+exports[`ActionsCacheService > restore > restores cache 2`] = `
 [
   [
     "<TEXDIR>",

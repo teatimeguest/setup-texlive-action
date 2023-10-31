@@ -1,13 +1,21 @@
-const { getBooleanInput, getInput } = jest.requireActual('@actions/core');
+const actual = await vi.importActual<typeof import('@actions/core')>(
+  '@actions/core',
+);
 
-module.exports = {
-  ...jest.createMockFromModule<object>('@actions/core'),
-  getBooleanInput,
-  getInput,
-  getState: jest.fn().mockReturnValue(''),
-  group: jest.fn(async (name, fn) => await fn()),
-  setFailed: jest.fn((error) => {
-    throw new Error(`${error}`);
-  }),
-  isDebug: jest.fn().mockReturnValue(true),
-};
+export const addPath = vi.fn();
+export const debug = vi.fn();
+export const error = vi.fn();
+export const exportVariable = vi.fn();
+export const getBooleanInput = vi.fn(actual.getBooleanInput);
+export const getInput = vi.fn(actual.getInput);
+export const getState = vi.fn().mockResolvedValue('');
+export const group = vi.fn(async (name, fn) => await fn());
+export const info = vi.fn();
+export const isDebug = vi.fn().mockReturnValue(false);
+export const notice = vi.fn();
+export const saveState = vi.fn();
+export const setFailed = vi.fn((error) => {
+  throw new Error(`${error}`);
+});
+export const setOutput = vi.fn();
+export const warning = vi.fn();

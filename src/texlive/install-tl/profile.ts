@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { platform } from 'node:os';
-import path from 'node:path';
+import * as path from 'node:path';
 
 import { Exclude, Expose, Type, instanceToPlain } from 'class-transformer';
 import { Mixin } from 'ts-mixer';

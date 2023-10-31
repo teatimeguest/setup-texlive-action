@@ -4,7 +4,7 @@ import { list } from '#/texlive/tlmgr/actions/list';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Tlpobj } from '#/texlive/tlpkg';
 
-jest.unmock('#/texlive/tlmgr/actions/list');
+vi.unmock('#/texlive/tlmgr/actions/list');
 
 const years = ['2008', '2023'] as const;
 const tlpdb = {
@@ -15,7 +15,7 @@ const tlpdb = {
 beforeAll(async () => {
   for (const year of years) {
     set(new TlmgrInternals({ TEXDIR: '', version: year }), true);
-    jest.mocked(readFile).mockResolvedValueOnce(
+    vi.mocked(readFile).mockResolvedValueOnce(
       await fixtures(`texlive.${year}.tlpdb`),
     );
     for await (const tlpobj of list()) {

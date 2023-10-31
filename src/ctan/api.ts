@@ -1,4 +1,4 @@
-import posixPath from 'node:path/posix';
+import { posix as posixPath } from 'node:path';
 
 import { getJson } from '#/util/http';
 

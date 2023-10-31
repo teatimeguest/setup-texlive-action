@@ -1,7 +1,7 @@
 import type { Buffer } from 'node:buffer';
 import { readFile, writeFile } from 'node:fs/promises';
 import { EOL, platform } from 'node:os';
-import path from 'node:path';
+import * as path from 'node:path';
 
 import * as log from '#/log';
 import type { Version } from '#/texlive/version';

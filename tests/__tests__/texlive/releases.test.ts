@@ -3,8 +3,8 @@ import nock from 'nock';
 
 import { Latest, ReleaseData } from '#/texlive/releases';
 
-jest.unmock('@actions/http-client');
-jest.unmock('#/texlive/releases');
+vi.unmock('@actions/http-client');
+vi.unmock('#/texlive/releases');
 
 let doMock: () => nock.Scope;
 
@@ -50,7 +50,7 @@ describe('ReleaseData.setup', () => {
   });
 
   it('checks for the latest version if needed', async () => {
-    jest.spyOn(Temporal.Now, 'instant').mockReturnValueOnce(
+    vi.spyOn(Temporal.Now, 'instant').mockReturnValueOnce(
       Temporal
         .PlainDateTime
         .from('2024-04-01')

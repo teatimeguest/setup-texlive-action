@@ -1,9 +1,13 @@
-import os from 'node:os';
+import * as os from 'node:os';
 
 import { Profile } from '#/texlive/install-tl/profile';
 import type { Version } from '#/texlive/version';
 
-jest.unmock('#/texlive/install-tl/profile');
+const rawSerializer = await vi.importActual<import('pretty-format').Plugin>(
+  '##/tests/vitest/raw-serializer',
+);
+
+vi.unmock('#/texlive/install-tl/profile');
 
 const opts = { prefix: '<prefix>' };
 
@@ -44,17 +48,14 @@ describe.each([
     }
   })(),
 ])('%s', (version) => {
-  beforeAll(() => {
-    expect.addSnapshotSerializer({
-      serialize: (val) => val,
-      test: (val) => typeof val === 'string',
-    });
+  beforeAll(async () => {
+    expect.addSnapshotSerializer(rawSerializer);
   });
 
   describe.each(['linux', 'win32'] as const)('%s', (platform) => {
     test('texlive.profile', () => {
       const prefix = '$RUNNER_TEMP/setup-texlive-action';
-      jest.mocked(os.platform).mockReturnValue(platform);
+      vi.mocked(os.platform).mockReturnValue(platform);
       expect(new Profile(version, { prefix }).toString()).toMatchSnapshot();
     });
   });

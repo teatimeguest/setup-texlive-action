@@ -1,15 +1,30 @@
 import { stdout } from 'node:process';
-import util from 'node:util';
+import * as util from 'node:util';
 
 import * as core from '@actions/core';
 
 import * as log from '#/log';
 
-jest.spyOn(util, 'formatWithOptions');
-jest.mocked(core.setFailed).mockImplementation();
-const hasColors = jest.spyOn(stdout, 'hasColors');
+const rawSerializer = await vi.importActual<import('pretty-format').Plugin>(
+  '##/tests/vitest/raw-serializer',
+);
+
+vi.mock('node:util', async (importOriginal) => {
+  const original = await importOriginal<typeof import('node:util')>();
+  return {
+    ...original,
+    formatWithOptions: vi.fn(original.formatWithOptions),
+  };
+});
+vi.mocked(core.setFailed).mockImplementation(() => {});
+
+const hasColors = vi.spyOn(stdout, 'hasColors');
 
 let error: Error;
+
+beforeAll(async () => {
+  expect.addSnapshotSerializer(rawSerializer);
+});
 
 beforeAll(() => {
   const { prepareStackTrace, stackTraceLimit } = Error;
@@ -56,7 +71,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  jest.mocked(core.isDebug).mockReturnValue(false);
+  vi.mocked(core.isDebug).mockReturnValue(false);
   hasColors.mockReturnValue(false);
 });
 
@@ -67,7 +82,7 @@ describe('debug', () => {
   });
 
   it('logs messages if debug logs are enabled', () => {
-    jest.mocked(core.isDebug).mockReturnValue(true);
+    vi.mocked(core.isDebug).mockReturnValue(true);
     log.debug('test');
     expect(core.debug).toHaveBeenCalledOnce();
   });
@@ -79,18 +94,18 @@ describe('debug', () => {
   });
 
   it('logs stack traces if debug logs are enabled', () => {
-    jest.mocked(core.isDebug).mockReturnValue(true);
+    vi.mocked(core.isDebug).mockReturnValue(true);
     const error = new Error('NG');
     log.debug({ error }, 'Failed to ...');
     expect(util.formatWithOptions).toHaveBeenCalledTimes(2);
     expect(core.debug).toHaveBeenCalledTimes(2);
-    expect(jest.mocked(core.debug).mock.lastCall?.[0]).toMatchInlineSnapshot(
-      `"Failed to ...: Error: NG"`,
+    expect(vi.mocked(core.debug).mock.lastCall?.[0]).toMatchInlineSnapshot(
+      'Failed to ...: Error: NG',
     );
   });
 
   it('never calls `core.notice`', () => {
-    jest.mocked(core.isDebug).mockReturnValue(true);
+    vi.mocked(core.isDebug).mockReturnValue(true);
     const error = new Error('NG');
     error['note'] = 'Note';
     log.debug({ error }, 'Failed to ...');
@@ -108,13 +123,13 @@ describe('info', () => {
     const error = new Error('NG');
     log.info({ error }, 'Failed to ...');
     expect(core.info).toHaveBeenCalledTimes(2);
-    expect(jest.mocked(core.info).mock.lastCall?.[0]).toMatchInlineSnapshot(
-      `"Failed to ...: Error: NG"`,
+    expect(vi.mocked(core.info).mock.lastCall?.[0]).toMatchInlineSnapshot(
+      'Failed to ...: Error: NG',
     );
   });
 
   it('never calls `core.notice`', () => {
-    jest.mocked(core.isDebug).mockReturnValue(true);
+    vi.mocked(core.isDebug).mockReturnValue(true);
     const error = new Error('NG');
     error['note'] = 'Note';
     log.info({ error }, 'Failed to ...');
@@ -125,7 +140,7 @@ describe('info', () => {
     hasColors.mockReturnValue(value);
     log.info({ error });
     expect(core.info).toHaveBeenCalled();
-    expect(jest.mocked(core.info).mock.calls[0]?.[0]).toMatchSnapshot();
+    expect(vi.mocked(core.info).mock.calls[0]?.[0]).toMatchSnapshot();
   });
 });
 
@@ -140,14 +155,14 @@ describe('warn', () => {
     log.warn({ error }, 'Failed to ...');
     expect(util.formatWithOptions).toHaveBeenCalledTimes(2);
     expect(core.warning).toHaveBeenCalledOnce();
-    expect(core.info).toHaveBeenCalledBefore(jest.mocked(core.warning));
-    expect(jest.mocked(core.warning).mock.lastCall?.[0]).toMatchInlineSnapshot(
-      `"Failed to ...: Error: NG"`,
+    expect(core.info).toHaveBeenCalledBefore(core.warning);
+    expect(vi.mocked(core.warning).mock.lastCall?.[0]).toMatchInlineSnapshot(
+      'Failed to ...: Error: NG',
     );
   });
 
   it('calls `core.notice`', () => {
-    jest.mocked(core.isDebug).mockReturnValue(true);
+    vi.mocked(core.isDebug).mockReturnValue(true);
     const error = new Error('NG');
     error[log.symbols.note] = 'Note';
     log.warn({ error });
@@ -158,7 +173,7 @@ describe('warn', () => {
     hasColors.mockReturnValue(true);
     log.warn({ error });
     expect(core.info).toHaveBeenCalledOnce();
-    expect(jest.mocked(core.info).mock.lastCall?.[0]).toMatchSnapshot();
+    expect(vi.mocked(core.info).mock.lastCall?.[0]).toMatchSnapshot();
   });
 });
 
@@ -173,15 +188,15 @@ describe('fatal', () => {
     log.fatal({ error }, 'Failed to ...');
     expect(util.formatWithOptions).toHaveBeenCalledTimes(2);
     expect(core.setFailed).toHaveBeenCalledOnce();
-    expect(core.info).toHaveBeenCalledBefore(jest.mocked(core.setFailed));
-    expect(jest.mocked(core.setFailed).mock.lastCall?.[0])
+    expect(core.info).toHaveBeenCalledBefore(core.setFailed);
+    expect(vi.mocked(core.setFailed).mock.lastCall?.[0])
       .toMatchInlineSnapshot(
-        `"Failed to ...: Error: NG"`,
+        'Failed to ...: Error: NG',
       );
   });
 
   it('calls `core.notice`', () => {
-    jest.mocked(core.isDebug).mockReturnValue(true);
+    vi.mocked(core.isDebug).mockReturnValue(true);
     log.fatal({ error });
     expect(core.notice).toHaveBeenCalledTimes(2);
   });

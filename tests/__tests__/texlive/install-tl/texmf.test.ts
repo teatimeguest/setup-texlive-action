@@ -1,8 +1,8 @@
-import process from 'node:process';
+import * as process from 'node:process';
 
 import { SystemTrees, UserTrees } from '#/texlive/install-tl/texmf';
 
-jest.unmock('#/texlive/install-tl/texmf');
+vi.unmock('#/texlive/install-tl/texmf');
 
 const opts = { prefix: '<prefix>' };
 
@@ -39,7 +39,7 @@ describe('SystemTrees', () => {
     { TEXLIVE_INSTALL_TEXMFSYSCONFIG: '<TEXMFSYSCONFIG>' },
     { TEXLIVE_INSTALL_TEXMFSYSVAR: '<TEXMFSYSVAR>' },
   ])('uses texdir', (env) => {
-    process.env = env as unknown as NodeJS.ProcessEnv;
+    Object.assign(globalThis.process.env, env);
     const trees = new SystemTrees(LATEST_VERSION, {
       ...opts,
       texdir: '<texdir>',
@@ -93,7 +93,7 @@ describe('UserTrees', () => {
     {},
     { TEXLIVE_INSTALL_TEXMFCONFIG: '<TEXMFCONFIG>' },
   ])('uses texuserdir', (env) => {
-    process.env = env as NodeJS.ProcessEnv;
+    Object.assign(globalThis.process.env, env);
     const trees = new UserTrees(LATEST_VERSION, {
       ...opts,
       texuserdir: '<texuserdir>',

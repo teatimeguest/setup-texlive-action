@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import path from 'node:path';
+import * as path from 'node:path';
 
 import * as log from '#/log';
 import { use } from '#/texlive/tlmgr/internals';

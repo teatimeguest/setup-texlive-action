@@ -1,7 +1,7 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`info logs exception 1`] = `
-"[2m|[22m [31mAggregateError:[39m Error 8
+exports[`info > logs exception 1`] = `
+[2m|[22m [31mAggregateError:[39m Error 8
 [2m|[22m     at ...
 [2m|[22m     at ... {
 [2m|[22m   [errors]: [
@@ -36,11 +36,11 @@ exports[`info logs exception 1`] = `
 [2m|[22m     [1mnull[22m,
 [2m|[22m     [90mundefined[39m
 [2m|[22m   ]
-[2m|[22m }"
+[2m|[22m }
 `;
 
-exports[`info logs exception 2`] = `
-"| AggregateError: Error 8
+exports[`info > logs exception 2`] = `
+| AggregateError: Error 8
 |     at ...
 |     at ... {
 |   [errors]: [
@@ -75,11 +75,11 @@ exports[`info logs exception 2`] = `
 |     null,
 |     undefined
 |   ]
-| }"
+| }
 `;
 
-exports[`warn logs exception 1`] = `
-"[31m|[39m [31mAggregateError:[39m Error 8
+exports[`warn > logs exception 1`] = `
+[31m|[39m [31mAggregateError:[39m Error 8
 [31m|[39m     at ...
 [31m|[39m     at ... {
 [31m|[39m   [errors]: [
@@ -114,5 +114,5 @@ exports[`warn logs exception 1`] = `
 [31m|[39m     [1mnull[22m,
 [31m|[39m     [90mundefined[39m
 [31m|[39m   ]
-[31m|[39m }"
+[31m|[39m }
 `;

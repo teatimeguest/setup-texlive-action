@@ -1,4 +1,4 @@
-import path from 'node:path';
+import * as path from 'node:path';
 import { env } from 'node:process';
 
 import { Expose, Transform } from 'class-transformer';
@@ -56,6 +56,14 @@ export function Case(
     }
   }
   return decorator;
+}
+
+export function getExposedName(target: object, key: string | symbol): string {
+  return defaultMetadataStorage
+    .getExposedMetadatas(target.constructor)
+    .find((data) => data.propertyName === key)
+    ?.options
+    .name ?? (key as string);
 }
 
 /** Read initial values from environment variables. */

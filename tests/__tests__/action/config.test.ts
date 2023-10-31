@@ -9,21 +9,21 @@ import * as env from '#/action/env';
 import { Inputs } from '#/action/inputs';
 import { ReleaseData } from '#/texlive/releases';
 
-jest.unmock('node:fs/promises');
-jest.unmock('@actions/glob');
-jest.unmock('#/action/config');
+vi.unmock('node:fs/promises');
+vi.unmock('@actions/glob');
+vi.unmock('#/action/config');
 
 const defaultInputs = Inputs.load();
 
 it('calls `env.init`', async () => {
   await expect(Config.load()).toResolve();
-  expect(env.init).toHaveBeenCalledBefore(jest.mocked(Inputs.load));
+  expect(env.init).toHaveBeenCalledBefore(vi.mocked(Inputs.load));
 });
 
 it('calls `ReleaseData.setup`', async () => {
   await expect(Config.load()).toResolve();
-  expect(ReleaseData.setup).toHaveBeenCalledAfter(jest.mocked(env.init));
-  expect(ReleaseData.setup).toHaveBeenCalledBefore(jest.mocked(Inputs.load));
+  expect(ReleaseData.setup).toHaveBeenCalledAfter(vi.mocked(env.init));
+  expect(ReleaseData.setup).toHaveBeenCalledBefore(vi.mocked(Inputs.load));
 });
 
 describe('packages', () => {
@@ -87,7 +87,7 @@ describe('packages', () => {
   });
 
   it('is set to the set of specified packages by packages input', async () => {
-    jest.mocked(Inputs.load).mockReturnValueOnce({
+    vi.mocked(Inputs.load).mockReturnValueOnce({
       ...defaultInputs,
       packages: 'foo bar baz',
     });
@@ -98,7 +98,7 @@ describe('packages', () => {
   });
 
   it('is set to the set of packages defined by `package-file`', async () => {
-    jest.mocked(Inputs.load).mockReturnValueOnce({
+    vi.mocked(Inputs.load).mockReturnValueOnce({
       ...defaultInputs,
       packageFile: `
         .github/tl_packages
@@ -112,7 +112,7 @@ describe('packages', () => {
   });
 
   it('contains packages specified by both input and file', async () => {
-    jest.mocked(Inputs.load).mockReturnValueOnce({
+    vi.mocked(Inputs.load).mockReturnValueOnce({
       ...defaultInputs,
       packageFile: 'bundle/package-1/DEPENDS.txt',
       packages: 'foo bar baz',
@@ -126,22 +126,22 @@ describe('packages', () => {
 
 describe('tlcontrib', () => {
   it('is set to false for older versions', async () => {
-    jest.mocked(Inputs.load).mockReturnValueOnce({
+    vi.mocked(Inputs.load).mockReturnValueOnce({
       ...defaultInputs,
       tlcontrib: true,
       version: '2020',
     });
     await expect(Config.load()).resolves.toHaveProperty('tlcontrib', false);
     expect(core.warning).toHaveBeenCalledOnce();
-    expect(jest.mocked(core.warning).mock.calls[0]?.[0]).toMatchInlineSnapshot(
-      `"TLContrib cannot be used with an older version of TeX Live"`,
+    expect(vi.mocked(core.warning).mock.calls[0]?.[0]).toMatchInlineSnapshot(
+      '"TLContrib cannot be used with an older version of TeX Live"',
     );
   });
 });
 
 describe('updateAllPackages', () => {
   it('is set to false for older versions', async () => {
-    jest.mocked(Inputs.load).mockReturnValueOnce({
+    vi.mocked(Inputs.load).mockReturnValueOnce({
       ...defaultInputs,
       updateAllPackages: true,
       version: '2015',
@@ -151,8 +151,8 @@ describe('updateAllPackages', () => {
       false,
     );
     expect(core.info).toHaveBeenCalledOnce();
-    expect(jest.mocked(core.info).mock.calls[0]?.[0]).toMatchInlineSnapshot(
-      `"\`update-all-packages\` is ignored for older versions"`,
+    expect(vi.mocked(core.info).mock.calls[0]?.[0]).toMatchInlineSnapshot(
+      '"`update-all-packages` is ignored for older versions"',
     );
   });
 });
@@ -166,7 +166,7 @@ describe('version', () => {
   });
 
   it('is set to the specified version', async () => {
-    jest.mocked(Inputs.load).mockReturnValueOnce({
+    vi.mocked(Inputs.load).mockReturnValueOnce({
       ...defaultInputs,
       version: '2018',
     });
@@ -175,10 +175,10 @@ describe('version', () => {
 
   describe.each(['linux', 'win32'] as const)('on %s', (os) => {
     beforeEach(() => {
-      jest.mocked(platform).mockReturnValue(os);
+      vi.mocked(platform).mockReturnValue(os);
     });
-    it.each(['2013', '2017', '2022'] as const)('accepts %p', async (spec) => {
-      jest.mocked(Inputs.load).mockReturnValueOnce({
+    it.each(['2013', '2017', '2022'] as const)('accepts %o', async (spec) => {
+      vi.mocked(Inputs.load).mockReturnValueOnce({
         ...defaultInputs,
         version: spec,
       });
@@ -188,10 +188,10 @@ describe('version', () => {
 
   describe.each(['darwin', 'linux', 'win32'] as const)('on %s', (os) => {
     beforeEach(() => {
-      jest.mocked(platform).mockReturnValue(os);
+      vi.mocked(platform).mockReturnValue(os);
     });
-    it.each(['2007', '2029'] as const)('rejects %p', async (spec) => {
-      jest.mocked(Inputs.load).mockReturnValueOnce({
+    it.each(['2007', '2029'] as const)('rejects %o', async (spec) => {
+      vi.mocked(Inputs.load).mockReturnValueOnce({
         ...defaultInputs,
         version: spec,
       });
@@ -201,10 +201,10 @@ describe('version', () => {
 
   describe('on macOS', () => {
     beforeEach(() => {
-      jest.mocked(platform).mockReturnValue('darwin');
+      vi.mocked(platform).mockReturnValue('darwin');
     });
-    it.each(['2008', '2010', '2012'] as const)('rejects %p', async (spec) => {
-      jest.mocked(Inputs.load).mockReturnValueOnce({
+    it.each(['2008', '2010', '2012'] as const)('rejects %o', async (spec) => {
+      vi.mocked(Inputs.load).mockReturnValueOnce({
         ...defaultInputs,
         version: spec,
       });

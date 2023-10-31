@@ -1,18 +1,18 @@
-import path from 'node:path';
+import * as path from 'node:path';
 import { env } from 'node:process';
 
 import { getBooleanInput, getInput } from '@actions/core';
 import { Transform, instanceToInstance } from 'class-transformer';
-import { defaultMetadataStorage } from 'class-transformer/esm5/storage';
 
 import id from '#/action/id';
 import type { Env } from '#/texlive/install-tl/env';
-import { AsPath, Case, FromEnv } from '#/util/decorators';
+import { AsPath, Case, FromEnv, getExposedName } from '#/util/decorators';
 
 export class Inputs {
   @BooleanInput
   readonly cache: boolean = true;
 
+  @Case('kebab')
   @Input
   readonly packageFile: string | undefined;
 
@@ -32,6 +32,7 @@ export class Inputs {
   @BooleanInput
   readonly tlcontrib: boolean = false;
 
+  @Case('kebab')
   @BooleanInput
   readonly updateAllPackages: boolean = false;
 
@@ -47,16 +48,7 @@ export class Inputs {
 
 type Probably<T> = Partial<T> | null | undefined;
 
-function getExposedName(target: object, key: string | symbol): string {
-  return defaultMetadataStorage
-    .getExposedMetadatas(target.constructor)
-    .find((data) => data.propertyName === key)
-    ?.options
-    .name ?? (key as string);
-}
-
 function Input(target: object, key: string | symbol): void {
-  Case('kebab')(target, key);
   Transform(({ value }) => {
     const raw = getInput(getExposedName(target, key));
     return raw === '' ? (value as string) : raw;
@@ -64,7 +56,6 @@ function Input(target: object, key: string | symbol): void {
 }
 
 function BooleanInput(target: object, key: string | symbol): void {
-  Case('kebab')(target, key);
   Transform(({ value }) => {
     try {
       return getBooleanInput(getExposedName(target, key));

@@ -6,7 +6,7 @@ import { makeLocalSkeleton } from '#/texlive/tlpkg';
 import type { Version } from '#/texlive/version';
 import { exec } from '#/util/exec';
 
-jest.unmock('#/texlive/tlmgr/actions/conf');
+vi.unmock('#/texlive/tlmgr/actions/conf');
 
 const setVersion = (version: Version) => {
   set(new TlmgrInternals({ TEXDIR: '', version }), true);

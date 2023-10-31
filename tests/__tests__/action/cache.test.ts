@@ -8,10 +8,10 @@ import {
   save,
 } from '#/action/cache';
 
-jest.unmock('#/action/cache');
-jest.mock('node:crypto', () => ({
-  ...jest.requireActual('node:crypto'),
-  randomUUID: jest.fn().mockReturnValue('<random_string>'),
+vi.unmock('#/action/cache');
+vi.mock('node:crypto', async () => ({
+  ...await vi.importActual<typeof import('node:crypto')>('node:crypto'),
+  randomUUID: vi.fn().mockReturnValue('<random_string>'),
 }));
 
 const entry = {
@@ -22,7 +22,7 @@ const entry = {
 
 describe('CacheService.setup', () => {
   beforeEach(() => {
-    jest.mocked(cache.isFeatureAvailable).mockReturnValue(true);
+    vi.mocked(cache.isFeatureAvailable).mockReturnValue(true);
   });
 
   it.each([
@@ -47,7 +47,7 @@ describe('CacheService.setup', () => {
     { enable: true },
     { enable: false },
   ])('is disabled if cache feature not available', (config) => {
-    jest.mocked(cache.isFeatureAvailable).mockReturnValue(false);
+    vi.mocked(cache.isFeatureAvailable).mockReturnValue(false);
     expect(CacheService.setup(entry, config)).toHaveProperty('enabled', false);
   });
 });
@@ -109,15 +109,15 @@ describe('ActionsCacheService', () => {
       await expect(new ActionsCacheService({ ...entry, packages }).restore())
         .toResolve();
       expect(cache.restoreCache).toHaveBeenCalledOnce();
-      expect(jest.mocked(cache.restoreCache).mock.lastCall).toMatchSnapshot();
+      expect(vi.mocked(cache.restoreCache).mock.lastCall).toMatchSnapshot();
     });
 
     it('never throws', async () => {
-      jest.mocked(cache.restoreCache).mockImplementationOnce(restore.fail);
+      vi.mocked(cache.restoreCache).mockImplementationOnce(restore.fail);
       await expect(new ActionsCacheService(entry).restore()).toResolve();
       expect(core.warning).toHaveBeenCalledOnce();
-      expect(jest.mocked(core.warning).mock.lastCall?.[0])
-        .toMatchInlineSnapshot(`"Failed to restore cache: Error"`);
+      expect(vi.mocked(core.warning).mock.lastCall?.[0])
+        .toMatchInlineSnapshot('"Failed to restore cache: Error"');
     });
   });
 
@@ -127,8 +127,8 @@ describe('ActionsCacheService', () => {
       [false, ['secondary', 'oldsecondary', 'none', 'fail']],
     ] as const,
   )('hit', (value, types) => {
-    it.each(types)(`is set to ${value} (%p)`, async (type) => {
-      jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+    it.each(types)(`is set to ${value} (%s)`, async (type) => {
+      vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
       const service = new ActionsCacheService(entry);
       await expect(service.restore()).toResolve();
       expect(service).toHaveProperty('hit', value);
@@ -148,8 +148,8 @@ describe('ActionsCacheService', () => {
       [false, ['none', 'fail']],
     ] as const,
   )('restored', (value, types) => {
-    it.each(types)(`is set to ${value} (%p)`, async (type) => {
-      jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+    it.each(types)(`is set to ${value} (%s)`, async (type) => {
+      vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
       const service = new ActionsCacheService(entry);
       await expect(service.restore()).toResolve();
       expect(service).toHaveProperty('restored', value);
@@ -173,37 +173,37 @@ describe('ActionsCacheService', () => {
         'none',
         'fail',
       ] as const,
-    )('sets `target` (%p)', async (type) => {
-      jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+    )('sets `target` (%s)', async (type) => {
+      vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
       await expect(run()).toResolve();
       expect(core.saveState).toHaveBeenCalledOnce();
-      expect(jest.mocked(core.saveState).mock.lastCall).toMatchSnapshot();
+      expect(vi.mocked(core.saveState).mock.lastCall).toMatchSnapshot();
     });
 
     it.each(
       ['unique', 'primary'] as const,
-    )('does not set `target` (%p)', async (type) => {
-      jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+    )('does not set `target` (%s)', async (type) => {
+      vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
       await expect(run()).toResolve();
       expect(core.saveState).toHaveBeenCalledOnce();
-      expect(jest.mocked(core.saveState).mock.lastCall).toMatchSnapshot();
+      expect(vi.mocked(core.saveState).mock.lastCall).toMatchSnapshot();
     });
 
     it.each(cacheTypes)(
-      'sets `target` if `SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE` is set (%p)',
+      'sets `target` if `SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE` is set (%s)',
       async (type) => {
         process.env['SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE'] = '1';
-        jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+        vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
         await expect(run()).toResolve();
         expect(core.saveState).toHaveBeenCalledOnce();
       },
     );
 
     it.each(cacheTypes)(
-      'sets `target` if `SETUP_TEXLIVE_FORCE_UPDATE_CACHE` is set (%p)',
+      'sets `target` if `SETUP_TEXLIVE_FORCE_UPDATE_CACHE` is set (%s)',
       async (type) => {
         process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '1';
-        jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+        vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
         await expect(run()).toResolve();
         expect(core.saveState).toHaveBeenCalledOnce();
         expect(core.notice).toHaveBeenCalledOnce();
@@ -212,7 +212,7 @@ describe('ActionsCacheService', () => {
 
     describe('prefer `SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE`', () => {
       beforeEach(() => {
-        jest.mocked(cache.restoreCache).mockImplementationOnce(restore.primary);
+        vi.mocked(cache.restoreCache).mockImplementationOnce(restore.primary);
       });
 
       it('updates cache', async () => {
@@ -220,7 +220,7 @@ describe('ActionsCacheService', () => {
         process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '0';
         await expect(run()).toResolve();
         expect(core.saveState).toHaveBeenCalledOnce();
-        expect(jest.mocked(core.saveState).mock.lastCall?.[1])
+        expect(vi.mocked(core.saveState).mock.lastCall?.[1])
           .toHaveProperty('target');
         expect(core.notice).not.toHaveBeenCalledOnce();
       });
@@ -230,7 +230,7 @@ describe('ActionsCacheService', () => {
         process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '1';
         await expect(run()).toResolve();
         expect(core.saveState).toHaveBeenCalledOnce();
-        expect(jest.mocked(core.saveState).mock.lastCall?.[1])
+        expect(vi.mocked(core.saveState).mock.lastCall?.[1])
           .not
           .toHaveProperty('target');
         expect(core.notice).not.toHaveBeenCalledOnce();
@@ -252,9 +252,9 @@ describe('ActionsCacheService', () => {
           'fail',
         ]],
       ] as const,
-    )('sets `cache-hit` to `%p`', (value, types) => {
-      it.each(types)('%p', async (type) => {
-        jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+    )('sets `cache-hit` to `%j`', (value, types) => {
+      it.each(types)('%s', async (type) => {
+        vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
         await expect(run()).toResolve();
         expect(core.setOutput).toHaveBeenCalledWith('cache-hit', value);
       });
@@ -272,9 +272,9 @@ describe('ActionsCacheService', () => {
         ]],
         [false, ['none', 'fail']],
       ] as const,
-    )('sets `cache-restored` to `%p`', (value, types) => {
-      it.each(types)('%p', async (type) => {
-        jest.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
+    )('sets `cache-restored` to `%j`', (value, types) => {
+      it.each(types)('%s', async (type) => {
+        vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
         await expect(run()).toResolve();
         expect(core.setOutput).toHaveBeenCalledWith('cache-restored', value);
       });
@@ -289,7 +289,7 @@ describe('save', () => {
   });
 
   it('saves `target` as cache', async () => {
-    jest.mocked(core.getState).mockReturnValueOnce(
+    vi.mocked(core.getState).mockReturnValueOnce(
       JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
     );
     await expect(save()).toResolve();
@@ -297,7 +297,7 @@ describe('save', () => {
   });
 
   it('does nothing if `target` is not set', async () => {
-    jest.mocked(core.getState).mockReturnValueOnce(
+    vi.mocked(core.getState).mockReturnValueOnce(
       JSON.stringify({ key: '<key>' }),
     );
     await expect(save()).toResolve();
@@ -305,22 +305,22 @@ describe('save', () => {
   });
 
   it('never throws', async () => {
-    jest.mocked(cache.saveCache).mockImplementationOnce(async () => {
-      throw new Error();
+    vi.mocked(cache.saveCache).mockImplementationOnce(async () => {
+      throw new Error('unexpected error');
     });
-    jest.mocked(core.getState).mockReturnValueOnce(
+    vi.mocked(core.getState).mockReturnValueOnce(
       JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
     );
     await expect(save()).toResolve();
     expect(core.warning).toHaveBeenCalledOnce();
-    expect(jest.mocked(core.warning).mock.lastCall?.[0]).toMatchInlineSnapshot(
-      `"Failed to save to cache: Error"`,
+    expect(vi.mocked(core.warning).mock.lastCall?.[0]).toMatchInlineSnapshot(
+      '"Failed to save to cache: Error: unexpected error"',
     );
   });
 
   it('checks the return value of saveCache', async () => {
-    jest.mocked(cache.saveCache).mockResolvedValueOnce(-1);
-    jest.mocked(core.getState).mockReturnValueOnce(
+    vi.mocked(cache.saveCache).mockResolvedValueOnce(-1);
+    vi.mocked(core.getState).mockReturnValueOnce(
       JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
     );
     await expect(save()).toResolve();
