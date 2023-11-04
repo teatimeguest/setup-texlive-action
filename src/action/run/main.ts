@@ -1,4 +1,5 @@
 import { setOutput } from '@actions/core';
+import { getProxyUrl } from '@actions/http-client';
 
 import { CacheService } from '#/action/cache';
 import { Config } from '#/action/config';
@@ -59,11 +60,16 @@ export async function main(): Promise<void> {
           await tlmgr.update({ self: true });
         } catch (error) {
           if (error instanceof TLVersionOutdated) {
-            await updateRepository(profile.version);
-            cache.update();
-          } else {
-            throw error;
+            try {
+              await updateRepository(profile.version);
+              cache.update();
+              return;
+            } catch (anotherError) {
+              log.info('%s', anotherError);
+              log.debug({ error: anotherError });
+            }
           }
+          throw error;
         }
       },
     );
@@ -104,6 +110,11 @@ async function updateRepository(version: Version): Promise<void> {
   const tlmgr = Tlmgr.use();
   const tag = 'main';
   const historic = tlnet.historic(version, { master: true });
+  if (historic.protocol === 'ftp:' && getProxyUrl(historic.href) !== '') {
+    throw new Error(
+      'The use of ftp repositories under proxy is currently not supported',
+    );
+  }
   log.info('Changing the %s repository to %s', tag, historic.href);
   await tlmgr.repository.remove(tag);
   await tlmgr.repository.add(historic, tag);

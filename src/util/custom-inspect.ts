@@ -1,4 +1,4 @@
-import { platform } from 'node:os';
+import { EOL, platform } from 'node:os';
 import * as path from 'node:path';
 import { env } from 'node:process';
 import type { InspectOptions, InspectOptionsStylized } from 'node:util';
@@ -77,31 +77,32 @@ function inspectNoCustom(
 
 /**
  * ```regex
- * ^.*                # error message
  * (?:
  *   \r?\n            # newline
  *   (?:.\[[\d;]+m)*  # ansi escapes
  *   \ {4}at.*        # callsite
- * )*
+ * )+
  * ```
  */
-const reStack = /^.*(?:\r?\n(?:.\[[\d;]+m)* {4}at.*)*/v;
+const reStack = /(?:\r?\n(?:.\[[\d;]+m)* {4}at.*)+/v;
 
 function formatStack(text: string): string {
-  let stack = reStack.exec(text)?.[0];
-  if (stack === undefined) {
-    return text;
-  }
-  if (stack.endsWith(' {')) {
-    stack = stack.slice(0, -2);
-  }
-  let basePath = getBasePath();
-  // Make sure disk designators are handled properly.
-  // https://nodejs.org/api/url.html#urlpathtofileurlpath
-  if (platform() === 'win32' && basePath?.charAt(1) === ':') {
-    basePath = '/' + basePath;
-  }
-  return cleanStack(stack, { basePath: basePath! }) + text.slice(stack.length);
+  return text.replace(reStack, (stack) => {
+    const braceOpen = ' {';
+    const endsWithBraceOpen = stack.endsWith(braceOpen);
+    if (endsWithBraceOpen) {
+      stack = stack.slice(0, -braceOpen.length);
+    }
+    let basePath = getBasePath();
+    // Make sure disk designators are handled properly.
+    // https://nodejs.org/api/url.html#urlpathtofileurlpath
+    if (platform() === 'win32' && basePath?.charAt(1) === ':') {
+      basePath = '/' + basePath;
+    }
+    return EOL
+      + cleanStack(stack, { basePath: basePath! })
+      + (endsWithBraceOpen ? braceOpen : '');
+  });
 }
 
 /**
@@ -112,10 +113,9 @@ function formatStack(text: string): string {
  *   GITHUB_ACTION_PATH = /home/runner/work/_actions/<owner>/<repository>/<ref>
  *   GITHUB_WORKSPACE   = /home/runner/work/<owner>/<repository>
  *   ```
- * @see {@link https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables}
  */
 function getBasePath(): string | undefined {
-  const workspace = env['GITHUB_WORKSPACE'];
+  const workspace = env.GITHUB_WORKSPACE;
   if (workspace === undefined) {
     return undefined;
   }

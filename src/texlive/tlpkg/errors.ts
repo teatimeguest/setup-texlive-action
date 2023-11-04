@@ -15,7 +15,7 @@ export class PackageChecksumMismatch extends TLError {
     readonly packages: readonly string[],
     options?: Readonly<TLErrorOptions>,
   ) {
-    super('The checksums of some packages did not match', options);
+    super('Checksums of some packages did not match', options);
     this[symbols.note] = deline`
       The CTAN mirror may be in the process of synchronisation.
       Please try re-running the workflow after a while.
@@ -34,13 +34,13 @@ export class PackageChecksumMismatch extends TLError {
       ([, found]) => path.basename(found!, '.tar.xz'),
     );
     if (packages.length > 0) {
-      throw new this(packages, options);
+      throw new this([...new Set(packages.sort())], options);
     }
   }
 }
 
 @Exception
-export class TlpdbNotFound extends TLError {
+export class TlpdbError extends TLError {
   private constructor(
     readonly url: string,
     options?: Readonly<TLErrorOptions>,
@@ -53,17 +53,37 @@ export class TlpdbNotFound extends TLError {
   }
 
   /** @see `tlpkg/TeXLive/TLPDB.pm` */
-  private static readonly RE =
-    /TLPDB::from_file could not initialize from: (.*)$/mv;
+  private static readonly ERRORS = {
+    notFound: {
+      re: /TLPDB::from_file could not initialize from: (.*)$/mv,
+      note: deline`
+        The repository may not have been synchronized yet.
+        Please try re-running the workflow after a while.
+      `,
+    },
+    checksumMismatch: {
+      re: /from (.+): digest disagree/v,
+      note: deline`
+        The repository seems to have some problem.
+        Please try re-running the workflow after a while.
+      `,
+    },
+  } as const;
 
   static check(
     output: Readonly<ExecOutput>,
     options?: Readonly<TLErrorOptions>,
   ): void {
-    if (output.exitCode !== 0) {
-      const url = this.RE.exec(output.stderr)?.[1] ?? undefined;
+    for (const [key, { re, note }] of Object.entries(this.ERRORS)) {
+      if (key === 'notFound' && output.exitCode === 0) {
+        continue;
+      }
+      const url = re.exec(output.stderr)?.[1];
       if (url !== undefined) {
-        throw new this(url, options);
+        const error = new this(url, options);
+        error[symbols.note] = note;
+        error['stderr'] = output.stderr;
+        throw error;
       }
     }
   }

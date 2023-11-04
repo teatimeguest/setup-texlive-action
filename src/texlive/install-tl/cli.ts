@@ -5,12 +5,13 @@ import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
 
 import * as log from '#/log';
 import {
+  InstallTLError,
   RepositoryVersionIncompatible,
   UnexpectedVersion,
 } from '#/texlive/install-tl/errors';
 import type { Profile } from '#/texlive/install-tl/profile';
 import { ReleaseData } from '#/texlive/releases';
-import { PackageChecksumMismatch, TlpdbNotFound, patch } from '#/texlive/tlpkg';
+import { PackageChecksumMismatch, TlpdbError, patch } from '#/texlive/tlpkg';
 import { Version } from '#/texlive/version';
 import { exec, extract } from '#/util';
 
@@ -50,10 +51,17 @@ export async function installTL(options: InstallTLOptions): Promise<void> {
   if (isLatest(version)) {
     RepositoryVersionIncompatible.check(result, errorOptions);
   } else {
-    TlpdbNotFound.check(result, errorOptions);
+    TlpdbError.check(result, errorOptions);
   }
-  result.check();
   PackageChecksumMismatch.check(result, errorOptions);
+  try {
+    result.check();
+  } catch (cause) {
+    throw new InstallTLError('Failed to install TeX Live', {
+      ...errorOptions,
+      cause,
+    });
+  }
 
   await patch(profile);
 }

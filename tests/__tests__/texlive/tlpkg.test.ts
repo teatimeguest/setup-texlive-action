@@ -4,7 +4,6 @@ import * as os from 'node:os';
 import * as tlpkg from '#/texlive/tlpkg';
 import type { Version } from '#/texlive/version';
 
-// vi.unmock('#/texlive/tlpkg/errors');
 vi.unmock('#/texlive/tlpkg/patch');
 
 describe('check', () => {
@@ -12,8 +11,8 @@ describe('check', () => {
     const stderr = await fixtures('tlpkg-check_file_and_remove.stderr');
     const output = { exitCode: 0, stderr, stdout: '' };
     const result = (async () => tlpkg.PackageChecksumMismatch.check(output))();
-    await expect(result).rejects.toThrow(
-      'The checksums of some packages did not match',
+    await expect(result).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Checksums of some packages did not match"',
     );
     await expect(result).rejects.toMatchObject({
       packages: ['babel'],

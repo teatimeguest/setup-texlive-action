@@ -1,6 +1,6 @@
 import { EOL } from 'node:os';
 import { env, stdout } from 'node:process';
-import { formatWithOptions } from 'node:util';
+import { type InspectOptions, formatWithOptions } from 'node:util';
 
 import * as core from '@actions/core';
 import ansi, {
@@ -31,12 +31,12 @@ export interface LogFn<Options extends LogOptions = LogOptions> {
   (options: MarkRequired<Options, 'error'>): void;
 }
 
-export const notify: typeof warn = setLogFn('info', core.notice);
+export const notify: typeof warn = createLogMethod('info', core.notice);
 
-export const debug = setLogFn('debug', core.debug);
-export const info = setLogFn('info', core.info);
-export const warn = setLogFn('warn', core.warning);
-export const fatal = setLogFn('fatal', core.setFailed);
+export const debug = createLogMethod('debug', core.debug);
+export const info = createLogMethod('info', core.info);
+export const warn = createLogMethod('warn', core.warning);
+export const fatal = createLogMethod('fatal', core.setFailed);
 
 export namespace symbols {
   export const note = Symbol('note');
@@ -49,10 +49,13 @@ declare global {
 }
 
 export function hasColors(): boolean {
+  const NO_COLOR = 'NO_COLOR';
   if (core.isDebug()) {
     return false;
   }
-  const NO_COLOR = 'NO_COLOR';
+  if (env.GITHUB_ACTIONS === 'true') {
+    return (env[NO_COLOR] ?? '') === '';
+  }
   // `internal.tty.hasColors` supports `NO_COLOR` (https://no-color.org/),
   // but its handling of empty strings does not conform to the spec.
   // https://github.com/nodejs/node/blob/v21.0.0/lib/internal/tty.js#L129
@@ -60,7 +63,7 @@ export function hasColors(): boolean {
     delete env[NO_COLOR];
   }
   // `process.stdout` is not necessarily an instance of `tty.WriteStream`.
-  return (stdout as Partial<typeof stdout>).hasColors?.() ?? !(NO_COLOR in env);
+  return (stdout as Partial<typeof stdout>).hasColors?.() ?? false;
 }
 
 export namespace styles {
@@ -85,11 +88,11 @@ const defaultInspectOptions = {
   compact: false,
   maxArrayLength: 10,
   maxStringLength: 200,
-} as const;
+} as const satisfies InspectOptions;
 
 const logger = { debug, info, warn, fatal } as const;
 
-function setLogFn<
+function createLogMethod<
   const L extends LogLevel,
 >(level: L, logFn: (msg: string) => void): LogFn<
   // dprint-ignore
@@ -142,7 +145,7 @@ function setLogFn<
     } else {
       logFn(message);
     }
-    if (warning && error instanceof Error) {
+    if (warning) {
       for (const note of new Set(collectNotes(error))) {
         core.notice(note);
       }
@@ -151,34 +154,55 @@ function setLogFn<
   return log;
 }
 
-function* collectNotes(
-  error: Readonly<Error>,
-  depth: number = defaultInspectOptions.depth,
-): Generator<string, void, void> {
-  if (depth > 0) {
-    const errors = match(error)
+function* collectNotes(error: unknown): Generator<string, void, void> {
+  for (const e of traverseErrors(error, defaultInspectOptions.depth)) {
+    if (Object.hasOwn(e, symbols.note)) {
+      yield e[symbols.note]!;
+    }
+  }
+}
+
+abstract class Never {
+  static [Symbol.hasInstance](instance: unknown): instance is Never {
+    return false;
+  }
+}
+
+interface Never {
+  new(...args: readonly unknown[]): never;
+}
+
+/** @yields Suberrors in depth-first postorder. */
+function* traverseErrors(
+  root: unknown,
+  depthLimit: number,
+): Generator<Error, void, void> {
+  if (root instanceof Error && depthLimit > 0) {
+    const children = match(root)
       .with(
         P.instanceOf(AggregateError),
         { name: 'AggregateError', errors: P.array() },
         ({ errors }) => errors,
       )
       .with(
-        { name: 'SuppressedError', error: P._, suppressed: P._ },
-        ({ error: err, suppressed }) => [err, suppressed],
+        P.instanceOf(
+          Reflect.get(globalThis, 'SuppressedError') as (
+            | SuppressedErrorConstructor
+            | undefined
+          ) ?? Never,
+        ),
+        { name: 'SuppressedError' },
+        ({ error, suppressed }) => [error, suppressed],
       )
       .with(
         { cause: P._ },
         ({ cause }) => [cause],
       )
       .otherwise(() => []);
-    for (const e of errors) {
-      if (e instanceof Error) {
-        yield* collectNotes(e, depth - 1);
-      }
+    for (const child of children) {
+      yield* traverseErrors(child, depthLimit - 1);
     }
-    if (Object.hasOwn(error, symbols.note)) {
-      yield error[symbols.note]!;
-    }
+    yield root;
   }
 }
 

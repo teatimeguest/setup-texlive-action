@@ -8,7 +8,7 @@ import { TLError, type TLErrorOptions } from '#/texlive/errors';
 import { Exception, type ExecOutput, type Strict } from '#/util';
 
 @Exception
-export abstract class InstallTLError extends TLError {}
+export class InstallTLError extends TLError {}
 
 @Exception
 export class RepositoryVersionIncompatible extends InstallTLError {

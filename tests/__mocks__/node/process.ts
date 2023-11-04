@@ -3,7 +3,7 @@ beforeEach(() => {
     delete globalThis.process.env[key];
   }
   globalThis.process.env.RUNNER_TEMP = '<RUNNER_TEMP>';
-  globalThis.process.env['RUNNER_DEBUG'] = '0';
+  globalThis.process.env.RUNNER_DEBUG = '0';
 });
 
 export const { env } = globalThis.process;
