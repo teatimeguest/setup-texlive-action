@@ -15,7 +15,7 @@ export async function install(packages: Iterable<string>): Promise<void> {
     // the DEPENDS.txt format requires a CTAN name, while
     // `tlmgr install` requires a TeX Live one.
     // To install such packages with tlmgr,
-    // the action uses the CTAN API to look up thier names in TeX Live.
+    // the action uses the CTAN API to look up their names in TeX Live.
     log.info('Trying to resolve package names: ', error.packages.join(', '));
     const result = await Promise.all(error.packages.map((name) => {
       return resolvePackageName(name);

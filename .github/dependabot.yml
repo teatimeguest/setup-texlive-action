@@ -4,7 +4,13 @@ updates:
     directory: /
     schedule:
       interval: monthly
-
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-patch
+    commit-message:
+      prefix: ci
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -13,3 +19,10 @@ updates:
       time: '05:00'
     allow:
       - dependency-type: production
+    ignore:
+      - dependency-name: node-fetch
+        update-types:
+          - version-update:semver-major
+    commit-message:
+      prefix: build
+      include: scope

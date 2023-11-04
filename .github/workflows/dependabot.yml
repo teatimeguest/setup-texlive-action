@@ -1,8 +1,8 @@
 name: Dependabot
 on:
   workflow_run:
-    workflows: Pull request
-    types: completed
+    workflows: [Pull request]
+    types: [completed]
 permissions:
   contents: write
   pull-requests: write
@@ -19,5 +19,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.workflow_run.pull_requests[0].number }}
         run: >-
-          gh pr merge -sd ${{ github.event.workflow_run.pull_requests[0].number }}
+          gh pr merge -sd "${PR}"

@@ -1,7 +1,7 @@
 name: Test
 on:
   push:
-    branches: main
+    branches: [main]
     paths:
       - 'dist/**'
       - '!**/*.md'
@@ -34,32 +34,51 @@ jobs:
         os: [ubuntu, windows, macos]
       fail-fast: false
     runs-on: ${{ matrix.os }}-latest
+    outputs:
+      ubuntu: ${{ steps.status.outputs.ubuntu || '' }}
+      windows: ${{ steps.status.outputs.windows || '' }}
+      macos: ${{ steps.status.outputs.macos || '' }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup TeX Live
+        id: setup
         uses: ./
-        continue-on-error: true
+      - if: fromJSON(steps.setup.outputs.cache-restored)
+        run: exit 1
+      - run: tlmgr version
+      - name: Set output
+        id: status
+        shell: bash
+        run: |
+          echo "${MATRIX_OS}=${MATRIX_OS}" >> "${GITHUB_OUTPUT}"
+        env:
+          MATRIX_OS: ${{ matrix.os }}
   restore-cache:
     needs: save-cache
-    if: '!cancelled()'
+    if: ${{ !cancelled() }}
     strategy:
       matrix:
-        os: [ubuntu, windows, macos]
+        os:
+          - ${{ needs.save-cache.outputs.ubuntu }}
+          - ${{ needs.save-cache.outputs.windows }}
+          - ${{ needs.save-cache.outputs.macos }}
+        exclude:
+          - os: ''
       fail-fast: false
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup TeX Live
-        id: texlive
+        id: setup
         uses: ./
-      - shell: bash
-        run: |
-          [[ "${CACHE_HIT}" == true ]]
-        env:
-          CACHE_HIT: ${{ fromJSON(steps.texlive.outputs.cache-hit) }}
+      - if: ${{ !fromJSON(steps.setup.outputs.cache-hit) }}
+        run: exit 1
+      - run: tlmgr version
   delete-caches:
     needs: restore-cache
-    if: github.actor != 'nektos/act'
+    if: >-
+      always() &&
+      github.actor != 'nektos/act'
     runs-on: ubuntu-latest
     permissions:
       actions: write

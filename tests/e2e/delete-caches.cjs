@@ -1,4 +1,11 @@
-module.exports = async ({ context, core, github }) => {
+/**
+ * @param {object} args
+ * @param {import('@actions/github').Context} args.context
+ * @param {import('@actions/core')} args.core
+ * @param {ReturnType<typeof import('@actions/github').getOctokit>} args.github
+ */
+async function deleteCaches(args) {
+  const { context, core, github } = args;
   const { deleteActionsCacheByKey, getActionsCacheList } = github.rest.actions;
   const paginator = github.paginate.iterator(getActionsCacheList, {
     ...context.repo,
@@ -9,8 +16,14 @@ module.exports = async ({ context, core, github }) => {
     await Promise.all(caches.map(async ({ key }) => {
       if (key !== undefined) {
         core.info(`Deleting ${key}`);
-        return await deleteActionsCacheByKey({ ...context.repo, key });
+        try {
+          await deleteActionsCacheByKey({ ...context.repo, key });
+        } catch (error) {
+          core.setFailed(`${error}`);
+        }
       }
     }));
   }
-};
+}
+
+module.exports = deleteCaches;
