@@ -8,7 +8,7 @@ import type { Env } from '#/texlive/install-tl/env';
 export function init(): void {
   if (!('RUNNER_TEMP' in env)) {
     log.warn('`RUNNER_TEMP` not defined, %s will be used instead', tmpdir());
-    (env as Record<string, string>)['RUNNER_TEMP'] = tmpdir();
+    env.RUNNER_TEMP = tmpdir();
   }
   // Use RUNNER_TEMP as a temporary directory during setup.
   env['TMPDIR'] = env.RUNNER_TEMP;

@@ -53,9 +53,13 @@ export class Profile extends Mixin(SystemTrees, UserTrees) {
     const { instopt, tlpdbopt, ...plain } = instanceToPlain(this, {
       version: Number.parseInt(this.version),
       groups: [platform()],
-    });
+    }) as {
+      readonly instopt: object;
+      readonly tlpdbopt: object;
+      [key: string]: object;
+    };
     const options = this.version < '2017'
-      ? { option: { ...(instopt as object), ...(tlpdbopt as object) } }
+      ? { option: { ...instopt, ...tlpdbopt } }
       : { instopt, tlpdbopt };
     for (const [prefix, values] of Object.entries(options)) {
       for (const [key, value] of Object.entries(values ?? {})) {

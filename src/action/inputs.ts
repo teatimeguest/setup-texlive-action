@@ -7,6 +7,7 @@ import { Transform, instanceToInstance } from 'class-transformer';
 import id from '#/action/id';
 import type { Env } from '#/texlive/install-tl/env';
 import { AsPath, Case, FromEnv, getExposedName } from '#/util/decorators';
+import type { Lax } from '#/util/types';
 
 export class Inputs {
   @BooleanInput
@@ -19,7 +20,7 @@ export class Inputs {
   @Input
   readonly packages: string | undefined;
 
-  @Transform(() => path.join(env.RUNNER_TEMP, id['kebab-case']))
+  @Transform(() => path.join(env.RUNNER_TEMP!, id['kebab-case']))
   @FromEnv('TEXLIVE_INSTALL_PREFIX' satisfies keyof Env)
   @Input
   @AsPath
@@ -38,15 +39,13 @@ export class Inputs {
 
   @Input
   // eslint-disable-next-line @typescript-eslint/ban-types
-  @Transform<Probably<String>>(({ value }) => value?.toLowerCase?.())
+  @Transform(({ value }) => (value as Lax<String> | undefined)?.toLowerCase?.())
   readonly version: string = 'latest';
 
   static load(this: void): Inputs {
     return instanceToInstance(new Inputs(), { ignoreDecorators: true });
   }
 }
-
-type Probably<T> = Partial<T> | null | undefined;
 
 function Input(target: object, key: string | symbol): void {
   Transform(({ value }) => {

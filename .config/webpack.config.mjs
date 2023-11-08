@@ -40,39 +40,24 @@ export class PluginLicenses extends LicenseWebpackPlugin {
   constructor(options) {
     super({
       outputFilename: path.basename(options.templatePath, '.njk'),
-      /**
-       * @param {string} license
-       * @returns {boolean}
-       */
       unacceptableLicenseTest: (license) => {
         return !options.allowList.has(license);
       },
-      /**
-       * @param {object[]} data
-       * @param {string} data[].name
-       * @param {string} data[].licenseId
-       * @param {string | undefined} data[].licenseText
-       * @param {object} data[].packageJson
-       * @returns {string}
-       */
       renderLicenses: (data) => {
         const modules = data.sort((lhs, rhs) => lhs.name < rhs.name ? -1 : 1);
         console.table(
           Object.fromEntries(modules.map((m) => [m.name, m.licenseId])),
         );
         const env = nunjucks.configure(nunjucksConfig);
-        env.addFilter('slugify', (s) => slugify(s, {
-          remove: /[!-/:-@[-`{-~]/gu,
-          lower: true,
-        }));
+        env.addFilter('slugify', (s) => {
+          return slugify(s, {
+            remove: /[!-/:-@[-`{-~]/gu,
+            lower: true,
+          });
+        });
         env.addFilter('escape', (s) => s.replaceAll(/[<>]/gu, '\\$&'));
         return env.render(options.templatePath, { modules });
       },
-      /**
-       * @param {string} name
-       * @param {string} license
-       * @returns {string}
-       */
       handleMissingLicenseText: (name, license) => {
         if (options.allowList.has(license)) {
           return `${spdx[license].name} (${spdx[license].url})`;
@@ -84,6 +69,7 @@ export class PluginLicenses extends LicenseWebpackPlugin {
   }
 }
 
+/** @type {import('webpack').Configuration} */
 export default {
   entry: path.resolve(tsconfig.compilerOptions.baseUrl),
   output: {
@@ -109,7 +95,12 @@ export default {
       },
     ],
   },
-  experiments: { topLevelAwait: true },
+  experiments: {
+    topLevelAwait: true,
+  },
+  optimization: {
+    minimize: false,
+  },
   stats: 'minimal',
   ignoreWarnings: [
     { message: /Should not import the named export/u },

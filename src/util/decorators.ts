@@ -68,13 +68,26 @@ export function getExposedName(target: object, key: string | symbol): string {
 
 /** Read initial values from environment variables. */
 export function FromEnv(key: string): PropertyDecorator {
-  return Transform(({ value }) => env[key] ?? value);
+  return Transform(({ value }) => {
+    return env[key] ?? (value === undefined ? undefined : assertString(value));
+  });
 }
 
 /** Read a string value as path. */
-export const AsPath: PropertyDecorator = Transform<string | undefined>(
-  ({ value }) => value === undefined ? undefined : path.normalize(value),
-);
+export const AsPath: PropertyDecorator = Transform(({ value }) => {
+  return value === undefined ? undefined : path.normalize(assertString(value));
+});
+
+function assertString(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  } else if (value instanceof String) {
+    return value.valueOf();
+  }
+  const error = new TypeError('Unexpectedly non-string passed');
+  error['input'] = value;
+  throw error;
+}
 
 /* eslint
   @typescript-eslint/ban-types: ["error", { types: { Function: false } }] */

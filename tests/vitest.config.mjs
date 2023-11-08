@@ -43,9 +43,9 @@ export default {
       ],
       exclude: [
         '**/*.d.ts',
-        'src/index.ts',
         'src/globals.ts',
-        'src/shim/**/*',
+        'src/index.ts',
+        'src/polyfill/**/*',
       ],
       reporter: ['text', 'json'],
     },

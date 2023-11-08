@@ -43,7 +43,7 @@ export async function uniqueChild(parent: string): Promise<string> {
 }
 
 export function tmpdir(): string {
-  return env.RUNNER_TEMP;
+  return env.RUNNER_TEMP!;
 }
 
 export interface Tmpdir extends AsyncDisposable {

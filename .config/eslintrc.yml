@@ -13,7 +13,7 @@ parserOptions:
 reportUnusedDisableDirectives: true
 ignorePatterns:
   - /src/index.ts
-  - /src/types.d.ts
+  - /src/**/*.d.ts
 settings:
   import/internal-regex: ^#/
 rules:
@@ -97,6 +97,9 @@ overrides:
         - error
         - selector: default
           format: [camelCase, PascalCase]
+        - selector: default
+          format: null
+          filter: '^__proto__$'
         - selector:
             - accessor
             - classProperty
@@ -176,6 +179,7 @@ overrides:
       unicorn/no-array-for-each: off
       unicorn/no-array-reduce: off
       unicorn/no-negated-condition: off
+      unicorn/no-useless-undefined: off
       unicorn/prefer-export-from: off
       unicorn/prefer-number-properties:
         - error

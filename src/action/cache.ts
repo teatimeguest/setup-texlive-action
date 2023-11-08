@@ -191,9 +191,9 @@ export class ActionsCacheService extends CacheService implements CacheEntry {
   }
 
   override register(): void {
-    const state = instanceToPlain<CacheEntry>(this, {
+    const state = instanceToPlain(this, {
       groups: (this.#forceUpdate || !this.hit) ? ['update'] : [],
-    });
+    }) as CacheEntry;
     saveState(STATE_NAME, state);
     if ('target' in state) {
       log.info(
