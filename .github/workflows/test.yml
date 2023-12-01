@@ -67,7 +67,7 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v7
         with:
           script: |
             await require('./tests/e2e/delete-caches.cjs')({
