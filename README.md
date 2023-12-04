@@ -18,81 +18,116 @@ Linux, Windows, and macOS are supported.
 
 ## Breaking Changes in V3
 
-- Use Node.js v20 as runtime.
+<details>
+  <summary>
+    Use Node.js v20 as runtime.
+  </summary>
+  <p>
 
-  With Node.js v16 having reached its [end-of-life][node16-eol] and
-  GitHub Actions beginning the [transition to Node.js v20][actions-node20],
-  the action has upgraded its default runtime to Node.js v20.
+With Node.js v16 having reached its [end-of-life][node16-eol] and
+GitHub Actions beginning the [transition to Node.js v20][actions-node20],
+the action has upgraded its default runtime to Node.js v20.
 
-  If you are using a self-hosted runner,
-  update it to [v2.308.0][runner-node20] or later
-  to ensure `node20` runtime functionality.
+If you are using a self-hosted runner,
+update it to [v2.308.0][runner-node20] or later
+to ensure `node20` runtime functionality.
 
-- Change the condition under which `cache-hit` is set to `true`.
+</p>
+</details>
+<details>
+  <summary>
+    Change the condition under which
+    <code>cache-hit</code> is set to <code>true</code>.
+  </summary>
+  <p>
 
-  To be more consistent with official actions
-  such as [`actions/cache`][cache-hits],
-  the `cache-hit` output is now set to `true` only if
-  a cache is found that exactly matches the specified version and package set.
-  To simply check if a cache was found, use `cache-restored` instead:
+To be more consistent with official actions
+such as [`actions/cache`][cache-hits],
+the `cache-hit` output is now set to `true` only if
+a cache is found that exactly matches the specified version and package set.
+To simply check if a cache was found, use `cache-restored` instead:
 
-  ```yaml
-  - uses: teatimeguest/setup-texlive-action@v3
-    id: setup
+```yaml
+- uses: teatimeguest/setup-texlive-action@v3
+  id: setup
 
-  - if: fromJSON(steps.setup.outputs.cache-restored)
-    run: echo 'A cache has been found'
+- if: fromJSON(steps.setup.outputs.cache-restored)
+  run: echo 'A cache has been found'
+```
+
+</p>
+</details>
+<details>
+  <summary>
+    Change the default installation prefix,
+    environment variable name, and
+    cache key prefix.
+  </summary>
+  <p>
+
+Actions published on [GitHub Marketplace][github-marketplace] have
+unique names defined in the metadata file `action.yml`.
+To minimize conflicts with other actions,
+the action name (`setup-texlive-action`) is now used for the following things:
+
+- Directory name of the default installation prefix:
+
+  ```diff
+  - $RUNNER_TEMP/setup-texlive
+  + $RUNNER_TEMP/setup-texlive-action
   ```
 
-- Change the default installation prefix to `$RUNNER_TEMP/setup-texlive-action`;
-- Change the environment variable for updating cache to
-  `SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE`.
+- Environment variable name:
 
-  Actions published on [GitHub Marketplace][github-marketplace] have
-  unique names defined in the metadata file `action.yml`.
-  To minimize conflicts with other actions,
-  the action name (`setup-texlive-action`) is now used for the following things:
-
-  - Directory name of the default installation prefix:
-
-    ```diff
-    - $RUNNER_TEMP/setup-texlive
-    + $RUNNER_TEMP/setup-texlive-action
-    ```
-
-  - Environment variable name:
-
-    ```diff
-    - SETUP_TEXLIVE_FORCE_UPDATE_CACHE
-    + SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE
-    ```
-
-  - Cache keys.
-
-- Change the default texmf user directories.
-
-  As with the [portable installation][portable] of the official installer,
-  `TEXMFHOME`, `TEXMFCONFIG`, and `TEXMFVAR` are now set by default to be
-  the same as `TEXMFLOCAL`, `TEXMFSYSCONFIG`, and `TEXMFSYSVAR`, respectively.
-  To emulate the previous behavior,
-  use environment variables to explicitly specify the user directories:
-
-  ```yaml
-  - uses: teatimeguest/setup-texlive-action@v3
-    env:
-      TEXLIVE_INSTALL_TEXMFHOME: >-
-        ~/texmf
-      TEXLIVE_INSTALL_TEXMFCONFIG: >-
-        ~/.local/texlive/<version>/texmf-config
-      TEXLIVE_INSTALL_TEXMFVAR: >-
-        ~/.local/texlive/<version>/texmf-var
+  ```diff
+  - SETUP_TEXLIVE_FORCE_UPDATE_CACHE
+  + SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE
   ```
 
-- The `package-file` input now accepts
-  [glob patterns][glob-patterns] for specifying multiple files.
+- Cache keys.
 
-  Since special characters such as `*` and `?` will need to be escaped,
-  this might break existing workflow behavior.
+</p>
+</details>
+<details>
+  <summary>
+    Change the default texmf user directories.
+  </summary>
+  <p>
+
+As with the [portable installation][portable] of the official installer,
+`TEXMFHOME`, `TEXMFCONFIG`, and `TEXMFVAR` are now set by default to be
+the same as `TEXMFLOCAL`, `TEXMFSYSCONFIG`, and `TEXMFSYSVAR`, respectively.
+To emulate the previous behavior,
+use environment variables to explicitly specify the user directories:
+
+```yaml
+- uses: teatimeguest/setup-texlive-action@v3
+  env:
+    TEXLIVE_INSTALL_TEXMFHOME: >-
+      ~/texmf
+    TEXLIVE_INSTALL_TEXMFCONFIG: >-
+      ~/.local/texlive/<version>/texmf-config
+    TEXLIVE_INSTALL_TEXMFVAR: >-
+      ~/.local/texlive/<version>/texmf-var
+```
+
+</p>
+</details>
+<details>
+  <summary>
+    The <code>package-file</code> input now accepts
+    <a href="https://github.com/actions/toolkit/tree/main/packages/glob#patterns">
+      glob patterns
+    </a>
+    for specifying multiple files.
+  </summary>
+  <p>
+
+Since special characters such as `*` and `?` will need to be escaped,
+this might break existing workflow behavior.
+
+</p>
+</details>
 
 ## Table of Contents
 
@@ -229,7 +264,7 @@ The action reads the following environment variable:
 Setting this to anything other than `0`, the action will use
 [a unique cache key each time][update-cache] to keep the cache up-to-date.
 
-> [!WARNING]\
+> :warning: Warning\
 > Enabling this will consume more [cache space][cache-limits].
 
 </div>
