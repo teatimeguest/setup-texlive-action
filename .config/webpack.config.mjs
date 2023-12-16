@@ -56,6 +56,10 @@ export class PluginLicenses extends LicenseWebpackPlugin {
           });
         });
         env.addFilter('escape', (s) => s.replaceAll(/[<>]/gu, '\\$&'));
+        delete modules
+          .find(({ name }) => name === '@azure/core-http')
+          ?.packageJson
+          ?.['homepage'];
         return env.render(options.templatePath, { modules });
       },
       handleMissingLicenseText: (name, license) => {

@@ -20,15 +20,18 @@ This software incorporates the following third-party software components:
 - [`@azure/storage-blob`](#azurestorage-blob)
 - [`@fastify/busboy`](#fastifybusboy)
 - [`@opentelemetry/api`](#opentelemetryapi)
+- [`ansi-styles`](#ansi-styles)
+- [`array-from-async`](#array-from-async)
 - [`asynckit`](#asynckit)
 - [`balanced-match`](#balanced-match)
 - [`brace-expansion`](#brace-expansion)
 - [`class-transformer`](#class-transformer)
+- [`clean-stack`](#clean-stack)
 - [`combined-stream`](#combined-stream)
 - [`concat-map`](#concat-map)
-- [`core-js`](#core-js)
 - [`delayed-stream`](#delayed-stream)
 - [`deline`](#deline)
+- [`escape-string-regexp`](#escape-string-regexp)
 - [`form-data`](#form-data)
 - [`lru-cache`](#lru-cache)
 - [`mime-db`](#mime-db)
@@ -40,6 +43,7 @@ This software incorporates the following third-party software components:
 - [`semver`](#semver)
 - [`temporal-polyfill`](#temporal-polyfill)
 - [`ts-mixer`](#ts-mixer)
+- [`ts-pattern`](#ts-pattern)
 - [`tslib`](#tslib)
 - [`tunnel`](#tunnel)
 - [`unctx`](#unctx)
@@ -243,7 +247,7 @@ SOFTWARE.
 
 Copyright (c) Microsoft Corporation
 
-URL: <https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/core/core-http/README.md>
+URL: <https://www.npmjs.com/package/@azure/core-http>
 
 License: `MIT`
 
@@ -705,6 +709,65 @@ License: `Apache-2.0`
    limitations under the License.
 ```
 
+## `ansi-styles`
+
+Copyright (c) Sindre Sorhus \<<sindresorhus@gmail.com>\> (<https://sindresorhus.com>)
+
+URL: <https://www.npmjs.com/package/ansi-styles>
+
+License: `MIT`
+
+```
+MIT License
+
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```
+
+## `array-from-async`
+
+Copyright (c) J. S. Choi \<jschoi@jschoi.org\> (https://jschoi.org/)
+
+URL: <https://github.com/js-choi/array-from-async>
+
+License: `BSD-3-Clause`
+
+```
+Copyright 2021 J. S. Choi
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+**This software is provided by the copyright holders and contributors
+“as is” and any express or implied warranties, including, but not
+limited to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed. In no event shall the copyright
+holder or contributors be liable for any direct, indirect, incidental,
+special, exemplary, or consequential damages (including, but not limited
+to, procurement of substitute goods or services; loss of use, data, or
+profits; or business interruption) however caused and on any theory of
+liability, whether in contract, strict liability, or tort (including
+negligence or otherwise) arising in any way out of the use of this
+software, even if advised of the possibility of such damage.**
+```
+
 ## `asynckit`
 
 Copyright (c) Alex Indigo \<iam@alexindigo.com\>
@@ -833,6 +896,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
+## `clean-stack`
+
+Copyright (c) Sindre Sorhus \<<sindresorhus@gmail.com>\> (<https://sindresorhus.com>)
+
+URL: <https://www.npmjs.com/package/clean-stack>
+
+License: `MIT`
+
+```
+MIT License
+
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```
+
 ## `combined-stream`
 
 Copyright (c) Felix Geisendörfer \<felix@debuggable.com\> (http://debuggable.com/)
@@ -890,36 +973,6 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
-
-## `core-js`
-
-Copyright (c) Denis Pushkarev \<<zloirock@zloirock.ru>\> (<http://zloirock.ru>)
-
-URL: <https://www.npmjs.com/package/core-js>
-
-License: `MIT`
-
-```
-Copyright (c) 2014-2023 Denis Pushkarev
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
 ```
 
 ## `delayed-stream`
@@ -982,6 +1035,26 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
+
+## `escape-string-regexp`
+
+Copyright (c) Sindre Sorhus \<<sindresorhus@gmail.com>\> (<https://sindresorhus.com>)
+
+URL: <https://www.npmjs.com/package/escape-string-regexp>
+
+License: `MIT`
+
+```
+MIT License
+
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
 ## `form-data`
@@ -1294,6 +1367,38 @@ License: `MIT`
 MIT License
 
 Copyright (c) 2023 Tanner Nielsen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## `ts-pattern`
+
+Copyright (c) Gabriel Vergnaud
+
+URL: <https://github.com/gvergnaud/ts-pattern#readme>
+
+License: `MIT`
+
+```
+MIT License
+
+Copyright (c) 2021 Gabriel Vergnaud
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
