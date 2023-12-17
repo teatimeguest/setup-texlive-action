@@ -32,6 +32,8 @@ If you are using a self-hosted runner,
 update it to [v2.308.0][runner-node20] or later
 to ensure `node20` runtime functionality.
 
+---
+
 </p>
 </details>
 <details>
@@ -54,6 +56,8 @@ To simply check if a cache was found, use `cache-restored` instead:
 - if: fromJSON(steps.setup.outputs.cache-restored)
   run: echo 'A cache has been found'
 ```
+
+---
 
 </p>
 </details>
@@ -86,6 +90,8 @@ the action name (`setup-texlive-action`) is now used for the following things:
 
 - Cache keys.
 
+---
+
 </p>
 </details>
 <details>
@@ -111,6 +117,8 @@ use environment variables to explicitly specify the user directories:
       ~/.local/texlive/<version>/texmf-var
 ```
 
+---
+
 </p>
 </details>
 <details>
@@ -125,6 +133,8 @@ use environment variables to explicitly specify the user directories:
 
 Since special characters such as `*` and `?` will need to be escaped,
 this might break existing workflow behavior.
+
+---
 
 </p>
 </details>
@@ -247,31 +257,10 @@ All inputs are optional.
 
 The action reads the following environment variable:
 
-<table>
-  <tr>
-    <th>Name</th>
-    <th>Type</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>
-      <code>SETUP_TEXLIVE_ACTION_&#x200B;FORCE_UPDATE_CACHE</code>
-    </td>
-    <td>String</td>
-    <td>
-      <div>
-
-Setting this to anything other than `0`, the action will use
-[a unique cache key each time][update-cache] to keep the cache up-to-date.
-
-> :warning: Warning\
-> Enabling this will consume more [cache space][cache-limits].
-
-</div>
-      <strong>Default:&ensp;</strong><var>unset</var>
-    </td>
-  </tr>
-</table>
+| Name                                                         | Type   | Description                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <code>SETUP_TEXLIVE_ACTION_&#x200B;FORCE_UPDATE_CACHE</code> | String | <p>Setting this to anything other than `0`, the action will use [a unique cache key each time][update-cache] to keep the cache up-to-date.</p><div><blockquote>:warning: **Warning**<br>Enabling this will consume more [cache space][cache-limits].</blockquote></div> **Default:**&ensp;<var>unset</var> |
+| [`NO_COLOR`](https://no-color.org/)                          | String | Disable color output.                                                                                                                                                                                                                                                                                      |
 
 In addition,
 the following [official environment variables][install-tl-env] are supported:
@@ -326,7 +315,7 @@ See the [releases page][releases].
 [historic]: https://tug.org/historic/
 [install-tl-env]: https://tug.org/texlive/doc/install-tl.html#ENVIRONMENT-VARIABLES
 [install-tl-texdir]: https://tug.org/texlive/doc/install-tl.html#texdir-dir
-[marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?label=Marketplace&logo=github
+[marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?logo=github&logoColor=959da5&label=Marketplace&labelColor=24292e
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action
 [node16-eol]: https://nodejs.org/en/blog/announcements/nodejs16-eol
 [portable]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#tlportable
