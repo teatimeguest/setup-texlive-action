@@ -2,6 +2,7 @@ import { platform } from 'node:os';
 import * as path from 'node:path';
 
 import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
+import { Range } from 'semver';
 
 import * as log from '#/log';
 import {
@@ -22,30 +23,17 @@ export interface InstallTLOptions {
 
 export async function installTL(options: InstallTLOptions): Promise<void> {
   const { isLatest } = ReleaseData.use();
-  const { profile } = options;
-  const { version } = profile;
-  const repository = new URL(options.repository.href);
+  const { profile, repository } = options;
+  const version = profile.version;
 
   const installTLPath = await acquire(options);
-  // eslint-disable-next-line unicorn/no-null
   await exec(installTLPath, ['-version'], { stdin: null });
 
-  // `install-tl` of versions prior to 2017 does not support HTTPS, and
-  // that of version 2017 supports HTTPS but does not work properly.
-  if (version < '2018' && repository.protocol === 'https:') {
-    repository.protocol = 'http:';
-  }
-
-  const result = await exec(installTLPath, [
-    '-profile',
-    await profile.open(),
-    // Only version 2008 uses `-location` instead of `-repository`.
-    version === '2008' ? '-location' : '-repository',
-    repository.href,
-  ], {
-    stdin: null, // eslint-disable-line unicorn/no-null
-    ignoreReturnCode: true,
-  });
+  const result = await exec(
+    installTLPath,
+    await Array.fromAsync(commandArgs(options)),
+    { stdin: null, ignoreReturnCode: true },
+  );
 
   const errorOptions = { version, repository };
   if (isLatest(version)) {
@@ -66,6 +54,50 @@ export async function installTL(options: InstallTLOptions): Promise<void> {
   await patch(profile);
 }
 
+const supportVersions = {
+  options: {
+    ['-repository']: new Range('>=2009'),
+    ['-no-continue']: new Range('>=2022'),
+    ['-no-interaction']: new Range('>=2023'),
+  },
+  protocol: {
+    /**
+     * @remarks
+     * Versions prior to 2017 does not support HTTPS, and
+     * version 2017 supports HTTPS but does not work properly.
+     */
+    ['https:']: new Range('>=2018'),
+  },
+} as const;
+
+async function* commandArgs(
+  options: InstallTLOptions,
+): AsyncGenerator<string, void, void> {
+  const version = options.profile.version;
+
+  for (const option of ['-no-continue', '-no-interaction'] as const) {
+    if (Version.satisfies(version, supportVersions.options[option])) {
+      yield option;
+    }
+  }
+
+  yield* ['-profile', await options.profile.open()];
+
+  const repository = new URL(options.repository.href);
+  if (
+    repository.protocol === 'https:'
+    && !Version.satisfies(version, supportVersions.protocol['https:'])
+  ) {
+    repository.protocol = 'http:';
+  }
+  yield* [
+    Version.satisfies(version, supportVersions.options['-repository'])
+      ? '-repository'
+      : '-location',
+    repository.href,
+  ];
+}
+
 async function acquire(options: InstallTLOptions): Promise<string> {
   return path.format({
     dir: restoreCache(options) ?? await download(options),
@@ -80,7 +112,7 @@ export function restoreCache(options: InstallTLOptions): string | undefined {
   try {
     const TEXMFROOT = findTool(executable, version);
     if (TEXMFROOT !== '') {
-      log.info('Found in tool cache');
+      log.info('Found in tool cache: %s', TEXMFROOT);
       return TEXMFROOT;
     }
   } catch (error) {
@@ -147,3 +179,5 @@ function executableName(version: Version): string {
 function archiveName(): string {
   return platform() === 'win32' ? 'install-tl.zip' : 'install-tl-unx.tar.gz';
 }
+
+/* eslint unicorn/no-null: off */
