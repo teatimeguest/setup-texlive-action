@@ -54,7 +54,7 @@
     "clean-stack": "5.2.0",
     "core-js": "3.35.0",
     "deline": "1.0.4",
-    "scule": "1.1.1",
+    "scule": "1.2.0",
     "node-fetch": "2.7.0",
     "semver": "7.5.4",
     "temporal-polyfill": "0.1.1",
