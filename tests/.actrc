@@ -1,7 +1,0 @@
---matrix os:ubuntu
---platform ubuntu-latest=node:20.0
---detect-event
---cache-server-path .cache/act
---pull=false
---rm
---env-file tests/e2e/.env

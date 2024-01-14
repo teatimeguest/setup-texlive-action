@@ -1,0 +1,8 @@
+--matrix os:ubuntu
+--platform ubuntu-latest=node:20.0
+--detect-event
+--env NODE_OPTIONS=--enable-source-maps
+--env RUNNER_DEBUG=1
+--cache-server-path node_modules/.act
+--pull=false
+--rm

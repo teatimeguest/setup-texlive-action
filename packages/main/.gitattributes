@@ -1,0 +1,6 @@
+/tests/fixtures/** -text -diff -merge linguist-generated
+*.log linguist-language=shellsession
+*.stderr linguist-language=shellsession
+*.stdout linguist-language=shellsession
+*.tlpdb linguist-language=gitattributes
+release-texlive.txt linguist-vendored !linguist-generated

@@ -23,7 +23,7 @@ case "${npm_lifecycle_event}" in
       xargs -0 git update-index --assume-unchanged --
 
     git cliff \
-      --config .config/git-cliff/cliff.toml \
+      --config packages/config/cliff.toml \
       --unreleased \
       --tag "${version}" |
       git tag "${version}" --cleanup=whitespace -F -

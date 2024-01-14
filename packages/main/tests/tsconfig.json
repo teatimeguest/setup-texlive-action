@@ -1,0 +1,17 @@
+{
+  "extends": "@setup-texlive-action/config/tsconfig",
+  "compilerOptions": {
+    "baseUrl": "../src",
+    "paths": {
+      "#/*": ["*", "*.js", "*/index.js"],
+    },
+  },
+  "include": [
+    "../src/**/*.ts",
+    "../src/**/*.json",
+    "./**/*.ts",
+  ],
+  "references": [
+    { "path": "../../polyfill" },
+  ],
+}

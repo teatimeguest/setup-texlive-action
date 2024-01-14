@@ -8,7 +8,7 @@ import { parseArgs } from 'node:util';
 
 import esbuild from 'esbuild';
 
-import esbuildConfig from '##/.config/esbuild.config.mjs';
+import esbuildConfig from '@setup-texlive-action/config/esbuild';
 
 const script = path.basename(fileURLToPath(import.meta.url), '');
 
@@ -29,9 +29,8 @@ const mkdtemp = async function*() {
  * @return {Promise<number>}
  */
 const node = async (main, args) => {
-  const dotenv = fileURLToPath(import.meta.resolve('##/tests/e2e/.env'));
   const { status, signal } = spawnSync('node', [
-    `--env-file=${path.relative('.', dotenv)}`,
+    '--enable-source-maps',
     '--',
     main,
     ...args,

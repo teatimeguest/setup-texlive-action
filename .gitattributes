@@ -6,13 +6,5 @@ tl_packages linguist-language=ignore
 
 /dist/** -diff -merge linguist-generated
 
-/tests/fixtures/** -text -diff -merge linguist-generated
-*.log linguist-language=shellsession
-*.stderr linguist-language=shellsession
-*.stdout linguist-language=shellsession
-*.tlpdb linguist-language=gitattributes
-release-texlive.txt linguist-vendored !linguist-generated
-
 *.snap text eof=lf linguist-language=javascript linguist-generated
-
 *.patch -text -merge linguist-generated

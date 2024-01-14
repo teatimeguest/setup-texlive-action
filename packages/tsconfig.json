@@ -1,0 +1,20 @@
+{
+  "extends": "@setup-texlive-action/config/tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "#/*": [
+        "main/src/*",
+        "main/src/*.js",
+        "main/src/*/index.js",
+      ],
+      "@setup-texlive-action/polyfill/*": ["polyfill/src/*"],
+    },
+    "experimentalDecorators": true,
+  },
+  "exclude": [
+    "node_modules",
+    "lib",
+    "dist",
+  ],
+}

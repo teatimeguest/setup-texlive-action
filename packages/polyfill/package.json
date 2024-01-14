@@ -1,0 +1,29 @@
+{
+  "name": "@setup-texlive-action/polyfill",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf lib",
+    "lint": "eslint src"
+  },
+  "exports": {
+    "./pure": {
+      "import": "./lib/pure/index.js",
+      "types": "./lib/pure/index.d.ts"
+    },
+    "./shims": {
+      "import": "./lib/shims/index.js",
+      "types": "./lib/shims/index.d.ts"
+    }
+  },
+  "dependencies": {
+    "@abraham/reflection": "0.12.0",
+    "array-from-async": "3.0.0",
+    "node-fetch": "2.7.0",
+    "temporal-polyfill": "0.2.0"
+  },
+  "devDependencies": {
+    "@setup-texlive-action/config": "*",
+    "@types/node-fetch": "^2.6.10"
+  }
+}
