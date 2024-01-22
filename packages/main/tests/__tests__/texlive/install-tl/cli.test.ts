@@ -5,6 +5,7 @@ import * as os from 'node:os';
 
 import * as core from '@actions/core';
 import * as tool from '@actions/tool-cache';
+import releaseText from '@setup-texlive-action/fixtures/release-texlive.txt?raw';
 
 import { download, restoreCache } from '#/texlive/install-tl/cli';
 import { Profile } from '#/texlive/install-tl/profile';
@@ -20,8 +21,7 @@ const options = {
   repository: new URL('https://example.com/'),
 };
 
-beforeAll(async () => {
-  const releaseText = await fixtures('release-texlive.txt');
+beforeAll(() => {
   vi.mocked(readFile).mockResolvedValue(releaseText);
 });
 

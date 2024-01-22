@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import stderr from '@setup-texlive-action/fixtures/tlmgr-repository-add.stderr';
+
 import * as repository from '#/texlive/tlmgr/actions/repository';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
@@ -45,7 +47,7 @@ describe('add', () => {
         command: 'tlmgr',
         exitCode: 2,
         stdout: '',
-        stderr: await fixtures('tlmgr-repository-add.stderr'),
+        stderr,
       }),
     );
     setVersion('2019');

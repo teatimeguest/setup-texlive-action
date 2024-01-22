@@ -5,6 +5,7 @@
     "paths": {
       "#/*": ["*", "*.js", "*/index.js"],
     },
+    "allowArbitraryExtensions": true,
   },
   "include": [
     "../src/**/*.ts",

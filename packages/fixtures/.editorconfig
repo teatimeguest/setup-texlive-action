@@ -1,4 +1,4 @@
-[tests/fixtures/**/*]
+[data/**/*]
 charset = unset
 end_of_line = unset
 indent_size = unset

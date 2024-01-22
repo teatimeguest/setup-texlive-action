@@ -29,15 +29,14 @@
   "devDependencies": {
     "@setup-texlive-action/config": "*",
     "@setup-texlive-action/polyfill": "*",
+    "@setup-texlive-action/fixtures": "*",
     "@types/deline": "1.0.4",
-    "@types/http-headers": "3.0.3",
     "@types/mock-fs": "4.13.4",
-    "http-headers": "3.0.2",
     "mock-fs": "5.2.0",
     "nock": "13.4.0",
     "ts-dedent": "2.2.0",
     "ts-essentials": "9.4.1",
-    "vitest": "1.2.0"
+    "vitest": "1.2.1"
   },
   "overrides": {
     "semver": "$semver"

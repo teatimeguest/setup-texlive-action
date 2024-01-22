@@ -2,6 +2,9 @@ import { beforeAll, expect, it, vi } from 'vitest';
 
 import { readFile } from 'node:fs/promises';
 
+import tlpdb2008 from '@setup-texlive-action/fixtures/texlive.2008.tlpdb';
+import tlpdb2023 from '@setup-texlive-action/fixtures/texlive.2023.tlpdb';
+
 import { list } from '#/texlive/tlmgr/actions/list';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Tlpobj } from '#/texlive/tlpkg';
@@ -18,7 +21,7 @@ beforeAll(async () => {
   for (const year of years) {
     set(new TlmgrInternals({ TEXDIR: '', version: year }), true);
     vi.mocked(readFile).mockResolvedValueOnce(
-      await fixtures(`texlive.${year}.tlpdb`),
+      year === '2008' ? tlpdb2008 : tlpdb2023,
     );
     for await (const tlpobj of list()) {
       tlpdb[year].add(tlpobj);

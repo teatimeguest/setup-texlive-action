@@ -1,0 +1,25 @@
+{
+  "name": "@setup-texlive-action/fixtures",
+  "private": true,
+  "type": "module",
+  "scripts": {
+  },
+  "exports": {
+    ".": "./index.mjs",
+    "./*.json": {
+      "import": "./data/*.json"
+    },
+    "./*.http": {
+      "import": "./data/*.http",
+      "types": "./types/http.d.ts"
+    },
+    "./*": {
+      "import": "./data/*",
+      "types": "./types/txt.d.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/http-headers": "3.0.3",
+    "http-headers": "3.0.2"
+  }
+}

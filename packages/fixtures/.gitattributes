@@ -1,6 +1,7 @@
-/tests/fixtures/** -text -diff -merge linguist-generated
+/data/** -text -diff -merge linguist-generated
 *.log linguist-language=shellsession
 *.stderr linguist-language=shellsession
 *.stdout linguist-language=shellsession
 *.tlpdb linguist-language=gitattributes
+mirmon.state linguist-language=dircolors
 release-texlive.txt linguist-vendored !linguist-generated

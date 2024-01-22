@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 
+import stderr from '@setup-texlive-action/fixtures/tlpkg-check_file_and_remove.stderr';
+
 import * as tlpkg from '#/texlive/tlpkg';
 import type { Version } from '#/texlive/version';
 
@@ -10,7 +12,6 @@ vi.unmock('#/texlive/tlpkg/patch');
 
 describe('check', () => {
   it('detects forcible removal of packages', async () => {
-    const stderr = await fixtures('tlpkg-check_file_and_remove.stderr');
     const output = { exitCode: 0, stderr, stdout: '' };
     const result = (async () => tlpkg.PackageChecksumMismatch.check(output))();
     await expect(result).rejects.toThrowErrorMatchingInlineSnapshot(

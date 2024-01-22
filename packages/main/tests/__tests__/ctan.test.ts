@@ -1,15 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import parseHttp, { type ResponseData } from 'http-headers';
+import {
+  headers,
+  statusCode,
+} from '@setup-texlive-action/fixtures/mirrors.ctan.org.http';
 import nock, { type ReplyHeaders } from 'nock';
 
 import * as ctan from '#/ctan';
 
 beforeAll(async () => {
-  const { headers, statusCode } = parseHttp(
-    await fixtures('mirrors.ctan.org.http'),
-  ) as ResponseData;
-
   nock('https://mirrors.ctan.org')
     .head('/')
     .reply(statusCode, '', headers as ReplyHeaders);

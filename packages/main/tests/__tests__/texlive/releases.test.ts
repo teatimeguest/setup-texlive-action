@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import * as core from '@actions/core';
+import json from '@setup-texlive-action/fixtures/ctan-api-pkg-texlive.json';
 import nock from 'nock';
 
 import { Latest, ReleaseData } from '#/texlive/releases';
@@ -11,11 +12,10 @@ vi.unmock('#/texlive/releases');
 let doMock: () => nock.Scope;
 
 beforeAll(async () => {
-  const data = await fixtures('ctan-api-pkg-texlive.json');
   doMock = () => {
     return nock('https://ctan.org')
       .get('/json/2.0/pkg/texlive')
-      .reply(200, data);
+      .reply(200, json);
   };
 });
 
