@@ -2,8 +2,7 @@
   "name": "@setup-texlive-action/fixtures",
   "private": true,
   "type": "module",
-  "scripts": {
-  },
+  "scripts": {},
   "exports": {
     ".": "./index.mjs",
     "./*.json": {
@@ -19,7 +18,7 @@
     }
   },
   "devDependencies": {
-    "@types/http-headers": "3.0.3",
-    "http-headers": "3.0.2"
+    "@types/http-headers": "^3.0.3",
+    "http-headers": "^3.0.2"
   }
 }
