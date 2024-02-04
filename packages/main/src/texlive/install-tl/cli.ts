@@ -5,14 +5,10 @@ import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
 import { Range } from 'semver';
 
 import * as log from '#/log';
-import {
-  InstallTLError,
-  RepositoryVersionIncompatible,
-  UnexpectedVersion,
-} from '#/texlive/install-tl/errors';
+import { InstallTLError } from '#/texlive/install-tl/errors';
 import type { Profile } from '#/texlive/install-tl/profile';
 import { ReleaseData } from '#/texlive/releases';
-import { PackageChecksumMismatch, TlpdbError, patch } from '#/texlive/tlpkg';
+import { TlpdbError, patch } from '#/texlive/tlpkg';
 import { Version } from '#/texlive/version';
 import { exec, extract } from '#/util';
 
@@ -37,11 +33,12 @@ export async function installTL(options: InstallTLOptions): Promise<void> {
 
   const errorOptions = { version, repository };
   if (isLatest(version)) {
-    RepositoryVersionIncompatible.check(result, errorOptions);
+    InstallTLError.checkCompatibility(result, errorOptions);
   } else {
-    TlpdbError.check(result, errorOptions);
+    TlpdbError.checkRepositoryStatus(result, errorOptions);
+    TlpdbError.checkRepositoryHealth(result, errorOptions);
   }
-  PackageChecksumMismatch.check(result, errorOptions);
+  TlpdbError.checkPackageChecksumMismatch(result, errorOptions);
   try {
     result.check();
   } catch (cause) {
@@ -125,34 +122,56 @@ export function restoreCache(options: InstallTLOptions): string | undefined {
 export async function download(options: InstallTLOptions): Promise<string> {
   const { isLatest } = ReleaseData.use();
   const { profile: { version }, repository } = options;
+  const errorOpts = {
+    repository,
+    version,
+    code: InstallTLError.Code.FAILED_TO_DOWNLOAD,
+  };
+
+  if (repository.protocol === 'ftp:') {
+    throw new InstallTLError(
+      'Download from FTP repositories is currently not supported',
+      errorOpts,
+    );
+  }
+
   const archive = archiveName();
   const executable = executableName(version);
 
   const url = new URL(archive, repository);
   log.info('Downloading %s from %s', archive, url.href);
-  const archivePath = await downloadTool(url.href);
+  let archivePath: string;
+  try {
+    archivePath = await downloadTool(url.href);
+  } catch (cause) {
+    const error = new InstallTLError('Failed to download install-tl', {
+      ...errorOpts,
+      cause,
+    });
+    throw error;
+  }
 
   log.info('Extracting %s from %s', executable, archivePath);
-  const TEXMFROOT = await extract(
+  const texmfroot = await extract(
     archivePath,
     platform() === 'win32' ? 'zip' : 'tgz',
   );
   if (isLatest(version)) {
     try {
-      await UnexpectedVersion.check(TEXMFROOT, { version, repository });
+      await InstallTLError.checkVersion(texmfroot, { version, repository });
     } catch (error) {
       if (
-        error instanceof UnexpectedVersion
+        error instanceof InstallTLError
         && Version.isVersion(error.remoteVersion)
       ) {
-        await saveCache(TEXMFROOT, error.remoteVersion);
+        await saveCache(texmfroot, error.remoteVersion);
       }
       throw error;
     }
   }
-  await saveCache(TEXMFROOT, version);
+  await saveCache(texmfroot, version);
 
-  return TEXMFROOT;
+  return texmfroot;
 }
 
 async function saveCache(TEXMFROOT: string, version: Version): Promise<void> {

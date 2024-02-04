@@ -12,9 +12,8 @@
     },
     "experimentalDecorators": true,
   },
-  "exclude": [
-    "node_modules",
-    "lib",
-    "dist",
+  "include": [
+    "*/src/**/*.ts",
+    "*/src/**/*.json",
   ],
 }

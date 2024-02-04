@@ -1,8 +1,16 @@
 import { expect, it, vi } from 'vitest';
 
+import stderrCtan from '@setup-texlive-action/fixtures/tlmgr-setup_one_remotetlpdb-ctan.stderr';
+import stderrTlcontrib from '@setup-texlive-action/fixtures/tlmgr-setup_one_remotetlpdb-tlcontrib.stderr';
+
 import { update } from '#/texlive/tlmgr/actions/update';
+import {
+  TLVersionNotSupported,
+  TLVersionOutdated,
+} from '#/texlive/tlmgr/errors';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
+import { ExecError } from '#/util/exec';
 
 vi.unmock('#/texlive/tlmgr/actions/update');
 
@@ -56,4 +64,32 @@ it('updates packages with `--reinstall-forcibly-removed`', async () => {
     'bar',
     'baz',
   ]);
+});
+
+it('throws TLVersionOutdated', async () => {
+  setVersion('2022');
+  vi.mocked(TlmgrInternals.prototype.exec).mockRejectedValueOnce(
+    new ExecError({
+      command: 'tlmgr',
+      stderr: stderrCtan,
+      stdout: '',
+      exitCode: 1,
+    }),
+  );
+  await expect(update()).rejects.toThrow(TLVersionOutdated as unknown as Error);
+});
+
+it('throws TLVersionNotSupported', async () => {
+  setVersion('2022');
+  vi.mocked(TlmgrInternals.prototype.exec).mockRejectedValueOnce(
+    new ExecError({
+      command: 'tlmgr',
+      stderr: stderrTlcontrib,
+      stdout: '',
+      exitCode: 1,
+    }),
+  );
+  await expect(update()).rejects.toThrow(
+    TLVersionNotSupported as unknown as Error,
+  );
 });

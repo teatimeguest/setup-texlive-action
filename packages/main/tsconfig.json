@@ -8,6 +8,7 @@
     "rootDir": "./src",
     "outDir": "./lib",
     "experimentalDecorators": true,
+    "composite": true,
     "tsBuildInfoFile": "./lib/.tsbuildinfo",
   },
   "files": [

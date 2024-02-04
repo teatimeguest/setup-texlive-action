@@ -8,7 +8,7 @@ import type { DeepWritable } from 'ts-essentials';
 import { CacheService } from '#/action/cache';
 import { Config } from '#/action/config';
 import { main } from '#/action/run/main';
-import { installTL } from '#/texlive';
+import { ReleaseData, installTL } from '#/texlive';
 import * as tlmgr from '#/texlive/tlmgr/actions';
 
 vi.unmock('#/action/run/main');
@@ -149,12 +149,15 @@ it.each(cacheTypes)(
 );
 
 it.each(cacheTypes)(
-  'updates tlmgr even for older versions',
+  'updates tlmgr for the one previous version',
   async (...kind) => {
     setCacheType(kind);
     config.updateAllPackages = true;
-    config.version = '2020';
-    await expect(main()).toResolve();
+    config.version = `${
+      Number.parseInt(LATEST_VERSION, 10) - 1
+    }` as typeof config.version;
+    vi.mocked(ReleaseData.use().newVersionReleased).mockReturnValue(true);
+    await expect(main()).resolves.not.toThrow();
     expect(tlmgr.update).toHaveBeenCalledWith(
       expect.objectContaining({ self: true }),
     );

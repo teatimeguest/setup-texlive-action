@@ -1,3 +1,4 @@
+import deline from 'deline';
 import { createContext } from 'unctx';
 
 import * as ctan from '#/ctan';
@@ -17,8 +18,10 @@ export interface Release {
 }
 
 export interface ReleaseData {
+  readonly newVersionReleased: () => boolean;
   readonly latest: Release;
   readonly isLatest: (version: Version) => boolean;
+  readonly isOnePrevious: (version: Version) => boolean;
 }
 
 export namespace ReleaseData {
@@ -30,11 +33,19 @@ export namespace ReleaseData {
     if (Latest.needToCheck()) {
       await latest.checkVersion();
     }
+    function newVersionReleased(): boolean {
+      return data.latest.version === latest.version;
+    }
     function isLatest(version: Version): boolean {
       return version === latest.version;
     }
-    ctx.set({ latest, isLatest });
-    return { latest, isLatest };
+    function isOnePrevious(version: Version): boolean {
+      return Number.parseInt(version, 10) + 1
+        === Number.parseInt(latest.version, 10);
+    }
+    const releases = { newVersionReleased, latest, isLatest, isOnePrevious };
+    ctx.set(releases);
+    return releases;
   }
 }
 
@@ -51,7 +62,13 @@ export class Latest implements Release {
     if (this.#version !== latest) {
       this.#version = latest;
       this.releaseDate = undefined;
-      log.info('A new version of TeX Live has been released: %s', latest);
+      log.notify(
+        deline`
+          TeX Live %d has been released.
+          The action may not work properly for a few days after release.
+        `,
+        latest,
+      );
     } else {
       log.info('Latest version: %s', this.version);
     }

@@ -1,0 +1,47 @@
+version: '3'
+tasks:
+  act:
+    internal: true
+    dir: '{{ .npm_config_local_prefix }}'
+    cmd: >-
+      act
+      --container-architecture linux/{{ ARCH }}
+      --workflows {{ .workflows }}
+      {{ .CLI_ARGS }}
+    requires:
+      vars: [workflows]
+  clear-cache:
+    cmd: rm -rf "${npm_config_local_prefix}/node_modules/.act"
+  default:
+    - task: act
+      vars:
+        workflows: .github/workflows/test.yml
+        CLI_ARGS: >-
+          --job save-cache
+          --no-cache-server
+  historic:
+    - task: act
+      vars:
+        workflows: .github/workflows/{{ .TASK }}.yml
+  proxy:
+    - task: act
+      vars:
+        workflows: .github/workflows/{{ .TASK }}.yml
+  test:
+    deps: [clear-cache]
+    cmd:
+      task: act
+      vars:
+        workflows: .github/workflows/{{ .TASK }}.yml
+  fallback-to-historic-master:
+    deps: [clear-cache]
+    cmd:
+      task: act
+      vars:
+        workflows: packages/e2e/workflows/{{ .TASK }}.yml
+  move-to-historic:
+    deps: [clear-cache]
+    cmd:
+      task: act
+      vars:
+        workflows: packages/e2e/workflows/{{ .TASK }}.yml
