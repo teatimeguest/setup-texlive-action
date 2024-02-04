@@ -3,7 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "clean": "rimraf lib",
     "lint": "eslint src"
   },
   "exports": {

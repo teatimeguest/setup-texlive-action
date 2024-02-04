@@ -6,6 +6,7 @@
       "#/*": ["*", "*.js", "*/index.js"],
     },
     "allowArbitraryExtensions": true,
+    "composite": true,
   },
   "include": [
     "../src/**/*.ts",

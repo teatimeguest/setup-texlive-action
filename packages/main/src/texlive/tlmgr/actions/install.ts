@@ -2,7 +2,7 @@ import * as ctan from '#/ctan';
 import * as log from '#/log';
 import { PackageNotFound } from '#/texlive/tlmgr/errors';
 import { use } from '#/texlive/tlmgr/internals';
-import * as tlpkg from '#/texlive/tlpkg';
+import { TlpdbError } from '#/texlive/tlpkg';
 
 export async function install(packages: Iterable<string>): Promise<void> {
   try {
@@ -44,7 +44,7 @@ async function tryToInstall(packages: ReadonlySet<string>): Promise<void> {
     const result = await internals.exec(action, packages, {
       ignoreReturnCode: true,
     });
-    tlpkg.PackageChecksumMismatch.check(result);
+    TlpdbError.checkPackageChecksumMismatch(result);
     // Missing packages is not an error in versions prior to 2015,
     // so a non-zero status code indicates a more severe error has occurred.
     if (internals.version < '2015') {

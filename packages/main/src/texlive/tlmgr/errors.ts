@@ -6,12 +6,14 @@ import { Version } from '#/texlive/version';
 import { Exception, type ExecOutput, type Strict } from '#/util';
 
 export interface TlmgrErrorOptions extends TLErrorOptions {
+  code?: TlmgrError.Code;
   action: TlmgrAction;
   subaction?: string | undefined;
 }
 
 @Exception
 export class TlmgrError extends TLError implements TlmgrErrorOptions {
+  declare readonly code?: TlmgrError.Code;
   readonly action: TlmgrAction;
   declare readonly subaction?: string;
 
@@ -20,6 +22,66 @@ export class TlmgrError extends TLError implements TlmgrErrorOptions {
     this.action = options.action;
     if (options.subaction !== undefined) {
       this.subaction = options.subaction;
+    }
+  }
+}
+
+export namespace TlmgrError {
+  const CODES = [
+    'TL_VERSION_OUTDATED',
+    'TL_VERSION_NOT_SUPPORTED',
+  ] as const;
+
+  export type Code = typeof CODES[number];
+
+  export const Code = Object.fromEntries(
+    CODES.map((code) => [code, code]),
+  ) as {
+    readonly [C in Code]: C;
+  };
+}
+
+export namespace TlmgrError {
+  const RE = /is older than remote repository(?: \((?<remote>\d{4})\))?/v;
+
+  export function checkOutdated(
+    output: Readonly<ExecOutput>,
+    options: Readonly<TlmgrErrorOptions>,
+  ): void {
+    if (output.exitCode !== 0) {
+      const remoteVersion = RE.exec(output.stderr)?.groups?.['remote'];
+      if (remoteVersion !== undefined) {
+        throw new TlmgrError('The version of TeX Live is outdated', {
+          ...options,
+          code: TlmgrError.Code.TL_VERSION_OUTDATED,
+          remoteVersion,
+        });
+      }
+    }
+  }
+}
+
+export namespace TlmgrError {
+  const RE = /The TeX Live versions supported by the repository(?<rest>.*)/v;
+
+  export function checkNotSupported(
+    output: Readonly<ExecOutput>,
+    options: Readonly<TlmgrErrorOptions>,
+  ): void {
+    if (output.exitCode !== 0) {
+      const rest = RE.exec(output.stderr)?.groups?.['rest']?.trim();
+      if (rest !== undefined) {
+        const [repository, remote] = rest.split(/\r?\n/v);
+        throw new TlmgrError(
+          'The version of TeX Live is not supported by the repository',
+          {
+            ...options,
+            code: TlmgrError.Code.TL_VERSION_NOT_SUPPORTED,
+            repository: repository?.trim(),
+            remoteVersion: remote?.trim().replaceAll(/^\(|\)$/gv, ''),
+          },
+        );
+      }
     }
   }
 }
@@ -63,28 +125,6 @@ export class PackageNotFound extends TlmgrError {
       );
       if (packages.length > 0) {
         throw new this(packages, options);
-      }
-    }
-  }
-}
-
-@Exception
-export class TLVersionOutdated extends TlmgrError {
-  private constructor(options: Readonly<TlmgrErrorOptions>) {
-    super('The TeX Live version is outdated', options);
-  }
-
-  private static readonly RE =
-    /is older than remote repository(?: \((?<remote>\d{4})\))?/v;
-
-  static check(
-    output: Readonly<ExecOutput>,
-    options: Readonly<TlmgrErrorOptions>,
-  ): void {
-    if (output.exitCode !== 0) {
-      const remoteVersion = this.RE.exec(output.stderr)?.groups?.['remote'];
-      if (remoteVersion !== undefined) {
-        throw new this({ ...options, remoteVersion });
       }
     }
   }

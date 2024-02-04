@@ -2,6 +2,7 @@ import type { Version } from '#/texlive/version';
 import { Exception } from '#/util/decorators';
 
 export interface TLErrorOptions extends ErrorOptions {
+  code?: string;
   version?: Version | undefined;
   repository?: Readonly<URL> | string | undefined;
   remoteVersion?: string | undefined;
@@ -9,12 +10,16 @@ export interface TLErrorOptions extends ErrorOptions {
 
 @Exception
 export abstract class TLError extends Error implements TLErrorOptions {
+  declare code?: string;
   declare version?: Version;
   declare repository?: string;
   declare remoteVersion?: string;
 
   constructor(msg: string, options?: Readonly<TLErrorOptions>) {
     super(msg, options);
+    if (options?.code !== undefined) {
+      this.code = options.code;
+    }
     if (options?.version !== undefined) {
       this.version = options.version;
     }

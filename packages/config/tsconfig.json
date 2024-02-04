@@ -25,6 +25,5 @@
     "verbatimModuleSyntax": true,
     "lib": ["es2023"],
     "target": "esnext",
-    "composite": true,
   },
 }

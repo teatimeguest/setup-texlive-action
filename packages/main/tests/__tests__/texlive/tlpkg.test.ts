@@ -13,9 +13,11 @@ vi.unmock('#/texlive/tlpkg/patch');
 describe('check', () => {
   it('detects forcible removal of packages', async () => {
     const output = { exitCode: 0, stderr, stdout: '' };
-    const result = (async () => tlpkg.PackageChecksumMismatch.check(output))();
+    const result = (async () => {
+      tlpkg.TlpdbError.checkPackageChecksumMismatch(output);
+    })();
     await expect(result).rejects.toThrowErrorMatchingInlineSnapshot(
-      `[PackageChecksumMismatch: Checksums of some packages did not match]`,
+      `[TlpdbError: Checksums of some packages did not match]`,
     );
     await expect(result).rejects.toMatchObject({
       packages: ['babel'],

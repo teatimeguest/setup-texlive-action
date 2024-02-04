@@ -1,7 +1,8 @@
 import { P, match } from 'ts-pattern';
 
-import { TLVersionOutdated } from '#/texlive/tlmgr/errors';
+import { TlmgrError } from '#/texlive/tlmgr/errors';
 import { use } from '#/texlive/tlmgr/internals';
+import { TlpdbError } from '#/texlive/tlpkg';
 import { ExecError, isIterable } from '#/util';
 
 export interface UpdateOptions {
@@ -53,11 +54,11 @@ export async function update(
     await internals.exec(action, [...args]);
   } catch (cause) {
     if (cause instanceof ExecError) {
-      TLVersionOutdated.check(cause, {
-        action,
-        cause,
-        version: internals.version,
-      });
+      const opts = { action, cause, version: internals.version } as const;
+      TlpdbError.checkRepositoryStatus(cause, opts);
+      TlpdbError.checkRepositoryHealth(cause, opts);
+      TlmgrError.checkOutdated(cause, opts);
+      TlmgrError.checkNotSupported(cause, opts);
     }
     throw cause;
   }

@@ -1,0 +1,28 @@
+on: workflow_dispatch
+jobs:
+  save-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup TeX Live
+        id: setup
+        uses: ./
+        with:
+          version: 2022
+      - if: fromJSON(steps.setup.outputs.cache-restored)
+        run: exit 1
+      - run: |
+          tlmgr option repository ctan
+          tlmgr repository add https://mirrors.ctan.org/systems/texlive/tlcontrib/ tlcontrib
+  restore-cache:
+    needs: save-cache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup TeX Live
+        id: setup
+        uses: ./
+        with:
+          version: 2022
+      - if: ${{ !fromJSON(steps.setup.outputs.cache-hit) }}
+        run: exit 1

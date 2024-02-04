@@ -20,7 +20,7 @@ export namespace Config {
   export async function load(): Promise<Config> {
     env.init();
 
-    const { isLatest } = await ReleaseData.setup();
+    const releases = await ReleaseData.setup();
     const { packageFile, packages, version, ...inputs } = Inputs.load();
 
     const config = {
@@ -29,16 +29,22 @@ export namespace Config {
       packages: await collectPackages({ packageFile, packages }),
     };
 
-    if (!isLatest(config.version)) {
+    if (!releases.isLatest(config.version)) {
       if (config.tlcontrib) {
         log.warn(`TLContrib cannot be used with an older version of TeX Live`);
         config.tlcontrib = false;
       }
-      if (config.updateAllPackages) {
+      if (
+        !(
+          releases.isOnePrevious(config.version)
+          && releases.newVersionReleased()
+        ) && config.updateAllPackages
+      ) {
         log.info('`update-all-packages` is ignored for older versions');
         config.updateAllPackages = false;
       }
     }
+
     return config;
   }
 }

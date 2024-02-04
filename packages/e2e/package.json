@@ -1,0 +1,10 @@
+{
+  "name": "@setup-texlive-action/e2e",
+  "private": true,
+  "scripts": {
+    "test": "task"
+  },
+  "devDependencies": {
+    "@go-task/cli": "^3.34.1"
+  }
+}

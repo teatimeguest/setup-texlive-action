@@ -8,69 +8,83 @@ import { TLError, type TLErrorOptions } from '#/texlive/errors';
 import { Exception, type ExecOutput, type Strict } from '#/util';
 
 @Exception
-export class InstallTLError extends TLError {}
+export class InstallTLError extends TLError {
+  declare readonly code?: InstallTLError.Code;
+}
 
-@Exception
-export class RepositoryVersionIncompatible extends InstallTLError {
-  private constructor(options?: Readonly<TLErrorOptions>) {
-    super(
-      'The repository is not compatible with this version of install-tl',
-      options,
-    );
-    this[symbols.note] = deline`
-      The CTAN mirrors may not have completed synchronisation
-      against a release of new version of TeX Live.
-      Please try re-running the workflow after a while.
-    `;
-  }
+export namespace InstallTLError {
+  const CODES = [
+    'INCOMPATIBLE_REPOSITORY_VERSION',
+    'UNEXPECTED_VERSION',
+    'FAILED_TO_DOWNLOAD',
+  ] as const;
 
-  private static readonly MSG = 'repository being accessed are not compatible';
+  export type Code = typeof CODES[number];
+
+  export const Code = Object.fromEntries(
+    CODES.map((code) => [code, code]),
+  ) as {
+    readonly [K in Code]: K;
+  };
+}
+
+export namespace InstallTLError {
+  const MSG = 'repository being accessed are not compatible';
   // eslint-disable-next-line regexp/no-super-linear-move
-  private static readonly RE = /^\s*repository:\s*(?<remote>20\d{2})/mv;
+  const RE = /^\s*repository:\s*(?<remote>20\d{2})/mv;
 
-  static check(
+  export function checkCompatibility(
     output: Readonly<ExecOutput>,
     options?: Readonly<TLErrorOptions>,
   ): void {
-    if (output.exitCode !== 0 && output.stderr.includes(this.MSG)) {
-      throw new this({
-        ...options,
-        remoteVersion: this.RE.exec(output.stderr)?.groups?.['remote'],
-      });
+    if (output.exitCode !== 0 && output.stderr.includes(MSG)) {
+      const remoteVersion = RE.exec(output.stderr)?.groups?.['remote'];
+      const error = new InstallTLError(
+        'The repository is not compatible with this version of install-tl',
+        {
+          ...options,
+          code: InstallTLError.Code.INCOMPATIBLE_REPOSITORY_VERSION,
+          remoteVersion,
+        },
+      );
+      error[symbols.note] = deline`
+        The CTAN mirrors may not have completed synchronisation
+        against a release of new version of TeX Live.
+        Please try re-running the workflow after a while.
+      `;
+      throw error;
     }
   }
 }
 
-@Exception
-export class UnexpectedVersion extends InstallTLError {
-  private constructor(options?: Readonly<TLErrorOptions>) {
-    super(
-      `Unexpected install-tl version: ${options?.remoteVersion ?? 'unknown'}`,
-      options,
-    );
-  }
+export namespace InstallTLError {
+  const RELEASE_TEXT_FILE = 'release-texlive.txt';
+  const RE = /^TeX Live .+ version (20\d{2})/v;
 
-  private static readonly RELEASE_TEXT_FILE = 'release-texlive.txt';
-  private static readonly RE = /^TeX Live .+ version (20\d{2})/v;
-
-  static async check(
-    TEXMFROOT: string,
+  export async function checkVersion(
+    texmfroot: string,
     options: Readonly<Strict<TLErrorOptions, 'version'>>,
   ): Promise<void> {
-    const opts = { ...options };
+    const opts = {
+      ...options,
+      code: InstallTLError.Code.UNEXPECTED_VERSION,
+    };
     try {
       const releaseTextPath = path.format({
-        dir: TEXMFROOT,
-        name: this.RELEASE_TEXT_FILE,
+        dir: texmfroot,
+        name: RELEASE_TEXT_FILE,
       });
       const text = await readFile(releaseTextPath, 'utf8');
       if (text.includes(`version ${options.version}`)) {
         return;
       }
-      opts.remoteVersion = this.RE.exec(text)?.[1];
+      opts.remoteVersion = RE.exec(text)?.[1];
     } catch (cause) {
       opts.cause = cause;
     }
-    throw new this(opts);
+    throw new InstallTLError(
+      `Unexpected install-tl version: ${opts.remoteVersion ?? 'unknown'}`,
+      opts,
+    );
   }
 }
