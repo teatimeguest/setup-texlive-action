@@ -33,13 +33,13 @@ export async function updateTlmgr(version: Version): Promise<void> {
         )
       )
     ) {
-      log.info('%s', error);
-      log.debug({ error });
+      log.info({ error });
       try {
         log.info('Removing `%s`', tlcontrib);
         await tlmgr.repository.remove(tlcontrib);
         await tlmgr.update({ self: true });
       } catch (error) { // eslint-disable-line @typescript-eslint/no-shadow
+        log.info(`${error}`);
         log.debug({ error });
       }
     }
@@ -51,8 +51,7 @@ export async function updateTlmgr(version: Version): Promise<void> {
       error instanceof TlpdbError
       && error.code === TlpdbError.Code.FAILED_TO_INITIALIZE
     ) {
-      log.info('%s', error);
-      log.debug({ error });
+      log.info({ error });
       await setupHistoric(version, { master: true });
     } else {
       throw error;

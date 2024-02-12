@@ -32,8 +32,7 @@ export async function install(profile: Profile): Promise<void> {
           || error instanceof InstallTLError)
         && recoverable.includes(error.code!)
       ) {
-        log.info('%s', error);
-        log.debug({ error });
+        log.info({ error });
       } else {
         throw error;
       }
