@@ -1,5 +1,5 @@
 # Based on: https://github.com/actions/setup-node/blob/v4.0.0/.github/workflows/proxy.yml
-name: Proxy
+name: E2E Proxy
 on:
   push:
     branches: [main]
@@ -20,7 +20,7 @@ jobs:
           || 'ubuntu:latest'
         }}
       options: --dns 127.0.0.1
-    services:
+    services: # Requires `act >= 0.2.53` for local run.
       squid-proxy:
         image: ubuntu/squid:latest
         ports:

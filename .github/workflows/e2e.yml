@@ -1,4 +1,4 @@
-name: Test
+name: E2E
 on:
   push:
     branches: [main]
@@ -10,25 +10,6 @@ on:
 permissions:
   contents: read
 jobs:
-  non-latest-runners:
-    if: github.actor != 'nektos/act'
-    strategy:
-      matrix:
-        runner:
-          - ubuntu-20.04
-          - windows-2019
-          - macos-14
-          - macos-13
-          - macos-11
-      fail-fast: false
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup TeX Live
-        uses: ./
-        with:
-          cache: false
-      - run: tlmgr version
   save-cache:
     strategy:
       matrix:
@@ -87,15 +68,19 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+      - name: Install
+        run: >-
+          npm ci
+          --omit=dev
+          --engine-strict=false
+          --ignore-scripts
+          -w packages/e2e
       - uses: actions/github-script@v7
         with:
           script: |
-            await require('./.github/delete-caches.cjs')({
-              context,
-              core,
-              github,
-            });
-  install-packages:
+            const args = { context, core, github };
+            await require('@setup-texlive-action/e2e/delete-caches')(args);
+  compile:
     strategy:
       matrix:
         os: [ubuntu, windows, macos]
@@ -111,4 +96,13 @@ jobs:
             **/tl_packages
             **/DEPENDS.txt
           packages: latex-bin
-      - run: latex -version
+      - name: Compile
+        shell: bash -e {0}
+        run: |
+          pdflatex -halt-on-error << 'EOF'
+          \documentclass{article}
+          \usepackage[language=english]{lipsum}
+          \begin{document}
+          \lipsum
+          \end{document}
+          EOF

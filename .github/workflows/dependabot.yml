@@ -1,7 +1,7 @@
 name: Dependabot
 on:
   workflow_run:
-    workflows: [Pull request]
+    workflows: ['Pull request']
     types: [completed]
 permissions:
   contents: write

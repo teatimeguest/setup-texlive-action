@@ -2,46 +2,39 @@ version: '3'
 tasks:
   act:
     internal: true
-    dir: '{{ .npm_config_local_prefix }}'
-    cmd: >-
-      act
-      --container-architecture linux/{{ ARCH }}
-      --workflows {{ .workflows }}
-      {{ .CLI_ARGS }}
     requires:
       vars: [workflows]
+    <<: &act
+      desc: '{{ .workflows }}'
+      dir: '{{ .npm_config_local_prefix }}'
+      cmd: >-
+        act
+        --container-architecture linux/{{ ARCH }}
+        --workflows {{ .workflows }}
+        {{ .CLI_ARGS }}
   clear-cache:
     cmd: rm -rf "${npm_config_local_prefix}/node_modules/.act"
   default:
     - task: act
       vars:
-        workflows: .github/workflows/test.yml
         CLI_ARGS: >-
           --job save-cache
           --no-cache-server
-  historic:
-    - task: act
-      vars:
-        workflows: .github/workflows/{{ .TASK }}.yml
-  proxy:
-    - task: act
-      vars:
-        workflows: .github/workflows/{{ .TASK }}.yml
+        workflows: .github/workflows/e2e.yml
+  historic: &run-global-workflow
+    <<: *act
+    vars:
+      workflows: .github/workflows/e2e-{{ .TASK }}.yml
+  proxy: *run-global-workflow
   test:
+    <<: *act
     deps: [clear-cache]
-    cmd:
-      task: act
-      vars:
-        workflows: .github/workflows/{{ .TASK }}.yml
-  fallback-to-historic-master:
+    vars:
+      workflows: .github/workflows/e2e.yml
+  fallback-to-historic-master: &run-local-workflow
+    <<: *act
     deps: [clear-cache]
-    cmd:
-      task: act
-      vars:
-        workflows: packages/e2e/workflows/{{ .TASK }}.yml
-  move-to-historic:
-    deps: [clear-cache]
-    cmd:
-      task: act
-      vars:
-        workflows: packages/e2e/workflows/{{ .TASK }}.yml
+    vars:
+      basedir: '{{ .TASKFILE_DIR | relPath .npm_config_local_prefix }}'
+      workflows: '{{ .basedir }}/workflows/{{ .TASK }}.yml'
+  move-to-historic: *run-local-workflow

@@ -1,4 +1,4 @@
-name: Historic
+name: E2E Historic
 on: workflow_dispatch
 permissions:
   contents: read

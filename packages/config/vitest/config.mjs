@@ -8,6 +8,8 @@ import esbuildConfig, {
   transformConfig,
 } from '@setup-texlive-action/config/esbuild';
 
+const $ = (relative) => path.join(env.npm_config_local_prefix, relative);
+
 /** @type {import('vitest/config').UserConfig} */
 export default {
   plugins: [
@@ -24,6 +26,9 @@ export default {
       includeStack: true,
       truncateThreshold: 1000,
     },
+    cache: {
+      dir: $('node_modules/.vitest'),
+    },
     sequence: {
       hooks: 'stack',
       setupFiles: 'list',
@@ -33,7 +38,6 @@ export default {
     },
     coverage: {
       provider: 'v8',
-      enabled: true,
       reporter: ['text', 'json'],
       reportOnFailure: true,
     },
@@ -41,10 +45,7 @@ export default {
   },
   resolve: {
     alias: {
-      '@setup-texlive-action/polyfill': path.join(
-        env.npm_config_local_prefix,
-        'packages/polyfill/src',
-      ),
+      '@setup-texlive-action/polyfill': $('packages/polyfill/src'),
     },
     mainFields: esbuildConfig.mainFields,
   },

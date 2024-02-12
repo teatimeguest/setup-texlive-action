@@ -7,7 +7,7 @@
     "build": "node scripts/build.mjs",
     "check": "tsc -p packages/tsconfig.json --noEmit",
     "dprint": "dprint -c packages/config/dprint/config.jsonc",
-    "e2e": "npm -w packages/e2e test",
+    "e2e": "npm -w packages/e2e test --",
     "fmt": "npm run dprint fmt",
     "fmt-check": "run-p --aggregate-output -c 'dprint check' fmt-check:ec",
     "fmt-check:ec": "git ls-files -z | xargs -0 ec",
