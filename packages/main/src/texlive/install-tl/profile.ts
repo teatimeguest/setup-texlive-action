@@ -1,15 +1,27 @@
 import { writeFile } from 'node:fs/promises';
-import { platform } from 'node:os';
+import { arch, platform } from 'node:os';
 import * as path from 'node:path';
 
 import { Exclude, Expose, Type, instanceToPlain } from 'class-transformer';
 import { Mixin } from 'ts-mixer';
 
-import { SystemTrees, UserTrees } from '#/texlive/install-tl/texmf';
+import {
+  SystemTrees,
+  type TexmfOptions,
+  UserTrees,
+} from '#/texlive/install-tl/texmf';
+import type { Version } from '#/texlive/version';
 import { Case, type Tmpdir, mkdtemp } from '#/util';
 
 @Exclude()
 export class Profile extends Mixin(SystemTrees, UserTrees) {
+  constructor(version: Version, options: TexmfOptions) {
+    super(version, options);
+    if (version < '2020' && platform() === 'darwin' && arch() === 'arm64') {
+      this.binary = 'universal-darwin';
+    }
+  }
+
   @Case('snake')
   get selectedScheme(): string {
     // `scheme-infraonly` was first introduced in TeX Live 2016.
@@ -19,6 +31,8 @@ export class Profile extends Mixin(SystemTrees, UserTrees) {
   readonly instopt = new InstOpt();
   @Expose()
   readonly tlpdbopt = new TlpdbOpt();
+  @Expose({ until: 2017, groups: ['darwin'] })
+  declare readonly binary?: string;
 
   #tmpdir: Tmpdir | undefined;
   #path: string | undefined;
@@ -50,13 +64,12 @@ export class Profile extends Mixin(SystemTrees, UserTrees) {
   }
 
   toJSON(): object {
-    const { instopt, tlpdbopt, ...plain } = instanceToPlain(this, {
+    const { instopt, tlpdbopt, binary, ...plain } = instanceToPlain(this, {
       version: Number.parseInt(this.version),
       groups: [platform()],
-    }) as {
+    }) as Record<string, unknown> & {
       readonly instopt: object;
       readonly tlpdbopt: object;
-      [key: string]: object;
     };
     const options = this.version < '2017'
       ? { option: { ...instopt, ...tlpdbopt } }
@@ -65,6 +78,9 @@ export class Profile extends Mixin(SystemTrees, UserTrees) {
       for (const [key, value] of Object.entries(values ?? {})) {
         plain[`${prefix}_${key}`] = value;
       }
+    }
+    if (binary !== undefined) {
+      plain[`binary_${binary}`] = '1';
     }
     return plain;
   }

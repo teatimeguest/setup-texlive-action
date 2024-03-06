@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, test, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, test, vi } from 'vitest';
 
 import * as os from 'node:os';
 
@@ -10,6 +10,10 @@ import type { Version } from '#/texlive/version';
 vi.unmock('#/texlive/install-tl/profile');
 
 const opts = { prefix: '<prefix>' };
+
+beforeEach(() => {
+  vi.mocked(os.arch).mockReturnValue('x64');
+});
 
 describe('selected_scheme', () => {
   it('uses scheme-infraonly by default', () => {
@@ -39,6 +43,25 @@ describe('instopt_adjustrepo', () => {
       expect(profile.instopt.adjustrepo).toBe(false);
     },
   );
+});
+
+describe('binary', () => {
+  it.each(
+    ['linux', 'win32', 'darwin'] as const,
+  )('is unspecified by default', (platform) => {
+    vi.mocked(os.platform).withImplementation(() => platform, () => {
+      const profile = new Profile(LATEST_VERSION, opts);
+      expect(profile).not.toHaveProperty('binary');
+    });
+  });
+
+  it('uses universal-darwin on apple silicon', () => {
+    vi.mocked(os.arch).mockReturnValue('arm64');
+    vi.mocked(os.platform).withImplementation(() => 'darwin', () => {
+      const profile = new Profile('2019', opts);
+      expect(profile).toHaveProperty('binary', 'universal-darwin');
+    });
+  });
 });
 
 describe.each([
