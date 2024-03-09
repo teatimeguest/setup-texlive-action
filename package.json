@@ -11,7 +11,6 @@
     "fmt": "npm run dprint fmt",
     "fmt-check": "run-p --aggregate-output -c 'dprint check' fmt-check:ec",
     "fmt-check:ec": "git ls-files -z | xargs -0 ec",
-    "postinstall": "patch-package",
     "licenses": "webpack -c packages/config/webpack/config.mjs",
     "link-check": "markdown-link-check README.md",
     "lint": "npm run -ws --if-present lint",
