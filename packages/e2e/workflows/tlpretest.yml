@@ -1,0 +1,12 @@
+on: workflow_dispatch
+jobs:
+  tlpretest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup TeX Live
+        uses: ./
+        with:
+          repository: https://ftp.math.utah.edu/pub/tlpretest/
+          version: 2024
+      - run: tlmgr version

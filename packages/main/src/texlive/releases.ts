@@ -14,14 +14,14 @@ type ZonedDateTime = Temporal.ZonedDateTime;
 
 export interface Release {
   readonly version: Version;
-  readonly releaseDate: ZonedDateTime | undefined;
+  readonly releaseDate?: ZonedDateTime | undefined;
 }
 
 export interface ReleaseData {
   readonly newVersionReleased: () => boolean;
+  readonly previous: Release;
   readonly latest: Release;
-  readonly isLatest: (version: Version) => boolean;
-  readonly isOnePrevious: (version: Version) => boolean;
+  readonly next: Release;
 }
 
 export namespace ReleaseData {
@@ -36,14 +36,13 @@ export namespace ReleaseData {
     function newVersionReleased(): boolean {
       return data.latest.version === latest.version;
     }
-    function isLatest(version: Version): boolean {
-      return version === latest.version;
-    }
-    function isOnePrevious(version: Version): boolean {
-      return Number.parseInt(version, 10) + 1
-        === Number.parseInt(latest.version, 10);
-    }
-    const releases = { newVersionReleased, latest, isLatest, isOnePrevious };
+    const latestVersionNumber = Number.parseInt(latest.version, 10);
+    const releases = {
+      newVersionReleased,
+      previous: { version: `${latestVersionNumber - 1}` as Version },
+      latest,
+      next: { version: `${latestVersionNumber + 1}` as Version },
+    };
     ctx.set(releases);
     return releases;
   }

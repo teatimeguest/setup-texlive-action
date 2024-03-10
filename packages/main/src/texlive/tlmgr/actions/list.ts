@@ -1,21 +1,17 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
+import { P, match } from 'ts-pattern';
+
 import * as log from '#/log';
 import { use } from '#/texlive/tlmgr/internals';
-import { type Tlpobj, tlpdb } from '#/texlive/tlpkg';
-
-const RE = {
-  nonPackage: /(?:^(?:collection|scheme)-|\.)/v,
-  version: /^catalogue-version\s+(\S.*)$/mv,
-  revision: /^revision\s+(\d+)\s*$/mv,
-} as const;
+import { type TLPObj, tlpdb } from '#/texlive/tlpkg';
 
 /**
  * Lists packages by reading `texlive.tlpdb` directly
  * instead of running `tlmgr list`.
  */
-export async function* list(): AsyncGenerator<Tlpobj, void, void> {
+export async function* list(): AsyncGenerator<TLPObj, void, void> {
   const tlpdbPath = path.join(use().TEXDIR, 'tlpkg', 'texlive.tlpdb');
   let db: string;
   try {
@@ -25,11 +21,16 @@ export async function* list(): AsyncGenerator<Tlpobj, void, void> {
     return;
   }
   try {
-    for (const [name, data] of tlpdb.parse(db)) {
-      if (name === 'texlive.infra' || !RE.nonPackage.test(name)) {
-        const version = RE.version.exec(data)?.[1]?.trimEnd();
-        const revision = RE.revision.exec(data)?.[1] ?? '';
-        yield { name, version, revision };
+    for (const [tag, data] of tlpdb.parse(db)) {
+      if (
+        tag === 'TLPOBJ' && match(data.name)
+          .with('texlive.infra', () => true)
+          .with(P.string.includes('.'), () => false) // platform-specific subpackage
+          .with(P.string.startsWith('scheme-'), () => false)
+          .with(P.string.startsWith('collection-'), () => false)
+          .otherwise(() => true)
+      ) {
+        yield data;
       }
     }
   } catch (error) {

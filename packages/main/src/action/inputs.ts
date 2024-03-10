@@ -27,6 +27,9 @@ export class Inputs {
   readonly prefix!: string;
 
   @Input
+  readonly repository: string | undefined;
+
+  @Input
   @AsPath
   readonly texdir: string | undefined;
 

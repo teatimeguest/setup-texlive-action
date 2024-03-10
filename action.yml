@@ -5,7 +5,7 @@ inputs:
   cache:
     description: >-
       Enable caching for `TEXDIR`.
-    default: true
+    default: 'true'
     required: false
   package-file:
     description: >-
@@ -28,6 +28,11 @@ inputs:
       This has the same effect as `TEXLIVE_INSTALL_PREFIX`.
       Defaults to `$RUNNER_TEMP/setup-texlive-action`.
     required: false
+  repository:
+    description: >-
+      Specify the package repository to be used as the main repository.
+      Currently only http/https repositories are supported.
+    required: false
   texdir:
     description: >-
       TeX Live system installation directory.
@@ -39,13 +44,13 @@ inputs:
     description: >-
       Set up TLContrib as an additional TeX package repository.
       This input will be ignored for older versions.
-    default: false
+    default: 'false'
     required: false
   update-all-packages:
     description: >-
       Update all TeX packages when cache restored.
       The default is `false` and the action will update only `tlmgr`.
-    default: false
+    default: 'false'
     required: false
   version:
     description: >-

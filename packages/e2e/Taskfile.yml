@@ -9,7 +9,7 @@ tasks:
       dir: '{{ .npm_config_local_prefix }}'
       cmd: >-
         act
-        --container-architecture linux/{{ ARCH }}
+        --container-architecture linux/{{ default ARCH .architecture }}
         --workflows {{ .workflows }}
         {{ .CLI_ARGS }}
   clear-cache:
@@ -24,6 +24,7 @@ tasks:
   historic: &run-global-workflow
     <<: *act
     vars:
+      architecture: amd64
       workflows: .github/workflows/e2e-{{ .TASK }}.yml
   proxy: *run-global-workflow
   test:
@@ -38,3 +39,4 @@ tasks:
       basedir: '{{ .TASKFILE_DIR | relPath .npm_config_local_prefix }}'
       workflows: '{{ .basedir }}/workflows/{{ .TASK }}.yml'
   move-to-historic: *run-local-workflow
+  tlpretest: *run-local-workflow

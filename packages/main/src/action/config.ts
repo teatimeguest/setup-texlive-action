@@ -1,8 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { platform } from 'node:os';
+import * as posixPath from 'node:path/posix';
 
 import { create as createGlobber } from '@actions/glob';
-import type { DeepUndefinable } from 'ts-essentials';
+import type { DeepUndefinable, Writable } from 'ts-essentials';
 
 import * as env from '#/action/env';
 import { Inputs } from '#/action/inputs';
@@ -10,9 +11,10 @@ import * as log from '#/log';
 import { ReleaseData, Version, dependsTxt } from '#/texlive';
 
 export interface Config
-  extends Omit<Inputs, 'packageFile' | 'packages' | 'version'>
+  extends Omit<Inputs, 'packageFile' | 'packages' | 'repository' | 'version'>
 {
   readonly packages: ReadonlySet<string>;
+  readonly repository?: Readonly<URL>;
   readonly version: Version;
 }
 
@@ -21,22 +23,50 @@ export namespace Config {
     env.init();
 
     const releases = await ReleaseData.setup();
-    const { packageFile, packages, version, ...inputs } = Inputs.load();
+    const {
+      packageFile,
+      packages,
+      repository,
+      version,
+      ...inputs
+    } = Inputs.load();
 
-    const config = {
+    const config: Writable<Config> = {
       ...inputs,
       version: await resolveVersion({ version }),
       packages: await collectPackages({ packageFile, packages }),
     };
 
-    if (!releases.isLatest(config.version)) {
+    if (repository !== undefined) {
+      if (version < '2012') {
+        const error = new RangeError(
+          'Currently `repository` input is only supported with version 2012 or later',
+        );
+        error['version'] = version;
+        throw error;
+      }
+      const url = new URL(repository);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        const error = new TypeError(
+          'Currently only http/https repositories are supported',
+        );
+        error['repository'] = repository;
+        throw error;
+      }
+      if (!url.pathname.endsWith('/')) {
+        url.pathname = posixPath.join(url.pathname, '/');
+      }
+      config.repository = url;
+    }
+
+    if (config.version < releases.latest.version) {
       if (config.tlcontrib) {
-        log.warn(`TLContrib cannot be used with an older version of TeX Live`);
+        log.warn('TLContrib cannot be used with an older version of TeX Live');
         config.tlcontrib = false;
       }
       if (
         !(
-          releases.isOnePrevious(config.version)
+          config.version < releases.previous.version
           && releases.newVersionReleased()
         ) && config.updateAllPackages
       ) {
@@ -77,7 +107,7 @@ async function collectPackages(
 async function resolveVersion(
   inputs: Pick<Inputs, 'version'>,
 ): Promise<Version> {
-  const { latest } = ReleaseData.use();
+  const { latest, next } = ReleaseData.use();
   const version = inputs.version === 'latest'
     ? latest.version
     : Version.parse(inputs.version);
@@ -89,7 +119,7 @@ async function resolveVersion(
       'Versions prior to 2013 does not work on 64-bit macOS',
     );
   }
-  if (version > latest.version) {
+  if (version > next.version) {
     throw new RangeError(`${version} is not a valid version`);
   }
   return version;

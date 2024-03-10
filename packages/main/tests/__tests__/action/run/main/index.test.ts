@@ -3,18 +3,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { env } from 'node:process';
 
 import { setOutput } from '@actions/core';
-import type { DeepWritable } from 'ts-essentials';
+import type { Writable } from 'ts-essentials';
 
 import { CacheService } from '#/action/cache';
 import { Config } from '#/action/config';
 import { main } from '#/action/run/main';
-import { ReleaseData, installTL } from '#/texlive';
+import { install } from '#/action/run/main/install';
+import { adjustTexmf, updateTlmgr } from '#/action/run/main/update';
 import * as tlmgr from '#/texlive/tlmgr/actions';
 
 vi.unmock('#/action/run/main');
 
-const config = {} as DeepWritable<Config>;
+const config = {} as Writable<Config>;
 vi.mocked(Config.load).mockResolvedValue(config);
+
+vi.mock('#/action/run/main/install');
+vi.mock('#/action/run/main/update');
 
 beforeEach(() => {
   config.cache = true;
@@ -69,14 +73,14 @@ const setCacheType = ([type]: typeof cacheTypes[number]) => {
 };
 
 it('installs TeX Live if cache not found', async () => {
-  await expect(main()).toResolve();
+  await expect(main()).resolves.not.toThrow();
   expect(MockCacheService.prototype.restore).toHaveBeenCalled();
-  expect(installTL).toHaveBeenCalled();
+  expect(install).toHaveBeenCalled();
 });
 
 it('does not use cache if input cache is false', async () => {
   config.cache = false;
-  await expect(main()).toResolve();
+  await expect(main()).resolves.not.toThrow();
   expect(MockCacheService.prototype.restore).not.toHaveBeenCalled();
 });
 
@@ -84,8 +88,8 @@ it.each(cacheTypes)(
   'does not install TeX Live if cache found (%s)',
   async (...kind) => {
     setCacheType(kind);
-    await expect(main()).toResolve();
-    expect(installTL).not.toHaveBeenCalled();
+    await expect(main()).resolves.not.toThrow();
+    expect(install).not.toHaveBeenCalled();
   },
 );
 
@@ -93,21 +97,21 @@ it.each([LATEST_VERSION, '2009', '2014'] as const)(
   'sets version to %o with input %o',
   async (version) => {
     config.version = version;
-    await expect(main()).toResolve();
+    await expect(main()).resolves.not.toThrow();
     expect(setOutput).toHaveBeenCalledWith('version', version);
   },
 );
 
 it('adds TeX Live to path after installation', async () => {
-  await expect(main()).toResolve();
-  expect(tlmgr.path.add).toHaveBeenCalledAfter(installTL);
+  await expect(main()).resolves.not.toThrow();
+  expect(tlmgr.path.add).toHaveBeenCalledAfter(install);
 });
 
 it.each(cacheTypes)(
   'adds TeX Live to path after cache restoration (%s)',
   async (...kind) => {
     setCacheType(kind);
-    await expect(main()).toResolve();
+    await expect(main()).resolves.not.toThrow();
     expect(tlmgr.path.add).not.toHaveBeenCalledBefore(
       MockCacheService.prototype.restore,
     );
@@ -119,18 +123,17 @@ it.each([[true], [false]])(
   'does not update any TeX packages for new installation',
   async (input) => {
     config.updateAllPackages = input;
-    await expect(main()).toResolve();
+    await expect(main()).resolves.not.toThrow();
     expect(tlmgr.update).not.toHaveBeenCalled();
   },
 );
 
 it.each(cacheTypes)(
-  'updates `tlmgr` when cache restored (%s)',
+  'updates TeX Live when cache restored (%s)',
   async (...kind) => {
     setCacheType(kind);
-    await expect(main()).toResolve();
-    expect(tlmgr.update).toHaveBeenCalledOnce();
-    expect(tlmgr.update).toHaveBeenCalledWith({ self: true });
+    await expect(main()).resolves.not.toThrow();
+    expect(updateTlmgr).toHaveBeenCalledOnce();
   },
 );
 
@@ -139,8 +142,7 @@ it.each(cacheTypes)(
   async (...kind) => {
     setCacheType(kind);
     config.updateAllPackages = true;
-    await expect(main()).toResolve();
-    expect(tlmgr.update).toHaveBeenCalledTimes(2);
+    await expect(main()).resolves.not.toThrow();
     expect(tlmgr.update).toHaveBeenCalledWith({
       all: true,
       reinstallForciblyRemoved: true,
@@ -148,33 +150,17 @@ it.each(cacheTypes)(
   },
 );
 
-it.each(cacheTypes)(
-  'updates tlmgr for the one previous version',
-  async (...kind) => {
-    setCacheType(kind);
-    config.updateAllPackages = true;
-    config.version = `${
-      Number.parseInt(LATEST_VERSION, 10) - 1
-    }` as typeof config.version;
-    vi.mocked(ReleaseData.use().newVersionReleased).mockReturnValue(true);
-    await expect(main()).resolves.not.toThrow();
-    expect(tlmgr.update).toHaveBeenCalledWith(
-      expect.objectContaining({ self: true }),
-    );
-  },
-);
-
 it('does nothing about TEXMF for new installation', async () => {
-  await expect(main()).toResolve();
-  expect(tlmgr.conf.texmf).not.toHaveBeenCalled();
+  await expect(main()).resolves.not.toThrow();
+  expect(adjustTexmf).not.toHaveBeenCalled();
 });
 
 it.each(cacheTypes)(
   'may change TEXMF after adding TeX Live to path (%s)',
   async (...kind) => {
     setCacheType(kind);
-    await expect(main()).toResolve();
-    expect(tlmgr.conf.texmf).not.toHaveBeenCalledBefore(tlmgr.path.add);
+    await expect(main()).resolves.not.toThrow();
+    expect(adjustTexmf).not.toHaveBeenCalledBefore(tlmgr.path.add);
   },
 );
 
@@ -182,41 +168,20 @@ it.each(cacheTypes)(
   'change old settings if they are not appropriate (%s)',
   async (...kind) => {
     setCacheType(kind);
-    vi.mocked(tlmgr.conf.texmf).mockResolvedValue('<old>' as unknown as void);
-    await expect(main()).toResolve();
-    expect(tlmgr.conf.texmf).toHaveBeenCalledWith(
-      'TEXMFHOME',
-      expect.anything(),
-    );
-    vi.mocked(tlmgr.conf.texmf).mockReset();
-  },
-);
-
-it.each(cacheTypes)(
-  'does not change old settings if not necessary (case %s)',
-  async (...kind) => {
-    setCacheType(kind);
-    vi.mocked(tlmgr.conf.texmf).mockResolvedValue(
-      '<prefix>/texmf-local' as unknown as void,
-    );
-    await expect(main()).toResolve();
-    expect(tlmgr.conf.texmf).not.toHaveBeenCalledWith(
-      'TEXMFHOME',
-      expect.anything(),
-    );
-    vi.mocked(tlmgr.conf.texmf).mockReset();
+    await expect(main()).resolves.not.toThrow();
+    expect(adjustTexmf).toHaveBeenCalled();
   },
 );
 
 it('does not setup tlcontrib by default', async () => {
-  await expect(main()).toResolve();
+  await expect(main()).resolves.not.toThrow();
   expect(tlmgr.repository.add).not.toHaveBeenCalled();
   expect(tlmgr.pinning.add).not.toHaveBeenCalled();
 });
 
 it('sets up tlcontrib if input tlcontrib is true', async () => {
   config.tlcontrib = true;
-  await expect(main()).toResolve();
+  await expect(main()).resolves.not.toThrow();
   expect(tlmgr.repository.add).not.toHaveBeenCalledBefore(tlmgr.path.add);
   expect(tlmgr.repository.add).toHaveBeenCalledWith(
     expect.anything(),
@@ -232,7 +197,7 @@ describe.each([[true], [false]])('%j', (force) => {
   });
 
   it('does not install any packages by default', async () => {
-    await expect(main()).toResolve();
+    await expect(main()).resolves.not.toThrow();
     expect(tlmgr.install).not.toHaveBeenCalled();
   });
 
@@ -241,7 +206,7 @@ describe.each([[true], [false]])('%j', (force) => {
     async (...kind) => {
       setCacheType(kind);
       config.packages = new Set(['foo', 'bar', 'baz']);
-      await expect(main()).toResolve();
+      await expect(main()).resolves.not.toThrow();
       expect(tlmgr.install).not.toHaveBeenCalled();
     },
   );
@@ -251,7 +216,7 @@ describe.each([[true], [false]])('%j', (force) => {
     async (...kind) => {
       setCacheType(kind);
       config.packages = new Set(['foo', 'bar', 'baz']);
-      await expect(main()).toResolve();
+      await expect(main()).resolves.not.toThrow();
       expect(tlmgr.install).toHaveBeenCalled();
     },
   );

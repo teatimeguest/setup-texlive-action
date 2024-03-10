@@ -9,7 +9,7 @@ import { Profile, ReleaseData, Tlmgr, tlnet } from '#/texlive';
 
 export async function main(): Promise<void> {
   const config = await Config.load();
-  const releases = ReleaseData.use();
+  const { latest, previous, newVersionReleased } = ReleaseData.use();
   await using profile = new Profile(config.version, config);
 
   using cache = CacheService.setup({
@@ -31,7 +31,7 @@ export async function main(): Promise<void> {
       log.info(profile.toString());
     });
     await log.group('Installing TeX Live', async () => {
-      await install(profile);
+      await install({ profile, repository: config.repository });
     });
   }
 
@@ -40,18 +40,15 @@ export async function main(): Promise<void> {
 
   if (cache.restored) {
     if (
-      releases.isLatest(profile.version)
-      || (
-        releases.isOnePrevious(profile.version)
-        && releases.newVersionReleased()
-      )
+      profile.version >= latest.version
+      || (profile.version === previous.version && newVersionReleased())
     ) {
       await log.group(
-        releases.isLatest(profile.version)
+        profile.version >= latest.version
           ? 'Updating tlmgr'
           : 'Checking the package repository status',
         async () => {
-          await updateTlmgr(profile.version);
+          await updateTlmgr(config);
         },
       );
       if (config.updateAllPackages) {
@@ -79,8 +76,8 @@ export async function main(): Promise<void> {
   await log.group('TeX Live version info', async () => {
     await tlmgr.version();
     log.info('Package version:');
-    for await (const { name, version, revision } of tlmgr.list()) {
-      log.info('  %s: %s', name, version ?? `rev${revision}`);
+    for await (const { name, revision, cataloguedata } of tlmgr.list()) {
+      log.info('  %s: %s', name, cataloguedata?.version ?? `rev${revision}`);
     }
   });
 

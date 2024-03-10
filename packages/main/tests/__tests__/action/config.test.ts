@@ -183,6 +183,14 @@ describe('version', () => {
     await expect(Config.load()).resolves.toHaveProperty('version', '2018');
   });
 
+  it('permits the next version', async () => {
+    vi.mocked(Inputs.load).mockReturnValueOnce({
+      ...defaultInputs,
+      version: `${Number.parseInt(LATEST_VERSION, 10) + 1}`,
+    });
+    await expect(Config.load()).resolves.not.toThrow();
+  });
+
   describe.each(['linux', 'win32'] as const)('on %s', (os) => {
     beforeEach(() => {
       vi.mocked(platform).mockReturnValue(os);
@@ -205,7 +213,7 @@ describe('version', () => {
         ...defaultInputs,
         version: spec,
       });
-      await expect(Config.load()).toReject();
+      await expect(Config.load()).rejects.toThrow('');
     });
   });
 

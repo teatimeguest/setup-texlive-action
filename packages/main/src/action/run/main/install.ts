@@ -1,41 +1,79 @@
+import { P, match } from 'ts-pattern';
+
 import * as log from '#/log';
 import {
+  type InstallTL,
   InstallTLError,
-  Profile,
+  type Profile,
   ReleaseData,
   TlpdbError,
-  installTL,
+  acquire,
   tlnet,
 } from '#/texlive';
 
-export async function install(profile: Profile): Promise<void> {
-  const { isLatest, isOnePrevious } = ReleaseData.use();
-  for (const master of [false, true]) {
-    const repository = isLatest(profile.version)
-      ? await tlnet.ctan({ master })
-      : tlnet.historic(profile.version, { master });
-    log.info('Main repository: %s', repository);
+export async function install(options: {
+  readonly profile: Profile;
+  readonly repository?: Readonly<URL> | undefined;
+}): Promise<void> {
+  const { latest, previous } = ReleaseData.use();
+  const { version } = options.profile;
+
+  let repository = options?.repository;
+  const fallbackToMaster = repository === undefined
+    && version > previous.version;
+
+  let installTL: InstallTL;
+
+  for (const master of fallbackToMaster ? [false, true] : [false]) {
+    if (repository === undefined || master) {
+      repository = version >= latest.version
+        ? await tlnet.ctan({ master })
+        : tlnet.historic(version, { master });
+    }
     try {
-      await installTL({ profile, repository });
-      return;
+      installTL ??= await acquire({ repository, version });
     } catch (error) {
-      const recoverable: (InstallTLError.Code | TlpdbError.Code)[] = [
-        InstallTLError.Code.FAILED_TO_DOWNLOAD,
-        InstallTLError.Code.INCOMPATIBLE_REPOSITORY_VERSION,
-        InstallTLError.Code.UNEXPECTED_VERSION,
-        TlpdbError.Code.FAILED_TO_INITIALIZE,
-      ];
       if (
         !master
-        && (isLatest(profile.version) || isOnePrevious(profile.version))
-        && (error instanceof TlpdbError
-          || error instanceof InstallTLError)
-        && recoverable.includes(error.code!)
+        && fallbackToMaster
+        && error instanceof InstallTLError
+        && match(error.code)
+          .with(InstallTLError.Code.FAILED_TO_DOWNLOAD, () => true)
+          .with(InstallTLError.Code.UNEXPECTED_VERSION, () => true)
+          .otherwise(() => false)
       ) {
         log.info({ error });
-      } else {
-        throw error;
+        continue;
       }
+      throw error;
+    }
+    log.info('Using repository: %s', repository);
+    try {
+      await installTL.run({
+        profile: options.profile,
+        repository: options.repository ?? repository,
+      });
+      return;
+    } catch (error) {
+      if (
+        !master
+        && fallbackToMaster
+        && match(error)
+          .with(
+            P.instanceOf(TlpdbError),
+            ({ code }) => code === TlpdbError.Code.FAILED_TO_INITIALIZE,
+          )
+          .with(
+            P.instanceOf(InstallTLError),
+            ({ code }) =>
+              code === InstallTLError.Code.INCOMPATIBLE_REPOSITORY_VERSION,
+          )
+          .otherwise(() => false)
+      ) {
+        log.info({ error });
+        continue;
+      }
+      throw error;
     }
   }
 }

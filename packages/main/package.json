@@ -34,6 +34,7 @@
     "@types/mock-fs": "^4.13.4",
     "mock-fs": "^5.2.0",
     "nock": "^13.5.1",
+    "texlive-json-schemas": "^0.1.0",
     "ts-dedent": "^2.2.0",
     "ts-essentials": "^9.4.1",
     "vitest": "^1.2.2"

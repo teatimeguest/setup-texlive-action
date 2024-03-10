@@ -1,7 +1,11 @@
 import { EOL, platform } from 'node:os';
 import * as path from 'node:path';
 import { env } from 'node:process';
-import type { InspectOptions, InspectOptionsStylized } from 'node:util';
+import {
+  type InspectOptions,
+  type InspectOptionsStylized,
+  inspect as utilInspect,
+} from 'node:util';
 
 import { isDebug } from '@actions/core';
 import ansi from 'ansi-styles';
@@ -18,7 +22,7 @@ Reflect.defineProperty(Error.prototype, customInspect, {
     this: Readonly<Error>,
     depth: number,
     options: Readonly<InspectOptionsStylized>,
-    inspect: Inspect,
+    inspect: Inspect = utilInspect,
   ): string {
     if (depth < 0) {
       return `[${getErrorName(this)}]`;
@@ -33,7 +37,7 @@ Reflect.defineProperty(Error.prototype, customInspect, {
 function formatError(
   error: Readonly<Error>,
   options: Readonly<InspectOptionsStylized>,
-  inspect: Inspect,
+  inspect: Inspect = utilInspect,
 ): string {
   let stylized: string = inspectNoCustom(error, options, inspect);
   // Colorize error name in red to improve legibility.
@@ -56,7 +60,7 @@ function getErrorName(error: Readonly<Error>): string {
 function inspectNoCustom(
   target: object,
   options: Readonly<InspectOptionsStylized>,
-  inspect: Inspect,
+  inspect: Inspect = utilInspect,
 ): string {
   // Temporarily overrides `customInspect` to prevent circular calls.
   const success = Reflect.defineProperty(target, customInspect, {

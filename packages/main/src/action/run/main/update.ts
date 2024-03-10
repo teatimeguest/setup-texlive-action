@@ -13,68 +13,90 @@ import {
   tlnet,
 } from '#/texlive';
 
-export async function updateTlmgr(version: Version): Promise<void> {
-  const tlmgr = Tlmgr.use();
-  const { isOnePrevious } = ReleaseData.use();
+export interface UpdateOptions {
+  readonly version: Version;
+  readonly repository?: Readonly<URL> | undefined;
+}
+
+export async function updateTlmgr(options: UpdateOptions): Promise<void> {
   try {
-    await tlmgr.update({ self: true });
-    return;
+    await updateRepositories(options);
   } catch (error) {
-    const tlcontrib = 'tlcontrib';
     if (
-      isOnePrevious(version)
-      && error instanceof TlmgrError
-      && (
-        error.code === TlmgrError.Code.TL_VERSION_OUTDATED
-        || (
-          error.code === TlmgrError.Code.TL_VERSION_NOT_SUPPORTED
-          && 'repository' in error
-          && error.repository.includes(tlcontrib)
-        )
-      )
+      error instanceof TlmgrError
+      && error.code === TlmgrError.Code.TL_VERSION_OUTDATED
+      && options.repository === undefined
     ) {
       log.info({ error });
-      try {
-        log.info('Removing `%s`', tlcontrib);
-        await tlmgr.repository.remove(tlcontrib);
-        await tlmgr.update({ self: true });
-      } catch (error) { // eslint-disable-line @typescript-eslint/no-shadow
-        log.info(`${error}`);
-        log.debug({ error });
+      await moveToHistoric(options.version);
+    } else {
+      throw error;
+    }
+  }
+}
+
+async function updateRepositories(options: UpdateOptions): Promise<void> {
+  const tlmgr = Tlmgr.use();
+  const { latest, previous } = ReleaseData.use();
+  const version = options.version;
+  let repository = options.repository;
+  if (version >= previous.version) {
+    for await (const { path, tag } of tlmgr.repository.list()) {
+      if (
+        tag === 'main'
+        && path.includes('tlpretest')
+        && repository === undefined
+        && version === latest.version
+      ) {
+        repository = await tlnet.ctan();
+      } else if (
+        (tag === 'tlcontrib' || path.includes('tlcontrib'))
+        && version < latest.version
+      ) {
+        log.info(`Removing %s`, tag ?? path);
+        await tlmgr.repository.remove(tag ?? path);
       }
     }
   }
+  if (repository !== undefined) {
+    await changeRepository('main', repository);
+  } else {
+    await tlmgr.update({ self: true });
+  }
+}
+
+async function moveToHistoric(version: Version): Promise<void> {
+  const cache = CacheService.use();
+  const tag = 'main';
   try {
-    await setupHistoric(version);
+    await changeRepository(tag, tlnet.historic(version));
   } catch (error) {
     if (
       error instanceof TlpdbError
       && error.code === TlpdbError.Code.FAILED_TO_INITIALIZE
     ) {
       log.info({ error });
-      await setupHistoric(version, { master: true });
+      await changeRepository(tag, tlnet.historic(version, { master: true }));
     } else {
       throw error;
     }
   }
-  CacheService.use().update();
+  cache.update();
 }
 
-export async function setupHistoric(
-  version: Version,
-  options?: { readonly master?: boolean },
+async function changeRepository(
+  tag: string,
+  url: Readonly<URL>,
 ): Promise<void> {
   const tlmgr = Tlmgr.use();
-  const tag = 'main';
-  const historic = tlnet.historic(version, options);
-  log.info('Changing the %s repository to %s', tag, historic.href);
-  if (historic.protocol === 'ftp:' && getProxyUrl(historic.href) !== '') {
+  log.info('Changing the repository `%s` to %s', tag, url.href);
+  if (url.protocol === 'ftp:' && getProxyUrl(url.href) !== '') {
     throw new Error(
       'The use of ftp repositories under proxy is currently not supported',
     );
   }
   await tlmgr.repository.remove(tag);
-  await tlmgr.repository.add(historic, tag);
+  await tlmgr.repository.add(url, tag);
   await tlmgr.update({ self: true });
 }
 

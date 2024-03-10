@@ -17,38 +17,41 @@ export interface InstallTLOptions {
   readonly repository: Readonly<URL>;
 }
 
-export async function installTL(options: InstallTLOptions): Promise<void> {
-  const { isLatest } = ReleaseData.use();
-  const { profile, repository } = options;
-  const version = profile.version;
+export class InstallTL {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  constructor(readonly path: string, readonly version: Version) {}
 
-  const installTLPath = await acquire(options);
-  await exec(installTLPath, ['-version'], { stdin: null });
+  async run(options: InstallTLOptions): Promise<void> {
+    const { latest } = ReleaseData.use();
+    const { profile, repository } = options;
 
-  const result = await exec(
-    installTLPath,
-    await Array.fromAsync(commandArgs(options)),
-    { stdin: null, ignoreReturnCode: true },
-  );
+    await exec(this.path, ['-version'], { stdin: null });
 
-  const errorOptions = { version, repository };
-  if (isLatest(version)) {
-    InstallTLError.checkCompatibility(result, errorOptions);
-  } else {
-    TlpdbError.checkRepositoryStatus(result, errorOptions);
-    TlpdbError.checkRepositoryHealth(result, errorOptions);
+    const result = await exec(
+      this.path,
+      await Array.fromAsync(commandArgs(options)),
+      { stdin: null, ignoreReturnCode: true },
+    );
+
+    const errorOptions = { version: this.version, repository };
+    if (this.version >= latest.version) {
+      InstallTLError.checkCompatibility(result, errorOptions);
+    } else {
+      TlpdbError.checkRepositoryStatus(result, errorOptions);
+      TlpdbError.checkRepositoryHealth(result, errorOptions);
+    }
+    TlpdbError.checkPackageChecksumMismatch(result, errorOptions);
+    try {
+      result.check();
+    } catch (cause) {
+      throw new InstallTLError('Failed to install TeX Live', {
+        ...errorOptions,
+        cause,
+      });
+    }
+
+    await patch(profile);
   }
-  TlpdbError.checkPackageChecksumMismatch(result, errorOptions);
-  try {
-    result.check();
-  } catch (cause) {
-    throw new InstallTLError('Failed to install TeX Live', {
-      ...errorOptions,
-      cause,
-    });
-  }
-
-  await patch(profile);
 }
 
 const supportVersions = {
@@ -95,19 +98,24 @@ async function* commandArgs(
   ];
 }
 
-async function acquire(options: InstallTLOptions): Promise<string> {
-  return path.format({
+export interface DownloadOptions {
+  readonly version: Version;
+  readonly repository: Readonly<URL>;
+}
+
+export async function acquire(options: DownloadOptions): Promise<InstallTL> {
+  const installerPath = path.format({
     dir: restoreCache(options) ?? await download(options),
-    base: executableName(options.profile.version),
+    base: executableName(options.version),
   });
+  return new InstallTL(installerPath, options.version);
 }
 
 /** @internal */
-export function restoreCache(options: InstallTLOptions): string | undefined {
-  const { profile: { version } } = options;
-  const executable = executableName(version);
+export function restoreCache(options: DownloadOptions): string | undefined {
+  const executable = executableName(options.version);
   try {
-    const TEXMFROOT = findTool(executable, version);
+    const TEXMFROOT = findTool(executable, options.version);
     if (TEXMFROOT !== '') {
       log.info('Found in tool cache: %s', TEXMFROOT);
       return TEXMFROOT;
@@ -119,9 +127,9 @@ export function restoreCache(options: InstallTLOptions): string | undefined {
 }
 
 /** @internal */
-export async function download(options: InstallTLOptions): Promise<string> {
-  const { isLatest } = ReleaseData.use();
-  const { profile: { version }, repository } = options;
+export async function download(options: DownloadOptions): Promise<string> {
+  const { latest } = ReleaseData.use();
+  const { version, repository } = options;
   const errorOpts = {
     repository,
     version,
@@ -156,7 +164,7 @@ export async function download(options: InstallTLOptions): Promise<string> {
     archivePath,
     platform() === 'win32' ? 'zip' : 'tgz',
   );
-  if (isLatest(version)) {
+  if (version >= latest.version) {
     try {
       await InstallTLError.checkVersion(texmfroot, { version, repository });
     } catch (error) {

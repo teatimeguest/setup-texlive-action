@@ -33,15 +33,15 @@ it('lists texlive.infra', () => {
   expect(tlpdb['2008']).toContainEqual(
     expect.objectContaining({
       name: 'texlive.infra',
-      version: undefined,
       revision: '12186',
+      cataloguedata: { version: undefined },
     }),
   );
   expect(tlpdb['2023']).toContainEqual(
     expect.objectContaining({
       name: 'texlive.infra',
-      version: undefined,
       revision: '66822',
+      cataloguedata: { version: undefined },
     }),
   );
 });
@@ -80,15 +80,15 @@ it('lists normal packages', () => {
   expect(tlpdb['2008']).toContainEqual(
     expect.objectContaining({
       name: 'pdftex',
-      version: '1.40.9',
       revision: '12898',
+      cataloguedata: { version: '1.40.9' },
     }),
   );
   expect(tlpdb['2023']).toContainEqual(
     expect.objectContaining({
       name: 'hyphen-base',
-      version: undefined,
       revision: '66413',
+      cataloguedata: { version: undefined },
     }),
   );
 });
