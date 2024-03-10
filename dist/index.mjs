@@ -33,13 +33,13 @@ var __export = (target, all) => {
   for (var name2 in all)
     __defProp(target, name2, { get: all[name2], enumerable: true });
 };
-var __copyProps = (to2, from, except, desc) => {
+var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to2, key) && key !== except)
-        __defProp(to2, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
   }
-  return to2;
+  return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
   // If the importer is in node compatibility mode or this is not an ESM
@@ -189,11 +189,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issue = exports.issueCommand = void 0;
-    var os4 = __importStar(__require("os"));
+    var os5 = __importStar(__require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os4.EOL);
+      process.stdout.write(cmd.toString() + os5.EOL);
     }
     exports.issueCommand = issueCommand;
     function issue(name2, message = "") {
@@ -624,8 +624,8 @@ var require_file_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
-    var fs3 = __importStar(__require("fs"));
-    var os4 = __importStar(__require("os"));
+    var fs4 = __importStar(__require("fs"));
+    var os5 = __importStar(__require("os"));
     var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
@@ -633,10 +633,10 @@ var require_file_command = __commonJS({
       if (!filePath) {
         throw new Error(`Unable to find environment variable for file command ${command}`);
       }
-      if (!fs3.existsSync(filePath)) {
+      if (!fs4.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os4.EOL}`, {
+      fs4.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os5.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -650,7 +650,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter2)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter2}"`);
       }
-      return `${key}<<${delimiter2}${os4.EOL}${convertedValue}${os4.EOL}${delimiter2}`;
+      return `${key}<<${delimiter2}${os5.EOL}${convertedValue}${os5.EOL}${delimiter2}`;
     }
     exports.prepareKeyValueMessage = prepareKeyValueMessage;
   }
@@ -677,7 +677,7 @@ var require_proxy = __commonJS({
       if (proxyVar) {
         try {
           return new URL(proxyVar);
-        } catch (_a2) {
+        } catch (_a3) {
           if (!proxyVar.startsWith("http://") && !proxyVar.startsWith("https://"))
             return new URL(`http://${proxyVar}`);
         }
@@ -5800,7 +5800,7 @@ Content-Type: ${value.type || "application/octet-stream"}\r
             await busboyResolve;
             return responseFormData;
           } else if (/application\/x-www-form-urlencoded/.test(contentType2)) {
-            let entries;
+            let entries2;
             try {
               let text = "";
               const streamingDecoder = new TextDecoder("utf-8", { ignoreBOM: true });
@@ -5811,12 +5811,12 @@ Content-Type: ${value.type || "application/octet-stream"}\r
                 text += streamingDecoder.decode(chunk, { stream: true });
               }
               text += streamingDecoder.decode();
-              entries = new URLSearchParams(text);
+              entries2 = new URLSearchParams(text);
             } catch (err) {
               throw Object.assign(new TypeError(), { cause: err });
             }
             const formData = new FormData2();
-            for (const [name2, value] of entries) {
+            for (const [name2, value] of entries2) {
               formData.append(name2, value);
             }
             return formData;
@@ -10623,11 +10623,11 @@ var require_mock_utils = __commonJS({
     }
     function buildHeadersFromArray(headers) {
       const clone2 = headers.slice();
-      const entries = [];
+      const entries2 = [];
       for (let index = 0; index < clone2.length; index += 2) {
-        entries.push([clone2[index], clone2[index + 1]]);
+        entries2.push([clone2[index], clone2[index + 1]]);
       }
-      return Object.fromEntries(entries);
+      return Object.fromEntries(entries2);
     }
     function matchHeaders(mockDispatch2, headers) {
       if (typeof mockDispatch2.headers === "function") {
@@ -13807,6 +13807,7 @@ var require_fetch = __commonJS({
       }
       if (!sameOrigin(requestCurrentURL(request), locationURL)) {
         request.headersList.delete("authorization");
+        request.headersList.delete("proxy-authorization", true);
         request.headersList.delete("cookie");
         request.headersList.delete("host");
       }
@@ -18128,8 +18129,8 @@ var require_lib = __commonJS({
       _performExponentialBackoff(retryNumber) {
         return __awaiter(this, void 0, void 0, function* () {
           retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
-          const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
-          return new Promise((resolve3) => setTimeout(() => resolve3(), ms));
+          const ms2 = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
+          return new Promise((resolve3) => setTimeout(() => resolve3(), ms2));
         });
       }
       _processResponse(res, options) {
@@ -18355,7 +18356,7 @@ var require_oidc_utils = __commonJS({
         return runtimeUrl;
       }
       static getCall(id_token_url) {
-        var _a2;
+        var _a3;
         return __awaiter(this, void 0, void 0, function* () {
           const httpclient = _OidcClient.createHttpClient();
           const res = yield httpclient.getJson(id_token_url).catch((error) => {
@@ -18365,7 +18366,7 @@ var require_oidc_utils = __commonJS({
  
         Error Message: ${error.message}`);
           });
-          const id_token = (_a2 = res.result) === null || _a2 === void 0 ? void 0 : _a2.value;
+          const id_token = (_a3 = res.result) === null || _a3 === void 0 ? void 0 : _a3.value;
           if (!id_token) {
             throw new Error("Response json body do not have ID Token field");
           }
@@ -18453,7 +18454,7 @@ var require_summary = __commonJS({
           }
           try {
             yield access2(pathFromEnv, fs_1.constants.R_OK | fs_1.constants.W_OK);
-          } catch (_a2) {
+          } catch (_a3) {
             throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`);
           }
           this._filePath = pathFromEnv;
@@ -18802,7 +18803,7 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os4 = __importStar(__require("os"));
+    var os5 = __importStar(__require("os"));
     var path15 = __importStar(__require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
@@ -18870,7 +18871,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       if (filePath) {
         return file_command_1.issueFileCommand("OUTPUT", file_command_1.prepareKeyValueMessage(name2, value));
       }
-      process.stdout.write(os4.EOL);
+      process.stdout.write(os5.EOL);
       command_1.issueCommand("set-output", { name: name2 }, utils_1.toCommandValue(value));
     }
     exports.setOutput = setOutput3;
@@ -18904,7 +18905,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.notice = notice2;
     function info3(message) {
-      process.stdout.write(message + os4.EOL);
+      process.stdout.write(message + os5.EOL);
     }
     exports.info = info3;
     function startGroup(name2) {
@@ -19026,15 +19027,15 @@ var require_io_util = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var _a2;
+    var _a3;
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readlink = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
-    var fs3 = __importStar(__require("fs"));
+    var fs4 = __importStar(__require("fs"));
     var path15 = __importStar(__require("path"));
-    _a2 = fs3.promises, exports.chmod = _a2.chmod, exports.copyFile = _a2.copyFile, exports.lstat = _a2.lstat, exports.mkdir = _a2.mkdir, exports.open = _a2.open, exports.readdir = _a2.readdir, exports.readlink = _a2.readlink, exports.rename = _a2.rename, exports.rm = _a2.rm, exports.rmdir = _a2.rmdir, exports.stat = _a2.stat, exports.symlink = _a2.symlink, exports.unlink = _a2.unlink;
+    _a3 = fs4.promises, exports.chmod = _a3.chmod, exports.copyFile = _a3.copyFile, exports.lstat = _a3.lstat, exports.mkdir = _a3.mkdir, exports.open = _a3.open, exports.readdir = _a3.readdir, exports.readlink = _a3.readlink, exports.rename = _a3.rename, exports.rm = _a3.rm, exports.rmdir = _a3.rmdir, exports.stat = _a3.stat, exports.symlink = _a3.symlink, exports.unlink = _a3.unlink;
     exports.IS_WINDOWS = process.platform === "win32";
     exports.UV_FS_O_EXLOCK = 268435456;
-    exports.READONLY = fs3.constants.O_RDONLY;
+    exports.READONLY = fs4.constants.O_RDONLY;
     function exists(fsPath) {
       return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -19138,8 +19139,8 @@ var require_io_util = __commonJS({
       return (stats.mode & 1) > 0 || (stats.mode & 8) > 0 && stats.gid === process.getgid() || (stats.mode & 64) > 0 && stats.uid === process.getuid();
     }
     function getCmdPath() {
-      var _a3;
-      return (_a3 = process.env["COMSPEC"]) !== null && _a3 !== void 0 ? _a3 : `cmd.exe`;
+      var _a4;
+      return (_a4 = process.env["COMSPEC"]) !== null && _a4 !== void 0 ? _a4 : `cmd.exe`;
     }
     exports.getCmdPath = getCmdPath;
   }
@@ -19459,11 +19460,11 @@ var require_toolrunner = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.argStringToArray = exports.ToolRunner = void 0;
-    var os4 = __importStar(__require("os"));
+    var os5 = __importStar(__require("os"));
     var events = __importStar(__require("events"));
     var child = __importStar(__require("child_process"));
     var path15 = __importStar(__require("path"));
-    var io2 = __importStar(require_io());
+    var io = __importStar(require_io());
     var ioUtil = __importStar(require_io_util());
     var timers_1 = __require("timers");
     var IS_WINDOWS = process.platform === "win32";
@@ -19514,12 +19515,12 @@ var require_toolrunner = __commonJS({
       _processLineBuffer(data, strBuffer, onLine) {
         try {
           let s3 = strBuffer + data.toString();
-          let n3 = s3.indexOf(os4.EOL);
+          let n3 = s3.indexOf(os5.EOL);
           while (n3 > -1) {
             const line = s3.substring(0, n3);
             onLine(line);
-            s3 = s3.substring(n3 + os4.EOL.length);
-            n3 = s3.indexOf(os4.EOL);
+            s3 = s3.substring(n3 + os5.EOL.length);
+            n3 = s3.indexOf(os5.EOL);
           }
           return s3;
         } catch (err) {
@@ -19679,7 +19680,7 @@ var require_toolrunner = __commonJS({
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
             this.toolPath = path15.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
-          this.toolPath = yield io2.which(this.toolPath, true);
+          this.toolPath = yield io.which(this.toolPath, true);
           return new Promise((resolve3, reject) => __awaiter(this, void 0, void 0, function* () {
             this._debug(`exec tool: ${this.toolPath}`);
             this._debug("arguments:");
@@ -19688,7 +19689,7 @@ var require_toolrunner = __commonJS({
             }
             const optionsNonNull = this._cloneExecOptions(this.options);
             if (!optionsNonNull.silent && optionsNonNull.outStream) {
-              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os4.EOL);
+              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os5.EOL);
             }
             const state = new ExecState(optionsNonNull, this.toolPath);
             state.on("debug", (message) => {
@@ -19964,13 +19965,13 @@ var require_exec = __commonJS({
     }
     exports.exec = exec2;
     function getExecOutput2(commandLine, args, options) {
-      var _a2, _b2;
+      var _a3, _b2;
       return __awaiter(this, void 0, void 0, function* () {
         let stdout2 = "";
         let stderr = "";
         const stdoutDecoder = new string_decoder_1.StringDecoder("utf8");
         const stderrDecoder = new string_decoder_1.StringDecoder("utf8");
-        const originalStdoutListener = (_a2 = options === null || options === void 0 ? void 0 : options.listeners) === null || _a2 === void 0 ? void 0 : _a2.stdout;
+        const originalStdoutListener = (_a3 = options === null || options === void 0 ? void 0 : options.listeners) === null || _a3 === void 0 ? void 0 : _a3.stdout;
         const originalStdErrListener = (_b2 = options === null || options === void 0 ? void 0 : options.listeners) === null || _b2 === void 0 ? void 0 : _b2.stderr;
         const stdErrListener = (data) => {
           stderr += stderrDecoder.write(data);
@@ -20347,30 +20348,30 @@ var require_balanced_match = __commonJS({
     balanced.range = range2;
     function range2(a3, b3, str) {
       var begs, beg, left, right, result;
-      var ai = str.indexOf(a3);
-      var bi = str.indexOf(b3, ai + 1);
-      var i3 = ai;
-      if (ai >= 0 && bi > 0) {
+      var ai2 = str.indexOf(a3);
+      var bi2 = str.indexOf(b3, ai2 + 1);
+      var i3 = ai2;
+      if (ai2 >= 0 && bi2 > 0) {
         if (a3 === b3) {
-          return [ai, bi];
+          return [ai2, bi2];
         }
         begs = [];
         left = str.length;
         while (i3 >= 0 && !result) {
-          if (i3 == ai) {
+          if (i3 == ai2) {
             begs.push(i3);
-            ai = str.indexOf(a3, i3 + 1);
+            ai2 = str.indexOf(a3, i3 + 1);
           } else if (begs.length == 1) {
-            result = [begs.pop(), bi];
+            result = [begs.pop(), bi2];
           } else {
             beg = begs.pop();
             if (beg < left) {
               left = beg;
-              right = bi;
+              right = bi2;
             }
-            bi = str.indexOf(b3, i3 + 1);
+            bi2 = str.indexOf(b3, i3 + 1);
           }
-          i3 = ai < bi && ai >= 0 ? ai : bi;
+          i3 = ai2 < bi2 && ai2 >= 0 ? ai2 : bi2;
         }
         if (begs.length) {
           result = [left, right];
@@ -20670,7 +20671,7 @@ var require_minimatch = __commonJS({
         return s3.split(slashSplit);
       });
       this.debug(this.pattern, set2);
-      set2 = set2.map(function(s3, si, set3) {
+      set2 = set2.map(function(s3, si2, set3) {
         return s3.map(this.parse, this);
       }, this);
       this.debug(this.pattern, set2);
@@ -20861,11 +20862,11 @@ var require_minimatch = __commonJS({
               escaping = false;
               continue;
             }
-            var cs = pattern.substring(classStart + 1, i3);
+            var cs2 = pattern.substring(classStart + 1, i3);
             try {
-              RegExp("[" + cs + "]");
+              RegExp("[" + cs2 + "]");
             } catch (er) {
-              var sp = this.parse(cs, SUBPARSE);
+              var sp = this.parse(cs2, SUBPARSE);
               re3 = re3.substr(0, reClassStart) + "\\[" + sp[0] + "\\]";
               hasMagic = hasMagic || sp[1];
               inClass = false;
@@ -20886,8 +20887,8 @@ var require_minimatch = __commonJS({
         }
       }
       if (inClass) {
-        cs = pattern.substr(classStart + 1);
-        sp = this.parse(cs, SUBPARSE);
+        cs2 = pattern.substr(classStart + 1);
+        sp = this.parse(cs2, SUBPARSE);
         re3 = re3.substr(0, reClassStart) + "\\[" + sp[0];
         hasMagic = hasMagic || sp[1];
       }
@@ -21048,21 +21049,21 @@ var require_minimatch = __commonJS({
         { "this": this, file, pattern }
       );
       this.debug("matchOne", file.length, pattern.length);
-      for (var fi = 0, pi = 0, fl = file.length, pl = pattern.length; fi < fl && pi < pl; fi++, pi++) {
+      for (var fi2 = 0, pi2 = 0, fl = file.length, pl = pattern.length; fi2 < fl && pi2 < pl; fi2++, pi2++) {
         this.debug("matchOne loop");
-        var p3 = pattern[pi];
-        var f3 = file[fi];
+        var p3 = pattern[pi2];
+        var f3 = file[fi2];
         this.debug(pattern, p3, f3);
         if (p3 === false)
           return false;
         if (p3 === GLOBSTAR) {
           this.debug("GLOBSTAR", [pattern, p3, f3]);
-          var fr = fi;
-          var pr = pi + 1;
+          var fr = fi2;
+          var pr = pi2 + 1;
           if (pr === pl) {
             this.debug("** at the end");
-            for (; fi < fl; fi++) {
-              if (file[fi] === "." || file[fi] === ".." || !options.dot && file[fi].charAt(0) === ".")
+            for (; fi2 < fl; fi2++) {
+              if (file[fi2] === "." || file[fi2] === ".." || !options.dot && file[fi2].charAt(0) === ".")
                 return false;
             }
             return true;
@@ -21100,12 +21101,12 @@ var require_minimatch = __commonJS({
         if (!hit)
           return false;
       }
-      if (fi === fl && pi === pl) {
+      if (fi2 === fl && pi2 === pl) {
         return true;
-      } else if (fi === fl) {
+      } else if (fi2 === fl) {
         return partial;
-      } else if (pi === pl) {
-        return fi === fl - 1 && file[fi] === "";
+      } else if (pi2 === pl) {
+        return fi2 === fl - 1 && file[fi2] === "";
       }
       throw new Error("wtf?");
     };
@@ -21257,7 +21258,7 @@ var require_internal_pattern = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Pattern = void 0;
-    var os4 = __importStar(__require("os"));
+    var os5 = __importStar(__require("os"));
     var path15 = __importStar(__require("path"));
     var pathHelper = __importStar(require_internal_path_helper());
     var assert_1 = __importDefault(__require("assert"));
@@ -21350,7 +21351,7 @@ var require_internal_pattern = __commonJS({
         if (pattern === "." || pattern.startsWith(`.${path15.sep}`)) {
           pattern = _Pattern.globEscape(process.cwd()) + pattern.substr(1);
         } else if (pattern === "~" || pattern.startsWith(`~${path15.sep}`)) {
-          homedir = homedir || os4.homedir();
+          homedir = homedir || os5.homedir();
           assert_1.default(homedir, "Unable to determine HOME directory");
           assert_1.default(pathHelper.hasAbsoluteRoot(homedir), `Expected HOME directory to be a rooted path. Actual '${homedir}'`);
           pattern = _Pattern.globEscape(homedir) + pattern.substr(1);
@@ -21563,7 +21564,7 @@ var require_internal_globber = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DefaultGlobber = void 0;
     var core2 = __importStar(require_core());
-    var fs3 = __importStar(__require("fs"));
+    var fs4 = __importStar(__require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper());
     var path15 = __importStar(__require("path"));
     var patternHelper = __importStar(require_internal_pattern_helper());
@@ -21581,7 +21582,7 @@ var require_internal_globber = __commonJS({
         return this.searchPaths.slice();
       }
       glob() {
-        var e_1, _a2;
+        var e_1, _a3;
         return __awaiter(this, void 0, void 0, function* () {
           const result = [];
           try {
@@ -21593,8 +21594,8 @@ var require_internal_globber = __commonJS({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c2 && !_c2.done && (_a2 = _b2.return))
-                yield _a2.call(_b2);
+              if (_c2 && !_c2.done && (_a3 = _b2.return))
+                yield _a3.call(_b2);
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -21617,7 +21618,7 @@ var require_internal_globber = __commonJS({
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
             core2.debug(`Search path '${searchPath}'`);
             try {
-              yield __await2(fs3.promises.lstat(searchPath));
+              yield __await2(fs4.promises.lstat(searchPath));
             } catch (err) {
               if (err.code === "ENOENT") {
                 continue;
@@ -21648,7 +21649,7 @@ var require_internal_globber = __commonJS({
                 continue;
               }
               const childLevel = item.level + 1;
-              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x3) => new internal_search_state_1.SearchState(path15.join(item.path, x3), childLevel));
+              const childItems = (yield __await2(fs4.promises.readdir(item.path))).map((x3) => new internal_search_state_1.SearchState(path15.join(item.path, x3), childLevel));
               stack.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
               yield yield __await2(item.path);
@@ -21683,7 +21684,7 @@ var require_internal_globber = __commonJS({
           let stats;
           if (options.followSymbolicLinks) {
             try {
-              stats = yield fs3.promises.stat(item.path);
+              stats = yield fs4.promises.stat(item.path);
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
@@ -21695,10 +21696,10 @@ var require_internal_globber = __commonJS({
               throw err;
             }
           } else {
-            stats = yield fs3.promises.lstat(item.path);
+            stats = yield fs4.promises.lstat(item.path);
           }
           if (stats.isDirectory() && options.followSymbolicLinks) {
-            const realPath = yield fs3.promises.realpath(item.path);
+            const realPath = yield fs4.promises.realpath(item.path);
             while (traversalChain.length >= item.level) {
               traversalChain.pop();
             }
@@ -22643,7 +22644,7 @@ var require_semver = __commonJS({
       debug3("replaceStars", comp26, options);
       return comp26.trim().replace(safeRe[t3.STAR], "");
     }
-    function hyphenReplace($0, from, fM, fm, fp, fpr, fb, to2, tM, tm, tp, tpr, tb) {
+    function hyphenReplace($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) {
       if (isX(fM)) {
         from = "";
       } else if (isX(fm)) {
@@ -22654,17 +22655,17 @@ var require_semver = __commonJS({
         from = ">=" + from;
       }
       if (isX(tM)) {
-        to2 = "";
+        to = "";
       } else if (isX(tm)) {
-        to2 = "<" + (+tM + 1) + ".0.0";
+        to = "<" + (+tM + 1) + ".0.0";
       } else if (isX(tp)) {
-        to2 = "<" + tM + "." + (+tm + 1) + ".0";
+        to = "<" + tM + "." + (+tm + 1) + ".0";
       } else if (tpr) {
-        to2 = "<=" + tM + "." + tm + "." + tp + "-" + tpr;
+        to = "<=" + tM + "." + tm + "." + tp + "-" + tpr;
       } else {
-        to2 = "<=" + to2;
+        to = "<=" + to;
       }
-      return (from + " " + to2).trim();
+      return (from + " " + to).trim();
     }
     Range4.prototype.test = function(version4) {
       if (!version4) {
@@ -23046,8 +23047,8 @@ var require_v4 = __commonJS({
       rnds[6] = rnds[6] & 15 | 64;
       rnds[8] = rnds[8] & 63 | 128;
       if (buf) {
-        for (var ii = 0; ii < 16; ++ii) {
-          buf[i3 + ii] = rnds[ii];
+        for (var ii2 = 0; ii2 < 16; ++ii2) {
+          buf[i3 + ii2] = rnds[ii2];
         }
       }
       return buf || bytesToUuid(rnds);
@@ -23189,8 +23190,8 @@ var require_cacheUtils = __commonJS({
     var core2 = __importStar(require_core());
     var exec2 = __importStar(require_exec());
     var glob = __importStar(require_glob());
-    var io2 = __importStar(require_io());
-    var fs3 = __importStar(__require("fs"));
+    var io = __importStar(require_io());
+    var fs4 = __importStar(__require("fs"));
     var path15 = __importStar(__require("path"));
     var semver = __importStar(require_semver());
     var util3 = __importStar(__require("util"));
@@ -23214,17 +23215,17 @@ var require_cacheUtils = __commonJS({
           tempDirectory = path15.join(baseLocation, "actions", "temp");
         }
         const dest = path15.join(tempDirectory, (0, uuid_1.v4)());
-        yield io2.mkdirP(dest);
+        yield io.mkdirP(dest);
         return dest;
       });
     }
     exports.createTempDirectory = createTempDirectory;
     function getArchiveFileSizeInBytes(filePath) {
-      return fs3.statSync(filePath).size;
+      return fs4.statSync(filePath).size;
     }
     exports.getArchiveFileSizeInBytes = getArchiveFileSizeInBytes;
     function resolvePaths(patterns) {
-      var _a2, e_1, _b2, _c2;
+      var _a3, e_1, _b2, _c2;
       var _d2;
       return __awaiter(this, void 0, void 0, function* () {
         const paths = [];
@@ -23233,7 +23234,7 @@ var require_cacheUtils = __commonJS({
           implicitDescendants: false
         });
         try {
-          for (var _e2 = true, _f = __asyncValues2(globber.globGenerator()), _g; _g = yield _f.next(), _a2 = _g.done, !_a2; _e2 = true) {
+          for (var _e2 = true, _f = __asyncValues2(globber.globGenerator()), _g; _g = yield _f.next(), _a3 = _g.done, !_a3; _e2 = true) {
             _c2 = _g.value;
             _e2 = false;
             const file = _c2;
@@ -23249,7 +23250,7 @@ var require_cacheUtils = __commonJS({
           e_1 = { error: e_1_1 };
         } finally {
           try {
-            if (!_e2 && !_a2 && (_b2 = _f.return))
+            if (!_e2 && !_a3 && (_b2 = _f.return))
               yield _b2.call(_f);
           } finally {
             if (e_1)
@@ -23262,7 +23263,7 @@ var require_cacheUtils = __commonJS({
     exports.resolvePaths = resolvePaths;
     function unlinkFile(filePath) {
       return __awaiter(this, void 0, void 0, function* () {
-        return util3.promisify(fs3.unlink)(filePath);
+        return util3.promisify(fs4.unlink)(filePath);
       });
     }
     exports.unlinkFile = unlinkFile;
@@ -23307,11 +23308,11 @@ var require_cacheUtils = __commonJS({
     exports.getCacheFileName = getCacheFileName;
     function getGnuTarPathOnWindows() {
       return __awaiter(this, void 0, void 0, function* () {
-        if (fs3.existsSync(constants_1.GnuTarPathOnWindows)) {
+        if (fs4.existsSync(constants_1.GnuTarPathOnWindows)) {
           return constants_1.GnuTarPathOnWindows;
         }
         const versionOutput = yield getVersion("tar");
-        return versionOutput.toLowerCase().includes("gnu tar") ? io2.which("tar") : "";
+        return versionOutput.toLowerCase().includes("gnu tar") ? io.which("tar") : "";
       });
     }
     exports.getGnuTarPathOnWindows = getGnuTarPathOnWindows;
@@ -24039,8 +24040,8 @@ function isSpecialXmlProperty(propertyName, options) {
   return [XML_ATTRKEY, options.xmlCharKey].includes(propertyName);
 }
 function deserializeCompositeType(serializer4, mapper, responseBody, objectName, options) {
-  var _a2, _b2;
-  const xmlCharKey = (_a2 = options.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+  var _a3, _b2;
+  const xmlCharKey = (_a3 = options.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
   if (getPolymorphicDiscriminatorRecursively(serializer4, mapper)) {
     mapper = getPolymorphicMapper(serializer4, mapper, responseBody, "serializedName");
   }
@@ -24279,9 +24280,9 @@ var init_serializer = __esm({
        * @returns A valid serialized Javascript object.
        */
       serialize(mapper, object, objectName, options = {}) {
-        var _a2, _b2, _c2;
+        var _a3, _b2, _c2;
         const updatedOptions = {
-          rootName: (_a2 = options.rootName) !== null && _a2 !== void 0 ? _a2 : "",
+          rootName: (_a3 = options.rootName) !== null && _a3 !== void 0 ? _a3 : "",
           includeRoot: (_b2 = options.includeRoot) !== null && _b2 !== void 0 ? _b2 : false,
           xmlCharKey: (_c2 = options.xmlCharKey) !== null && _c2 !== void 0 ? _c2 : XML_CHARKEY
         };
@@ -24342,9 +24343,9 @@ var init_serializer = __esm({
        * @returns A valid deserialized Javascript object.
        */
       deserialize(mapper, responseBody, objectName, options = {}) {
-        var _a2, _b2, _c2;
+        var _a3, _b2, _c2;
         const updatedOptions = {
-          rootName: (_a2 = options.rootName) !== null && _a2 !== void 0 ? _a2 : "",
+          rootName: (_a3 = options.rootName) !== null && _a3 !== void 0 ? _a3 : "",
           includeRoot: (_b2 = options.includeRoot) !== null && _b2 !== void 0 ? _b2 : false,
           xmlCharKey: (_c2 = options.xmlCharKey) !== null && _c2 !== void 0 ? _c2 : XML_CHARKEY
         };
@@ -28314,15 +28315,15 @@ var require_encoding2 = __commonJS({
     "use strict";
     var iconvLite = require_lib2();
     module.exports.convert = convert2;
-    function convert2(str, to2, from) {
+    function convert2(str, to, from) {
       from = checkEncoding(from || "UTF-8");
-      to2 = checkEncoding(to2 || "UTF-8");
+      to = checkEncoding(to || "UTF-8");
       str = str || "";
       var result;
       if (from !== "UTF-8" && typeof str === "string") {
         str = Buffer.from(str, "binary");
       }
-      if (from === to2) {
+      if (from === to) {
         if (typeof str === "string") {
           result = Buffer.from(str);
         } else {
@@ -28330,7 +28331,7 @@ var require_encoding2 = __commonJS({
         }
       } else {
         try {
-          result = convertIconvLite(str, to2, from);
+          result = convertIconvLite(str, to, from);
         } catch (E3) {
           console.error(E3);
           result = str;
@@ -28341,13 +28342,13 @@ var require_encoding2 = __commonJS({
       }
       return result;
     }
-    function convertIconvLite(str, to2, from) {
-      if (to2 === "UTF-8") {
+    function convertIconvLite(str, to, from) {
+      if (to === "UTF-8") {
         return iconvLite.decode(str, from);
       } else if (from === "UTF-8") {
-        return iconvLite.encode(str, to2);
+        return iconvLite.encode(str, to);
       } else {
-        return iconvLite.encode(iconvLite.decode(str, from), to2);
+        return iconvLite.encode(iconvLite.decode(str, from), to);
       }
     }
     function checkEncoding(name2) {
@@ -39093,8 +39094,8 @@ var require_mime_types = __commonJS({
           var extension2 = exts[i3];
           if (types[extension2]) {
             var from = preference.indexOf(db[types[extension2]].source);
-            var to2 = preference.indexOf(mime.source);
-            if (types[extension2] !== "application/octet-stream" && (from > to2 || from === to2 && types[extension2].substr(0, 12) === "application/")) {
+            var to = preference.indexOf(mime.source);
+            if (types[extension2] !== "application/octet-stream" && (from > to || from === to && types[extension2].substr(0, 12) === "application/")) {
               continue;
             }
           }
@@ -39347,7 +39348,7 @@ var require_form_data = __commonJS({
     var http3 = __require("http");
     var https3 = __require("https");
     var parseUrl = __require("url").parse;
-    var fs3 = __require("fs");
+    var fs4 = __require("fs");
     var Stream2 = __require("stream").Stream;
     var mime = require_mime_types();
     var asynckit = require_asynckit();
@@ -39412,7 +39413,7 @@ var require_form_data = __commonJS({
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
-          fs3.stat(value.path, function(err, stat2) {
+          fs4.stat(value.path, function(err, stat2) {
             var fileSize;
             if (err) {
               callback(err);
@@ -39838,12 +39839,12 @@ function enable(namespaces) {
   enabledNamespaces = [];
   skippedNamespaces = [];
   const wildcard = /\*/g;
-  const namespaceList = namespaces.split(",").map((ns) => ns.trim().replace(wildcard, ".*?"));
-  for (const ns of namespaceList) {
-    if (ns.startsWith("-")) {
-      skippedNamespaces.push(new RegExp(`^${ns.substr(1)}$`));
+  const namespaceList = namespaces.split(",").map((ns2) => ns2.trim().replace(wildcard, ".*?"));
+  for (const ns2 of namespaceList) {
+    if (ns2.startsWith("-")) {
+      skippedNamespaces.push(new RegExp(`^${ns2.substr(1)}$`));
     } else {
-      enabledNamespaces.push(new RegExp(`^${ns}$`));
+      enabledNamespaces.push(new RegExp(`^${ns2}$`));
     }
   }
   for (const instance of debuggers) {
@@ -40075,7 +40076,7 @@ var init_nodeFetchHttpClient = __esm({
        * @returns An object representing the incoming HTTP response.
        */
       async sendRequest(httpRequest) {
-        var _a2;
+        var _a3;
         if (!httpRequest && typeof httpRequest !== "object") {
           throw new Error("'httpRequest' (WebResourceLike) cannot be null or undefined and must be of type object.");
         }
@@ -40157,7 +40158,7 @@ var init_nodeFetchHttpClient = __esm({
         try {
           const response = await this.fetch(httpRequest.url, requestInit);
           const headers = parseHeaders(response.headers);
-          const streaming = ((_a2 = httpRequest.streamResponseStatusCodes) === null || _a2 === void 0 ? void 0 : _a2.has(response.status)) || httpRequest.streamResponseBody;
+          const streaming = ((_a3 = httpRequest.streamResponseStatusCodes) === null || _a3 === void 0 ? void 0 : _a3.has(response.status)) || httpRequest.streamResponseBody;
           operationResponse = {
             headers,
             request: httpRequest,
@@ -40200,8 +40201,8 @@ var init_nodeFetchHttpClient = __esm({
               downloadStreamDone = isStreamComplete(operationResponse.readableStreamBody, abortController);
             }
             Promise.all([uploadStreamDone, downloadStreamDone]).then(() => {
-              var _a3;
-              (_a3 = httpRequest.abortSignal) === null || _a3 === void 0 ? void 0 : _a3.removeEventListener("abort", abortListener);
+              var _a4;
+              (_a4 = httpRequest.abortSignal) === null || _a4 === void 0 ? void 0 : _a4.removeEventListener("abort", abortListener);
               return;
             }).catch((e3) => {
               logger.warning("Error when cleaning up abortListener on httpRequest", e3);
@@ -40210,12 +40211,12 @@ var init_nodeFetchHttpClient = __esm({
         }
       }
       getOrCreateAgent(httpRequest) {
-        var _a2;
+        var _a3;
         const isHttps = isUrlHttps(httpRequest.url);
         if (httpRequest.proxySettings) {
           const { host, port, username, password } = httpRequest.proxySettings;
           const key = `${host}:${port}:${username}:${password}`;
-          const proxyAgents = (_a2 = this.proxyAgentMap.get(key)) !== null && _a2 !== void 0 ? _a2 : {};
+          const proxyAgents = (_a3 = this.proxyAgentMap.get(key)) !== null && _a3 !== void 0 ? _a3 : {};
           let agent = getCachedAgent(isHttps, proxyAgents);
           if (agent) {
             return agent;
@@ -46449,16 +46450,16 @@ var require_xml2js = __commonJS({
 
 // node_modules/@azure/core-http/dist-esm/src/util/xml.js
 function stringifyXML(obj, opts = {}) {
-  var _a2;
+  var _a3;
   xml2jsBuilderSettings.rootName = opts.rootName;
-  xml2jsBuilderSettings.charkey = (_a2 = opts.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+  xml2jsBuilderSettings.charkey = (_a3 = opts.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
   const builder = new xml2js.Builder(xml2jsBuilderSettings);
   return builder.buildObject(obj);
 }
 function parseXML(str, opts = {}) {
-  var _a2;
+  var _a3;
   xml2jsParserSettings.explicitRoot = !!opts.includeRoot;
-  xml2jsParserSettings.charkey = (_a2 = opts.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+  xml2jsParserSettings.charkey = (_a3 = opts.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
   const xmlParser = new xml2js.Parser(xml2jsParserSettings);
   return new Promise((resolve3, reject) => {
     if (!str) {
@@ -46565,9 +46566,9 @@ function shouldDeserializeResponse(parsedResponse) {
   return result;
 }
 function deserializeResponseBody(jsonContentTypes, xmlContentTypes, response, options = {}) {
-  var _a2, _b2, _c2;
+  var _a3, _b2, _c2;
   const updatedOptions = {
-    rootName: (_a2 = options.rootName) !== null && _a2 !== void 0 ? _a2 : "",
+    rootName: (_a3 = options.rootName) !== null && _a3 !== void 0 ? _a3 : "",
     includeRoot: (_b2 = options.includeRoot) !== null && _b2 !== void 0 ? _b2 : false,
     xmlCharKey: (_c2 = options.xmlCharKey) !== null && _c2 !== void 0 ? _c2 : XML_CHARKEY
   };
@@ -46613,7 +46614,7 @@ function isOperationSpecEmpty(operationSpec) {
   return expectedStatusCodes.length === 0 || expectedStatusCodes.length === 1 && expectedStatusCodes[0] === "default";
 }
 function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
-  var _a2;
+  var _a3;
   const isSuccessByStatus = 200 <= parsedResponse.status && parsedResponse.status < 300;
   const isExpectedStatusCode = isOperationSpecEmpty(operationSpec) ? isSuccessByStatus : !!responseSpec;
   if (isExpectedStatusCode) {
@@ -46626,7 +46627,7 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
     }
   }
   const errorResponseSpec = responseSpec !== null && responseSpec !== void 0 ? responseSpec : operationSpec.responses.default;
-  const streaming = ((_a2 = parsedResponse.request.streamResponseStatusCodes) === null || _a2 === void 0 ? void 0 : _a2.has(parsedResponse.status)) || parsedResponse.request.streamResponseBody;
+  const streaming = ((_a3 = parsedResponse.request.streamResponseStatusCodes) === null || _a3 === void 0 ? void 0 : _a3.has(parsedResponse.status)) || parsedResponse.request.streamResponseBody;
   const initialErrorMessage = streaming ? `Unexpected status code: ${parsedResponse.status}` : parsedResponse.bodyAsText;
   const error = new RestError(initialErrorMessage, void 0, parsedResponse.status, parsedResponse.request, parsedResponse);
   if (!errorResponseSpec) {
@@ -46663,14 +46664,14 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec) {
   return { error, shouldReturnResponse: false };
 }
 function parse2(jsonContentTypes, xmlContentTypes, operationResponse, opts) {
-  var _a2;
+  var _a3;
   const errorHandler = (err) => {
     const msg = `Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`;
     const errCode = err.code || RestError.PARSE_ERROR;
     const e3 = new RestError(msg, errCode, operationResponse.status, operationResponse.request, operationResponse);
     return Promise.reject(e3);
   };
-  const streaming = ((_a2 = operationResponse.request.streamResponseStatusCodes) === null || _a2 === void 0 ? void 0 : _a2.has(operationResponse.status)) || operationResponse.request.streamResponseBody;
+  const streaming = ((_a3 = operationResponse.request.streamResponseStatusCodes) === null || _a3 === void 0 ? void 0 : _a3.has(operationResponse.status)) || operationResponse.request.streamResponseBody;
   if (!streaming && operationResponse.bodyAsText) {
     const text = operationResponse.bodyAsText;
     const contentType2 = operationResponse.headers.get("Content-Type") || "";
@@ -46702,11 +46703,11 @@ var init_deserializationPolicy = __esm({
     defaultXmlContentTypes = ["application/xml", "application/atom+xml"];
     DeserializationPolicy = class extends BaseRequestPolicy {
       constructor(nextPolicy, requestPolicyOptions, deserializationContentTypes, parsingOptions = {}) {
-        var _a2;
+        var _a3;
         super(nextPolicy, requestPolicyOptions);
         this.jsonContentTypes = deserializationContentTypes && deserializationContentTypes.json || defaultJsonContentTypes;
         this.xmlContentTypes = deserializationContentTypes && deserializationContentTypes.xml || defaultXmlContentTypes;
-        this.xmlCharKey = (_a2 = parsingOptions.xmlCharKey) !== null && _a2 !== void 0 ? _a2 : XML_CHARKEY;
+        this.xmlCharKey = (_a3 = parsingOptions.xmlCharKey) !== null && _a3 !== void 0 ? _a3 : XML_CHARKEY;
       }
       async sendRequest(request) {
         return this._nextPolicy.sendRequest(request).then((response) => deserializeResponseBody(this.jsonContentTypes, this.xmlContentTypes, response, {
@@ -46897,12 +46898,12 @@ var init_delay = __esm({
 });
 
 // node_modules/@azure/core-util/dist-esm/src/checkEnvironment.js
-var _a, _b, _c, _d, isBrowser, isWebWorker, isDeno, isNode, isBun, isReactNative;
+var _a2, _b, _c, _d, isBrowser, isWebWorker, isDeno, isNode, isBun, isReactNative;
 var init_checkEnvironment = __esm({
   "node_modules/@azure/core-util/dist-esm/src/checkEnvironment.js"() {
     "use strict";
     isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined";
-    isWebWorker = typeof self === "object" && typeof (self === null || self === void 0 ? void 0 : self.importScripts) === "function" && (((_a = self.constructor) === null || _a === void 0 ? void 0 : _a.name) === "DedicatedWorkerGlobalScope" || ((_b = self.constructor) === null || _b === void 0 ? void 0 : _b.name) === "ServiceWorkerGlobalScope" || ((_c = self.constructor) === null || _c === void 0 ? void 0 : _c.name) === "SharedWorkerGlobalScope");
+    isWebWorker = typeof self === "object" && typeof (self === null || self === void 0 ? void 0 : self.importScripts) === "function" && (((_a2 = self.constructor) === null || _a2 === void 0 ? void 0 : _a2.name) === "DedicatedWorkerGlobalScope" || ((_b = self.constructor) === null || _b === void 0 ? void 0 : _b.name) === "ServiceWorkerGlobalScope" || ((_c = self.constructor) === null || _c === void 0 ? void 0 : _c.name) === "SharedWorkerGlobalScope");
     isDeno = typeof Deno !== "undefined" && typeof Deno.version !== "undefined" && typeof Deno.version.deno !== "undefined";
     isNode = typeof process !== "undefined" && Boolean(process.version) && Boolean((_d = process.versions) === null || _d === void 0 ? void 0 : _d.node) && // Deno thought it was a good idea to spoof process.versions.node, see https://deno.land/std@0.177.0/node/process.ts?s=versions
     !isDeno;
@@ -47130,7 +47131,7 @@ var init_src3 = __esm({
 });
 
 // node_modules/@azure/core-http/dist-esm/src/policies/msRestUserAgentPolicy.js
-import * as os2 from "os";
+import * as os3 from "os";
 function getDefaultUserAgentKey() {
   return Constants.HeaderConstants.USER_AGENT;
 }
@@ -47141,7 +47142,7 @@ function getPlatformSpecificData() {
   };
   const osInfo = {
     key: "OS",
-    value: `(${os2.arch()}-${os2.type()}-${os2.release()})`
+    value: `(${os3.arch()}-${os3.type()}-${os3.release()})`
   };
   return [runtimeInfo, osInfo];
 }
@@ -47238,7 +47239,7 @@ async function beginRefresh(getAccessToken, retryIntervalInMs, timeoutInMs) {
     if (Date.now() < timeoutInMs) {
       try {
         return await getAccessToken();
-      } catch (_a2) {
+      } catch (_a3) {
         return null;
       }
     } else {
@@ -47272,8 +47273,8 @@ function createTokenCycler(credential, scopes, tokenCyclerOptions) {
      * window and not already refreshing)
      */
     get shouldRefresh() {
-      var _a2;
-      return !cycler.isRefreshing && ((_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : 0) - options.refreshWindowInMs < Date.now();
+      var _a3;
+      return !cycler.isRefreshing && ((_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : 0) - options.refreshWindowInMs < Date.now();
     },
     /**
      * Produces true if the cycler MUST refresh (null or nearly-expired
@@ -47284,14 +47285,14 @@ function createTokenCycler(credential, scopes, tokenCyclerOptions) {
     }
   };
   function refresh(getTokenOptions) {
-    var _a2;
+    var _a3;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
       refreshWorker = beginRefresh(
         tryGetAccessToken,
         options.retryIntervalInMs,
         // If we don't have a token, then we should timeout immediately
-        (_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : Date.now()
+        (_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : Date.now()
       ).then((_token) => {
         refreshWorker = null;
         token = _token;
@@ -47553,8 +47554,8 @@ var init_proxyPolicy = __esm({
         this.customNoProxyList = customNoProxyList;
       }
       sendRequest(request) {
-        var _a2;
-        if (!request.proxySettings && !isBypassed(request.url, (_a2 = this.customNoProxyList) !== null && _a2 !== void 0 ? _a2 : globalNoProxyList, this.customNoProxyList ? void 0 : globalBypassedMap)) {
+        var _a3;
+        if (!request.proxySettings && !isBypassed(request.url, (_a3 = this.customNoProxyList) !== null && _a3 !== void 0 ? _a3 : globalNoProxyList, this.customNoProxyList ? void 0 : globalBypassedMap)) {
           request.proxySettings = this.proxySettings;
         }
         return this._nextPolicy.sendRequest(request);
@@ -47789,7 +47790,7 @@ var init_throttlingRetryPolicy = __esm({
         }
       }
       async _defaultResponseHandler(httpRequest, httpResponse) {
-        var _a2;
+        var _a3;
         const retryAfterHeader = httpResponse.headers.get(Constants.HeaderConstants.RETRY_AFTER);
         if (retryAfterHeader) {
           const delayInMs = _ThrottlingRetryPolicy.parseRetryAfterHeader(retryAfterHeader);
@@ -47799,7 +47800,7 @@ var init_throttlingRetryPolicy = __esm({
               abortSignal: httpRequest.abortSignal,
               abortErrorMsg: StandardAbortMessage2
             });
-            if ((_a2 = httpRequest.abortSignal) === null || _a2 === void 0 ? void 0 : _a2.aborted) {
+            if ((_a3 = httpRequest.abortSignal) === null || _a3 === void 0 ? void 0 : _a3.aborted) {
               throw new AbortError(StandardAbortMessage2);
             }
             if (this.numberOfRetries < DEFAULT_CLIENT_MAX_RETRY_COUNT) {
@@ -47943,11 +47944,11 @@ var init_semver = __esm({
 
 // node_modules/@opentelemetry/api/build/esm/internal/global-utils.js
 function registerGlobal(type3, instance, diag, allowOverride) {
-  var _a2;
+  var _a3;
   if (allowOverride === void 0) {
     allowOverride = false;
   }
-  var api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a2 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a2 !== void 0 ? _a2 : {
+  var api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a3 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a3 !== void 0 ? _a3 : {
     version: VERSION
   };
   if (!allowOverride && api[type3]) {
@@ -47965,8 +47966,8 @@ function registerGlobal(type3, instance, diag, allowOverride) {
   return true;
 }
 function getGlobal(type3) {
-  var _a2, _b2;
-  var globalVersion = (_a2 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a2 === void 0 ? void 0 : _a2.version;
+  var _a3, _b2;
+  var globalVersion = (_a3 = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a3 === void 0 ? void 0 : _a3.version;
   if (!globalVersion || !isCompatible(globalVersion)) {
     return;
   }
@@ -48027,7 +48028,7 @@ var init_ComponentLogger = __esm({
       }
       return ar;
     };
-    __spreadArray = function(to2, from, pack) {
+    __spreadArray = function(to, from, pack) {
       if (pack || arguments.length === 2)
         for (var i3 = 0, l3 = from.length, ar; i3 < l3; i3++) {
           if (ar || !(i3 in from)) {
@@ -48036,7 +48037,7 @@ var init_ComponentLogger = __esm({
             ar[i3] = from[i3];
           }
         }
-      return to2.concat(ar || Array.prototype.slice.call(from));
+      return to.concat(ar || Array.prototype.slice.call(from));
     };
     DiagComponentLogger = /** @class */
     function() {
@@ -48045,36 +48046,36 @@ var init_ComponentLogger = __esm({
       }
       DiagComponentLogger2.prototype.debug = function() {
         var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
+        for (var _i2 = 0; _i2 < arguments.length; _i2++) {
+          args[_i2] = arguments[_i2];
         }
         return logProxy("debug", this._namespace, args);
       };
       DiagComponentLogger2.prototype.error = function() {
         var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
+        for (var _i2 = 0; _i2 < arguments.length; _i2++) {
+          args[_i2] = arguments[_i2];
         }
         return logProxy("error", this._namespace, args);
       };
       DiagComponentLogger2.prototype.info = function() {
         var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
+        for (var _i2 = 0; _i2 < arguments.length; _i2++) {
+          args[_i2] = arguments[_i2];
         }
         return logProxy("info", this._namespace, args);
       };
       DiagComponentLogger2.prototype.warn = function() {
         var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
+        for (var _i2 = 0; _i2 < arguments.length; _i2++) {
+          args[_i2] = arguments[_i2];
         }
         return logProxy("warn", this._namespace, args);
       };
       DiagComponentLogger2.prototype.verbose = function() {
         var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
+        for (var _i2 = 0; _i2 < arguments.length; _i2++) {
+          args[_i2] = arguments[_i2];
         }
         return logProxy("verbose", this._namespace, args);
       };
@@ -48161,7 +48162,7 @@ var init_diag = __esm({
       }
       return ar;
     };
-    __spreadArray2 = function(to2, from, pack) {
+    __spreadArray2 = function(to, from, pack) {
       if (pack || arguments.length === 2)
         for (var i3 = 0, l3 = from.length, ar; i3 < l3; i3++) {
           if (ar || !(i3 in from)) {
@@ -48170,7 +48171,7 @@ var init_diag = __esm({
             ar[i3] = from[i3];
           }
         }
-      return to2.concat(ar || Array.prototype.slice.call(from));
+      return to.concat(ar || Array.prototype.slice.call(from));
     };
     API_NAME = "diag";
     DiagAPI = /** @class */
@@ -48179,8 +48180,8 @@ var init_diag = __esm({
         function _logProxy(funcName) {
           return function() {
             var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-              args[_i] = arguments[_i];
+            for (var _i2 = 0; _i2 < arguments.length; _i2++) {
+              args[_i2] = arguments[_i2];
             }
             var logger4 = getGlobal("diag");
             if (!logger4)
@@ -48190,13 +48191,13 @@ var init_diag = __esm({
         }
         var self2 = this;
         var setLogger = function(logger4, optionsOrLogLevel) {
-          var _a2, _b2, _c2;
+          var _a3, _b2, _c2;
           if (optionsOrLogLevel === void 0) {
             optionsOrLogLevel = { logLevel: DiagLogLevel.INFO };
           }
           if (logger4 === self2) {
             var err = new Error("Cannot use diag as the logger for itself. Please use a DiagLogger implementation like ConsoleDiagLogger or a custom implementation");
-            self2.error((_a2 = err.stack) !== null && _a2 !== void 0 ? _a2 : err.message);
+            self2.error((_a3 = err.stack) !== null && _a3 !== void 0 ? _a3 : err.message);
             return false;
           }
           if (typeof optionsOrLogLevel === "number") {
@@ -48297,7 +48298,7 @@ var init_NoopContextManager = __esm({
       }
       return ar;
     };
-    __spreadArray3 = function(to2, from, pack) {
+    __spreadArray3 = function(to, from, pack) {
       if (pack || arguments.length === 2)
         for (var i3 = 0, l3 = from.length, ar; i3 < l3; i3++) {
           if (ar || !(i3 in from)) {
@@ -48306,7 +48307,7 @@ var init_NoopContextManager = __esm({
             ar[i3] = from[i3];
           }
         }
-      return to2.concat(ar || Array.prototype.slice.call(from));
+      return to.concat(ar || Array.prototype.slice.call(from));
     };
     NoopContextManager = /** @class */
     function() {
@@ -48317,8 +48318,8 @@ var init_NoopContextManager = __esm({
       };
       NoopContextManager2.prototype.with = function(_context, fn2, thisArg) {
         var args = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-          args[_i - 3] = arguments[_i];
+        for (var _i2 = 3; _i2 < arguments.length; _i2++) {
+          args[_i2 - 3] = arguments[_i2];
         }
         return fn2.call.apply(fn2, __spreadArray3([thisArg], __read3(args), false));
       };
@@ -48365,7 +48366,7 @@ var init_context2 = __esm({
       }
       return ar;
     };
-    __spreadArray4 = function(to2, from, pack) {
+    __spreadArray4 = function(to, from, pack) {
       if (pack || arguments.length === 2)
         for (var i3 = 0, l3 = from.length, ar; i3 < l3; i3++) {
           if (ar || !(i3 in from)) {
@@ -48374,7 +48375,7 @@ var init_context2 = __esm({
             ar[i3] = from[i3];
           }
         }
-      return to2.concat(ar || Array.prototype.slice.call(from));
+      return to.concat(ar || Array.prototype.slice.call(from));
     };
     API_NAME2 = "context";
     NOOP_CONTEXT_MANAGER = new NoopContextManager();
@@ -48395,12 +48396,12 @@ var init_context2 = __esm({
         return this._getContextManager().active();
       };
       ContextAPI2.prototype.with = function(context3, fn2, thisArg) {
-        var _a2;
+        var _a3;
         var args = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-          args[_i - 3] = arguments[_i];
+        for (var _i2 = 3; _i2 < arguments.length; _i2++) {
+          args[_i2 - 3] = arguments[_i2];
         }
-        return (_a2 = this._getContextManager()).with.apply(_a2, __spreadArray4([context3, fn2, thisArg], __read4(args), false));
+        return (_a3 = this._getContextManager()).with.apply(_a3, __spreadArray4([context3, fn2, thisArg], __read4(args), false));
       };
       ContextAPI2.prototype.bind = function(context3, target) {
         return this._getContextManager().bind(context3, target);
@@ -48506,8 +48507,8 @@ function setSpanContext(context3, spanContext) {
   return setSpan(context3, new NonRecordingSpan(spanContext));
 }
 function getSpanContext(context3) {
-  var _a2;
-  return (_a2 = getSpan(context3)) === null || _a2 === void 0 ? void 0 : _a2.spanContext();
+  var _a3;
+  return (_a3 = getSpan(context3)) === null || _a3 === void 0 ? void 0 : _a3.spanContext();
 }
 var SPAN_KEY;
 var init_context_utils = __esm({
@@ -48671,19 +48672,19 @@ var init_ProxyTracerProvider = __esm({
       function ProxyTracerProvider2() {
       }
       ProxyTracerProvider2.prototype.getTracer = function(name2, version4, options) {
-        var _a2;
-        return (_a2 = this.getDelegateTracer(name2, version4, options)) !== null && _a2 !== void 0 ? _a2 : new ProxyTracer(this, name2, version4, options);
+        var _a3;
+        return (_a3 = this.getDelegateTracer(name2, version4, options)) !== null && _a3 !== void 0 ? _a3 : new ProxyTracer(this, name2, version4, options);
       };
       ProxyTracerProvider2.prototype.getDelegate = function() {
-        var _a2;
-        return (_a2 = this._delegate) !== null && _a2 !== void 0 ? _a2 : NOOP_TRACER_PROVIDER;
+        var _a3;
+        return (_a3 = this._delegate) !== null && _a3 !== void 0 ? _a3 : NOOP_TRACER_PROVIDER;
       };
       ProxyTracerProvider2.prototype.setDelegate = function(delegate) {
         this._delegate = delegate;
       };
       ProxyTracerProvider2.prototype.getDelegateTracer = function(name2, version4, options) {
-        var _a2;
-        return (_a2 = this._delegate) === null || _a2 === void 0 ? void 0 : _a2.getTracer(name2, version4, options);
+        var _a3;
+        return (_a3 = this._delegate) === null || _a3 === void 0 ? void 0 : _a3.getTracer(name2, version4, options);
       };
       return ProxyTracerProvider2;
     }();
@@ -48805,11 +48806,11 @@ var init_interfaces = __esm({
 
 // node_modules/@azure/core-tracing/dist-esm/src/createSpan.js
 function isTracingDisabled() {
-  var _a2;
+  var _a3;
   if (typeof process === "undefined") {
     return false;
   }
-  const azureTracingDisabledValue = (_a2 = process.env.AZURE_TRACING_DISABLED) === null || _a2 === void 0 ? void 0 : _a2.toLowerCase();
+  const azureTracingDisabledValue = (_a3 = process.env.AZURE_TRACING_DISABLED) === null || _a3 === void 0 ? void 0 : _a3.toLowerCase();
   if (azureTracingDisabledValue === "false" || azureTracingDisabledValue === "0") {
     return false;
   }
@@ -48927,7 +48928,7 @@ var init_tracingPolicy = __esm({
         }
       }
       tryCreateSpan(request) {
-        var _a2;
+        var _a3;
         try {
           const { span } = createSpan(`HTTP ${request.method}`, {
             tracingOptions: {
@@ -48939,7 +48940,7 @@ var init_tracingPolicy = __esm({
             span.end();
             return void 0;
           }
-          const namespaceFromContext = (_a2 = request.tracingContext) === null || _a2 === void 0 ? void 0 : _a2.getValue(Symbol.for("az.namespace"));
+          const namespaceFromContext = (_a3 = request.tracingContext) === null || _a3 === void 0 ? void 0 : _a3.getValue(Symbol.for("az.namespace"));
           if (typeof namespaceFromContext === "string") {
             span.setAttribute("az.namespace", namespaceFromContext);
           }
@@ -49001,8 +49002,8 @@ var init_tracingPolicy = __esm({
 
 // node_modules/@azure/core-http/dist-esm/src/serviceClient.js
 function serializeRequestBody(serviceClient, httpRequest, operationArguments, operationSpec) {
-  var _a2, _b2, _c2, _d2, _e2, _f;
-  const serializerOptions = (_b2 = (_a2 = operationArguments.options) === null || _a2 === void 0 ? void 0 : _a2.serializerOptions) !== null && _b2 !== void 0 ? _b2 : {};
+  var _a3, _b2, _c2, _d2, _e2, _f;
+  const serializerOptions = (_b2 = (_a3 = operationArguments.options) === null || _a3 === void 0 ? void 0 : _a3.serializerOptions) !== null && _b2 !== void 0 ? _b2 : {};
   const updatedOptions = {
     rootName: (_c2 = serializerOptions.rootName) !== null && _c2 !== void 0 ? _c2 : "",
     includeRoot: (_d2 = serializerOptions.includeRoot) !== null && _d2 !== void 0 ? _d2 : false,
@@ -49105,12 +49106,12 @@ function getOperationArgumentValueFromParameter(serviceClient, operationArgument
   return getOperationArgumentValueFromParameterPath(serviceClient, operationArguments, parameter.parameterPath, parameter.mapper, serializer4);
 }
 function getOperationArgumentValueFromParameterPath(serviceClient, operationArguments, parameterPath, parameterMapper, serializer4) {
-  var _a2;
+  var _a3;
   let value;
   if (typeof parameterPath === "string") {
     parameterPath = [parameterPath];
   }
-  const serializerOptions = (_a2 = operationArguments.options) === null || _a2 === void 0 ? void 0 : _a2.serializerOptions;
+  const serializerOptions = (_a3 = operationArguments.options) === null || _a3 === void 0 ? void 0 : _a3.serializerOptions;
   if (Array.isArray(parameterPath)) {
     if (parameterPath.length > 0) {
       if (parameterMapper.isConstant) {
@@ -49334,12 +49335,12 @@ var init_serviceClient = __esm({
        * @param callback - The callback to call when the response is received.
        */
       async sendOperationRequest(operationArguments, operationSpec, callback) {
-        var _a2;
+        var _a3;
         if (typeof operationArguments.options === "function") {
           callback = operationArguments.options;
           operationArguments.options = void 0;
         }
-        const serializerOptions = (_a2 = operationArguments.options) === null || _a2 === void 0 ? void 0 : _a2.serializerOptions;
+        const serializerOptions = (_a3 = operationArguments.options) === null || _a3 === void 0 ? void 0 : _a3.serializerOptions;
         const httpRequest = new WebResource();
         let result;
         try {
@@ -63474,9 +63475,9 @@ function ConvertInternalResponseOfListBlobFlat(internalResponse) {
   } });
 }
 function ConvertInternalResponseOfListBlobHierarchy(internalResponse) {
-  var _a2;
+  var _a3;
   return Object.assign(Object.assign({}, internalResponse), { segment: {
-    blobPrefixes: (_a2 = internalResponse.segment.blobPrefixes) === null || _a2 === void 0 ? void 0 : _a2.map((blobPrefixInternal) => {
+    blobPrefixes: (_a3 = internalResponse.segment.blobPrefixes) === null || _a3 === void 0 ? void 0 : _a3.map((blobPrefixInternal) => {
       const blobPrefix = Object.assign(Object.assign({}, blobPrefixInternal), { name: BlobNameToString(blobPrefixInternal.name) });
       return blobPrefix;
     }),
@@ -63921,7 +63922,7 @@ var init_TelemetryPolicy = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/TelemetryPolicyFactory.js
-import * as os3 from "os";
+import * as os4 from "os";
 var TelemetryPolicyFactory;
 var init_TelemetryPolicyFactory = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/TelemetryPolicyFactory.js"() {
@@ -63948,8 +63949,8 @@ var init_TelemetryPolicyFactory = __esm({
             userAgentInfo.push(libInfo);
           }
           let runtimeInfo = `(NODE-VERSION ${process.version})`;
-          if (os3) {
-            runtimeInfo = `(NODE-VERSION ${process.version}; ${os3.type()} ${os3.release()})`;
+          if (os4) {
+            runtimeInfo = `(NODE-VERSION ${process.version}; ${os4.type()} ${os4.release()})`;
           }
           if (userAgentInfo.indexOf(runtimeInfo) === -1) {
             userAgentInfo.push(runtimeInfo);
@@ -63989,7 +63990,7 @@ async function beginRefresh2(getAccessToken, retryIntervalInMs, timeoutInMs) {
     if (Date.now() < timeoutInMs) {
       try {
         return await getAccessToken();
-      } catch (_a2) {
+      } catch (_a3) {
         return null;
       }
     } else {
@@ -64023,8 +64024,8 @@ function createTokenCycler2(credential, scopes, tokenCyclerOptions) {
      * window and not already refreshing)
      */
     get shouldRefresh() {
-      var _a2;
-      return !cycler.isRefreshing && ((_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : 0) - options.refreshWindowInMs < Date.now();
+      var _a3;
+      return !cycler.isRefreshing && ((_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : 0) - options.refreshWindowInMs < Date.now();
     },
     /**
      * Produces true if the cycler MUST refresh (null or nearly-expired
@@ -64035,14 +64036,14 @@ function createTokenCycler2(credential, scopes, tokenCyclerOptions) {
     }
   };
   function refresh(getTokenOptions) {
-    var _a2;
+    var _a3;
     if (!cycler.isRefreshing) {
       const tryGetAccessToken = () => credential.getToken(scopes, getTokenOptions);
       refreshWorker = beginRefresh2(
         tryGetAccessToken,
         options.retryIntervalInMs,
         // If we don't have a token, then we should timeout immediately
-        (_a2 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a2 !== void 0 ? _a2 : Date.now()
+        (_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : Date.now()
       ).then((_token) => {
         refreshWorker = null;
         token = _token;
@@ -64163,7 +64164,7 @@ function isPipelineLike(pipeline) {
   return Array.isArray(castPipeline.factories) && typeof castPipeline.options === "object" && typeof castPipeline.toServiceClientOptions === "function";
 }
 function newPipeline(credential, pipelineOptions = {}) {
-  var _a2;
+  var _a3;
   if (credential === void 0) {
     credential = new AnonymousCredential();
   }
@@ -64189,7 +64190,7 @@ function newPipeline(credential, pipelineOptions = {}) {
     factories.push(proxyPolicy(pipelineOptions.proxyOptions));
     factories.push(disableResponseDecompressionPolicy());
   }
-  factories.push(isTokenCredential(credential) ? attachCredential(storageBearerTokenChallengeAuthenticationPolicy(credential, (_a2 = pipelineOptions.audience) !== null && _a2 !== void 0 ? _a2 : StorageOAuthScopes), credential) : credential);
+  factories.push(isTokenCredential(credential) ? attachCredential(storageBearerTokenChallengeAuthenticationPolicy(credential, (_a3 = pipelineOptions.audience) !== null && _a3 !== void 0 ? _a3 : StorageOAuthScopes), credential) : credential);
   return new Pipeline(factories, pipelineOptions);
 }
 var Pipeline;
@@ -64477,10 +64478,10 @@ var init_StorageClient = __esm({
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/tracing.js
 function convertTracingToRequestOptionsBase(options) {
-  var _a2, _b2;
+  var _a3, _b2;
   return {
     // By passing spanOptions if they exist at runtime, we're backwards compatible with @azure/core-tracing@preview.13 and earlier.
-    spanOptions: (_a2 = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _a2 === void 0 ? void 0 : _a2.spanOptions,
+    spanOptions: (_a3 = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _a3 === void 0 ? void 0 : _a3.spanOptions,
     tracingContext: (_b2 = options === null || options === void 0 ? void 0 : options.tracingOptions) === null || _b2 === void 0 ? void 0 : _b2.tracingContext
   };
 }
@@ -65546,9 +65547,9 @@ var init_BlobLeaseClient = __esm({
        * @returns Response data for acquire lease operation.
        */
       async acquireLease(duration2, options = {}) {
-        var _a2, _b2, _c2, _d2, _e2, _f;
+        var _a3, _b2, _c2, _d2, _e2, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-acquireLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -65574,9 +65575,9 @@ var init_BlobLeaseClient = __esm({
        * @returns Response data for change lease operation.
        */
       async changeLease(proposedLeaseId2, options = {}) {
-        var _a2, _b2, _c2, _d2, _e2, _f;
+        var _a3, _b2, _c2, _d2, _e2, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-changeLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -65604,9 +65605,9 @@ var init_BlobLeaseClient = __esm({
        * @returns Response data for release lease operation.
        */
       async releaseLease(options = {}) {
-        var _a2, _b2, _c2, _d2, _e2, _f;
+        var _a3, _b2, _c2, _d2, _e2, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-releaseLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -65631,9 +65632,9 @@ var init_BlobLeaseClient = __esm({
        * @returns Response data for renew lease operation.
        */
       async renewLease(options = {}) {
-        var _a2, _b2, _c2, _d2, _e2, _f;
+        var _a3, _b2, _c2, _d2, _e2, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-renewLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -65660,9 +65661,9 @@ var init_BlobLeaseClient = __esm({
        * @returns Response data for break lease operation.
        */
       async breakLease(breakPeriod2, options = {}) {
-        var _a2, _b2, _c2, _d2, _e2, _f;
+        var _a3, _b2, _c2, _d2, _e2, _f;
         const { span, updatedOptions } = createSpan2("BlobLeaseClient-breakLease", options);
-        if (this._isContainer && (((_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
+        if (this._isContainer && (((_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch) && ((_b2 = options.conditions) === null || _b2 === void 0 ? void 0 : _b2.ifMatch) !== ETagNone || ((_c2 = options.conditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch) && ((_d2 = options.conditions) === null || _d2 === void 0 ? void 0 : _d2.ifNoneMatch) !== ETagNone || ((_e2 = options.conditions) === null || _e2 === void 0 ? void 0 : _e2.tagConditions))) {
           throw new RangeError("The IfMatch, IfNoneMatch and tags access conditions are ignored by the service. Values other than undefined or their default values are not acceptable.");
         }
         try {
@@ -66725,8 +66726,8 @@ var init_AvroReadableFromStream = __esm({
         return this._position;
       }
       async read(size, options = {}) {
-        var _a2;
-        if ((_a2 = options.abortSignal) === null || _a2 === void 0 ? void 0 : _a2.aborted) {
+        var _a3;
+        if ((_a3 = options.abortSignal) === null || _a3 === void 0 ? void 0 : _a3.aborted) {
           throw ABORT_ERROR;
         }
         if (size < 0) {
@@ -68251,7 +68252,7 @@ var init_src10 = __esm({
 });
 
 // node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/utils.node.js
-import * as fs from "fs";
+import * as fs2 from "fs";
 import * as util2 from "util";
 async function streamToBuffer(stream, buffer, offset, end, encoding) {
   let pos = 0;
@@ -68313,17 +68314,17 @@ async function streamToBuffer2(stream, buffer, encoding) {
     stream.on("error", reject);
   });
 }
-async function readStreamToLocalFile(rs, file) {
+async function readStreamToLocalFile(rs2, file) {
   return new Promise((resolve3, reject) => {
-    const ws = fs.createWriteStream(file);
-    rs.on("error", (err) => {
+    const ws = fs2.createWriteStream(file);
+    rs2.on("error", (err) => {
       reject(err);
     });
     ws.on("error", (err) => {
       reject(err);
     });
     ws.on("close", resolve3);
-    rs.pipe(ws);
+    rs2.pipe(ws);
   });
 }
 var fsStat, fsCreateReadStream;
@@ -68331,8 +68332,8 @@ var init_utils_node = __esm({
   "node_modules/@azure/storage-blob/dist-esm/storage-blob/src/utils/utils.node.js"() {
     "use strict";
     init_constants2();
-    fsStat = util2.promisify(fs.stat);
-    fsCreateReadStream = fs.createReadStream;
+    fsStat = util2.promisify(fs2.stat);
+    fsCreateReadStream = fs2.createReadStream;
   }
 });
 
@@ -68524,13 +68525,13 @@ var init_Clients = __esm({
        * ```
        */
       async download(offset = 0, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         options.conditions = options.conditions || {};
         ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
         const { span, updatedOptions } = createSpan2("BlobClient-download", options);
         try {
-          const res = await this.blobContext.download(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          const res = await this.blobContext.download(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
             onDownloadProgress: isNode ? void 0 : options.onProgress
             // for Node.js, progress is reported by RetriableReadableStream
           }, range: offset === 0 && !count ? void 0 : rangeToString({ offset, count }), rangeGetContentMD5: options.rangeGetContentMD5, rangeGetContentCRC64: options.rangeGetContentCrc64, snapshot: options.snapshot, cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
@@ -68548,7 +68549,7 @@ var init_Clients = __esm({
             throw new RangeError(`File download response doesn't contain valid etag header`);
           }
           return new BlobDownloadResponse(wrappedRes, async (start) => {
-            var _a3;
+            var _a4;
             const updatedDownloadOptions = {
               leaseAccessConditions: options.conditions,
               modifiedAccessConditions: {
@@ -68556,7 +68557,7 @@ var init_Clients = __esm({
                 ifModifiedSince: options.conditions.ifModifiedSince,
                 ifNoneMatch: options.conditions.ifNoneMatch,
                 ifUnmodifiedSince: options.conditions.ifUnmodifiedSince,
-                ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions
+                ifTags: (_a4 = options.conditions) === null || _a4 === void 0 ? void 0 : _a4.tagConditions
               },
               range: rangeToString({
                 count: offset + res.contentLength - start,
@@ -68630,12 +68631,12 @@ var init_Clients = __esm({
        * @param options - Optional options to Get Properties operation.
        */
       async getProperties(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-getProperties", options);
         try {
           options.conditions = options.conditions || {};
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          const res = await this.blobContext.getProperties(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const res = await this.blobContext.getProperties(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           return Object.assign(Object.assign({}, res), { _response: res._response, objectReplicationDestinationPolicyId: res.objectReplicationPolicyId, objectReplicationSourceProperties: parseObjectReplicationRecord(res.objectReplicationRules) });
         } catch (e3) {
           span.setStatus({
@@ -68657,11 +68658,11 @@ var init_Clients = __esm({
        * @param options - Optional options to Blob Delete operation.
        */
       async delete(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-delete", options);
         options.conditions = options.conditions || {};
         try {
-          return await this.blobContext.delete(Object.assign({ abortSignal: options.abortSignal, deleteSnapshots: options.deleteSnapshots, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.delete(Object.assign({ abortSignal: options.abortSignal, deleteSnapshots: options.deleteSnapshots, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -68682,13 +68683,13 @@ var init_Clients = __esm({
        * @param options - Optional options to Blob Delete operation.
        */
       async deleteIfExists(options = {}) {
-        var _a2, _b2;
+        var _a3, _b2;
         const { span, updatedOptions } = createSpan2("BlobClient-deleteIfExists", options);
         try {
           const res = await this.delete(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e3) {
-          if (((_a2 = e3.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "BlobNotFound") {
+          if (((_a3 = e3.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "BlobNotFound") {
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: "Expected exception when deleting a blob or snapshot only if it exists."
@@ -68742,12 +68743,12 @@ var init_Clients = __esm({
        * @param options - Optional options to Blob Set HTTP Headers operation.
        */
       async setHTTPHeaders(blobHTTPHeaders, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-setHTTPHeaders", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.setHttpHeaders(Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setHttpHeaders(Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -68770,12 +68771,12 @@ var init_Clients = __esm({
        * @param options - Optional options to Set Metadata operation.
        */
       async setMetadata(metadata3, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-setMetadata", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.setMetadata(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: metadata3, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setMetadata(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: metadata3, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -68796,10 +68797,10 @@ var init_Clients = __esm({
        * @param options -
        */
       async setTags(tags2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-setTags", options);
         try {
-          return await this.blobContext.setTags(Object.assign(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)), { tags: toBlobTags(tags2) }));
+          return await this.blobContext.setTags(Object.assign(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)), { tags: toBlobTags(tags2) }));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -68816,10 +68817,10 @@ var init_Clients = __esm({
        * @param options -
        */
       async getTags(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-getTags", options);
         try {
-          const response = await this.blobContext.getTags(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const response = await this.blobContext.getTags(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, tags: toTags({ blobTagSet: response.blobTagSet }) || {} });
           return wrappedResponse;
         } catch (e3) {
@@ -68848,12 +68849,12 @@ var init_Clients = __esm({
        * @param options - Optional options to the Blob Create Snapshot operation.
        */
       async createSnapshot(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-createSnapshot", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blobContext.createSnapshot(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.createSnapshot(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -68984,12 +68985,12 @@ var init_Clients = __esm({
        * @param options -
        */
       async syncCopyFromURL(copySource2, options = {}) {
-        var _a2, _b2, _c2;
+        var _a3, _b2, _c2;
         const { span, updatedOptions } = createSpan2("BlobClient-syncCopyFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
-          return await this.blobContext.copyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, metadata: options.metadata, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.blobContext.copyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, metadata: options.metadata, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -69017,10 +69018,10 @@ var init_Clients = __esm({
        * @param options - Optional options to the Blob Set Tier operation.
        */
       async setAccessTier(tier2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobClient-setAccessTier", options);
         try {
-          return await this.blobContext.setTier(toAccessTier(tier2), Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), rehydratePriority: options.rehydratePriority }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blobContext.setTier(toAccessTier(tier2), Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), rehydratePriority: options.rehydratePriority }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -69195,12 +69196,12 @@ var init_Clients = __esm({
        * @param options - Optional options to the Blob Start Copy From URL operation.
        */
       async startCopyFromURL(copySource2, options = {}) {
-        var _a2, _b2, _c2;
+        var _a3, _b2, _c2;
         const { span, updatedOptions } = createSpan2("BlobClient-startCopyFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
-          return await this.blobContext.startCopyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.blobContext.startCopyFromURL(copySource2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -69363,12 +69364,12 @@ var init_Clients = __esm({
        * ```
        */
       async create(options = {}) {
-        var _a2, _b2, _c2;
+        var _a3, _b2, _c2;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-create", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.create(0, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b2 = options.immutabilityPolicy) === null || _b2 === void 0 ? void 0 : _b2.expiriesOn, immutabilityPolicyMode: (_c2 = options.immutabilityPolicy) === null || _c2 === void 0 ? void 0 : _c2.policyMode, legalHold: options.legalHold, blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.appendBlobContext.create(0, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b2 = options.immutabilityPolicy) === null || _b2 === void 0 ? void 0 : _b2.expiriesOn, immutabilityPolicyMode: (_c2 = options.immutabilityPolicy) === null || _c2 === void 0 ? void 0 : _c2.policyMode, legalHold: options.legalHold, blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -69387,14 +69388,14 @@ var init_Clients = __esm({
        * @param options -
        */
       async createIfNotExists(options = {}) {
-        var _a2, _b2;
+        var _a3, _b2;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-createIfNotExists", options);
         const conditions = { ifNoneMatch: ETagAny };
         try {
           const res = await this.create(Object.assign(Object.assign({}, updatedOptions), { conditions }));
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e3) {
-          if (((_a2 = e3.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "BlobAlreadyExists") {
+          if (((_a3 = e3.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "BlobAlreadyExists") {
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: "Expected exception when creating a blob only if it does not already exist."
@@ -69416,11 +69417,11 @@ var init_Clients = __esm({
        * @param options -
        */
       async seal(options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-seal", options);
         options.conditions = options.conditions || {};
         try {
-          return await this.appendBlobContext.seal(Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.appendBlobContext.seal(Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -69456,12 +69457,12 @@ var init_Clients = __esm({
        * ```
        */
       async appendBlock(body2, contentLength2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-appendBlock", options);
         options.conditions = options.conditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.appendBlock(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          return await this.appendBlobContext.appendBlock(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, appendPositionAccessConditions: options.conditions, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, transactionalContentMD5: options.transactionalContentMD5, transactionalContentCrc64: options.transactionalContentCrc64, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
@@ -69489,13 +69490,13 @@ var init_Clients = __esm({
        * @param options -
        */
       async appendBlockFromURL(sourceURL, sourceOffset, count, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("AppendBlobClient-appendBlockFromURL", options);
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.appendBlobContext.appendBlockFromUrl(sourceURL, 0, Object.assign({ abortSignal: options.abortSignal, sourceRange: rangeToString({ offset: sourceOffset, count }), sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, appendPositionAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.appendBlobContext.appendBlockFromUrl(sourceURL, 0, Object.assign({ abortSignal: options.abortSignal, sourceRange: rangeToString({ offset: sourceOffset, count }), sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, appendPositionAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -69600,7 +69601,7 @@ var init_Clients = __esm({
        * @param options -
        */
       async query(query, options = {}) {
-        var _a2;
+        var _a3;
         ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
         const { span, updatedOptions } = createSpan2("BlockBlobClient-query", options);
         try {
@@ -69613,7 +69614,7 @@ var init_Clients = __esm({
             expression: query,
             inputSerialization: toQuerySerialization(options.inputTextConfiguration),
             outputSerialization: toQuerySerialization(options.outputTextConfiguration)
-          }, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
+          }, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey }, convertTracingToRequestOptionsBase(updatedOptions)));
           return new BlobQueryResponse(response, {
             abortSignal: options.abortSignal,
             onProgress: options.onProgress,
@@ -69657,12 +69658,12 @@ var init_Clients = __esm({
        * ```
        */
       async upload(body2, contentLength2, options = {}) {
-        var _a2, _b2, _c2;
+        var _a3, _b2, _c2;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-upload", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blockBlobContext.upload(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          return await this.blockBlobContext.upload(contentLength2, body2, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b2 = options.immutabilityPolicy) === null || _b2 === void 0 ? void 0 : _b2.expiriesOn, immutabilityPolicyMode: (_c2 = options.immutabilityPolicy) === null || _c2 === void 0 ? void 0 : _c2.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
@@ -69694,13 +69695,13 @@ var init_Clients = __esm({
        * @param options - Optional parameters.
        */
       async syncUploadFromURL(sourceURL, options = {}) {
-        var _a2, _b2, _c2, _d2, _e2;
+        var _a3, _b2, _c2, _d2, _e2;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-syncUploadFromURL", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
           return await this.blockBlobContext.putBlobFromUrl(0, sourceURL, Object.assign(Object.assign(Object.assign({}, options), { blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: options.conditions.tagConditions }), sourceModifiedAccessConditions: {
-            sourceIfMatch: (_a2 = options.sourceConditions) === null || _a2 === void 0 ? void 0 : _a2.ifMatch,
+            sourceIfMatch: (_a3 = options.sourceConditions) === null || _a3 === void 0 ? void 0 : _a3.ifMatch,
             sourceIfModifiedSince: (_b2 = options.sourceConditions) === null || _b2 === void 0 ? void 0 : _b2.ifModifiedSince,
             sourceIfNoneMatch: (_c2 = options.sourceConditions) === null || _c2 === void 0 ? void 0 : _c2.ifNoneMatch,
             sourceIfUnmodifiedSince: (_d2 = options.sourceConditions) === null || _d2 === void 0 ? void 0 : _d2.ifUnmodifiedSince,
@@ -69793,12 +69794,12 @@ var init_Clients = __esm({
        * @returns Response data for the Block Blob Commit Block List operation.
        */
       async commitBlockList(blocks2, options = {}) {
-        var _a2, _b2, _c2;
+        var _a3, _b2, _c2;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("BlockBlobClient-commitBlockList", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.blockBlobContext.commitBlockList({ latest: blocks2 }, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b2 = options.immutabilityPolicy) === null || _b2 === void 0 ? void 0 : _b2.expiriesOn, immutabilityPolicyMode: (_c2 = options.immutabilityPolicy) === null || _c2 === void 0 ? void 0 : _c2.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.blockBlobContext.commitBlockList({ latest: blocks2 }, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b2 = options.immutabilityPolicy) === null || _b2 === void 0 ? void 0 : _b2.expiriesOn, immutabilityPolicyMode: (_c2 = options.immutabilityPolicy) === null || _c2 === void 0 ? void 0 : _c2.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -69820,10 +69821,10 @@ var init_Clients = __esm({
        * @returns Response data for the Block Blob Get Block List operation.
        */
       async getBlockList(listType2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlockBlobClient-getBlockList", options);
         try {
-          const res = await this.blockBlobContext.getBlockList(listType2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          const res = await this.blockBlobContext.getBlockList(listType2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
           if (!res.committedBlocks) {
             res.committedBlocks = [];
           }
@@ -70173,12 +70174,12 @@ var init_Clients = __esm({
        * @returns Response data for the Page Blob Create operation.
        */
       async create(size, options = {}) {
-        var _a2, _b2, _c2;
+        var _a3, _b2, _c2;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-create", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.create(0, size, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, blobSequenceNumber: options.blobSequenceNumber, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b2 = options.immutabilityPolicy) === null || _b2 === void 0 ? void 0 : _b2.expiriesOn, immutabilityPolicyMode: (_c2 = options.immutabilityPolicy) === null || _c2 === void 0 ? void 0 : _c2.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.create(0, size, Object.assign({ abortSignal: options.abortSignal, blobHttpHeaders: options.blobHTTPHeaders, blobSequenceNumber: options.blobSequenceNumber, leaseAccessConditions: options.conditions, metadata: options.metadata, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope, immutabilityPolicyExpiry: (_b2 = options.immutabilityPolicy) === null || _b2 === void 0 ? void 0 : _b2.expiriesOn, immutabilityPolicyMode: (_c2 = options.immutabilityPolicy) === null || _c2 === void 0 ? void 0 : _c2.policyMode, legalHold: options.legalHold, tier: toAccessTier(options.tier), blobTagsString: toBlobTagsString(options.tags) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -70199,14 +70200,14 @@ var init_Clients = __esm({
        * @param options -
        */
       async createIfNotExists(size, options = {}) {
-        var _a2, _b2;
+        var _a3, _b2;
         const { span, updatedOptions } = createSpan2("PageBlobClient-createIfNotExists", options);
         try {
           const conditions = { ifNoneMatch: ETagAny };
           const res = await this.create(size, Object.assign(Object.assign({}, options), { conditions, tracingOptions: updatedOptions.tracingOptions }));
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e3) {
-          if (((_a2 = e3.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "BlobAlreadyExists") {
+          if (((_a3 = e3.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "BlobAlreadyExists") {
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: "Expected exception when creating a blob only if it does not already exist."
@@ -70233,12 +70234,12 @@ var init_Clients = __esm({
        * @returns Response data for the Page Blob Upload Pages operation.
        */
       async uploadPages(body2, offset, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-uploadPages", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.uploadPages(count, body2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), requestOptions: {
+          return await this.pageBlobContext.uploadPages(count, body2, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), requestOptions: {
             onUploadProgress: options.onProgress
           }, range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, transactionalContentMD5: options.transactionalContentMD5, transactionalContentCrc64: options.transactionalContentCrc64, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
@@ -70263,13 +70264,13 @@ var init_Clients = __esm({
        * @param options -
        */
       async uploadPagesFromURL(sourceURL, sourceOffset, destOffset, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         options.sourceConditions = options.sourceConditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-uploadPagesFromURL", options);
         try {
           ensureCpkIfSpecified(options.customerProvidedKey, this.isHttps);
-          return await this.pageBlobContext.uploadPagesFromURL(sourceURL, rangeToString({ offset: sourceOffset, count }), 0, rangeToString({ offset: destOffset, count }), Object.assign({ abortSignal: options.abortSignal, sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, sequenceNumberAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), sourceModifiedAccessConditions: {
+          return await this.pageBlobContext.uploadPagesFromURL(sourceURL, rangeToString({ offset: sourceOffset, count }), 0, rangeToString({ offset: destOffset, count }), Object.assign({ abortSignal: options.abortSignal, sourceContentMD5: options.sourceContentMD5, sourceContentCrc64: options.sourceContentCrc64, leaseAccessConditions: options.conditions, sequenceNumberAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), sourceModifiedAccessConditions: {
             sourceIfMatch: options.sourceConditions.ifMatch,
             sourceIfModifiedSince: options.sourceConditions.ifModifiedSince,
             sourceIfNoneMatch: options.sourceConditions.ifNoneMatch,
@@ -70295,11 +70296,11 @@ var init_Clients = __esm({
        * @returns Response data for the Page Blob Clear Pages operation.
        */
       async clearPages(offset = 0, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-clearPages", options);
         try {
-          return await this.pageBlobContext.clearPages(0, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.clearPages(0, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), range: rangeToString({ offset, count }), sequenceNumberAccessConditions: options.conditions, cpkInfo: options.customerProvidedKey, encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -70320,11 +70321,11 @@ var init_Clients = __esm({
        * @returns Response data for the Page Blob Get Ranges operation.
        */
       async getPageRanges(offset = 0, count, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRanges", options);
         try {
-          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -70348,10 +70349,10 @@ var init_Clients = __esm({
        * @param options - Options to PageBlob Get Page Ranges Segment operation.
        */
       async listPageRangesSegment(offset = 0, count, marker2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesSegment", options);
         try {
-          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), range: rangeToString({ offset, count }), marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.getPageRanges(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), range: rangeToString({ offset, count }), marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -70397,7 +70398,7 @@ var init_Clients = __esm({
        */
       listPageRangeItems(offset = 0, count, options = {}) {
         return __asyncGenerator(this, arguments, function* listPageRangeItems_1() {
-          var e_1, _a2;
+          var e_1, _a3;
           let marker2;
           try {
             for (var _b2 = __asyncValues(this.listPageRangeItemSegments(offset, count, marker2, options)), _c2; _c2 = yield __await(_b2.next()), !_c2.done; ) {
@@ -70408,8 +70409,8 @@ var init_Clients = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c2 && !_c2.done && (_a2 = _b2.return))
-                yield __await(_a2.call(_b2));
+              if (_c2 && !_c2.done && (_a3 = _b2.return))
+                yield __await(_a3.call(_b2));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -70523,11 +70524,11 @@ var init_Clients = __esm({
        * @returns Response data for the Page Blob Get Page Range Diff operation.
        */
       async getPageRangesDiff(offset, count, prevSnapshot, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesDiff", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), prevsnapshot: prevSnapshot, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), prevsnapshot: prevSnapshot, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -70553,10 +70554,10 @@ var init_Clients = __esm({
        * @param options - Options to the Page Blob Get Page Ranges Diff operation.
        */
       async listPageRangesDiffSegment(offset, count, prevSnapshotOrUrl, marker2, options) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("PageBlobClient-getPageRangesDiffSegment", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal, leaseAccessConditions: options === null || options === void 0 ? void 0 : options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.conditions), { ifTags: (_a2 = options === null || options === void 0 ? void 0 : options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), prevsnapshot: prevSnapshotOrUrl, range: rangeToString({
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options === null || options === void 0 ? void 0 : options.abortSignal, leaseAccessConditions: options === null || options === void 0 ? void 0 : options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.conditions), { ifTags: (_a3 = options === null || options === void 0 ? void 0 : options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), prevsnapshot: prevSnapshotOrUrl, range: rangeToString({
             offset,
             count
           }), marker: marker2, maxPageSize: options === null || options === void 0 ? void 0 : options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
@@ -70608,7 +70609,7 @@ var init_Clients = __esm({
        */
       listPageRangeDiffItems(offset, count, prevSnapshotOrUrl, options) {
         return __asyncGenerator(this, arguments, function* listPageRangeDiffItems_1() {
-          var e_2, _a2;
+          var e_2, _a3;
           let marker2;
           try {
             for (var _b2 = __asyncValues(this.listPageRangeDiffItemSegments(offset, count, prevSnapshotOrUrl, marker2, options)), _c2; _c2 = yield __await(_b2.next()), !_c2.done; ) {
@@ -70619,8 +70620,8 @@ var init_Clients = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c2 && !_c2.done && (_a2 = _b2.return))
-                yield __await(_a2.call(_b2));
+              if (_c2 && !_c2.done && (_a3 = _b2.return))
+                yield __await(_a3.call(_b2));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -70735,11 +70736,11 @@ var init_Clients = __esm({
        * @returns Response data for the Page Blob Get Page Range Diff operation.
        */
       async getPageRangesDiffForManagedDisks(offset, count, prevSnapshotUrl2, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-GetPageRangesDiffForManagedDisks", options);
         try {
-          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), prevSnapshotUrl: prevSnapshotUrl2, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
+          return await this.pageBlobContext.getPageRangesDiff(Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), prevSnapshotUrl: prevSnapshotUrl2, range: rangeToString({ offset, count }) }, convertTracingToRequestOptionsBase(updatedOptions))).then(rangeResponseFromModel);
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -70759,11 +70760,11 @@ var init_Clients = __esm({
        * @returns Response data for the Page Blob Resize operation.
        */
       async resize(size, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-resize", options);
         try {
-          return await this.pageBlobContext.resize(size, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }), encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.resize(size, Object.assign({ abortSignal: options.abortSignal, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }), encryptionScope: options.encryptionScope }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -70784,11 +70785,11 @@ var init_Clients = __esm({
        * @returns Response data for the Page Blob Update Sequence Number operation.
        */
       async updateSequenceNumber(sequenceNumberAction2, sequenceNumber, options = {}) {
-        var _a2;
+        var _a3;
         options.conditions = options.conditions || {};
         const { span, updatedOptions } = createSpan2("PageBlobClient-updateSequenceNumber", options);
         try {
-          return await this.pageBlobContext.updateSequenceNumber(sequenceNumberAction2, Object.assign({ abortSignal: options.abortSignal, blobSequenceNumber: sequenceNumber, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.updateSequenceNumber(sequenceNumberAction2, Object.assign({ abortSignal: options.abortSignal, blobSequenceNumber: sequenceNumber, leaseAccessConditions: options.conditions, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -70813,10 +70814,10 @@ var init_Clients = __esm({
        * @returns Response data for the Page Blob Copy Incremental operation.
        */
       async startCopyIncremental(copySource2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("PageBlobClient-startCopyIncremental", options);
         try {
-          return await this.pageBlobContext.copyIncremental(copySource2, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a2 = options.conditions) === null || _a2 === void 0 ? void 0 : _a2.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
+          return await this.pageBlobContext.copyIncremental(copySource2, Object.assign({ abortSignal: options.abortSignal, modifiedAccessConditions: Object.assign(Object.assign({}, options.conditions), { ifTags: (_a3 = options.conditions) === null || _a3 === void 0 ? void 0 : _a3.tagConditions }) }, convertTracingToRequestOptionsBase(updatedOptions)));
         } catch (e3) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -71508,13 +71509,13 @@ var init_ContainerClient = __esm({
        * @param options -
        */
       async createIfNotExists(options = {}) {
-        var _a2, _b2;
+        var _a3, _b2;
         const { span, updatedOptions } = createSpan2("ContainerClient-createIfNotExists", options);
         try {
           const res = await this.create(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e3) {
-          if (((_a2 = e3.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "ContainerAlreadyExists") {
+          if (((_a3 = e3.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "ContainerAlreadyExists") {
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: "Expected exception when creating a container only if it does not already exist."
@@ -71668,13 +71669,13 @@ var init_ContainerClient = __esm({
        * @param options - Options to Container Delete operation.
        */
       async deleteIfExists(options = {}) {
-        var _a2, _b2;
+        var _a3, _b2;
         const { span, updatedOptions } = createSpan2("ContainerClient-deleteIfExists", options);
         try {
           const res = await this.delete(updatedOptions);
           return Object.assign(Object.assign({ succeeded: true }, res), { _response: res._response });
         } catch (e3) {
-          if (((_a2 = e3.details) === null || _a2 === void 0 ? void 0 : _a2.errorCode) === "ContainerNotFound") {
+          if (((_a3 = e3.details) === null || _a3 === void 0 ? void 0 : _a3.errorCode) === "ContainerNotFound") {
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: "Expected exception when deleting a container only if it exists."
@@ -71944,14 +71945,14 @@ var init_ContainerClient = __esm({
        * @param options - Options to Container List Blob Hierarchy Segment operation.
        */
       async listBlobHierarchySegment(delimiter2, marker2, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("ContainerClient-listBlobHierarchySegment", options);
         try {
           const response = await this.containerContext.listBlobHierarchySegment(delimiter2, Object.assign(Object.assign({ marker: marker2 }, options), convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: Object.assign(Object.assign({}, response._response), { parsedBody: ConvertInternalResponseOfListBlobHierarchy(response._response.parsedBody) }), segment: Object.assign(Object.assign({}, response.segment), { blobItems: response.segment.blobItems.map((blobItemInteral) => {
             const blobItem = Object.assign(Object.assign({}, blobItemInteral), { name: BlobNameToString(blobItemInteral.name), tags: toTags(blobItemInteral.blobTags), objectReplicationSourceProperties: parseObjectReplicationRecord(blobItemInteral.objectReplicationMetadata) });
             return blobItem;
-          }), blobPrefixes: (_a2 = response.segment.blobPrefixes) === null || _a2 === void 0 ? void 0 : _a2.map((blobPrefixInternal) => {
+          }), blobPrefixes: (_a3 = response.segment.blobPrefixes) === null || _a3 === void 0 ? void 0 : _a3.map((blobPrefixInternal) => {
             const blobPrefix = Object.assign(Object.assign({}, blobPrefixInternal), { name: BlobNameToString(blobPrefixInternal.name) });
             return blobPrefix;
           }) }) });
@@ -71997,7 +71998,7 @@ var init_ContainerClient = __esm({
        */
       listItems(options = {}) {
         return __asyncGenerator(this, arguments, function* listItems_1() {
-          var e_1, _a2;
+          var e_1, _a3;
           let marker2;
           try {
             for (var _b2 = __asyncValues(this.listSegments(marker2, options)), _c2; _c2 = yield __await(_b2.next()), !_c2.done; ) {
@@ -72008,8 +72009,8 @@ var init_ContainerClient = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c2 && !_c2.done && (_a2 = _b2.return))
-                yield __await(_a2.call(_b2));
+              if (_c2 && !_c2.done && (_a3 = _b2.return))
+                yield __await(_a3.call(_b2));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -72178,7 +72179,7 @@ var init_ContainerClient = __esm({
        */
       listItemsByHierarchy(delimiter2, options = {}) {
         return __asyncGenerator(this, arguments, function* listItemsByHierarchy_1() {
-          var e_2, _a2;
+          var e_2, _a3;
           let marker2;
           try {
             for (var _b2 = __asyncValues(this.listHierarchySegments(delimiter2, marker2, options)), _c2; _c2 = yield __await(_b2.next()), !_c2.done; ) {
@@ -72197,8 +72198,8 @@ var init_ContainerClient = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c2 && !_c2.done && (_a2 = _b2.return))
-                yield __await(_a2.call(_b2));
+              if (_c2 && !_c2.done && (_a3 = _b2.return))
+                yield __await(_a3.call(_b2));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -72367,9 +72368,9 @@ var init_ContainerClient = __esm({
         try {
           const response = await this.containerContext.filterBlobs(Object.assign({ abortSignal: options.abortSignal, where: tagFilterSqlExpression, marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, blobs: response.blobs.map((blob) => {
-            var _a2;
+            var _a3;
             let tagValue = "";
-            if (((_a2 = blob.tags) === null || _a2 === void 0 ? void 0 : _a2.blobTagSet.length) === 1) {
+            if (((_a3 = blob.tags) === null || _a3 === void 0 ? void 0 : _a3.blobTagSet.length) === 1) {
               tagValue = blob.tags.blobTagSet[0].value;
             }
             return Object.assign(Object.assign({}, blob), { tags: toTags(blob.tags), tagValue });
@@ -72425,7 +72426,7 @@ var init_ContainerClient = __esm({
        */
       findBlobsByTagsItems(tagFilterSqlExpression, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsItems_1() {
-          var e_3, _a2;
+          var e_3, _a3;
           let marker2;
           try {
             for (var _b2 = __asyncValues(this.findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options)), _c2; _c2 = yield __await(_b2.next()), !_c2.done; ) {
@@ -72436,8 +72437,8 @@ var init_ContainerClient = __esm({
             e_3 = { error: e_3_1 };
           } finally {
             try {
-              if (_c2 && !_c2.done && (_a2 = _b2.return))
-                yield __await(_a2.call(_b2));
+              if (_c2 && !_c2.done && (_a3 = _b2.return))
+                yield __await(_a3.call(_b2));
             } finally {
               if (e_3)
                 throw e_3.error;
@@ -73145,12 +73146,12 @@ var init_BlobServiceClient = __esm({
       /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
       // @ts-ignore Need to hide this interface for now. Make it public and turn on the live tests for it when the service is ready.
       async renameContainer(sourceContainerName2, destinationContainerName, options = {}) {
-        var _a2;
+        var _a3;
         const { span, updatedOptions } = createSpan2("BlobServiceClient-renameContainer", options);
         try {
           const containerClient = this.getContainerClient(destinationContainerName);
           const containerContext = new Container(containerClient["storageClientContext"]);
-          const containerRenameResponse = await containerContext.rename(sourceContainerName2, Object.assign(Object.assign({}, updatedOptions), { sourceLeaseId: (_a2 = options.sourceCondition) === null || _a2 === void 0 ? void 0 : _a2.leaseId }));
+          const containerRenameResponse = await containerContext.rename(sourceContainerName2, Object.assign(Object.assign({}, updatedOptions), { sourceLeaseId: (_a3 = options.sourceCondition) === null || _a3 === void 0 ? void 0 : _a3.leaseId }));
           return { containerClient, containerRenameResponse };
         } catch (e3) {
           span.setStatus({
@@ -73305,9 +73306,9 @@ var init_BlobServiceClient = __esm({
         try {
           const response = await this.serviceContext.filterBlobs(Object.assign({ abortSignal: options.abortSignal, where: tagFilterSqlExpression, marker: marker2, maxPageSize: options.maxPageSize }, convertTracingToRequestOptionsBase(updatedOptions)));
           const wrappedResponse = Object.assign(Object.assign({}, response), { _response: response._response, blobs: response.blobs.map((blob) => {
-            var _a2;
+            var _a3;
             let tagValue = "";
-            if (((_a2 = blob.tags) === null || _a2 === void 0 ? void 0 : _a2.blobTagSet.length) === 1) {
+            if (((_a3 = blob.tags) === null || _a3 === void 0 ? void 0 : _a3.blobTagSet.length) === 1) {
               tagValue = blob.tags.blobTagSet[0].value;
             }
             return Object.assign(Object.assign({}, blob), { tags: toTags(blob.tags), tagValue });
@@ -73363,7 +73364,7 @@ var init_BlobServiceClient = __esm({
        */
       findBlobsByTagsItems(tagFilterSqlExpression, options = {}) {
         return __asyncGenerator(this, arguments, function* findBlobsByTagsItems_1() {
-          var e_1, _a2;
+          var e_1, _a3;
           let marker2;
           try {
             for (var _b2 = __asyncValues(this.findBlobsByTagsSegments(tagFilterSqlExpression, marker2, options)), _c2; _c2 = yield __await(_b2.next()), !_c2.done; ) {
@@ -73374,8 +73375,8 @@ var init_BlobServiceClient = __esm({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c2 && !_c2.done && (_a2 = _b2.return))
-                yield __await(_a2.call(_b2));
+              if (_c2 && !_c2.done && (_a3 = _b2.return))
+                yield __await(_a3.call(_b2));
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -73518,7 +73519,7 @@ var init_BlobServiceClient = __esm({
        */
       listItems(options = {}) {
         return __asyncGenerator(this, arguments, function* listItems_1() {
-          var e_2, _a2;
+          var e_2, _a3;
           let marker2;
           try {
             for (var _b2 = __asyncValues(this.listSegments(marker2, options)), _c2; _c2 = yield __await(_b2.next()), !_c2.done; ) {
@@ -73529,8 +73530,8 @@ var init_BlobServiceClient = __esm({
             e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (_c2 && !_c2.done && (_a2 = _b2.return))
-                yield __await(_a2.call(_b2));
+              if (_c2 && !_c2.done && (_a3 = _b2.return))
+                yield __await(_a3.call(_b2));
             } finally {
               if (e_2)
                 throw e_2.error;
@@ -74075,7 +74076,7 @@ var require_downloadUtils = __commonJS({
     var http_client_1 = require_lib();
     var storage_blob_1 = (init_src11(), __toCommonJS(src_exports2));
     var buffer = __importStar(__require("buffer"));
-    var fs3 = __importStar(__require("fs"));
+    var fs4 = __importStar(__require("fs"));
     var stream = __importStar(__require("stream"));
     var util3 = __importStar(__require("util"));
     var utils = __importStar(require_cacheUtils());
@@ -74186,7 +74187,7 @@ var require_downloadUtils = __commonJS({
     exports.DownloadProgress = DownloadProgress;
     function downloadCacheHttpClient(archiveLocation, archivePath) {
       return __awaiter(this, void 0, void 0, function* () {
-        const writeStream = fs3.createWriteStream(archivePath);
+        const writeStream = fs4.createWriteStream(archivePath);
         const httpClient = new http_client_1.HttpClient("actions/cache");
         const downloadResponse = yield (0, requestUtils_1.retryHttpClientResponse)("downloadCache", () => __awaiter(this, void 0, void 0, function* () {
           return httpClient.get(archiveLocation);
@@ -74210,9 +74211,9 @@ var require_downloadUtils = __commonJS({
     }
     exports.downloadCacheHttpClient = downloadCacheHttpClient;
     function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options) {
-      var _a2;
+      var _a3;
       return __awaiter(this, void 0, void 0, function* () {
-        const archiveDescriptor = yield fs3.promises.open(archivePath, "w");
+        const archiveDescriptor = yield fs4.promises.open(archivePath, "w");
         const httpClient = new http_client_1.HttpClient("actions/cache", void 0, {
           socketTimeout: options.timeoutInMs,
           keepAlive: true
@@ -74259,7 +74260,7 @@ var require_downloadUtils = __commonJS({
           while (nextDownload = downloads.pop()) {
             activeDownloads[nextDownload.offset] = nextDownload.promiseGetter();
             actives++;
-            if (actives >= ((_a2 = options.downloadConcurrency) !== null && _a2 !== void 0 ? _a2 : 10)) {
+            if (actives >= ((_a3 = options.downloadConcurrency) !== null && _a3 !== void 0 ? _a3 : 10)) {
               yield waitAndWrite();
             }
           }
@@ -74312,7 +74313,7 @@ var require_downloadUtils = __commonJS({
       });
     }
     function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
-      var _a2;
+      var _a3;
       return __awaiter(this, void 0, void 0, function* () {
         const client = new storage_blob_1.BlockBlobClient(archiveLocation, void 0, {
           retryOptions: {
@@ -74322,14 +74323,14 @@ var require_downloadUtils = __commonJS({
           }
         });
         const properties = yield client.getProperties();
-        const contentLength2 = (_a2 = properties.contentLength) !== null && _a2 !== void 0 ? _a2 : -1;
+        const contentLength2 = (_a3 = properties.contentLength) !== null && _a3 !== void 0 ? _a3 : -1;
         if (contentLength2 < 0) {
           core2.debug("Unable to determine content length, downloading file with http-client...");
           yield downloadCacheHttpClient(archiveLocation, archivePath);
         } else {
           const maxSegmentSize = Math.min(134217728, buffer.constants.MAX_LENGTH);
           const downloadProgress = new DownloadProgress(contentLength2);
-          const fd = fs3.openSync(archivePath, "w");
+          const fd = fs4.openSync(archivePath, "w");
           try {
             downloadProgress.startDisplayTimer();
             const controller = new abort_controller_1.AbortController();
@@ -74347,12 +74348,12 @@ var require_downloadUtils = __commonJS({
                 controller.abort();
                 throw new Error("Aborting cache download as the download time exceeded the timeout.");
               } else if (Buffer.isBuffer(result)) {
-                fs3.writeFileSync(fd, result);
+                fs4.writeFileSync(fd, result);
               }
             }
           } finally {
             downloadProgress.stopDisplayTimer();
-            fs3.closeSync(fd);
+            fs4.closeSync(fd);
           }
         }
       });
@@ -74542,7 +74543,7 @@ var require_cacheHttpClient = __commonJS({
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
     var crypto5 = __importStar(__require("crypto"));
-    var fs3 = __importStar(__require("fs"));
+    var fs4 = __importStar(__require("fs"));
     var url_1 = __require("url");
     var utils = __importStar(require_cacheUtils());
     var downloadUtils_1 = require_downloadUtils();
@@ -74690,7 +74691,7 @@ Other caches with similar key:`);
       return __awaiter(this, void 0, void 0, function* () {
         const fileSize = utils.getArchiveFileSizeInBytes(archivePath);
         const resourceUrl = getCacheApiUrl(`caches/${cacheId.toString()}`);
-        const fd = fs3.openSync(archivePath, "r");
+        const fd = fs4.openSync(archivePath, "r");
         const uploadOptions = (0, options_1.getUploadOptions)(options);
         const concurrency = utils.assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
         const maxChunkSize = utils.assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
@@ -74704,7 +74705,7 @@ Other caches with similar key:`);
               const start = offset;
               const end = offset + chunkSize - 1;
               offset += maxChunkSize;
-              yield uploadChunk(httpClient, resourceUrl, () => fs3.createReadStream(archivePath, {
+              yield uploadChunk(httpClient, resourceUrl, () => fs4.createReadStream(archivePath, {
                 fd,
                 start,
                 end,
@@ -74715,7 +74716,7 @@ Other caches with similar key:`);
             }
           })));
         } finally {
-          fs3.closeSync(fd);
+          fs4.closeSync(fd);
         }
         return;
       });
@@ -74813,7 +74814,7 @@ var require_tar = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.createTar = exports.extractTar = exports.listTar = void 0;
     var exec_1 = require_exec();
-    var io2 = __importStar(require_io());
+    var io = __importStar(require_io());
     var fs_1 = __require("fs");
     var path15 = __importStar(__require("path"));
     var utils = __importStar(require_cacheUtils());
@@ -74833,12 +74834,12 @@ var require_tar = __commonJS({
             break;
           }
           case "darwin": {
-            const gnuTar = yield io2.which("gtar", false);
+            const gnuTar = yield io.which("gtar", false);
             if (gnuTar) {
               return { path: gnuTar, type: constants_1.ArchiveToolType.GNU };
             } else {
               return {
-                path: yield io2.which("tar", true),
+                path: yield io.which("tar", true),
                 type: constants_1.ArchiveToolType.BSD
               };
             }
@@ -74847,7 +74848,7 @@ var require_tar = __commonJS({
             break;
         }
         return {
-          path: yield io2.which("tar", true),
+          path: yield io.which("tar", true),
           type: constants_1.ArchiveToolType.GNU
         };
       });
@@ -74902,8 +74903,8 @@ var require_tar = __commonJS({
       });
     }
     function getWorkingDirectory() {
-      var _a2;
-      return (_a2 = process.env["GITHUB_WORKSPACE"]) !== null && _a2 !== void 0 ? _a2 : process.cwd();
+      var _a3;
+      return (_a3 = process.env["GITHUB_WORKSPACE"]) !== null && _a3 !== void 0 ? _a3 : process.cwd();
     }
     function getDecompressionProgram(tarPath, compressionMethod, archivePath) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -74978,7 +74979,7 @@ var require_tar = __commonJS({
     function extractTar2(archivePath, compressionMethod) {
       return __awaiter(this, void 0, void 0, function* () {
         const workingDirectory = getWorkingDirectory();
-        yield io2.mkdirP(workingDirectory);
+        yield io.mkdirP(workingDirectory);
         const commands = yield getCommands(compressionMethod, "extract", archivePath);
         yield execCommands(commands);
       });
@@ -75156,7 +75157,7 @@ var require_cache2 = __commonJS({
     }
     exports.restoreCache = restoreCache3;
     function saveCache3(paths, key, options, enableCrossOsArchive = false) {
-      var _a2, _b2, _c2, _d2, _e2;
+      var _a3, _b2, _c2, _d2, _e2;
       return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(key);
@@ -75188,7 +75189,7 @@ var require_cache2 = __commonJS({
             enableCrossOsArchive,
             cacheSize: archiveFileSize
           });
-          if ((_a2 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a2 === void 0 ? void 0 : _a2.cacheId) {
+          if ((_a3 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a3 === void 0 ? void 0 : _a3.cacheId) {
             cacheId = (_b2 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _b2 === void 0 ? void 0 : _b2.cacheId;
           } else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) {
             throw new Error((_d2 = (_c2 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c2 === void 0 ? void 0 : _c2.message) !== null && _d2 !== void 0 ? _d2 : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
@@ -75665,7 +75666,7 @@ var require_internal_pattern2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Pattern = void 0;
-    var os4 = __importStar(__require("os"));
+    var os5 = __importStar(__require("os"));
     var path15 = __importStar(__require("path"));
     var pathHelper = __importStar(require_internal_path_helper2());
     var assert_1 = __importDefault(__require("assert"));
@@ -75758,7 +75759,7 @@ var require_internal_pattern2 = __commonJS({
         if (pattern === "." || pattern.startsWith(`.${path15.sep}`)) {
           pattern = _Pattern.globEscape(process.cwd()) + pattern.substr(1);
         } else if (pattern === "~" || pattern.startsWith(`~${path15.sep}`)) {
-          homedir = homedir || os4.homedir();
+          homedir = homedir || os5.homedir();
           assert_1.default(homedir, "Unable to determine HOME directory");
           assert_1.default(pathHelper.hasAbsoluteRoot(homedir), `Expected HOME directory to be a rooted path. Actual '${homedir}'`);
           pattern = _Pattern.globEscape(homedir) + pattern.substr(1);
@@ -75971,7 +75972,7 @@ var require_internal_globber2 = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DefaultGlobber = void 0;
     var core2 = __importStar(require_core());
-    var fs3 = __importStar(__require("fs"));
+    var fs4 = __importStar(__require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper2());
     var path15 = __importStar(__require("path"));
     var patternHelper = __importStar(require_internal_pattern_helper2());
@@ -75989,7 +75990,7 @@ var require_internal_globber2 = __commonJS({
         return this.searchPaths.slice();
       }
       glob() {
-        var e_1, _a2;
+        var e_1, _a3;
         return __awaiter(this, void 0, void 0, function* () {
           const result = [];
           try {
@@ -76001,8 +76002,8 @@ var require_internal_globber2 = __commonJS({
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (_c2 && !_c2.done && (_a2 = _b2.return))
-                yield _a2.call(_b2);
+              if (_c2 && !_c2.done && (_a3 = _b2.return))
+                yield _a3.call(_b2);
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -76025,7 +76026,7 @@ var require_internal_globber2 = __commonJS({
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
             core2.debug(`Search path '${searchPath}'`);
             try {
-              yield __await2(fs3.promises.lstat(searchPath));
+              yield __await2(fs4.promises.lstat(searchPath));
             } catch (err) {
               if (err.code === "ENOENT") {
                 continue;
@@ -76056,7 +76057,7 @@ var require_internal_globber2 = __commonJS({
                 continue;
               }
               const childLevel = item.level + 1;
-              const childItems = (yield __await2(fs3.promises.readdir(item.path))).map((x3) => new internal_search_state_1.SearchState(path15.join(item.path, x3), childLevel));
+              const childItems = (yield __await2(fs4.promises.readdir(item.path))).map((x3) => new internal_search_state_1.SearchState(path15.join(item.path, x3), childLevel));
               stack.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
               yield yield __await2(item.path);
@@ -76091,7 +76092,7 @@ var require_internal_globber2 = __commonJS({
           let stats;
           if (options.followSymbolicLinks) {
             try {
-              stats = yield fs3.promises.stat(item.path);
+              stats = yield fs4.promises.stat(item.path);
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
@@ -76103,10 +76104,10 @@ var require_internal_globber2 = __commonJS({
               throw err;
             }
           } else {
-            stats = yield fs3.promises.lstat(item.path);
+            stats = yield fs4.promises.lstat(item.path);
           }
           if (stats.isDirectory() && options.followSymbolicLinks) {
-            const realPath = yield fs3.promises.realpath(item.path);
+            const realPath = yield fs4.promises.realpath(item.path);
             while (traversalChain.length >= item.level) {
               traversalChain.pop();
             }
@@ -76207,12 +76208,12 @@ var require_internal_hash_files = __commonJS({
     exports.hashFiles = void 0;
     var crypto5 = __importStar(__require("crypto"));
     var core2 = __importStar(require_core());
-    var fs3 = __importStar(__require("fs"));
+    var fs4 = __importStar(__require("fs"));
     var stream = __importStar(__require("stream"));
     var util3 = __importStar(__require("util"));
     var path15 = __importStar(__require("path"));
     function hashFiles(globber, currentWorkspace, verbose = false) {
-      var e_1, _a2;
+      var e_1, _a3;
       var _b2;
       return __awaiter(this, void 0, void 0, function* () {
         const writeDelegate = verbose ? core2.info : core2.debug;
@@ -76228,13 +76229,13 @@ var require_internal_hash_files = __commonJS({
               writeDelegate(`Ignore '${file}' since it is not under GITHUB_WORKSPACE.`);
               continue;
             }
-            if (fs3.statSync(file).isDirectory()) {
+            if (fs4.statSync(file).isDirectory()) {
               writeDelegate(`Skip directory '${file}'.`);
               continue;
             }
             const hash = crypto5.createHash("sha256");
             const pipeline = util3.promisify(stream.pipeline);
-            yield pipeline(fs3.createReadStream(file), hash);
+            yield pipeline(fs4.createReadStream(file), hash);
             result.write(hash.digest());
             count++;
             if (!hasMatch) {
@@ -76245,8 +76246,8 @@ var require_internal_hash_files = __commonJS({
           e_1 = { error: e_1_1 };
         } finally {
           try {
-            if (_d2 && !_d2.done && (_a2 = _c2.return))
-              yield _a2.call(_c2);
+            if (_d2 && !_d2.done && (_a3 = _c2.return))
+              yield _a3.call(_c2);
           } finally {
             if (e_1)
               throw e_1.error;
@@ -77205,7 +77206,7 @@ var require_semver2 = __commonJS({
       debug3("replaceStars", comp26, options);
       return comp26.trim().replace(safeRe[t3.STAR], "");
     }
-    function hyphenReplace($0, from, fM, fm, fp, fpr, fb, to2, tM, tm, tp, tpr, tb) {
+    function hyphenReplace($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) {
       if (isX(fM)) {
         from = "";
       } else if (isX(fm)) {
@@ -77216,17 +77217,17 @@ var require_semver2 = __commonJS({
         from = ">=" + from;
       }
       if (isX(tM)) {
-        to2 = "";
+        to = "";
       } else if (isX(tm)) {
-        to2 = "<" + (+tM + 1) + ".0.0";
+        to = "<" + (+tM + 1) + ".0.0";
       } else if (isX(tp)) {
-        to2 = "<" + tM + "." + (+tm + 1) + ".0";
+        to = "<" + tM + "." + (+tm + 1) + ".0";
       } else if (tpr) {
-        to2 = "<=" + tM + "." + tm + "." + tp + "-" + tpr;
+        to = "<=" + tM + "." + tm + "." + tp + "-" + tpr;
       } else {
-        to2 = "<=" + to2;
+        to = "<=" + to;
       }
-      return (from + " " + to2).trim();
+      return (from + " " + to).trim();
     }
     Range4.prototype.test = function(version4) {
       if (!version4) {
@@ -77535,12 +77536,12 @@ var require_manifest = __commonJS({
     exports._readLinuxVersionFile = exports._getOsVersion = exports._findMatch = void 0;
     var semver = __importStar(require_semver2());
     var core_1 = require_core();
-    var os4 = __require("os");
+    var os5 = __require("os");
     var cp = __require("child_process");
-    var fs3 = __require("fs");
+    var fs4 = __require("fs");
     function _findMatch(versionSpec, stable, candidates, archFilter) {
       return __awaiter(this, void 0, void 0, function* () {
-        const platFilter = os4.platform();
+        const platFilter = os5.platform();
         let result;
         let match;
         let file;
@@ -77577,7 +77578,7 @@ var require_manifest = __commonJS({
     }
     exports._findMatch = _findMatch;
     function _getOsVersion() {
-      const plat = os4.platform();
+      const plat = os5.platform();
       let version4 = "";
       if (plat === "darwin") {
         version4 = cp.execSync("sw_vers -productVersion").toString();
@@ -77601,10 +77602,10 @@ var require_manifest = __commonJS({
       const lsbReleaseFile = "/etc/lsb-release";
       const osReleaseFile = "/etc/os-release";
       let contents = "";
-      if (fs3.existsSync(lsbReleaseFile)) {
-        contents = fs3.readFileSync(lsbReleaseFile).toString();
-      } else if (fs3.existsSync(osReleaseFile)) {
-        contents = fs3.readFileSync(osReleaseFile).toString();
+      if (fs4.existsSync(lsbReleaseFile)) {
+        contents = fs4.readFileSync(lsbReleaseFile).toString();
+      } else if (fs4.existsSync(osReleaseFile)) {
+        contents = fs4.readFileSync(osReleaseFile).toString();
       }
       return contents;
     }
@@ -77784,10 +77785,10 @@ var require_tool_cache = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.evaluateVersions = exports.isExplicitVersion = exports.findFromManifest = exports.getManifestFromRepo = exports.findAllVersions = exports.find = exports.cacheFile = exports.cacheDir = exports.extractZip = exports.extractXar = exports.extractTar = exports.extract7z = exports.downloadTool = exports.HTTPError = void 0;
     var core2 = __importStar(require_core());
-    var io2 = __importStar(require_io());
-    var fs3 = __importStar(__require("fs"));
+    var io = __importStar(require_io());
+    var fs4 = __importStar(__require("fs"));
     var mm = __importStar(require_manifest());
-    var os4 = __importStar(__require("os"));
+    var os5 = __importStar(__require("os"));
     var path15 = __importStar(__require("path"));
     var httpm = __importStar(require_lib());
     var semver = __importStar(require_semver2());
@@ -77811,7 +77812,7 @@ var require_tool_cache = __commonJS({
     function downloadTool2(url2, dest, auth, headers) {
       return __awaiter(this, void 0, void 0, function* () {
         dest = dest || path15.join(_getTempDirectory(), v4_1.default());
-        yield io2.mkdirP(path15.dirname(dest));
+        yield io.mkdirP(path15.dirname(dest));
         core2.debug(`Downloading ${url2}`);
         core2.debug(`Destination ${dest}`);
         const maxAttempts = 3;
@@ -77833,7 +77834,7 @@ var require_tool_cache = __commonJS({
     exports.downloadTool = downloadTool2;
     function downloadToolAttempt(url2, dest, auth, headers) {
       return __awaiter(this, void 0, void 0, function* () {
-        if (fs3.existsSync(dest)) {
+        if (fs4.existsSync(dest)) {
           throw new Error(`Destination file path ${dest} already exists`);
         }
         const http3 = new httpm.HttpClient(userAgent, [], {
@@ -77857,7 +77858,7 @@ var require_tool_cache = __commonJS({
         const readStream = responseMessageFactory();
         let succeeded = false;
         try {
-          yield pipeline(readStream, fs3.createWriteStream(dest));
+          yield pipeline(readStream, fs4.createWriteStream(dest));
           core2.debug("download complete");
           succeeded = true;
           return dest;
@@ -77865,7 +77866,7 @@ var require_tool_cache = __commonJS({
           if (!succeeded) {
             core2.debug("download failed");
             try {
-              yield io2.rmRF(dest);
+              yield io.rmRF(dest);
             } catch (err) {
               core2.debug(`Failed to delete '${dest}'. ${err.message}`);
             }
@@ -77916,7 +77917,7 @@ var require_tool_cache = __commonJS({
             silent: true
           };
           try {
-            const powershellPath = yield io2.which("powershell", true);
+            const powershellPath = yield io.which("powershell", true);
             yield exec_1.exec(`"${powershellPath}"`, args, options);
           } finally {
             process.chdir(originalCwd);
@@ -77985,7 +77986,7 @@ var require_tool_cache = __commonJS({
         if (core2.isDebug()) {
           args.push("-v");
         }
-        const xarPath = yield io2.which("xar", true);
+        const xarPath = yield io.which("xar", true);
         yield exec_1.exec(`"${xarPath}"`, _unique(args));
         return dest;
       });
@@ -78010,7 +78011,7 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         const escapedFile = file.replace(/'/g, "''").replace(/"|\n|\r/g, "");
         const escapedDest = dest.replace(/'/g, "''").replace(/"|\n|\r/g, "");
-        const pwshPath = yield io2.which("pwsh", false);
+        const pwshPath = yield io.which("pwsh", false);
         if (pwshPath) {
           const pwshCommand = [
             `$ErrorActionPreference = 'Stop' ;`,
@@ -78046,7 +78047,7 @@ var require_tool_cache = __commonJS({
             "-Command",
             powershellCommand
           ];
-          const powershellPath = yield io2.which("powershell", true);
+          const powershellPath = yield io.which("powershell", true);
           core2.debug(`Using powershell at path: ${powershellPath}`);
           yield exec_1.exec(`"${powershellPath}"`, args);
         }
@@ -78054,7 +78055,7 @@ var require_tool_cache = __commonJS({
     }
     function extractZipNix(file, dest) {
       return __awaiter(this, void 0, void 0, function* () {
-        const unzipPath = yield io2.which("unzip", true);
+        const unzipPath = yield io.which("unzip", true);
         const args = [file];
         if (!core2.isDebug()) {
           args.unshift("-q");
@@ -78063,63 +78064,63 @@ var require_tool_cache = __commonJS({
         yield exec_1.exec(`"${unzipPath}"`, args, { cwd: dest });
       });
     }
-    function cacheDir2(sourceDir, tool, version4, arch3) {
+    function cacheDir2(sourceDir, tool, version4, arch4) {
       return __awaiter(this, void 0, void 0, function* () {
         version4 = semver.clean(version4) || version4;
-        arch3 = arch3 || os4.arch();
-        core2.debug(`Caching tool ${tool} ${version4} ${arch3}`);
+        arch4 = arch4 || os5.arch();
+        core2.debug(`Caching tool ${tool} ${version4} ${arch4}`);
         core2.debug(`source dir: ${sourceDir}`);
-        if (!fs3.statSync(sourceDir).isDirectory()) {
+        if (!fs4.statSync(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
-        const destPath = yield _createToolPath(tool, version4, arch3);
-        for (const itemName of fs3.readdirSync(sourceDir)) {
+        const destPath = yield _createToolPath(tool, version4, arch4);
+        for (const itemName of fs4.readdirSync(sourceDir)) {
           const s3 = path15.join(sourceDir, itemName);
-          yield io2.cp(s3, destPath, { recursive: true });
+          yield io.cp(s3, destPath, { recursive: true });
         }
-        _completeToolPath(tool, version4, arch3);
+        _completeToolPath(tool, version4, arch4);
         return destPath;
       });
     }
     exports.cacheDir = cacheDir2;
-    function cacheFile(sourceFile, targetFile, tool, version4, arch3) {
+    function cacheFile(sourceFile, targetFile, tool, version4, arch4) {
       return __awaiter(this, void 0, void 0, function* () {
         version4 = semver.clean(version4) || version4;
-        arch3 = arch3 || os4.arch();
-        core2.debug(`Caching tool ${tool} ${version4} ${arch3}`);
+        arch4 = arch4 || os5.arch();
+        core2.debug(`Caching tool ${tool} ${version4} ${arch4}`);
         core2.debug(`source file: ${sourceFile}`);
-        if (!fs3.statSync(sourceFile).isFile()) {
+        if (!fs4.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
-        const destFolder = yield _createToolPath(tool, version4, arch3);
+        const destFolder = yield _createToolPath(tool, version4, arch4);
         const destPath = path15.join(destFolder, targetFile);
         core2.debug(`destination file ${destPath}`);
-        yield io2.cp(sourceFile, destPath);
-        _completeToolPath(tool, version4, arch3);
+        yield io.cp(sourceFile, destPath);
+        _completeToolPath(tool, version4, arch4);
         return destFolder;
       });
     }
     exports.cacheFile = cacheFile;
-    function find2(toolName, versionSpec, arch3) {
+    function find2(toolName, versionSpec, arch4) {
       if (!toolName) {
         throw new Error("toolName parameter is required");
       }
       if (!versionSpec) {
         throw new Error("versionSpec parameter is required");
       }
-      arch3 = arch3 || os4.arch();
+      arch4 = arch4 || os5.arch();
       if (!isExplicitVersion(versionSpec)) {
-        const localVersions = findAllVersions(toolName, arch3);
+        const localVersions = findAllVersions(toolName, arch4);
         const match = evaluateVersions(localVersions, versionSpec);
         versionSpec = match;
       }
       let toolPath = "";
       if (versionSpec) {
         versionSpec = semver.clean(versionSpec) || "";
-        const cachePath = path15.join(_getCacheDirectory(), toolName, versionSpec, arch3);
+        const cachePath = path15.join(_getCacheDirectory(), toolName, versionSpec, arch4);
         core2.debug(`checking cache: ${cachePath}`);
-        if (fs3.existsSync(cachePath) && fs3.existsSync(`${cachePath}.complete`)) {
-          core2.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch3}`);
+        if (fs4.existsSync(cachePath) && fs4.existsSync(`${cachePath}.complete`)) {
+          core2.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch4}`);
           toolPath = cachePath;
         } else {
           core2.debug("not found");
@@ -78128,16 +78129,16 @@ var require_tool_cache = __commonJS({
       return toolPath;
     }
     exports.find = find2;
-    function findAllVersions(toolName, arch3) {
+    function findAllVersions(toolName, arch4) {
       const versions = [];
-      arch3 = arch3 || os4.arch();
+      arch4 = arch4 || os5.arch();
       const toolPath = path15.join(_getCacheDirectory(), toolName);
-      if (fs3.existsSync(toolPath)) {
-        const children2 = fs3.readdirSync(toolPath);
+      if (fs4.existsSync(toolPath)) {
+        const children2 = fs4.readdirSync(toolPath);
         for (const child of children2) {
           if (isExplicitVersion(child)) {
-            const fullPath = path15.join(toolPath, child, arch3 || "");
-            if (fs3.existsSync(fullPath) && fs3.existsSync(`${fullPath}.complete`)) {
+            const fullPath = path15.join(toolPath, child, arch4 || "");
+            if (fs4.existsSync(fullPath) && fs4.existsSync(`${fullPath}.complete`)) {
               versions.push(child);
             }
           }
@@ -78173,7 +78174,7 @@ var require_tool_cache = __commonJS({
           versionsRaw = versionsRaw.replace(/^\uFEFF/, "");
           try {
             releases = JSON.parse(versionsRaw);
-          } catch (_a2) {
+          } catch (_a3) {
             core2.debug("Invalid json");
           }
         }
@@ -78181,7 +78182,7 @@ var require_tool_cache = __commonJS({
       });
     }
     exports.getManifestFromRepo = getManifestFromRepo;
-    function findFromManifest(versionSpec, stable, manifest, archFilter = os4.arch()) {
+    function findFromManifest(versionSpec, stable, manifest, archFilter = os5.arch()) {
       return __awaiter(this, void 0, void 0, function* () {
         const match = yield mm._findMatch(versionSpec, stable, manifest, archFilter);
         return match;
@@ -78193,25 +78194,25 @@ var require_tool_cache = __commonJS({
         if (!dest) {
           dest = path15.join(_getTempDirectory(), v4_1.default());
         }
-        yield io2.mkdirP(dest);
+        yield io.mkdirP(dest);
         return dest;
       });
     }
-    function _createToolPath(tool, version4, arch3) {
+    function _createToolPath(tool, version4, arch4) {
       return __awaiter(this, void 0, void 0, function* () {
-        const folderPath = path15.join(_getCacheDirectory(), tool, semver.clean(version4) || version4, arch3 || "");
+        const folderPath = path15.join(_getCacheDirectory(), tool, semver.clean(version4) || version4, arch4 || "");
         core2.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
-        yield io2.rmRF(folderPath);
-        yield io2.rmRF(markerPath);
-        yield io2.mkdirP(folderPath);
+        yield io.rmRF(folderPath);
+        yield io.rmRF(markerPath);
+        yield io.mkdirP(folderPath);
         return folderPath;
       });
     }
-    function _completeToolPath(tool, version4, arch3) {
-      const folderPath = path15.join(_getCacheDirectory(), tool, semver.clean(version4) || version4, arch3 || "");
+    function _completeToolPath(tool, version4, arch4) {
+      const folderPath = path15.join(_getCacheDirectory(), tool, semver.clean(version4) || version4, arch4 || "");
       const markerPath = `${folderPath}.complete`;
-      fs3.writeFileSync(markerPath, "");
+      fs4.writeFileSync(markerPath, "");
       core2.debug("finished caching tool");
     }
     function isExplicitVersion(versionSpec) {
@@ -78368,8 +78369,11 @@ var require_re = __commonJS({
     createToken("XRANGEPLAINLOOSE", `[v=\\s]*(${src[t3.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t3.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t3.XRANGEIDENTIFIERLOOSE]})(?:${src[t3.PRERELEASELOOSE]})?${src[t3.BUILD]}?)?)?`);
     createToken("XRANGE", `^${src[t3.GTLT]}\\s*${src[t3.XRANGEPLAIN]}$`);
     createToken("XRANGELOOSE", `^${src[t3.GTLT]}\\s*${src[t3.XRANGEPLAINLOOSE]}$`);
-    createToken("COERCE", `${"(^|[^\\d])(\\d{1,"}${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:$|[^\\d])`);
+    createToken("COERCEPLAIN", `${"(^|[^\\d])(\\d{1,"}${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?`);
+    createToken("COERCE", `${src[t3.COERCEPLAIN]}(?:$|[^\\d])`);
+    createToken("COERCEFULL", src[t3.COERCEPLAIN] + `(?:${src[t3.PRERELEASE]})?(?:${src[t3.BUILD]})?(?:$|[^\\d])`);
     createToken("COERCERTL", src[t3.COERCE], true);
+    createToken("COERCERTLFULL", src[t3.COERCEFULL], true);
     createToken("LONETILDE", "(?:~>?)");
     createToken("TILDETRIM", `(\\s*)${src[t3.LONETILDE]}\\s+`, true);
     exports.tildeTrimReplace = "$1~";
@@ -79030,21 +79034,27 @@ var require_coerce = __commonJS({
       options = options || {};
       let match = null;
       if (!options.rtl) {
-        match = version4.match(re3[t3.COERCE]);
+        match = version4.match(options.includePrerelease ? re3[t3.COERCEFULL] : re3[t3.COERCE]);
       } else {
+        const coerceRtlRegex = options.includePrerelease ? re3[t3.COERCERTLFULL] : re3[t3.COERCERTL];
         let next;
-        while ((next = re3[t3.COERCERTL].exec(version4)) && (!match || match.index + match[0].length !== version4.length)) {
+        while ((next = coerceRtlRegex.exec(version4)) && (!match || match.index + match[0].length !== version4.length)) {
           if (!match || next.index + next[0].length !== match.index + match[0].length) {
             match = next;
           }
-          re3[t3.COERCERTL].lastIndex = next.index + next[1].length + next[2].length;
+          coerceRtlRegex.lastIndex = next.index + next[1].length + next[2].length;
         }
-        re3[t3.COERCERTL].lastIndex = -1;
+        coerceRtlRegex.lastIndex = -1;
       }
       if (match === null) {
         return null;
       }
-      return parse5(`${match[2]}.${match[3] || "0"}.${match[4] || "0"}`, options);
+      const major2 = match[2];
+      const minor = match[3] || "0";
+      const patch2 = match[4] || "0";
+      const prerelease = options.includePrerelease && match[5] ? `-${match[5]}` : "";
+      const build = options.includePrerelease && match[6] ? `+${match[6]}` : "";
+      return parse5(`${major2}.${minor}.${patch2}${prerelease}${build}`, options);
     };
     module.exports = coerce;
   }
@@ -79290,53 +79300,53 @@ var require_yallist = __commonJS({
       }
       return arr;
     };
-    Yallist.prototype.slice = function(from, to2) {
-      to2 = to2 || this.length;
-      if (to2 < 0) {
-        to2 += this.length;
+    Yallist.prototype.slice = function(from, to) {
+      to = to || this.length;
+      if (to < 0) {
+        to += this.length;
       }
       from = from || 0;
       if (from < 0) {
         from += this.length;
       }
       var ret = new Yallist();
-      if (to2 < from || to2 < 0) {
+      if (to < from || to < 0) {
         return ret;
       }
       if (from < 0) {
         from = 0;
       }
-      if (to2 > this.length) {
-        to2 = this.length;
+      if (to > this.length) {
+        to = this.length;
       }
       for (var i3 = 0, walker = this.head; walker !== null && i3 < from; i3++) {
         walker = walker.next;
       }
-      for (; walker !== null && i3 < to2; i3++, walker = walker.next) {
+      for (; walker !== null && i3 < to; i3++, walker = walker.next) {
         ret.push(walker.value);
       }
       return ret;
     };
-    Yallist.prototype.sliceReverse = function(from, to2) {
-      to2 = to2 || this.length;
-      if (to2 < 0) {
-        to2 += this.length;
+    Yallist.prototype.sliceReverse = function(from, to) {
+      to = to || this.length;
+      if (to < 0) {
+        to += this.length;
       }
       from = from || 0;
       if (from < 0) {
         from += this.length;
       }
       var ret = new Yallist();
-      if (to2 < from || to2 < 0) {
+      if (to < from || to < 0) {
         return ret;
       }
       if (from < 0) {
         from = 0;
       }
-      if (to2 > this.length) {
-        to2 = this.length;
+      if (to > this.length) {
+        to = this.length;
       }
-      for (var i3 = this.length, walker = this.tail; walker !== null && i3 > to2; i3--) {
+      for (var i3 = this.length, walker = this.tail; walker !== null && i3 > to; i3--) {
         walker = walker.prev;
       }
       for (; walker !== null && i3 > from; i3--, walker = walker.prev) {
@@ -80008,7 +80018,7 @@ var require_range = __commonJS({
       debug3("replaceGTE0", comp26, options);
       return comp26.trim().replace(re3[options.includePrerelease ? t3.GTE0PRE : t3.GTE0], "");
     };
-    var hyphenReplace = (incPr) => ($0, from, fM, fm, fp, fpr, fb, to2, tM, tm, tp, tpr, tb) => {
+    var hyphenReplace = (incPr) => ($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) => {
       if (isX(fM)) {
         from = "";
       } else if (isX(fm)) {
@@ -80021,19 +80031,19 @@ var require_range = __commonJS({
         from = `>=${from}${incPr ? "-0" : ""}`;
       }
       if (isX(tM)) {
-        to2 = "";
+        to = "";
       } else if (isX(tm)) {
-        to2 = `<${+tM + 1}.0.0-0`;
+        to = `<${+tM + 1}.0.0-0`;
       } else if (isX(tp)) {
-        to2 = `<${tM}.${+tm + 1}.0-0`;
+        to = `<${tM}.${+tm + 1}.0-0`;
       } else if (tpr) {
-        to2 = `<=${tM}.${tm}.${tp}-${tpr}`;
+        to = `<=${tM}.${tm}.${tp}-${tpr}`;
       } else if (incPr) {
-        to2 = `<${tM}.${tm}.${+tp + 1}-0`;
+        to = `<${tM}.${tm}.${+tp + 1}-0`;
       } else {
-        to2 = `<=${to2}`;
+        to = `<=${to}`;
       }
-      return `${from} ${to2}`.trim();
+      return `${from} ${to}`.trim();
     };
     var testSet = (set2, version4, options) => {
       for (let i3 = 0; i3 < set2.length; i3++) {
@@ -80868,71 +80878,35 @@ var Reflection = {
 };
 Object.assign(Reflect, Reflection);
 
-// node_modules/temporal-polyfill/chunk-33169ef4.esm.js
-function bindArgs(e3, ...n3) {
-  return (...t3) => e3(...n3, ...t3);
+// node_modules/temporal-polyfill/chunks/hSIG78sM.esm.js
+function clampProp(e3, n3, t3, o3, r3) {
+  return clampEntity(n3, getDefinedProp(e3, n3), t3, o3, r3);
+}
+function clampEntity(e3, n3, t3, o3, r3, i3) {
+  const a3 = clampNumber(n3, t3, o3);
+  if (r3 && n3 !== a3) {
+    throw new RangeError(numberOutOfRange(e3, n3, t3, o3, i3));
+  }
+  return a3;
+}
+function getDefinedProp(e3, n3) {
+  const t3 = e3[n3];
+  if (void 0 === t3) {
+    throw new TypeError(missingField(n3));
+  }
+  return t3;
 }
 function isObjectLike(e3) {
-  return null !== e3 && N.test(typeof e3);
+  return null !== e3 && /object|function/.test(typeof e3);
 }
-function mapProps(e3, n3, t3) {
-  const o3 = {};
-  for (const r3 in n3) {
-    o3[r3] = e3(n3[r3], r3, t3);
-  }
-  return o3;
-}
-function zipProps(e3, n3) {
-  const t3 = {};
-  let o3 = e3.length;
-  for (const r3 of n3) {
-    t3[e3[--o3]] = r3;
-  }
-  return t3;
-}
-function mapPropNames(e3, n3, t3) {
-  const o3 = {};
-  for (let r3 = 0; r3 < n3.length; r3++) {
-    const i3 = n3[r3];
-    o3[i3] = e3(i3, r3, t3);
-  }
-  return o3;
-}
-function pluckProps(e3, n3) {
-  const t3 = {};
-  for (const o3 of e3) {
-    t3[o3] = n3[o3];
-  }
-  return t3;
-}
-function excludeUndefinedProps(e3) {
-  e3 = {
-    ...e3
-  };
-  const n3 = Object.keys(e3);
-  for (const t3 of n3) {
-    void 0 === e3[t3] && delete e3[t3];
-  }
-  return e3;
-}
-function allFieldsEqual(e3, n3, t3) {
-  for (const o3 of e3) {
-    if (n3[o3] !== t3[o3]) {
-      return 0;
-    }
-  }
-  return 1;
-}
-function createLazyGenerator(e3, n3 = Map) {
+function memoize(e3, n3 = Map) {
   const t3 = new n3();
   return (n4, ...o3) => {
     if (t3.has(n4)) {
       return t3.get(n4);
     }
-    {
-      const r3 = e3(n4, ...o3);
-      return t3.set(n4, r3), r3;
-    }
+    const r3 = e3(n4, ...o3);
+    return t3.set(n4, r3), r3;
   };
 }
 function createNameDescriptors(e3) {
@@ -80961,8 +80935,84 @@ function createStringTagDescriptors(e3) {
     }
   };
 }
-function identityFunc(e3) {
+function zipProps(e3, n3) {
+  const t3 = {};
+  let o3 = e3.length;
+  for (const r3 of n3) {
+    t3[e3[--o3]] = r3;
+  }
+  return t3;
+}
+function mapProps(e3, n3, t3) {
+  const o3 = {};
+  for (const r3 in n3) {
+    o3[r3] = e3(n3[r3], r3, t3);
+  }
+  return o3;
+}
+function mapPropNames(e3, n3, t3) {
+  const o3 = {};
+  for (let r3 = 0; r3 < n3.length; r3++) {
+    const i3 = n3[r3];
+    o3[i3] = e3(i3, r3, t3);
+  }
+  return o3;
+}
+function remapProps(e3, n3, t3) {
+  const o3 = {};
+  for (let r3 = 0; r3 < e3.length; r3++) {
+    o3[n3[r3]] = t3[e3[r3]];
+  }
+  return o3;
+}
+function pluckProps(e3, n3) {
+  const t3 = {};
+  for (const o3 of e3) {
+    t3[o3] = n3[o3];
+  }
+  return t3;
+}
+function excludePropsByName(e3, n3) {
+  const t3 = {};
+  for (const o3 in n3) {
+    e3.has(o3) || (t3[o3] = n3[o3]);
+  }
+  return t3;
+}
+function excludeUndefinedProps(e3) {
+  e3 = {
+    ...e3
+  };
+  const n3 = Object.keys(e3);
+  for (const t3 of n3) {
+    void 0 === e3[t3] && delete e3[t3];
+  }
   return e3;
+}
+function hasAllPropsByName(e3, n3) {
+  for (const t3 of n3) {
+    if (!(t3 in e3)) {
+      return 0;
+    }
+  }
+  return 1;
+}
+function allPropsEqual(e3, n3, t3) {
+  for (const o3 of e3) {
+    if (n3[o3] !== t3[o3]) {
+      return 0;
+    }
+  }
+  return 1;
+}
+function bindArgs(e3, ...n3) {
+  return (...t3) => e3(...n3, ...t3);
+}
+function capitalize(e3) {
+  return e3[0].toUpperCase() + e3.substring(1);
+}
+function sortStrings(e3) {
+  return e3.slice().sort();
 }
 function padNumber(e3, n3) {
   return String(n3).padStart(e3, "0");
@@ -80972,23 +81022,6 @@ function compareNumbers(e3, n3) {
 }
 function clampNumber(e3, n3, t3) {
   return Math.min(Math.max(e3, n3), t3);
-}
-function clampEntity(e3, n3, t3, o3, r3) {
-  const i3 = clampNumber(n3, t3, o3);
-  if (r3 && n3 !== i3) {
-    throw new RangeError(numberOutOfRange(e3, n3, t3, o3));
-  }
-  return i3;
-}
-function clampProp(e3, n3, t3, o3, r3) {
-  return clampEntity(n3, getDefinedProp(e3, n3), t3, o3, r3);
-}
-function getDefinedProp(e3, n3) {
-  const t3 = e3[n3];
-  if (void 0 === t3) {
-    throw new TypeError(missingField(n3));
-  }
-  return t3;
 }
 function divModFloor(e3, n3) {
   return [Math.floor(e3 / n3), modFloor(e3, n3)];
@@ -81008,52 +81041,248 @@ function modTrunc(e3, n3) {
 function hasHalf(e3) {
   return 0.5 === Math.abs(e3 % 1);
 }
-function givenFieldsToDayTimeNano(e3, n3, t3) {
+function givenFieldsToBigNano(e3, n3, t3) {
   let o3 = 0, r3 = 0;
   for (let i4 = 0; i4 <= n3; i4++) {
-    const n4 = e3[t3[i4]], a4 = R[i4], s3 = B / a4, [c3, l3] = divModTrunc(n4, s3);
-    o3 += l3 * a4, r3 += c3;
+    const n4 = e3[t3[i4]], a4 = j[i4], s3 = W / a4, [c3, u3] = divModTrunc(n4, s3);
+    o3 += u3 * a4, r3 += c3;
   }
-  const [i3, a3] = divModTrunc(o3, B);
+  const [i3, a3] = divModTrunc(o3, W);
   return [r3 + i3, a3];
 }
 function nanoToGivenFields(e3, n3, t3) {
   const o3 = {};
   for (let r3 = n3; r3 >= 0; r3--) {
-    const n4 = R[r3];
+    const n4 = j[r3];
     o3[t3[r3]] = divTrunc(e3, n4), e3 = modTrunc(e3, n4);
   }
   return o3;
 }
-function requireObjectlike(e3) {
-  if (!isObjectLike(e3)) {
-    throw new TypeError(n);
+function getRequiredYearMonthFields(e3) {
+  return e3 === ce ? Q : [];
+}
+function getRequiredMonthDayFields(e3) {
+  return e3 === ce ? ne : [];
+}
+function getRequiredDateFields(e3) {
+  return e3 === ce ? ["year", "day"] : [];
+}
+function createBigNano(e3, n3) {
+  let [t3, o3] = divModTrunc(n3, W), r3 = e3 + t3;
+  const i3 = Math.sign(r3);
+  return i3 && i3 === -Math.sign(o3) && (r3 -= i3, o3 += i3 * W), [r3, o3];
+}
+function addBigNanoAndNumber(e3, n3) {
+  return createBigNano(e3[0], e3[1] + n3);
+}
+function addBigNanos(e3, n3, t3 = 1) {
+  return createBigNano(e3[0] + n3[0] * t3, e3[1] + n3[1] * t3);
+}
+function diffBigNanos(e3, n3) {
+  return addBigNanos(n3, e3, -1);
+}
+function compareBigNanos(e3, n3) {
+  return compareNumbers(e3[0], n3[0]) || compareNumbers(e3[1], n3[1]);
+}
+function bigIntToBigNano(e3, n3 = 1) {
+  const t3 = BigInt(W / n3);
+  return [Number(e3 / t3), Number(e3 % t3) * n3];
+}
+function numberToBigNano(e3, n3 = 1) {
+  const t3 = W / n3, [o3, r3] = divModTrunc(e3, t3);
+  return [o3, r3 * n3];
+}
+function bigNanoToBigInt(e3, n3 = 1) {
+  const [t3, o3] = e3, r3 = Math.floor(o3 / n3), i3 = W / n3;
+  return BigInt(t3) * BigInt(i3) + BigInt(r3);
+}
+function bigNanoToNumber(e3, n3 = 1, t3) {
+  const [o3, r3] = e3, [i3, a3] = divModTrunc(r3, n3);
+  return o3 * (W / n3) + (i3 + (t3 ? a3 / n3 : 0));
+}
+function divModBigNano(e3, n3, t3 = divModFloor) {
+  const [o3, r3] = e3, [i3, a3] = t3(r3, n3);
+  return [o3 * (W / n3) + i3, a3];
+}
+function hashIntlFormatParts(e3, n3) {
+  const t3 = e3.formatToParts(n3), o3 = {};
+  for (const e4 of t3) {
+    o3[e4.type] = e4.value;
+  }
+  return o3;
+}
+function checkIsoYearMonthInBounds(e3) {
+  return clampProp(e3, "isoYear", Ze, Re, 1), e3.isoYear === Ze ? clampProp(e3, "isoMonth", 4, 12, 1) : e3.isoYear === Re && clampProp(e3, "isoMonth", 1, 9, 1), e3;
+}
+function checkIsoDateInBounds(e3) {
+  return checkIsoDateTimeInBounds({
+    ...e3,
+    ...be,
+    isoHour: 12
+  }), e3;
+}
+function checkIsoDateTimeInBounds(e3) {
+  const n3 = clampProp(e3, "isoYear", Ze, Re, 1), t3 = n3 === Ze ? 1 : n3 === Re ? -1 : 0;
+  return t3 && checkEpochNanoInBounds(isoToEpochNano({
+    ...e3,
+    isoDay: e3.isoDay + t3,
+    isoNanosecond: e3.isoNanosecond - t3
+  })), e3;
+}
+function checkEpochNanoInBounds(e3) {
+  if (!e3 || -1 === compareBigNanos(e3, Ce) || 1 === compareBigNanos(e3, Ye)) {
+    throw new RangeError(N);
   }
   return e3;
 }
-function requireType(e3, n3, t3 = e3) {
-  if (typeof n3 !== e3) {
-    throw new TypeError(invalidEntity(t3, n3));
-  }
-  return n3;
+function isoTimeFieldsToNano(e3) {
+  return givenFieldsToBigNano(e3, 5, ye)[1];
 }
-function requireInteger(e3) {
-  return requireNumberIsInteger(oe(e3));
+function nanoToIsoTimeAndDay(e3) {
+  const [n3, t3] = divModFloor(e3, W);
+  return [nanoToGivenFields(t3, 5, ye), n3];
+}
+function epochNanoToSec(e3) {
+  return epochNanoToSecMod(e3)[0];
+}
+function epochNanoToSecMod(e3) {
+  return divModBigNano(e3, A);
+}
+function epochNanoToMilli(e3) {
+  return divModBigNano(e3, q)[0];
+}
+function isoToEpochMilli(e3) {
+  return isoArgsToEpochMilli(e3.isoYear, e3.isoMonth, e3.isoDay, e3.isoHour, e3.isoMinute, e3.isoSecond, e3.isoMillisecond);
+}
+function isoToEpochNano(e3) {
+  const n3 = isoToEpochMilli(e3);
+  if (void 0 !== n3) {
+    const [t3, o3] = divModTrunc(n3, R);
+    return [t3, o3 * q + (e3.isoMicrosecond || 0) * z + (e3.isoNanosecond || 0)];
+  }
+}
+function isoToEpochNanoWithOffset(e3, n3) {
+  const [t3, o3] = nanoToIsoTimeAndDay(isoTimeFieldsToNano(e3) - n3);
+  return checkEpochNanoInBounds(isoToEpochNano({
+    ...e3,
+    isoDay: e3.isoDay + o3,
+    ...t3
+  }));
+}
+function isoArgsToEpochSec(...e3) {
+  return isoArgsToEpochMilli(...e3) / Z;
+}
+function isoArgsToEpochMilli(...e3) {
+  const [n3, t3] = isoToLegacyDate(...e3), o3 = n3.getTime();
+  if (!isNaN(o3)) {
+    return o3 - t3 * R;
+  }
+}
+function isoToLegacyDate(e3, n3 = 1, t3 = 1, o3 = 0, r3 = 0, i3 = 0, a3 = 0) {
+  const s3 = e3 === Ze ? 1 : e3 === Re ? -1 : 0, c3 = /* @__PURE__ */ new Date();
+  return c3.setUTCHours(o3, r3, i3, a3), c3.setUTCFullYear(e3, n3 - 1, t3 + s3), [c3, s3];
+}
+function epochNanoToIso(e3, n3) {
+  let [t3, o3] = addBigNanoAndNumber(e3, n3);
+  o3 < 0 && (o3 += W, t3 -= 1);
+  const [r3, i3] = divModFloor(o3, q), [a3, s3] = divModFloor(i3, z);
+  return {
+    ...epochMilliToIso(t3 * R + r3),
+    isoMicrosecond: a3,
+    isoNanosecond: s3
+  };
+}
+function epochMilliToIso(e3) {
+  const n3 = Math.ceil(Math.max(0, Math.abs(e3) - ke) / R) * Math.sign(e3), t3 = new Date(e3 - n3 * R);
+  return zipProps(Pe, [t3.getUTCFullYear(), t3.getUTCMonth() + 1, t3.getUTCDate() + n3, t3.getUTCHours(), t3.getUTCMinutes(), t3.getUTCSeconds(), t3.getUTCMilliseconds()]);
+}
+function computeIsoMonthsInYear() {
+  return Ae;
+}
+function computeIsoDaysInMonth(e3, n3) {
+  switch (n3) {
+    case 2:
+      return computeIsoInLeapYear(e3) ? 29 : 28;
+    case 4:
+    case 6:
+    case 9:
+    case 11:
+      return 30;
+  }
+  return 31;
+}
+function computeIsoDaysInYear(e3) {
+  return computeIsoInLeapYear(e3) ? 366 : 365;
+}
+function computeIsoInLeapYear(e3) {
+  return e3 % 4 == 0 && (e3 % 100 != 0 || e3 % 400 == 0);
+}
+function computeIsoDayOfYear(e3) {
+  return diffEpochMilliByDay(isoToEpochMilli(((e4) => ({
+    ...e4,
+    isoMonth: 1,
+    isoDay: 1,
+    ...be
+  }))(e3)), isoToEpochMilli({
+    ...e3,
+    ...be
+  })) + 1;
+}
+function computeIsoDayOfWeek(e3) {
+  const [n3, t3] = isoToLegacyDate(e3.isoYear, e3.isoMonth, e3.isoDay);
+  return modFloor(n3.getUTCDay() - t3, 7) || 7;
+}
+function computeGregoryEraParts({ isoYear: e3 }) {
+  return e3 < 1 ? ["bce", 1 - e3] : ["ce", e3];
+}
+function computeJapaneseEraParts(e3) {
+  const n3 = isoToEpochMilli(e3);
+  if (n3 < Le) {
+    return computeGregoryEraParts(e3);
+  }
+  const t3 = hashIntlFormatParts(Kn(le), n3), { era: o3, eraYear: r3 } = parseIntlYear(t3, le);
+  return [o3, r3];
+}
+function checkIsoDateTimeFields(e3) {
+  return checkIsoDateFields(e3), constrainIsoTimeFields(e3, 1), e3;
+}
+function checkIsoDateFields(e3) {
+  return constrainIsoDateFields(e3, 1), e3;
+}
+function isIsoDateFieldsValid(e3) {
+  return allPropsEqual(ve, e3, constrainIsoDateFields(e3));
+}
+function constrainIsoDateFields(e3, n3) {
+  const { isoYear: t3 } = e3, o3 = clampProp(e3, "isoMonth", 1, computeIsoMonthsInYear(), n3);
+  return {
+    isoYear: t3,
+    isoMonth: o3,
+    isoDay: clampProp(e3, "isoDay", 1, computeIsoDaysInMonth(t3, o3), n3)
+  };
+}
+function constrainIsoTimeFields(e3, n3) {
+  return zipProps(ye, [clampProp(e3, "isoHour", 0, 23, n3), clampProp(e3, "isoMinute", 0, 59, n3), clampProp(e3, "isoSecond", 0, 59, n3), clampProp(e3, "isoMillisecond", 0, 999, n3), clampProp(e3, "isoMicrosecond", 0, 999, n3), clampProp(e3, "isoNanosecond", 0, 999, n3)]);
+}
+function requireStringOrUndefined(e3) {
+  if (void 0 !== e3) {
+    return We(e3);
+  }
+}
+function requirePositiveIntegerOrUndefined(e3) {
+  if (void 0 !== e3) {
+    return requirePositiveInteger(e3);
+  }
+}
+function requireIntegerOrUndefined(e3) {
+  if (void 0 !== e3) {
+    return requireInteger(e3);
+  }
 }
 function requirePositiveInteger(e3) {
   return requireNumberIsPositive(requireInteger(e3));
 }
-function requireNumberIsInteger(e3, n3 = "number") {
-  if (!Number.isInteger(e3)) {
-    throw new RangeError(expectedInteger(n3, e3));
-  }
-  return e3 || 0;
-}
-function requireNumberIsPositive(e3, n3 = "number") {
-  if (e3 <= 0) {
-    throw new RangeError(expectedPositive(n3, e3));
-  }
-  return e3;
+function requireInteger(e3) {
+  return requireNumberIsInteger($e(e3));
 }
 function requireNonNullish(e3) {
   if (null == e3) {
@@ -81067,6 +81296,30 @@ function requirePropDefined(e3, n3) {
   }
   return n3;
 }
+function requireObjectLike(e3) {
+  if (!isObjectLike(e3)) {
+    throw new TypeError(n);
+  }
+  return e3;
+}
+function requireType(e3, n3, t3 = e3) {
+  if (typeof n3 !== e3) {
+    throw new TypeError(invalidEntity(t3, n3));
+  }
+  return n3;
+}
+function requireNumberIsInteger(e3, n3 = "number") {
+  if (!Number.isInteger(e3)) {
+    throw new RangeError(expectedInteger(n3, e3));
+  }
+  return e3 || 0;
+}
+function requireNumberIsPositive(e3, n3 = "number") {
+  if (e3 <= 0) {
+    throw new RangeError(expectedPositive(n3, e3));
+  }
+  return e3;
+}
 function toString(n3) {
   if ("symbol" == typeof n3) {
     throw new TypeError(e);
@@ -81074,7 +81327,7 @@ function toString(n3) {
   return String(n3);
 }
 function toStringViaPrimitive(e3, n3) {
-  return isObjectLike(e3) ? String(e3) : ne(e3, n3);
+  return isObjectLike(e3) ? String(e3) : We(e3, n3);
 }
 function toBigInt(e3) {
   if ("string" == typeof e3) {
@@ -81104,76 +81357,80 @@ function toPositiveInteger(e3, n3) {
   return requireNumberIsPositive(toInteger(e3, n3), n3);
 }
 function refineOverflowOptions(e3) {
-  return void 0 === e3 ? 0 : Ne(requireObjectlike(e3));
+  return void 0 === e3 ? 0 : un(requireObjectLike(e3));
 }
 function refineZonedFieldOptions(e3, n3 = 0) {
   e3 = normalizeOptions(e3);
-  const t3 = Oe(e3), o3 = Pe(e3, n3);
-  return [Ne(e3), o3, t3];
+  const t3 = ln(e3), o3 = fn(e3, n3);
+  return [un(e3), o3, t3];
 }
 function refineEpochDisambigOptions(e3) {
-  return Oe(normalizeOptions(e3));
+  return ln(normalizeOptions(e3));
+}
+function refineCalendarDiffOptions(e3) {
+  return e3 = normalizeOptions(e3), sn(e3, 9, 6, 1);
 }
 function refineDiffOptions(e3, n3, t3, o3 = 9, r3 = 0, i3 = 4) {
   n3 = normalizeOptions(n3);
-  let a3 = ye(n3, o3, r3), s3 = parseRoundingIncInteger(n3), c3 = be(n3, i3), l3 = Ie(n3, o3, r3, 1);
-  return null == a3 ? a3 = Math.max(t3, l3) : checkLargestSmallestUnit(a3, l3), s3 = refineRoundingInc(s3, l3, 1), e3 && (c3 = ((e4) => e4 < 4 ? (e4 + 2) % 4 : e4)(c3)), [a3, l3, s3, c3];
+  let a3 = sn(n3, o3, r3), s3 = parseRoundingIncInteger(n3), c3 = hn(n3, i3);
+  const u3 = an(n3, o3, r3, 1);
+  return null == a3 ? a3 = Math.max(t3, u3) : checkLargestSmallestUnit(a3, u3), s3 = refineRoundingInc(s3, u3, 1), e3 && (c3 = ((e4) => e4 < 4 ? (e4 + 2) % 4 : e4)(c3)), [a3, u3, s3, c3];
 }
 function refineRoundOptions(e3, n3 = 6, t3) {
-  let o3 = parseRoundingIncInteger(e3 = normalizeUnitNameOptions(e3, fe));
-  const r3 = be(e3, 7);
-  let i3 = Ie(e3, n3);
-  return i3 = requirePropDefined(fe, i3), o3 = refineRoundingInc(o3, i3, void 0, t3), [i3, o3, r3];
+  let o3 = parseRoundingIncInteger(e3 = normalizeUnitNameOptions(e3, He));
+  const r3 = hn(e3, 7);
+  let i3 = an(e3, n3);
+  return i3 = requirePropDefined(He, i3), o3 = refineRoundingInc(o3, i3, void 0, t3), [i3, o3, r3];
 }
 function refineDateDisplayOptions(e3) {
-  return ve(normalizeOptions(e3));
+  return dn(normalizeOptions(e3));
 }
 function refineTimeDisplayOptions(e3, n3) {
   return refineTimeDisplayTuple(normalizeOptions(e3), n3);
 }
 function refineTimeDisplayTuple(e3, n3 = 4) {
   const t3 = refineSubsecDigits(e3);
-  return [be(e3, 4), ...refineSmallestUnitAndSubsecDigits(Ie(e3, n3), t3)];
+  return [hn(e3, 4), ...refineSmallestUnitAndSubsecDigits(an(e3, n3), t3)];
 }
 function refineSmallestUnitAndSubsecDigits(e3, n3) {
-  return null != e3 ? [R[e3], e3 < 4 ? 9 - 3 * e3 : -1] : [void 0 === n3 ? 1 : 10 ** (9 - n3), n3];
+  return null != e3 ? [j[e3], e3 < 4 ? 9 - 3 * e3 : -1] : [void 0 === n3 ? 1 : 10 ** (9 - n3), n3];
 }
 function parseRoundingIncInteger(e3) {
-  let n3 = e3[pe];
-  return void 0 === n3 ? 1 : toInteger(n3, pe);
+  const n3 = e3[Ve];
+  return void 0 === n3 ? 1 : toInteger(n3, Ve);
 }
 function refineRoundingInc(e3, n3, t3, o3) {
-  const r3 = o3 ? B : R[n3 + 1];
+  const r3 = o3 ? W : j[n3 + 1];
   if (r3) {
-    const t4 = R[n3];
-    if (r3 % ((e3 = clampEntity(pe, e3, 1, r3 / t4 - (o3 ? 0 : 1), 1)) * t4)) {
-      throw new RangeError(invalidEntity(pe, e3));
+    const t4 = j[n3];
+    if (r3 % ((e3 = clampEntity(Ve, e3, 1, r3 / t4 - (o3 ? 0 : 1), 1)) * t4)) {
+      throw new RangeError(invalidEntity(Ve, e3));
     }
   } else {
-    e3 = clampEntity(pe, e3, 1, t3 ? 10 ** 9 : 1, 1);
+    e3 = clampEntity(Ve, e3, 1, t3 ? 10 ** 9 : 1, 1);
   }
   return e3;
 }
 function refineSubsecDigits(e3) {
-  let n3 = e3[he];
+  let n3 = e3[_e];
   if (void 0 !== n3) {
     if ("number" != typeof n3) {
       if ("auto" === toString(n3)) {
         return;
       }
-      throw new RangeError(invalidEntity(he, n3));
+      throw new RangeError(invalidEntity(_e, n3));
     }
-    n3 = clampEntity(he, Math.floor(n3), 0, 9, 1);
+    n3 = clampEntity(_e, Math.floor(n3), 0, 9, 1);
   }
   return n3;
 }
 function normalizeOptions(e3) {
-  return void 0 === e3 ? {} : requireObjectlike(e3);
+  return void 0 === e3 ? {} : requireObjectLike(e3);
 }
 function normalizeUnitNameOptions(e3, n3) {
   return "string" == typeof e3 ? {
     [n3]: e3
-  } : requireObjectlike(e3);
+  } : requireObjectLike(e3);
 }
 function copyOptions(e3) {
   if (void 0 !== e3) {
@@ -81185,7 +81442,7 @@ function copyOptions(e3) {
 }
 function overrideOverflowOptions(e3, n3) {
   return e3 && Object.assign(/* @__PURE__ */ Object.create(null), e3, {
-    overflow: ge[n3]
+    overflow: Qe[n3]
   });
 }
 function refineUnitOption(e3, n3, t3 = 9, o3 = 0, r3) {
@@ -81196,11 +81453,11 @@ function refineUnitOption(e3, n3, t3 = 9, o3 = 0, r3) {
   if (i3 = toString(i3), "auto" === i3) {
     return r3 ? o3 : null;
   }
-  let a3 = M[i3];
-  if (void 0 === a3 && (a3 = le[i3]), void 0 === a3) {
-    throw new RangeError(invalidEntity(e3, i3));
+  let a3 = Y[i3];
+  if (void 0 === a3 && (a3 = Ie[i3]), void 0 === a3) {
+    throw new RangeError(invalidChoice(e3, i3, Y));
   }
-  return clampEntity(e3, a3, o3, t3, 1), a3;
+  return clampEntity(e3, a3, o3, t3, 1, C), a3;
 }
 function refineChoiceOption(e3, n3, t3, o3 = 0) {
   const r3 = t3[e3];
@@ -81209,453 +81466,254 @@ function refineChoiceOption(e3, n3, t3, o3 = 0) {
   }
   const i3 = toString(r3), a3 = n3[i3];
   if (void 0 === a3) {
-    throw new RangeError(invalidEntity(e3, i3));
+    throw new RangeError(invalidChoice(e3, i3, n3));
   }
   return a3;
 }
 function checkLargestSmallestUnit(e3, n3) {
   if (n3 > e3) {
-    throw new RangeError(S);
+    throw new RangeError(F);
   }
 }
-function createDayTimeNano(e3, n3) {
-  let [t3, o3] = divModTrunc(n3, B), r3 = e3 + t3;
-  const i3 = Math.sign(r3);
-  return i3 && i3 === -Math.sign(o3) && (r3 -= i3, o3 += i3 * B), [r3, o3];
+function createInstantSlots(e3) {
+  return {
+    branding: yn,
+    epochNanoseconds: e3
+  };
 }
-function addDayTimeNanoAndNumber(e3, n3) {
-  return createDayTimeNano(e3[0], e3[1] + n3);
+function createZonedDateTimeSlots(e3, n3, t3) {
+  return {
+    branding: Nn,
+    calendar: t3,
+    timeZone: n3,
+    epochNanoseconds: e3
+  };
 }
-function addDayTimeNanos(e3, n3, t3 = 1) {
-  return createDayTimeNano(e3[0] + n3[0] * t3, e3[1] + n3[1] * t3);
+function createPlainDateTimeSlots(e3, n3 = e3.calendar) {
+  return {
+    branding: In,
+    calendar: n3,
+    ...pluckProps(Fe, e3)
+  };
 }
-function diffDayTimeNanos(e3, n3) {
-  return createDayTimeNano(n3[0] - e3[0], n3[1] - e3[1]);
+function createPlainDateSlots(e3, n3 = e3.calendar) {
+  return {
+    branding: Dn,
+    calendar: n3,
+    ...pluckProps(Ee, e3)
+  };
 }
-function compareDayTimeNanos(e3, n3) {
-  return compareNumbers(e3[0], n3[0]) || compareNumbers(e3[1], n3[1]);
+function createPlainYearMonthSlots(e3, n3 = e3.calendar) {
+  return {
+    branding: Tn,
+    calendar: n3,
+    ...pluckProps(Ee, e3)
+  };
 }
-function bigIntToDayTimeNano(e3, n3 = 1) {
-  const t3 = BigInt(B / n3);
-  return [Number(e3 / t3), Number(e3 % t3) * n3];
+function createPlainMonthDaySlots(e3, n3 = e3.calendar) {
+  return {
+    branding: gn,
+    calendar: n3,
+    ...pluckProps(Ee, e3)
+  };
 }
-function numberToDayTimeNano(e3, n3 = 1) {
-  const t3 = B / n3, [o3, r3] = divModTrunc(e3, t3);
-  return [o3, r3 * n3];
+function createPlainTimeSlots(e3) {
+  return {
+    branding: Mn,
+    ...pluckProps(Se, e3)
+  };
 }
-function dayTimeNanoToBigInt(e3, n3 = 1) {
-  const [t3, o3] = e3, r3 = Math.floor(o3 / n3), i3 = B / n3;
-  return BigInt(t3) * BigInt(i3) + BigInt(r3);
+function createDurationSlots(e3) {
+  return {
+    branding: vn,
+    sign: computeDurationSign(e3),
+    ...pluckProps(he, e3)
+  };
 }
-function dayTimeNanoToNumber(e3, n3 = 1, t3) {
-  const [o3, r3] = dayTimeNanoToNumberRemainder(e3, n3);
-  return o3 + (t3 ? r3 / n3 : 0);
+function getEpochSeconds(e3) {
+  return epochNanoToSec(e3.epochNanoseconds);
 }
-function dayTimeNanoToNumberRemainder(e3, n3) {
-  const [t3, o3] = e3, [r3, i3] = divModFloor(o3, n3);
-  return [t3 * (B / n3) + r3, i3];
+function getEpochMilliseconds(e3) {
+  return epochNanoToMilli(e3.epochNanoseconds);
 }
-function checkIsoYearMonthInBounds(e3) {
-  return clampProp(e3, "isoYear", We, Ge, 1), e3.isoYear === We ? clampProp(e3, "isoMonth", 4, 12, 1) : e3.isoYear === Ge && clampProp(e3, "isoMonth", 1, 9, 1), e3;
+function getEpochMicroseconds(e3) {
+  return bigNanoToBigInt(e3.epochNanoseconds, z);
 }
-function checkIsoDateInBounds(e3) {
+function getEpochNanoseconds(e3) {
+  return bigNanoToBigInt(e3.epochNanoseconds);
+}
+function getId(e3) {
+  return "string" == typeof e3 ? e3 : We(e3.id);
+}
+function isIdLikeEqual(e3, n3) {
+  return e3 === n3 || getId(e3) === getId(n3);
+}
+function createRelativeSystem(e3, n3, t3) {
+  const o3 = e3(t3.calendar);
+  return t3.epochNanoseconds ? [t3, o3, n3(t3.timeZone)] : [{
+    ...t3,
+    ...be
+  }, o3];
+}
+function relativeMarkerToEpochNano(e3, n3) {
+  return n3 ? e3.epochNanoseconds : isoToEpochNano(e3);
+}
+function totalDuration(e3, n3, t3, o3, r3) {
+  const i3 = getLargestDurationUnit(o3), [a3, s3] = ((e4, n4) => {
+    const t4 = n4((e4 = normalizeUnitNameOptions(e4, Ge))[Je]);
+    let o4 = cn(e4);
+    return o4 = requirePropDefined(Ge, o4), [o4, t4];
+  })(r3, e3), c3 = Math.max(a3, i3);
+  if (c3 < 6 || 6 === c3 && (!s3 || !s3.epochNanoseconds)) {
+    return ((e4, n4) => totalBigNano(durationFieldsToBigNano(e4), n4))(o3, a3);
+  }
+  if (!s3) {
+    throw new RangeError(P);
+  }
+  const u3 = createRelativeSystem(n3, t3, s3);
+  return ((e4, n4, t4, o4, r4, i4) => {
+    const a4 = computeDurationSign(e4), [s4, c4] = clampRelativeDuration(clearDurationFields(e4, t4 - 1), t4, a4, o4, r4, i4), u4 = computeEpochNanoFrac(s4, c4, n4);
+    return e4[pe[t4]] + u4 * a4;
+  })(...spanDuration(o3, void 0, a3, ...u3), a3, ...u3);
+}
+function totalBigNano(e3, n3) {
+  return bigNanoToNumber(e3, j[n3], 1);
+}
+function clampRelativeDuration(e3, n3, t3, o3, r3, i3) {
+  const a3 = {
+    ...Me,
+    [pe[n3]]: t3
+  }, s3 = moveRelativeMarker(e3, o3, r3, i3), c3 = moveRelativeMarker(a3, s3, r3, i3);
+  return [relativeMarkerToEpochNano(s3, i3), relativeMarkerToEpochNano(c3, i3)];
+}
+function computeEpochNanoFrac(e3, n3, t3) {
+  const o3 = bigNanoToNumber(diffBigNanos(e3, n3));
+  if (!o3) {
+    throw new RangeError(m);
+  }
+  return bigNanoToNumber(diffBigNanos(e3, t3)) / o3;
+}
+function roundInstant(e3, n3) {
+  const [t3, o3, r3] = refineRoundOptions(n3, 5, 1);
+  return createInstantSlots(roundBigNano(e3.epochNanoseconds, t3, o3, r3, 1));
+}
+function roundZonedDateTime(e3, n3, t3) {
+  let { epochNanoseconds: o3, timeZone: r3, calendar: i3 } = n3;
+  const [a3, s3, c3] = refineRoundOptions(t3);
+  if (0 === a3 && 1 === s3) {
+    return n3;
+  }
+  const u3 = e3(r3), l3 = u3.getOffsetNanosecondsFor(o3);
+  let f3 = {
+    ...epochNanoToIso(o3, l3),
+    calendar: i3
+  };
+  return f3 = {
+    calendar: i3,
+    ...roundDateTime(f3, a3, s3, c3, u3)
+  }, o3 = getMatchingInstantFor(u3, f3, l3, 2, 0, 1), createZonedDateTimeSlots(o3, r3, i3);
+}
+function roundPlainDateTime(e3, n3) {
+  return createPlainDateTimeSlots(roundDateTime(e3, ...refineRoundOptions(n3)), e3.calendar);
+}
+function roundPlainTime(e3, n3) {
+  return createPlainTimeSlots(((e4, n4, t3, o3) => roundTimeToNano(e4, computeNanoInc(n4, t3), o3)[0])(e3, ...refineRoundOptions(n3, 5)));
+}
+function roundDateTime(e3, n3, t3, o3, r3) {
+  return 6 === n3 ? ((e4, n4, t4) => {
+    if (n4) {
+      const o4 = computeTimeInDay(n4, e4);
+      return checkIsoDateTimeInBounds({
+        ...moveByIsoDays(e4, roundByInc(isoTimeFieldsToNano(e4), o4, t4) / o4),
+        ...be
+      });
+    }
+    return roundDateTimeToNano(e4, W, t4);
+  })(e3, r3, o3) : roundDateTimeToNano(e3, computeNanoInc(n3, t3), o3);
+}
+function roundDateTimeToNano(e3, n3, t3) {
+  const [o3, r3] = roundTimeToNano(e3, n3, t3);
   return checkIsoDateTimeInBounds({
-    ...e3,
-    ...Ae,
-    isoHour: 12
-  }), e3;
-}
-function checkIsoDateTimeInBounds(e3) {
-  const n3 = clampProp(e3, "isoYear", We, Ge, 1), t3 = n3 === We ? 1 : n3 === Ge ? -1 : 0;
-  return t3 && checkEpochNanoInBounds(isoToEpochNano({
-    ...e3,
-    isoDay: e3.isoDay + t3,
-    isoNanosecond: e3.isoNanosecond - t3
-  })), e3;
-}
-function checkEpochNanoInBounds(e3) {
-  if (!e3 || -1 === compareDayTimeNanos(e3, $e) || 1 === compareDayTimeNanos(e3, xe)) {
-    throw new RangeError(D);
-  }
-  return e3;
-}
-function isoTimeFieldsToNano(e3) {
-  return givenFieldsToDayTimeNano(e3, 5, Be)[1];
-}
-function nanoToIsoTimeAndDay(e3) {
-  const [n3, t3] = divModFloor(e3, B);
-  return [nanoToGivenFields(t3, 5, Be), n3];
-}
-function epochNanoToSec(e3) {
-  return dayTimeNanoToNumber(e3, Z);
-}
-function epochNanoToMilli(e3) {
-  return dayTimeNanoToNumber(e3, C);
-}
-function isoToEpochMilli(e3) {
-  return isoArgsToEpochMilli(e3.isoYear, e3.isoMonth, e3.isoDay, e3.isoHour, e3.isoMinute, e3.isoSecond, e3.isoMillisecond);
-}
-function isoToEpochNano(e3) {
-  const n3 = isoToEpochMilli(e3);
-  if (void 0 !== n3) {
-    const [t3, o3] = divModTrunc(n3, b);
-    return [t3, o3 * C + (e3.isoMicrosecond || 0) * E + (e3.isoNanosecond || 0)];
-  }
-}
-function isoToEpochNanoWithOffset(e3, n3) {
-  const [t3, o3] = nanoToIsoTimeAndDay(isoTimeFieldsToNano(e3) - n3);
-  return checkEpochNanoInBounds(isoToEpochNano({
-    ...e3,
-    isoDay: e3.isoDay + o3,
-    ...t3
-  }));
-}
-function isoArgsToEpochSec(...e3) {
-  return isoArgsToEpochMilli(...e3) / w;
-}
-function isoArgsToEpochMilli(...e3) {
-  const [n3, t3] = isoToLegacyDate(...e3), o3 = n3.getTime();
-  if (!isNaN(o3)) {
-    return o3 - t3 * b;
-  }
-}
-function isoToLegacyDate(e3, n3 = 1, t3 = 1, o3 = 0, r3 = 0, i3 = 0, a3 = 0) {
-  const s3 = e3 === We ? 1 : e3 === Ge ? -1 : 0, c3 = /* @__PURE__ */ new Date();
-  return c3.setUTCHours(o3, r3, i3, a3), c3.setUTCFullYear(e3, n3 - 1, t3 + s3), [c3, s3];
-}
-function epochNanoToIso(e3, n3) {
-  let [t3, o3] = addDayTimeNanoAndNumber(e3, n3);
-  o3 < 0 && (o3 += B, t3 -= 1);
-  const [r3, i3] = divModFloor(o3, C), [a3, s3] = divModFloor(i3, E);
-  return {
-    ...epochMilliToIso(t3 * b + r3),
-    isoMicrosecond: a3,
-    isoNanosecond: s3
-  };
-}
-function epochMilliToIso(e3) {
-  const n3 = e3 < -b * Ue ? 1 : e3 > b * Ue ? -1 : 0, t3 = new Date(e3 + n3 * b);
-  return zipProps(Le, [t3.getUTCFullYear(), t3.getUTCMonth() + 1, t3.getUTCDate() - n3, t3.getUTCHours(), t3.getUTCMinutes(), t3.getUTCSeconds(), t3.getUTCMilliseconds()]);
-}
-function createOptionsTransformer(e3, n3, t3 = []) {
-  const o3 = new Set(t3);
-  return (t4) => (((e4, n4) => {
-    for (const t5 of n4) {
-      if (t5 in e4) {
-        return 1;
-      }
-    }
-    return 0;
-  })(t4 = ((e4, n4) => {
-    const t5 = {};
-    for (const o4 in e4) {
-      n4.has(o4) || (t5[o4] = e4[o4]);
-    }
-    return t5;
-  })(t4, o3), e3) || Object.assign(t4, n3), t4);
-}
-function isoDateFieldsToEpochNano(e3, n3) {
-  return getSingleInstantFor(queryNativeTimeZone(n3.timeZone), {
-    ...Ae,
-    isoHour: 12,
-    ...e3
+    ...moveByIsoDays(e3, r3),
+    ...o3
   });
 }
-function extractEpochNano(e3) {
-  return e3.epochNanoseconds;
+function roundTimeToNano(e3, n3, t3) {
+  return nanoToIsoTimeAndDay(roundByInc(isoTimeFieldsToNano(e3), n3, t3));
 }
-function createFormatPrepper(e3, n3 = createFormat) {
-  const [t3] = e3;
-  return (o3, r3 = Fn, i3, a3) => {
-    const s3 = n3(o3, r3, t3, i3, a3), c3 = s3.resolvedOptions();
-    return [s3, ...toEpochMillis(e3, c3, i3, a3)];
-  };
+function balanceDayTimeDuration(e3, n3, t3, o3, r3) {
+  return nanoToDurationDayTimeFields(roundBigNano(durationFieldsToBigNano(e3), t3, o3, r3), n3);
 }
-function createFormat(e3, n3, t3, o3, r3) {
-  return new He(e3, t3(n3, o3, r3));
+function balanceDayTimeDurationByInc(e3, n3, t3, o3) {
+  return nanoToDurationDayTimeFields(roundBigNanoByInc(durationFieldsToBigNano(e3, n3), t3, o3), n3);
 }
-function toEpochMillis(e3, n3, t3, o3) {
-  return [toEpochMilli(e3, n3, t3), void 0 !== o3 ? toEpochMilli(e3, n3, o3) : void 0];
-}
-function toEpochMilli([, e3, n3], t3, o3) {
-  return o3.calendar && ((e4, n4, t4) => {
-    if ((t4 || e4 !== we) && e4 !== n4) {
-      throw new RangeError(f);
-    }
-  })(getId(o3.calendar), t3.calendar, n3), epochNanoToMilli(e3(o3, t3));
-}
-function hashIntlFormatParts(e3, n3) {
-  const t3 = e3.formatToParts(n3), o3 = {};
-  for (const e4 of t3) {
-    o3[e4.type] = e4.value;
-  }
-  return o3;
-}
-function refinePlainDateBag(e3, n3, t3, o3 = []) {
-  const r3 = refineCalendarFields(e3, n3, K, o3);
-  return e3.dateFromFields(r3, t3);
-}
-function refinePlainYearMonthBag(e3, n3, t3, o3) {
-  const r3 = refineCalendarFields(e3, n3, J, o3);
-  return e3.yearMonthFromFields(r3, t3);
-}
-function refinePlainMonthDayBag(e3, n3, t3, o3, r3 = []) {
-  const i3 = refineCalendarFields(e3, t3, K, r3);
-  return n3 && void 0 !== i3.month && void 0 === i3.monthCode && void 0 === i3.year && (i3.year = Un), e3.monthDayFromFields(i3, o3);
-}
-function refineCalendarFields(e3, n3, t3, o3 = [], r3 = []) {
-  return refineFields(n3, [...e3.fields(t3), ...r3].sort(), o3);
-}
-function refineFields(e3, n3, o3, r3 = !o3) {
-  const i3 = {};
-  let a3, s3 = 0;
-  for (const t3 of n3) {
-    if (t3 === a3) {
-      throw new RangeError(duplicateFields(t3));
-    }
-    if ("constructor" === t3 || "__proto__" === t3) {
-      throw new RangeError(forbiddenField(t3));
-    }
-    let n4 = e3[t3];
-    if (void 0 !== n4) {
-      s3 = 1, wn[t3] && (n4 = wn[t3](n4, t3)), i3[t3] = n4;
-    } else if (o3) {
-      if (o3.includes(t3)) {
-        throw new TypeError(missingField(t3));
+function roundRelativeDuration(e3, n3, t3, o3, r3, i3, a3, s3, c3) {
+  const u3 = o3 > 6 ? nudgeRelativeDuration : c3 && o3 < 6 ? nudgeRelativeDurationTime : nudgeDurationDayTime;
+  let [l3, f3, d3] = u3(e3, n3, t3, o3, r3, i3, a3, s3, c3);
+  return d3 && (l3 = ((e4, n4, t4, o4, r4, i4, a4) => {
+    const s4 = computeDurationSign(e4);
+    for (let c4 = o4 + 1; c4 <= t4; c4++) {
+      if (7 === c4 && 7 !== t4) {
+        continue;
       }
-      i3[t3] = ee[t3];
-    }
-    a3 = t3;
-  }
-  if (r3 && !s3) {
-    throw new TypeError(t);
-  }
-  return i3;
-}
-function refineTimeBag(e3, n3) {
-  return constrainIsoTimeFields(En({
-    ...ee,
-    ...e3
-  }), n3);
-}
-function mergeCalendarFields(e3, n3, t3, o3, r3 = [], i3 = []) {
-  const a3 = [...e3.fields(o3), ...r3].sort();
-  let s3 = refineFields(n3, a3, i3);
-  const c3 = refineFields(t3, a3);
-  return s3 = e3.mergeFields(s3, c3), refineFields(s3, a3, []);
-}
-function convertToPlainMonthDay(e3, n3) {
-  const t3 = refineCalendarFields(e3, n3, X);
-  return e3.monthDayFromFields(t3);
-}
-function convertToPlainYearMonth(e3, n3, t3) {
-  const o3 = refineCalendarFields(e3, n3, _);
-  return e3.yearMonthFromFields(o3, t3);
-}
-function convertToIso(e3, n3, t3, o3, r3) {
-  n3 = pluckProps(t3 = e3.fields(t3), n3), o3 = refineFields(o3, r3 = e3.fields(r3), []);
-  let i3 = e3.mergeFields(n3, o3);
-  return i3 = refineFields(i3, [...t3, ...r3].sort(), []), e3.dateFromFields(i3);
-}
-function refineYear(e3, n3) {
-  let { era: t3, eraYear: o3, year: s3 } = n3;
-  const c3 = getCalendarEraOrigins(e3);
-  if (void 0 !== t3 || void 0 !== o3) {
-    if (void 0 === t3 || void 0 === o3) {
-      throw new TypeError(i);
-    }
-    if (!c3) {
-      throw new RangeError(r);
-    }
-    const e4 = c3[t3];
-    if (void 0 === e4) {
-      throw new RangeError(invalidEra(t3));
-    }
-    const n4 = eraYearToYear(o3, e4);
-    if (void 0 !== s3 && s3 !== n4) {
-      throw new RangeError(a);
-    }
-    s3 = n4;
-  } else if (void 0 === s3) {
-    throw new TypeError(missingYear(c3));
-  }
-  return s3;
-}
-function refineMonth(e3, n3, t3, o3) {
-  let { month: r3, monthCode: i3 } = n3;
-  if (void 0 !== i3) {
-    const n4 = ((e4, n5, t4, o4) => {
-      const r4 = e4.o(t4), [i4, a3] = parseMonthCode(n5);
-      let s3 = monthCodeNumberToMonth(i4, a3, r4);
-      if (a3) {
-        const n6 = getCalendarLeapMonthMeta(e4);
-        if (void 0 === n6) {
-          throw new RangeError(u);
-        }
-        if (n6 > 0) {
-          if (s3 > n6) {
-            throw new RangeError(u);
-          }
-          if (void 0 === r4) {
-            if (1 === o4) {
-              throw new RangeError(u);
-            }
-            s3--;
-          }
-        } else {
-          if (s3 !== -n6) {
-            throw new RangeError(u);
-          }
-          if (void 0 === r4 && 1 === o4) {
-            throw new RangeError(u);
-          }
-        }
+      const o5 = clearDurationFields(e4, c4 - 1);
+      o5[pe[c4]] += s4;
+      const u4 = bigNanoToNumber(diffBigNanos(relativeMarkerToEpochNano(moveRelativeMarker(o5, r4, i4, a4), a4), n4));
+      if (u4 && Math.sign(u4) !== s4) {
+        break;
       }
-      return s3;
-    })(e3, i3, t3, o3);
-    if (void 0 !== r3 && r3 !== n4) {
-      throw new RangeError(s);
+      e4 = o5;
     }
-    r3 = n4, o3 = 1;
-  } else if (void 0 === r3) {
-    throw new TypeError(c);
-  }
-  return clampEntity("month", r3, 1, e3.i(t3), o3);
+    return e4;
+  })(l3, f3, t3, Math.max(6, o3), a3, s3, c3)), l3;
 }
-function refineDay(e3, n3, t3, o3, r3) {
-  return clampProp(n3, "day", 1, e3.l(o3, t3), r3);
+function computeNanoInc(e3, n3) {
+  return j[e3] * n3;
 }
-function spliceFields(e3, n3, t3, o3) {
-  let r3 = 0;
-  const i3 = [];
-  for (const e4 of t3) {
-    void 0 !== n3[e4] ? r3 = 1 : i3.push(e4);
-  }
-  if (Object.assign(e3, n3), r3) {
-    for (const n4 of o3 || i3) {
-      delete e3[n4];
-    }
-  }
+function roundByInc(e3, n3, t3) {
+  return ((e4, n4) => Pn[n4](e4))(e3 / n3, t3) * n3;
 }
-function parseMonthCode(e3) {
-  const n3 = Zn.exec(e3);
-  if (!n3) {
-    throw new RangeError(invalidMonthCode(e3));
-  }
-  return [parseInt(n3[1]), Boolean(n3[2])];
+function roundToMinute(e3) {
+  return roundByInc(e3, L, 7);
 }
-function monthCodeNumberToMonth(e3, n3, t3) {
-  return e3 + (n3 || t3 && e3 >= t3 ? 1 : 0);
+function roundBigNano(e3, n3, t3, o3, r3) {
+  return 6 === n3 ? [roundByInc(totalBigNano(e3, 6), t3, o3), 0] : roundBigNanoByInc(e3, computeNanoInc(n3, t3), o3, r3);
 }
-function monthToMonthCodeNumber(e3, n3) {
-  return e3 - (n3 && e3 >= n3 ? 1 : 0);
+function roundBigNanoByInc(e3, n3, t3, o3) {
+  let [r3, i3] = e3;
+  o3 && i3 < 0 && (i3 += W, r3 -= 1);
+  const [a3, s3] = divModFloor(roundByInc(i3, n3, t3), W);
+  return createBigNano(r3 + a3, s3);
 }
-function eraYearToYear(e3, n3) {
-  return (n3 + e3) * (Math.sign(n3) || 1) || 0;
+function nudgeDurationDayTime(e3, n3, t3, o3, r3, i3) {
+  const a3 = computeDurationSign(e3), s3 = durationFieldsToBigNano(e3), c3 = roundBigNano(s3, o3, r3, i3), u3 = diffBigNanos(s3, c3), l3 = Math.sign(c3[0] - s3[0]) === a3, f3 = nanoToDurationDayTimeFields(c3, Math.min(t3, 6));
+  return [{
+    ...e3,
+    ...f3
+  }, addBigNanos(n3, u3), l3];
 }
-function getCalendarEraOrigins(e3) {
-  return Ze[getCalendarIdBase(e3)];
+function nudgeRelativeDurationTime(e3, n3, t3, o3, r3, i3, a3, s3, c3) {
+  const u3 = computeDurationSign(e3);
+  let [l3, f3] = givenFieldsToBigNano(e3, 5, pe);
+  const d3 = computeNanoInc(o3, r3);
+  let m3 = roundByInc(f3, d3, i3);
+  const [p3, h3] = clampRelativeDuration({
+    ...e3,
+    ...Ne
+  }, 6, u3, a3, s3, c3), T3 = m3 - bigNanoToNumber(diffBigNanos(p3, h3));
+  T3 && Math.sign(T3) !== u3 ? n3 = addBigNanoAndNumber(p3, m3) : (l3 += u3, m3 = roundByInc(T3, d3, i3), n3 = addBigNanoAndNumber(h3, m3));
+  const g3 = nanoToDurationTimeFields(m3);
+  return [{
+    ...e3,
+    ...g3,
+    days: e3.days + l3
+  }, n3, Boolean(l3)];
 }
-function getCalendarLeapMonthMeta(e3) {
-  return Ye[getCalendarIdBase(e3)];
-}
-function getCalendarIdBase(e3) {
-  return computeCalendarIdBase(e3.id || we);
-}
-function computeCalendarIdBase(e3) {
-  return e3.split("-")[0];
-}
-function createIntlFieldCache(e3) {
-  return createLazyGenerator((n3) => {
-    const t3 = isoToEpochMilli(n3);
-    return e3(t3);
-  }, WeakMap);
-}
-function createIntlYearMonthCache(e3) {
-  const n3 = e3(0).year - An;
-  return createLazyGenerator((t3) => {
-    let o3, r3 = isoArgsToEpochMilli(t3 - n3);
-    const i3 = [], a3 = [];
-    do {
-      r3 += 400 * b;
-    } while ((o3 = e3(r3)).year <= t3);
-    do {
-      r3 += (1 - o3.day) * b, o3.year === t3 && (i3.push(r3), a3.push(o3.month)), r3 -= b;
-    } while ((o3 = e3(r3)).year >= t3);
-    return {
-      u: i3.reverse(),
-      m: O(a3.reverse())
-    };
-  });
-}
-function parseIntlYear(e3, n3) {
-  let t3, o3, r3 = parseInt(e3.relatedYear || e3.year);
-  if (e3.era) {
-    const a3 = Ze[n3];
-    void 0 !== a3 && (i3 = (i3 = e3.era).normalize("NFD").toLowerCase().replace(/[^a-z0-9]/g, ""), t3 = ke[i3] || i3, o3 = r3, r3 = eraYearToYear(o3, a3[t3] || 0));
-  }
-  var i3;
-  return {
-    era: t3,
-    eraYear: o3,
-    year: r3
-  };
-}
-function buildIntlFormat$1(e3) {
-  return new He(bn, {
-    calendar: e3,
-    timeZone: Yn,
-    era: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric"
-  });
-}
-function computeIntlDateParts(e3) {
-  const { year: n3, month: t3, day: o3 } = this.p(e3), { m: r3 } = this.h(n3);
-  return [n3, r3[t3] + 1, o3];
-}
-function computeIntlEpochMilli(e3, n3 = 1, t3 = 1) {
-  return this.h(e3).u[n3 - 1] + (t3 - 1) * b;
-}
-function computeIntlLeapMonth(e3) {
-  const n3 = queryMonthStrs(this, e3), t3 = queryMonthStrs(this, e3 - 1), o3 = n3.length;
-  if (o3 > t3.length) {
-    const e4 = getCalendarLeapMonthMeta(this);
-    if (e4 < 0) {
-      return -e4;
-    }
-    for (let e5 = 0; e5 < o3; e5++) {
-      if (n3[e5] !== t3[e5]) {
-        return e5 + 1;
-      }
-    }
-  }
-}
-function computeIntlDaysInYear(e3) {
-  return diffEpochMilliByDay(computeIntlEpochMilli.call(this, e3), computeIntlEpochMilli.call(this, e3 + 1));
-}
-function computeIntlDaysInMonth(e3, n3) {
-  const { u: t3 } = this.h(e3);
-  let o3 = n3 + 1, r3 = t3;
-  return o3 > t3.length && (o3 = 1, r3 = this.h(e3 + 1).u), diffEpochMilliByDay(t3[n3 - 1], r3[o3 - 1]);
-}
-function computeIntlMonthsInYear(e3) {
-  return this.h(e3).u.length;
-}
-function queryMonthStrs(e3, n3) {
-  return Object.keys(e3.h(n3).m);
-}
-function queryNativeTimeZone(e3) {
-  const n3 = parseOffsetNanoMaybe(e3 = e3.toLocaleUpperCase(), 1);
-  return void 0 !== n3 ? new FixedTimeZone(n3) : jn(e3);
-}
-function createSplitTuple(e3, n3) {
-  return [e3, n3];
-}
-function computePeriod(e3) {
-  const n3 = Math.floor(e3 / Bn) * Bn;
-  return [n3, n3 + Bn];
+function nudgeRelativeDuration(e3, n3, t3, o3, r3, i3, a3, s3, c3) {
+  const u3 = computeDurationSign(e3), l3 = pe[o3], f3 = clearDurationFields(e3, o3 - 1), d3 = divTrunc(e3[l3], r3) * r3;
+  f3[l3] = d3;
+  const [m3, p3] = clampRelativeDuration(f3, o3, r3 * u3, a3, s3, c3), h3 = d3 + computeEpochNanoFrac(m3, p3, n3) * u3 * r3, T3 = roundByInc(h3, r3, i3), g3 = Math.sign(T3 - h3) === u3;
+  return f3[l3] = T3, [f3, g3 ? p3 : m3, g3];
 }
 function formatInstantIso(e3, n3, t3, o3) {
   const [r3, i3, a3, s3] = ((e4) => {
@@ -81663,24 +81721,24 @@ function formatInstantIso(e3, n3, t3, o3) {
     return [e4.timeZone, ...n4];
   })(o3), c3 = void 0 !== r3;
   return ((e4, n4, t4, o4, r4, i4) => {
-    t4 = roundDayTimeNanoByInc(t4, r4, o4, 1);
-    let a4 = n4.getOffsetNanosecondsFor(t4);
+    t4 = roundBigNanoByInc(t4, r4, o4, 1);
+    const a4 = n4.getOffsetNanosecondsFor(t4);
     return formatIsoDateTimeFields(epochNanoToIso(t4, a4), i4) + (e4 ? formatOffsetNano(roundToMinute(a4)) : "Z");
-  })(c3, n3(c3 ? e3(r3) : Yn), t3.epochNanoseconds, i3, a3, s3);
+  })(c3, n3(c3 ? e3(r3) : En), t3.epochNanoseconds, i3, a3, s3);
 }
 function formatZonedDateTimeIso(e3, n3, t3) {
-  return ((e4, n4, t4, o3, r3, i3, a3, s3, c3, l3) => {
-    o3 = roundDayTimeNanoByInc(o3, c3, s3, 1);
-    const u3 = e4(t4).getOffsetNanosecondsFor(o3);
-    return formatIsoDateTimeFields(epochNanoToIso(o3, u3), l3) + formatOffsetNano(roundToMinute(u3), a3) + ((e5, n5) => 1 !== n5 ? "[" + (2 === n5 ? "!" : "") + getId(e5) + "]" : "")(t4, i3) + formatCalendar(n4, r3);
+  return ((e4, n4, t4, o3, r3, i3, a3, s3, c3, u3) => {
+    o3 = roundBigNanoByInc(o3, c3, s3, 1);
+    const l3 = e4(t4).getOffsetNanosecondsFor(o3);
+    return formatIsoDateTimeFields(epochNanoToIso(o3, l3), u3) + formatOffsetNano(roundToMinute(l3), a3) + ((e5, n5) => 1 !== n5 ? "[" + (2 === n5 ? "!" : "") + getId(e5) + "]" : "")(t4, i3) + formatCalendar(n4, r3);
   })(e3, n3.calendar, n3.timeZone, n3.epochNanoseconds, ...((e4) => {
     e4 = normalizeOptions(e4);
-    const n4 = ve(e4), t4 = refineSubsecDigits(e4), o3 = Fe(e4), r3 = be(e4, 4), i3 = Ie(e4, 4);
-    return [n4, Me(e4), o3, r3, ...refineSmallestUnitAndSubsecDigits(i3, t4)];
+    const n4 = dn(e4), t4 = refineSubsecDigits(e4), o3 = pn(e4), r3 = hn(e4, 4), i3 = an(e4, 4);
+    return [n4, mn(e4), o3, r3, ...refineSmallestUnitAndSubsecDigits(i3, t4)];
   })(t3));
 }
 function formatPlainDateTimeIso(e3, n3) {
-  return ((e4, n4, t3, o3, r3, i3) => formatIsoDateTimeFields(roundDateTimeToNano(n4, r3, o3), i3) + formatCalendar(e4, t3))(e3.calendar, e3, ...((e4) => (e4 = normalizeOptions(e4), [ve(e4), ...refineTimeDisplayTuple(e4)]))(n3));
+  return ((e4, n4, t3, o3, r3, i3) => formatIsoDateTimeFields(roundDateTimeToNano(n4, r3, o3), i3) + formatCalendar(e4, t3))(e3.calendar, e3, ...((e4) => (e4 = normalizeOptions(e4), [dn(e4), ...refineTimeDisplayTuple(e4)]))(n3));
 }
 function formatPlainDateIso(e3, n3) {
   return t3 = e3.calendar, o3 = e3, r3 = refineDateDisplayOptions(n3), formatIsoDateFields(o3) + formatCalendar(t3, r3);
@@ -81701,22 +81759,24 @@ function formatDurationIso(e3, n3) {
     ...e3,
     ...balanceDayTimeDurationByInc(e3, Math.min(getLargestDurationUnit(e3), 6), o3, t3)
   }), ((e4, n4) => {
-    const t4 = Hn(e4), o4 = -1 === t4 ? negateDurationFields(e4) : e4, { hours: r4, minutes: i3 } = o4, [a3, s3] = dayTimeNanoToNumberRemainder(givenFieldsToDayTimeNano(o4, 3, ie), Z), c3 = formatSubsecNano(s3, n4), l3 = n4 >= 0 || !t4 || c3;
+    const { sign: t4 } = e4, o4 = -1 === t4 ? negateDurationFields(e4) : e4, { hours: r4, minutes: i3 } = o4, [a3, s3] = divModBigNano(givenFieldsToBigNano(o4, 3, pe), A, divModTrunc);
+    checkDurationTimeUnit(a3);
+    const c3 = formatSubsecNano(s3, n4), u3 = n4 >= 0 || !t4 || c3;
     return (t4 < 0 ? "-" : "") + "P" + formatDurationFragments({
-      Y: formatNumberUnscientific(o4.years),
-      M: formatNumberUnscientific(o4.months),
-      W: formatNumberUnscientific(o4.weeks),
-      D: formatNumberUnscientific(o4.days)
-    }) + (r4 || i3 || a3 || l3 ? "T" + formatDurationFragments({
-      H: formatNumberUnscientific(r4),
-      M: formatNumberUnscientific(i3),
-      S: formatNumberUnscientific(a3, l3) + c3
+      Y: formatDurationNumber(o4.years),
+      M: formatDurationNumber(o4.months),
+      W: formatDurationNumber(o4.weeks),
+      D: formatDurationNumber(o4.days)
+    }) + (r4 || i3 || a3 || u3 ? "T" + formatDurationFragments({
+      H: formatDurationNumber(r4),
+      M: formatDurationNumber(i3),
+      S: formatDurationNumber(a3, u3) + c3
     }) : "");
   })(e3, r3);
 }
 function formatDateLikeIso(e3, n3, t3, o3) {
-  const r3 = getId(e3), i3 = o3 > 1 || 0 === o3 && r3 !== we;
-  return 1 === o3 ? r3 === we ? n3(t3) : formatIsoDateFields(t3) : i3 ? formatIsoDateFields(t3) + formatCalendarId(r3, 2 === o3) : n3(t3);
+  const r3 = getId(e3), i3 = o3 > 1 || 0 === o3 && r3 !== ce;
+  return 1 === o3 ? r3 === ce ? n3(t3) : formatIsoDateFields(t3) : i3 ? formatIsoDateFields(t3) + formatCalendarId(r3, 2 === o3) : n3(t3);
 }
 function formatDurationFragments(e3) {
   const n3 = [];
@@ -81730,30 +81790,30 @@ function formatIsoDateTimeFields(e3, n3) {
   return formatIsoDateFields(e3) + "T" + formatIsoTimeFields(e3, n3);
 }
 function formatIsoDateFields(e3) {
-  return formatIsoYearMonthFields(e3) + "-" + v(e3.isoDay);
+  return formatIsoYearMonthFields(e3) + "-" + k(e3.isoDay);
 }
 function formatIsoYearMonthFields(e3) {
   const { isoYear: n3 } = e3;
-  return (n3 < 0 || n3 > 9999 ? getSignStr(n3) + padNumber(6, Math.abs(n3)) : padNumber(4, n3)) + "-" + v(e3.isoMonth);
+  return (n3 < 0 || n3 > 9999 ? getSignStr(n3) + padNumber(6, Math.abs(n3)) : padNumber(4, n3)) + "-" + k(e3.isoMonth);
 }
 function formatIsoMonthDayFields(e3) {
-  return v(e3.isoMonth) + "-" + v(e3.isoDay);
+  return k(e3.isoMonth) + "-" + k(e3.isoDay);
 }
 function formatIsoTimeFields(e3, n3) {
-  const t3 = [v(e3.isoHour), v(e3.isoMinute)];
-  return -1 !== n3 && t3.push(v(e3.isoSecond) + ((e4, n4, t4, o3) => formatSubsecNano(e4 * C + n4 * E + t4, o3))(e3.isoMillisecond, e3.isoMicrosecond, e3.isoNanosecond, n3)), t3.join(":");
+  const t3 = [k(e3.isoHour), k(e3.isoMinute)];
+  return -1 !== n3 && t3.push(k(e3.isoSecond) + ((e4, n4, t4, o3) => formatSubsecNano(e4 * q + n4 * z + t4, o3))(e3.isoMillisecond, e3.isoMicrosecond, e3.isoNanosecond, n3)), t3.join(":");
 }
 function formatOffsetNano(e3, n3 = 0) {
   if (1 === n3) {
     return "";
   }
-  const [t3, o3] = divModFloor(Math.abs(e3), Y), [r3, i3] = divModFloor(o3, k), [a3, s3] = divModFloor(i3, Z);
-  return getSignStr(e3) + v(t3) + ":" + v(r3) + (a3 || s3 ? ":" + v(a3) + formatSubsecNano(s3) : "");
+  const [t3, o3] = divModFloor(Math.abs(e3), U), [r3, i3] = divModFloor(o3, L), [a3, s3] = divModFloor(i3, A);
+  return getSignStr(e3) + k(t3) + ":" + k(r3) + (a3 || s3 ? ":" + k(a3) + formatSubsecNano(s3) : "");
 }
 function formatCalendar(e3, n3) {
   if (1 !== n3) {
     const t3 = getId(e3);
-    if (n3 > 1 || 0 === n3 && t3 !== we) {
+    if (n3 > 1 || 0 === n3 && t3 !== ce) {
       return formatCalendarId(t3, 2 === n3);
     }
   }
@@ -81764,18 +81824,32 @@ function formatCalendarId(e3, n3) {
 }
 function formatSubsecNano(e3, n3) {
   let t3 = padNumber(9, e3);
-  return t3 = void 0 === n3 ? t3.replace(qn, "") : t3.slice(0, n3), t3 ? "." + t3 : "";
+  return t3 = void 0 === n3 ? t3.replace(On, "") : t3.slice(0, n3), t3 ? "." + t3 : "";
 }
 function getSignStr(e3) {
   return e3 < 0 ? "-" : "+";
 }
-function formatNumberUnscientific(e3, n3) {
+function formatDurationNumber(e3, n3) {
   return e3 || n3 ? e3.toLocaleString("fullwide", {
     useGrouping: 0
   }) : "";
 }
-function zonedEpochNanoToIso(e3, n3) {
-  return epochNanoToIso(n3, e3.getOffsetNanosecondsFor(n3));
+function _zonedEpochSlotsToIso(e3, n3) {
+  const { epochNanoseconds: t3 } = e3, o3 = (n3.getOffsetNanosecondsFor ? n3 : n3(e3.timeZone)).getOffsetNanosecondsFor(t3), r3 = epochNanoToIso(t3, o3);
+  return {
+    calendar: e3.calendar,
+    ...r3,
+    offsetNanoseconds: o3
+  };
+}
+function buildZonedIsoFields(e3, n3) {
+  const t3 = wn(n3, e3);
+  return {
+    calendar: n3.calendar,
+    ...pluckProps(Fe, t3),
+    offset: formatOffsetNano(t3.offsetNanoseconds),
+    timeZone: n3.timeZone
+  };
 }
 function getMatchingInstantFor(e3, n3, t3, o3 = 0, r3 = 0, i3, a3) {
   if (void 0 !== t3 && 1 === o3 && (1 === o3 || a3)) {
@@ -81787,7 +81861,7 @@ function getMatchingInstantFor(e3, n3, t3, o3 = 0, r3 = 0, i3, a3) {
       const r4 = isoToEpochNano(n4);
       o4 && (t4 = roundToMinute(t4));
       for (const n5 of e5) {
-        let e6 = dayTimeNanoToNumber(diffDayTimeNanos(n5, r4));
+        let e6 = bigNanoToNumber(diffBigNanos(n5, r4));
         if (o4 && (e6 = roundToMinute(e6)), e6 === t4) {
           return n5;
         }
@@ -81797,7 +81871,7 @@ function getMatchingInstantFor(e3, n3, t3, o3 = 0, r3 = 0, i3, a3) {
       return e4;
     }
     if (0 === o3) {
-      throw new RangeError(h);
+      throw new RangeError(I);
     }
   }
   return a3 ? isoToEpochNano(n3) : getSingleInstantFor(e3, n3, r3, s3);
@@ -81807,412 +81881,123 @@ function getSingleInstantFor(e3, n3, t3 = 0, o3 = e3.getPossibleInstantsFor(n3))
     return o3[0];
   }
   if (1 === t3) {
-    throw new RangeError(T);
+    throw new RangeError(M);
   }
   if (o3.length) {
     return o3[3 === t3 ? 1 : 0];
   }
   const r3 = isoToEpochNano(n3), i3 = ((e4, n4) => {
-    const t4 = e4.getOffsetNanosecondsFor(addDayTimeNanoAndNumber(n4, -B));
-    return e4.getOffsetNanosecondsFor(addDayTimeNanoAndNumber(n4, B)) - t4;
+    const t4 = e4.getOffsetNanosecondsFor(addBigNanoAndNumber(n4, -W));
+    return validateTimeZoneGap(e4.getOffsetNanosecondsFor(addBigNanoAndNumber(n4, W)) - t4);
   })(e3, r3), a3 = i3 * (2 === t3 ? -1 : 1);
   return (o3 = e3.getPossibleInstantsFor(epochNanoToIso(r3, a3)))[2 === t3 ? 0 : o3.length - 1];
 }
-function computeNanosecondsInDay(e3, n3) {
+function computeStartOfDay(e3, n3) {
+  let { epochNanoseconds: t3, timeZone: o3, calendar: r3 } = n3;
+  const i3 = e3(o3);
+  return t3 = getMatchingInstantFor(i3, {
+    ...wn(n3, i3),
+    ...be
+  }, void 0, 0, 0, 1), createZonedDateTimeSlots(t3, o3, r3);
+}
+function computeHoursInDay(e3, n3) {
+  const t3 = e3(n3.timeZone);
+  return computeTimeInDay(t3, wn(n3, t3), U);
+}
+function computeTimeInDay(e3, n3, t3) {
   n3 = {
     ...n3,
-    ...Ae
+    ...be
   };
-  const t3 = dayTimeNanoToNumber(diffDayTimeNanos(getSingleInstantFor(e3, {
+  const o3 = bigNanoToNumber(diffBigNanos(getSingleInstantFor(e3, {
     ...n3,
-    ...Ae
+    ...be
   }), getSingleInstantFor(e3, {
     ...moveByIsoDays(n3, 1),
-    ...Ae
-  })));
-  if (t3 <= 0) {
-    throw new RangeError(d);
+    ...be
+  })), t3, 1);
+  if (o3 <= 0) {
+    throw new RangeError(m);
   }
-  return t3;
+  return o3;
 }
 function validateTimeZoneOffset(e3) {
-  if (Math.abs(e3) >= B) {
-    throw new RangeError(p);
+  if (Math.abs(e3) >= W) {
+    throw new RangeError(g);
   }
   return e3;
 }
-function totalDayTimeNano(e3, n3) {
-  return dayTimeNanoToNumber(e3, R[n3], 1);
-}
-function clampRelativeDuration(e3, n3, t3, o3, r3, i3) {
-  const a3 = {
-    ...ue,
-    [ie[n3]]: t3
-  }, s3 = i3(o3, e3), c3 = i3(s3, a3);
-  return [r3(s3), r3(c3)];
-}
-function computeEpochNanoFrac(e3, n3, t3) {
-  const o3 = dayTimeNanoToNumber(diffDayTimeNanos(e3, n3));
-  if (!o3) {
-    throw new RangeError(d);
+function validateTimeZoneGap(e3) {
+  if (e3 > W) {
+    throw new RangeError(D);
   }
-  return dayTimeNanoToNumber(diffDayTimeNanos(e3, t3)) / o3;
-}
-function roundDateTime(e3, n3, t3, o3, r3) {
-  return 6 === n3 ? ((e4, n4, t4) => {
-    if (n4) {
-      const o4 = computeNanosecondsInDay(n4, e4);
-      return checkIsoDateTimeInBounds({
-        ...moveByIsoDays(e4, roundByInc(isoTimeFieldsToNano(e4), o4, t4) / o4),
-        ...Ae
-      });
-    }
-    return roundDateTimeToNano(e4, B, t4);
-  })(e3, r3, o3) : roundDateTimeToNano(e3, computeNanoInc(n3, t3), o3);
-}
-function roundDateTimeToNano(e3, n3, t3) {
-  const [o3, r3] = roundTimeToNano(e3, n3, t3);
-  return checkIsoDateTimeInBounds({
-    ...moveByIsoDays(e3, r3),
-    ...o3
-  });
-}
-function roundTimeToNano(e3, n3, t3) {
-  return nanoToIsoTimeAndDay(roundByInc(isoTimeFieldsToNano(e3), n3, t3));
-}
-function balanceDayTimeDuration(e3, n3, t3, o3, r3) {
-  return nanoToDurationDayTimeFields(roundDayTimeNano(durationFieldsToDayTimeNano(e3, 6), t3, o3, r3), n3);
-}
-function balanceDayTimeDurationByInc(e3, n3, t3, o3) {
-  return nanoToDurationDayTimeFields(roundDayTimeNanoByInc(durationFieldsToDayTimeNano(e3, n3), t3, o3), n3);
-}
-function roundRelativeDuration(e3, n3, t3, o3, r3, i3, a3, s3, c3) {
-  const l3 = s3 === identityFunc ? o3 > 6 ? nudgeRelativeDuration : 6 === o3 ? nudgeDurationDayTime : nudgeRelativeDurationTime : o3 > 6 ? nudgeRelativeDuration : nudgeDurationDayTime;
-  let [u3, d3, f3] = l3(e3, n3, t3, o3, r3, i3, a3, s3, c3);
-  return f3 && (u3 = ((e4, n4, t4, o4, r4, i4, a4) => {
-    const s4 = Hn(e4);
-    for (let c4 = o4 + 1; c4 <= t4; c4++) {
-      if (7 === c4 && 7 !== t4) {
-        continue;
-      }
-      const o5 = clearDurationFields(e4, c4 - 1);
-      o5[ie[c4]] += s4;
-      const l4 = dayTimeNanoToNumber(diffDayTimeNanos(i4(a4(r4, o5)), n4));
-      if (l4 && Math.sign(l4) !== s4) {
-        break;
-      }
-      e4 = o5;
-    }
-    return e4;
-  })(u3, d3, t3, Math.max(6, o3), a3, s3, c3)), u3;
-}
-function computeNanoInc(e3, n3) {
-  return R[e3] * n3;
-}
-function roundByInc(e3, n3, t3) {
-  return ((e4, n4) => Ve[n4](e4))(e3 / n3, t3) * n3;
-}
-function roundToMinute(e3) {
-  return roundByInc(e3, k, 7);
-}
-function roundDayTimeNano(e3, n3, t3, o3, r3) {
-  return 6 === n3 ? [roundByInc(totalDayTimeNano(e3, 6), t3, o3), 0] : roundDayTimeNanoByInc(e3, computeNanoInc(n3, t3), o3, r3);
-}
-function roundDayTimeNanoByInc(e3, n3, t3, o3) {
-  let [r3, i3] = e3;
-  o3 && i3 < 0 && (i3 += B, r3 -= 1);
-  const [a3, s3] = divModFloor(roundByInc(i3, n3, t3), B);
-  return createDayTimeNano(r3 + a3, s3);
-}
-function nudgeDurationDayTime(e3, n3, t3, o3, r3, i3) {
-  const a3 = Hn(e3), s3 = durationFieldsToDayTimeNano(e3, 6), c3 = roundDayTimeNano(s3, o3, r3, i3), l3 = diffDayTimeNanos(s3, c3), u3 = Math.sign(c3[0] - s3[0]) === a3, d3 = nanoToDurationDayTimeFields(c3, Math.min(t3, 6));
-  return [{
-    ...e3,
-    ...d3
-  }, addDayTimeNanos(n3, l3), u3];
-}
-function nudgeRelativeDurationTime(e3, n3, t3, o3, r3, i3, a3, s3, c3) {
-  const l3 = Hn(e3);
-  let [u3, d3] = givenFieldsToDayTimeNano(e3, 5, ie);
-  const f3 = computeNanoInc(o3, r3);
-  let m3 = roundByInc(d3, f3, i3);
-  const [p3, h3] = clampRelativeDuration({
-    ...e3,
-    ...de
-  }, 6, l3, a3, s3, c3), T3 = m3 - dayTimeNanoToNumber(diffDayTimeNanos(p3, h3));
-  T3 && Math.sign(T3) !== l3 ? n3 = addDayTimeNanoAndNumber(p3, m3) : (u3 += l3, m3 = roundByInc(T3, f3, i3), n3 = addDayTimeNanoAndNumber(h3, m3));
-  const D2 = nanoToDurationTimeFields(m3);
-  return [{
-    ...e3,
-    ...D2,
-    days: e3.days + u3
-  }, n3, Boolean(u3)];
-}
-function nudgeRelativeDuration(e3, n3, t3, o3, r3, i3, a3, s3, c3) {
-  const l3 = Hn(e3), u3 = ie[o3], d3 = clearDurationFields(e3, o3 - 1), f3 = divTrunc(e3[u3], r3) * r3;
-  d3[u3] = f3;
-  const [m3, p3] = clampRelativeDuration(d3, o3, r3 * l3, a3, s3, c3), h3 = f3 + computeEpochNanoFrac(m3, p3, n3) * l3 * r3, T3 = roundByInc(h3, r3, i3), D2 = Math.sign(T3 - h3) === l3;
-  return d3[u3] = T3, [d3, D2 ? p3 : m3, D2];
-}
-function diffInstants(e3, n3, t3, o3) {
-  const r3 = refineDiffOptions(o3, copyOptions(t3), 3, 5);
-  let i3 = diffEpochNano(e3.epochNanoseconds, n3.epochNanoseconds, ...r3);
-  return createDurationSlots(o3 ? negateDurationFields(i3) : i3);
-}
-function diffZonedDateTimes(e3, n3, t3, o3, r3, i3) {
-  const a3 = getCommonCalendarSlot(t3.calendar, o3.calendar), s3 = copyOptions(r3), [c3, l3, u3, d3] = refineDiffOptions(i3, s3, 5), f3 = t3.epochNanoseconds, p3 = o3.epochNanoseconds, h3 = compareDayTimeNanos(p3, f3);
-  let T3;
-  if (h3) {
-    if (c3 < 6) {
-      T3 = diffEpochNano(f3, p3, c3, l3, u3, d3);
-    } else {
-      const r4 = n3(((e4, n4) => {
-        if (!isTimeZoneSlotsEqual(e4, n4, 1)) {
-          throw new RangeError(m);
-        }
-        return e4;
-      })(t3.timeZone, o3.timeZone)), i4 = e3(a3);
-      T3 = diffZonedEpochNanoViaCalendar(i4, r4, h3, f3, p3, c3, s3), !h3 || 0 === l3 && 1 === u3 || (T3 = roundRelativeDuration(T3, p3, c3, l3, u3, d3, f3, identityFunc, bindArgs(moveZonedEpochNano, i4, r4)));
-    }
-  } else {
-    T3 = ue;
-  }
-  return createDurationSlots(i3 ? negateDurationFields(T3) : T3);
-}
-function diffPlainDateTimes(e3, n3, t3, o3, r3) {
-  const i3 = getCommonCalendarSlot(n3.calendar, t3.calendar), a3 = copyOptions(o3), [s3, c3, l3, u3] = refineDiffOptions(r3, a3, 6), d3 = isoToEpochNano(n3), f3 = isoToEpochNano(t3), m3 = compareDayTimeNanos(f3, d3);
-  let p3;
-  if (m3) {
-    if (s3 <= 6) {
-      p3 = diffEpochNano(d3, f3, s3, c3, l3, u3);
-    } else {
-      const o4 = e3(i3);
-      p3 = diffDateTimesViaCalendar(o4, m3, n3, t3, s3, a3), !m3 || 0 === c3 && 1 === l3 || (p3 = roundRelativeDuration(p3, f3, s3, c3, l3, u3, n3, isoToEpochNano, bindArgs(moveDateTime, o4)));
-    }
-  } else {
-    p3 = ue;
-  }
-  return createDurationSlots(r3 ? negateDurationFields(p3) : p3);
-}
-function diffPlainDates(e3, n3, t3, o3, r3) {
-  const i3 = getCommonCalendarSlot(n3.calendar, t3.calendar), a3 = copyOptions(o3);
-  return diffDateLike(r3 || 0, () => e3(i3), n3, t3, ...refineDiffOptions(r3, a3, 6, 9, 6), a3);
-}
-function diffPlainYearMonth(e3, n3, t3, o3, r3) {
-  const i3 = getCommonCalendarSlot(n3.calendar, t3.calendar), a3 = copyOptions(o3), s3 = refineDiffOptions(r3, a3, 9, 9, 8), c3 = e3(i3);
-  return diffDateLike(r3 || 0, () => c3, moveToMonthStart(c3, n3), moveToMonthStart(c3, t3), ...s3, a3);
-}
-function diffDateLike(e3, n3, t3, o3, r3, i3, a3, s3, c3) {
-  const l3 = isoToEpochNano(t3), u3 = isoToEpochNano(o3);
-  let d3;
-  if (compareDayTimeNanos(u3, l3)) {
-    let e4;
-    6 === r3 ? d3 = diffByDay(t3, o3) : (e4 = n3(), d3 = e4.dateUntil(t3, o3, r3, c3)), 6 === i3 && 1 === a3 || (e4 || (e4 = n3()), d3 = roundRelativeDuration(d3, u3, r3, i3, a3, s3, t3, isoToEpochNano, (n4, t4) => e4.dateAdd(n4, t4)));
-  } else {
-    d3 = ue;
-  }
-  return createDurationSlots(e3 ? negateDurationFields(d3) : d3);
-}
-function diffPlainTimes(e3, n3, t3, o3) {
-  const r3 = copyOptions(t3), [i3, a3, s3, c3] = refineDiffOptions(o3, r3, 5, 5), l3 = isoTimeFieldsToNano(e3), u3 = roundByInc(isoTimeFieldsToNano(n3) - l3, computeNanoInc(a3, s3), c3);
-  let d3 = {
-    ...ue,
-    ...nanoToDurationTimeFields(u3, i3)
-  };
-  return createDurationSlots(o3 ? negateDurationFields(d3) : d3);
-}
-function diffZonedEpochNanoExact(e3, n3, t3, o3, r3, i3) {
-  const a3 = compareDayTimeNanos(o3, t3);
-  return a3 ? r3 < 6 ? diffEpochNanoExact(t3, o3, r3) : diffZonedEpochNanoViaCalendar(e3, n3, a3, t3, o3, r3, i3) : ue;
-}
-function diffDateTimesExact(e3, n3, t3, o3, r3) {
-  const i3 = isoToEpochNano(n3), a3 = isoToEpochNano(t3), s3 = compareDayTimeNanos(a3, i3);
-  return s3 ? o3 <= 6 ? diffEpochNanoExact(i3, a3, o3) : diffDateTimesViaCalendar(e3, s3, n3, t3, o3, r3) : ue;
-}
-function diffZonedEpochNanoViaCalendar(e3, n3, t3, o3, r3, i3, a3) {
-  const s3 = zonedEpochNanoToIso(n3, o3), c3 = pluckProps(Be, s3), l3 = zonedEpochNanoToIso(n3, r3), u3 = bindArgs(getSingleInstantFor, n3);
-  let f3, m3, p3, h3 = 0;
-  do {
-    if (h3 > 2) {
-      throw new RangeError(d);
-    }
-    f3 = {
-      ...moveByIsoDays(l3, h3++ * -t3),
-      ...c3
-    }, m3 = u3(f3), p3 = compareDayTimeNanos(r3, m3);
-  } while (p3 === -t3);
-  return {
-    ...6 === i3 ? diffByDay(s3, f3) : e3.dateUntil(s3, f3, i3, a3),
-    ...nanoToDurationTimeFields(dayTimeNanoToNumber(diffDayTimeNanos(m3, r3)))
-  };
-}
-function diffDateTimesViaCalendar(e3, n3, t3, o3, r3, i3) {
-  const a3 = isoTimeFieldsToNano(t3);
-  let s3 = isoTimeFieldsToNano(o3) - a3, c3 = t3;
-  return Math.sign(s3) === -n3 && (c3 = moveByIsoDays(t3, n3), s3 += B * n3), {
-    ...e3.dateUntil({
-      ...c3,
-      ...Ae
-    }, {
-      ...o3,
-      ...Ae
-    }, r3, i3),
-    ...nanoToDurationTimeFields(s3)
-  };
-}
-function diffEpochNano(e3, n3, t3, o3, r3, i3) {
-  return {
-    ...ue,
-    ...nanoToDurationDayTimeFields(roundDayTimeNano(diffDayTimeNanos(e3, n3), o3, r3, i3), t3)
-  };
-}
-function diffEpochNanoExact(e3, n3, t3) {
-  return {
-    ...ue,
-    ...nanoToDurationDayTimeFields(diffDayTimeNanos(e3, n3), t3)
-  };
-}
-function diffByDay(e3, n3) {
-  return {
-    ...ue,
-    days: diffDays(e3, n3)
-  };
-}
-function diffDays(e3, n3) {
-  return diffEpochMilliByDay(isoToEpochMilli(e3), isoToEpochMilli(n3));
-}
-function diffEpochMilliByDay(e3, n3) {
-  return Math.round((n3 - e3) / b);
-}
-function computeIsoMonthsInYear() {
-  return xn;
-}
-function computeIsoDaysInMonth(e3, n3) {
-  switch (n3) {
-    case 2:
-      return computeIsoInLeapYear(e3) ? 29 : 28;
-    case 4:
-    case 6:
-    case 9:
-    case 11:
-      return 30;
-  }
-  return 31;
-}
-function computeIsoDaysInYear(e3) {
-  return computeIsoInLeapYear(e3) ? 366 : 365;
-}
-function computeIsoInLeapYear(e3) {
-  return e3 % 4 == 0 && (e3 % 100 != 0 || e3 % 400 == 0);
-}
-function computeIsoDayOfYear(e3) {
-  return diffEpochMilliByDay(isoToEpochMilli(isoDateYearStart(e3)), isoToEpochMilli({
-    ...e3,
-    ...Ae
-  })) + 1;
-}
-function computeIsoDayOfWeek(e3) {
-  const [n3, t3] = isoToLegacyDate(e3.isoYear, e3.isoMonth, e3.isoDay);
-  return modFloor(n3.getDay() + 1 - t3, 7) || 7;
-}
-function computeIsoWeekParts(e3) {
-  const n3 = computeIsoDayOfYear(e3), t3 = computeIsoDayOfWeek(e3), o3 = computeIsoDayOfWeek(isoDateYearStart(e3)), r3 = Math.floor((n3 - t3 + 10) / $n), { isoYear: i3 } = e3;
-  return r3 < 1 ? [i3 - 1, 5 === o3 || 6 === o3 && computeIsoInLeapYear(i3 - 1) ? 53 : 52] : 53 === r3 && computeIsoDaysInYear(i3) - n3 < 4 - t3 ? [i3 + 1, 1] : [i3, r3];
-}
-function isoDateYearStart(e3) {
-  return {
-    ...e3,
-    isoMonth: 1,
-    isoDay: 1,
-    ...Ae
-  };
-}
-function computeGregoryEraParts({ isoYear: e3 }) {
-  return e3 < 1 ? ["bce", 1 - e3] : ["ce", e3];
-}
-function checkIsoDateTimeFields(e3) {
-  return checkIsoDateFields(e3), constrainIsoTimeFields(e3, 1), e3;
-}
-function checkIsoDateFields(e3) {
-  return constrainIsoDateFields(e3, 1), e3;
-}
-function isIsoDateFieldsValid(e3) {
-  return allFieldsEqual(Re, e3, constrainIsoDateFields(e3));
-}
-function constrainIsoDateFields(e3, n3) {
-  const { isoYear: t3 } = e3, o3 = clampProp(e3, "isoMonth", 1, computeIsoMonthsInYear(), n3);
-  return {
-    isoYear: t3,
-    isoMonth: o3,
-    isoDay: clampProp(e3, "isoDay", 1, computeIsoDaysInMonth(t3, o3), n3)
-  };
-}
-function constrainIsoTimeFields(e3, n3) {
-  return zipProps(Be, [clampProp(e3, "isoHour", 0, 23, n3), clampProp(e3, "isoMinute", 0, 59, n3), clampProp(e3, "isoSecond", 0, 59, n3), clampProp(e3, "isoMillisecond", 0, 999, n3), clampProp(e3, "isoMicrosecond", 0, 999, n3), clampProp(e3, "isoNanosecond", 0, 999, n3)]);
+  return e3;
 }
 function moveInstant(e3, n3, t3) {
-  return createInstantSlots(checkEpochNanoInBounds(addDayTimeNanos(e3.epochNanoseconds, ((e4) => {
+  return createInstantSlots(checkEpochNanoInBounds(addBigNanos(n3.epochNanoseconds, ((e4) => {
     if (durationHasDateParts(e4)) {
-      throw new RangeError(y);
+      throw new RangeError(E);
     }
-    return durationFieldsToDayTimeNano(e4, 5);
-  })(t3 ? negateDurationFields(n3) : n3))));
+    return durationFieldsToBigNano(e4, 5);
+  })(e3 ? negateDurationFields(t3) : t3))));
 }
-function moveZonedDateTime(e3, n3, t3, o3, r3 = /* @__PURE__ */ Object.create(null), i3) {
-  const a3 = n3(t3.timeZone), s3 = moveZonedEpochNano(e3(t3.calendar), a3, t3.epochNanoseconds, i3 ? negateDurationFields(o3) : o3, r3);
+function moveZonedDateTime(e3, n3, t3, o3, r3, i3 = /* @__PURE__ */ Object.create(null)) {
+  const a3 = n3(o3.timeZone), s3 = moveZonedEpochSlots(e3(o3.calendar), a3, o3, t3 ? negateDurationFields(r3) : r3, i3);
   return {
-    ...t3,
+    ...o3,
     epochNanoseconds: s3
   };
 }
-function movePlainDateTime(e3, n3, t3, o3 = /* @__PURE__ */ Object.create(null), r3) {
-  return createPlainDateTimeSlots({
-    ...n3,
-    ...moveDateTime(e3(n3.calendar), n3, r3 ? negateDurationFields(t3) : t3, o3)
-  });
+function movePlainDateTime(e3, n3, t3, o3, r3 = /* @__PURE__ */ Object.create(null)) {
+  const { calendar: i3 } = t3;
+  return createPlainDateTimeSlots(moveDateTime(e3(i3), t3, n3 ? negateDurationFields(o3) : o3, r3), i3);
 }
 function movePlainDate(e3, n3, t3, o3, r3) {
-  return {
-    ...n3,
-    ...moveDateEfficient(e3(n3.calendar), n3, r3 ? negateDurationFields(t3) : t3, o3)
-  };
+  const { calendar: i3 } = t3;
+  return createPlainDateSlots(moveDateEfficient(e3(i3), t3, n3 ? negateDurationFields(o3) : o3, r3), i3);
 }
-function movePlainYearMonth(e3, n3, t3, o3 = /* @__PURE__ */ Object.create(null), r3) {
-  const i3 = n3.calendar, a3 = e3(i3);
-  let s3 = moveToMonthStart(a3, n3);
-  r3 && (t3 = negateDuration(t3)), Hn(t3) < 0 && (s3 = a3.dateAdd(s3, {
-    ...ue,
+function movePlainYearMonth(e3, n3, t3, o3, r3 = /* @__PURE__ */ Object.create(null)) {
+  const i3 = t3.calendar, a3 = e3(i3);
+  let s3 = moveToMonthStart(a3, t3);
+  n3 && (o3 = negateDuration(o3)), o3.sign < 0 && (s3 = a3.dateAdd(s3, {
+    ...Me,
     months: 1
   }), s3 = moveByIsoDays(s3, -1));
-  const c3 = a3.dateAdd(s3, t3, o3);
+  const c3 = a3.dateAdd(s3, o3, r3);
   return createPlainYearMonthSlots(moveToMonthStart(a3, c3), i3);
 }
 function movePlainTime(e3, n3, t3) {
-  return createPlainTimeSlots(moveTime(e3, t3 ? negateDurationFields(n3) : n3)[0]);
+  return createPlainTimeSlots(moveTime(n3, e3 ? negateDurationFields(t3) : t3)[0]);
 }
-function moveZonedEpochNano(e3, n3, t3, o3, r3) {
-  const i3 = durationFieldsToDayTimeNano(o3, 5);
+function moveRelativeMarker(e3, n3, t3, o3) {
+  return o3 ? {
+    epochNanoseconds: moveZonedEpochSlots(t3, o3, n3, e3)
+  } : moveDateTime(t3, n3, e3);
+}
+function moveZonedEpochSlots(e3, n3, t3, o3, r3) {
+  const i3 = durationFieldsToBigNano(o3, 5);
+  let a3 = t3.epochNanoseconds;
   if (durationHasDateParts(o3)) {
-    const a3 = zonedEpochNanoToIso(n3, t3);
-    t3 = addDayTimeNanos(getSingleInstantFor(n3, {
-      ...moveDateEfficient(e3, a3, {
+    const s3 = wn(t3, n3);
+    a3 = addBigNanos(getSingleInstantFor(n3, {
+      ...moveDateEfficient(e3, s3, {
         ...o3,
-        ...de
+        ...Ne
       }, r3),
-      ...pluckProps(Be, a3),
-      calendar: we
+      ...pluckProps(ye, s3),
+      calendar: ce
     }), i3);
   } else {
-    t3 = addDayTimeNanos(t3, i3), refineOverflowOptions(r3);
+    a3 = addBigNanos(a3, i3), refineOverflowOptions(r3);
   }
-  return checkEpochNanoInBounds(t3);
+  return checkEpochNanoInBounds(a3);
 }
 function moveDateTime(e3, n3, t3, o3) {
   const [r3, i3] = moveTime(n3, t3);
   return checkIsoDateTimeInBounds({
     ...moveDateEfficient(e3, n3, {
       ...t3,
-      ...de,
+      ...Ne,
       days: t3.days + i3
     }, o3),
     ...r3
@@ -82223,115 +82008,199 @@ function moveDateEfficient(e3, n3, t3, o3) {
     return e3.dateAdd(n3, t3, o3);
   }
   refineOverflowOptions(o3);
-  const r3 = t3.days + givenFieldsToDayTimeNano(t3, 5, ie)[0];
+  const r3 = t3.days + givenFieldsToBigNano(t3, 5, pe)[0];
   return r3 ? checkIsoDateInBounds(moveByIsoDays(n3, r3)) : n3;
 }
 function moveToMonthStart(e3, n3) {
   return moveByIsoDays(n3, 1 - e3.day(n3));
 }
 function moveTime(e3, n3) {
-  const [t3, o3] = givenFieldsToDayTimeNano(n3, 5, ie), [r3, i3] = nanoToIsoTimeAndDay(isoTimeFieldsToNano(e3) + o3);
+  const [t3, o3] = givenFieldsToBigNano(n3, 5, pe), [r3, i3] = nanoToIsoTimeAndDay(isoTimeFieldsToNano(e3) + o3);
   return [r3, t3 + i3];
 }
 function moveByIsoDays(e3, n3) {
-  return n3 && (e3 = epochMilliToIso(isoToEpochMilli(e3) + n3 * b)), e3;
+  return n3 && (e3 = epochMilliToIso(isoToEpochMilli(e3) + n3 * R)), e3;
 }
-function createMarkerSystem(e3, n3, t3) {
-  const { calendar: o3, timeZone: r3, epochNanoseconds: i3 } = t3, a3 = e3(o3);
-  if (i3) {
-    const e4 = n3(r3);
-    return [i3, identityFunc, bindArgs(moveZonedEpochNano, a3, e4), bindArgs(diffZonedEpochNanoExact, a3, e4)];
-  }
-  return [{
-    ...t3,
-    ...Ae
-  }, isoToEpochNano, bindArgs(moveDateTime, a3), bindArgs(diffDateTimesExact, a3)];
-}
-function spanDuration(e3, n3, t3, o3, r3, i3, a3) {
-  let s3 = i3(o3, e3);
-  return n3 && (s3 = i3(s3, n3)), [a3(o3, s3, t3), r3(s3)];
+function spanDuration(e3, n3, t3, o3, r3, i3) {
+  let a3 = moveRelativeMarker(e3, o3, r3, i3);
+  n3 && (a3 = moveRelativeMarker(n3, a3, r3, i3));
+  const s3 = ((e4, n4, t4, o4, r4) => r4 ? ((e5, n5, t5, o5, r5) => {
+    const i4 = compareBigNanos(o5.epochNanoseconds, t5.epochNanoseconds);
+    return i4 ? r5 < 6 ? diffEpochNanoExact(t5.epochNanoseconds, o5.epochNanoseconds, r5) : diffZonedEpochNanoViaCalendar(e5, n5, i4, t5, o5, r5, void 0) : Me;
+  })(o4, r4, n4, t4, e4) : ((e5, n5, t5, o5) => {
+    const r5 = isoToEpochNano(n5), i4 = isoToEpochNano(t5), a4 = compareBigNanos(i4, r5);
+    return a4 ? o5 <= 6 ? diffEpochNanoExact(r5, i4, o5) : diffDateTimesViaCalendar(e5, a4, n5, t5, o5, void 0) : Me;
+  })(o4, n4, t4, e4))(t3, o3, a3, r3, i3);
+  return [s3, relativeMarkerToEpochNano(a3, i3)];
 }
 function addDurations(e3, n3, t3, o3, r3, i3, a3) {
-  const s3 = e3(normalizeOptions(i3).relativeTo), c3 = Math.max(getLargestDurationUnit(o3), getLargestDurationUnit(r3));
+  const s3 = e3(normalizeOptions(a3).relativeTo), c3 = Math.max(getLargestDurationUnit(r3), getLargestDurationUnit(i3));
   if (c3 < 6 || 6 === c3 && (!s3 || !s3.epochNanoseconds)) {
-    return createDurationSlots(((e4, n4, t4, o4) => {
-      const r4 = addDayTimeNanos(durationFieldsToDayTimeNano(e4, 6), durationFieldsToDayTimeNano(n4, 6), o4 ? -1 : 1);
+    return createDurationSlots(checkDurationUnits(((e4, n4, t4, o4) => {
+      const r4 = addBigNanos(durationFieldsToBigNano(e4), durationFieldsToBigNano(n4), o4 ? -1 : 1);
       if (!Number.isFinite(r4[0])) {
-        throw new RangeError(D);
+        throw new RangeError(N);
       }
       return {
-        ...ue,
+        ...Me,
         ...nanoToDurationDayTimeFields(r4, t4)
       };
-    })(o3, r3, c3, a3));
+    })(r3, i3, c3, o3)));
   }
   if (!s3) {
-    throw new RangeError(I);
+    throw new RangeError(P);
   }
-  return a3 && (r3 = negateDurationFields(r3)), createDurationSlots(spanDuration(o3, r3, c3, ...createMarkerSystem(n3, t3, s3))[0]);
+  return o3 && (i3 = negateDurationFields(i3)), createDurationSlots(spanDuration(r3, i3, c3, ...createRelativeSystem(n3, t3, s3))[0]);
+}
+function roundDuration(e3, n3, t3, o3, r3) {
+  const i3 = getLargestDurationUnit(o3), [a3, s3, c3, u3, l3] = ((e4, n4, t4) => {
+    e4 = normalizeUnitNameOptions(e4, He);
+    let o4 = sn(e4);
+    const r4 = t4(e4[Je]);
+    let i4 = parseRoundingIncInteger(e4);
+    const a4 = hn(e4, 7);
+    let s4 = an(e4);
+    if (void 0 === o4 && void 0 === s4) {
+      throw new RangeError(S);
+    }
+    return null == s4 && (s4 = 0), null == o4 && (o4 = Math.max(s4, n4)), checkLargestSmallestUnit(o4, s4), i4 = refineRoundingInc(i4, s4, 1), [o4, s4, i4, a4, r4];
+  })(r3, i3, e3), f3 = Math.max(i3, a3);
+  if (f3 < 6 || 6 === f3 && (!l3 || !l3.epochNanoseconds)) {
+    return createDurationSlots(checkDurationUnits(((e4, n4, t4, o4, r4) => ({
+      ...Me,
+      ...balanceDayTimeDuration(e4, n4, t4, o4, r4)
+    }))(o3, a3, s3, c3, u3)));
+  }
+  if (!l3) {
+    throw new RangeError(P);
+  }
+  const d3 = createRelativeSystem(n3, t3, l3);
+  let p3 = 0;
+  o3.weeks && 7 === s3 && (p3 = o3.weeks, o3 = {
+    ...o3,
+    weeks: 0
+  });
+  let [h3, T3] = spanDuration(o3, void 0, a3, ...d3);
+  const g3 = o3.sign, D2 = computeDurationSign(h3);
+  if (g3 && D2 && g3 !== D2) {
+    throw new RangeError(m);
+  }
+  return !D2 || 0 === s3 && 1 === c3 || (h3 = roundRelativeDuration(h3, T3, a3, s3, c3, u3, ...d3)), h3.weeks += p3, createDurationSlots(h3);
+}
+function absDuration(e3) {
+  return -1 === e3.sign ? negateDuration(e3) : e3;
 }
 function negateDuration(e3) {
   return createDurationSlots(negateDurationFields(e3));
 }
 function negateDurationFields(e3) {
   const n3 = {};
-  for (const t3 of ie) {
+  for (const t3 of pe) {
     n3[t3] = -1 * e3[t3] || 0;
   }
   return n3;
 }
-function computeDurationSign(e3, n3 = ie) {
+function getDurationBlank(e3) {
+  return !e3.sign;
+}
+function computeDurationSign(e3, n3 = pe) {
   let t3 = 0;
   for (const o3 of n3) {
     const n4 = Math.sign(e3[o3]);
     if (n4) {
       if (t3 && t3 !== n4) {
-        throw new RangeError(g);
+        throw new RangeError(v);
       }
       t3 = n4;
     }
   }
   return t3;
 }
-function checkDurationFields(e3) {
-  return Hn(e3), e3;
+function checkDurationUnits(e3) {
+  for (const n3 of De) {
+    clampEntity(n3, e3[n3], -Bn, Bn, 1);
+  }
+  return checkDurationTimeUnit(bigNanoToNumber(durationFieldsToBigNano(e3), A)), e3;
 }
-function durationFieldsToDayTimeNano(e3, n3) {
-  return givenFieldsToDayTimeNano(e3, n3, ie);
+function checkDurationTimeUnit(e3) {
+  if (!Number.isSafeInteger(e3)) {
+    throw new RangeError(y);
+  }
+}
+function durationFieldsToBigNano(e3, n3 = 6) {
+  return givenFieldsToBigNano(e3, n3, pe);
 }
 function nanoToDurationDayTimeFields(e3, n3 = 6) {
-  const [t3, o3] = e3, r3 = nanoToGivenFields(o3, n3, ie);
-  if (r3[ie[n3]] += t3 * (B / R[n3]), !Number.isFinite(r3[ie[n3]])) {
-    throw new RangeError(D);
+  const [t3, o3] = e3, r3 = nanoToGivenFields(o3, n3, pe);
+  if (r3[pe[n3]] += t3 * (W / j[n3]), !Number.isFinite(r3[pe[n3]])) {
+    throw new RangeError(N);
   }
   return r3;
 }
 function nanoToDurationTimeFields(e3, n3 = 5) {
-  return nanoToGivenFields(e3, n3, ie);
+  return nanoToGivenFields(e3, n3, pe);
 }
 function clearDurationFields(e3, n3) {
   const t3 = {
     ...e3
   };
   for (let e4 = 0; e4 <= n3; e4++) {
-    t3[ie[e4]] = 0;
+    t3[pe[e4]] = 0;
   }
   return t3;
 }
 function durationHasDateParts(e3) {
-  return Boolean(computeDurationSign(e3, ce));
+  return Boolean(computeDurationSign(e3, ge));
 }
 function getLargestDurationUnit(e3) {
   let n3 = 9;
-  for (; n3 > 0 && !e3[ie[n3]]; n3--) {
+  for (; n3 > 0 && !e3[pe[n3]]; n3--) {
   }
   return n3;
 }
-function realizeCalendarId(e3) {
-  return (e3 = normalizeCalendarId(e3)) !== we && e3 !== Ee && kn(e3), e3;
+function createSplitTuple(e3, n3) {
+  return [e3, n3];
 }
-function normalizeCalendarId(e3) {
-  return "islamicc" === (e3 = e3.toLocaleLowerCase()) && (e3 = "islamic-civil"), e3;
+function computePeriod(e3) {
+  const n3 = Math.floor(e3 / Sn) * Sn;
+  return [n3, n3 + Sn];
+}
+function parseInstant(e3) {
+  const n3 = parseDateTimeLike(e3 = toStringViaPrimitive(e3));
+  if (!n3) {
+    throw new RangeError(failedParse(e3));
+  }
+  let t3;
+  if (n3.o) {
+    t3 = 0;
+  } else {
+    if (!n3.offset) {
+      throw new RangeError(failedParse(e3));
+    }
+    t3 = parseOffsetNano(n3.offset);
+  }
+  return n3.timeZone && parseOffsetNanoMaybe(n3.timeZone, 1), createInstantSlots(isoToEpochNanoWithOffset(checkIsoDateTimeFields(n3), t3));
+}
+function parseRelativeToSlots(e3) {
+  const n3 = parseDateTimeLike(We(e3));
+  if (!n3) {
+    throw new RangeError(failedParse(e3));
+  }
+  if (n3.timeZone) {
+    return finalizeZonedDateTime(n3, n3.offset ? parseOffsetNano(n3.offset) : void 0);
+  }
+  if (n3.o) {
+    throw new RangeError(failedParse(e3));
+  }
+  return finalizeDate(n3);
+}
+function parseZonedDateTime(e3, n3) {
+  const t3 = parseDateTimeLike(We(e3));
+  if (!t3 || !t3.timeZone) {
+    throw new RangeError(failedParse(e3));
+  }
+  const { offset: o3 } = t3, r3 = o3 ? parseOffsetNano(o3) : void 0, [, i3, a3] = refineZonedFieldOptions(n3);
+  return finalizeZonedDateTime(t3, r3, i3, a3);
 }
 function parseOffsetNano(e3) {
   const n3 = parseOffsetNanoMaybe(e3);
@@ -82340,36 +82209,130 @@ function parseOffsetNano(e3) {
   }
   return n3;
 }
-function parsePlainDate(e3) {
-  const n3 = parseDateTimeLike(ne(e3));
-  if (!n3 || n3.I) {
+function parsePlainDateTime(e3) {
+  const n3 = parseDateTimeLike(We(e3));
+  if (!n3 || n3.o) {
     throw new RangeError(failedParse(e3));
   }
-  return createPlainDateSlots(n3.N ? finalizeDateTime(n3) : finalizeDate(n3));
+  return createPlainDateTimeSlots(finalizeDateTime(n3));
+}
+function parsePlainDate(e3) {
+  const n3 = parseDateTimeLike(We(e3));
+  if (!n3 || n3.o) {
+    throw new RangeError(failedParse(e3));
+  }
+  return createPlainDateSlots(n3.i ? finalizeDateTime(n3) : finalizeDate(n3));
+}
+function parsePlainYearMonth(e3, n3) {
+  const t3 = parseYearMonthOnly(We(n3));
+  if (t3) {
+    return requireIsoCalendar(t3), createPlainYearMonthSlots(checkIsoYearMonthInBounds(checkIsoDateFields(t3)));
+  }
+  const o3 = parsePlainDate(n3), r3 = moveToMonthStart(e3(o3.calendar), o3);
+  return createPlainYearMonthSlots({
+    ...o3,
+    ...r3
+  });
 }
 function requireIsoCalendar(e3) {
-  if (e3.calendar !== we) {
+  if (e3.calendar !== ce) {
     throw new RangeError(invalidSubstring(e3.calendar));
   }
 }
+function parsePlainMonthDay(e3, n3) {
+  const t3 = parseMonthDayOnly(We(n3));
+  if (t3) {
+    return requireIsoCalendar(t3), createPlainMonthDaySlots(checkIsoDateFields(t3));
+  }
+  const o3 = parsePlainDate(n3), { calendar: r3 } = o3, i3 = e3(r3), [a3, s3, c3] = i3.u(o3), [u3, l3] = i3.l(a3, s3), [f3, d3] = i3.m(u3, l3, c3);
+  return createPlainMonthDaySlots(i3.p(f3, d3, c3), r3);
+}
+function parsePlainTime(e3) {
+  let n3, t3 = ((e4) => {
+    const n4 = $n.exec(e4);
+    return n4 ? (organizeAnnotationParts(n4[10]), organizeTimeParts(n4)) : void 0;
+  })(We(e3));
+  if (!t3) {
+    if (t3 = parseDateTimeLike(e3), !t3) {
+      throw new RangeError(failedParse(e3));
+    }
+    if (!t3.i) {
+      throw new RangeError(failedParse(e3));
+    }
+    if (t3.o) {
+      throw new RangeError(invalidSubstring("Z"));
+    }
+    requireIsoCalendar(t3);
+  }
+  if ((n3 = parseYearMonthOnly(e3)) && isIsoDateFieldsValid(n3)) {
+    throw new RangeError(failedParse(e3));
+  }
+  if ((n3 = parseMonthDayOnly(e3)) && isIsoDateFieldsValid(n3)) {
+    throw new RangeError(failedParse(e3));
+  }
+  return createPlainTimeSlots(constrainIsoTimeFields(t3, 1));
+}
+function parseDuration(e3) {
+  const n3 = ((e4) => {
+    const n4 = Gn.exec(e4);
+    return n4 ? ((e5) => {
+      function parseUnit(e6, r4, i3) {
+        let a3 = 0, s3 = 0;
+        if (i3 && ([a3, o3] = divModFloor(o3, j[i3])), void 0 !== e6) {
+          if (t3) {
+            throw new RangeError(invalidSubstring(e6));
+          }
+          s3 = ((e7) => {
+            const n6 = parseInt(e7);
+            if (!Number.isFinite(n6)) {
+              throw new RangeError(invalidSubstring(e7));
+            }
+            return n6;
+          })(e6), n5 = 1, r4 && (o3 = parseSubsecNano(r4) * (j[i3] / A), t3 = 1);
+        }
+        return a3 + s3;
+      }
+      let n5 = 0, t3 = 0, o3 = 0, r3 = {
+        ...zipProps(pe, [parseUnit(e5[2]), parseUnit(e5[3]), parseUnit(e5[4]), parseUnit(e5[5]), parseUnit(e5[6], e5[7], 5), parseUnit(e5[8], e5[9], 4), parseUnit(e5[10], e5[11], 3)]),
+        ...nanoToGivenFields(o3, 2, pe)
+      };
+      if (!n5) {
+        throw new RangeError(noValidFields(pe));
+      }
+      return parseSign(e5[1]) < 0 && (r3 = negateDurationFields(r3)), r3;
+    })(n4) : void 0;
+  })(We(e3));
+  if (!n3) {
+    throw new RangeError(failedParse(e3));
+  }
+  return createDurationSlots(checkDurationUnits(n3));
+}
+function parseCalendarId(e3) {
+  const n3 = parseDateTimeLike(e3) || parseYearMonthOnly(e3) || parseMonthDayOnly(e3);
+  return n3 ? n3.calendar : e3;
+}
+function parseTimeZoneId(e3) {
+  const n3 = parseDateTimeLike(e3);
+  return n3 && (n3.timeZone || n3.o && En || n3.offset) || e3;
+}
 function finalizeZonedDateTime(e3, n3, t3 = 0, o3 = 0) {
-  const r3 = queryNativeTimeZone(e3.timeZone);
-  return createZonedDateTimeSlots(getMatchingInstantFor(r3, checkIsoDateTimeFields(e3), n3, t3, o3, !(r3 instanceof FixedTimeZone), e3.I), r3.id, realizeCalendarId(e3.calendar));
+  const r3 = resolveTimeZoneId(e3.timeZone), i3 = kn(r3);
+  return createZonedDateTimeSlots(getMatchingInstantFor(i3, checkIsoDateTimeFields(e3), n3, t3, o3, !i3.h, e3.o), r3, resolveCalendarId(e3.calendar));
 }
 function finalizeDateTime(e3) {
-  return realizeCalendarSlot(checkIsoDateTimeInBounds(checkIsoDateTimeFields(e3)));
+  return resolveSlotsCalendar(checkIsoDateTimeInBounds(checkIsoDateTimeFields(e3)));
 }
 function finalizeDate(e3) {
-  return realizeCalendarSlot(checkIsoDateInBounds(checkIsoDateFields(e3)));
+  return resolveSlotsCalendar(checkIsoDateInBounds(checkIsoDateFields(e3)));
 }
-function realizeCalendarSlot(e3) {
+function resolveSlotsCalendar(e3) {
   return {
     ...e3,
-    calendar: realizeCalendarId(e3.calendar)
+    calendar: resolveCalendarId(e3.calendar)
   };
 }
 function parseDateTimeLike(e3) {
-  const n3 = ut.exec(e3);
+  const n3 = jn.exec(e3);
   return n3 ? ((e4) => {
     const n4 = e4[10], t3 = "Z" === (n4 || "").toUpperCase();
     return {
@@ -82378,14 +82341,14 @@ function parseDateTimeLike(e3) {
       isoDay: parseInt(e4[5]),
       ...organizeTimeParts(e4.slice(5)),
       ...organizeAnnotationParts(e4[16]),
-      N: Boolean(e4[6]),
-      I: t3,
+      i: Boolean(e4[6]),
+      o: t3,
       offset: t3 ? void 0 : n4
     };
   })(n3) : void 0;
 }
 function parseYearMonthOnly(e3) {
-  const n3 = ct.exec(e3);
+  const n3 = Un.exec(e3);
   return n3 ? ((e4) => ({
     isoYear: organizeIsoYearParts(e4),
     isoMonth: parseInt(e4[4]),
@@ -82394,22 +82357,22 @@ function parseYearMonthOnly(e3) {
   }))(n3) : void 0;
 }
 function parseMonthDayOnly(e3) {
-  const n3 = lt.exec(e3);
+  const n3 = Wn.exec(e3);
   return n3 ? ((e4) => ({
-    isoYear: Un,
+    isoYear: qe,
     isoMonth: parseInt(e4[1]),
     isoDay: parseInt(e4[2]),
     ...organizeAnnotationParts(e4[3])
   }))(n3) : void 0;
 }
 function parseOffsetNanoMaybe(e3, n3) {
-  const t3 = ft.exec(e3);
+  const t3 = xn.exec(e3);
   return t3 ? ((e4, n4) => {
     const t4 = e4[4] || e4[5];
     if (n4 && t4) {
       throw new RangeError(invalidSubstring(t4));
     }
-    return validateTimeZoneOffset((parseInt0(e4[2]) * Y + parseInt0(e4[3]) * k + parseInt0(e4[4]) * Z + parseSubsecNano(e4[5] || "")) * parseSign(e4[1]));
+    return validateTimeZoneOffset((parseInt0(e4[2]) * U + parseInt0(e4[3]) * L + parseInt0(e4[4]) * A + parseSubsecNano(e4[5] || "")) * parseSign(e4[1]));
   })(t3, n3) : void 0;
 }
 function organizeIsoYearParts(e3) {
@@ -82431,7 +82394,7 @@ function organizeTimeParts(e3) {
 function organizeAnnotationParts(e3) {
   let n3, t3;
   const o3 = [];
-  if (e3.replace(mt, (e4, r3, i3) => {
+  if (e3.replace(Hn, (e4, r3, i3) => {
     const a3 = Boolean(r3), [s3, c3] = i3.split("=").reverse();
     if (c3) {
       if ("u-ca" === c3) {
@@ -82451,7 +82414,7 @@ function organizeAnnotationParts(e3) {
   }
   return {
     timeZone: t3,
-    calendar: o3[0] || we
+    calendar: o3[0] || ce
   };
 }
 function parseSubsecNano(e3) {
@@ -82466,135 +82429,42 @@ function parseSign(e3) {
 function parseInt0(e3) {
   return void 0 === e3 ? 0 : parseInt(e3);
 }
-function createInstantSlots(e3) {
-  return {
-    O: St,
-    epochNanoseconds: e3
-  };
+function resolveTimeZoneId(e3) {
+  const n3 = getTimeZoneEssence(e3);
+  return "number" == typeof n3 ? formatOffsetNano(n3) : n3 ? ((e4) => {
+    if (_n.test(e4)) {
+      throw new RangeError(T);
+    }
+    return e4.toLowerCase().split("/").map((e5, n4) => (e5.length <= 3 || /\d/.test(e5)) && !/etc|yap/.test(e5) ? e5.toUpperCase() : e5.replace(/baja|dumont|[a-z]+/g, (e6, t3) => e6.length <= 2 && !n4 || "in" === e6 || "chat" === e6 ? e6.toUpperCase() : e6.length > 2 || !t3 ? capitalize(e6).replace(/island|noronha|murdo|rivadavia|urville/, capitalize) : e6)).join("/");
+  })(e3) : En;
 }
-function createZonedDateTimeSlots(e3, n3, t3) {
-  return {
-    O: yt,
-    calendar: t3,
-    timeZone: n3,
-    epochNanoseconds: e3
-  };
+function getTimeZoneAtomic(e3) {
+  const n3 = getTimeZoneEssence(e3);
+  return "number" == typeof n3 ? n3 : n3 ? n3.resolvedOptions().timeZone : En;
 }
-function createPlainDateTimeSlots(e3, n3 = e3.calendar) {
-  return {
-    O: gt,
-    calendar: n3,
-    ...pluckProps(ze, e3)
-  };
-}
-function createPlainDateSlots(e3, n3 = e3.calendar) {
-  return {
-    O: Dt,
-    calendar: n3,
-    ...pluckProps(je, e3)
-  };
-}
-function createPlainYearMonthSlots(e3, n3 = e3.calendar) {
-  return {
-    O: ht,
-    calendar: n3,
-    ...pluckProps(je, e3)
-  };
-}
-function createPlainMonthDaySlots(e3, n3 = e3.calendar) {
-  return {
-    O: Tt,
-    calendar: n3,
-    ...pluckProps(je, e3)
-  };
-}
-function createPlainTimeSlots(e3) {
-  return {
-    O: It,
-    ...pluckProps(qe, e3)
-  };
-}
-function createDurationSlots(e3) {
-  return {
-    O: Nt,
-    ...pluckProps(ae, e3)
-  };
-}
-function removeBranding(e3) {
-  return delete (e3 = {
-    ...e3
-  }).O, e3;
-}
-function getCommonCalendarSlot(e3, n3) {
-  if (!isIdLikeEqual(e3, n3)) {
-    throw new RangeError(f);
-  }
-  return e3;
-}
-function getPreferredCalendarSlot(e3, n3) {
-  if (e3 === n3) {
-    return e3;
-  }
-  const t3 = getId(e3), o3 = getId(n3);
-  if (t3 === o3 || t3 === we) {
-    return n3;
-  }
-  if (o3 === we) {
-    return e3;
-  }
-  throw new RangeError(f);
-}
-function isTimeZoneSlotsEqual(e3, n3, t3) {
-  return e3 === n3 || getTimeZoneSlotRaw(e3, t3) === getTimeZoneSlotRaw(n3, t3);
-}
-function getTimeZoneSlotRaw(e3, n3) {
-  const t3 = getId(e3);
-  if (n3 && t3 === Yn) {
-    return 0;
-  }
-  const o3 = parseOffsetNanoMaybe(t3);
-  return void 0 !== o3 ? o3 : t3;
-}
-function getId(e3) {
-  return "string" == typeof e3 ? e3 : ne(e3.id);
-}
-function isIdLikeEqual(e3, n3) {
-  return e3 === n3 || getId(e3) === getId(n3);
-}
-function createCalendarFieldMethods(e3, n3) {
-  const t3 = {};
-  for (const o3 in e3) {
-    t3[o3] = ({ P: e4 }, t4) => {
-      const r3 = Uo(t4) || {}, { O: i3 } = r3, a3 = i3 === Dt || n3.includes(i3) ? r3 : toPlainDateSlots(t4);
-      return e4[o3](a3);
-    };
-  }
-  return t3;
-}
-function createCalendarGetters(e3) {
-  const n3 = {};
-  for (const t3 in e3) {
-    n3[t3] = (e4) => {
-      const { calendar: n4 } = e4;
-      return (o3 = n4, "string" == typeof o3 ? Kn(o3) : (r3 = o3, Object.assign(Object.create(kt), {
-        v: r3
-      })))[t3](e4);
-      var o3, r3;
-    };
-  }
-  return n3;
-}
-function neverValueOf() {
-  throw new TypeError("Cannot use valueOf");
-}
-function getCalendarFromSlots({ calendar: e3 }) {
-  return "string" == typeof e3 ? new Go(e3) : e3;
+function getTimeZoneEssence(e3) {
+  const n3 = parseOffsetNanoMaybe(e3 = e3.toUpperCase(), 1);
+  return void 0 !== n3 ? n3 : e3 !== En ? Vn(e3) : void 0;
 }
 function compareInstants(e3, n3) {
-  return compareDayTimeNanos(e3.epochNanoseconds, n3.epochNanoseconds);
+  return compareBigNanos(e3.epochNanoseconds, n3.epochNanoseconds);
 }
 function compareZonedDateTimes(e3, n3) {
-  return compareDayTimeNanos(e3.epochNanoseconds, n3.epochNanoseconds);
+  return compareBigNanos(e3.epochNanoseconds, n3.epochNanoseconds);
+}
+function compareDurations(e3, n3, t3, o3, r3, i3) {
+  const a3 = e3(normalizeOptions(i3).relativeTo), s3 = Math.max(getLargestDurationUnit(o3), getLargestDurationUnit(r3));
+  if (allPropsEqual(pe, o3, r3)) {
+    return 0;
+  }
+  if (s3 < 6 || 6 === s3 && (!a3 || !a3.epochNanoseconds)) {
+    return compareBigNanos(givenFieldsToBigNano(o3, 6, pe), givenFieldsToBigNano(r3, 6, pe));
+  }
+  if (!a3) {
+    throw new RangeError(P);
+  }
+  const [c3, u3, l3] = createRelativeSystem(n3, t3, a3);
+  return compareBigNanos(relativeMarkerToEpochNano(moveRelativeMarker(o3, c3, u3, l3), l3), relativeMarkerToEpochNano(moveRelativeMarker(r3, c3, u3, l3), l3));
 }
 function compareIsoDateTimeFields(e3, n3) {
   return compareIsoDateFields(e3, n3) || compareIsoTimeFields(e3, n3);
@@ -82605,70 +82475,693 @@ function compareIsoDateFields(e3, n3) {
 function compareIsoTimeFields(e3, n3) {
   return compareNumbers(isoTimeFieldsToNano(e3), isoTimeFieldsToNano(n3));
 }
-function instantToZonedDateTime(e3, n3, t3 = we) {
+function instantsEqual(e3, n3) {
+  return !compareInstants(e3, n3);
+}
+function zonedDateTimesEqual(e3, n3) {
+  return !compareZonedDateTimes(e3, n3) && !!isTimeZoneSlotsEqual(e3.timeZone, n3.timeZone) && isIdLikeEqual(e3.calendar, n3.calendar);
+}
+function plainDateTimesEqual(e3, n3) {
+  return !compareIsoDateTimeFields(e3, n3) && isIdLikeEqual(e3.calendar, n3.calendar);
+}
+function plainDatesEqual(e3, n3) {
+  return !compareIsoDateFields(e3, n3) && isIdLikeEqual(e3.calendar, n3.calendar);
+}
+function plainYearMonthsEqual(e3, n3) {
+  return !compareIsoDateFields(e3, n3) && isIdLikeEqual(e3.calendar, n3.calendar);
+}
+function plainMonthDaysEqual(e3, n3) {
+  return !compareIsoDateFields(e3, n3) && isIdLikeEqual(e3.calendar, n3.calendar);
+}
+function plainTimesEqual(e3, n3) {
+  return !compareIsoTimeFields(e3, n3);
+}
+function isTimeZoneSlotsEqual(e3, n3) {
+  if (e3 === n3) {
+    return 1;
+  }
+  const t3 = getId(e3), o3 = getId(n3);
+  if (t3 === o3) {
+    return 1;
+  }
+  try {
+    return getTimeZoneAtomic(t3) === getTimeZoneAtomic(o3);
+  } catch (e4) {
+  }
+}
+function diffInstants(e3, n3, t3, o3) {
+  const r3 = refineDiffOptions(e3, copyOptions(o3), 3, 5), i3 = diffEpochNano(n3.epochNanoseconds, t3.epochNanoseconds, ...r3);
+  return createDurationSlots(e3 ? negateDurationFields(i3) : i3);
+}
+function diffZonedDateTimes(e3, n3, t3, o3, r3, i3) {
+  const a3 = getCommonCalendarSlot(o3.calendar, r3.calendar), s3 = copyOptions(i3), [c3, u3, l3, f3] = refineDiffOptions(t3, s3, 5), d3 = o3.epochNanoseconds, m3 = r3.epochNanoseconds, p3 = compareBigNanos(m3, d3);
+  let T3;
+  if (p3) {
+    if (c3 < 6) {
+      T3 = diffEpochNano(d3, m3, c3, u3, l3, f3);
+    } else {
+      const t4 = n3(((e4, n4) => {
+        if (!isTimeZoneSlotsEqual(e4, n4)) {
+          throw new RangeError(h);
+        }
+        return e4;
+      })(o3.timeZone, r3.timeZone)), i4 = e3(a3);
+      T3 = diffZonedEpochNanoViaCalendar(i4, t4, p3, o3, r3, c3, s3), !p3 || 0 === u3 && 1 === l3 || (T3 = roundRelativeDuration(T3, m3, c3, u3, l3, f3, o3, i4, t4));
+    }
+  } else {
+    T3 = Me;
+  }
+  return createDurationSlots(t3 ? negateDurationFields(T3) : T3);
+}
+function diffPlainDateTimes(e3, n3, t3, o3, r3) {
+  const i3 = getCommonCalendarSlot(t3.calendar, o3.calendar), a3 = copyOptions(r3), [s3, c3, u3, l3] = refineDiffOptions(n3, a3, 6), f3 = isoToEpochNano(t3), d3 = isoToEpochNano(o3), m3 = compareBigNanos(d3, f3);
+  let p3;
+  if (m3) {
+    if (s3 <= 6) {
+      p3 = diffEpochNano(f3, d3, s3, c3, u3, l3);
+    } else {
+      const n4 = e3(i3);
+      p3 = diffDateTimesViaCalendar(n4, m3, t3, o3, s3, a3), !m3 || 0 === c3 && 1 === u3 || (p3 = roundRelativeDuration(p3, d3, s3, c3, u3, l3, t3, n4));
+    }
+  } else {
+    p3 = Me;
+  }
+  return createDurationSlots(n3 ? negateDurationFields(p3) : p3);
+}
+function diffPlainDates(e3, n3, t3, o3, r3) {
+  const i3 = getCommonCalendarSlot(t3.calendar, o3.calendar), a3 = copyOptions(r3);
+  return diffDateLike(n3 || 0, () => e3(i3), t3, o3, ...refineDiffOptions(n3, a3, 6, 9, 6), a3);
+}
+function diffPlainYearMonth(e3, n3, t3, o3, r3) {
+  const i3 = getCommonCalendarSlot(t3.calendar, o3.calendar), a3 = copyOptions(r3), s3 = refineDiffOptions(n3, a3, 9, 9, 8), c3 = e3(i3);
+  return diffDateLike(n3 || 0, () => c3, moveToMonthStart(c3, t3), moveToMonthStart(c3, o3), ...s3, a3);
+}
+function diffDateLike(e3, n3, t3, o3, r3, i3, a3, s3, c3) {
+  const u3 = isoToEpochNano(t3), l3 = isoToEpochNano(o3);
+  let f3;
+  if (compareBigNanos(l3, u3)) {
+    let e4;
+    6 === r3 ? f3 = diffByDay(t3, o3) : (e4 = n3(), f3 = e4.dateUntil(t3, o3, r3, c3)), 6 === i3 && 1 === a3 || (e4 || (e4 = n3()), f3 = roundRelativeDuration(f3, l3, r3, i3, a3, s3, {
+      ...t3,
+      ...be
+    }, e4));
+  } else {
+    f3 = Me;
+  }
+  return createDurationSlots(e3 ? negateDurationFields(f3) : f3);
+}
+function diffPlainTimes(e3, n3, t3, o3) {
+  const r3 = copyOptions(o3), [i3, a3, s3, c3] = refineDiffOptions(e3, r3, 5, 5), u3 = isoTimeFieldsToNano(n3), l3 = roundByInc(isoTimeFieldsToNano(t3) - u3, computeNanoInc(a3, s3), c3), f3 = {
+    ...Me,
+    ...nanoToDurationTimeFields(l3, i3)
+  };
+  return createDurationSlots(e3 ? negateDurationFields(f3) : f3);
+}
+function diffZonedEpochNanoViaCalendar(e3, n3, t3, o3, r3, i3, a3) {
+  const s3 = wn(o3, n3), c3 = pluckProps(ye, s3), u3 = wn(r3, n3), l3 = r3.epochNanoseconds, f3 = bindArgs(getSingleInstantFor, n3);
+  let d3, p3, h3, T3 = 0;
+  do {
+    if (T3 > 2) {
+      throw new RangeError(m);
+    }
+    d3 = {
+      ...moveByIsoDays(u3, T3++ * -t3),
+      ...c3
+    }, p3 = f3(d3), h3 = compareBigNanos(l3, p3);
+  } while (h3 === -t3);
+  return {
+    ...6 === i3 ? diffByDay(s3, d3) : e3.dateUntil(s3, d3, i3, a3),
+    ...nanoToDurationTimeFields(bigNanoToNumber(diffBigNanos(p3, l3)))
+  };
+}
+function diffDateTimesViaCalendar(e3, n3, t3, o3, r3, i3) {
+  const a3 = isoTimeFieldsToNano(t3);
+  let s3 = isoTimeFieldsToNano(o3) - a3, c3 = t3;
+  return Math.sign(s3) === -n3 && (c3 = moveByIsoDays(t3, n3), s3 += W * n3), {
+    ...e3.dateUntil({
+      ...c3,
+      ...be
+    }, {
+      ...o3,
+      ...be
+    }, r3, i3),
+    ...nanoToDurationTimeFields(s3)
+  };
+}
+function diffEpochNano(e3, n3, t3, o3, r3, i3) {
+  return {
+    ...Me,
+    ...nanoToDurationDayTimeFields(roundBigNano(diffBigNanos(e3, n3), o3, r3, i3), t3)
+  };
+}
+function diffEpochNanoExact(e3, n3, t3) {
+  return {
+    ...Me,
+    ...nanoToDurationDayTimeFields(diffBigNanos(e3, n3), t3)
+  };
+}
+function diffByDay(e3, n3) {
+  return {
+    ...Me,
+    days: diffDays(e3, n3)
+  };
+}
+function diffDays(e3, n3) {
+  return diffEpochMilliByDay(isoToEpochMilli(e3), isoToEpochMilli(n3));
+}
+function diffEpochMilliByDay(e3, n3) {
+  return Math.round((n3 - e3) / R);
+}
+function getCommonCalendarSlot(e3, n3) {
+  if (!isIdLikeEqual(e3, n3)) {
+    throw new RangeError(p);
+  }
+  return e3;
+}
+function createIntlCalendar(e3) {
+  function epochMilliToIntlFields(e4) {
+    return ((e5, n4) => ({
+      ...parseIntlYear(e5, n4),
+      month: e5.month,
+      day: parseInt(e5.day)
+    }))(hashIntlFormatParts(n3, e4), t3);
+  }
+  const n3 = Kn(e3), t3 = computeCalendarIdBase(e3);
+  return {
+    id: e3,
+    I: createIntlFieldCache(epochMilliToIntlFields),
+    N: createIntlYearMonthCache(epochMilliToIntlFields)
+  };
+}
+function createIntlFieldCache(e3) {
+  return memoize((n3) => {
+    const t3 = isoToEpochMilli(n3);
+    return e3(t3);
+  }, WeakMap);
+}
+function createIntlYearMonthCache(e3) {
+  const n3 = e3(0).year - ze;
+  return memoize((t3) => {
+    let o3, r3 = isoArgsToEpochMilli(t3 - n3);
+    const i3 = [], a3 = [];
+    do {
+      r3 += 400 * R;
+    } while ((o3 = e3(r3)).year <= t3);
+    do {
+      r3 += (1 - o3.day) * R, o3.year === t3 && (i3.push(r3), a3.push(o3.month)), r3 -= R;
+    } while ((o3 = e3(r3)).year >= t3);
+    return {
+      v: i3.reverse(),
+      P: w(a3.reverse())
+    };
+  });
+}
+function parseIntlYear(e3, n3) {
+  let t3, o3, r3 = parseIntlPartsYear(e3);
+  if (e3.era) {
+    const a3 = fe[n3];
+    void 0 !== a3 && (i3 = (i3 = e3.era).normalize("NFD").toLowerCase().replace(/[^a-z0-9]/g, ""), t3 = de[i3] || i3, o3 = r3, r3 = eraYearToYear(o3, a3[t3] || 0));
+  }
+  var i3;
+  return {
+    era: t3,
+    eraYear: o3,
+    year: r3
+  };
+}
+function parseIntlPartsYear(e3) {
+  return parseInt(e3.relatedYear || e3.year);
+}
+function computeIntlDateParts(e3) {
+  const { year: n3, month: t3, day: o3 } = this.I(e3), { P: r3 } = this.N(n3);
+  return [n3, r3[t3] + 1, o3];
+}
+function computeIntlEpochMilli(e3, n3 = 1, t3 = 1) {
+  return this.N(e3).v[n3 - 1] + (t3 - 1) * R;
+}
+function computeIntlLeapMonth(e3) {
+  const n3 = queryMonthStrs(this, e3), t3 = queryMonthStrs(this, e3 - 1), o3 = n3.length;
+  if (o3 > t3.length) {
+    const e4 = getCalendarLeapMonthMeta(this);
+    if (e4 < 0) {
+      return -e4;
+    }
+    for (let e5 = 0; e5 < o3; e5++) {
+      if (n3[e5] !== t3[e5]) {
+        return e5 + 1;
+      }
+    }
+  }
+}
+function computeIntlDaysInYear(e3) {
+  return diffEpochMilliByDay(computeIntlEpochMilli.call(this, e3), computeIntlEpochMilli.call(this, e3 + 1));
+}
+function computeIntlDaysInMonth(e3, n3) {
+  const { v: t3 } = this.N(e3);
+  let o3 = n3 + 1, r3 = t3;
+  return o3 > t3.length && (o3 = 1, r3 = this.N(e3 + 1).v), diffEpochMilliByDay(t3[n3 - 1], r3[o3 - 1]);
+}
+function computeIntlMonthsInYear(e3) {
+  return this.N(e3).v.length;
+}
+function queryMonthStrs(e3, n3) {
+  return Object.keys(e3.N(n3).P);
+}
+function resolveCalendarId(e3) {
+  if ((e3 = e3.toLowerCase()) !== ce && e3 !== ue && computeCalendarIdBase(e3) !== computeCalendarIdBase(Kn(e3).resolvedOptions().calendar)) {
+    throw new RangeError(invalidCalendar(e3));
+  }
+  return e3;
+}
+function computeCalendarIdBase(e3) {
+  return "islamicc" === e3 && (e3 = "islamic"), e3.split("-")[0];
+}
+function computeNativeWeekOfYear(e3) {
+  return this.F(e3)[0];
+}
+function computeNativeYearOfWeek(e3) {
+  return this.F(e3)[1];
+}
+function parseMonthCode(e3) {
+  const n3 = Qn.exec(e3);
+  if (!n3) {
+    throw new RangeError(invalidMonthCode(e3));
+  }
+  return [parseInt(n3[1]), Boolean(n3[2])];
+}
+function monthCodeNumberToMonth(e3, n3, t3) {
+  return e3 + (n3 || t3 && e3 >= t3 ? 1 : 0);
+}
+function monthToMonthCodeNumber(e3, n3) {
+  return e3 - (n3 && e3 >= n3 ? 1 : 0);
+}
+function eraYearToYear(e3, n3) {
+  return (n3 + e3) * (Math.sign(n3) || 1) || 0;
+}
+function getCalendarEraOrigins(e3) {
+  return fe[getCalendarIdBase(e3)];
+}
+function getCalendarLeapMonthMeta(e3) {
+  return me[getCalendarIdBase(e3)];
+}
+function getCalendarIdBase(e3) {
+  return computeCalendarIdBase(e3.id || ce);
+}
+function refineMaybeZonedDateTimeBag(e3, n3, t3, o3) {
+  const r3 = refineCalendarFields(t3, o3, re, [], _);
+  if (void 0 !== r3.timeZone) {
+    const o4 = t3.dateFromFields(r3), i3 = refineTimeBag(r3), a3 = e3(r3.timeZone);
+    return {
+      epochNanoseconds: getMatchingInstantFor(n3(a3), {
+        ...o4,
+        ...i3
+      }, void 0 !== r3.offset ? parseOffsetNano(r3.offset) : void 0),
+      timeZone: a3
+    };
+  }
+  return {
+    ...t3.dateFromFields(r3),
+    ...be
+  };
+}
+function refineZonedDateTimeBag(e3, n3, t3, o3, r3, i3) {
+  const a3 = refineCalendarFields(t3, r3, re, G, _), s3 = e3(a3.timeZone), [c3, u3, l3] = refineZonedFieldOptions(i3), f3 = t3.dateFromFields(a3, overrideOverflowOptions(i3, c3)), d3 = refineTimeBag(a3, c3);
+  return createZonedDateTimeSlots(getMatchingInstantFor(n3(s3), {
+    ...f3,
+    ...d3
+  }, void 0 !== a3.offset ? parseOffsetNano(a3.offset) : void 0, u3, l3), s3, o3);
+}
+function refinePlainDateTimeBag(e3, n3, t3) {
+  const o3 = refineCalendarFields(e3, n3, re, [], $), r3 = refineOverflowOptions(t3);
+  return createPlainDateTimeSlots(checkIsoDateTimeInBounds({
+    ...e3.dateFromFields(o3, overrideOverflowOptions(t3, r3)),
+    ...refineTimeBag(o3, r3)
+  }));
+}
+function refinePlainDateBag(e3, n3, t3, o3 = []) {
+  const r3 = refineCalendarFields(e3, n3, re, o3);
+  return e3.dateFromFields(r3, t3);
+}
+function refinePlainYearMonthBag(e3, n3, t3, o3) {
+  const r3 = refineCalendarFields(e3, n3, te, o3);
+  return e3.yearMonthFromFields(r3, t3);
+}
+function refinePlainMonthDayBag(e3, n3, t3, o3, r3 = []) {
+  const i3 = refineCalendarFields(e3, t3, re, r3);
+  return n3 && void 0 !== i3.month && void 0 === i3.monthCode && void 0 === i3.year && (i3.year = qe), e3.monthDayFromFields(i3, o3);
+}
+function refinePlainTimeBag(e3, n3) {
+  const t3 = refineOverflowOptions(n3);
+  return createPlainTimeSlots(refineTimeBag(refineFields(e3, x, [], 1), t3));
+}
+function refineDurationBag(e3) {
+  const n3 = refineFields(e3, he);
+  return createDurationSlots(checkDurationUnits({
+    ...Me,
+    ...n3
+  }));
+}
+function refineCalendarFields(e3, n3, t3, o3 = [], r3 = []) {
+  return refineFields(n3, [...e3.fields(t3), ...r3].sort(), o3);
+}
+function refineFields(e3, n3, t3, o3 = !t3) {
+  const r3 = {};
+  let i3, a3 = 0;
+  for (const o4 of n3) {
+    if (o4 === i3) {
+      throw new RangeError(duplicateFields(o4));
+    }
+    if ("constructor" === o4 || "__proto__" === o4) {
+      throw new RangeError(forbiddenField(o4));
+    }
+    let n4 = e3[o4];
+    if (void 0 !== n4) {
+      a3 = 1, tt[o4] && (n4 = tt[o4](n4, o4)), r3[o4] = n4;
+    } else if (t3) {
+      if (t3.includes(o4)) {
+        throw new TypeError(missingField(o4));
+      }
+      r3[o4] = se[o4];
+    }
+    i3 = o4;
+  }
+  if (o3 && !a3) {
+    throw new TypeError(noValidFields(n3));
+  }
+  return r3;
+}
+function refineTimeBag(e3, n3) {
+  return constrainIsoTimeFields(ot({
+    ...se,
+    ...e3
+  }), n3);
+}
+function zonedDateTimeWithFields(e3, n3, t3, o3, r3, i3) {
+  const a3 = copyOptions(i3), { calendar: s3, timeZone: c3 } = t3;
+  return createZonedDateTimeSlots(((e4, n4, t4, o4, r4) => {
+    const i4 = mergeCalendarFields(e4, t4, o4, re, V, H), [a4, s4, c4] = refineZonedFieldOptions(r4, 2);
+    return getMatchingInstantFor(n4, {
+      ...e4.dateFromFields(i4, overrideOverflowOptions(r4, a4)),
+      ...refineTimeBag(i4, a4)
+    }, parseOffsetNano(i4.offset), s4, c4);
+  })(e3(s3), n3(c3), o3, r3, a3), c3, s3);
+}
+function plainDateTimeWithFields(e3, n3, t3, o3, r3) {
+  const i3 = copyOptions(r3);
+  return createPlainDateTimeSlots(((e4, n4, t4, o4) => {
+    const r4 = mergeCalendarFields(e4, n4, t4, re, $), i4 = refineOverflowOptions(o4);
+    return checkIsoDateTimeInBounds({
+      ...e4.dateFromFields(r4, overrideOverflowOptions(o4, i4)),
+      ...refineTimeBag(r4, i4)
+    });
+  })(e3(n3.calendar), t3, o3, i3));
+}
+function plainDateWithFields(e3, n3, t3, o3, r3) {
+  const i3 = copyOptions(r3);
+  return ((e4, n4, t4, o4) => {
+    const r4 = mergeCalendarFields(e4, n4, t4, re);
+    return e4.dateFromFields(r4, o4);
+  })(e3(n3.calendar), t3, o3, i3);
+}
+function plainYearMonthWithFields(e3, n3, t3, o3, r3) {
+  const i3 = copyOptions(r3);
+  return createPlainYearMonthSlots(((e4, n4, t4, o4) => {
+    const r4 = mergeCalendarFields(e4, n4, t4, te);
+    return e4.yearMonthFromFields(r4, o4);
+  })(e3(n3.calendar), t3, o3, i3));
+}
+function plainMonthDayWithFields(e3, n3, t3, o3, r3) {
+  const i3 = copyOptions(r3);
+  return ((e4, n4, t4, o4) => {
+    const r4 = mergeCalendarFields(e4, n4, t4, re);
+    return e4.monthDayFromFields(r4, o4);
+  })(e3(n3.calendar), t3, o3, i3);
+}
+function plainTimeWithFields(e3, n3, t3) {
+  return createPlainTimeSlots(((e4, n4, t4) => {
+    const o3 = refineOverflowOptions(t4);
+    return refineTimeBag({
+      ...pluckProps(x, e4),
+      ...refineFields(n4, x)
+    }, o3);
+  })(e3, n3, t3));
+}
+function durationWithFields(e3, n3) {
+  return createDurationSlots((t3 = e3, o3 = n3, checkDurationUnits({
+    ...t3,
+    ...refineFields(o3, he)
+  })));
+  var t3, o3;
+}
+function mergeCalendarFields(e3, n3, t3, o3, r3 = [], i3 = []) {
+  const a3 = [...e3.fields(o3), ...r3].sort();
+  let s3 = refineFields(n3, a3, i3);
+  const c3 = refineFields(t3, a3);
+  return s3 = e3.mergeFields(s3, c3), refineFields(s3, a3, []);
+}
+function convertToPlainMonthDay(e3, n3) {
+  const t3 = refineCalendarFields(e3, n3, ae);
+  return e3.monthDayFromFields(t3);
+}
+function convertToPlainYearMonth(e3, n3, t3) {
+  const o3 = refineCalendarFields(e3, n3, oe);
+  return e3.yearMonthFromFields(o3, t3);
+}
+function convertToIso(e3, n3, t3, o3, r3) {
+  n3 = pluckProps(t3 = e3.fields(t3), n3), o3 = refineFields(o3, r3 = e3.fields(r3), []);
+  let i3 = e3.mergeFields(n3, o3);
+  return i3 = refineFields(i3, [...t3, ...r3].sort(), []), e3.dateFromFields(i3);
+}
+function refineYear(e3, n3) {
+  let { era: t3, eraYear: o3, year: r3 } = n3;
+  const c3 = getCalendarEraOrigins(e3);
+  if (void 0 !== t3 || void 0 !== o3) {
+    if (void 0 === t3 || void 0 === o3) {
+      throw new TypeError(a);
+    }
+    if (!c3) {
+      throw new RangeError(i);
+    }
+    const e4 = c3[t3];
+    if (void 0 === e4) {
+      throw new RangeError(invalidEra(t3));
+    }
+    const n4 = eraYearToYear(o3, e4);
+    if (void 0 !== r3 && r3 !== n4) {
+      throw new RangeError(s);
+    }
+    r3 = n4;
+  } else if (void 0 === r3) {
+    throw new TypeError(missingYear(c3));
+  }
+  return r3;
+}
+function refineMonth(e3, n3, t3, o3) {
+  let { month: r3, monthCode: i3 } = n3;
+  if (void 0 !== i3) {
+    const n4 = ((e4, n5, t4, o4) => {
+      const r4 = e4.O(t4), [i4, a3] = parseMonthCode(n5);
+      let s3 = monthCodeNumberToMonth(i4, a3, r4);
+      if (a3) {
+        const n6 = getCalendarLeapMonthMeta(e4);
+        if (void 0 === n6) {
+          throw new RangeError(f);
+        }
+        if (n6 > 0) {
+          if (s3 > n6) {
+            throw new RangeError(f);
+          }
+          if (void 0 === r4) {
+            if (1 === o4) {
+              throw new RangeError(f);
+            }
+            s3--;
+          }
+        } else {
+          if (s3 !== -n6) {
+            throw new RangeError(f);
+          }
+          if (void 0 === r4 && 1 === o4) {
+            throw new RangeError(f);
+          }
+        }
+      }
+      return s3;
+    })(e3, i3, t3, o3);
+    if (void 0 !== r3 && r3 !== n4) {
+      throw new RangeError(c);
+    }
+    r3 = n4, o3 = 1;
+  } else if (void 0 === r3) {
+    throw new TypeError(u);
+  }
+  return clampEntity("month", r3, 1, e3.B(t3), o3);
+}
+function refineDay(e3, n3, t3, o3, r3) {
+  return clampProp(n3, "day", 1, e3.k(o3, t3), r3);
+}
+function spliceFields(e3, n3, t3, o3) {
+  let r3 = 0;
+  const i3 = [];
+  for (const e4 of t3) {
+    void 0 !== n3[e4] ? r3 = 1 : i3.push(e4);
+  }
+  if (Object.assign(e3, n3), r3) {
+    for (const n4 of o3 || i3) {
+      delete e3[n4];
+    }
+  }
+}
+function constructInstantSlots(e3) {
+  return createInstantSlots(checkEpochNanoInBounds(bigIntToBigNano(toBigInt(e3))));
+}
+function constructZonedDateTimeSlots(e3, n3, t3, o3, r3 = ce) {
+  return createZonedDateTimeSlots(checkEpochNanoInBounds(bigIntToBigNano(toBigInt(t3))), n3(o3), e3(r3));
+}
+function constructPlainDateTimeSlots(e3, n3, t3, o3, r3 = 0, i3 = 0, a3 = 0, s3 = 0, c3 = 0, u3 = 0, l3 = ce) {
+  return createPlainDateTimeSlots(checkIsoDateTimeInBounds(checkIsoDateTimeFields(mapProps(toInteger, zipProps(Pe, [n3, t3, o3, r3, i3, a3, s3, c3, u3])))), e3(l3));
+}
+function constructPlainDateSlots(e3, n3, t3, o3, r3 = ce) {
+  return createPlainDateSlots(checkIsoDateInBounds(checkIsoDateFields(mapProps(toInteger, {
+    isoYear: n3,
+    isoMonth: t3,
+    isoDay: o3
+  }))), e3(r3));
+}
+function constructPlainYearMonthSlots(e3, n3, t3, o3 = ce, r3 = 1) {
+  const i3 = toInteger(n3), a3 = toInteger(t3), s3 = e3(o3);
+  return createPlainYearMonthSlots(checkIsoYearMonthInBounds(checkIsoDateFields({
+    isoYear: i3,
+    isoMonth: a3,
+    isoDay: toInteger(r3)
+  })), s3);
+}
+function constructPlainMonthDaySlots(e3, n3, t3, o3 = ce, r3 = qe) {
+  const i3 = toInteger(n3), a3 = toInteger(t3), s3 = e3(o3);
+  return createPlainMonthDaySlots(checkIsoDateInBounds(checkIsoDateFields({
+    isoYear: toInteger(r3),
+    isoMonth: i3,
+    isoDay: a3
+  })), s3);
+}
+function constructPlainTimeSlots(e3 = 0, n3 = 0, t3 = 0, o3 = 0, r3 = 0, i3 = 0) {
+  return createPlainTimeSlots(constrainIsoTimeFields(mapProps(toInteger, zipProps(ye, [e3, n3, t3, o3, r3, i3])), 1));
+}
+function constructDurationSlots(e3 = 0, n3 = 0, t3 = 0, o3 = 0, r3 = 0, i3 = 0, a3 = 0, s3 = 0, c3 = 0, u3 = 0) {
+  return createDurationSlots(checkDurationUnits(mapProps(toStrictInteger, zipProps(pe, [e3, n3, t3, o3, r3, i3, a3, s3, c3, u3]))));
+}
+function instantToZonedDateTime(e3, n3, t3 = ce) {
   return createZonedDateTimeSlots(e3.epochNanoseconds, n3, t3);
 }
+function zonedDateTimeToInstant(e3) {
+  return createInstantSlots(e3.epochNanoseconds);
+}
 function zonedDateTimeToPlainDateTime(e3, n3) {
-  return createPlainDateTimeSlots(zn(n3, e3(n3.timeZone)), n3.calendar);
+  return createPlainDateTimeSlots(wn(n3, e3));
 }
 function zonedDateTimeToPlainDate(e3, n3) {
-  return createPlainDateSlots(zn(n3, e3(n3.timeZone)), n3.calendar);
+  return createPlainDateSlots(wn(n3, e3));
+}
+function zonedDateTimeToPlainYearMonth(e3, n3, t3) {
+  return convertToPlainYearMonth(e3(n3.calendar), t3);
+}
+function zonedDateTimeToPlainMonthDay(e3, n3, t3) {
+  return convertToPlainMonthDay(e3(n3.calendar), t3);
 }
 function zonedDateTimeToPlainTime(e3, n3) {
-  return createPlainTimeSlots(zn(n3, e3(n3.timeZone)));
+  return createPlainTimeSlots(wn(n3, e3));
 }
-function toPlainMonthDaySlots(e3, n3) {
-  if (n3 = copyOptions(n3), isObjectLike(e3)) {
-    const t4 = Uo(e3);
-    if (t4 && t4.O === Tt) {
-      return refineOverflowOptions(n3), t4;
-    }
-    const o3 = extractCalendarSlotFromBag(e3);
-    return refinePlainMonthDayBag(mo(o3 || we), !o3, e3, n3);
-  }
-  const t3 = ((e4, n4) => {
-    const t4 = parseMonthDayOnly(ne(n4));
-    if (t4) {
-      return requireIsoCalendar(t4), createPlainMonthDaySlots(checkIsoDateFields(t4));
-    }
-    const o3 = parsePlainDate(n4), { calendar: r3 } = o3, i3 = e4(r3), [a3, s3, c3] = i3.F(o3), [l3, u3] = i3.C(a3, s3), [d3, f3] = i3.k(l3, u3, c3);
-    return createPlainMonthDaySlots(i3.B(d3, f3, c3), r3);
-  })(Kn, e3);
-  return refineOverflowOptions(n3), t3;
+function plainDateTimeToZonedDateTime(e3, n3, t3, o3) {
+  return createZonedDateTimeSlots(((e4, n4, t4, o4) => {
+    const r3 = refineEpochDisambigOptions(o4);
+    return checkEpochNanoInBounds(getSingleInstantFor(e4(n4), t4, r3));
+  })(e3, t3, n3, o3), t3, n3.calendar);
 }
-function toPlainYearMonthSlots(e3, n3) {
-  if (n3 = copyOptions(n3), isObjectLike(e3)) {
-    const t4 = Uo(e3);
-    return t4 && t4.O === ht ? (refineOverflowOptions(n3), t4) : refinePlainYearMonthBag(uo(getCalendarSlotFromBag(e3)), e3, n3);
-  }
-  const t3 = ((e4, n4) => {
-    const t4 = parseYearMonthOnly(ne(n4));
-    if (t4) {
-      return requireIsoCalendar(t4), createPlainYearMonthSlots(checkIsoYearMonthInBounds(checkIsoDateFields(t4)));
-    }
-    const o3 = parsePlainDate(n4), r3 = moveToMonthStart(e4(o3.calendar), o3);
-    return createPlainYearMonthSlots({
-      ...o3,
-      ...r3
-    });
-  })(Kn, e3);
-  return refineOverflowOptions(n3), t3;
+function plainDateTimeToPlainYearMonth(e3, n3, t3) {
+  const o3 = e3(n3.calendar);
+  return createPlainYearMonthSlots({
+    ...n3,
+    ...convertToPlainYearMonth(o3, t3)
+  });
 }
-function dayAdapter(e3, n3, t3) {
-  return requirePositiveInteger(n3.call(e3, Ro(createPlainDateSlots(t3, e3))));
+function plainDateTimeToPlainMonthDay(e3, n3, t3) {
+  return convertToPlainMonthDay(e3(n3.calendar), t3);
 }
-function createCompoundOpsCreator(e3) {
-  return (n3) => "string" == typeof n3 ? Kn(n3) : ((e4, n4) => {
-    const t3 = Object.keys(n4).sort(), o3 = {};
-    for (const r3 of t3) {
-      o3[r3] = bindArgs(n4[r3], e4, e4[r3]);
-    }
-    return o3;
-  })(n3, e3);
+function plainDateToZonedDateTime(e3, n3, t3, o3, r3) {
+  const i3 = e3(r3.timeZone), a3 = r3.plainTime, s3 = void 0 !== a3 ? n3(a3) : be;
+  return createZonedDateTimeSlots(getSingleInstantFor(t3(i3), {
+    ...o3,
+    ...s3
+  }), i3, o3.calendar);
 }
-function getImplTransition(e3, n3, t3) {
-  const o3 = n3.R(toInstantSlots(t3).epochNanoseconds, e3);
-  return o3 ? Mo(createInstantSlots(o3)) : null;
+function plainDateToPlainDateTime(e3, n3 = be) {
+  return createPlainDateTimeSlots(checkIsoDateTimeInBounds({
+    ...e3,
+    ...n3
+  }));
+}
+function plainDateToPlainYearMonth(e3, n3, t3) {
+  return convertToPlainYearMonth(e3(n3.calendar), t3);
+}
+function plainDateToPlainMonthDay(e3, n3, t3) {
+  return convertToPlainMonthDay(e3(n3.calendar), t3);
+}
+function plainYearMonthToPlainDate(e3, n3, t3, o3) {
+  return ((e4, n4, t4) => convertToIso(e4, n4, oe, requireObjectLike(t4), ne))(e3(n3.calendar), t3, o3);
+}
+function plainMonthDayToPlainDate(e3, n3, t3, o3) {
+  return ((e4, n4, t4) => convertToIso(e4, n4, ae, requireObjectLike(t4), Q))(e3(n3.calendar), t3, o3);
+}
+function plainTimeToZonedDateTime(e3, n3, t3, o3, r3) {
+  const i3 = requireObjectLike(r3), a3 = n3(i3.plainDate), s3 = e3(i3.timeZone);
+  return createZonedDateTimeSlots(getSingleInstantFor(t3(s3), {
+    ...a3,
+    ...o3
+  }), s3, a3.calendar);
+}
+function plainTimeToPlainDateTime(e3, n3) {
+  return createPlainDateTimeSlots(checkIsoDateTimeInBounds({
+    ...e3,
+    ...n3
+  }));
+}
+function epochSecToInstant(e3) {
+  return createInstantSlots(checkEpochNanoInBounds(numberToBigNano(e3, A)));
+}
+function epochMilliToInstant(e3) {
+  return createInstantSlots(checkEpochNanoInBounds(numberToBigNano(e3, q)));
+}
+function epochMicroToInstant(e3) {
+  return createInstantSlots(checkEpochNanoInBounds(bigIntToBigNano(toBigInt(e3), z)));
+}
+function epochNanoToInstant(e3) {
+  return createInstantSlots(checkEpochNanoInBounds(bigIntToBigNano(toBigInt(e3))));
+}
+function zonedDateTimeWithPlainTime(e3, n3, t3 = be) {
+  const o3 = n3.timeZone, r3 = e3(o3), i3 = {
+    ...wn(n3, r3),
+    ...t3
+  };
+  return createZonedDateTimeSlots(getMatchingInstantFor(r3, i3, i3.offsetNanoseconds, 2), o3, n3.calendar);
+}
+function zonedDateTimeWithPlainDate(e3, n3, t3) {
+  const o3 = n3.timeZone, r3 = e3(o3), i3 = {
+    ...wn(n3, r3),
+    ...t3
+  }, a3 = getPreferredCalendarSlot(n3.calendar, t3.calendar);
+  return createZonedDateTimeSlots(getMatchingInstantFor(r3, i3, i3.offsetNanoseconds, 2), o3, a3);
+}
+function plainDateTimeWithPlainTime(e3, n3 = be) {
+  return createPlainDateTimeSlots({
+    ...e3,
+    ...n3
+  });
+}
+function plainDateTimeWithPlainDate(e3, n3) {
+  return createPlainDateTimeSlots({
+    ...e3,
+    ...n3
+  }, getPreferredCalendarSlot(e3.calendar, n3.calendar));
 }
 function slotsWithCalendar(e3, n3) {
   return {
@@ -82676,369 +83169,84 @@ function slotsWithCalendar(e3, n3) {
     calendar: n3
   };
 }
-function adaptToIsoFields(e3) {
-  return mapProps((e4) => (n3) => e4(slotsToIsoFields(n3)), e3);
-}
-function slotsToIsoFields(e3) {
-  const n3 = createSimpleTimeZoneOps(e3.timeZone);
+function slotsWithTimeZone(e3, n3) {
   return {
-    ...zn(e3, n3),
-    calendar: e3.calendar
+    ...e3,
+    timeZone: n3
   };
 }
-function toZonedDateTimeSlots(e3, n3) {
-  if (n3 = copyOptions(n3), isObjectLike(e3)) {
-    const t3 = Uo(e3);
-    if (t3 && t3.O === yt) {
-      return refineZonedFieldOptions(n3), t3;
-    }
-    const o3 = getCalendarSlotFromBag(e3);
-    return ((e4, n4, t4, o4, r3, i3) => {
-      const a3 = refineCalendarFields(t4, r3, K, z, U), s3 = e4(a3.timeZone), [c3, l3, u3] = refineZonedFieldOptions(i3), d3 = t4.dateFromFields(a3, overrideOverflowOptions(i3, c3)), f3 = refineTimeBag(a3, c3);
-      return createZonedDateTimeSlots(getMatchingInstantFor(n4(s3), {
-        ...d3,
-        ...f3
-      }, void 0 !== a3.offset ? parseOffsetNano(a3.offset) : void 0, l3, u3), s3, o4);
-    })(refineTimeZoneSlot, createTimeZoneOps, fo(o3), o3, e3, n3);
+function getPreferredCalendarSlot(e3, n3) {
+  if (e3 === n3) {
+    return e3;
   }
-  return ((e4, n4) => {
-    const t3 = parseDateTimeLike(ne(e4));
-    if (!t3 || !t3.timeZone) {
-      throw new RangeError(failedParse(e4));
-    }
-    const { offset: o3 } = t3, r3 = o3 ? parseOffsetNano(o3) : void 0, [, i3, a3] = refineZonedFieldOptions(n4);
-    return finalizeZonedDateTime(t3, r3, i3, a3);
-  })(e3, n3);
-}
-function toInstantSlots(e3) {
-  if (isObjectLike(e3)) {
-    const n3 = Uo(e3);
-    if (n3) {
-      switch (n3.O) {
-        case St:
-          return n3;
-        case yt:
-          return createInstantSlots(n3.epochNanoseconds);
-      }
-    }
+  const t3 = getId(e3), o3 = getId(n3);
+  if (t3 === o3 || t3 === ce) {
+    return n3;
   }
-  return ((e4) => {
-    const n3 = parseDateTimeLike(e4 = toStringViaPrimitive(e4));
-    if (!n3) {
-      throw new RangeError(failedParse(e4));
-    }
-    let t3;
-    if (n3.I) {
-      t3 = 0;
-    } else {
-      if (!n3.offset) {
-        throw new RangeError(failedParse(e4));
-      }
-      t3 = parseOffsetNano(n3.offset);
-    }
-    return n3.timeZone && parseOffsetNanoMaybe(n3.timeZone, 1), createInstantSlots(isoToEpochNanoWithOffset(checkIsoDateTimeFields(n3), t3));
-  })(e3);
-}
-function toTemporalInstant() {
-  return Mo(createInstantSlots(numberToDayTimeNano(this.valueOf(), C)));
-}
-function adapterGetOffsetNanosecondsFor(e3, n3, t3) {
-  return validateTimeZoneOffset(requireInteger(n3.call(e3, Mo(createInstantSlots(t3)))));
-}
-function createAdapterOps(e3, n3 = bo) {
-  const t3 = Object.keys(n3).sort(), o3 = {};
-  for (const r3 of t3) {
-    o3[r3] = bindArgs(n3[r3], e3, re(e3[r3]));
+  if (o3 === ce) {
+    return e3;
   }
-  return o3;
+  throw new RangeError(p);
 }
-function createTimeZoneOps(e3, n3) {
-  return "string" == typeof e3 ? queryNativeTimeZone(e3) : createAdapterOps(e3, n3);
+function createNativeOpsCreator(e3, n3) {
+  return (t3) => t3 === ce ? e3 : t3 === ue || t3 === le ? Object.assign(Object.create(e3), {
+    id: t3
+  }) : Object.assign(Object.create(n3), Jn(t3));
 }
-function createSimpleTimeZoneOps(e3) {
-  return createTimeZoneOps(e3, wo);
+function createOptionsTransformer(e3, n3, t3 = []) {
+  const o3 = new Set(t3);
+  return (t4) => (((e4, n4) => {
+    for (const t5 of n4) {
+      if (t5 in e4) {
+        return 1;
+      }
+    }
+    return 0;
+  })(t4 = excludePropsByName(o3, t4), e3) || Object.assign(t4, n3), t4);
 }
-function toDurationSlots(e3) {
-  if (isObjectLike(e3)) {
-    const n3 = Uo(e3);
-    return n3 && n3.O === Nt ? n3 : ((e4) => {
-      const n4 = refineFields(e4, ae);
-      return createDurationSlots(checkDurationFields({
-        ...ue,
-        ...n4
-      }));
-    })(e3);
-  }
-  return ((e4) => {
-    const n3 = ((e5) => {
-      const n4 = pt.exec(e5);
-      return n4 ? ((e6) => {
-        function parseUnit(e7, t3, i4) {
-          let a3 = 0, s3 = 0;
-          if (i4 && ([a3, r3] = divModFloor(r3, R[i4])), void 0 !== e7) {
-            if (o3) {
-              throw new RangeError(invalidSubstring(e7));
-            }
-            s3 = ((e8) => {
-              const n6 = parseInt(e8);
-              if (!Number.isFinite(n6)) {
-                throw new RangeError(invalidSubstring(e8));
-              }
-              return n6;
-            })(e7), n5 = 1, t3 && (r3 = parseSubsecNano(t3) * (R[i4] / Z), o3 = 1);
-          }
-          return a3 + s3;
-        }
-        let n5 = 0, o3 = 0, r3 = 0, i3 = {
-          ...zipProps(ie, [parseUnit(e6[2]), parseUnit(e6[3]), parseUnit(e6[4]), parseUnit(e6[5]), parseUnit(e6[6], e6[7], 5), parseUnit(e6[8], e6[9], 4), parseUnit(e6[10], e6[11], 3)]),
-          ...nanoToGivenFields(r3, 2, ie)
-        };
-        if (!n5) {
-          throw new RangeError(t);
-        }
-        return parseSign(e6[1]) < 0 && (i3 = negateDurationFields(i3)), i3;
-      })(n4) : void 0;
-    })(ne(e4));
-    if (!n3) {
-      throw new RangeError(failedParse(e4));
-    }
-    return createDurationSlots(n3);
-  })(e3);
+function isoDateFieldsToEpochNano(e3, n3) {
+  return getSingleInstantFor(kn(n3.timeZone), {
+    ...be,
+    isoHour: 12,
+    ...e3
+  });
 }
-function refinePublicRelativeTo(e3) {
-  if (void 0 !== e3) {
-    if (isObjectLike(e3)) {
-      const n3 = Uo(e3) || {};
-      switch (n3.O) {
-        case yt:
-        case Dt:
-          return n3;
-        case gt:
-          return createPlainDateSlots(n3);
-      }
-      const t3 = getCalendarSlotFromBag(e3);
-      return {
-        ...((e4, n4, t4, o3) => {
-          const r3 = refineCalendarFields(t4, o3, K, [], U);
-          if (void 0 !== r3.timeZone) {
-            const o4 = t4.dateFromFields(r3), i3 = refineTimeBag(r3), a3 = e4(r3.timeZone);
-            return {
-              epochNanoseconds: getMatchingInstantFor(n4(a3), {
-                ...o4,
-                ...i3
-              }, void 0 !== r3.offset ? parseOffsetNano(r3.offset) : void 0),
-              timeZone: a3
-            };
-          }
-          return {
-            ...t4.dateFromFields(r3),
-            ...Ae
-          };
-        })(refineTimeZoneSlot, createTimeZoneOps, fo(t3), e3),
-        calendar: t3
-      };
-    }
-    return ((e4) => {
-      const n3 = parseDateTimeLike(ne(e4));
-      if (!n3) {
-        throw new RangeError(failedParse(e4));
-      }
-      if (n3.timeZone) {
-        return finalizeZonedDateTime(n3, n3.offset ? parseOffsetNano(n3.offset) : void 0);
-      }
-      if (n3.I) {
-        throw new RangeError(failedParse(e4));
-      }
-      return finalizeDate(n3);
-    })(e3);
-  }
+function extractEpochNano(e3) {
+  return e3.epochNanoseconds;
 }
-function toPlainDateTimeSlots(e3, n3) {
-  if (n3 = copyOptions(n3), isObjectLike(e3)) {
-    const t4 = Uo(e3) || {};
-    switch (t4.O) {
-      case gt:
-        return refineOverflowOptions(n3), t4;
-      case Dt:
-        return refineOverflowOptions(n3), createPlainDateTimeSlots({
-          ...t4,
-          ...Ae
-        });
-      case yt:
-        return refineOverflowOptions(n3), zonedDateTimeToPlainDateTime(createSimpleTimeZoneOps, t4);
-    }
-    return ((e4, n4, t5) => {
-      const o3 = refineCalendarFields(e4, n4, K, [], L), r3 = refineOverflowOptions(t5);
-      return createPlainDateTimeSlots(checkIsoDateTimeInBounds({
-        ...e4.dateFromFields(o3, overrideOverflowOptions(t5, r3)),
-        ...refineTimeBag(o3, r3)
-      }));
-    })(fo(getCalendarSlotFromBag(e3)), e3, n3);
-  }
-  const t3 = ((e4) => {
-    const n4 = parseDateTimeLike(ne(e4));
-    if (!n4 || n4.I) {
-      throw new RangeError(failedParse(e4));
-    }
-    return createPlainDateTimeSlots(finalizeDateTime(n4));
-  })(e3);
-  return refineOverflowOptions(n3), t3;
-}
-function toPlainDateSlots(e3, n3) {
-  if (n3 = copyOptions(n3), isObjectLike(e3)) {
-    const t4 = Uo(e3) || {};
-    switch (t4.O) {
-      case Dt:
-        return refineOverflowOptions(n3), t4;
-      case gt:
-        return refineOverflowOptions(n3), createPlainDateSlots(t4);
-      case yt:
-        return refineOverflowOptions(n3), zonedDateTimeToPlainDate(createSimpleTimeZoneOps, t4);
-    }
-    return refinePlainDateBag(fo(getCalendarSlotFromBag(e3)), e3, n3);
-  }
-  const t3 = parsePlainDate(e3);
-  return refineOverflowOptions(n3), t3;
-}
-function toPlainTimeSlots(e3, n3) {
-  if (isObjectLike(e3)) {
-    const t3 = Uo(e3) || {};
-    switch (t3.O) {
-      case It:
-        return refineOverflowOptions(n3), t3;
-      case gt:
-        return refineOverflowOptions(n3), createPlainTimeSlots(t3);
-      case yt:
-        return refineOverflowOptions(n3), zonedDateTimeToPlainTime(createSimpleTimeZoneOps, t3);
-    }
-    return ((e4, n4) => {
-      const t4 = refineOverflowOptions(n4);
-      return createPlainTimeSlots(refineTimeBag(refineFields(e4, j, [], 1), t4));
-    })(e3, n3);
-  }
-  return refineOverflowOptions(n3), ((e4) => {
-    let n4, t3 = ((e5) => {
-      const n5 = dt.exec(e5);
-      return n5 ? (organizeAnnotationParts(n5[10]), organizeTimeParts(n5)) : void 0;
-    })(ne(e4));
-    if (!t3) {
-      if (t3 = parseDateTimeLike(e4), !t3) {
-        throw new RangeError(failedParse(e4));
-      }
-      if (!t3.N) {
-        throw new RangeError(failedParse(e4));
-      }
-      if (t3.I) {
-        throw new RangeError(invalidSubstring("Z"));
-      }
-      requireIsoCalendar(t3);
-    }
-    if ((n4 = parseYearMonthOnly(e4)) && isIsoDateFieldsValid(n4)) {
-      throw new RangeError(failedParse(e4));
-    }
-    if ((n4 = parseMonthDayOnly(e4)) && isIsoDateFieldsValid(n4)) {
-      throw new RangeError(failedParse(e4));
-    }
-    return createPlainTimeSlots(constrainIsoTimeFields(t3, 1));
-  })(e3);
-}
-function createProtocolChecker(e3) {
-  return e3 = e3.concat("id").sort(), (n3) => {
-    if (!((e4, n4) => {
-      for (const t3 of n4) {
-        if (!(t3 in e4)) {
-          return 0;
-        }
-      }
-      return 1;
-    })(n3, e3)) {
-      throw new TypeError("Invalid protocol");
-    }
+function createFormatPrepper(e3, n3 = createFormatForPrep) {
+  const [t3, , , o3] = e3;
+  return (r3, i3 = Rt, ...a3) => {
+    const s3 = n3(o3 ? o3(...a3) : void 0, r3, i3, t3), c3 = s3.resolvedOptions();
+    return [s3, ...toEpochMillis(e3, c3, ...a3)];
   };
 }
-function optionalToPlainTimeFields(e3) {
-  return void 0 === e3 ? void 0 : toPlainTimeSlots(e3);
-}
-function createSlotClass(e3, n3, t3, r3, i3) {
-  function Class(...e4) {
-    if (!(this instanceof Class)) {
-      throw new TypeError(o);
+function createFormatForPrep(e3, n3, t3, o3) {
+  if (t3 = o3(t3), e3) {
+    if (void 0 !== t3.timeZone) {
+      throw new TypeError(O);
     }
-    xo(this, n3(...e4));
+    t3.timeZone = e3;
   }
-  function curryMethod(n4, t4) {
-    return Object.defineProperties(function(...t5) {
-      const r4 = Uo(this);
-      if (!r4 || r4.O !== e3) {
-        throw new TypeError(o);
-      }
-      return n4.call(this, r4, ...t5);
-    }, createNameDescriptors(t4));
-  }
-  return Object.defineProperties(Class.prototype, {
-    ...createGetterDescriptors(mapProps(curryMethod, t3)),
-    ...createPropDescriptors(mapProps(curryMethod, r3)),
-    ...createStringTagDescriptors("Temporal." + e3)
-  }), Object.defineProperties(Class, {
-    ...createPropDescriptors(i3),
-    ...createNameDescriptors(e3)
-  }), [Class, (e4) => {
-    const n4 = Object.create(Class.prototype);
-    return xo(n4, e4), n4;
-  }, (n4) => {
-    const t4 = Uo(n4);
-    if (!t4 || t4.O !== e3) {
-      throw new TypeError(o);
+  return new Oe(n3, t3);
+}
+function toEpochMillis(e3, n3, ...t3) {
+  const [, o3, r3] = e3;
+  return t3.map((e4) => (e4.calendar && ((e5, n4, t4) => {
+    if ((t4 || e5 !== ce) && e5 !== n4) {
+      throw new RangeError(p);
     }
-    return t4;
-  }];
-}
-function rejectInvalidBag(e3) {
-  if (Uo(e3) || void 0 !== e3.calendar || void 0 !== e3.timeZone) {
-    throw new TypeError("Invalid bag");
-  }
-  return e3;
-}
-function refineCalendarSlot(e3) {
-  if (isObjectLike(e3)) {
-    const { calendar: n3 } = Uo(e3) || {};
-    return n3 || (Wo(e3), e3);
-  }
-  return ((e4) => realizeCalendarId(((e5) => {
-    const n3 = parseDateTimeLike(e5) || parseYearMonthOnly(e5) || parseMonthDayOnly(e5);
-    return n3 ? n3.calendar : e5;
-  })(ne(e4))))(e3);
-}
-function getCalendarSlotFromBag(e3) {
-  return extractCalendarSlotFromBag(e3) || we;
-}
-function extractCalendarSlotFromBag(e3) {
-  const { calendar: n3 } = e3;
-  if (void 0 !== n3) {
-    return refineCalendarSlot(n3);
-  }
-}
-function refineTimeZoneSlot(e3) {
-  if (isObjectLike(e3)) {
-    const { timeZone: n3 } = Uo(e3) || {};
-    return n3 || (zo(e3), e3);
-  }
-  return ((e4) => queryNativeTimeZone(((e5) => {
-    const n3 = parseDateTimeLike(e5);
-    return n3 && (n3.timeZone || n3.I && Yn || n3.offset) || e5;
-  })(ne(e4))).id)(e3);
+  })(getId(e4.calendar), n3.calendar, r3), epochNanoToMilli(o3(e4, n3))));
 }
 function getCurrentIsoDateTime(e3) {
-  const n3 = {
-    epochNanoseconds: getCurrentEpochNanoseconds()
-  };
-  return pluckProps(Le, zn(n3, e3));
+  const n3 = getCurrentEpochNano();
+  return epochNanoToIso(n3, e3.getOffsetNanosecondsFor(n3));
 }
-function getCurrentEpochNanoseconds() {
-  return numberToDayTimeNano(Date.now(), C);
+function getCurrentEpochNano() {
+  return numberToBigNano(Date.now(), q);
 }
 function getCurrentTimeZoneId() {
-  return Vo || (Vo = new He().resolvedOptions().timeZone);
+  return Zt || (Zt = new Oe().resolvedOptions().timeZone);
 }
 var expectedInteger = (e3, n3) => `Non-integer ${e3}: ${n3}`;
 var expectedPositive = (e3, n3) => `Non-positive ${e3}: ${n3}`;
@@ -83047,41 +83255,52 @@ var forbiddenBigIntToNumber = (e3) => `Cannot convert bigint to ${e3}`;
 var invalidBigInt = (e3) => `Invalid bigint: ${e3}`;
 var e = "Cannot convert Symbol to string";
 var n = "Invalid object";
-var numberOutOfRange = (e3, n3, t3, o3) => `${e3} ${n3} must be between ${t3}-${o3}`;
+var numberOutOfRange = (e3, n3, t3, o3, r3) => r3 ? numberOutOfRange(e3, r3[n3], r3[t3], r3[o3]) : invalidEntity(e3, n3) + `; must be between ${t3}-${o3}`;
 var invalidEntity = (e3, n3) => `Invalid ${e3}: ${n3}`;
 var missingField = (e3) => `Missing ${e3}`;
 var forbiddenField = (e3) => `Invalid field ${e3}`;
 var duplicateFields = (e3) => `Duplicate field ${e3}`;
-var t = "No valid fields";
-var o = "Invalid calling context";
-var r = "Forbidden era/eraYear";
-var i = "Mismatching era/eraYear";
-var a = "Mismatching year/eraYear";
+var noValidFields = (e3) => "No valid fields: " + e3.join();
+var t = "Invalid bag";
+var invalidChoice = (e3, n3, t3) => invalidEntity(e3, n3) + "; must be " + Object.keys(t3).join();
+var o = "Cannot use valueOf";
+var r = "Invalid calling context";
+var i = "Forbidden era/eraYear";
+var a = "Mismatching era/eraYear";
+var s = "Mismatching year/eraYear";
 var invalidEra = (e3) => `Invalid era: ${e3}`;
 var missingYear = (e3) => "Missing year" + (e3 ? "/era/eraYear" : "");
 var invalidMonthCode = (e3) => `Invalid monthCode: ${e3}`;
-var s = "Mismatching month/monthCode";
-var c = "Missing month/monthCode";
+var c = "Mismatching month/monthCode";
+var u = "Missing month/monthCode";
 var l = "Cannot guess year";
-var u = "Invalid leap month";
-var d = "Invalid protocol results";
-var f = "Mismatching Calendars";
-var m = "Mismatching TimeZones";
-var p = "Out-of-bounds offset";
-var h = "Invalid offset for TimeZone";
-var T = "Ambiguous offset";
-var D = "Out-of-bounds date";
-var g = "Cannot mix duration signs";
-var I = "Missing relativeTo";
-var y = "Cannot use large units";
-var S = "smallestUnit > largestUnit";
+var f = "Invalid leap month";
+var d = "Invalid protocol";
+var m = "Invalid protocol results";
+var p = "Mismatching Calendars";
+var invalidCalendar = (e3) => `Invalid Calendar: ${e3}`;
+var h = "Mismatching TimeZones";
+var T = "Forbidden ICU TimeZone";
+var g = "Out-of-bounds offset";
+var D = "Out-of-bounds TimeZone gap";
+var I = "Invalid TimeZone offset";
+var M = "Ambiguous offset";
+var N = "Out-of-bounds date";
+var y = "Out-of-bounds duration";
+var v = "Cannot mix duration signs";
+var P = "Missing relativeTo";
+var E = "Cannot use large units";
+var S = "Required smallestUnit or largestUnit";
+var F = "smallestUnit > largestUnit";
 var failedParse = (e3) => `Cannot parse: ${e3}`;
 var invalidSubstring = (e3) => `Invalid substring: ${e3}`;
-var N = /object|function/;
-var O = bindArgs(mapPropNames, (e3, n3) => n3);
-var P = bindArgs(mapPropNames, (e3, n3, t3) => t3);
-var v = bindArgs(padNumber, 2);
-var M = {
+var invalidFormatType = (e3) => `Cannot format ${e3}`;
+var b = "Mismatching types for formatting";
+var O = "Cannot specify TimeZone";
+var w = /* @__PURE__ */ bindArgs(mapPropNames, (e3, n3) => n3);
+var B = /* @__PURE__ */ bindArgs(mapPropNames, (e3, n3, t3) => t3);
+var k = /* @__PURE__ */ bindArgs(padNumber, 2);
+var Y = {
   nanosecond: 0,
   microsecond: 1,
   millisecond: 2,
@@ -83093,106 +83312,43 @@ var M = {
   month: 8,
   year: 9
 };
-var F = Object.keys(M);
-var b = 864e5;
-var w = 1e3;
-var E = 1e3;
-var C = 1e6;
-var Z = 1e9;
-var k = 6e10;
-var Y = 36e11;
-var B = 864e11;
-var R = [1, E, C, Z, k, Y, B];
-var L = F.slice(0, 6);
-var j = L.slice().sort();
-var q = ["offset"];
-var z = ["timeZone"];
-var A = [...L, ...q];
-var U = [...A, ...z];
-var x = ["era", "eraYear"];
-var $ = [...x, "year"];
-var G = ["year"];
-var W = ["monthCode"];
-var V = ["month", ...W];
-var H = ["day"];
-var J = [...V, ...G];
-var _ = [...W, ...G];
-var K = [...H, ...J];
-var Q = [...H, ...V];
-var X = [...H, ...W];
-var ee = P(L, 0);
-var ne = bindArgs(requireType, "string");
-var te = bindArgs(requireType, "boolean");
-var oe = bindArgs(requireType, "number");
-var re = bindArgs(requireType, "function");
-var ie = F.map((e3) => e3 + "s");
-var ae = ie.slice().sort();
-var se = ie.slice(0, 6);
-var ce = ie.slice(6);
-var le = O(ie);
-var ue = P(ie, 0);
-var de = P(se, 0);
-var fe = "smallestUnit";
-var me = "unit";
-var pe = "roundingIncrement";
-var he = "fractionalSecondDigits";
-var Te = "relativeTo";
-var De = {
-  constrain: 0,
-  reject: 1
-};
-var ge = Object.keys(De);
-var Ie = bindArgs(refineUnitOption, fe);
-var ye = bindArgs(refineUnitOption, "largestUnit");
-var Se = bindArgs(refineUnitOption, me);
-var Ne = bindArgs(refineChoiceOption, "overflow", De);
-var Oe = bindArgs(refineChoiceOption, "disambiguation", {
-  compatible: 0,
-  reject: 1,
-  earlier: 2,
-  later: 3
-});
-var Pe = bindArgs(refineChoiceOption, "offset", {
-  reject: 0,
-  use: 1,
-  prefer: 2,
-  ignore: 3
-});
-var ve = bindArgs(refineChoiceOption, "calendarName", {
-  auto: 0,
-  never: 1,
-  critical: 2,
-  always: 3
-});
-var Me = bindArgs(refineChoiceOption, "timeZoneName", {
-  auto: 0,
-  never: 1,
-  critical: 2
-});
-var Fe = bindArgs(refineChoiceOption, "offset", {
-  auto: 0,
-  never: 1
-});
-var be = bindArgs(refineChoiceOption, "roundingMode", {
-  floor: 0,
-  halfFloor: 1,
-  ceil: 2,
-  halfCeil: 3,
-  trunc: 4,
-  halfTrunc: 5,
-  expand: 6,
-  halfExpand: 7,
-  halfEven: 8
-});
-var we = "iso8601";
-var Ee = "gregory";
-var Ce = "japanese";
-var Ze = {
-  [Ee]: {
+var C = /* @__PURE__ */ Object.keys(Y);
+var R = 864e5;
+var Z = 1e3;
+var z = 1e3;
+var q = 1e6;
+var A = 1e9;
+var L = 6e10;
+var U = 36e11;
+var W = 864e11;
+var j = [1, z, q, A, L, U, W];
+var $ = /* @__PURE__ */ C.slice(0, 6);
+var x = /* @__PURE__ */ sortStrings($);
+var H = ["offset"];
+var G = ["timeZone"];
+var V = /* @__PURE__ */ $.concat(H);
+var _ = /* @__PURE__ */ V.concat(G);
+var J = ["era", "eraYear"];
+var K = /* @__PURE__ */ J.concat(["year"]);
+var Q = ["year"];
+var X = ["monthCode"];
+var ee = /* @__PURE__ */ ["month"].concat(X);
+var ne = ["day"];
+var te = /* @__PURE__ */ ee.concat(Q);
+var oe = /* @__PURE__ */ X.concat(Q);
+var re = /* @__PURE__ */ ne.concat(te);
+var ie = /* @__PURE__ */ ne.concat(ee);
+var ae = /* @__PURE__ */ ne.concat(X);
+var se = /* @__PURE__ */ B($, 0);
+var ce = "iso8601";
+var ue = "gregory";
+var le = "japanese";
+var fe = {
+  [ue]: {
     bce: -1,
     ce: 0
   },
-  [Ce]: {
+  [le]: {
     bce: -1,
     ce: 0,
     meiji: 1867,
@@ -83229,169 +83385,303 @@ var Ze = {
     ap: 0
   }
 };
-var ke = {
+var de = {
   bc: "bce",
   ad: "ce"
 };
-var Ye = {
+var me = {
   chinese: 13,
   dangi: 13,
   hebrew: -6
 };
-var Be = ["isoNanosecond", "isoMicrosecond", "isoMillisecond", "isoSecond", "isoMinute", "isoHour"];
-var Re = ["isoDay", "isoMonth", "isoYear"];
-var Le = [...Be, ...Re];
-var je = Re.slice().sort();
-var qe = Be.slice().sort();
-var ze = Le.slice().sort();
-var Ae = P(qe, 0);
-var Ue = 1e8;
-var xe = [Ue, 0];
-var $e = [-Ue, 0];
-var Ge = 275760;
-var We = -271821;
-var Ve = [Math.floor, (e3) => hasHalf(e3) ? Math.floor(e3) : Math.round(e3), Math.ceil, (e3) => hasHalf(e3) ? Math.ceil(e3) : Math.round(e3), Math.trunc, (e3) => hasHalf(e3) ? Math.trunc(e3) || 0 : Math.round(e3), (e3) => e3 < 0 ? Math.floor(e3) : Math.ceil(e3), (e3) => Math.sign(e3) * Math.round(Math.abs(e3)) || 0, (e3) => hasHalf(e3) ? (e3 = Math.trunc(e3) || 0) + e3 % 2 : Math.round(e3)];
-var He = Intl.DateTimeFormat;
-var Je = "numeric";
-var _e = ["timeZoneName"];
+var pe = /* @__PURE__ */ C.map((e3) => e3 + "s");
+var he = /* @__PURE__ */ sortStrings(pe);
+var Te = /* @__PURE__ */ pe.slice(0, 6);
+var ge = /* @__PURE__ */ pe.slice(6);
+var De = /* @__PURE__ */ ge.slice(1);
+var Ie = /* @__PURE__ */ w(pe);
+var Me = /* @__PURE__ */ B(pe, 0);
+var Ne = /* @__PURE__ */ B(Te, 0);
+var ye = ["isoNanosecond", "isoMicrosecond", "isoMillisecond", "isoSecond", "isoMinute", "isoHour"];
+var ve = ["isoDay", "isoMonth", "isoYear"];
+var Pe = /* @__PURE__ */ ye.concat(ve);
+var Ee = /* @__PURE__ */ sortStrings(ve);
+var Se = /* @__PURE__ */ sortStrings(ye);
+var Fe = /* @__PURE__ */ sortStrings(Pe);
+var be = /* @__PURE__ */ B(Se, 0);
+var Oe = Intl.DateTimeFormat;
+var we = "en-GB";
+var Be = 1e8;
+var ke = Be * R;
+var Ye = [Be, 0];
+var Ce = [-Be, 0];
+var Re = 275760;
+var Ze = -271821;
+var ze = 1970;
+var qe = 1972;
+var Ae = 12;
+var Le = /* @__PURE__ */ isoArgsToEpochMilli(1868, 9, 8);
+var Ue = /* @__PURE__ */ memoize(computeJapaneseEraParts, WeakMap);
+var We = /* @__PURE__ */ bindArgs(requireType, "string");
+var je = /* @__PURE__ */ bindArgs(requireType, "boolean");
+var $e = /* @__PURE__ */ bindArgs(requireType, "number");
+var xe = /* @__PURE__ */ bindArgs(requireType, "function");
+var He = "smallestUnit";
+var Ge = "unit";
+var Ve = "roundingIncrement";
+var _e = "fractionalSecondDigits";
+var Je = "relativeTo";
 var Ke = {
-  month: Je,
-  day: Je
+  constrain: 0,
+  reject: 1
 };
-var Qe = {
-  year: Je,
-  month: Je
-};
+var Qe = /* @__PURE__ */ Object.keys(Ke);
 var Xe = {
-  ...Qe,
-  day: Je
+  compatible: 0,
+  reject: 1,
+  earlier: 2,
+  later: 3
 };
 var en = {
-  hour: Je,
-  minute: Je,
-  second: Je
+  reject: 0,
+  use: 1,
+  prefer: 2,
+  ignore: 3
 };
 var nn = {
-  ...Xe,
-  ...en
+  auto: 0,
+  never: 1,
+  critical: 2,
+  always: 3
 };
 var tn = {
-  ...nn,
-  timeZoneName: "short"
+  auto: 0,
+  never: 1,
+  critical: 2
 };
-var on = Object.keys(Ke);
-var rn = Object.keys(Qe);
-var an = [...Object.keys(Xe), "weekday", "dateStyle"];
-var sn = [...Object.keys(en), "dayPeriod", "timeStyle"];
-var cn = [...an, ...sn];
-var ln = [...cn, ..._e];
-var un = [..._e, ...sn];
-var dn = [..._e, ...an];
-var fn = [..._e, "day", "weekday", "dateStyle", ...sn];
-var mn = createOptionsTransformer(on, Ke, [..._e, "year", "weekday", "dateStyle", ...sn]);
-var pn = createOptionsTransformer(rn, Qe, fn);
-var hn = createOptionsTransformer(an, Xe, un);
-var Tn = createOptionsTransformer(cn, nn, _e);
-var Dn = createOptionsTransformer(sn, en, dn);
-var gn = createOptionsTransformer(cn, nn);
-var In = createOptionsTransformer(ln, tn);
-var yn = [pn, isoDateFieldsToEpochNano, 1];
-var Sn = [mn, isoDateFieldsToEpochNano, 1];
-var Nn = [hn, isoDateFieldsToEpochNano];
-var On = [Tn, isoDateFieldsToEpochNano];
-var Pn = [Dn, (e3, n3) => getSingleInstantFor(queryNativeTimeZone(n3.timeZone), {
-  isoYear: An,
-  isoMonth: 1,
-  isoDay: 1,
-  ...e3
-})];
-var vn = [gn, extractEpochNano];
-var Mn = [(e3, n3, t3) => {
-  if (void 0 !== (e3 = In(e3)).timeZone) {
-    throw new TypeError("Forbidden timeZone");
+var on = {
+  auto: 0,
+  never: 1
+};
+var rn = {
+  floor: 0,
+  halfFloor: 1,
+  ceil: 2,
+  halfCeil: 3,
+  trunc: 4,
+  halfTrunc: 5,
+  expand: 6,
+  halfExpand: 7,
+  halfEven: 8
+};
+var an = /* @__PURE__ */ bindArgs(refineUnitOption, He);
+var sn = /* @__PURE__ */ bindArgs(refineUnitOption, "largestUnit");
+var cn = /* @__PURE__ */ bindArgs(refineUnitOption, Ge);
+var un = /* @__PURE__ */ bindArgs(refineChoiceOption, "overflow", Ke);
+var ln = /* @__PURE__ */ bindArgs(refineChoiceOption, "disambiguation", Xe);
+var fn = /* @__PURE__ */ bindArgs(refineChoiceOption, "offset", en);
+var dn = /* @__PURE__ */ bindArgs(refineChoiceOption, "calendarName", nn);
+var mn = /* @__PURE__ */ bindArgs(refineChoiceOption, "timeZoneName", tn);
+var pn = /* @__PURE__ */ bindArgs(refineChoiceOption, "offset", on);
+var hn = /* @__PURE__ */ bindArgs(refineChoiceOption, "roundingMode", rn);
+var Tn = "PlainYearMonth";
+var gn = "PlainMonthDay";
+var Dn = "PlainDate";
+var In = "PlainDateTime";
+var Mn = "PlainTime";
+var Nn = "ZonedDateTime";
+var yn = "Instant";
+var vn = "Duration";
+var Pn = [Math.floor, (e3) => hasHalf(e3) ? Math.floor(e3) : Math.round(e3), Math.ceil, (e3) => hasHalf(e3) ? Math.ceil(e3) : Math.round(e3), Math.trunc, (e3) => hasHalf(e3) ? Math.trunc(e3) || 0 : Math.round(e3), (e3) => e3 < 0 ? Math.floor(e3) : Math.ceil(e3), (e3) => Math.sign(e3) * Math.round(Math.abs(e3)) || 0, (e3) => hasHalf(e3) ? (e3 = Math.trunc(e3) || 0) + e3 % 2 : Math.round(e3)];
+var En = "UTC";
+var Sn = 5184e3;
+var Fn = /* @__PURE__ */ isoArgsToEpochSec(1847);
+var bn = /* @__PURE__ */ isoArgsToEpochSec(/* @__PURE__ */ (/* @__PURE__ */ new Date()).getUTCFullYear() + 10);
+var On = /0+$/;
+var wn = /* @__PURE__ */ memoize(_zonedEpochSlotsToIso, WeakMap);
+var Bn = 2 ** 32 - 1;
+var kn = /* @__PURE__ */ memoize((e3) => {
+  const n3 = getTimeZoneEssence(e3);
+  return "object" == typeof n3 ? new IntlTimeZone(n3) : new FixedTimeZone(n3 || 0);
+});
+var FixedTimeZone = class {
+  constructor(e3) {
+    this.h = e3;
   }
-  return e3.timeZone = ((e4, n4) => {
-    const t4 = getId(e4.timeZone);
-    if (n4 && getId(n4.timeZone) !== t4) {
-      throw new RangeError(m);
+  getOffsetNanosecondsFor() {
+    return this.h;
+  }
+  getPossibleInstantsFor(e3) {
+    return [isoToEpochNanoWithOffset(e3, this.h)];
+  }
+  C() {
+  }
+};
+var IntlTimeZone = class {
+  constructor(e3) {
+    this.R = ((e4) => {
+      function getOffsetSec(e5) {
+        const i3 = clampNumber(e5, o3, r3), [a3, s3] = computePeriod(i3), c3 = n3(a3), u3 = n3(s3);
+        return c3 === u3 ? c3 : pinch(t3(a3, s3), c3, u3, e5);
+      }
+      function pinch(n4, t4, o4, r4) {
+        let i3, a3;
+        for (; (void 0 === r4 || void 0 === (i3 = r4 < n4[0] ? t4 : r4 >= n4[1] ? o4 : void 0)) && (a3 = n4[1] - n4[0]); ) {
+          const t5 = n4[0] + Math.floor(a3 / 2);
+          e4(t5) === o4 ? n4[1] = t5 : n4[0] = t5 + 1;
+        }
+        return i3;
+      }
+      const n3 = memoize(e4), t3 = memoize(createSplitTuple);
+      let o3 = Fn, r3 = bn;
+      return {
+        q(e5) {
+          const n4 = getOffsetSec(e5 - 86400), t4 = getOffsetSec(e5 + 86400), o4 = e5 - n4, r4 = e5 - t4;
+          if (n4 === t4) {
+            return [o4];
+          }
+          const i3 = getOffsetSec(o4);
+          return i3 === getOffsetSec(r4) ? [e5 - i3] : n4 > t4 ? [o4, r4] : [];
+        },
+        L: getOffsetSec,
+        C(e5, i3) {
+          const a3 = clampNumber(e5, o3, r3);
+          let [s3, c3] = computePeriod(a3);
+          const u3 = Sn * i3, l3 = i3 < 0 ? () => c3 > o3 || (o3 = a3, 0) : () => s3 < r3 || (r3 = a3, 0);
+          for (; l3(); ) {
+            const o4 = n3(s3), r4 = n3(c3);
+            if (o4 !== r4) {
+              const n4 = t3(s3, c3);
+              pinch(n4, o4, r4);
+              const a4 = n4[0];
+              if ((compareNumbers(a4, e5) || 1) === i3) {
+                return a4;
+              }
+            }
+            s3 += u3, c3 += u3;
+          }
+        }
+      };
+    })(/* @__PURE__ */ ((e4) => (n3) => {
+      const t3 = hashIntlFormatParts(e4, n3 * Z);
+      return isoArgsToEpochSec(parseIntlPartsYear(t3), parseInt(t3.month), parseInt(t3.day), parseInt(t3.hour), parseInt(t3.minute), parseInt(t3.second)) - n3;
+    })(e3));
+  }
+  getOffsetNanosecondsFor(e3) {
+    return this.R.L(epochNanoToSec(e3)) * A;
+  }
+  getPossibleInstantsFor(e3) {
+    const [n3, t3] = [isoArgsToEpochSec((o3 = e3).isoYear, o3.isoMonth, o3.isoDay, o3.isoHour, o3.isoMinute, o3.isoSecond), o3.isoMillisecond * q + o3.isoMicrosecond * z + o3.isoNanosecond];
+    var o3;
+    return this.R.q(n3).map((e4) => checkEpochNanoInBounds(addBigNanoAndNumber(numberToBigNano(e4, A), t3)));
+  }
+  C(e3, n3) {
+    const [t3, o3] = epochNanoToSecMod(e3), r3 = this.R.C(t3 + (n3 > 0 || o3 ? 1 : 0), n3);
+    if (void 0 !== r3) {
+      return numberToBigNano(r3, A);
     }
-    return t4;
-  })(n3, t3), e3;
-}, extractEpochNano];
-var Fn = {};
-var bn = "en-GB";
-var wn = {
+  }
+};
+var Yn = "([+\u2212-])";
+var Cn = "(?:[.,](\\d{1,9}))?";
+var Rn = `(?:(?:${Yn}(\\d{6}))|(\\d{4}))-?(\\d{2})`;
+var Zn = "(\\d{2})(?::?(\\d{2})(?::?(\\d{2})" + Cn + ")?)?";
+var zn = Yn + Zn;
+var qn = Rn + "-?(\\d{2})(?:[T ]" + Zn + "(Z|" + zn + ")?)?";
+var An = "\\[(!?)([^\\]]*)\\]";
+var Ln = `((?:${An}){0,9})`;
+var Un = /* @__PURE__ */ createRegExp(Rn + Ln);
+var Wn = /* @__PURE__ */ createRegExp("(?:--)?(\\d{2})-?(\\d{2})" + Ln);
+var jn = /* @__PURE__ */ createRegExp(qn + Ln);
+var $n = /* @__PURE__ */ createRegExp("T?" + Zn + "(?:" + zn + ")?" + Ln);
+var xn = /* @__PURE__ */ createRegExp(zn);
+var Hn = /* @__PURE__ */ new RegExp(An, "g");
+var Gn = /* @__PURE__ */ createRegExp(`${Yn}?P(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(?:T(?:(\\d+)${Cn}H)?(?:(\\d+)${Cn}M)?(?:(\\d+)${Cn}S)?)?`);
+var Vn = /* @__PURE__ */ memoize((e3) => new Oe(we, {
+  timeZone: e3,
+  era: "short",
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+  second: "numeric"
+}));
+var _n = /^(AC|AE|AG|AR|AS|BE|BS|CA|CN|CS|CT|EA|EC|IE|IS|JS|MI|NE|NS|PL|PN|PR|PS|SS|VS)T$/;
+var Jn = /* @__PURE__ */ memoize(createIntlCalendar);
+var Kn = /* @__PURE__ */ memoize((e3) => new Oe(we, {
+  calendar: e3,
+  timeZone: En,
+  era: "short",
+  year: "numeric",
+  month: "short",
+  day: "numeric"
+}));
+var Qn = /^M(\d{2})(L?)$/;
+var Xn = {
   era: toStringViaPrimitive,
   eraYear: toInteger,
   year: toInteger,
   month: toPositiveInteger,
   monthCode: toStringViaPrimitive,
-  day: toPositiveInteger,
-  ...P(L, toInteger),
-  ...P(ie, toStrictInteger),
-  offset: toStringViaPrimitive
+  day: toPositiveInteger
 };
-var En = bindArgs((e3, n3, t3) => {
-  const o3 = {};
-  for (let r3 = 0; r3 < e3.length; r3++) {
-    o3[n3[r3]] = t3[e3[r3]];
-  }
-  return o3;
-}, L, Be);
-var Cn = {
+var et = /* @__PURE__ */ B($, toInteger);
+var nt = /* @__PURE__ */ B(pe, toStrictInteger);
+var tt = /* @__PURE__ */ Object.assign({}, Xn, et, nt, {
+  offset: toStringViaPrimitive
+});
+var ot = /* @__PURE__ */ bindArgs(remapProps, $, ye);
+var rt = {
   dateAdd(e3, n3, t3) {
     const o3 = refineOverflowOptions(t3);
     let r3, { years: i3, months: a3, weeks: s3, days: c3 } = n3;
-    if (c3 += givenFieldsToDayTimeNano(n3, 5, ie)[0], i3 || a3) {
-      let [n4, t4, s4] = this.F(e3);
+    if (c3 += givenFieldsToBigNano(n3, 5, pe)[0], i3 || a3) {
+      let [n4, t4, s4] = this.u(e3);
       if (i3) {
-        const [e4, r4] = this.C(n4, t4);
-        n4 += i3, t4 = monthCodeNumberToMonth(e4, r4, this.o(n4)), t4 = clampEntity("month", t4, 1, this.i(n4), o3);
+        const [e4, r4] = this.l(n4, t4);
+        n4 += i3, t4 = monthCodeNumberToMonth(e4, r4, this.O(n4)), t4 = clampEntity("month", t4, 1, this.B(n4), o3);
       }
-      a3 && ([n4, t4] = this.L(n4, t4, a3)), s4 = clampEntity("day", s4, 1, this.l(n4, t4), o3), r3 = this.j(n4, t4, s4);
+      a3 && ([n4, t4] = this.U(n4, t4, a3)), s4 = clampEntity("day", s4, 1, this.k(n4, t4), o3), r3 = this.j(n4, t4, s4);
     } else {
       if (!s3 && !c3) {
         return e3;
       }
       r3 = isoToEpochMilli(e3);
     }
-    return r3 += (s3 * $n + c3) * b, checkIsoDateInBounds(epochMilliToIso(r3));
+    return r3 += (7 * s3 + c3) * R, checkIsoDateInBounds(epochMilliToIso(r3));
   },
   dateUntil(e3, n3, t3) {
     if (t3 <= 7) {
       let o4 = 0, r4 = diffDays(e3, n3);
-      return 7 === t3 && ([o4, r4] = divModTrunc(r4, $n)), {
-        ...ue,
+      return 7 === t3 && ([o4, r4] = divModTrunc(r4, 7)), {
+        ...Me,
         weeks: o4,
         days: r4
       };
     }
-    const o3 = this.F(e3), r3 = this.F(n3);
+    const o3 = this.u(e3), r3 = this.u(n3);
     let [i3, a3, s3] = ((e4, n4, t4, o4, r4, i4, a4) => {
-      function updateYearMonth() {
-        let [o5, a5] = e4.C(n4, t4), [u4, d4] = e4.C(r4, i4);
-        s4 = r4 - n4, c3 = e4.i(r4), l3 = s4 ? u4 - o5 || Number(d4) - Number(a5) : i4 - Math.min(t4, c3);
-      }
-      function updateYearMonthDay() {
-        updateYearMonth(), u3 = e4.l(r4, i4), d3 = a4 - Math.min(o4, u3);
-      }
-      let s4, c3, l3, u3, d3;
-      updateYearMonthDay();
-      const f3 = Math.sign(d3), m3 = Math.sign(s4) || Math.sign(l3) || f3;
-      if (m3) {
-        if (f3 === -m3) {
-          const n5 = u3;
-          [r4, i4] = e4.L(r4, i4, -m3), updateYearMonthDay(), d3 += m3 < 0 ? -n5 : u3;
+      let s4 = r4 - n4, c3 = i4 - t4, u3 = a4 - o4;
+      if (s4 || c3) {
+        const l3 = Math.sign(s4 || c3);
+        let f3 = e4.k(r4, i4), d3 = 0;
+        if (Math.sign(u3) === -l3) {
+          const o5 = f3;
+          [r4, i4] = e4.U(r4, i4, -l3), s4 = r4 - n4, c3 = i4 - t4, f3 = e4.k(r4, i4), d3 = l3 < 0 ? -o5 : f3;
         }
-        if (Math.sign(l3) === -m3) {
-          const e5 = c3;
-          r4 -= m3, updateYearMonth(), l3 += m3 < 0 ? -e5 : c3;
+        if (u3 = a4 - Math.min(o4, f3) + d3, s4) {
+          const [o5, a5] = e4.l(n4, t4), [u4, f4] = e4.l(r4, i4);
+          if (c3 = u4 - o5 || Number(f4) - Number(a5), Math.sign(c3) === -l3) {
+            const t5 = l3 < 0 && -e4.B(r4);
+            s4 = (r4 -= l3) - n4, c3 = i4 - monthCodeNumberToMonth(o5, a5, e4.O(r4)) + (t5 || e4.B(r4));
+          }
         }
       }
-      return [s4, l3, d3];
+      return [s4, c3, u3];
     })(this, ...o3, ...r3);
-    return 8 === t3 && (a3 += this.q(i3, o3[0]), i3 = 0), {
-      ...ue,
+    return 8 === t3 && (a3 += this.$(i3, o3[0]), i3 = 0), {
+      ...Me,
       years: i3,
       months: a3,
       days: s3
@@ -83399,252 +83689,124 @@ var Cn = {
   },
   dateFromFields(e3, n3) {
     const t3 = refineOverflowOptions(n3), o3 = refineYear(this, e3), r3 = refineMonth(this, e3, o3, t3), i3 = refineDay(this, e3, r3, o3, t3);
-    return createPlainDateSlots(checkIsoDateInBounds(this.B(o3, r3, i3)), this.id || we);
+    return createPlainDateSlots(checkIsoDateInBounds(this.p(o3, r3, i3)), this.id || ce);
   },
   yearMonthFromFields(e3, n3) {
     const t3 = refineOverflowOptions(n3), o3 = refineYear(this, e3), r3 = refineMonth(this, e3, o3, t3);
-    return createPlainYearMonthSlots(checkIsoYearMonthInBounds(this.B(o3, r3, 1)), this.id || we);
+    return createPlainYearMonthSlots(checkIsoYearMonthInBounds(this.p(o3, r3, 1)), this.id || ce);
   },
   monthDayFromFields(e3, n3) {
-    const t3 = refineOverflowOptions(n3);
-    let o3, r3, i3, a3, c3, u3 = !this.id, { monthCode: d3, year: f3, month: m3 } = e3;
-    if (void 0 !== d3) {
-      [o3, r3] = parseMonthCode(d3), c3 = getDefinedProp(e3, "day");
-      const n4 = this.k(o3, r3, c3);
+    const t3 = refineOverflowOptions(n3), o3 = !this.id, { monthCode: r3, year: i3, month: a3 } = e3;
+    let s3, u3, f3, d3, m3;
+    if (void 0 !== r3) {
+      [s3, u3] = parseMonthCode(r3), m3 = getDefinedProp(e3, "day");
+      const n4 = this.m(s3, u3, m3);
       if (!n4) {
         throw new RangeError(l);
       }
-      if ([i3, a3] = n4, void 0 !== m3 && m3 !== a3) {
-        throw new RangeError(s);
+      if ([f3, d3] = n4, void 0 !== a3 && a3 !== d3) {
+        throw new RangeError(c);
       }
-      u3 && (a3 = clampEntity("month", a3, 1, xn, 1), c3 = clampEntity("day", c3, 1, computeIsoDaysInMonth(void 0 !== f3 ? f3 : i3, a3), t3));
+      o3 && (d3 = clampEntity("month", d3, 1, Ae, 1), m3 = clampEntity("day", m3, 1, computeIsoDaysInMonth(void 0 !== i3 ? i3 : f3, d3), t3));
     } else {
-      i3 = void 0 === f3 && u3 ? Un : refineYear(this, e3), a3 = refineMonth(this, e3, i3, t3), c3 = refineDay(this, e3, a3, i3, t3);
-      const n4 = this.o(i3);
-      r3 = a3 === n4, o3 = monthToMonthCodeNumber(a3, n4);
-      const s3 = this.k(o3, r3, c3);
-      if (!s3) {
+      f3 = void 0 === i3 && o3 ? qe : refineYear(this, e3), d3 = refineMonth(this, e3, f3, t3), m3 = refineDay(this, e3, d3, f3, t3);
+      const n4 = this.O(f3);
+      u3 = d3 === n4, s3 = monthToMonthCodeNumber(d3, n4);
+      const r4 = this.m(s3, u3, m3);
+      if (!r4) {
         throw new RangeError(l);
       }
-      [i3, a3] = s3;
+      [f3, d3] = r4;
     }
-    return createPlainMonthDaySlots(this.B(i3, a3, c3), this.id || we);
+    return createPlainMonthDaySlots(this.p(f3, d3, m3), this.id || ce);
   },
   fields(e3) {
-    return getCalendarEraOrigins(this) && e3.includes("year") ? [...e3, ...x] : e3;
+    return getCalendarEraOrigins(this) && e3.includes("year") ? [...e3, ...J] : e3;
   },
   mergeFields(e3, n3) {
     const t3 = Object.assign(/* @__PURE__ */ Object.create(null), e3);
-    return spliceFields(t3, n3, V), getCalendarEraOrigins(this) && (spliceFields(t3, n3, $), this.id === Ce && spliceFields(t3, n3, Q, x)), t3;
+    return spliceFields(t3, n3, ee), getCalendarEraOrigins(this) && (spliceFields(t3, n3, K), this.id === le && spliceFields(t3, n3, ie, J)), t3;
   },
   inLeapYear(e3) {
-    const [n3] = this.F(e3);
-    return this.U(n3);
+    const [n3] = this.u(e3);
+    return this.G(n3);
   },
   monthsInYear(e3) {
-    const [n3] = this.F(e3);
-    return this.i(n3);
+    const [n3] = this.u(e3);
+    return this.B(n3);
   },
   daysInMonth(e3) {
-    const [n3, t3] = this.F(e3);
-    return this.l(n3, t3);
+    const [n3, t3] = this.u(e3);
+    return this.k(n3, t3);
   },
   daysInYear(e3) {
-    const [n3] = this.F(e3);
-    return this.$(n3);
+    const [n3] = this.u(e3);
+    return this.V(n3);
   },
   era(e3) {
-    return this.G(e3)[0];
+    return this._(e3)[0];
   },
   eraYear(e3) {
-    return this.G(e3)[1];
+    return this._(e3)[1];
   },
   monthCode(e3) {
-    const [n3, t3] = this.F(e3), [o3, r3] = this.C(n3, t3);
-    return ((e4, n4) => "M" + v(e4) + (n4 ? "L" : ""))(o3, r3);
+    const [n3, t3] = this.u(e3), [o3, r3] = this.l(n3, t3);
+    return ((e4, n4) => "M" + k(e4) + (n4 ? "L" : ""))(o3, r3);
   },
   dayOfWeek: computeIsoDayOfWeek,
-  weekOfYear(e3) {
-    return computeIsoWeekParts(e3)[1];
-  },
-  yearOfWeek(e3) {
-    return computeIsoWeekParts(e3)[0];
-  },
   daysInWeek() {
-    return $n;
+    return 7;
   }
 };
-var Zn = /^M(\d{2})(L?)$/;
-var kn = createLazyGenerator((e3) => {
-  function epochMilliToIntlFields(e4) {
-    return ((e5, n4) => ({
-      ...parseIntlYear(e5, n4),
-      month: e5.month,
-      day: parseInt(e5.day)
-    }))(hashIntlFormatParts(n3, e4), t3);
-  }
-  const n3 = buildIntlFormat$1(e3), t3 = computeCalendarIdBase(e3);
-  if (t3 !== computeCalendarIdBase(n3.resolvedOptions().calendar)) {
-    throw new RangeError(((e4) => `Invalid Calendar: ${e4}`)(e3));
-  }
-  return {
-    id: e3,
-    p: createIntlFieldCache(epochMilliToIntlFields),
-    h: createIntlYearMonthCache(epochMilliToIntlFields)
-  };
-});
-var Yn = "UTC";
-var Bn = 5184e3;
-var Rn = isoArgsToEpochSec(1847);
-var Ln = isoArgsToEpochSec((/* @__PURE__ */ new Date()).getUTCFullYear() + 10);
-var jn = createLazyGenerator((e3) => e3 === Yn ? new FixedTimeZone(0, e3) : new IntlTimeZone(e3));
-var FixedTimeZone = class {
-  constructor(e3, n3 = formatOffsetNano(e3)) {
-    this.V = e3, this.id = n3;
-  }
-  getOffsetNanosecondsFor(e3) {
-    return this.V;
-  }
-  getPossibleInstantsFor(e3) {
-    return [isoToEpochNanoWithOffset(e3, this.V)];
-  }
-  R(e3, n3) {
-  }
-};
-var IntlTimeZone = class {
-  constructor(e3) {
-    const n3 = new He(bn, {
-      timeZone: e3,
-      era: "short",
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric"
-    });
-    this.id = n3.resolvedOptions().timeZone, this.store = ((e4) => {
-      function getOffsetSec(e5) {
-        const i3 = clampNumber(e5, o3, r3), [a3, s3] = computePeriod(i3), c3 = n4(a3), l3 = n4(s3);
-        return c3 === l3 ? c3 : pinch(t3(a3, s3), c3, l3, e5);
-      }
-      function pinch(n5, t4, o4, r4) {
-        let i3, a3;
-        for (; (void 0 === r4 || void 0 === (i3 = r4 < n5[0] ? t4 : r4 >= n5[1] ? o4 : void 0)) && (a3 = n5[1] - n5[0]); ) {
-          const t5 = n5[0] + Math.floor(a3 / 2);
-          e4(t5) === o4 ? n5[1] = t5 : n5[0] = t5 + 1;
-        }
-        return i3;
-      }
-      const n4 = createLazyGenerator(e4), t3 = createLazyGenerator(createSplitTuple);
-      let o3 = Rn, r3 = Ln;
-      return {
-        J(e5) {
-          const n5 = getOffsetSec(e5 - 86400), t4 = getOffsetSec(e5 + 86400), o4 = e5 - n5, r4 = e5 - t4;
-          if (n5 === t4) {
-            return [o4];
-          }
-          const i3 = getOffsetSec(o4);
-          return i3 === getOffsetSec(r4) ? [e5 - i3] : n5 > t4 ? [o4, r4] : [];
-        },
-        _: getOffsetSec,
-        R(e5, i3) {
-          const a3 = clampNumber(e5, o3, r3);
-          let [s3, c3] = computePeriod(a3);
-          const l3 = Bn * i3, u3 = i3 < 0 ? () => c3 > o3 || (o3 = a3, 0) : () => s3 < r3 || (r3 = a3, 0);
-          for (; u3(); ) {
-            const o4 = n4(s3), r4 = n4(c3);
-            if (o4 !== r4) {
-              const n5 = t3(s3, c3);
-              pinch(n5, o4, r4);
-              const a4 = n5[0];
-              if ((compareNumbers(a4, e5) || 1) === i3) {
-                return a4;
-              }
-            }
-            s3 += l3, c3 += l3;
-          }
-        }
-      };
-    })(/* @__PURE__ */ ((e4) => (n4) => {
-      const t3 = hashIntlFormatParts(e4, n4 * w);
-      return isoArgsToEpochSec(parseIntlYear(t3, we).year, parseInt(t3.month), parseInt(t3.day), parseInt(t3.hour), parseInt(t3.minute), parseInt(t3.second)) - n4;
-    })(n3));
-  }
-  getOffsetNanosecondsFor(e3) {
-    return this.store._(epochNanoToSec(e3)) * Z;
-  }
-  getPossibleInstantsFor(e3) {
-    const [n3, t3] = [isoArgsToEpochSec((o3 = e3).isoYear, o3.isoMonth, o3.isoDay, o3.isoHour, o3.isoMinute, o3.isoSecond), o3.isoMillisecond * C + o3.isoMicrosecond * E + o3.isoNanosecond];
-    var o3;
-    return this.store.J(n3).map((e4) => checkEpochNanoInBounds(addDayTimeNanoAndNumber(numberToDayTimeNano(e4, Z), t3)));
-  }
-  R(e3, n3) {
-    const [t3, o3] = ((e4) => dayTimeNanoToNumberRemainder(e4, Z))(e3), r3 = this.store.R(t3 + (n3 > 0 || o3 ? 1 : 0), n3);
-    if (void 0 !== r3) {
-      return numberToDayTimeNano(r3, Z);
-    }
-  }
-};
-var qn = /0+$/;
-var zn = createLazyGenerator((e3, n3) => {
-  const { epochNanoseconds: t3 } = e3, o3 = n3.getOffsetNanosecondsFor(t3);
-  return {
-    ...epochNanoToIso(t3, o3),
-    offsetNanoseconds: o3
-  };
-}, WeakMap);
-var An = 1970;
-var Un = 1972;
-var xn = 12;
-var $n = 7;
-var Gn = createLazyGenerator((e3) => {
-  const n3 = isoToEpochMilli(e3);
-  if (n3 < Wn) {
-    return computeGregoryEraParts(e3);
-  }
-  Vn || (Vn = buildIntlFormat$1(Ce));
-  const t3 = hashIntlFormatParts(Vn, n3), { era: o3, eraYear: r3 } = parseIntlYear(t3, Ce);
-  return [o3, r3];
-}, WeakMap);
-var Wn = isoArgsToEpochMilli(1868, 9, 8);
-var Vn;
-var Hn = createLazyGenerator(computeDurationSign, WeakMap);
-var Jn = {
-  ...Cn,
+var it = {
+  weekOfYear: computeNativeWeekOfYear,
+  yearOfWeek: computeNativeYearOfWeek,
   F(e3) {
-    return [e3.isoYear, e3.isoMonth, e3.isoDay];
+    function computeWeekShift(e4) {
+      return (7 - e4 < n3 ? 7 : 0) - e4;
+    }
+    function computeWeeksInYear(e4) {
+      const n4 = computeIsoDaysInYear(u3 + e4), t4 = e4 || 1;
+      return (n4 + (computeWeekShift(modFloor(a3 + n4 * t4, 7)) - s3) * t4) / 7;
+    }
+    const n3 = this.id ? 1 : 4, t3 = computeIsoDayOfWeek(e3), o3 = computeIsoDayOfYear(e3), r3 = modFloor(t3 - 1, 7), i3 = o3 - 1, a3 = modFloor(r3 - i3, 7), s3 = computeWeekShift(a3);
+    let c3 = Math.floor((i3 - s3) / 7) + 1, u3 = e3.isoYear;
+    return c3 ? c3 > computeWeeksInYear(0) && (c3 = 1, u3++) : (c3 = computeWeeksInYear(-1), u3--), [c3, u3];
+  }
+};
+var at = {
+  weekOfYear: computeNativeWeekOfYear,
+  yearOfWeek: computeNativeYearOfWeek,
+  F() {
+    return [];
+  }
+};
+var st = /* @__PURE__ */ createNativeOpsCreator(/* @__PURE__ */ Object.assign({}, rt, it, {
+  u: (e3) => [e3.isoYear, e3.isoMonth, e3.isoDay],
+  _(e3) {
+    return this.id === ue ? computeGregoryEraParts(e3) : this.id === le ? Ue(e3) : [];
   },
-  G(e3) {
-    return this.id === Ee ? computeGregoryEraParts(e3) : this.id === Ce ? Gn(e3) : [void 0, void 0];
-  },
-  C(e3, n3) {
-    return [n3, 0];
-  },
-  k(e3, n3) {
+  l: (e3, n3) => [n3, 0],
+  m(e3, n3) {
     if (!n3) {
-      return [Un, e3];
+      return [qe, e3];
     }
   },
-  U: computeIsoInLeapYear,
-  o() {
+  G: computeIsoInLeapYear,
+  O() {
   },
-  i: computeIsoMonthsInYear,
-  q: (e3) => e3 * xn,
-  l: computeIsoDaysInMonth,
-  $: computeIsoDaysInYear,
+  B: computeIsoMonthsInYear,
+  $: (e3) => e3 * Ae,
+  k: computeIsoDaysInMonth,
+  V: computeIsoDaysInYear,
   dayOfYear: computeIsoDayOfYear,
-  B(e3, n3, t3) {
-    return {
-      isoYear: e3,
-      isoMonth: n3,
-      isoDay: t3
-    };
-  },
+  p: (e3, n3, t3) => ({
+    isoYear: e3,
+    isoMonth: n3,
+    isoDay: t3
+  }),
   j: isoArgsToEpochMilli,
-  L(e3, n3, t3) {
-    return e3 += divTrunc(t3, xn), (n3 += modTrunc(t3, xn)) < 1 ? (e3--, n3 += xn) : n3 > xn && (e3++, n3 -= xn), [e3, n3];
-  },
+  U: (e3, n3, t3) => (e3 += divTrunc(t3, Ae), (n3 += modTrunc(t3, Ae)) < 1 ? (e3--, n3 += Ae) : n3 > Ae && (e3++, n3 -= Ae), [e3, n3]),
   year(e3) {
     return e3.isoYear;
   },
@@ -83652,22 +83814,20 @@ var Jn = {
     return e3.isoMonth;
   },
   day: (e3) => e3.isoDay
-};
-var _n = {
-  ...Cn,
-  F: computeIntlDateParts,
-  G(e3) {
-    const n3 = this.p(e3);
+}), /* @__PURE__ */ Object.assign({}, rt, at, {
+  u: computeIntlDateParts,
+  _(e3) {
+    const n3 = this.I(e3);
     return [n3.era, n3.eraYear];
   },
-  C(e3, n3) {
+  l(e3, n3) {
     const t3 = computeIntlLeapMonth.call(this, e3);
     return [monthToMonthCodeNumber(n3, t3), t3 === n3];
   },
-  k(e3, n3, t3) {
+  m(e3, n3, t3) {
     let [o3, r3, i3] = computeIntlDateParts.call(this, {
-      isoYear: Un,
-      isoMonth: xn,
+      isoYear: qe,
+      isoMonth: Ae,
       isoDay: 31
     });
     const a3 = computeIntlLeapMonth.call(this, o3), s3 = r3 === a3;
@@ -83679,13 +83839,13 @@ var _n = {
       }
     }
   },
-  U(e3) {
+  G(e3) {
     const n3 = computeIntlDaysInYear.call(this, e3);
     return n3 > computeIntlDaysInYear.call(this, e3 - 1) && n3 > computeIntlDaysInYear.call(this, e3 + 1);
   },
-  o: computeIntlLeapMonth,
-  i: computeIntlMonthsInYear,
-  q(e3, n3) {
+  O: computeIntlLeapMonth,
+  B: computeIntlMonthsInYear,
+  $(e3, n3) {
     const t3 = n3 + e3, o3 = Math.sign(e3), r3 = o3 < 0 ? -1 : 0;
     let i3 = 0;
     for (let e4 = n3; e4 !== t3; e4 += o3) {
@@ -83693,34 +83853,31 @@ var _n = {
     }
     return i3;
   },
-  l: computeIntlDaysInMonth,
-  $: computeIntlDaysInYear,
+  k: computeIntlDaysInMonth,
+  V: computeIntlDaysInYear,
   dayOfYear(e3) {
     const n3 = isoToEpochMilli({
       ...e3,
-      ...Ae
-    }), { year: t3 } = this.p(e3);
-    return diffEpochMilliByDay(computeIntlEpochMilli.call(this, t3), n3);
+      ...be
+    }), { year: t3 } = this.I(e3);
+    return diffEpochMilliByDay(computeIntlEpochMilli.call(this, t3), n3) + 1;
   },
-  B(e3, n3, t3) {
+  p(e3, n3, t3) {
     return checkIsoDateInBounds({
       ...epochMilliToIso(computeIntlEpochMilli.call(this, e3, n3, t3))
     });
   },
   j: computeIntlEpochMilli,
-  L(e3, n3, t3) {
+  U(e3, n3, t3) {
     if (t3) {
-      if (n3 += t3, t3 < 0) {
-        if (n3 < Number.MIN_SAFE_INTEGER) {
-          throw new RangeError(D);
-        }
+      if (n3 += t3, !Number.isSafeInteger(n3)) {
+        throw new RangeError(N);
+      }
+      if (t3 < 0) {
         for (; n3 < 1; ) {
           n3 += computeIntlMonthsInYear.call(this, --e3);
         }
       } else {
-        if (n3 > Number.MAX_SAFE_INTEGER) {
-          throw new RangeError(D);
-        }
         let t4;
         for (; n3 > (t4 = computeIntlMonthsInYear.call(this, e3)); ) {
           n3 -= t4, e3++;
@@ -83730,861 +83887,877 @@ var _n = {
     return [e3, n3];
   },
   year(e3) {
-    return this.p(e3).year;
+    return this.I(e3).year;
   },
   month(e3) {
-    const { year: n3, month: t3 } = this.p(e3), { m: o3 } = this.h(n3);
+    const { year: n3, month: t3 } = this.I(e3), { P: o3 } = this.N(n3);
     return o3[t3] + 1;
   },
   day(e3) {
-    return this.p(e3).day;
+    return this.I(e3).day;
   }
+}));
+var ct = "numeric";
+var ut = ["timeZoneName"];
+var lt = {
+  month: ct,
+  day: ct
 };
-var Kn = (Qn = Jn, Xn = _n, (e3) => e3 === we ? Qn : e3 === Ee || e3 === Ce ? Object.assign(Object.create(Qn), {
-  id: e3
-}) : Object.assign(Object.create(Xn), kn(e3)));
-var Qn;
-var Xn;
-var et = "([+\u2212-])";
-var nt = "(?:[.,](\\d{1,9}))?";
-var tt = `(?:(?:${et}(\\d{6}))|(\\d{4}))-?(\\d{2})`;
-var ot = "(\\d{2})(?::?(\\d{2})(?::?(\\d{2})" + nt + ")?)?";
-var rt = et + ot;
-var it = tt + "-?(\\d{2})(?:[T ]" + ot + "(Z|" + rt + ")?)?";
-var at = "\\[(!?)([^\\]]*)\\]";
-var st = `((?:${at})*)`;
-var ct = createRegExp(tt + st);
-var lt = createRegExp("(?:--)?(\\d{2})-?(\\d{2})" + st);
-var ut = createRegExp(it + st);
-var dt = createRegExp("T?" + ot + "(?:" + rt + ")?" + st);
-var ft = createRegExp(rt);
-var mt = new RegExp(at, "g");
-var pt = createRegExp(`${et}?P(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(?:T(?:(\\d+)${nt}H)?(?:(\\d+)${nt}M)?(?:(\\d+)${nt}S)?)?`);
-var ht = "PlainYearMonth";
-var Tt = "PlainMonthDay";
-var Dt = "PlainDate";
-var gt = "PlainDateTime";
-var It = "PlainTime";
-var yt = "ZonedDateTime";
-var St = "Instant";
-var Nt = "Duration";
-var Ot = {
-  era(e3) {
-    if (void 0 !== e3 && "string" != typeof e3) {
-      throw new TypeError("Expected string or undefined");
+var ft = {
+  year: ct,
+  month: ct
+};
+var dt = /* @__PURE__ */ Object.assign({}, ft, {
+  day: ct
+});
+var mt = {
+  hour: ct,
+  minute: ct,
+  second: ct
+};
+var pt = /* @__PURE__ */ Object.assign({}, dt, mt);
+var ht = /* @__PURE__ */ Object.assign({}, pt, {
+  timeZoneName: "short"
+});
+var Tt = /* @__PURE__ */ Object.keys(lt);
+var gt = /* @__PURE__ */ Object.keys(ft);
+var Dt = /* @__PURE__ */ Object.keys(dt);
+var It = /* @__PURE__ */ Object.keys(mt);
+var Mt = /* @__PURE__ */ Dt.concat(["weekday", "dateStyle"]);
+var Nt = /* @__PURE__ */ It.concat(["dayPeriod", "timeStyle"]);
+var yt = /* @__PURE__ */ Mt.concat(Nt);
+var vt = /* @__PURE__ */ yt.concat(ut);
+var Pt = /* @__PURE__ */ ut.concat(Nt);
+var Et = /* @__PURE__ */ ut.concat(Mt);
+var St = /* @__PURE__ */ ut.concat(["day", "weekday", "dateStyle"], Nt);
+var Ft = /* @__PURE__ */ createOptionsTransformer(Tt, lt, /* @__PURE__ */ ut.concat(["year", "weekday", "dateStyle"], Nt));
+var bt = [/* @__PURE__ */ createOptionsTransformer(gt, ft, St), isoDateFieldsToEpochNano, 1];
+var Ot = [Ft, isoDateFieldsToEpochNano, 1];
+var wt = [/* @__PURE__ */ createOptionsTransformer(Mt, dt, Pt), isoDateFieldsToEpochNano];
+var Bt = [/* @__PURE__ */ createOptionsTransformer(yt, pt, ut), isoDateFieldsToEpochNano];
+var kt = [/* @__PURE__ */ createOptionsTransformer(Nt, mt, Et), (e3, n3) => getSingleInstantFor(kn(n3.timeZone), {
+  isoYear: ze,
+  isoMonth: 1,
+  isoDay: 1,
+  ...e3
+})];
+var Yt = [/* @__PURE__ */ createOptionsTransformer(yt, pt), extractEpochNano];
+var Ct = [/* @__PURE__ */ createOptionsTransformer(vt, ht), extractEpochNano, 0, (e3, n3) => {
+  const t3 = getId(e3.timeZone);
+  if (n3 && getId(n3.timeZone) !== t3) {
+    throw new RangeError(h);
+  }
+  return t3;
+}];
+var Rt = {};
+var Zt;
+
+// node_modules/temporal-polyfill/chunks/nr4WXzrK.esm.js
+function createSlotClass(e3, t3, n3, o3, a3) {
+  function Class(...e4) {
+    if (!(this instanceof Class)) {
+      throw new TypeError(r);
     }
-    return e3;
-  },
-  eraYear(e3) {
-    if ("number" == typeof e3) {
-      requireNumberIsInteger(e3);
-    } else if (void 0 !== e3) {
-      throw new TypeError("Expected integer or undefined");
+    za(this, t3(...e4));
+  }
+  function bindMethod(e4, t4) {
+    return Object.defineProperties(function(...t5) {
+      return e4.call(this, getSpecificSlots(this), ...t5);
+    }, createNameDescriptors(t4));
+  }
+  function getSpecificSlots(t4) {
+    const n4 = Ua(t4);
+    if (!n4 || n4.branding !== e3) {
+      throw new TypeError(r);
     }
-    return e3;
-  },
+    return n4;
+  }
+  return Object.defineProperties(Class.prototype, {
+    ...createGetterDescriptors(mapProps(bindMethod, n3)),
+    ...createPropDescriptors(mapProps(bindMethod, o3)),
+    ...createStringTagDescriptors("Temporal." + e3)
+  }), Object.defineProperties(Class, {
+    ...createPropDescriptors(a3),
+    ...createNameDescriptors(e3)
+  }), [Class, (e4) => {
+    const t4 = Object.create(Class.prototype);
+    return za(t4, e4), t4;
+  }, getSpecificSlots];
+}
+function createProtocolValidator(e3) {
+  return e3 = e3.concat("id").sort(), (t3) => {
+    if (!hasAllPropsByName(t3, e3)) {
+      throw new TypeError(d);
+    }
+    return t3;
+  };
+}
+function rejectInvalidBag(e3) {
+  if (Ua(e3) || void 0 !== e3.calendar || void 0 !== e3.timeZone) {
+    throw new TypeError(t);
+  }
+  return e3;
+}
+function createDateTimeFormatClass() {
+  const e3 = Oe.prototype, t3 = Object.getOwnPropertyDescriptors(e3), n3 = Object.getOwnPropertyDescriptors(Oe), DateTimeFormat = function(e4, t4 = {}) {
+    if (!(this instanceof DateTimeFormat)) {
+      return new DateTimeFormat(e4, t4);
+    }
+    Ha.set(this, ((e5, t5 = {}) => {
+      const n4 = new Oe(e5, t5), o3 = n4.resolvedOptions(), r3 = o3.locale, a3 = pluckProps(Object.keys(t5), o3), i3 = memoize(createFormatPrepperForBranding), prepFormat = (...e6) => {
+        let t6;
+        const o4 = e6.map((e7, n5) => {
+          const o5 = Ua(e7), r4 = (o5 || {}).branding;
+          if (n5 && t6 && t6 !== r4) {
+            throw new TypeError(b);
+          }
+          return t6 = r4, o5;
+        });
+        return t6 ? i3(t6)(r3, a3, ...o4) : [n4, ...e6];
+      };
+      return prepFormat.J = n4, prepFormat;
+    })(e4, t4));
+  };
+  for (const e4 in t3) {
+    const n4 = t3[e4], o3 = e4.startsWith("format") && createFormatMethod(e4);
+    "function" == typeof n4.value ? n4.value = "constructor" === e4 ? DateTimeFormat : o3 || createProxiedMethod(e4) : o3 && (n4.get = function() {
+      return o3.bind(this);
+    });
+  }
+  return n3.prototype.value = Object.create(e3, t3), Object.defineProperties(DateTimeFormat, n3), DateTimeFormat;
+}
+function createFormatMethod(e3) {
+  return function(...t3) {
+    const n3 = Ha.get(this), [o3, ...r3] = n3(...t3);
+    return o3[e3](...r3);
+  };
+}
+function createProxiedMethod(e3) {
+  return function(...t3) {
+    return Ha.get(this).J[e3](...t3);
+  };
+}
+function createFormatPrepperForBranding(e3) {
+  const t3 = Ka[e3];
+  if (!t3) {
+    throw new TypeError(invalidFormatType(e3));
+  }
+  return createFormatPrepper(t3, memoize(createFormatForPrep));
+}
+function createCalendarFieldMethods(e3, t3) {
+  const n3 = {};
+  for (const o3 in e3) {
+    n3[o3] = ({ K: e4 }, n4) => {
+      const r3 = Ua(n4) || {}, { branding: a3 } = r3, i3 = a3 === Dn || t3.includes(a3) ? r3 : toPlainDateSlots(n4);
+      return e4[o3](i3);
+    };
+  }
+  return n3;
+}
+function createCalendarGetters(e3) {
+  const t3 = {};
+  for (const n3 in e3) {
+    t3[n3] = (e4) => {
+      const { calendar: t4 } = e4;
+      return (o3 = t4, "string" == typeof o3 ? st(o3) : (r3 = o3, Object.assign(Object.create(mi), {
+        X: r3
+      })))[n3](e4);
+      var o3, r3;
+    };
+  }
+  return t3;
+}
+function neverValueOf() {
+  throw new TypeError(o);
+}
+function createCalendarFromSlots({ calendar: e3 }) {
+  return "string" == typeof e3 ? new ds(e3) : e3;
+}
+function toPlainMonthDaySlots(e3, t3) {
+  if (t3 = copyOptions(t3), isObjectLike(e3)) {
+    const n4 = Ua(e3);
+    if (n4 && n4.branding === gn) {
+      return refineOverflowOptions(t3), n4;
+    }
+    const o3 = extractCalendarSlotFromBag(e3);
+    return refinePlainMonthDayBag(_i(o3 || ce), !o3, e3, t3);
+  }
+  const n3 = parsePlainMonthDay(st, e3);
+  return refineOverflowOptions(t3), n3;
+}
+function getOffsetNanosecondsForAdapter(e3, t3, n3) {
+  return o3 = t3.call(e3, bi(createInstantSlots(n3))), validateTimeZoneOffset(requireInteger(o3));
+  var o3;
+}
+function createAdapterOps(e3, t3 = Ci) {
+  const n3 = Object.keys(t3).sort(), o3 = {};
+  for (const r3 of n3) {
+    o3[r3] = bindArgs(t3[r3], e3, xe(e3[r3]));
+  }
+  return o3;
+}
+function createTimeZoneOps(e3, t3) {
+  return "string" == typeof e3 ? kn(e3) : createAdapterOps(e3, t3);
+}
+function createTimeZoneOffsetOps(e3) {
+  return createTimeZoneOps(e3, gi);
+}
+function toInstantSlots(e3) {
+  if (isObjectLike(e3)) {
+    const t3 = Ua(e3);
+    if (t3) {
+      switch (t3.branding) {
+        case yn:
+          return t3;
+        case Nn:
+          return createInstantSlots(t3.epochNanoseconds);
+      }
+    }
+  }
+  return parseInstant(e3);
+}
+function xt() {
+  return bi(createInstantSlots(numberToBigNano(this.valueOf(), q)));
+}
+function getImplTransition(e3, t3, n3) {
+  const o3 = t3.C(toInstantSlots(n3).epochNanoseconds, e3);
+  return o3 ? bi(createInstantSlots(o3)) : null;
+}
+function refineTimeZoneSlot(e3) {
+  return isObjectLike(e3) ? (Ua(e3) || {}).timeZone || wi(e3) : ((e4) => resolveTimeZoneId(parseTimeZoneId(We(e4))))(e3);
+}
+function toPlainTimeSlots(e3, t3) {
+  if (isObjectLike(e3)) {
+    const n3 = Ua(e3) || {};
+    switch (n3.branding) {
+      case Mn:
+        return refineOverflowOptions(t3), n3;
+      case In:
+        return refineOverflowOptions(t3), createPlainTimeSlots(n3);
+      case Nn:
+        return refineOverflowOptions(t3), zonedDateTimeToPlainTime(createTimeZoneOffsetOps, n3);
+    }
+    return refinePlainTimeBag(e3, t3);
+  }
+  return refineOverflowOptions(t3), parsePlainTime(e3);
+}
+function optionalToPlainTimeFields(e3) {
+  return void 0 === e3 ? void 0 : toPlainTimeSlots(e3);
+}
+function toPlainYearMonthSlots(e3, t3) {
+  if (t3 = copyOptions(t3), isObjectLike(e3)) {
+    const n4 = Ua(e3);
+    return n4 && n4.branding === Tn ? (refineOverflowOptions(t3), n4) : refinePlainYearMonthBag(Xi(getCalendarSlotFromBag(e3)), e3, t3);
+  }
+  const n3 = parsePlainYearMonth(st, e3);
+  return refineOverflowOptions(t3), n3;
+}
+function toPlainDateTimeSlots(e3, t3) {
+  if (t3 = copyOptions(t3), isObjectLike(e3)) {
+    const n4 = Ua(e3) || {};
+    switch (n4.branding) {
+      case In:
+        return refineOverflowOptions(t3), n4;
+      case Dn:
+        return refineOverflowOptions(t3), createPlainDateTimeSlots({
+          ...n4,
+          ...be
+        });
+      case Nn:
+        return refineOverflowOptions(t3), zonedDateTimeToPlainDateTime(createTimeZoneOffsetOps, n4);
+    }
+    return refinePlainDateTimeBag($i(getCalendarSlotFromBag(e3)), e3, t3);
+  }
+  const n3 = parsePlainDateTime(e3);
+  return refineOverflowOptions(t3), n3;
+}
+function toPlainDateSlots(e3, t3) {
+  if (t3 = copyOptions(t3), isObjectLike(e3)) {
+    const n4 = Ua(e3) || {};
+    switch (n4.branding) {
+      case Dn:
+        return refineOverflowOptions(t3), n4;
+      case In:
+        return refineOverflowOptions(t3), createPlainDateSlots(n4);
+      case Nn:
+        return refineOverflowOptions(t3), zonedDateTimeToPlainDate(createTimeZoneOffsetOps, n4);
+    }
+    return refinePlainDateBag($i(getCalendarSlotFromBag(e3)), e3, t3);
+  }
+  const n3 = parsePlainDate(e3);
+  return refineOverflowOptions(t3), n3;
+}
+function dayAdapter(e3, t3, n3) {
+  return requirePositiveInteger(t3.call(e3, Vi(createPlainDateSlots(n3, e3))));
+}
+function createCompoundOpsCreator(e3) {
+  return (t3) => "string" == typeof t3 ? st(t3) : ((e4, t4) => {
+    const n3 = Object.keys(t4).sort(), o3 = {};
+    for (const r3 of n3) {
+      o3[r3] = bindArgs(t4[r3], e4, e4[r3]);
+    }
+    return o3;
+  })(t3, e3);
+}
+function toDurationSlots(e3) {
+  if (isObjectLike(e3)) {
+    const t3 = Ua(e3);
+    return t3 && t3.branding === vn ? t3 : refineDurationBag(e3);
+  }
+  return parseDuration(e3);
+}
+function refinePublicRelativeTo(e3) {
+  if (void 0 !== e3) {
+    if (isObjectLike(e3)) {
+      const t3 = Ua(e3) || {};
+      switch (t3.branding) {
+        case Nn:
+        case Dn:
+          return t3;
+        case In:
+          return createPlainDateSlots(t3);
+      }
+      const n3 = getCalendarSlotFromBag(e3);
+      return {
+        ...refineMaybeZonedDateTimeBag(refineTimeZoneSlot, createTimeZoneOps, $i(n3), e3),
+        calendar: n3
+      };
+    }
+    return parseRelativeToSlots(e3);
+  }
+}
+function getCalendarSlotFromBag(e3) {
+  return extractCalendarSlotFromBag(e3) || ce;
+}
+function extractCalendarSlotFromBag(e3) {
+  const { calendar: t3 } = e3;
+  if (void 0 !== t3) {
+    return refineCalendarSlot(t3);
+  }
+}
+function refineCalendarSlot(e3) {
+  return isObjectLike(e3) ? (Ua(e3) || {}).calendar || fs(e3) : ((e4) => resolveCalendarId(parseCalendarId(We(e4))))(e3);
+}
+function toZonedDateTimeSlots(e3, t3) {
+  if (t3 = copyOptions(t3), isObjectLike(e3)) {
+    const n3 = Ua(e3);
+    if (n3 && n3.branding === Nn) {
+      return refineZonedFieldOptions(t3), n3;
+    }
+    const o3 = getCalendarSlotFromBag(e3);
+    return refineZonedDateTimeBag(refineTimeZoneSlot, createTimeZoneOps, $i(o3), o3, e3, t3);
+  }
+  return parseZonedDateTime(e3, t3);
+}
+function slotsToIso(e3) {
+  return wn(e3, createTimeZoneOffsetOps);
+}
+function adaptDateMethods(e3) {
+  return mapProps((e4) => (t3) => e4(slotsToIso(t3)), e3);
+}
+var Ga = /* @__PURE__ */ new WeakMap();
+var Ua = /* @__PURE__ */ Ga.get.bind(Ga);
+var za = /* @__PURE__ */ Ga.set.bind(Ga);
+var qt = /* @__PURE__ */ createDateTimeFormatClass();
+var Ha = /* @__PURE__ */ new WeakMap();
+var Ka = {
+  PlainYearMonth: bt,
+  PlainMonthDay: Ot,
+  PlainDate: wt,
+  PlainDateTime: Bt,
+  PlainTime: kt,
+  Instant: Yt
+};
+var Qa = /* @__PURE__ */ createFormatPrepper(bt);
+var Xa = /* @__PURE__ */ createFormatPrepper(Ot);
+var $a = /* @__PURE__ */ createFormatPrepper(wt);
+var _a = /* @__PURE__ */ createFormatPrepper(Bt);
+var ei = /* @__PURE__ */ createFormatPrepper(kt);
+var ti = /* @__PURE__ */ createFormatPrepper(Yt);
+var ni = /* @__PURE__ */ createFormatPrepper(Ct);
+var oi = {
+  era: requireStringOrUndefined,
+  eraYear: requireIntegerOrUndefined,
   year: requireInteger,
   month: requirePositiveInteger,
   daysInMonth: requirePositiveInteger,
   daysInYear: requirePositiveInteger,
-  inLeapYear: te,
+  inLeapYear: je,
   monthsInYear: requirePositiveInteger
 };
-var Pt = {
-  monthCode: ne
+var ri = {
+  monthCode: We
 };
-var vt = {
+var ai = {
   day: requirePositiveInteger
 };
-var Mt = {
+var ii = {
   dayOfWeek: requirePositiveInteger,
   dayOfYear: requirePositiveInteger,
-  weekOfYear: requirePositiveInteger,
-  yearOfWeek: requireInteger,
+  weekOfYear: requirePositiveIntegerOrUndefined,
+  yearOfWeek: requireIntegerOrUndefined,
   daysInWeek: requirePositiveInteger
 };
-var Ft = {
-  ...Ot,
-  ...Pt,
-  ...vt,
-  ...Mt
+var si = /* @__PURE__ */ Object.assign({}, oi, ri, ai, ii);
+var li = {
+  ...createCalendarFieldMethods(oi, [Tn]),
+  ...createCalendarFieldMethods(ii, []),
+  ...createCalendarFieldMethods(ri, [Tn, gn]),
+  ...createCalendarFieldMethods(ai, [gn])
 };
-var bt = {
-  ...createCalendarFieldMethods(Ot, [ht]),
-  ...createCalendarFieldMethods(Mt, []),
-  ...createCalendarFieldMethods(Pt, [ht, Tt]),
-  ...createCalendarFieldMethods(vt, [Tt])
-};
-var wt = createCalendarGetters(Ft);
-var Et = createCalendarGetters({
-  ...Ot,
-  ...Pt
+var ci = /* @__PURE__ */ createCalendarGetters(si);
+var ui = /* @__PURE__ */ createCalendarGetters({
+  ...oi,
+  ...ri
 });
-var Ct = createCalendarGetters({
-  ...Pt,
-  ...vt
+var di = /* @__PURE__ */ createCalendarGetters({
+  ...ri,
+  ...ai
 });
-var Zt = {
+var fi = {
   calendarId: (e3) => getId(e3.calendar)
 };
-var kt = mapProps((e3, n3) => function(t3) {
-  const { v: o3 } = this;
-  return e3(o3[n3](Ro(createPlainDateSlots(t3, o3))));
-}, Ft);
-var Yt = mapPropNames((e3) => (n3) => n3[e3], ie);
-var Bt = mapPropNames((e3, n3) => (e4) => e4[Be[n3]], L);
-var Rt = {
-  epochSeconds: (e3) => epochNanoToSec(e3.epochNanoseconds),
-  epochMilliseconds: (e3) => epochNanoToMilli(e3.epochNanoseconds),
-  epochMicroseconds: (e3) => dayTimeNanoToBigInt(e3.epochNanoseconds, E),
-  epochNanoseconds: (e3) => dayTimeNanoToBigInt(e3.epochNanoseconds)
+var mi = /* @__PURE__ */ mapProps((e3, t3) => function(n3) {
+  const { X: o3 } = this;
+  return e3(o3[t3](Vi(createPlainDateSlots(n3, o3))));
+}, si);
+var Si = /* @__PURE__ */ mapPropNames((e3) => (t3) => t3[e3], pe.concat("sign"));
+var Oi = /* @__PURE__ */ mapPropNames((e3, t3) => (e4) => e4[ye[t3]], $);
+var Ti = {
+  epochSeconds: getEpochSeconds,
+  epochMilliseconds: getEpochMilliseconds,
+  epochMicroseconds: getEpochMicroseconds,
+  epochNanoseconds: getEpochNanoseconds
 };
-var Lt = /* @__PURE__ */ new WeakMap();
-var DateTimeFormat = class extends He {
-  constructor(e3, n3 = {}) {
-    super(e3, n3);
-    const t3 = this.resolvedOptions(), o3 = pluckProps(Object.keys(n3), t3);
-    Lt.set(this, ((e4, n4) => {
-      const t4 = n4.locale, o4 = createLazyGenerator((n5) => {
-        const [o5] = jt[n5], r3 = o5(e4);
-        return new He(t4, r3);
-      });
-      return (e5, t5) => {
-        const r3 = Uo(e5), { O: i3 } = r3 || {};
-        let a3;
-        if (void 0 !== t5 && (a3 = Uo(t5), i3 !== (a3 || {}).O)) {
-          throw new TypeError("Mismatching types for formatting");
-        }
-        if (i3) {
-          const e6 = jt[i3];
-          if (!e6) {
-            throw new TypeError(((e7) => `Cannot format ${e7}`)(i3));
-          }
-          return [o4(i3), ...toEpochMillis(e6, n4, r3, a3)];
-        }
-        return [];
-      };
-    })(o3, t3));
-  }
-  format(e3) {
-    const n3 = Lt.get(this), [t3, o3] = n3(e3);
-    return t3 ? t3.format(o3) : super.format(e3);
-  }
-  formatToParts(e3) {
-    const n3 = Lt.get(this), [t3, o3] = n3(e3);
-    return t3 ? t3.formatToParts(o3) : super.formatToParts(e3);
-  }
-};
-["formatRange", "formatRangeToParts"].forEach((e3) => {
-  const n3 = He.prototype[e3];
-  n3 && Object.defineProperties(DateTimeFormat.prototype, createPropDescriptors({
-    [e3](e4, t3) {
-      const o3 = Lt.get(this), [r3, i3, a3] = o3(e4, t3);
-      return r3 ? n3.call(r3, i3, a3) : n3.call(this, e4, t3);
-    }
-  }));
-});
-var jt = {
-  PlainYearMonth: yn,
-  PlainMonthDay: Sn,
-  PlainDate: Nn,
-  PlainDateTime: On,
-  PlainTime: Pn,
-  Instant: vn
-};
-var qt = createFormatPrepper(yn);
-var zt = createFormatPrepper(Sn);
-var At = createFormatPrepper(Nn);
-var Ut = createFormatPrepper(On);
-var xt = createFormatPrepper(Pn);
-var $t = createFormatPrepper(vn);
-var Gt = createFormatPrepper(Mn);
-var [Wt, Vt, Ht] = createSlotClass(Tt, bindArgs((e3, n3, t3, o3 = we, r3 = Un) => {
-  const i3 = toInteger(n3), a3 = toInteger(t3), s3 = e3(o3);
-  return createPlainMonthDaySlots(checkIsoDateInBounds(checkIsoDateFields({
-    isoYear: toInteger(r3),
-    isoMonth: i3,
-    isoDay: a3
-  })), s3);
-}, refineCalendarSlot), {
-  ...Zt,
-  ...Ct
+var pi = /* @__PURE__ */ bindArgs(excludePropsByName, /* @__PURE__ */ new Set(["branding"]));
+var [hi, Pi, Di] = createSlotClass(gn, bindArgs(constructPlainMonthDaySlots, refineCalendarSlot), {
+  ...fi,
+  ...di
 }, {
-  with(e3, n3, t3) {
-    return Vt(((e4, n4, t4, o3, r3) => {
-      const i3 = copyOptions(r3);
-      return ((e5, n5, t5, o4) => {
-        const r4 = mergeCalendarFields(e5, n5, t5, K);
-        return e5.monthDayFromFields(r4, o4);
-      })(e4(n4.calendar), t4, o3, i3);
-    })(To, e3, this, rejectInvalidBag(n3), t3));
+  with(e3, t3, n3) {
+    return Pi(plainMonthDayWithFields(ns, e3, this, rejectInvalidBag(t3), n3));
   },
-  equals(e3, n3) {
-    return !compareIsoDateFields(t3 = e3, o3 = toPlainMonthDaySlots(n3)) && isIdLikeEqual(t3.calendar, o3.calendar);
-    var t3, o3;
-  },
+  equals: (e3, t3) => plainMonthDaysEqual(e3, toPlainMonthDaySlots(t3)),
   toString: formatPlainMonthDayIso,
   toJSON: (e3) => formatPlainMonthDayIso(e3),
-  toLocaleString(e3, n3, t3) {
-    const [o3, r3] = zt(n3, t3, e3);
+  toLocaleString(e3, t3, n3) {
+    const [o3, r3] = Xa(t3, n3, e3);
     return o3.format(r3);
   },
-  toPlainDate(e3, n3) {
-    return Ro(((e4, n4, t3, o3) => ((e5, n5, t4) => convertToIso(e5, n5, X, requireObjectlike(t4), G))(ho(n4.calendar), t3, o3))(0, e3, this, n3));
+  toPlainDate(e3, t3) {
+    return Vi(plainMonthDayToPlainDate(ts, e3, this, t3));
   },
-  getISOFields: removeBranding,
-  getCalendar: getCalendarFromSlots,
+  getISOFields: pi,
+  getCalendar: createCalendarFromSlots,
   valueOf: neverValueOf
 }, {
-  from: (e3, n3) => Vt(toPlainMonthDaySlots(e3, n3))
+  from: (e3, t3) => Pi(toPlainMonthDaySlots(e3, t3))
 });
-var [Jt, _t, Kt] = createSlotClass(ht, bindArgs((e3, n3, t3, o3 = we, r3 = 1) => {
-  const i3 = toInteger(n3), a3 = toInteger(t3), s3 = e3(o3);
-  return createPlainYearMonthSlots(checkIsoYearMonthInBounds(checkIsoDateFields({
-    isoYear: i3,
-    isoMonth: a3,
-    isoDay: toInteger(r3)
-  })), s3);
-}, refineCalendarSlot), {
-  ...Zt,
-  ...Et
-}, {
-  with(e3, n3, t3) {
-    return _t(((e4, n4, t4, o3, r3) => {
-      const i3 = copyOptions(r3);
-      return createPlainYearMonthSlots(((e5, n5, t5, o4) => {
-        const r4 = mergeCalendarFields(e5, n5, t5, J);
-        return e5.yearMonthFromFields(r4, o4);
-      })(e4(n4.calendar), t4, o3, i3));
-    })(po, e3, this, rejectInvalidBag(n3), t3));
-  },
-  add: (e3, n3, t3) => _t(movePlainYearMonth(Io, e3, toDurationSlots(n3), t3)),
-  subtract: (e3, n3, t3) => _t(movePlainYearMonth(Io, e3, toDurationSlots(n3), t3, 1)),
-  until: (e3, n3, t3) => Co(diffPlainYearMonth(yo, e3, toPlainYearMonthSlots(n3), t3)),
-  since: (e3, n3, t3) => Co(diffPlainYearMonth(yo, e3, toPlainYearMonthSlots(n3), t3, 1)),
-  equals(e3, n3) {
-    return !compareIsoDateFields(t3 = e3, o3 = toPlainYearMonthSlots(n3)) && isIdLikeEqual(t3.calendar, o3.calendar);
-    var t3, o3;
-  },
-  toString: formatPlainYearMonthIso,
-  toJSON: (e3) => formatPlainYearMonthIso(e3),
-  toLocaleString(e3, n3, t3) {
-    const [o3, r3] = qt(n3, t3, e3);
+var Ci = {
+  getOffsetNanosecondsFor: getOffsetNanosecondsForAdapter,
+  getPossibleInstantsFor(e3, t3, n3) {
+    const o3 = [...t3.call(e3, Ai(createPlainDateTimeSlots(n3, ce)))].map((e4) => Fi(e4).epochNanoseconds), r3 = o3.length;
+    return r3 > 1 && (o3.sort(compareBigNanos), validateTimeZoneGap(bigNanoToNumber(diffBigNanos(o3[0], o3[r3 - 1])))), o3;
+  }
+};
+var gi = {
+  getOffsetNanosecondsFor: getOffsetNanosecondsForAdapter
+};
+var [Zi, bi, Fi] = createSlotClass(yn, constructInstantSlots, Ti, {
+  add: (e3, t3) => bi(moveInstant(0, e3, toDurationSlots(t3))),
+  subtract: (e3, t3) => bi(moveInstant(1, e3, toDurationSlots(t3))),
+  until: (e3, t3, n3) => ls(diffInstants(0, e3, toInstantSlots(t3), n3)),
+  since: (e3, t3, n3) => ls(diffInstants(1, e3, toInstantSlots(t3), n3)),
+  round: (e3, t3) => bi(roundInstant(e3, t3)),
+  equals: (e3, t3) => instantsEqual(e3, toInstantSlots(t3)),
+  toString: (e3, t3) => formatInstantIso(refineTimeZoneSlot, createTimeZoneOffsetOps, e3, t3),
+  toJSON: (e3) => formatInstantIso(refineTimeZoneSlot, createTimeZoneOffsetOps, e3),
+  toLocaleString(e3, t3, n3) {
+    const [o3, r3] = ti(t3, n3, e3);
     return o3.format(r3);
   },
-  toPlainDate(e3, n3) {
-    return Ro(((e4, n4, t3, o3) => ((e5, n5, t4) => convertToIso(e5, n5, _, requireObjectlike(t4), H))(ho(n4.calendar), t3, o3))(0, e3, this, n3));
+  toZonedDateTimeISO: (e3, t3) => Ss(instantToZonedDateTime(e3, refineTimeZoneSlot(t3))),
+  toZonedDateTime(e3, t3) {
+    const n3 = requireObjectLike(t3);
+    return Ss(instantToZonedDateTime(e3, refineTimeZoneSlot(n3.timeZone), refineCalendarSlot(n3.calendar)));
   },
-  getISOFields: removeBranding,
-  getCalendar: getCalendarFromSlots,
   valueOf: neverValueOf
 }, {
-  from: (e3, n3) => _t(toPlainYearMonthSlots(e3, n3)),
-  compare: (e3, n3) => compareIsoDateFields(toPlainYearMonthSlots(e3), toPlainYearMonthSlots(n3))
+  from: (e3) => bi(toInstantSlots(e3)),
+  fromEpochSeconds: (e3) => bi(epochSecToInstant(e3)),
+  fromEpochMilliseconds: (e3) => bi(epochMilliToInstant(e3)),
+  fromEpochMicroseconds: (e3) => bi(epochMicroToInstant(e3)),
+  fromEpochNanoseconds: (e3) => bi(epochNanoToInstant(e3)),
+  compare: (e3, t3) => compareInstants(toInstantSlots(e3), toInstantSlots(t3))
 });
-var Qt = {
-  fields(e3, n3, t3) {
-    return [...n3.call(e3, t3)];
-  }
-};
-var Xt = {
-  dateFromFields(e3, n3, t3, o3) {
-    return Lo(n3.call(e3, Object.assign(/* @__PURE__ */ Object.create(null), t3), o3));
-  },
-  ...Qt
-};
-var eo = {
-  yearMonthFromFields(e3, n3, t3, o3) {
-    return Kt(n3.call(e3, Object.assign(/* @__PURE__ */ Object.create(null), t3), o3));
-  },
-  ...Qt
-};
-var no = {
-  monthDayFromFields(e3, n3, t3, o3) {
-    return Ht(n3.call(e3, Object.assign(/* @__PURE__ */ Object.create(null), t3), o3));
-  },
-  ...Qt
-};
-var to = {
-  mergeFields(e3, n3, t3, o3) {
-    return requireObjectlike(n3.call(e3, Object.assign(/* @__PURE__ */ Object.create(null), t3), Object.assign(/* @__PURE__ */ Object.create(null), o3)));
-  }
-};
-var oo = {
-  ...Xt,
-  ...to
-};
-var ro = {
-  ...eo,
-  ...to
-};
-var io = {
-  ...no,
-  ...to
-};
-var ao = {
-  dateAdd(e3, n3, t3, o3, r3) {
-    return Lo(n3.call(e3, Ro(createPlainDateSlots(t3, e3)), Co(createDurationSlots(o3)), r3));
-  }
-};
-var so = {
-  ...ao,
-  dateUntil(e3, n3, t3, o3, r3, i3) {
-    return Zo(n3.call(e3, Ro(createPlainDateSlots(t3, e3)), Ro(createPlainDateSlots(o3, e3)), Object.assign(/* @__PURE__ */ Object.create(null), i3, {
-      largestUnit: F[r3]
-    })));
-  }
-};
-var co = {
-  ...ao,
-  day: dayAdapter
-};
-var lo = {
-  ...so,
-  day: dayAdapter
-};
-var uo = createCompoundOpsCreator(eo);
-var fo = createCompoundOpsCreator(Xt);
-var mo = createCompoundOpsCreator(no);
-var po = createCompoundOpsCreator(ro);
-var ho = createCompoundOpsCreator(oo);
-var To = createCompoundOpsCreator(io);
-var Do = createCompoundOpsCreator(ao);
-var go = createCompoundOpsCreator(so);
-var Io = createCompoundOpsCreator(co);
-var yo = createCompoundOpsCreator(lo);
-var [So, No] = createSlotClass("TimeZone", (e3) => {
-  const n3 = queryNativeTimeZone(ne(e3));
+var [Ii, vi] = createSlotClass("TimeZone", (e3) => {
+  const t3 = resolveTimeZoneId(e3);
   return {
-    O: "TimeZone",
-    id: n3.id,
-    P: n3
+    branding: "TimeZone",
+    id: t3,
+    K: kn(t3)
   };
 }, {
   id: (e3) => e3.id
 }, {
   toString: (e3) => e3.id,
   toJSON: (e3) => e3.id,
-  getPossibleInstantsFor: ({ P: e3 }, n3) => e3.getPossibleInstantsFor(toPlainDateTimeSlots(n3)).map((e4) => Mo(createInstantSlots(e4))),
-  getOffsetNanosecondsFor: ({ P: e3 }, n3) => e3.getOffsetNanosecondsFor(toInstantSlots(n3).epochNanoseconds),
-  getOffsetStringFor(e3, n3) {
-    const t3 = toInstantSlots(n3).epochNanoseconds;
-    return formatOffsetNano(createAdapterOps(this, wo).getOffsetNanosecondsFor(t3));
+  getPossibleInstantsFor: ({ K: e3 }, t3) => e3.getPossibleInstantsFor(toPlainDateTimeSlots(t3)).map((e4) => bi(createInstantSlots(e4))),
+  getOffsetNanosecondsFor: ({ K: e3 }, t3) => e3.getOffsetNanosecondsFor(toInstantSlots(t3).epochNanoseconds),
+  getOffsetStringFor(e3, t3) {
+    const n3 = toInstantSlots(t3).epochNanoseconds, o3 = createAdapterOps(this, gi).getOffsetNanosecondsFor(n3);
+    return formatOffsetNano(o3);
   },
-  getPlainDateTimeFor(e3, n3, t3 = we) {
-    const o3 = toInstantSlots(n3).epochNanoseconds, r3 = createAdapterOps(this, wo).getOffsetNanosecondsFor(o3);
-    return Yo(createPlainDateTimeSlots(epochNanoToIso(o3, r3), refineCalendarSlot(t3)));
+  getPlainDateTimeFor(e3, t3, n3 = ce) {
+    const o3 = toInstantSlots(t3).epochNanoseconds, r3 = createAdapterOps(this, gi).getOffsetNanosecondsFor(o3);
+    return Ai(createPlainDateTimeSlots(epochNanoToIso(o3, r3), refineCalendarSlot(n3)));
   },
-  getInstantFor(e3, n3, t3) {
-    const o3 = toPlainDateTimeSlots(n3), r3 = refineEpochDisambigOptions(t3), i3 = createAdapterOps(this);
-    return Mo(createInstantSlots(getSingleInstantFor(i3, o3, r3)));
+  getInstantFor(e3, t3, n3) {
+    const o3 = toPlainDateTimeSlots(t3), r3 = refineEpochDisambigOptions(n3), a3 = createAdapterOps(this);
+    return bi(createInstantSlots(getSingleInstantFor(a3, o3, r3)));
   },
-  getNextTransition: ({ P: e3 }, n3) => getImplTransition(1, e3, n3),
-  getPreviousTransition: ({ P: e3 }, n3) => getImplTransition(-1, e3, n3),
-  equals(e3, n3) {
-    return isTimeZoneSlotsEqual(this, refineTimeZoneSlot(n3));
+  getNextTransition: ({ K: e3 }, t3) => getImplTransition(1, e3, t3),
+  getPreviousTransition: ({ K: e3 }, t3) => getImplTransition(-1, e3, t3),
+  equals(e3, t3) {
+    return !!isTimeZoneSlotsEqual(this, refineTimeZoneSlot(t3));
   }
 }, {
   from(e3) {
-    const n3 = refineTimeZoneSlot(e3);
-    return "string" == typeof n3 ? new So(n3) : n3;
+    const t3 = refineTimeZoneSlot(e3);
+    return "string" == typeof t3 ? new Ii(t3) : t3;
   }
 });
-var [Oo, Po] = createSlotClass(yt, bindArgs((e3, n3, t3, o3, r3 = we) => createZonedDateTimeSlots(checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(t3))), n3(o3), e3(r3)), refineCalendarSlot, refineTimeZoneSlot), {
-  ...Rt,
-  ...Zt,
-  ...adaptToIsoFields(wt),
-  ...adaptToIsoFields(Bt),
-  hoursInDay: (e3) => ((e4, n3) => {
-    const t3 = createTimeZoneOps(n3.timeZone);
-    return computeNanosecondsInDay(t3, zn(n3, t3)) / Y;
-  })(0, e3),
-  offsetNanoseconds: (e3) => slotsToIsoFields(e3).offsetNanoseconds,
-  offset: (e3) => formatOffsetNano(slotsToIsoFields(e3).offsetNanoseconds),
-  timeZoneId: (e3) => getId(e3.timeZone)
-}, {
-  with(e3, n3, t3) {
-    return Po(((e4, n4, t4, o3, r3, i3) => {
-      const a3 = copyOptions(i3), { calendar: s3, timeZone: c3 } = t4;
-      return createZonedDateTimeSlots(((e5, n5, t5, o4, r4) => {
-        const i4 = mergeCalendarFields(e5, t5, o4, K, A, q), [a4, s4, c4] = refineZonedFieldOptions(r4, 2);
-        return getMatchingInstantFor(n5, {
-          ...e5.dateFromFields(i4, overrideOverflowOptions(r4, a4)),
-          ...refineTimeBag(i4, a4)
-        }, parseOffsetNano(i4.offset), s4, c4);
-      })(e4(s3), n4(c3), o3, r3, a3), c3, s3);
-    })(ho, createTimeZoneOps, e3, this, rejectInvalidBag(n3), t3));
+var wi = /* @__PURE__ */ createProtocolValidator(Object.keys(Ci));
+var [ji, Mi] = createSlotClass(Mn, constructPlainTimeSlots, Oi, {
+  with(e3, t3, n3) {
+    return Mi(plainTimeWithFields(this, rejectInvalidBag(t3), n3));
   },
-  withPlainTime: (e3, n3) => Po(((e4, n4, t3 = Ae) => {
-    const o3 = n4.timeZone, r3 = e4(o3), i3 = {
-      ...zn(n4, r3),
-      ...t3
-    };
-    return createZonedDateTimeSlots(getMatchingInstantFor(r3, i3, i3.offsetNanoseconds, 2), o3, n4.calendar);
-  })(createTimeZoneOps, e3, optionalToPlainTimeFields(n3))),
-  withPlainDate: (e3, n3) => Po(((e4, n4, t3) => {
-    const o3 = n4.timeZone, r3 = e4(o3), i3 = {
-      ...zn(n4, r3),
-      ...t3
-    }, a3 = getPreferredCalendarSlot(n4.calendar, t3.calendar);
-    return createZonedDateTimeSlots(getMatchingInstantFor(r3, i3, i3.offsetNanoseconds, 2), o3, a3);
-  })(createTimeZoneOps, e3, toPlainDateSlots(n3))),
-  withTimeZone: (e3, n3) => Po(((e4, n4) => ({
-    ...e4,
-    timeZone: n4
-  }))(e3, refineTimeZoneSlot(n3))),
-  withCalendar: (e3, n3) => Po(slotsWithCalendar(e3, refineCalendarSlot(n3))),
-  add: (e3, n3, t3) => Po(moveZonedDateTime(Do, createTimeZoneOps, e3, toDurationSlots(n3), t3)),
-  subtract: (e3, n3, t3) => Po(moveZonedDateTime(Do, createTimeZoneOps, e3, toDurationSlots(n3), t3, 1)),
-  until: (e3, n3, t3) => Co(createDurationSlots(diffZonedDateTimes(go, createTimeZoneOps, e3, toZonedDateTimeSlots(n3), t3))),
-  since: (e3, n3, t3) => Co(createDurationSlots(diffZonedDateTimes(go, createTimeZoneOps, e3, toZonedDateTimeSlots(n3), t3, 1))),
-  round: (e3, n3) => Po(((e4, n4, t3) => {
-    let { epochNanoseconds: o3, timeZone: r3, calendar: i3 } = n4;
-    const [a3, s3, c3] = refineRoundOptions(t3);
-    if (0 === a3 && 1 === s3) {
-      return n4;
-    }
-    const l3 = e4(r3), u3 = l3.getOffsetNanosecondsFor(o3);
-    let d3 = {
-      ...epochNanoToIso(o3, u3),
-      calendar: i3
-    };
-    return d3 = {
-      calendar: i3,
-      ...roundDateTime(d3, a3, s3, c3, l3)
-    }, o3 = getMatchingInstantFor(l3, d3, u3, 2, 0, 1), createZonedDateTimeSlots(o3, r3, i3);
-  })(createTimeZoneOps, e3, n3)),
-  startOfDay: (e3) => Po(((e4, n3) => {
-    let { epochNanoseconds: t3, timeZone: o3, calendar: r3 } = n3;
-    const i3 = e4(o3);
-    return t3 = getMatchingInstantFor(i3, {
-      ...zn(n3, i3),
-      ...Ae
-    }, void 0, 0, 0, 1), createZonedDateTimeSlots(t3, o3, r3);
-  })(createTimeZoneOps, e3)),
-  equals(e3, n3) {
-    return !compareZonedDateTimes(t3 = e3, o3 = toZonedDateTimeSlots(n3)) && isTimeZoneSlotsEqual(t3.timeZone, o3.timeZone) && isIdLikeEqual(t3.calendar, o3.calendar);
-    var t3, o3;
-  },
-  toString: (e3, n3) => formatZonedDateTimeIso(createSimpleTimeZoneOps, e3, n3),
-  toJSON: (e3) => formatZonedDateTimeIso(createSimpleTimeZoneOps, e3),
-  toLocaleString(e3, n3, t3 = {}) {
-    const [o3, r3] = Gt(n3, t3, e3);
+  add: (e3, t3) => Mi(movePlainTime(0, e3, toDurationSlots(t3))),
+  subtract: (e3, t3) => Mi(movePlainTime(1, e3, toDurationSlots(t3))),
+  until: (e3, t3, n3) => ls(diffPlainTimes(0, e3, toPlainTimeSlots(t3), n3)),
+  since: (e3, t3, n3) => ls(diffPlainTimes(1, e3, toPlainTimeSlots(t3), n3)),
+  round: (e3, t3) => Mi(roundPlainTime(e3, t3)),
+  equals: (e3, t3) => plainTimesEqual(e3, toPlainTimeSlots(t3)),
+  toString: formatPlainTimeIso,
+  toJSON: (e3) => formatPlainTimeIso(e3),
+  toLocaleString(e3, t3, n3) {
+    const [o3, r3] = ei(t3, n3, e3);
     return o3.format(r3);
   },
-  toInstant: (e3) => Mo(createInstantSlots(e3.epochNanoseconds)),
-  toPlainDate: (e3) => Ro(zonedDateTimeToPlainDate(createSimpleTimeZoneOps, e3)),
-  toPlainTime: (e3) => qo(zonedDateTimeToPlainTime(createSimpleTimeZoneOps, e3)),
-  toPlainDateTime: (e3) => Yo(zonedDateTimeToPlainDateTime(createSimpleTimeZoneOps, e3)),
+  toZonedDateTime: (e3, t3) => Ss(plainTimeToZonedDateTime(refineTimeZoneSlot, toPlainDateSlots, createTimeZoneOps, e3, t3)),
+  toPlainDateTime: (e3, t3) => Ai(plainTimeToPlainDateTime(e3, toPlainDateSlots(t3))),
+  getISOFields: pi,
+  valueOf: neverValueOf
+}, {
+  from: (e3, t3) => Mi(toPlainTimeSlots(e3, t3)),
+  compare: (e3, t3) => compareIsoTimeFields(toPlainTimeSlots(e3), toPlainTimeSlots(t3))
+});
+var [yi, Ni, Bi] = createSlotClass(Tn, bindArgs(constructPlainYearMonthSlots, refineCalendarSlot), {
+  ...fi,
+  ...ui
+}, {
+  with(e3, t3, n3) {
+    return Ni(plainYearMonthWithFields(es, e3, this, rejectInvalidBag(t3), n3));
+  },
+  add: (e3, t3, n3) => Ni(movePlainYearMonth(as, 0, e3, toDurationSlots(t3), n3)),
+  subtract: (e3, t3, n3) => Ni(movePlainYearMonth(as, 1, e3, toDurationSlots(t3), n3)),
+  until: (e3, t3, n3) => ls(diffPlainYearMonth(is, 0, e3, toPlainYearMonthSlots(t3), n3)),
+  since: (e3, t3, n3) => ls(diffPlainYearMonth(is, 1, e3, toPlainYearMonthSlots(t3), n3)),
+  equals: (e3, t3) => plainYearMonthsEqual(e3, toPlainYearMonthSlots(t3)),
+  toString: formatPlainYearMonthIso,
+  toJSON: (e3) => formatPlainYearMonthIso(e3),
+  toLocaleString(e3, t3, n3) {
+    const [o3, r3] = Qa(t3, n3, e3);
+    return o3.format(r3);
+  },
+  toPlainDate(e3, t3) {
+    return Vi(plainYearMonthToPlainDate(ts, e3, this, t3));
+  },
+  getISOFields: pi,
+  getCalendar: createCalendarFromSlots,
+  valueOf: neverValueOf
+}, {
+  from: (e3, t3) => Ni(toPlainYearMonthSlots(e3, t3)),
+  compare: (e3, t3) => compareIsoDateFields(toPlainYearMonthSlots(e3), toPlainYearMonthSlots(t3))
+});
+var [Yi, Ai] = createSlotClass(In, bindArgs(constructPlainDateTimeSlots, refineCalendarSlot), {
+  ...fi,
+  ...ci,
+  ...Oi
+}, {
+  with(e3, t3, n3) {
+    return Ai(plainDateTimeWithFields(ts, e3, this, rejectInvalidBag(t3), n3));
+  },
+  withPlainTime: (e3, t3) => Ai(plainDateTimeWithPlainTime(e3, optionalToPlainTimeFields(t3))),
+  withPlainDate: (e3, t3) => Ai(plainDateTimeWithPlainDate(e3, toPlainDateSlots(t3))),
+  withCalendar: (e3, t3) => Ai(slotsWithCalendar(e3, refineCalendarSlot(t3))),
+  add: (e3, t3, n3) => Ai(movePlainDateTime(os, 0, e3, toDurationSlots(t3), n3)),
+  subtract: (e3, t3, n3) => Ai(movePlainDateTime(os, 1, e3, toDurationSlots(t3), n3)),
+  until: (e3, t3, n3) => ls(diffPlainDateTimes(rs, 0, e3, toPlainDateTimeSlots(t3), n3)),
+  since: (e3, t3, n3) => ls(diffPlainDateTimes(rs, 1, e3, toPlainDateTimeSlots(t3), n3)),
+  round: (e3, t3) => Ai(roundPlainDateTime(e3, t3)),
+  equals: (e3, t3) => plainDateTimesEqual(e3, toPlainDateTimeSlots(t3)),
+  toString: (e3, t3) => formatPlainDateTimeIso(e3, t3),
+  toJSON: (e3) => formatPlainDateTimeIso(e3),
+  toLocaleString(e3, t3, n3) {
+    const [o3, r3] = _a(t3, n3, e3);
+    return o3.format(r3);
+  },
+  toZonedDateTime: (e3, t3, n3) => Ss(plainDateTimeToZonedDateTime(createTimeZoneOps, e3, refineTimeZoneSlot(t3), n3)),
+  toPlainDate: (e3) => Vi(createPlainDateSlots(e3)),
   toPlainYearMonth(e3) {
-    return _t(convertToPlainYearMonth(uo(e3.calendar), this));
+    return Ni(plainDateTimeToPlainYearMonth(Xi, e3, this));
   },
   toPlainMonthDay(e3) {
-    return Vt(convertToPlainMonthDay(mo(e3.calendar), this));
+    return Pi(plainDateTimeToPlainMonthDay(_i, e3, this));
   },
-  getISOFields: (e3) => ((e4, n3) => {
-    const t3 = zn(n3, createSimpleTimeZoneOps(n3.timeZone));
-    return {
-      calendar: n3.calendar,
-      ...pluckProps(ze, t3),
-      offset: formatOffsetNano(t3.offsetNanoseconds),
-      timeZone: n3.timeZone
-    };
-  })(0, e3),
-  getCalendar: getCalendarFromSlots,
-  getTimeZone: ({ timeZone: e3 }) => "string" == typeof e3 ? new So(e3) : e3,
+  toPlainTime: (e3) => Mi(createPlainTimeSlots(e3)),
+  getISOFields: pi,
+  getCalendar: createCalendarFromSlots,
   valueOf: neverValueOf
 }, {
-  from: (e3, n3) => Po(toZonedDateTimeSlots(e3, n3)),
-  compare: (e3, n3) => compareZonedDateTimes(toZonedDateTimeSlots(e3), toZonedDateTimeSlots(n3))
+  from: (e3, t3) => Ai(toPlainDateTimeSlots(e3, t3)),
+  compare: (e3, t3) => compareIsoDateTimeFields(toPlainDateTimeSlots(e3), toPlainDateTimeSlots(t3))
 });
-var [vo, Mo, Fo] = createSlotClass(St, (e3) => createInstantSlots(checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(e3)))), Rt, {
-  add: (e3, n3) => Mo(moveInstant(e3, toDurationSlots(n3))),
-  subtract: (e3, n3) => Mo(moveInstant(e3, toDurationSlots(n3), 1)),
-  until: (e3, n3, t3) => Co(diffInstants(e3, toInstantSlots(n3), t3)),
-  since: (e3, n3, t3) => Co(diffInstants(e3, toInstantSlots(n3), t3, 1)),
-  round: (e3, n3) => Mo(((e4, n4) => {
-    const [t3, o3, r3] = refineRoundOptions(n4, 5, 1);
-    return createInstantSlots(roundDayTimeNano(e4.epochNanoseconds, t3, o3, r3, 1));
-  })(e3, n3)),
-  equals(e3, n3) {
-    return !compareInstants(e3, toInstantSlots(n3));
+var [Ei, Vi, Ji] = createSlotClass(Dn, bindArgs(constructPlainDateSlots, refineCalendarSlot), {
+  ...fi,
+  ...ci
+}, {
+  with(e3, t3, n3) {
+    return Vi(plainDateWithFields(ts, e3, this, rejectInvalidBag(t3), n3));
   },
-  toString: (e3, n3) => formatInstantIso(refineTimeZoneSlot, createSimpleTimeZoneOps, e3, n3),
-  toJSON: (e3) => formatInstantIso(refineTimeZoneSlot, createSimpleTimeZoneOps, e3),
-  toLocaleString(e3, n3, t3) {
-    const [o3, r3] = $t(n3, t3, e3);
+  withCalendar: (e3, t3) => Vi(slotsWithCalendar(e3, refineCalendarSlot(t3))),
+  add: (e3, t3, n3) => Vi(movePlainDate(os, 0, e3, toDurationSlots(t3), n3)),
+  subtract: (e3, t3, n3) => Vi(movePlainDate(os, 1, e3, toDurationSlots(t3), n3)),
+  until: (e3, t3, n3) => ls(diffPlainDates(rs, 0, e3, toPlainDateSlots(t3), n3)),
+  since: (e3, t3, n3) => ls(diffPlainDates(rs, 1, e3, toPlainDateSlots(t3), n3)),
+  equals: (e3, t3) => plainDatesEqual(e3, toPlainDateSlots(t3)),
+  toString: formatPlainDateIso,
+  toJSON: (e3) => formatPlainDateIso(e3),
+  toLocaleString(e3, t3, n3) {
+    const [o3, r3] = $a(t3, n3, e3);
     return o3.format(r3);
   },
-  toZonedDateTimeISO: (e3, n3) => Po(instantToZonedDateTime(e3, refineTimeZoneSlot(n3))),
-  toZonedDateTime(e3, n3) {
-    const t3 = requireObjectlike(n3);
-    return Po(instantToZonedDateTime(e3, refineTimeZoneSlot(t3.timeZone), refineCalendarSlot(t3.calendar)));
+  toZonedDateTime(e3, t3) {
+    const n3 = !isObjectLike(t3) || t3 instanceof Ii ? {
+      timeZone: t3
+    } : t3;
+    return Ss(plainDateToZonedDateTime(refineTimeZoneSlot, toPlainTimeSlots, createTimeZoneOps, e3, n3));
   },
+  toPlainDateTime: (e3, t3) => Ai(plainDateToPlainDateTime(e3, optionalToPlainTimeFields(t3))),
+  toPlainYearMonth(e3) {
+    return Ni(plainDateToPlainYearMonth(Xi, e3, this));
+  },
+  toPlainMonthDay(e3) {
+    return Pi(plainDateToPlainMonthDay(_i, e3, this));
+  },
+  getISOFields: pi,
+  getCalendar: createCalendarFromSlots,
   valueOf: neverValueOf
 }, {
-  from: (e3) => Mo(toInstantSlots(e3)),
-  fromEpochSeconds: (e3) => Mo(((e4) => createInstantSlots(checkEpochNanoInBounds(numberToDayTimeNano(e4, Z))))(e3)),
-  fromEpochMilliseconds: (e3) => Mo(((e4) => createInstantSlots(checkEpochNanoInBounds(numberToDayTimeNano(e4, C))))(e3)),
-  fromEpochMicroseconds: (e3) => Mo(((e4) => createInstantSlots(checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(e4), E))))(e3)),
-  fromEpochNanoseconds: (e3) => Mo(((e4) => createInstantSlots(checkEpochNanoInBounds(bigIntToDayTimeNano(toBigInt(e4)))))(e3)),
-  compare: (e3, n3) => compareInstants(toInstantSlots(e3), toInstantSlots(n3))
+  from: (e3, t3) => Vi(toPlainDateSlots(e3, t3)),
+  compare: (e3, t3) => compareIsoDateFields(toPlainDateSlots(e3), toPlainDateSlots(t3))
 });
-var bo = {
-  getOffsetNanosecondsFor: adapterGetOffsetNanosecondsFor,
-  getPossibleInstantsFor(e3, n3, t3) {
-    return [...n3.call(e3, Yo(createPlainDateTimeSlots(t3, we)))].map((e4) => Fo(e4).epochNanoseconds);
+var Li = {
+  fields(e3, t3, n3) {
+    return [...t3.call(e3, n3)];
   }
 };
-var wo = {
-  getOffsetNanosecondsFor: adapterGetOffsetNanosecondsFor
+var qi = /* @__PURE__ */ Object.assign({
+  dateFromFields(e3, t3, n3, o3) {
+    return Ji(t3.call(e3, Object.assign(/* @__PURE__ */ Object.create(null), n3), o3));
+  }
+}, Li);
+var ki = /* @__PURE__ */ Object.assign({
+  yearMonthFromFields(e3, t3, n3, o3) {
+    return Bi(t3.call(e3, Object.assign(/* @__PURE__ */ Object.create(null), n3), o3));
+  }
+}, Li);
+var xi = /* @__PURE__ */ Object.assign({
+  monthDayFromFields(e3, t3, n3, o3) {
+    return Di(t3.call(e3, Object.assign(/* @__PURE__ */ Object.create(null), n3), o3));
+  }
+}, Li);
+var Ri = {
+  mergeFields(e3, t3, n3, o3) {
+    return requireObjectLike(t3.call(e3, Object.assign(/* @__PURE__ */ Object.create(null), n3), Object.assign(/* @__PURE__ */ Object.create(null), o3)));
+  }
 };
-var [Eo, Co, Zo] = createSlotClass(Nt, (e3 = 0, n3 = 0, t3 = 0, o3 = 0, r3 = 0, i3 = 0, a3 = 0, s3 = 0, c3 = 0, l3 = 0) => createDurationSlots(checkDurationFields(mapProps(toStrictInteger, zipProps(ie, [e3, n3, t3, o3, r3, i3, a3, s3, c3, l3])))), {
-  ...Yt,
-  blank: (e3) => !Hn(e3),
-  sign: (e3) => Hn(e3)
-}, {
-  with: (e3, n3) => Co(((e4, n4) => {
-    return createDurationSlots((t3 = e4, o3 = n4, checkDurationFields({
-      ...t3,
-      ...refineFields(o3, ae)
+var Wi = /* @__PURE__ */ Object.assign({}, qi, Ri);
+var Gi = /* @__PURE__ */ Object.assign({}, ki, Ri);
+var Ui = /* @__PURE__ */ Object.assign({}, xi, Ri);
+var zi = {
+  dateAdd(e3, t3, n3, o3, r3) {
+    return Ji(t3.call(e3, Vi(createPlainDateSlots(n3, e3)), ls(createDurationSlots(o3)), r3));
+  }
+};
+var Hi = /* @__PURE__ */ Object.assign({}, zi, {
+  dateUntil(e3, t3, n3, o3, r3, a3) {
+    return cs(t3.call(e3, Vi(createPlainDateSlots(n3, e3)), Vi(createPlainDateSlots(o3, e3)), Object.assign(/* @__PURE__ */ Object.create(null), a3, {
+      largestUnit: C[r3]
     })));
-    var t3, o3;
-  })(e3, n3)),
-  add: (e3, n3, t3) => Co(addDurations(refinePublicRelativeTo, go, createTimeZoneOps, e3, toDurationSlots(n3), t3)),
-  subtract: (e3, n3, t3) => Co(addDurations(refinePublicRelativeTo, go, createTimeZoneOps, e3, toDurationSlots(n3), t3, 1)),
-  negated: (e3) => Co(negateDuration(e3)),
-  abs: (e3) => Co(((e4) => {
-    return createDurationSlots(-1 === Hn(n3 = e4) ? negateDurationFields(n3) : n3);
-    var n3;
-  })(e3)),
-  round: (e3, n3) => Co(((e4, n4, t3, o3, r3) => {
-    const i3 = getLargestDurationUnit(o3), [a3, s3, c3, l3, u3] = ((e5, n5, t4) => {
-      e5 = normalizeUnitNameOptions(e5, fe);
-      let o4 = ye(e5);
-      const r4 = t4(e5[Te]);
-      let i4 = parseRoundingIncInteger(e5);
-      const a4 = be(e5, 7);
-      let s4 = Ie(e5);
-      if (void 0 === o4 && void 0 === s4) {
-        throw new RangeError("Required smallestUnit or largestUnit");
-      }
-      return null == s4 && (s4 = 0), null == o4 && (o4 = Math.max(s4, n5)), checkLargestSmallestUnit(o4, s4), i4 = refineRoundingInc(i4, s4, 1), [o4, s4, i4, a4, r4];
-    })(r3, i3, e4), f3 = Math.max(i3, a3);
-    if (f3 < 6 || 6 === f3 && (!u3 || !u3.epochNanoseconds)) {
-      return createDurationSlots(((e5, n5, t4, o4, r4) => ({
-        ...ue,
-        ...balanceDayTimeDuration(e5, n5, t4, o4, r4)
-      }))(o3, a3, s3, c3, l3));
-    }
-    if (!u3) {
-      throw new RangeError(I);
-    }
-    const m3 = createMarkerSystem(n4, t3, u3);
-    let p3 = 0;
-    o3.weeks && 7 === s3 && (p3 = o3.weeks, o3 = {
-      ...o3,
-      weeks: 0
-    });
-    let [h3, T3] = spanDuration(o3, void 0, a3, ...m3);
-    const D2 = Hn(o3), g3 = Hn(h3);
-    if (D2 && g3 && D2 !== g3) {
-      throw new RangeError(d);
-    }
-    return !g3 || 0 === s3 && 1 === c3 || (h3 = roundRelativeDuration(h3, T3, a3, s3, c3, l3, ...m3)), h3.weeks += p3, createDurationSlots(h3);
-  })(refinePublicRelativeTo, go, createTimeZoneOps, e3, n3)),
-  total: (e3, n3) => ((e4, n4, t3, o3, r3) => {
-    const i3 = getLargestDurationUnit(o3), [a3, s3] = ((e5, n5) => {
-      const t4 = n5((e5 = normalizeUnitNameOptions(e5, me))[Te]);
-      let o4 = Se(e5);
-      return o4 = requirePropDefined(me, o4), [o4, t4];
-    })(r3, e4), c3 = Math.max(a3, i3);
-    if (c3 < 6 || 6 === c3 && (!s3 || !s3.epochNanoseconds)) {
-      return ((e5, n5) => totalDayTimeNano(durationFieldsToDayTimeNano(e5, 6), n5))(o3, a3);
-    }
-    if (!s3) {
-      throw new RangeError(I);
-    }
-    const l3 = createMarkerSystem(n4, t3, s3);
-    return ((e5, n5, t4, o4, r4, i4) => {
-      const a4 = Hn(e5), [s4, c4] = clampRelativeDuration(clearDurationFields(e5, t4 - 1), t4, a4, o4, r4, i4), l4 = computeEpochNanoFrac(s4, c4, n5);
-      return e5[ie[t4]] + l4 * a4;
-    })(...spanDuration(o3, void 0, a3, ...l3), a3, ...l3);
-  })(refinePublicRelativeTo, go, createTimeZoneOps, e3, n3),
+  }
+});
+var Ki = /* @__PURE__ */ Object.assign({}, zi, {
+  day: dayAdapter
+});
+var Qi = /* @__PURE__ */ Object.assign({}, Hi, {
+  day: dayAdapter
+});
+var Xi = /* @__PURE__ */ createCompoundOpsCreator(ki);
+var $i = /* @__PURE__ */ createCompoundOpsCreator(qi);
+var _i = /* @__PURE__ */ createCompoundOpsCreator(xi);
+var es = /* @__PURE__ */ createCompoundOpsCreator(Gi);
+var ts = /* @__PURE__ */ createCompoundOpsCreator(Wi);
+var ns = /* @__PURE__ */ createCompoundOpsCreator(Ui);
+var os = /* @__PURE__ */ createCompoundOpsCreator(zi);
+var rs = /* @__PURE__ */ createCompoundOpsCreator(Hi);
+var as = /* @__PURE__ */ createCompoundOpsCreator(Ki);
+var is = /* @__PURE__ */ createCompoundOpsCreator(Qi);
+var [ss, ls, cs] = createSlotClass(vn, constructDurationSlots, {
+  ...Si,
+  blank: getDurationBlank
+}, {
+  with: (e3, t3) => ls(durationWithFields(e3, t3)),
+  add: (e3, t3, n3) => ls(addDurations(refinePublicRelativeTo, rs, createTimeZoneOps, 0, e3, toDurationSlots(t3), n3)),
+  subtract: (e3, t3, n3) => ls(addDurations(refinePublicRelativeTo, rs, createTimeZoneOps, 1, e3, toDurationSlots(t3), n3)),
+  negated: (e3) => ls(negateDuration(e3)),
+  abs: (e3) => ls(absDuration(e3)),
+  round: (e3, t3) => ls(roundDuration(refinePublicRelativeTo, rs, createTimeZoneOps, e3, t3)),
+  total: (e3, t3) => totalDuration(refinePublicRelativeTo, rs, createTimeZoneOps, e3, t3),
   toString: formatDurationIso,
-  toLocaleString(e3, n3, t3) {
-    return new Intl.DurationFormat(n3, t3).format(this);
+  toLocaleString(e3, t3, n3) {
+    return Intl.DurationFormat ? new Intl.DurationFormat(t3, n3).format(this) : formatDurationIso(e3);
   },
   toJSON: (e3) => formatDurationIso(e3),
   valueOf: neverValueOf
 }, {
-  from: (e3) => Co(toDurationSlots(e3)),
-  compare: (e3, n3, t3) => ((e4, n4, t4, o3, r3, i3) => {
-    const a3 = e4(normalizeOptions(i3).relativeTo), s3 = Math.max(getLargestDurationUnit(o3), getLargestDurationUnit(r3));
-    if (allFieldsEqual(ie, o3, r3)) {
-      return 0;
-    }
-    if (s3 < 6 || 6 === s3 && (!a3 || !a3.epochNanoseconds)) {
-      return compareDayTimeNanos(givenFieldsToDayTimeNano(o3, 6, ie), givenFieldsToDayTimeNano(r3, 6, ie));
-    }
-    if (!a3) {
-      throw new RangeError(I);
-    }
-    const [c3, l3, u3] = createMarkerSystem(n4, t4, a3);
-    return compareDayTimeNanos(l3(u3(c3, o3)), l3(u3(c3, r3)));
-  })(refinePublicRelativeTo, go, createTimeZoneOps, toDurationSlots(e3), toDurationSlots(n3), t3)
+  from: (e3) => ls(toDurationSlots(e3)),
+  compare: (e3, t3, n3) => compareDurations(refinePublicRelativeTo, os, createTimeZoneOps, toDurationSlots(e3), toDurationSlots(t3), n3)
 });
-var [ko, Yo] = createSlotClass(gt, bindArgs((e3, n3, t3, o3, r3 = 0, i3 = 0, a3 = 0, s3 = 0, c3 = 0, l3 = 0, u3 = we) => createPlainDateTimeSlots(checkIsoDateTimeInBounds(checkIsoDateTimeFields(mapProps(toInteger, zipProps(Le, [n3, t3, o3, r3, i3, a3, s3, c3, l3])))), e3(u3)), refineCalendarSlot), {
-  ...Zt,
-  ...wt,
-  ...Bt
-}, {
-  with(e3, n3, t3) {
-    return Yo(((e4, n4, t4, o3, r3) => {
-      const i3 = copyOptions(r3);
-      return createPlainDateTimeSlots(((e5, n5, t5, o4) => {
-        const r4 = mergeCalendarFields(e5, n5, t5, K, L), i4 = refineOverflowOptions(o4);
-        return checkIsoDateTimeInBounds({
-          ...e5.dateFromFields(r4, overrideOverflowOptions(o4, i4)),
-          ...refineTimeBag(r4, i4)
-        });
-      })(e4(n4.calendar), t4, o3, i3));
-    })(ho, e3, this, rejectInvalidBag(n3), t3));
-  },
-  withPlainTime: (e3, n3) => Yo(((e4, n4 = Ae) => createPlainDateTimeSlots({
-    ...e4,
-    ...n4
-  }))(e3, optionalToPlainTimeFields(n3))),
-  withPlainDate(e3, n3) {
-    return Yo((t3 = e3, o3 = toPlainDateSlots(n3), createPlainDateTimeSlots({
-      ...t3,
-      ...o3
-    }, getPreferredCalendarSlot(t3.calendar, o3.calendar))));
-    var t3, o3;
-  },
-  withCalendar: (e3, n3) => Yo(slotsWithCalendar(e3, refineCalendarSlot(n3))),
-  add: (e3, n3, t3) => Yo(movePlainDateTime(Do, e3, toDurationSlots(n3), t3)),
-  subtract: (e3, n3, t3) => Yo(movePlainDateTime(Do, e3, toDurationSlots(n3), t3, 1)),
-  until: (e3, n3, t3) => Co(diffPlainDateTimes(go, e3, toPlainDateTimeSlots(n3), t3)),
-  since: (e3, n3, t3) => Co(diffPlainDateTimes(go, e3, toPlainDateTimeSlots(n3), t3, 1)),
-  round: (e3, n3) => Yo(((e4, n4) => createPlainDateTimeSlots(roundDateTime(e4, ...refineRoundOptions(n4)), e4.calendar))(e3, n3)),
-  equals(e3, n3) {
-    return !compareIsoDateTimeFields(t3 = e3, o3 = toPlainDateTimeSlots(n3)) && isIdLikeEqual(t3.calendar, o3.calendar);
-    var t3, o3;
-  },
-  toString: (e3, n3) => formatPlainDateTimeIso(e3, n3),
-  toJSON: (e3) => formatPlainDateTimeIso(e3),
-  toLocaleString(e3, n3, t3) {
-    const [o3, r3] = Ut(n3, t3, e3);
-    return o3.format(r3);
-  },
-  toZonedDateTime: (e3, n3, t3) => Po(((e4, n4, t4, o3) => createZonedDateTimeSlots(((e5, n5, t5, o4) => {
-    const r3 = refineEpochDisambigOptions(o4);
-    return checkEpochNanoInBounds(getSingleInstantFor(e5(n5), t5, r3));
-  })(e4, t4, n4, o3), t4, n4.calendar))(createTimeZoneOps, e3, refineTimeZoneSlot(n3), t3)),
-  toPlainDate: (e3) => Ro(createPlainDateSlots(e3)),
-  toPlainYearMonth(e3) {
-    return _t(((e4, n3, t3) => {
-      const o3 = uo(n3.calendar);
-      return createPlainYearMonthSlots({
-        ...n3,
-        ...convertToPlainYearMonth(o3, t3)
-      });
-    })(0, e3, this));
-  },
-  toPlainMonthDay(e3) {
-    return Vt(convertToPlainMonthDay(mo(e3.calendar), this));
-  },
-  toPlainTime: (e3) => qo(createPlainTimeSlots(e3)),
-  getISOFields: removeBranding,
-  getCalendar: getCalendarFromSlots,
-  valueOf: neverValueOf
-}, {
-  from: (e3, n3) => Yo(toPlainDateTimeSlots(e3, n3)),
-  compare: (e3, n3) => compareIsoDateTimeFields(toPlainDateTimeSlots(e3), toPlainDateTimeSlots(n3))
-});
-var [Bo, Ro, Lo] = createSlotClass(Dt, bindArgs((e3, n3, t3, o3, r3 = we) => createPlainDateSlots(checkIsoDateInBounds(checkIsoDateFields(mapProps(toInteger, {
-  isoYear: n3,
-  isoMonth: t3,
-  isoDay: o3
-}))), e3(r3)), refineCalendarSlot), {
-  ...Zt,
-  ...wt
-}, {
-  with(e3, n3, t3) {
-    return Ro(((e4, n4, t4, o3, r3) => {
-      const i3 = copyOptions(r3);
-      return ((e5, n5, t5, o4) => {
-        const r4 = mergeCalendarFields(e5, n5, t5, K);
-        return e5.dateFromFields(r4, o4);
-      })(e4(n4.calendar), t4, o3, i3);
-    })(ho, e3, this, rejectInvalidBag(n3), t3));
-  },
-  withCalendar: (e3, n3) => Ro(slotsWithCalendar(e3, refineCalendarSlot(n3))),
-  add: (e3, n3, t3) => Ro(movePlainDate(Do, e3, toDurationSlots(n3), t3)),
-  subtract: (e3, n3, t3) => Ro(movePlainDate(Do, e3, toDurationSlots(n3), t3, 1)),
-  until: (e3, n3, t3) => Co(diffPlainDates(go, e3, toPlainDateSlots(n3), t3)),
-  since: (e3, n3, t3) => Co(diffPlainDates(go, e3, toPlainDateSlots(n3), t3, 1)),
-  equals(e3, n3) {
-    return !compareIsoDateFields(t3 = e3, o3 = toPlainDateSlots(n3)) && isIdLikeEqual(t3.calendar, o3.calendar);
-    var t3, o3;
-  },
-  toString: formatPlainDateIso,
-  toJSON: (e3) => formatPlainDateIso(e3),
-  toLocaleString(e3, n3, t3) {
-    const [o3, r3] = At(n3, t3, e3);
-    return o3.format(r3);
-  },
-  toZonedDateTime(e3, n3) {
-    const t3 = !isObjectLike(n3) || n3 instanceof So ? {
-      timeZone: n3
-    } : n3;
-    return Po(((e4, n4, t4, o3, r3) => {
-      const i3 = refineTimeZoneSlot(r3.timeZone), a3 = r3.plainTime, s3 = void 0 !== a3 ? n4(a3) : Ae;
-      return createZonedDateTimeSlots(getSingleInstantFor(t4(i3), {
-        ...o3,
-        ...s3
-      }), i3, o3.calendar);
-    })(0, toPlainTimeSlots, createTimeZoneOps, e3, t3));
-  },
-  toPlainDateTime: (e3, n3) => Yo(((e4, n4 = Ae) => createPlainDateTimeSlots(checkIsoDateTimeInBounds({
-    ...e4,
-    ...n4
-  })))(e3, optionalToPlainTimeFields(n3))),
-  toPlainYearMonth(e3) {
-    return _t(convertToPlainYearMonth(uo(e3.calendar), this));
-  },
-  toPlainMonthDay(e3) {
-    return Vt(convertToPlainMonthDay(mo(e3.calendar), this));
-  },
-  getISOFields: removeBranding,
-  getCalendar: getCalendarFromSlots,
-  valueOf: neverValueOf
-}, {
-  from: (e3, n3) => Ro(toPlainDateSlots(e3, n3)),
-  compare: (e3, n3) => compareIsoDateFields(toPlainDateSlots(e3), toPlainDateSlots(n3))
-});
-var [jo, qo] = createSlotClass(It, (e3 = 0, n3 = 0, t3 = 0, o3 = 0, r3 = 0, i3 = 0) => createPlainTimeSlots(constrainIsoTimeFields(mapProps(toInteger, zipProps(Be, [e3, n3, t3, o3, r3, i3])), 1)), Bt, {
-  with(e3, n3, t3) {
-    return qo(((e4, n4, t4) => createPlainTimeSlots(((e5, n5, t5) => {
-      const o3 = refineOverflowOptions(t5);
-      return refineTimeBag({
-        ...pluckProps(j, e5),
-        ...refineFields(n5, j)
-      }, o3);
-    })(e4, n4, t4)))(this, rejectInvalidBag(n3), t3));
-  },
-  add: (e3, n3) => qo(movePlainTime(e3, toDurationSlots(n3))),
-  subtract: (e3, n3) => qo(movePlainTime(e3, toDurationSlots(n3), 1)),
-  until: (e3, n3, t3) => Co(diffPlainTimes(e3, toPlainTimeSlots(n3), t3)),
-  since: (e3, n3, t3) => Co(diffPlainTimes(e3, toPlainTimeSlots(n3), t3, 1)),
-  round: (e3, n3) => qo(((e4, n4) => createPlainTimeSlots(((e5, n5, t3, o3) => roundTimeToNano(e5, computeNanoInc(n5, t3), o3)[0])(e4, ...refineRoundOptions(n4, 5))))(e3, n3)),
-  equals(e3, n3) {
-    return !compareIsoTimeFields(e3, toPlainTimeSlots(n3));
-  },
-  toString: formatPlainTimeIso,
-  toJSON: (e3) => formatPlainTimeIso(e3),
-  toLocaleString(e3, n3, t3) {
-    const [o3, r3] = xt(n3, t3, e3);
-    return o3.format(r3);
-  },
-  toZonedDateTime: (e3, n3) => Po(((e4, n4, t3, o3, r3) => {
-    const i3 = toPlainDateSlots(r3.plainDate), a3 = e4(r3.timeZone);
-    return createZonedDateTimeSlots(getSingleInstantFor(t3(a3), {
-      ...i3,
-      ...o3
-    }), a3, i3.calendar);
-  })(refineTimeZoneSlot, 0, createTimeZoneOps, e3, n3)),
-  toPlainDateTime(e3, n3) {
-    return Yo((t3 = e3, o3 = toPlainDateSlots(n3), createPlainDateTimeSlots(checkIsoDateTimeInBounds({
-      ...t3,
-      ...o3
-    }))));
-    var t3, o3;
-  },
-  getISOFields: removeBranding,
-  valueOf: neverValueOf
-}, {
-  from: (e3, n3) => qo(toPlainTimeSlots(e3, n3)),
-  compare: (e3, n3) => compareIsoTimeFields(toPlainTimeSlots(e3), toPlainTimeSlots(n3))
-});
-var zo = createProtocolChecker(Object.keys(bo));
-var Ao = /* @__PURE__ */ new WeakMap();
-var Uo = Ao.get.bind(Ao);
-var xo = Ao.set.bind(Ao);
-var $o = {
+var us = {
   toString: (e3) => e3.id,
   toJSON: (e3) => e3.id,
-  ...bt,
-  dateAdd: ({ id: e3, P: n3 }, t3, o3, r3) => Ro(createPlainDateSlots(n3.dateAdd(toPlainDateSlots(t3), toDurationSlots(o3), r3), e3)),
-  dateUntil: ({ P: e3 }, n3, t3, o3) => Co(createDurationSlots(e3.dateUntil(toPlainDateSlots(n3), toPlainDateSlots(t3), ((e4) => (e4 = normalizeOptions(e4), ye(e4, 9, 6, 1)))(o3)))),
-  dateFromFields: ({ id: e3, P: n3 }, t3, o3) => Ro(refinePlainDateBag(n3, t3, o3, e3 === we ? ["year", "day"] : [])),
-  yearMonthFromFields: ({ id: e3, P: n3 }, t3, o3) => _t(refinePlainYearMonthBag(n3, t3, o3, e3 === we ? G : [])),
-  monthDayFromFields: ({ id: e3, P: n3 }, t3, o3) => Vt(refinePlainMonthDayBag(n3, 0, t3, o3, e3 === we ? H : [])),
-  fields({ P: e3 }, n3) {
-    const t3 = new Set(K), o3 = [];
-    for (const e4 of n3) {
-      if (ne(e4), !t3.has(e4)) {
+  ...li,
+  dateAdd: ({ id: e3, K: t3 }, n3, o3, r3) => Vi(createPlainDateSlots(t3.dateAdd(toPlainDateSlots(n3), toDurationSlots(o3), r3), e3)),
+  dateUntil: ({ K: e3 }, t3, n3, o3) => ls(createDurationSlots(e3.dateUntil(toPlainDateSlots(t3), toPlainDateSlots(n3), refineCalendarDiffOptions(o3)))),
+  dateFromFields: ({ id: e3, K: t3 }, n3, o3) => Vi(refinePlainDateBag(t3, n3, o3, getRequiredDateFields(e3))),
+  yearMonthFromFields: ({ id: e3, K: t3 }, n3, o3) => Ni(refinePlainYearMonthBag(t3, n3, o3, getRequiredYearMonthFields(e3))),
+  monthDayFromFields: ({ id: e3, K: t3 }, n3, o3) => Pi(refinePlainMonthDayBag(t3, 0, n3, o3, getRequiredMonthDayFields(e3))),
+  fields({ K: e3 }, t3) {
+    const n3 = new Set(re), o3 = [];
+    for (const e4 of t3) {
+      if (We(e4), !n3.has(e4)) {
         throw new RangeError(forbiddenField(e4));
       }
-      t3.delete(e4), o3.push(e4);
+      n3.delete(e4), o3.push(e4);
     }
     return e3.fields(o3);
   },
-  mergeFields: ({ P: e3 }, n3, t3) => e3.mergeFields(excludeUndefinedProps(requireNonNullish(n3)), excludeUndefinedProps(requireNonNullish(t3)))
+  mergeFields: ({ K: e3 }, t3, n3) => e3.mergeFields(excludeUndefinedProps(requireNonNullish(t3)), excludeUndefinedProps(requireNonNullish(n3)))
 };
-var [Go] = createSlotClass("Calendar", (e3) => ({
-  O: "Calendar",
-  id: e3 = normalizeCalendarId(ne(e3)),
-  P: Kn(e3)
-}), {
+var [ds] = createSlotClass("Calendar", (e3) => {
+  const t3 = resolveCalendarId(We(e3));
+  return {
+    branding: "Calendar",
+    id: t3,
+    K: st(t3)
+  };
+}, {
   id: (e3) => e3.id
-}, $o, {
+}, us, {
   from(e3) {
-    const n3 = refineCalendarSlot(e3);
-    return "string" == typeof n3 ? new Go(n3) : n3;
+    const t3 = refineCalendarSlot(e3);
+    return "string" == typeof t3 ? new ds(t3) : t3;
   }
 });
-var Wo = createProtocolChecker(Object.keys($o).slice(4));
-var Vo;
-var Ho = Object.defineProperties({}, {
+var fs = /* @__PURE__ */ createProtocolValidator(Object.keys(us).slice(4));
+var [ms, Ss] = createSlotClass(Nn, bindArgs(constructZonedDateTimeSlots, refineCalendarSlot, refineTimeZoneSlot), {
+  ...Ti,
+  ...fi,
+  ...adaptDateMethods(ci),
+  ...adaptDateMethods(Oi),
+  hoursInDay: (e3) => computeHoursInDay(createTimeZoneOps, e3),
+  offsetNanoseconds: (e3) => slotsToIso(e3).offsetNanoseconds,
+  offset: (e3) => formatOffsetNano(slotsToIso(e3).offsetNanoseconds),
+  timeZoneId: (e3) => getId(e3.timeZone)
+}, {
+  with(e3, t3, n3) {
+    return Ss(zonedDateTimeWithFields(ts, createTimeZoneOps, e3, this, rejectInvalidBag(t3), n3));
+  },
+  withPlainTime: (e3, t3) => Ss(zonedDateTimeWithPlainTime(createTimeZoneOps, e3, optionalToPlainTimeFields(t3))),
+  withPlainDate: (e3, t3) => Ss(zonedDateTimeWithPlainDate(createTimeZoneOps, e3, toPlainDateSlots(t3))),
+  withTimeZone: (e3, t3) => Ss(slotsWithTimeZone(e3, refineTimeZoneSlot(t3))),
+  withCalendar: (e3, t3) => Ss(slotsWithCalendar(e3, refineCalendarSlot(t3))),
+  add: (e3, t3, n3) => Ss(moveZonedDateTime(os, createTimeZoneOps, 0, e3, toDurationSlots(t3), n3)),
+  subtract: (e3, t3, n3) => Ss(moveZonedDateTime(os, createTimeZoneOps, 1, e3, toDurationSlots(t3), n3)),
+  until: (e3, t3, n3) => ls(createDurationSlots(diffZonedDateTimes(rs, createTimeZoneOps, 0, e3, toZonedDateTimeSlots(t3), n3))),
+  since: (e3, t3, n3) => ls(createDurationSlots(diffZonedDateTimes(rs, createTimeZoneOps, 1, e3, toZonedDateTimeSlots(t3), n3))),
+  round: (e3, t3) => Ss(roundZonedDateTime(createTimeZoneOps, e3, t3)),
+  startOfDay: (e3) => Ss(computeStartOfDay(createTimeZoneOps, e3)),
+  equals: (e3, t3) => zonedDateTimesEqual(e3, toZonedDateTimeSlots(t3)),
+  toString: (e3, t3) => formatZonedDateTimeIso(createTimeZoneOffsetOps, e3, t3),
+  toJSON: (e3) => formatZonedDateTimeIso(createTimeZoneOffsetOps, e3),
+  toLocaleString(e3, t3, n3 = {}) {
+    const [o3, r3] = ni(t3, n3, e3);
+    return o3.format(r3);
+  },
+  toInstant: (e3) => bi(zonedDateTimeToInstant(e3)),
+  toPlainDate: (e3) => Vi(zonedDateTimeToPlainDate(createTimeZoneOffsetOps, e3)),
+  toPlainTime: (e3) => Mi(zonedDateTimeToPlainTime(createTimeZoneOffsetOps, e3)),
+  toPlainDateTime: (e3) => Ai(zonedDateTimeToPlainDateTime(createTimeZoneOffsetOps, e3)),
+  toPlainYearMonth(e3) {
+    return Ni(zonedDateTimeToPlainYearMonth(Xi, e3, this));
+  },
+  toPlainMonthDay(e3) {
+    return Pi(zonedDateTimeToPlainMonthDay(_i, e3, this));
+  },
+  getISOFields: (e3) => buildZonedIsoFields(createTimeZoneOffsetOps, e3),
+  getCalendar: createCalendarFromSlots,
+  getTimeZone: ({ timeZone: e3 }) => "string" == typeof e3 ? new Ii(e3) : e3,
+  valueOf: neverValueOf
+}, {
+  from: (e3, t3) => Ss(toZonedDateTimeSlots(e3, t3)),
+  compare: (e3, t3) => compareZonedDateTimes(toZonedDateTimeSlots(e3), toZonedDateTimeSlots(t3))
+});
+var Os = /* @__PURE__ */ Object.defineProperties({}, {
   ...createStringTagDescriptors("Temporal.Now"),
   ...createPropDescriptors({
     timeZoneId: () => getCurrentTimeZoneId(),
-    instant: () => Mo(createInstantSlots(getCurrentEpochNanoseconds())),
-    zonedDateTime: (e3, n3 = getCurrentTimeZoneId()) => Po(createZonedDateTimeSlots(getCurrentEpochNanoseconds(), refineTimeZoneSlot(n3), refineCalendarSlot(e3))),
-    zonedDateTimeISO: (e3 = getCurrentTimeZoneId()) => Po(createZonedDateTimeSlots(getCurrentEpochNanoseconds(), refineTimeZoneSlot(e3), we)),
-    plainDateTime: (e3, n3 = getCurrentTimeZoneId()) => Yo(createPlainDateTimeSlots(getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(n3))), refineCalendarSlot(e3))),
-    plainDateTimeISO: (e3 = getCurrentTimeZoneId()) => Yo(createPlainDateTimeSlots(getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(e3))), we)),
-    plainDate: (e3, n3 = getCurrentTimeZoneId()) => Ro(createPlainDateSlots(getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(n3))), refineCalendarSlot(e3))),
-    plainDateISO: (e3 = getCurrentTimeZoneId()) => Ro(createPlainDateSlots(getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(e3))), we)),
-    plainTimeISO: (e3 = getCurrentTimeZoneId()) => qo(createPlainTimeSlots(getCurrentIsoDateTime(createSimpleTimeZoneOps(refineTimeZoneSlot(e3)))))
+    instant: () => bi(createInstantSlots(getCurrentEpochNano())),
+    zonedDateTime: (e3, t3 = getCurrentTimeZoneId()) => Ss(createZonedDateTimeSlots(getCurrentEpochNano(), refineTimeZoneSlot(t3), refineCalendarSlot(e3))),
+    zonedDateTimeISO: (e3 = getCurrentTimeZoneId()) => Ss(createZonedDateTimeSlots(getCurrentEpochNano(), refineTimeZoneSlot(e3), ce)),
+    plainDateTime: (e3, t3 = getCurrentTimeZoneId()) => Ai(createPlainDateTimeSlots(getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(t3))), refineCalendarSlot(e3))),
+    plainDateTimeISO: (e3 = getCurrentTimeZoneId()) => Ai(createPlainDateTimeSlots(getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(e3))), ce)),
+    plainDate: (e3, t3 = getCurrentTimeZoneId()) => Vi(createPlainDateSlots(getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(t3))), refineCalendarSlot(e3))),
+    plainDateISO: (e3 = getCurrentTimeZoneId()) => Vi(createPlainDateSlots(getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(e3))), ce)),
+    plainTimeISO: (e3 = getCurrentTimeZoneId()) => Mi(createPlainTimeSlots(getCurrentIsoDateTime(createTimeZoneOffsetOps(refineTimeZoneSlot(e3)))))
   })
 });
-var Jo = Object.defineProperties({}, {
+var jt = /* @__PURE__ */ Object.defineProperties({}, {
   ...createStringTagDescriptors("Temporal"),
   ...createPropDescriptors({
-    PlainYearMonth: Jt,
-    PlainMonthDay: Wt,
-    PlainDate: Bo,
-    PlainTime: jo,
-    PlainDateTime: ko,
-    ZonedDateTime: Oo,
-    Instant: vo,
-    Calendar: Go,
-    TimeZone: So,
-    Duration: Eo,
-    Now: Ho
+    PlainYearMonth: yi,
+    PlainMonthDay: hi,
+    PlainDate: Ei,
+    PlainTime: ji,
+    PlainDateTime: Yi,
+    ZonedDateTime: ms,
+    Instant: Zi,
+    Calendar: ds,
+    TimeZone: Ii,
+    Duration: ss,
+    Now: Os
   })
 });
 
 // node_modules/temporal-polyfill/global.esm.js
 Object.defineProperties(globalThis, createPropDescriptors({
-  Temporal: Jo
+  Temporal: jt
 })), Object.defineProperties(Intl, createPropDescriptors({
-  DateTimeFormat
+  DateTimeFormat: qt
 })), Object.defineProperties(Date.prototype, createPropDescriptors({
-  toTemporalInstant
+  toTemporalInstant: xt
 }));
 
 // node_modules/array-from-async/index.mjs
@@ -84675,6 +84848,9 @@ var import_core = __toESM(require_core(), 1);
 import { EOL, platform } from "node:os";
 import * as path from "node:path";
 import { env } from "node:process";
+import {
+  inspect as utilInspect
+} from "node:util";
 
 // packages/main/node_modules/ansi-styles/index.js
 var ANSI_BACKGROUND_OFFSET = 10;
@@ -84871,8 +85047,8 @@ function escapeStringRegexp(string) {
 }
 
 // node_modules/clean-stack/home-directory.js
-import os from "node:os";
-var getHomeDirectory = () => os.homedir().replace(/\\/g, "/");
+import os2 from "node:os";
+var getHomeDirectory = () => os2.homedir().replace(/\\/g, "/");
 var home_directory_default = getHomeDirectory;
 
 // node_modules/clean-stack/index.js
@@ -84908,7 +85084,7 @@ function cleanStack(stack, { pretty = false, basePath, pathFilter } = {}) {
 // packages/main/src/util/custom-inspect.ts
 var customInspect = Symbol.for("nodejs.util.inspect.custom");
 Reflect.defineProperty(Error.prototype, customInspect, {
-  value: function(depth, options, inspect2) {
+  value: function(depth, options, inspect2 = utilInspect) {
     if (depth < 0) {
       return `[${getErrorName(this)}]`;
     } else if ((0, import_core.isDebug)()) {
@@ -84918,7 +85094,7 @@ Reflect.defineProperty(Error.prototype, customInspect, {
     }
   }
 });
-function formatError(error, options, inspect2) {
+function formatError(error, options, inspect2 = utilInspect) {
   let stylized = inspectNoCustom(error, options, inspect2);
   if (options.colors ?? false) {
     const prefix2 = getErrorName(error) + (error.message !== "" ? ":" : "");
@@ -84932,7 +85108,7 @@ function formatError(error, options, inspect2) {
 function getErrorName(error) {
   return error.name === error.constructor.name ? error.name : `${error.constructor.name} [${error.name}]`;
 }
-function inspectNoCustom(target, options, inspect2) {
+function inspectNoCustom(target, options, inspect2 = utilInspect) {
   const success = Reflect.defineProperty(target, customInspect, {
     value: void 0,
     configurable: true
@@ -85128,8 +85304,8 @@ var MetadataStorage = (
         });
       }
       var metadataFromAncestors = [];
-      for (var _i = 0, _a2 = this.getAncestors(target); _i < _a2.length; _i++) {
-        var ancestor = _a2[_i];
+      for (var _i2 = 0, _a3 = this.getAncestors(target); _i2 < _a3.length; _i2++) {
+        var ancestor = _a3[_i2];
         var ancestorMetadataMap = metadatas.get(ancestor);
         if (ancestorMetadataMap) {
           var metadataFromAncestor = Array.from(ancestorMetadataMap.values()).filter(function(meta) {
@@ -85148,8 +85324,8 @@ var MetadataStorage = (
           return metadataFromTarget;
         }
       }
-      for (var _i = 0, _a2 = this.getAncestors(target); _i < _a2.length; _i++) {
-        var ancestor = _a2[_i];
+      for (var _i2 = 0, _a3 = this.getAncestors(target); _i2 < _a3.length; _i2++) {
+        var ancestor = _a3[_i2];
         var ancestorMetadataMap = metadatas.get(ancestor);
         if (ancestorMetadataMap) {
           var ancestorResult = ancestorMetadataMap.get(propertyName);
@@ -85167,8 +85343,8 @@ var MetadataStorage = (
         metadataFromTarget = metadataFromTargetMap.get(propertyName);
       }
       var metadataFromAncestorsTarget = [];
-      for (var _i = 0, _a2 = this.getAncestors(target); _i < _a2.length; _i++) {
-        var ancestor = _a2[_i];
+      for (var _i2 = 0, _a3 = this.getAncestors(target); _i2 < _a3.length; _i2++) {
+        var ancestor = _a3[_i2];
         var ancestorMetadataMap = metadatas.get(ancestor);
         if (ancestorMetadataMap) {
           if (ancestorMetadataMap.has(propertyName)) {
@@ -85219,7 +85395,7 @@ function isPromise(p3) {
 }
 
 // node_modules/class-transformer/esm5/TransformOperationExecutor.js
-var __spreadArray5 = function(to2, from, pack) {
+var __spreadArray5 = function(to, from, pack) {
   if (pack || arguments.length === 2)
     for (var i3 = 0, l3 = from.length, ar; i3 < l3; i3++) {
       if (ar || !(i3 in from)) {
@@ -85228,7 +85404,7 @@ var __spreadArray5 = function(to2, from, pack) {
         ar[i3] = from[i3];
       }
     }
-  return to2.concat(ar || Array.prototype.slice.call(from));
+  return to.concat(ar || Array.prototype.slice.call(from));
 };
 function instantiateArrayType(arrayType) {
   var array = new arrayType();
@@ -85475,8 +85651,8 @@ var TransformOperationExecutor = (
           }
         };
         var this_1 = this;
-        for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
-          var key = keys_1[_i];
+        for (var _i2 = 0, keys_1 = keys; _i2 < keys_1.length; _i2++) {
+          var key = keys_1[_i2];
           _loop_1(key);
         }
         if (this.options.enableCircularCheck) {
@@ -85990,11 +86166,16 @@ function a2(...t3) {
   throw new Error(`isMatching wasn't given the right number of arguments: expected 1 or 2, received ${t3.length}.`);
 }
 function u2(t3) {
-  return Object.assign(t3, { optional: () => l2(t3), and: (e3) => m2(t3, e3), or: (e3) => y2(t3, e3), select: (e3) => void 0 === e3 ? p2(t3) : p2(e3, t3) });
+  return Object.assign(t3, { optional: () => l2(t3), and: (e3) => m2(t3, e3), or: (e3) => d2(t3, e3), select: (e3) => void 0 === e3 ? p2(t3) : p2(e3, t3) });
 }
 function h2(t3) {
-  return Object.assign(((t4) => Object.assign(t4, { *[Symbol.iterator]() {
-    yield Object.assign(t4, { [e2]: true });
+  return Object.assign(((t4) => Object.assign(t4, { [Symbol.iterator]() {
+    let n3 = 0;
+    const r3 = [{ value: Object.assign(t4, { [e2]: true }), done: false }, { done: true, value: void 0 }];
+    return { next: () => {
+      var t5;
+      return null != (t5 = r3[n3++]) ? t5 : r3.at(-1);
+    } };
   } }))(t3), { optional: () => h2(l2(t3)), select: (e3) => h2(void 0 === e3 ? p2(t3) : p2(e3, t3)) });
 }
 function l2(e3) {
@@ -86027,7 +86208,7 @@ function m2(...e3) {
     return { matched: e3.every((e4) => s2(e4, t3, r3)), selections: n3 };
   }, getSelectionKeys: () => c2(e3, o2), matcherType: "and" }) });
 }
-function y2(...e3) {
+function d2(...e3) {
   return u2({ [t2]: () => ({ match: (t3) => {
     let n3 = {};
     const r3 = (t4, e4) => {
@@ -86036,7 +86217,7 @@ function y2(...e3) {
     return c2(e3, o2).forEach((t4) => r3(t4, void 0)), { matched: e3.some((e4) => s2(e4, t3, r3)), selections: n3 };
   }, getSelectionKeys: () => c2(e3, o2), matcherType: "or" }) });
 }
-function d2(e3) {
+function y2(e3) {
   return { [t2]: () => ({ match: (t3) => ({ matched: Boolean(e3(t3)) }) }) };
 }
 function p2(...e3) {
@@ -86057,35 +86238,35 @@ function b2(t3) {
 function w2(t3) {
   return "bigint" == typeof t3;
 }
-var S2 = u2(d2(function(t3) {
+var S2 = u2(y2(function(t3) {
   return true;
 }));
 var O2 = S2;
 var j2 = (t3) => Object.assign(u2(t3), { startsWith: (e3) => {
-  return j2(m2(t3, (n3 = e3, d2((t4) => b2(t4) && t4.startsWith(n3)))));
+  return j2(m2(t3, (n3 = e3, y2((t4) => b2(t4) && t4.startsWith(n3)))));
   var n3;
 }, endsWith: (e3) => {
-  return j2(m2(t3, (n3 = e3, d2((t4) => b2(t4) && t4.endsWith(n3)))));
+  return j2(m2(t3, (n3 = e3, y2((t4) => b2(t4) && t4.endsWith(n3)))));
   var n3;
-}, minLength: (e3) => j2(m2(t3, ((t4) => d2((e4) => b2(e4) && e4.length >= t4))(e3))), maxLength: (e3) => j2(m2(t3, ((t4) => d2((e4) => b2(e4) && e4.length <= t4))(e3))), includes: (e3) => {
-  return j2(m2(t3, (n3 = e3, d2((t4) => b2(t4) && t4.includes(n3)))));
+}, minLength: (e3) => j2(m2(t3, ((t4) => y2((e4) => b2(e4) && e4.length >= t4))(e3))), maxLength: (e3) => j2(m2(t3, ((t4) => y2((e4) => b2(e4) && e4.length <= t4))(e3))), includes: (e3) => {
+  return j2(m2(t3, (n3 = e3, y2((t4) => b2(t4) && t4.includes(n3)))));
   var n3;
 }, regex: (e3) => {
-  return j2(m2(t3, (n3 = e3, d2((t4) => b2(t4) && Boolean(t4.match(n3))))));
+  return j2(m2(t3, (n3 = e3, y2((t4) => b2(t4) && Boolean(t4.match(n3))))));
   var n3;
 } });
-var E2 = j2(d2(b2));
-var K2 = (t3) => Object.assign(u2(t3), { between: (e3, n3) => K2(m2(t3, ((t4, e4) => d2((n4) => v2(n4) && t4 <= n4 && e4 >= n4))(e3, n3))), lt: (e3) => K2(m2(t3, ((t4) => d2((e4) => v2(e4) && e4 < t4))(e3))), gt: (e3) => K2(m2(t3, ((t4) => d2((e4) => v2(e4) && e4 > t4))(e3))), lte: (e3) => K2(m2(t3, ((t4) => d2((e4) => v2(e4) && e4 <= t4))(e3))), gte: (e3) => K2(m2(t3, ((t4) => d2((e4) => v2(e4) && e4 >= t4))(e3))), int: () => K2(m2(t3, d2((t4) => v2(t4) && Number.isInteger(t4)))), finite: () => K2(m2(t3, d2((t4) => v2(t4) && Number.isFinite(t4)))), positive: () => K2(m2(t3, d2((t4) => v2(t4) && t4 > 0))), negative: () => K2(m2(t3, d2((t4) => v2(t4) && t4 < 0))) });
-var A2 = K2(d2(v2));
-var x2 = (t3) => Object.assign(u2(t3), { between: (e3, n3) => x2(m2(t3, ((t4, e4) => d2((n4) => w2(n4) && t4 <= n4 && e4 >= n4))(e3, n3))), lt: (e3) => x2(m2(t3, ((t4) => d2((e4) => w2(e4) && e4 < t4))(e3))), gt: (e3) => x2(m2(t3, ((t4) => d2((e4) => w2(e4) && e4 > t4))(e3))), lte: (e3) => x2(m2(t3, ((t4) => d2((e4) => w2(e4) && e4 <= t4))(e3))), gte: (e3) => x2(m2(t3, ((t4) => d2((e4) => w2(e4) && e4 >= t4))(e3))), positive: () => x2(m2(t3, d2((t4) => w2(t4) && t4 > 0))), negative: () => x2(m2(t3, d2((t4) => w2(t4) && t4 < 0))) });
-var P2 = x2(d2(w2));
-var T2 = u2(d2(function(t3) {
+var E2 = j2(y2(b2));
+var K2 = (t3) => Object.assign(u2(t3), { between: (e3, n3) => K2(m2(t3, ((t4, e4) => y2((n4) => v2(n4) && t4 <= n4 && e4 >= n4))(e3, n3))), lt: (e3) => K2(m2(t3, ((t4) => y2((e4) => v2(e4) && e4 < t4))(e3))), gt: (e3) => K2(m2(t3, ((t4) => y2((e4) => v2(e4) && e4 > t4))(e3))), lte: (e3) => K2(m2(t3, ((t4) => y2((e4) => v2(e4) && e4 <= t4))(e3))), gte: (e3) => K2(m2(t3, ((t4) => y2((e4) => v2(e4) && e4 >= t4))(e3))), int: () => K2(m2(t3, y2((t4) => v2(t4) && Number.isInteger(t4)))), finite: () => K2(m2(t3, y2((t4) => v2(t4) && Number.isFinite(t4)))), positive: () => K2(m2(t3, y2((t4) => v2(t4) && t4 > 0))), negative: () => K2(m2(t3, y2((t4) => v2(t4) && t4 < 0))) });
+var x2 = K2(y2(v2));
+var A2 = (t3) => Object.assign(u2(t3), { between: (e3, n3) => A2(m2(t3, ((t4, e4) => y2((n4) => w2(n4) && t4 <= n4 && e4 >= n4))(e3, n3))), lt: (e3) => A2(m2(t3, ((t4) => y2((e4) => w2(e4) && e4 < t4))(e3))), gt: (e3) => A2(m2(t3, ((t4) => y2((e4) => w2(e4) && e4 > t4))(e3))), lte: (e3) => A2(m2(t3, ((t4) => y2((e4) => w2(e4) && e4 <= t4))(e3))), gte: (e3) => A2(m2(t3, ((t4) => y2((e4) => w2(e4) && e4 >= t4))(e3))), positive: () => A2(m2(t3, y2((t4) => w2(t4) && t4 > 0))), negative: () => A2(m2(t3, y2((t4) => w2(t4) && t4 < 0))) });
+var P2 = A2(y2(w2));
+var T2 = u2(y2(function(t3) {
   return "boolean" == typeof t3;
 }));
-var k2 = u2(d2(function(t3) {
+var k2 = u2(y2(function(t3) {
   return "symbol" == typeof t3;
 }));
-var B2 = u2(d2(function(t3) {
+var B2 = u2(y2(function(t3) {
   return null == t3;
 }));
 var _2 = { __proto__: null, matcher: t2, optional: l2, array: function(...e3) {
@@ -86140,15 +86321,15 @@ var _2 = { __proto__: null, matcher: t2, optional: l2, array: function(...e3) {
       return n4 && i4;
     }), selections: n3 };
   }, getSelectionKeys: () => 0 === e3.length ? [] : [...o2(e3[0]), ...o2(e3[1])] }) });
-}, intersection: m2, union: y2, not: function(e3) {
+}, intersection: m2, union: d2, not: function(e3) {
   return u2({ [t2]: () => ({ match: (t3) => ({ matched: !s2(e3, t3, () => {
   }) }), getSelectionKeys: () => [], matcherType: "not" }) });
-}, when: d2, select: p2, any: S2, _: O2, string: E2, number: A2, bigint: P2, boolean: T2, symbol: k2, nullish: B2, instanceOf: function(t3) {
-  return u2(d2(/* @__PURE__ */ function(t4) {
+}, when: y2, select: p2, any: S2, _: O2, string: E2, number: x2, bigint: P2, boolean: T2, symbol: k2, nullish: B2, instanceOf: function(t3) {
+  return u2(y2(/* @__PURE__ */ function(t4) {
     return (e3) => e3 instanceof t4;
   }(t3)));
 }, shape: function(t3) {
-  return u2(d2(a2(t3)));
+  return u2(y2(a2(t3)));
 } };
 var W2 = { matched: false, value: void 0 };
 function N2(t3) {
@@ -86553,6 +86734,7 @@ function randomString() {
 var import_glob = __toESM(require_glob2(), 1);
 import { readFile as readFile4 } from "node:fs/promises";
 import { platform as platform6 } from "node:os";
+import * as posixPath3 from "node:path/posix";
 
 // packages/main/src/action/env.ts
 import { tmpdir } from "node:os";
@@ -86673,6 +86855,7 @@ var _Inputs = class _Inputs {
   packageFile;
   packages;
   prefix;
+  repository;
   texdir;
   tlcontrib = false;
   updateAllPackages = false;
@@ -86697,6 +86880,9 @@ __decorateClass([
   Input,
   AsPath
 ], _Inputs.prototype, "prefix", 2);
+__decorateClass([
+  Input
+], _Inputs.prototype, "repository", 2);
 __decorateClass([
   Input,
   AsPath
@@ -86865,7 +87051,7 @@ async function exec(command, args, options) {
 // packages/main/src/util/fs.ts
 var import_io = __toESM(require_io(), 1);
 var import_tool_cache = __toESM(require_tool_cache(), 1);
-import * as fs2 from "node:fs/promises";
+import * as fs3 from "node:fs/promises";
 import * as path4 from "node:path";
 import { env as env7 } from "node:process";
 async function extract(archive, kind) {
@@ -86884,7 +87070,7 @@ async function extract(archive, kind) {
   }
 }
 async function uniqueChild(parent) {
-  const [child, ...rest] = await fs2.readdir(parent);
+  const [child, ...rest] = await fs3.readdir(parent);
   if (child === void 0) {
     throw new Error(`${parent} has no entries`);
   }
@@ -86898,7 +87084,7 @@ function tmpdir2() {
 }
 async function mkdtemp2() {
   return {
-    path: await fs2.mkdtemp(path4.join(tmpdir2(), `${id_default["kebab-case"]}-`)),
+    path: await fs3.mkdtemp(path4.join(tmpdir2(), `${id_default["kebab-case"]}-`)),
     async [Symbol.asyncDispose]() {
       await (0, import_io.rmRF)(this.path);
     }
@@ -87199,13 +87385,13 @@ var ReleaseData;
     function newVersionReleased() {
       return release_data_default.latest.version === latest.version;
     }
-    function isLatest(version4) {
-      return version4 === latest.version;
-    }
-    function isOnePrevious(version4) {
-      return Number.parseInt(version4, 10) + 1 === Number.parseInt(latest.version, 10);
-    }
-    const releases = { newVersionReleased, latest, isLatest, isOnePrevious };
+    const latestVersionNumber = Number.parseInt(latest.version, 10);
+    const releases = {
+      newVersionReleased,
+      previous: { version: `${latestVersionNumber - 1}` },
+      latest,
+      next: { version: `${latestVersionNumber + 1}` }
+    };
     ctx.set(releases);
     return releases;
   }
@@ -87444,7 +87630,40 @@ var tlpdb_exports = {};
 __export(tlpdb_exports, {
   parse: () => parse4
 });
+var TAG = {
+  TLPOBJ: "TLPOBJ",
+  TLConfig: "TLConfig",
+  TLOptions: "TLOptions"
+};
+var RE2 = {
+  version: new RegExp("^catalogue-version\\s+(\\S.*)$", "mv"),
+  revision: new RegExp("^revision\\s+(\\d+)\\s*$", "mv"),
+  location: new RegExp("^depend\\s+(?:opt_)?location:(.+)$", "mv"),
+  release: new RegExp("^depend\\s+release\\/(.+)$", "mv")
+};
 function* parse4(db) {
+  for (const [name2, data] of entries(db)) {
+    if (name2 === "00texlive-installation.config" || name2 === "00texlive.installation") {
+      if (name2 === "00texlive-installation.config") {
+        yield [TAG.TLConfig, { release: "2008" }];
+      }
+      const location = RE2.location.exec(data)?.[1];
+      if (location !== void 0) {
+        yield [TAG.TLOptions, { location }];
+      }
+    } else if (name2 === "00texlive.config") {
+      const release3 = RE2.release.exec(data)?.[1];
+      if (release3 !== void 0) {
+        yield [TAG.TLConfig, { release: release3 }];
+      }
+    } else if (!name2.startsWith("00texlive")) {
+      const version4 = RE2.version.exec(data)?.[1]?.trimEnd();
+      const revision = RE2.revision.exec(data)?.[1] ?? "";
+      yield [TAG.TLPOBJ, { name: name2, revision, cataloguedata: { version: version4 } }];
+    }
+  }
+}
+function* entries(db) {
   const iter = db.replaceAll(new RegExp("\\\\\\r?\\n", "gv"), "").replaceAll(new RegExp("#.*", "gv"), "").split(new RegExp("^name\\s(.*)$", "mv")).values();
   iter.next();
   for (const name2 of iter) {
@@ -87466,35 +87685,40 @@ async function makeLocalSkeleton(texmflocal, options) {
 }
 
 // packages/main/src/texlive/install-tl/cli.ts
-async function installTL(options) {
-  const { isLatest } = ReleaseData.use();
-  const { profile, repository } = options;
-  const version4 = profile.version;
-  const installTLPath = await acquire(options);
-  await exec(installTLPath, ["-version"], { stdin: null });
-  const result = await exec(
-    installTLPath,
-    await Array.fromAsync(commandArgs(options)),
-    { stdin: null, ignoreReturnCode: true }
-  );
-  const errorOptions = { version: version4, repository };
-  if (isLatest(version4)) {
-    InstallTLError.checkCompatibility(result, errorOptions);
-  } else {
-    TlpdbError.checkRepositoryStatus(result, errorOptions);
-    TlpdbError.checkRepositoryHealth(result, errorOptions);
+var InstallTL = class {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  constructor(path15, version4) {
+    this.path = path15;
+    this.version = version4;
   }
-  TlpdbError.checkPackageChecksumMismatch(result, errorOptions);
-  try {
-    result.check();
-  } catch (cause) {
-    throw new InstallTLError("Failed to install TeX Live", {
-      ...errorOptions,
-      cause
-    });
+  async run(options) {
+    const { latest } = ReleaseData.use();
+    const { profile, repository } = options;
+    await exec(this.path, ["-version"], { stdin: null });
+    const result = await exec(
+      this.path,
+      await Array.fromAsync(commandArgs(options)),
+      { stdin: null, ignoreReturnCode: true }
+    );
+    const errorOptions = { version: this.version, repository };
+    if (this.version >= latest.version) {
+      InstallTLError.checkCompatibility(result, errorOptions);
+    } else {
+      TlpdbError.checkRepositoryStatus(result, errorOptions);
+      TlpdbError.checkRepositoryHealth(result, errorOptions);
+    }
+    TlpdbError.checkPackageChecksumMismatch(result, errorOptions);
+    try {
+      result.check();
+    } catch (cause) {
+      throw new InstallTLError("Failed to install TeX Live", {
+        ...errorOptions,
+        cause
+      });
+    }
+    await patch(profile);
   }
-  await patch(profile);
-}
+};
 var supportVersions = {
   options: {
     ["-repository"]: new import_semver3.Range(">=2009"),
@@ -87528,16 +87752,16 @@ async function* commandArgs(options) {
   ];
 }
 async function acquire(options) {
-  return path9.format({
+  const installerPath = path9.format({
     dir: restoreCache2(options) ?? await download(options),
-    base: executableName(options.profile.version)
+    base: executableName(options.version)
   });
+  return new InstallTL(installerPath, options.version);
 }
 function restoreCache2(options) {
-  const { profile: { version: version4 } } = options;
-  const executable = executableName(version4);
+  const executable = executableName(options.version);
   try {
-    const TEXMFROOT = (0, import_tool_cache2.find)(executable, version4);
+    const TEXMFROOT = (0, import_tool_cache2.find)(executable, options.version);
     if (TEXMFROOT !== "") {
       info2("Found in tool cache: %s", TEXMFROOT);
       return TEXMFROOT;
@@ -87548,8 +87772,8 @@ function restoreCache2(options) {
   return void 0;
 }
 async function download(options) {
-  const { isLatest } = ReleaseData.use();
-  const { profile: { version: version4 }, repository } = options;
+  const { latest } = ReleaseData.use();
+  const { version: version4, repository } = options;
   const errorOpts = {
     repository,
     version: version4,
@@ -87580,7 +87804,7 @@ async function download(options) {
     archivePath,
     platform4() === "win32" ? "zip" : "tgz"
   );
-  if (isLatest(version4)) {
+  if (version4 >= latest.version) {
     try {
       await InstallTLError.checkVersion(texmfroot, { version: version4, repository });
     } catch (error) {
@@ -87618,7 +87842,7 @@ function archiveName() {
 
 // packages/main/src/texlive/install-tl/profile.ts
 import { writeFile as writeFile2 } from "node:fs/promises";
-import { platform as platform5 } from "node:os";
+import { arch as arch3, platform as platform5 } from "node:os";
 import * as path11 from "node:path";
 
 // node_modules/ts-mixer/dist/esm/index.js
@@ -87650,8 +87874,8 @@ var nearestCommonProto = (...objs) => {
   return commonProto;
 };
 var hardMixProtos = (ingredients, constructor, exclude = []) => {
-  var _a2;
-  const base = (_a2 = nearestCommonProto(...ingredients)) !== null && _a2 !== void 0 ? _a2 : Object.prototype;
+  var _a3;
+  const base = (_a3 = nearestCommonProto(...ingredients)) !== null && _a3 !== void 0 ? _a3 : Object.prototype;
   const mixedProto = Object.create(base);
   const visitedProtos = protoChain(base);
   for (let prototype of ingredients) {
@@ -87727,41 +87951,41 @@ var settings = {
   prototypeStrategy: "copy",
   decoratorInheritance: "deep"
 };
-var mixins = /* @__PURE__ */ new Map();
+var mixins = /* @__PURE__ */ new WeakMap();
 var getMixinsForClass = (clazz) => mixins.get(clazz);
 var registerMixins = (mixedClass, constituents) => mixins.set(mixedClass, constituents);
 var mergeObjectsOfDecorators = (o1, o22) => {
-  var _a2, _b2;
+  var _a3, _b2;
   const allKeys = unique([...Object.getOwnPropertyNames(o1), ...Object.getOwnPropertyNames(o22)]);
   const mergedObject = {};
   for (let key of allKeys)
-    mergedObject[key] = unique([...(_a2 = o1 === null || o1 === void 0 ? void 0 : o1[key]) !== null && _a2 !== void 0 ? _a2 : [], ...(_b2 = o22 === null || o22 === void 0 ? void 0 : o22[key]) !== null && _b2 !== void 0 ? _b2 : []]);
+    mergedObject[key] = unique([...(_a3 = o1 === null || o1 === void 0 ? void 0 : o1[key]) !== null && _a3 !== void 0 ? _a3 : [], ...(_b2 = o22 === null || o22 === void 0 ? void 0 : o22[key]) !== null && _b2 !== void 0 ? _b2 : []]);
   return mergedObject;
 };
 var mergePropertyAndMethodDecorators = (d1, d22) => {
-  var _a2, _b2, _c2, _d2;
+  var _a3, _b2, _c2, _d2;
   return {
-    property: mergeObjectsOfDecorators((_a2 = d1 === null || d1 === void 0 ? void 0 : d1.property) !== null && _a2 !== void 0 ? _a2 : {}, (_b2 = d22 === null || d22 === void 0 ? void 0 : d22.property) !== null && _b2 !== void 0 ? _b2 : {}),
+    property: mergeObjectsOfDecorators((_a3 = d1 === null || d1 === void 0 ? void 0 : d1.property) !== null && _a3 !== void 0 ? _a3 : {}, (_b2 = d22 === null || d22 === void 0 ? void 0 : d22.property) !== null && _b2 !== void 0 ? _b2 : {}),
     method: mergeObjectsOfDecorators((_c2 = d1 === null || d1 === void 0 ? void 0 : d1.method) !== null && _c2 !== void 0 ? _c2 : {}, (_d2 = d22 === null || d22 === void 0 ? void 0 : d22.method) !== null && _d2 !== void 0 ? _d2 : {})
   };
 };
 var mergeDecorators = (d1, d22) => {
-  var _a2, _b2, _c2, _d2, _e2, _f;
+  var _a3, _b2, _c2, _d2, _e2, _f;
   return {
-    class: unique([...(_a2 = d1 === null || d1 === void 0 ? void 0 : d1.class) !== null && _a2 !== void 0 ? _a2 : [], ...(_b2 = d22 === null || d22 === void 0 ? void 0 : d22.class) !== null && _b2 !== void 0 ? _b2 : []]),
+    class: unique([...(_a3 = d1 === null || d1 === void 0 ? void 0 : d1.class) !== null && _a3 !== void 0 ? _a3 : [], ...(_b2 = d22 === null || d22 === void 0 ? void 0 : d22.class) !== null && _b2 !== void 0 ? _b2 : []]),
     static: mergePropertyAndMethodDecorators((_c2 = d1 === null || d1 === void 0 ? void 0 : d1.static) !== null && _c2 !== void 0 ? _c2 : {}, (_d2 = d22 === null || d22 === void 0 ? void 0 : d22.static) !== null && _d2 !== void 0 ? _d2 : {}),
     instance: mergePropertyAndMethodDecorators((_e2 = d1 === null || d1 === void 0 ? void 0 : d1.instance) !== null && _e2 !== void 0 ? _e2 : {}, (_f = d22 === null || d22 === void 0 ? void 0 : d22.instance) !== null && _f !== void 0 ? _f : {})
   };
 };
 var decorators = /* @__PURE__ */ new Map();
 var findAllConstituentClasses = (...classes) => {
-  var _a2;
+  var _a3;
   const allClasses = /* @__PURE__ */ new Set();
   const frontier = /* @__PURE__ */ new Set([...classes]);
   while (frontier.size > 0) {
     for (let clazz of frontier) {
       const protoChainClasses = protoChain(clazz.prototype).map((proto) => proto.constructor);
-      const mixinClasses = (_a2 = getMixinsForClass(clazz)) !== null && _a2 !== void 0 ? _a2 : [];
+      const mixinClasses = (_a3 = getMixinsForClass(clazz)) !== null && _a3 !== void 0 ? _a3 : [];
       const potentiallyNewClasses = [...protoChainClasses, ...mixinClasses];
       const newClasses = potentiallyNewClasses.filter((c3) => !allClasses.has(c3));
       for (let newClass of newClasses)
@@ -87807,12 +88031,12 @@ var decorateClass = (decorator) => (clazz) => {
   return decorator(clazz);
 };
 var decorateMember = (decorator) => (object, key, ...otherArgs) => {
-  var _a2, _b2, _c2;
+  var _a3, _b2, _c2;
   const decoratorTargetType = typeof object === "function" ? "static" : "instance";
   const decoratorType = typeof object[key] === "function" ? "method" : "property";
   const clazz = decoratorTargetType === "static" ? object : object.constructor;
   const decoratorsForClass = getDecoratorsForClass(clazz);
-  const decoratorsForTargetType = (_a2 = decoratorsForClass === null || decoratorsForClass === void 0 ? void 0 : decoratorsForClass[decoratorTargetType]) !== null && _a2 !== void 0 ? _a2 : {};
+  const decoratorsForTargetType = (_a3 = decoratorsForClass === null || decoratorsForClass === void 0 ? void 0 : decoratorsForClass[decoratorTargetType]) !== null && _a3 !== void 0 ? _a3 : {};
   decoratorsForClass[decoratorTargetType] = decoratorsForTargetType;
   let decoratorsForType = (_b2 = decoratorsForTargetType === null || decoratorsForTargetType === void 0 ? void 0 : decoratorsForTargetType[decoratorType]) !== null && _b2 !== void 0 ? _b2 : {};
   decoratorsForTargetType[decoratorType] = decoratorsForType;
@@ -87827,7 +88051,7 @@ var decorate2 = (decorator) => (...args) => {
   return decorateMember(decorator)(...args);
 };
 function Mixin(...constructors) {
-  var _a2, _b2, _c2;
+  var _a3, _b2, _c2;
   const prototypes = constructors.map((constructor) => constructor.prototype);
   const initFunctionName = settings.initFunction;
   if (initFunctionName !== null) {
@@ -87850,7 +88074,7 @@ function Mixin(...constructors) {
   let DecoratedMixedClass = MixedClass;
   if (settings.decoratorInheritance !== "none") {
     const classDecorators = settings.decoratorInheritance === "deep" ? deepDecoratorSearch(...constructors) : directDecoratorSearch(...constructors);
-    for (let decorator of (_a2 = classDecorators === null || classDecorators === void 0 ? void 0 : classDecorators.class) !== null && _a2 !== void 0 ? _a2 : []) {
+    for (let decorator of (_a3 = classDecorators === null || classDecorators === void 0 ? void 0 : classDecorators.class) !== null && _a3 !== void 0 ? _a3 : []) {
       const result = decorator(DecoratedMixedClass);
       if (result) {
         DecoratedMixedClass = result;
@@ -87977,12 +88201,15 @@ UserTrees = __decorateClass([
 // packages/main/src/texlive/install-tl/profile.ts
 var _tmpdir, _path;
 var Profile = class extends Mixin(SystemTrees, UserTrees) {
-  constructor() {
-    super(...arguments);
+  constructor(version4, options) {
+    super(version4, options);
     __publicField(this, "instopt", new InstOpt());
     __publicField(this, "tlpdbopt", new TlpdbOpt());
     __privateAdd(this, _tmpdir, void 0);
     __privateAdd(this, _path, void 0);
+    if (version4 < "2020" && platform5() === "darwin" && arch3() === "arm64") {
+      this.binary = "universal-darwin";
+    }
   }
   get selectedScheme() {
     return `scheme-${this.version < "2016" ? "minimal" : "infraonly"}`;
@@ -88008,7 +88235,7 @@ var Profile = class extends Mixin(SystemTrees, UserTrees) {
     return Object.entries(this.toJSON()).map((entry) => entry.join(" ")).join("\n");
   }
   toJSON() {
-    const { instopt, tlpdbopt, ...plain } = instanceToPlain(this, {
+    const { instopt, tlpdbopt, binary, ...plain } = instanceToPlain(this, {
       version: Number.parseInt(this.version),
       groups: [platform5()]
     });
@@ -88017,6 +88244,9 @@ var Profile = class extends Mixin(SystemTrees, UserTrees) {
       for (const [key, value] of Object.entries(values ?? {})) {
         plain[`${prefix2}_${key}`] = value;
       }
+    }
+    if (binary !== void 0) {
+      plain[`binary_${binary}`] = "1";
     }
     return plain;
   }
@@ -88032,6 +88262,9 @@ __decorateClass([
 __decorateClass([
   Expose()
 ], Profile.prototype, "tlpdbopt", 2);
+__decorateClass([
+  Expose({ until: 2017, groups: ["darwin"] })
+], Profile.prototype, "binary", 2);
 Profile = __decorateClass([
   Exclude()
 ], Profile);
@@ -88362,11 +88595,6 @@ async function resolvePackageName(name2) {
 // packages/main/src/texlive/tlmgr/actions/list.ts
 import { readFile as readFile3 } from "node:fs/promises";
 import * as path13 from "node:path";
-var RE2 = {
-  nonPackage: new RegExp("(?:^(?:collection|scheme)-|\\.)", "v"),
-  version: new RegExp("^catalogue-version\\s+(\\S.*)$", "mv"),
-  revision: new RegExp("^revision\\s+(\\d+)\\s*$", "mv")
-};
 async function* list() {
   const tlpdbPath = path13.join(use().TEXDIR, "tlpkg", "texlive.tlpdb");
   let db;
@@ -88377,11 +88605,9 @@ async function* list() {
     return;
   }
   try {
-    for (const [name2, data] of tlpdb_exports.parse(db)) {
-      if (name2 === "texlive.infra" || !RE2.nonPackage.test(name2)) {
-        const version4 = RE2.version.exec(data)?.[1]?.trimEnd();
-        const revision = RE2.revision.exec(data)?.[1] ?? "";
-        yield { name: name2, version: version4, revision };
+    for (const [tag, data] of tlpdb_exports.parse(db)) {
+      if (tag === "TLPOBJ" && N2(data.name).with("texlive.infra", () => true).with(_2.string.includes("."), () => false).with(_2.string.startsWith("scheme-"), () => false).with(_2.string.startsWith("collection-"), () => false).otherwise(() => true)) {
+        yield data;
       }
     }
   } catch (error) {
@@ -88510,18 +88736,45 @@ var Config;
   async function load() {
     init();
     const releases = await ReleaseData.setup();
-    const { packageFile, packages, version: version4, ...inputs } = Inputs.load();
+    const {
+      packageFile,
+      packages,
+      repository,
+      version: version4,
+      ...inputs
+    } = Inputs.load();
     const config = {
       ...inputs,
       version: await resolveVersion({ version: version4 }),
       packages: await collectPackages({ packageFile, packages })
     };
-    if (!releases.isLatest(config.version)) {
+    if (repository !== void 0) {
+      if (version4 < "2012") {
+        const error = new RangeError(
+          "Currently `repository` input is only supported with version 2012 or later"
+        );
+        error["version"] = version4;
+        throw error;
+      }
+      const url2 = new URL(repository);
+      if (url2.protocol !== "http:" && url2.protocol !== "https:") {
+        const error = new TypeError(
+          "Currently only http/https repositories are supported"
+        );
+        error["repository"] = repository;
+        throw error;
+      }
+      if (!url2.pathname.endsWith("/")) {
+        url2.pathname = posixPath3.join(url2.pathname, "/");
+      }
+      config.repository = url2;
+    }
+    if (config.version < releases.latest.version) {
       if (config.tlcontrib) {
-        warn(`TLContrib cannot be used with an older version of TeX Live`);
+        warn("TLContrib cannot be used with an older version of TeX Live");
         config.tlcontrib = false;
       }
-      if (!(releases.isOnePrevious(config.version) && releases.newVersionReleased()) && config.updateAllPackages) {
+      if (!(config.version < releases.previous.version && releases.newVersionReleased()) && config.updateAllPackages) {
         info2("`update-all-packages` is ignored for older versions");
         config.updateAllPackages = false;
       }
@@ -88552,7 +88805,7 @@ async function collectPackages(inputs) {
   return new Set(packages.sort());
 }
 async function resolveVersion(inputs) {
-  const { latest } = ReleaseData.use();
+  const { latest, next } = ReleaseData.use();
   const version4 = inputs.version === "latest" ? latest.version : Version.parse(inputs.version);
   if (version4 < "2008") {
     throw new RangeError("Versions prior to 2008 are not supported");
@@ -88562,85 +88815,115 @@ async function resolveVersion(inputs) {
       "Versions prior to 2013 does not work on 64-bit macOS"
     );
   }
-  if (version4 > latest.version) {
+  if (version4 > next.version) {
     throw new RangeError(`${version4} is not a valid version`);
   }
   return version4;
 }
 
 // packages/main/src/action/run/main/install.ts
-async function install2(profile) {
-  const { isLatest, isOnePrevious } = ReleaseData.use();
-  for (const master of [false, true]) {
-    const repository = isLatest(profile.version) ? await tlnet_exports.ctan({ master }) : tlnet_exports.historic(profile.version, { master });
-    info2("Main repository: %s", repository);
+async function install2(options) {
+  const { latest, previous } = ReleaseData.use();
+  const { version: version4 } = options.profile;
+  let repository = options?.repository;
+  const fallbackToMaster = repository === void 0 && version4 > previous.version;
+  let installTL;
+  for (const master of fallbackToMaster ? [false, true] : [false]) {
+    if (repository === void 0 || master) {
+      repository = version4 >= latest.version ? await tlnet_exports.ctan({ master }) : tlnet_exports.historic(version4, { master });
+    }
     try {
-      await installTL({ profile, repository });
+      installTL ??= await acquire({ repository, version: version4 });
+    } catch (error) {
+      if (!master && fallbackToMaster && error instanceof InstallTLError && N2(error.code).with(InstallTLError.Code.FAILED_TO_DOWNLOAD, () => true).with(InstallTLError.Code.UNEXPECTED_VERSION, () => true).otherwise(() => false)) {
+        info2({ error });
+        continue;
+      }
+      throw error;
+    }
+    info2("Using repository: %s", repository);
+    try {
+      await installTL.run({
+        profile: options.profile,
+        repository: options.repository ?? repository
+      });
       return;
     } catch (error) {
-      const recoverable = [
-        InstallTLError.Code.FAILED_TO_DOWNLOAD,
-        InstallTLError.Code.INCOMPATIBLE_REPOSITORY_VERSION,
-        InstallTLError.Code.UNEXPECTED_VERSION,
-        TlpdbError.Code.FAILED_TO_INITIALIZE
-      ];
-      if (!master && (isLatest(profile.version) || isOnePrevious(profile.version)) && (error instanceof TlpdbError || error instanceof InstallTLError) && recoverable.includes(error.code)) {
-        info2("%s", error);
-        debug2({ error });
-      } else {
-        throw error;
+      if (!master && fallbackToMaster && N2(error).with(
+        _2.instanceOf(TlpdbError),
+        ({ code }) => code === TlpdbError.Code.FAILED_TO_INITIALIZE
+      ).with(
+        _2.instanceOf(InstallTLError),
+        ({ code }) => code === InstallTLError.Code.INCOMPATIBLE_REPOSITORY_VERSION
+      ).otherwise(() => false)) {
+        info2({ error });
+        continue;
       }
+      throw error;
     }
   }
 }
 
 // packages/main/src/action/run/main/update.ts
 var import_http_client2 = __toESM(require_lib(), 1);
-async function updateTlmgr(version4) {
-  const tlmgr = Tlmgr.use();
-  const { isOnePrevious } = ReleaseData.use();
+async function updateTlmgr(options) {
   try {
-    await tlmgr.update({ self: true });
-    return;
+    await updateRepositories(options);
   } catch (error) {
-    const tlcontrib = "tlcontrib";
-    if (isOnePrevious(version4) && error instanceof TlmgrError && (error.code === TlmgrError.Code.TL_VERSION_OUTDATED || error.code === TlmgrError.Code.TL_VERSION_NOT_SUPPORTED && "repository" in error && error.repository.includes(tlcontrib))) {
-      info2("%s", error);
-      debug2({ error });
-      try {
-        info2("Removing `%s`", tlcontrib);
-        await tlmgr.repository.remove(tlcontrib);
-        await tlmgr.update({ self: true });
-      } catch (error2) {
-        debug2({ error: error2 });
-      }
-    }
-  }
-  try {
-    await setupHistoric(version4);
-  } catch (error) {
-    if (error instanceof TlpdbError && error.code === TlpdbError.Code.FAILED_TO_INITIALIZE) {
-      info2("%s", error);
-      debug2({ error });
-      await setupHistoric(version4, { master: true });
+    if (error instanceof TlmgrError && error.code === TlmgrError.Code.TL_VERSION_OUTDATED && options.repository === void 0) {
+      info2({ error });
+      await moveToHistoric(options.version);
     } else {
       throw error;
     }
   }
-  CacheService.use().update();
 }
-async function setupHistoric(version4, options) {
+async function updateRepositories(options) {
   const tlmgr = Tlmgr.use();
+  const { latest, previous } = ReleaseData.use();
+  const version4 = options.version;
+  let repository = options.repository;
+  if (version4 >= previous.version) {
+    for await (const { path: path15, tag } of tlmgr.repository.list()) {
+      if (tag === "main" && path15.includes("tlpretest") && repository === void 0 && version4 === latest.version) {
+        repository = await tlnet_exports.ctan();
+      } else if ((tag === "tlcontrib" || path15.includes("tlcontrib")) && version4 < latest.version) {
+        info2(`Removing %s`, tag ?? path15);
+        await tlmgr.repository.remove(tag ?? path15);
+      }
+    }
+  }
+  if (repository !== void 0) {
+    await changeRepository("main", repository);
+  } else {
+    await tlmgr.update({ self: true });
+  }
+}
+async function moveToHistoric(version4) {
+  const cache = CacheService.use();
   const tag = "main";
-  const historic2 = tlnet_exports.historic(version4, options);
-  info2("Changing the %s repository to %s", tag, historic2.href);
-  if (historic2.protocol === "ftp:" && (0, import_http_client2.getProxyUrl)(historic2.href) !== "") {
+  try {
+    await changeRepository(tag, tlnet_exports.historic(version4));
+  } catch (error) {
+    if (error instanceof TlpdbError && error.code === TlpdbError.Code.FAILED_TO_INITIALIZE) {
+      info2({ error });
+      await changeRepository(tag, tlnet_exports.historic(version4, { master: true }));
+    } else {
+      throw error;
+    }
+  }
+  cache.update();
+}
+async function changeRepository(tag, url2) {
+  const tlmgr = Tlmgr.use();
+  info2("Changing the repository `%s` to %s", tag, url2.href);
+  if (url2.protocol === "ftp:" && (0, import_http_client2.getProxyUrl)(url2.href) !== "") {
     throw new Error(
       "The use of ftp repositories under proxy is currently not supported"
     );
   }
   await tlmgr.repository.remove(tag);
-  await tlmgr.repository.add(historic2, tag);
+  await tlmgr.repository.add(url2, tag);
   await tlmgr.update({ self: true });
 }
 async function adjustTexmf(profile) {
@@ -88649,14 +88932,14 @@ async function adjustTexmf(profile) {
     "TEXMFLOCAL",
     ...Texmf.USER_TREES
   ];
-  const entries = await Promise.all(keys.map(async (key) => {
+  const entries2 = await Promise.all(keys.map(async (key) => {
     const value = profile[key];
     const old = await tlmgr.conf.texmf(key);
     return old === value ? [] : [[key, value]];
   })).then((e3) => e3.flat());
-  if (entries.length > 0) {
+  if (entries2.length > 0) {
     await import_core2.group("Adjusting TEXMF", async () => {
-      for (const [key, value] of entries) {
+      for (const [key, value] of entries2) {
         await tlmgr.conf.texmf(key, value);
       }
     });
@@ -88668,7 +88951,7 @@ async function main() {
   var _stack = [];
   try {
     const config = await Config.load();
-    const releases = ReleaseData.use();
+    const { latest, previous, newVersionReleased } = ReleaseData.use();
     const profile = __using(_stack, new Profile(config.version, config), true);
     const cache = __using(_stack, CacheService.setup({
       TEXDIR: profile.TEXDIR,
@@ -88687,17 +88970,17 @@ async function main() {
         info2(profile.toString());
       });
       await import_core2.group("Installing TeX Live", async () => {
-        await install2(profile);
+        await install2({ profile, repository: config.repository });
       });
     }
     const tlmgr = Tlmgr.setup(profile);
     await tlmgr.path.add();
     if (cache.restored) {
-      if (releases.isLatest(profile.version) || releases.isOnePrevious(profile.version) && releases.newVersionReleased()) {
+      if (profile.version >= latest.version || profile.version === previous.version && newVersionReleased()) {
         await import_core2.group(
-          releases.isLatest(profile.version) ? "Updating tlmgr" : "Checking the package repository status",
+          profile.version >= latest.version ? "Updating tlmgr" : "Checking the package repository status",
           async () => {
-            await updateTlmgr(profile.version);
+            await updateTlmgr(config);
           }
         );
         if (config.updateAllPackages) {
@@ -88722,8 +89005,8 @@ async function main() {
     await import_core2.group("TeX Live version info", async () => {
       await tlmgr.version();
       info2("Package version:");
-      for await (const { name: name2, version: version4, revision } of tlmgr.list()) {
-        info2("  %s: %s", name2, version4 ?? `rev${revision}`);
+      for await (const { name: name2, revision, cataloguedata } of tlmgr.list()) {
+        info2("  %s: %s", name2, cataloguedata?.version ?? `rev${revision}`);
       }
     });
     cache.register();

@@ -30,7 +30,7 @@
     "jest-extended": "^4.0.2",
     "license-webpack-plugin": "^4.0.2",
     "nunjucks": "^3.2.4",
-    "slugify": "^1.6.6",
+    "github-slugger": "^2.0.0",
     "spdx-license-list": "^6.8.0",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "vite-tsconfig-paths": "^4.3.1",

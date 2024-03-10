@@ -1,5 +1,7 @@
+import GitHubSlugger from 'github-slugger';
 import nunjucks from 'nunjucks';
-import slugify from 'slugify';
+
+const slugger = new GitHubSlugger();
 
 export default nunjucks
   .configure({
@@ -9,10 +11,5 @@ export default nunjucks
     lstripBlocks: true,
     noCache: true,
   })
-  .addFilter('slugify', (s) => {
-    return slugify(s, {
-      remove: /[!-/:-@[-`{-~]/gu,
-      lower: true,
-    });
-  })
+  .addFilter('slugify', (s) => slugger.slug(s))
   .addFilter('escape', (s) => s.replaceAll(/[<>]/gu, '\\$&'));
