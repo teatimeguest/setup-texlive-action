@@ -288,7 +288,7 @@ All inputs are optional.
 | `package-file`        | String | [Glob patterns] for specifying files containing the names of TeX packages to be installed. The file format should be the same as the syntax for the `packages` input. The [`DEPENDS.txt`] format is also supported.                   |
 | `packages`            | String | Specify the names of TeX packages to install, separated by whitespaces. Schemes and collections are also acceptable. Everything after `#` will be treated as a comment.                                                               |
 | `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p> **Default:**&ensp;<!-- dprint-ignore-start --><code>[$RUNNER_TEMP]/setup-texlive-action</code><!-- dprint-ignore-end --> |
-| `repository`          | URL    | Specify the package repository to be used as the main repository. Currently only http/https repositories are supported.                                                                                                               |
+| `repository`          | URL    | Specify the [package repository URL][repository] to be used as the main repository. Currently only http/https repositories are supported.                                                                                             |
 | `texdir`              | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`] option and takes precedence over the `prefix` input and related environment variables.                                                |
 | `tlcontrib`           | Bool   | <p>Set up [TLContrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                                                                           |
 | `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                                                           |
@@ -298,6 +298,7 @@ All inputs are optional.
 [TLContrib]: https://contrib.texlive.info
 [`-texdir`]: https://tug.org/texlive/doc/install-tl.html#texdir-dir
 [`DEPENDS.txt`]: https://tug.org/texlive/pkgcontrib.html#deps
+[repository]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#x1-280003.3.1
 
 ## Outputs
 
