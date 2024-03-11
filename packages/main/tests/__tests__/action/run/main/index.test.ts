@@ -18,6 +18,7 @@ const config = {} as Writable<Config>;
 vi.mocked(Config.load).mockResolvedValue(config);
 
 vi.mock('#/action/run/main/install');
+vi.mock('#/action/run/main/notice');
 vi.mock('#/action/run/main/update');
 
 beforeEach(() => {

@@ -1,5 +1,6 @@
 import { P, match } from 'ts-pattern';
 
+import synced from '#/action/run/main/tlnet';
 import * as log from '#/log';
 import {
   type InstallTL,
@@ -20,15 +21,19 @@ export async function install(options: {
 
   let repository = options?.repository;
   const fallbackToMaster = repository === undefined
-    && version > previous.version;
+    && version >= previous.version;
 
   let installTL: InstallTL;
 
   for (const master of fallbackToMaster ? [false, true] : [false]) {
     if (repository === undefined || master) {
-      repository = version >= latest.version
-        ? await tlnet.ctan({ master })
-        : tlnet.historic(version, { master });
+      if (master && version === '2024') {
+        repository = synced;
+      } else {
+        repository = version >= latest.version
+          ? await tlnet.ctan({ master })
+          : tlnet.historic(version, { master });
+      }
     }
     try {
       installTL ??= await acquire({ repository, version });

@@ -1,10 +1,14 @@
 {
-  "latest": {
+  "previous": {
     "version": "2023",
     "releaseDate": "2023-03-19T21:25:25.000Z"
   },
-  "next": {
+  "current": {
     "version": "2024",
-    "releaseDate": "2024-03-13"
+    "releaseDate": "2024-03-13T17:37Z"
+  },
+  "next": {
+    "version": "2025",
+    "releaseDate": "2025-03-01"
   }
 }

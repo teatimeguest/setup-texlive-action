@@ -12,6 +12,7 @@ vi.unmock('#/texlive/releases');
 let doMock: () => nock.Scope;
 
 beforeAll(async () => {
+  json.version.number = LATEST_VERSION;
   doMock = () => {
     return nock('https://ctan.org')
       .get('/json/2.0/pkg/texlive')
@@ -25,9 +26,7 @@ describe('LatestRelease', () => {
   describe('checkVersion', () => {
     it('checks for latest version using the CTAN API', async () => {
       const mock = doMock();
-      await expect(new Latest().checkVersion()).resolves.toBe(
-        LATEST_VERSION,
-      );
+      await expect(new Latest().checkVersion()).resolves.toBe(LATEST_VERSION);
       expect(mock.isDone()).toBeTrue();
     });
 
@@ -55,7 +54,7 @@ describe('ReleaseData.setup', () => {
     vi.spyOn(Temporal.Now, 'instant').mockReturnValueOnce(
       Temporal
         .PlainDateTime
-        .from('2024-04-01')
+        .from('2025-03-01')
         .toZonedDateTime('UTC')
         .toInstant(),
     );

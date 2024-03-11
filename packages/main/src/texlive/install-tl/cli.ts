@@ -22,7 +22,6 @@ export class InstallTL {
   constructor(readonly path: string, readonly version: Version) {}
 
   async run(options: InstallTLOptions): Promise<void> {
-    const { latest } = ReleaseData.use();
     const { profile, repository } = options;
 
     await exec(this.path, ['-version'], { stdin: null });
@@ -34,13 +33,12 @@ export class InstallTL {
     );
 
     const errorOptions = { version: this.version, repository };
-    if (this.version >= latest.version) {
-      InstallTLError.checkCompatibility(result, errorOptions);
-    } else {
-      TlpdbError.checkRepositoryStatus(result, errorOptions);
-      TlpdbError.checkRepositoryHealth(result, errorOptions);
-    }
+
+    InstallTLError.checkCompatibility(result, errorOptions);
+    TlpdbError.checkRepositoryStatus(result, errorOptions);
+    TlpdbError.checkRepositoryHealth(result, errorOptions);
     TlpdbError.checkPackageChecksumMismatch(result, errorOptions);
+
     try {
       result.check();
     } catch (cause) {

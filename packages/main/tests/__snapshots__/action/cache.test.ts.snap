@@ -4,7 +4,7 @@ exports[`ActionsCacheService > @@dispose > does not set \`target\` (primary) 1`]
 [
   "CACHE",
   {
-    "key": "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "key": "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
   },
 ]
 `;
@@ -13,7 +13,7 @@ exports[`ActionsCacheService > @@dispose > does not set \`target\` (unique) 1`] 
 [
   "CACHE",
   {
-    "key": "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945-<random_string>",
+    "key": "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945-<random_string>",
   },
 ]
 `;
@@ -22,7 +22,7 @@ exports[`ActionsCacheService > @@dispose > sets \`target\` (fail) 1`] = `
 [
   "CACHE",
   {
-    "key": "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "key": "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
     "target": "<TEXDIR>",
   },
 ]
@@ -32,7 +32,7 @@ exports[`ActionsCacheService > @@dispose > sets \`target\` (none) 1`] = `
 [
   "CACHE",
   {
-    "key": "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "key": "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
     "target": "<TEXDIR>",
   },
 ]
@@ -42,7 +42,7 @@ exports[`ActionsCacheService > @@dispose > sets \`target\` (oldprimary) 1`] = `
 [
   "CACHE",
   {
-    "key": "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945-<random_string>",
+    "key": "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945-<random_string>",
     "target": "<TEXDIR>",
   },
 ]
@@ -52,7 +52,7 @@ exports[`ActionsCacheService > @@dispose > sets \`target\` (oldsecondary) 1`] = 
 [
   "CACHE",
   {
-    "key": "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "key": "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
     "target": "<TEXDIR>",
   },
 ]
@@ -62,7 +62,7 @@ exports[`ActionsCacheService > @@dispose > sets \`target\` (oldunique) 1`] = `
 [
   "CACHE",
   {
-    "key": "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945-<random_string>}",
+    "key": "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945-<random_string>}",
   },
 ]
 `;
@@ -71,7 +71,7 @@ exports[`ActionsCacheService > @@dispose > sets \`target\` (secondary) 1`] = `
 [
   "CACHE",
   {
-    "key": "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "key": "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
     "target": "<TEXDIR>",
   },
 ]
@@ -82,12 +82,12 @@ exports[`ActionsCacheService > restore > restores cache 1`] = `
   [
     "<TEXDIR>",
   ],
-  "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945-<random_string>",
+  "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945-<random_string>",
   [
-    "setup-texlive-action-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "setup-texlive-linux-<arch>-2023-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "setup-texlive-action-linux-<arch>-2023-",
-    "setup-texlive-linux-<arch>-2023-",
+    "setup-texlive-action-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "setup-texlive-linux-<arch>-2024-4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "setup-texlive-action-linux-<arch>-2024-",
+    "setup-texlive-linux-<arch>-2024-",
   ],
 ]
 `;
@@ -97,12 +97,12 @@ exports[`ActionsCacheService > restore > restores cache 2`] = `
   [
     "<TEXDIR>",
   ],
-  "setup-texlive-action-linux-<arch>-2023-cc603f9d1b6fb8568f57853e4936e2604c5eb12ad31ad1908a08b32a04e38656-<random_string>",
+  "setup-texlive-action-linux-<arch>-2024-cc603f9d1b6fb8568f57853e4936e2604c5eb12ad31ad1908a08b32a04e38656-<random_string>",
   [
-    "setup-texlive-action-linux-<arch>-2023-cc603f9d1b6fb8568f57853e4936e2604c5eb12ad31ad1908a08b32a04e38656",
-    "setup-texlive-linux-<arch>-2023-cc603f9d1b6fb8568f57853e4936e2604c5eb12ad31ad1908a08b32a04e38656",
-    "setup-texlive-action-linux-<arch>-2023-",
-    "setup-texlive-linux-<arch>-2023-",
+    "setup-texlive-action-linux-<arch>-2024-cc603f9d1b6fb8568f57853e4936e2604c5eb12ad31ad1908a08b32a04e38656",
+    "setup-texlive-linux-<arch>-2024-cc603f9d1b6fb8568f57853e4936e2604c5eb12ad31ad1908a08b32a04e38656",
+    "setup-texlive-action-linux-<arch>-2024-",
+    "setup-texlive-linux-<arch>-2024-",
   ],
 ]
 `;

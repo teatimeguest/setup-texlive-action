@@ -54,7 +54,7 @@ it('removes tlcontrib', async () => {
     yield { tag: 'main', path: MOCK_URL };
     yield { tag: 'tlcontrib', path: MOCK_URL };
   });
-  const opts = { version: '2022' } as const;
+  const opts = { version: '2023' } as const;
   await expect(updateTlmgr(opts)).resolves.not.toThrow();
   expect(remove).toHaveBeenCalledWith('tlcontrib');
 });

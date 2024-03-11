@@ -1,4 +1,4 @@
-> TeX Live 2024 is scheduled for release on March 13.
+> TeX Live 2024 was released on March 13.
 > The action may not work properly for a few days after the release.
 > If you have any problems, please feel free to open an issue.
 
@@ -251,7 +251,11 @@ Supported TeX Live versions are as follows:
     <tr>
       <th rowspan="2">Linux</th>
       <td><code>ubuntu-22.04</code> (<code>ubuntu-latest</code>)</td>
-      <td rowspan="4"><code>2008</code>&ndash;<code>2023</code></td>
+      <td rowspan="4">
+
+`2008`&ndash;`2024`
+
+</td>
     </tr>
     <tr><td><code>ubuntu-20.04</code></td></tr>
     <tr>
@@ -264,7 +268,7 @@ Supported TeX Live versions are as follows:
       <td><code>macos-14</code></td>
       <td rowspan="4">
 
-`2013`&ndash;`2023`
+`2013`&ndash;`2024`
 
 > Versions `2008`–`2012` do not work
 > because the `kpsewhich` for those versions is a 32-bit executable
@@ -292,7 +296,7 @@ All inputs are optional.
 | `texdir`              | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`] option and takes precedence over the `prefix` input and related environment variables.                                                |
 | `tlcontrib`           | Bool   | <p>Set up [TLContrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                                                                           |
 | `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                                                           |
-| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2023`, and `latest`.</p> **Default:**&ensp;`latest`                                                                                                                   |
+| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2024`, and `latest`.</p> **Default:**&ensp;`latest`                                                                                                                   |
 
 [Glob patterns]: https://github.com/actions/toolkit/tree/main/packages/glob#patterns
 [TLContrib]: https://contrib.texlive.info

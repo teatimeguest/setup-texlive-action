@@ -5,9 +5,9 @@ import '@setup-texlive-action/config/vitest/setup-jest-extended.js';
 import '#/globals';
 import type { Version } from '#/texlive/version';
 
-import { latest } from '#/texlive/release-data.json';
+import { current } from '#/texlive/release-data.json';
 
-vi.stubGlobal('LATEST_VERSION', latest.version as Version);
+vi.stubGlobal('LATEST_VERSION', current.version as Version);
 // https://www.rfc-editor.org/rfc/rfc2606.html
 vi.stubGlobal('MOCK_URL', 'https://example.com/');
 
