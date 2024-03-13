@@ -34,7 +34,7 @@ export namespace ReleaseData {
       await latest.checkVersion();
     }
     function newVersionReleased(): boolean {
-      return data.latest.version === latest.version;
+      return data.current.version < latest.version;
     }
     const latestVersionNumber = Number.parseInt(latest.version, 10);
     const releases = {
@@ -51,14 +51,14 @@ export namespace ReleaseData {
 /** @internal */
 export class Latest implements Release {
   releaseDate: ZonedDateTime | undefined;
-  #version: Version = data.latest.version as Version;
+  #version: Version = data.current.version as Version;
 
   get version(): Version {
     return this.#version;
   }
 
   private set version(latest: Version) {
-    if (this.#version !== latest) {
+    if (this.#version < latest) {
       this.#version = latest;
       this.releaseDate = undefined;
       log.notify(
@@ -68,9 +68,8 @@ export class Latest implements Release {
         `,
         latest,
       );
-    } else {
-      log.info('Latest version: %s', this.version);
     }
+    log.info('Latest version: %s', this.version);
   }
 
   async checkVersion(): Promise<Version> {
@@ -96,8 +95,8 @@ export class Latest implements Release {
     if (this.releaseDate !== undefined) {
       return this.releaseDate;
     }
-    if (this.version === data.latest.version) {
-      return this.releaseDate = ZonedDateTime.from(data.latest.releaseDate);
+    if (this.version === data.current.version) {
+      return this.releaseDate = ZonedDateTime.from(data.current.releaseDate);
     }
     const ctanMaster = await tlnet.ctan({ master: true });
     const url = new URL(`TEXLIVE_${this.version}`, ctanMaster);

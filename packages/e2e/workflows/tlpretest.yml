@@ -8,5 +8,5 @@ jobs:
         uses: ./
         with:
           repository: https://ftp.math.utah.edu/pub/tlpretest/
-          version: 2024
+          version: 2025
       - run: tlmgr version

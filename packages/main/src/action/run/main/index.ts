@@ -3,11 +3,14 @@ import { setOutput } from '@actions/core';
 import { CacheService } from '#/action/cache';
 import { Config } from '#/action/config';
 import { install } from '#/action/run/main/install';
+import { notice } from '#/action/run/main/notice';
 import { adjustTexmf, updateTlmgr } from '#/action/run/main/update';
 import * as log from '#/log';
 import { Profile, ReleaseData, Tlmgr, tlnet } from '#/texlive';
 
 export async function main(): Promise<void> {
+  notice();
+
   const config = await Config.load();
   const { latest, previous, newVersionReleased } = ReleaseData.use();
   await using profile = new Profile(config.version, config);

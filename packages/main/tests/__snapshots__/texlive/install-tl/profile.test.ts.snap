@@ -536,3 +536,38 @@ tlpdbopt_desktop_integration 0
 tlpdbopt_file_assocs 0
 tlpdbopt_w32_multi_user 0
 `;
+
+exports[`2024 > linux > texlive.profile 1`] = `
+TEXDIR $RUNNER_TEMP/setup-texlive-action/2024
+TEXMFLOCAL $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP/setup-texlive-action/2024/texmf-config
+TEXMFSYSVAR $RUNNER_TEMP/setup-texlive-action/2024/texmf-var
+TEXMFHOME $RUNNER_TEMP/setup-texlive-action/texmf-local
+TEXMFCONFIG $RUNNER_TEMP/setup-texlive-action/2024/texmf-config
+TEXMFVAR $RUNNER_TEMP/setup-texlive-action/2024/texmf-var
+selected_scheme scheme-infraonly
+instopt_adjustpath 0
+instopt_adjustrepo 0
+tlpdbopt_autobackup 0
+tlpdbopt_install_docfiles 0
+tlpdbopt_install_srcfiles 0
+`;
+
+exports[`2024 > win32 > texlive.profile 1`] = `
+TEXDIR $RUNNER_TEMP\\setup-texlive-action\\2024
+TEXMFLOCAL $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFSYSCONFIG $RUNNER_TEMP\\setup-texlive-action\\2024\\texmf-config
+TEXMFSYSVAR $RUNNER_TEMP\\setup-texlive-action\\2024\\texmf-var
+TEXMFHOME $RUNNER_TEMP\\setup-texlive-action\\texmf-local
+TEXMFCONFIG $RUNNER_TEMP\\setup-texlive-action\\2024\\texmf-config
+TEXMFVAR $RUNNER_TEMP\\setup-texlive-action\\2024\\texmf-var
+selected_scheme scheme-infraonly
+instopt_adjustpath 0
+instopt_adjustrepo 0
+tlpdbopt_autobackup 0
+tlpdbopt_install_docfiles 0
+tlpdbopt_install_srcfiles 0
+tlpdbopt_desktop_integration 0
+tlpdbopt_file_assocs 0
+tlpdbopt_w32_multi_user 0
+`;
