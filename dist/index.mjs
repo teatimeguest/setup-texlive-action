@@ -18900,10 +18900,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       command_1.issueCommand("warning", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
     exports.warning = warning2;
-    function notice2(message, properties = {}) {
+    function notice3(message, properties = {}) {
       command_1.issueCommand("notice", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
-    exports.notice = notice2;
+    exports.notice = notice3;
     function info3(message) {
       process.stdout.write(message + os5.EOL);
     }
@@ -87361,13 +87361,17 @@ var Version;
 
 // packages/main/src/texlive/release-data.json
 var release_data_default = {
-  latest: {
+  previous: {
     version: "2023",
     releaseDate: "2023-03-19T21:25:25.000Z"
   },
-  next: {
+  current: {
     version: "2024",
-    releaseDate: "2024-03-13"
+    releaseDate: "2024-03-13T17:37Z"
+  },
+  next: {
+    version: "2025",
+    releaseDate: "2025-03-01"
   }
 };
 
@@ -87383,7 +87387,7 @@ var ReleaseData;
       await latest.checkVersion();
     }
     function newVersionReleased() {
-      return release_data_default.latest.version === latest.version;
+      return release_data_default.current.version < latest.version;
     }
     const latestVersionNumber = Number.parseInt(latest.version, 10);
     const releases = {
@@ -87399,12 +87403,12 @@ var ReleaseData;
 })(ReleaseData || (ReleaseData = {}));
 var Latest = class {
   releaseDate;
-  #version = release_data_default.latest.version;
+  #version = release_data_default.current.version;
   get version() {
     return this.#version;
   }
   set version(latest) {
-    if (this.#version !== latest) {
+    if (this.#version < latest) {
       this.#version = latest;
       this.releaseDate = void 0;
       notify(
@@ -87414,9 +87418,8 @@ var Latest = class {
         `,
         latest
       );
-    } else {
-      info2("Latest version: %s", this.version);
     }
+    info2("Latest version: %s", this.version);
   }
   async checkVersion() {
     info2("Checking for latest version of TeX Live");
@@ -87440,8 +87443,8 @@ var Latest = class {
     if (this.releaseDate !== void 0) {
       return this.releaseDate;
     }
-    if (this.version === release_data_default.latest.version) {
-      return this.releaseDate = ZonedDateTime.from(release_data_default.latest.releaseDate);
+    if (this.version === release_data_default.current.version) {
+      return this.releaseDate = ZonedDateTime.from(release_data_default.current.releaseDate);
     }
     const ctanMaster = await ctan({ master: true });
     const url2 = new URL(`TEXLIVE_${this.version}`, ctanMaster);
@@ -87692,7 +87695,6 @@ var InstallTL = class {
     this.version = version4;
   }
   async run(options) {
-    const { latest } = ReleaseData.use();
     const { profile, repository } = options;
     await exec(this.path, ["-version"], { stdin: null });
     const result = await exec(
@@ -87701,12 +87703,9 @@ var InstallTL = class {
       { stdin: null, ignoreReturnCode: true }
     );
     const errorOptions = { version: this.version, repository };
-    if (this.version >= latest.version) {
-      InstallTLError.checkCompatibility(result, errorOptions);
-    } else {
-      TlpdbError.checkRepositoryStatus(result, errorOptions);
-      TlpdbError.checkRepositoryHealth(result, errorOptions);
-    }
+    InstallTLError.checkCompatibility(result, errorOptions);
+    TlpdbError.checkRepositoryStatus(result, errorOptions);
+    TlpdbError.checkRepositoryHealth(result, errorOptions);
     TlpdbError.checkPackageChecksumMismatch(result, errorOptions);
     try {
       result.check();
@@ -88821,16 +88820,25 @@ async function resolveVersion(inputs) {
   return version4;
 }
 
+// packages/main/src/action/run/main/tlnet.ts
+var tlnet_default = new URL(
+  "https://mirror.math.princeton.edu/pub/CTAN/systems/texlive/tlnet/"
+);
+
 // packages/main/src/action/run/main/install.ts
 async function install2(options) {
   const { latest, previous } = ReleaseData.use();
   const { version: version4 } = options.profile;
   let repository = options?.repository;
-  const fallbackToMaster = repository === void 0 && version4 > previous.version;
+  const fallbackToMaster = repository === void 0 && version4 >= previous.version;
   let installTL;
   for (const master of fallbackToMaster ? [false, true] : [false]) {
     if (repository === void 0 || master) {
-      repository = version4 >= latest.version ? await tlnet_exports.ctan({ master }) : tlnet_exports.historic(version4, { master });
+      if (master && version4 === "2024") {
+        repository = tlnet_default;
+      } else {
+        repository = version4 >= latest.version ? await tlnet_exports.ctan({ master }) : tlnet_exports.historic(version4, { master });
+      }
     }
     try {
       installTL ??= await acquire({ repository, version: version4 });
@@ -88861,6 +88869,18 @@ async function install2(options) {
       }
       throw error;
     }
+  }
+}
+
+// packages/main/src/action/run/main/notice.ts
+function notice2() {
+  try {
+    const now = Temporal.Now.instant();
+    const newFY = Temporal.Instant.from("2024-04-01T00:00Z");
+    if (now.epochSeconds < newFY.epochSeconds) {
+      info2("TeX Live 2024 has been released");
+    }
+  } catch {
   }
 }
 
@@ -88950,6 +88970,7 @@ async function adjustTexmf(profile) {
 async function main() {
   var _stack = [];
   try {
+    notice2();
     const config = await Config.load();
     const { latest, previous, newVersionReleased } = ReleaseData.use();
     const profile = __using(_stack, new Profile(config.version, config), true);
