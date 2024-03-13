@@ -12,7 +12,7 @@ export async function main(): Promise<void> {
   notice();
 
   const config = await Config.load();
-  const { latest, previous, newVersionReleased } = ReleaseData.use();
+  const { latest, previous } = ReleaseData.use();
   await using profile = new Profile(config.version, config);
 
   using cache = CacheService.setup({
@@ -42,10 +42,7 @@ export async function main(): Promise<void> {
   await tlmgr.path.add();
 
   if (cache.restored) {
-    if (
-      profile.version >= latest.version
-      || (profile.version === previous.version && newVersionReleased())
-    ) {
+    if (profile.version >= previous.version) {
       await log.group(
         profile.version >= latest.version
           ? 'Updating tlmgr'
