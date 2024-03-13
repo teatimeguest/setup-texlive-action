@@ -88972,7 +88972,7 @@ async function main() {
   try {
     notice2();
     const config = await Config.load();
-    const { latest, previous, newVersionReleased } = ReleaseData.use();
+    const { latest, previous } = ReleaseData.use();
     const profile = __using(_stack, new Profile(config.version, config), true);
     const cache = __using(_stack, CacheService.setup({
       TEXDIR: profile.TEXDIR,
@@ -88997,7 +88997,7 @@ async function main() {
     const tlmgr = Tlmgr.setup(profile);
     await tlmgr.path.add();
     if (cache.restored) {
-      if (profile.version >= latest.version || profile.version === previous.version && newVersionReleased()) {
+      if (profile.version >= previous.version) {
         await import_core2.group(
           profile.version >= latest.version ? "Updating tlmgr" : "Checking the package repository status",
           async () => {
