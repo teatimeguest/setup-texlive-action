@@ -16,24 +16,24 @@
     "./vitest/config.mjs": null
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.0.0",
-    "@eslint/js": "^8.56.0",
-    "@typescript-eslint/eslint-plugin": "^6.20.0",
-    "@typescript-eslint/parser": "^6.20.0",
-    "@vitest/coverage-v8": "^1.2.2",
-    "esbuild-loader": "^4.0.3",
+    "@eslint/eslintrc": "^3.0.2",
+    "@eslint/js": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "@vitest/coverage-v8": "^1.4.0",
+    "esbuild-loader": "^4.1.0",
     "eslint-plugin-i": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-regexp": "^2.2.0",
-    "eslint-plugin-unicorn": "^50.0.1",
-    "eslint-plugin-vitest": "^0.3.21",
+    "eslint-plugin-regexp": "^2.3.0",
+    "eslint-plugin-unicorn": "^51.0.1",
+    "eslint-plugin-vitest": "^0.3.26",
+    "github-slugger": "^2.0.0",
     "jest-extended": "^4.0.2",
     "license-webpack-plugin": "^4.0.2",
     "nunjucks": "^3.2.4",
-    "github-slugger": "^2.0.0",
-    "spdx-license-list": "^6.8.0",
+    "spdx-license-list": "^6.9.0",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "vite-tsconfig-paths": "^4.3.1",
-    "webpack": "^5.90.0"
+    "vite-tsconfig-paths": "^4.3.2",
+    "webpack": "^5.90.3"
   }
 }

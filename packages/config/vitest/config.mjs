@@ -26,9 +26,6 @@ export default {
       includeStack: true,
       truncateThreshold: 1000,
     },
-    cache: {
-      dir: $('node_modules/.vitest'),
-    },
     sequence: {
       hooks: 'stack',
       setupFiles: 'list',

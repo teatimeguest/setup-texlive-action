@@ -8,6 +8,6 @@
     "./delete-caches": "./delete-caches.cjs"
   },
   "devDependencies": {
-    "@go-task/cli": "^3.34.1"
+    "@go-task/cli": "^3.35.1"
   }
 }

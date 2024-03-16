@@ -19,11 +19,11 @@ export async function install(options: {
   const { latest, previous } = ReleaseData.use();
   const { version } = options.profile;
 
-  let repository = options?.repository;
+  let repository = options.repository;
   const fallbackToMaster = repository === undefined
     && version >= previous.version;
 
-  let installTL: InstallTL;
+  let installTL: InstallTL | undefined;
 
   for (const master of fallbackToMaster ? [false, true] : [false]) {
     if (repository === undefined || master) {

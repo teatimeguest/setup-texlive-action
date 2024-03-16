@@ -21,7 +21,7 @@ import id from '#/action/id';
 import * as log from '#/log';
 import type { Version } from '#/texlive';
 
-const STATE_NAME = 'CACHE' as const;
+const STATE_NAME = 'CACHE';
 
 export interface CacheEntryConfig {
   readonly TEXDIR: string;
