@@ -1,3 +1,7 @@
+import {
+  current,
+  next,
+} from '@setup-texlive-action/data/texlive-versions.json';
 import deline from 'deline';
 import { createContext } from 'unctx';
 
@@ -6,8 +10,6 @@ import * as log from '#/log';
 import * as tlnet from '#/texlive/tlnet';
 import { Version } from '#/texlive/version';
 import { http } from '#/util';
-
-import data from '#/texlive/release-data.json';
 
 const { Instant, Now, PlainDateTime, ZonedDateTime } = Temporal;
 type ZonedDateTime = Temporal.ZonedDateTime;
@@ -34,7 +36,7 @@ export namespace ReleaseData {
       await latest.checkVersion();
     }
     function newVersionReleased(): boolean {
-      return data.current.version < latest.version;
+      return current.version < latest.version;
     }
     const latestVersionNumber = Number.parseInt(latest.version, 10);
     const releases = {
@@ -51,7 +53,7 @@ export namespace ReleaseData {
 /** @internal */
 export class Latest implements Release {
   releaseDate: ZonedDateTime | undefined;
-  #version: Version = data.current.version as Version;
+  #version: Version = current.version as Version;
 
   get version(): Version {
     return this.#version;
@@ -95,8 +97,8 @@ export class Latest implements Release {
     if (this.releaseDate !== undefined) {
       return this.releaseDate;
     }
-    if (this.version === data.current.version) {
-      return this.releaseDate = ZonedDateTime.from(data.current.releaseDate);
+    if (this.version === current.version) {
+      return this.releaseDate = ZonedDateTime.from(current.releaseDate);
     }
     const ctanMaster = await tlnet.ctan({ master: true });
     const url = new URL(`TEXLIVE_${this.version}`, ctanMaster);
@@ -116,7 +118,7 @@ export class Latest implements Release {
     /** @see {@link https://en.wikipedia.org/wiki/UTC%2B14:00} */
     const tzEarliest = '+14:00';
     const nextReleaseDate = PlainDateTime
-      .from(data.next.releaseDate)
+      .from(next.releaseDate)
       .toZonedDateTime(tzEarliest)
       .toInstant();
     return Instant.compare(now, nextReleaseDate) >= 0;

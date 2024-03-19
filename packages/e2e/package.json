@@ -6,8 +6,5 @@
   },
   "exports": {
     "./delete-caches": "./delete-caches.cjs"
-  },
-  "devDependencies": {
-    "@go-task/cli": "^3.35.1"
   }
 }

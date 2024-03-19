@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@setup-texlive-action/config": "*",
+    "@setup-texlive-action/data": "*",
     "@setup-texlive-action/fixtures": "*",
     "@setup-texlive-action/polyfill": "*",
     "@types/deline": "^1.0.4",

@@ -1,11 +1,10 @@
 import { vi } from 'vitest';
 
 import '@setup-texlive-action/config/vitest/setup-jest-extended.js';
+import { current } from '@setup-texlive-action/data/texlive-versions.json';
 
 import '#/globals';
 import type { Version } from '#/texlive/version';
-
-import { current } from '#/texlive/release-data.json';
 
 vi.stubGlobal('LATEST_VERSION', current.version as Version);
 // https://www.rfc-editor.org/rfc/rfc2606.html

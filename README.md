@@ -1,7 +1,3 @@
-> TeX Live 2024 was released on March 13.
-> The action may not work properly for a few days after the release.
-> If you have any problems, please feel free to open an issue.
-
 # setup-texlive-action
 
 > A GitHub Action to set up TeX Live

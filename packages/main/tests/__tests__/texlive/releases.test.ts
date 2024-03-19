@@ -54,7 +54,7 @@ describe('ReleaseData.setup', () => {
     vi.spyOn(Temporal.Now, 'instant').mockReturnValueOnce(
       Temporal
         .PlainDateTime
-        .from('2025-03-01')
+        .from('2025-03-08')
         .toZonedDateTime('UTC')
         .toInstant(),
     );

@@ -1,0 +1,56 @@
+{
+  "$id": "texlive-versions.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "TeX Live versions",
+  "type": "object",
+  "properties": {
+    "previous": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "releaseDate": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["version", "releaseDate"],
+      "patternProperties": {
+        "^\\$.*$": {}
+      },
+      "additionalProperties": false
+    },
+    "current": {
+      "$ref": "#/properties/previous"
+    },
+    "next": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "releaseDate": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": ["version", "releaseDate"],
+      "patternProperties": {
+        "^\\$.*$": {}
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["previous", "current", "next"],
+  "patternProperties": {
+    "^\\$.*$": {}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^20\\d\\d$"
+    }
+  }
+}
