@@ -14,7 +14,7 @@ import nunjucks from '@setup-texlive-action/config/nunjucks/markdown';
  */
 
 export default class PluginLicenses extends LicenseWebpackPlugin {
-  /** @param {PluginLicensesOptions} options */
+  /** @param {PluginOptions} options */
   constructor(options) {
     const outputFilename = options.outputFilename
       ?? path.basename(options.templatePath, '.njk');
@@ -28,31 +28,30 @@ export default class PluginLicenses extends LicenseWebpackPlugin {
     }
 
     /**
-     * @param {string} name
-     * @param {string} license
-     * @returns {string}
-     */
-    function handleMissingLicenseText(name, license) {
-      return `${spdx[license].name} (${spdx[license].url})`;
-    }
-
-    /**
      * @param
-     *   {import('license-webpack-plugin/dist/LicenseIdentifiedModule')
+     *   {import('license-webpack-plugin/dist/LicenseIdentifiedModule.js')
      *     .LicenseIdentifiedModule[]}
      *   data
      * @returns {string}
      */
     function renderLicenses(data) {
-      const modules = data.sort((lhs, rhs) => lhs.name < rhs.name ? -1 : 1);
+      const modules = data
+        .sort((lhs, rhs) => lhs.name < rhs.name ? -1 : 1)
+        .map((m) => {
+          switch (m.name) {
+            case '@azure/core-http':
+              delete m.packageJson?.['homepage'];
+              break;
+            case 'temporal-polyfill':
+              delete m.licenseText;
+              break;
+          }
+          return m;
+        });
       console.table(
         Object.fromEntries(modules.map((m) => [m.name, m.licenseId])),
       );
-      delete modules
-        .find(({ name }) => name === '@azure/core-http')
-        ?.packageJson
-        ?.['homepage'];
-      return nunjucks.render(options.templatePath, { modules });
+      return nunjucks.render(options.templatePath, { modules, spdx });
     }
 
     /**
@@ -66,9 +65,11 @@ export default class PluginLicenses extends LicenseWebpackPlugin {
     super({
       outputFilename,
       unacceptableLicenseTest,
-      handleMissingLicenseText,
       renderLicenses,
       excludedPackageTest,
+      licenseFileOverrides: {
+        'temporal-polyfill': 'package.json',
+      },
     });
   }
 }

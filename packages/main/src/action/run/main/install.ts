@@ -1,6 +1,6 @@
+import { ctan } from '@setup-texlive-action/data/tlnet.json';
 import { P, match } from 'ts-pattern';
 
-import synced from '#/action/run/main/tlnet';
 import * as log from '#/log';
 import {
   type InstallTL,
@@ -28,7 +28,7 @@ export async function install(options: {
   for (const master of fallbackToMaster ? [false, true] : [false]) {
     if (repository === undefined || master) {
       if (master && version === '2024') {
-        repository = synced;
+        repository = new URL(ctan.path, ctan.default);
       } else {
         repository = version >= latest.version
           ? await tlnet.ctan({ master })

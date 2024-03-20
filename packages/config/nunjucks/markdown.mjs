@@ -12,4 +12,4 @@ export default nunjucks
     noCache: true,
   })
   .addFilter('slugify', (s) => slugger.slug(s))
-  .addFilter('escape', (s) => s.replaceAll(/[<>]/gu, '\\$&'));
+  .addFilter('escape', (s) => s.replaceAll(/[<>]/gv, '\\$&'));

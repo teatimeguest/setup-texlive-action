@@ -1,4 +1,4 @@
-/** @type {import('esbuild').TransformOptions} */
+/** @type {import('esbuild').CommonOptions} */
 export const transformConfig = {
   target: 'node20',
   format: 'esm',

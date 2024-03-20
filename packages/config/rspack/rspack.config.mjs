@@ -1,6 +1,5 @@
 import path from 'node:path';
-
-import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin';
+import { env } from 'node:process';
 
 import esbuildConfig, {
   transformConfig,
@@ -9,46 +8,38 @@ import esbuildConfig, {
 import PluginLicenses from './plugins/licenses.mjs';
 import pluginNoEmit from './plugins/no-emit.mjs';
 
-/** @type {import('webpack').Configuration} */
+env['FORCE_COLOR'] = '1';
+
+/** @type {import('@rspack/cli').Configuration} */
 export default {
   entry: path.resolve('./packages/main/src/index.ts'),
   output: {
     path: path.resolve('./dist'),
   },
   resolve: {
+    conditionNames: esbuildConfig.conditions,
     extensions: esbuildConfig.resolveExtensions,
     extensionAlias: {
       '.js': ['.ts', '.js'],
     },
-    plugins: [
-      new TsconfigPathsPlugin({
-        configFile: './packages/tsconfig.json',
-        extensions: esbuildConfig.resolveExtensions,
-      }),
-    ],
+    mainFields: esbuildConfig.mainFields,
+    tsConfigPath: path.resolve('./packages/tsconfig.json'),
   },
-  mode: 'development',
-  target: transformConfig.target,
-  externals: Object.keys(esbuildConfig.alias),
+  mode: 'production',
   module: {
     rules: [
       {
-        test: /\.ts/u,
+        test: /\.ts/v,
         loader: 'esbuild-loader',
         options: transformConfig,
       },
     ],
   },
-  experiments: {
-    topLevelAwait: true,
-  },
+  target: transformConfig.target,
+  externals: Object.keys(esbuildConfig.alias),
   optimization: {
     minimize: false,
   },
-  stats: 'minimal',
-  ignoreWarnings: [
-    { message: /Should not import the named export/u },
-  ],
   plugins: [
     pluginNoEmit,
     new PluginLicenses({
@@ -62,4 +53,8 @@ export default {
       templatePath: './packages/config/nunjucks/NOTICE.md.njk',
     }),
   ],
+  stats: {
+    preset: 'errors-warnings',
+    colors: true,
+  },
 };

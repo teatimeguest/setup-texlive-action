@@ -18,16 +18,19 @@ export interface InstallTLOptions {
 }
 
 export class InstallTL {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  constructor(readonly path: string, readonly version: Version) {}
+  constructor(readonly directory: string, readonly version: Version) {}
 
   async run(options: InstallTLOptions): Promise<void> {
     const { profile, repository } = options;
 
-    await exec(this.path, ['-version'], { stdin: null });
+    const installTL = path.format({
+      dir: this.directory,
+      base: executableName(this.version),
+    });
+    await exec(installTL, ['-version'], { stdin: null });
 
     const result = await exec(
-      this.path,
+      installTL,
       await Array.fromAsync(commandArgs(options)),
       { stdin: null, ignoreReturnCode: true },
     );
@@ -48,7 +51,7 @@ export class InstallTL {
       });
     }
 
-    await patch(profile);
+    await patch({ directory: this.directory, version: profile.version });
   }
 }
 
@@ -102,10 +105,7 @@ export interface DownloadOptions {
 }
 
 export async function acquire(options: DownloadOptions): Promise<InstallTL> {
-  const installerPath = path.format({
-    dir: restoreCache(options) ?? await download(options),
-    base: executableName(options.version),
-  });
+  const installerPath = restoreCache(options) ?? await download(options);
   return new InstallTL(installerPath, options.version);
 }
 
@@ -180,12 +180,12 @@ export async function download(options: DownloadOptions): Promise<string> {
   return texmfroot;
 }
 
-async function saveCache(TEXMFROOT: string, version: Version): Promise<void> {
-  await patch({ TEXMFROOT, version });
+async function saveCache(directory: string, version: Version): Promise<void> {
+  await patch({ directory, version });
   const executable = executableName(version);
   try {
     log.info('Adding to tool cache');
-    await cacheDir(TEXMFROOT, executable, version);
+    await cacheDir(directory, executable, version);
   } catch (error) {
     log.info({ error }, 'Failed to cache %s', executable);
   }

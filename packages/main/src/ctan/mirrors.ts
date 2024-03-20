@@ -1,10 +1,9 @@
 import { setTimeout } from 'node:timers/promises';
 
+import { ctan } from '@setup-texlive-action/data/tlnet.json';
+
 import * as log from '#/log';
 import { HttpClient, HttpCodes, createClientError } from '#/util/http';
-
-const CTAN_MASTER_URL = 'http://dante.ctan.org/tex-archive/';
-const CTAN_MIRROR_URL = 'https://mirrors.ctan.org/';
 
 const MAX_TRIES = 10;
 const RETRY_DELAY = 500;
@@ -18,7 +17,7 @@ export interface CtanMirrorOptions {
 
 export async function resolve(options?: CtanMirrorOptions): Promise<URL> {
   if (options?.master ?? false) {
-    return new URL(CTAN_MASTER_URL);
+    return new URL(ctan.master);
   }
   if (resolvedMirrorLocation !== undefined) {
     return new URL(resolvedMirrorLocation.href);
@@ -29,10 +28,10 @@ export async function resolve(options?: CtanMirrorOptions): Promise<URL> {
   });
   for (let i = 0; i < MAX_TRIES; ++i) {
     try {
-      const { message } = await http.head(CTAN_MIRROR_URL);
+      const { message } = await http.head(ctan.mirrors);
       const { headers, statusCode = Number.NaN } = message.destroy();
       if (!REDIRECT_CODES.has(statusCode as HttpCodes)) {
-        throw createClientError(statusCode, CTAN_MIRROR_URL);
+        throw createClientError(statusCode, ctan.mirrors);
       }
       const mirror = new URL(headers.location!);
       log.debug(

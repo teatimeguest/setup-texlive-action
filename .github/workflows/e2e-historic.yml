@@ -1,24 +1,42 @@
 name: E2E Historic
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: OS (ubuntu, windows, macos)
+        type: string
+        required: false
+      version:
+        description: TeX Live version
+        type: string
+        required: false
 permissions:
   contents: read
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - if: github.actor == 'nektos/act'
+        name: Install jq
+        run: |
+          apt update
+          apt install -y --no-install-recommends jq
+      - name: Generate matrix
+        id: generate
+        run: |
+          ./scripts/generate-matrix.jq packages/data/data/texlive-versions.json |
+          tee -a "${GITHUB_OUTPUT}"
+        env:
+          os: ${{ inputs.os }}
+          version: ${{ inputs.version }}
   historic:
+    needs: generate-matrix
     strategy:
       matrix:
-        os: [ubuntu, windows, macos]
-        version:
-          [
-                                                            2008, 2009,
-            2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
-            2020, 2021, 2022, 2023,
-          ]
-        exclude:
-          - { os: macos, version: 2008 }
-          - { os: macos, version: 2009 }
-          - { os: macos, version: 2010 }
-          - { os: macos, version: 2011 }
-          - { os: macos, version: 2012 }
+        include: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
       fail-fast: false
       max-parallel: 4
     runs-on: ${{ matrix.os }}-latest

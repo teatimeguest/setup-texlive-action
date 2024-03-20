@@ -34,7 +34,7 @@ jobs:
         if: github.actor != 'nektos/act'
         run: |
           apt update
-          apt install -y perl wget xz-utils
+          apt install -y --no-install-recommends perl wget xz-utils
       - name: Setup TeX Live
         uses: ./
         with:

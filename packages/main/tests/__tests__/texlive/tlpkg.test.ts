@@ -26,7 +26,7 @@ describe('check', () => {
 });
 
 describe('patch', () => {
-  const TEXMFROOT = '<TEXDIR>';
+  const directory = '<TEXDIR>';
 
   it.each<[NodeJS.Platform, Version]>([
     ['linux', `2009`],
@@ -37,7 +37,7 @@ describe('patch', () => {
     'applies a patch for tlpkg/TeXLive/TLWinGoo.pm on (%s %s)',
     async (platform, version) => {
       vi.mocked(os.platform).mockReturnValue(platform);
-      await expect(tlpkg.patch({ TEXMFROOT, version })).toResolve();
+      await expect(tlpkg.patch({ directory, version })).toResolve();
       expect(fs.readFile).toHaveBeenCalledWith(
         expect.stringContaining('TLWinGoo.pm'),
         'utf8',
@@ -47,7 +47,7 @@ describe('patch', () => {
 
   it('applies a patch for tlpkg/tlperl/lib/Encode/Alias.pm', async () => {
     vi.mocked(os.platform).mockReturnValue('win32');
-    await expect(tlpkg.patch({ TEXMFROOT, version: `2015` })).toResolve();
+    await expect(tlpkg.patch({ directory, version: `2015` })).toResolve();
     expect(fs.readFile).toHaveBeenCalledWith(
       expect.stringContaining('Alias.pm'),
       'utf8',
@@ -66,7 +66,7 @@ describe('patch', () => {
     'applies a patch tlpkg/TeXLive/TLUtils.pm (%s %s)',
     async (platform, version) => {
       vi.mocked(os.platform).mockReturnValue(platform);
-      await expect(tlpkg.patch({ TEXMFROOT, version })).toResolve();
+      await expect(tlpkg.patch({ directory, version })).toResolve();
       expect(fs.readFile).toHaveBeenCalledWith(
         expect.stringContaining('TLUtils.pm'),
         'utf8',

@@ -1,0 +1,76 @@
+{
+  "$id": "tlnet.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "ctan": {
+      "$ref": "#/$defs/tlnet"
+    },
+    "tlcontrib": {
+      "$ref": "#/$defs/tlnet"
+    },
+    "historic": {
+      "$ref": "#/$defs/tlnet"
+    },
+    "tlpretest": {
+      "$ref": "#/$defs/tlnet"
+    }
+  },
+  "required": ["ctan", "tlcontrib", "historic", "tlpretest"],
+  "patternProperties": {
+    "^\\$.*$": {}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "tlnet": {
+      "type": "object",
+      "properties": {
+        "master": {
+          "description": "Master repository URL",
+          "type": "string",
+          "format": "uri"
+        },
+        "mirrors": {
+          "description": "Mirror multiplexor URL",
+          "type": "string",
+          "format": "uri"
+        },
+        "default": {
+          "description": "Mirror URL used by default",
+          "type": "string",
+          "format": "uri"
+        },
+        "path": {
+          "description": "tlnet path",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri-template"
+            },
+            {
+              "type": "object",
+              "propertyNames": {
+                "format": "uri-template"
+              },
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "versions": {
+                    "$ref": "#/$defs/semverRange"
+                  }
+                },
+                "required": ["versions"],
+                "additionalProperties": false
+              }
+            }
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "semverRange": {
+      "type": "string"
+    }
+  }
+}

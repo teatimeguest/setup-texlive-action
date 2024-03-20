@@ -11,13 +11,13 @@
     "./eslint": "./eslint.config.mjs",
     "./nunjucks/*": "./nunjucks/*.mjs",
     "./tsconfig": "./tsconfig.json",
-    "./vitest": "./vitest/config.mjs",
-    "./vitest/*": "./vitest/*",
-    "./vitest/config.mjs": null
+    "./vitest": "./vitest/vitest.config.mjs",
+    "./vitest/*": "./vitest/*"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.0.2",
     "@eslint/js": "^8.57.0",
+    "@tsconfig/strictest": "^2.0.3",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
     "@vitest/coverage-v8": "^1.4.0",
@@ -32,8 +32,6 @@
     "license-webpack-plugin": "^4.0.2",
     "nunjucks": "^3.2.4",
     "spdx-license-list": "^6.9.0",
-    "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "vite-tsconfig-paths": "^4.3.2",
-    "webpack": "^5.90.3"
+    "vite-tsconfig-paths": "^4.3.2"
   }
 }

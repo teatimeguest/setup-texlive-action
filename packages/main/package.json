@@ -7,6 +7,11 @@
     "lint": "eslint src tests",
     "test": "vitest"
   },
+  "sideEffects": [
+    "./src/globals.ts",
+    "./src/util/custom-inspect.ts",
+    "./src/util/node16-compat.ts"
+  ],
   "dependencies": {
     "@actions/cache": "^3.2.4",
     "@actions/core": "^1.10.1",
@@ -24,7 +29,8 @@
     "ts-mixer": "^6.0.4",
     "ts-pattern": "^5.0.8",
     "tslib": "^2.6.2",
-    "unctx": "^2.3.1"
+    "unctx": "^2.3.1",
+    "url-template": "^3.1.1"
   },
   "devDependencies": {
     "@setup-texlive-action/config": "*",

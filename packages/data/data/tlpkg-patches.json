@@ -1,0 +1,56 @@
+{
+  "$schema": "../schemas/tlpkg-patches.schema.json",
+  "patches": [
+    {
+      "description": "Fixes a syntax error",
+      "versions": ">=2009 <2011",
+      "file": "tlpkg/TeXLive/TLWinGoo.pm",
+      "changes": [
+        {
+          "from": "foreach \\$p qw\\((.*)\\)",
+          "to": "foreach $$p (qw($1))"
+        }
+      ]
+    },
+    {
+      "description": "Defines Code Page 65001 as an alias for UTF-8",
+      "platforms": ["win32"],
+      "versions": "2015",
+      "file": "tlpkg/tlperl/lib/Encode/Alias.pm",
+      "changes": [
+        {
+          "from": "# utf8 is blessed :\\)",
+          "to": "define_alias( qr/\\bcp65001$$/i => '\"utf-8-strict\"' );"
+        }
+      ]
+    },
+    {
+      "description": "Makes it possible to use `\\` as a directory separator",
+      "platforms": ["win32"],
+      "versions": "<2019",
+      "file": "tlpkg/TeXLive/TLUtils.pm",
+      "changes": [
+        {
+          "from": "split \\(/\\\\//, \\$tree\\)",
+          "to": "split (/[\\/\\\\]/, $$tree)"
+        }
+      ]
+    },
+    {
+      "description": "Adds support for macOS 11 or later",
+      "platforms": ["darwin"],
+      "versions": ">=2017 <2020",
+      "file": "tlpkg/TeXLive/TLUtils.pm",
+      "changes": [
+        {
+          "from": "\\$os_major != 10",
+          "to": "$$os_major < 10"
+        },
+        {
+          "from": "\\$os_minor >= \\$mactex_darwin",
+          "to": "$$os_major > 10 || $&"
+        }
+      ]
+    }
+  ]
+}

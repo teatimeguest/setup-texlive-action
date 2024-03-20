@@ -6,16 +6,16 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "check": "tsc -p packages/tsconfig.json --noEmit",
-    "dprint": "dprint -c packages/config/dprint/config.jsonc",
+    "dprint": "dprint -c packages/config/dprint/dprint.jsonc",
     "e2e": "npm -w packages/e2e test --",
     "fmt": "npm run dprint fmt",
     "fmt-check": "run-p --aggregate-output -c 'dprint check' fmt-check:ec",
     "fmt-check:ec": "git ls-files -z | xargs -0 ec",
-    "licenses": "webpack -c packages/config/webpack/config.mjs",
+    "licenses": "rspack -c packages/config/rspack/rspack.config.mjs",
     "link-check": "markdown-link-check README.md",
     "lint": "npm run -ws --if-present lint",
     "test": "vitest -c packages/vitest.config.mjs",
-    "prepack": "run-s 'build -- --release' licenses",
+    "prepack": "run-p --aggregate-output -c 'build -- --release' licenses",
     "preversion": "bash scripts/bump-version.sh",
     "version": "bash scripts/bump-version.sh",
     "postversion": "bash scripts/bump-version.sh"
@@ -36,6 +36,7 @@
   ],
   "devDependencies": {
     "@go-task/cli": "^3.35.1",
+    "@rspack/cli": "^0.5.8",
     "@types/node": "~20.0.0",
     "better-typescript-lib": "2.4.0",
     "dprint": "^0.45.0",
@@ -48,7 +49,6 @@
     "patch-package": "^8.0.0",
     "taze": "^0.13.3",
     "typescript": "5.3",
-    "vitest": "^1.4.0",
-    "webpack-cli": "^5.1.4"
+    "vitest": "^1.4.0"
   }
 }
