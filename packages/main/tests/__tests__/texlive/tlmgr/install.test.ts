@@ -5,12 +5,12 @@ import stderr2008 from '@setup-texlive-action/fixtures/tlmgr-install.2008.stderr
 import stderr2009 from '@setup-texlive-action/fixtures/tlmgr-install.2009.stderr';
 import stderr2014 from '@setup-texlive-action/fixtures/tlmgr-install.2014.stderr';
 import stderr2023 from '@setup-texlive-action/fixtures/tlmgr-install.2023.stderr';
+import { ExecResult } from '@setup-texlive-action/utils';
 import nock from 'nock';
 
 import { install } from '#/texlive/tlmgr/actions/install';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
-import { ExecResult } from '#/util/exec';
 
 vi.unmock('@actions/http-client');
 vi.unmock('#/texlive/tlmgr/actions/install');
@@ -62,11 +62,11 @@ it.each(
       stderr,
     }),
   );
-  await expect(install(['shellesc'])).toResolve();
+  await expect(install(['shellesc'])).resolves.not.toThrow();
   expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
     'install',
     new Set(['tools']),
     expect.anything(),
   );
-  expect(nock.isDone()).toBeTrue();
+  expect(nock.isDone()).toBe(true);
 });

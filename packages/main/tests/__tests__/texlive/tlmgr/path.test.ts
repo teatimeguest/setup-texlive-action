@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { addPath } from '@actions/core';
+import { uniqueChild } from '@setup-texlive-action/utils';
 
 import * as path from '#/texlive/tlmgr/actions/path';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
-import { uniqueChild } from '#/util/fs';
 
 vi.unmock('#/texlive/tlmgr/actions/path');
 

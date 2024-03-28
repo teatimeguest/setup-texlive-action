@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { exportVariable } from '@actions/core';
+import { exec } from '@setup-texlive-action/utils';
 
 import * as conf from '#/texlive/tlmgr/actions/conf';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import { makeLocalSkeleton } from '#/texlive/tlpkg';
 import type { Version } from '#/texlive/version';
-import { exec } from '#/util/exec';
 
 vi.unmock('#/texlive/tlmgr/actions/conf');
 

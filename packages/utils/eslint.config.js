@@ -5,14 +5,16 @@ import {
   tests,
 } from '@setup-texlive-action/config/eslint';
 
+const mockfiles = 'src/__mocks__/**/*.ts';
+
 export default defineConfig(
   {
     files: ['src/**/*.ts'],
-    ignores: ['src/index.ts', 'src/**/*.d.ts'],
+    ignores: [mockfiles],
     extends: [...common, ...sources],
   },
   {
-    files: ['tests/**/*.ts'],
+    files: ['__tests__/**/*.ts', mockfiles],
     extends: [...common, ...tests],
   },
 );

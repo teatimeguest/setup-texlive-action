@@ -24,7 +24,7 @@ describe('mirrors.resolve', () => {
 
   it('resolves location', async () => {
     await expect(ctan.mirrors.resolve()).resolves.toStrictEqual(mirror);
-    expect(nock.isDone()).toBeTrue();
+    expect(nock.isDone()).toBe(true);
   });
 
   it('does not send a request twice', async () => {

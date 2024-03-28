@@ -8,6 +8,7 @@ const tests = path.dirname(fileURLToPath(import.meta.url));
 vi.mock('@actions/http-client');
 vi.mock('@actions/glob');
 vi.mock('@actions/io');
+vi.mock('@setup-texlive-action/utils');
 vi.mock('#/action/config');
 vi.mock('#/action/env');
 vi.mock('#/texlive/install-tl/cli');
@@ -46,8 +47,6 @@ for (
       '#/texlive/tlmgr/actions/list',
       '#/texlive/tlmgr/internals',
       '#/texlive/tlnet',
-      '#/util/exec',
-      '#/util/fs',
     ],
   })
 ) {

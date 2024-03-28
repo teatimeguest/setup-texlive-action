@@ -31,6 +31,6 @@ describe('add', () => {
 
   it('fails since the `pinning` action is not implemented', async () => {
     setVersion('2012');
-    await expect(pinning.add('<repository>', '*')).toReject();
+    await expect(pinning.add('<repository>', '*')).rejects.toThrow('');
   });
 });

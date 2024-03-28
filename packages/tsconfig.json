@@ -8,7 +8,6 @@
         "main/src/*.js",
         "main/src/*/index.js",
       ],
-      "@setup-texlive-action/polyfill/*": ["polyfill/src/*"],
     },
     "experimentalDecorators": true,
   },

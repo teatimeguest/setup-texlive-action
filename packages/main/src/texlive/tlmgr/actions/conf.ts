@@ -1,10 +1,10 @@
 import { exportVariable } from '@actions/core';
+import { exec } from '@setup-texlive-action/utils';
 
 import * as log from '#/log';
 import { type Texmf, kpse } from '#/tex';
 import { use } from '#/texlive/tlmgr/internals';
 import * as tlpkg from '#/texlive/tlpkg';
-import { exec } from '#/util';
 
 export type KpseVar = Exclude<
   keyof Texmf,

@@ -3,20 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "eslint src"
+    "lint": "eslint"
   },
   "exports": {
-    "./pure": {
-      "import": "./lib/pure/index.js",
-      "types": "./lib/pure/index.d.ts"
-    },
-    "./shims": {
-      "import": "./lib/shims/index.js",
-      "types": "./lib/shims/index.d.ts"
-    }
+    "./pure": "./src/pure/index.ts",
+    "./shims": "./src/shims/index.ts"
   },
   "sideEffects": [
-    "./lib/shims/**/*.js",
     "./src/shims/**/*.ts"
   ],
   "dependencies": {

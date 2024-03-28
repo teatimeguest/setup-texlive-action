@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { env } from 'node:process';
 
 import { setOutput } from '@actions/core';
+import { toHaveBeenCalledAfter, toHaveBeenCalledBefore } from 'jest-extended';
 import type { Writable } from 'ts-essentials';
 
 import { CacheService } from '#/action/cache';
@@ -20,6 +21,10 @@ vi.mocked(Config.load).mockResolvedValue(config);
 vi.mock('#/action/run/main/install');
 vi.mock('#/action/run/main/notice');
 vi.mock('#/action/run/main/update');
+
+beforeAll(() => {
+  expect.extend({ toHaveBeenCalledAfter, toHaveBeenCalledBefore });
+});
 
 beforeEach(() => {
   config.cache = true;

@@ -1,11 +1,12 @@
 import * as fs from 'node:fs/promises';
+import { tmpdir as osTmpdir } from 'node:os';
 import * as path from 'node:path';
 import { env } from 'node:process';
 
 import { rmRF } from '@actions/io';
 import { extractTar, extractZip } from '@actions/tool-cache';
 
-import id from '#/action/id';
+import id from './id.js';
 
 /**
  * Extracts files from an archive.
@@ -43,7 +44,7 @@ export async function uniqueChild(parent: string): Promise<string> {
 }
 
 export function tmpdir(): string {
-  return env.RUNNER_TEMP!;
+  return env['RUNNER_TEMP'] ?? osTmpdir();
 }
 
 export interface Tmpdir extends AsyncDisposable {

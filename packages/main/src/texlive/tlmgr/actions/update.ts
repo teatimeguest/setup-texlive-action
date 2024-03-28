@@ -1,9 +1,9 @@
+import { ExecError, isIterable } from '@setup-texlive-action/utils';
 import { P, match } from 'ts-pattern';
 
 import { TlmgrError } from '#/texlive/tlmgr/errors';
 import { use } from '#/texlive/tlmgr/internals';
 import { TlpdbError } from '#/texlive/tlpkg';
-import { ExecError, isIterable } from '#/util';
 
 export interface UpdateOptions {
   readonly all?: boolean;
@@ -35,21 +35,27 @@ export async function update(
     )
     .with(P._, ([options]) => [[], options])
     .exhaustive();
+
   const {
     all = false,
     reinstallForciblyRemoved = false,
     self = false,
   } = options ?? {};
+
   const args = all ? ['--all'] : [...packages];
+
   if (self) {
     // tlmgr for TeX Live 2008 does not have `self` option
     args.push(internals.version > '2008' ? '--self' : 'texlive.infra');
   }
+
   // `--reinstall-forcibly-removed` was first implemented in TeX Live 2009.
   if (reinstallForciblyRemoved && internals.version >= '2009') {
     args.unshift('--reinstall-forcibly-removed');
   }
+
   const action = 'update';
+
   try {
     await internals.exec(action, [...args]);
   } catch (cause) {

@@ -3,11 +3,11 @@ import { EOL, platform } from 'node:os';
 import * as path from 'node:path';
 
 import { patches } from '@setup-texlive-action/data/tlpkg-patches.json';
+import { exec } from '@setup-texlive-action/utils';
 import type { DeepReadonly } from 'ts-essentials';
 
 import * as log from '#/log';
 import { Version } from '#/texlive/version';
-import { exec } from '#/util';
 
 export async function patch(options: {
   readonly directory: string;

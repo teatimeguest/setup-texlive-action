@@ -1,10 +1,10 @@
 import * as path from 'node:path';
 
+import { Exception, type ExecOutput } from '@setup-texlive-action/utils';
 import deline from 'deline';
 
 import { symbols } from '#/log';
 import { TLError, type TLErrorOptions } from '#/texlive/errors';
-import { Exception, type ExecOutput } from '#/util';
 
 @Exception
 export class TlpdbError extends TLError {

@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { exec } from '#/util';
+import { exec } from '@setup-texlive-action/utils';
 
 /**
  * Initialize TEXMFLOCAL just as the installer does.

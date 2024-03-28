@@ -12,9 +12,9 @@ env['FORCE_COLOR'] = '1';
 
 /** @type {import('@rspack/cli').Configuration} */
 export default {
-  entry: path.resolve('./packages/main/src/index.ts'),
+  entry: './packages/main',
   output: {
-    path: path.resolve('./dist'),
+    path: './dist',
   },
   resolve: {
     conditionNames: esbuildConfig.conditions,

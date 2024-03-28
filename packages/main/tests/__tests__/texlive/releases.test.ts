@@ -27,11 +27,11 @@ describe('LatestRelease', () => {
     it('checks for latest version using the CTAN API', async () => {
       const mock = doMock();
       await expect(new Latest().checkVersion()).resolves.toBe(LATEST_VERSION);
-      expect(mock.isDone()).toBeTrue();
+      expect(mock.isDone()).toBe(true);
     });
 
     it('throws no exception', async () => {
-      await expect(new Latest().checkVersion()).toResolve();
+      await expect(new Latest().checkVersion()).resolves.not.toThrow();
       expect(core.info).toHaveBeenCalledWith(
         expect.stringContaining('Failed to check'),
       );
@@ -46,8 +46,8 @@ describe('ReleaseData.setup', () => {
   });
 
   it('does not usually check for the latest version', async () => {
-    await expect(ReleaseData.setup()).toResolve();
-    expect(mock.isDone()).toBeFalse();
+    await expect(ReleaseData.setup()).resolves.not.toThrow();
+    expect(mock.isDone()).toBe(false);
   });
 
   it('checks for the latest version if needed', async () => {
@@ -58,7 +58,7 @@ describe('ReleaseData.setup', () => {
         .toZonedDateTime('UTC')
         .toInstant(),
     );
-    await expect(ReleaseData.setup()).toResolve();
-    expect(mock.isDone()).toBeTrue();
+    await expect(ReleaseData.setup()).resolves.not.toThrow();
+    expect(mock.isDone()).toBe(true);
   });
 });

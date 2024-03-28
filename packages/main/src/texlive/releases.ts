@@ -2,6 +2,7 @@ import {
   current,
   next,
 } from '@setup-texlive-action/data/texlive-versions.json';
+import { http } from '@setup-texlive-action/utils';
 import deline from 'deline';
 import { createContext } from 'unctx';
 
@@ -9,7 +10,6 @@ import * as ctan from '#/ctan';
 import * as log from '#/log';
 import * as tlnet from '#/texlive/tlnet';
 import { Version } from '#/texlive/version';
-import { http } from '#/util';
 
 const { Instant, Now, PlainDateTime, ZonedDateTime } = Temporal;
 type ZonedDateTime = Temporal.ZonedDateTime;

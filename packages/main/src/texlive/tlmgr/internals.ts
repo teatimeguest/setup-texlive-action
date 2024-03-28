@@ -1,9 +1,13 @@
+import {
+  type ExecOptions,
+  type ExecResult,
+  exec,
+} from '@setup-texlive-action/utils';
 import { createContext } from 'unctx';
 
 import { SUPPORTED_VERSIONS } from '#/texlive/tlmgr/action';
 import { TlmgrError } from '#/texlive/tlmgr/errors';
 import { Version } from '#/texlive/version';
-import { type ExecOptions, type ExecResult, exec } from '#/util';
 
 export interface TlmgrConfig {
   readonly TEXDIR: string;

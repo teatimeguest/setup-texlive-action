@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import stderr from '@setup-texlive-action/fixtures/tlmgr-repository-add.stderr';
+import { ExecError } from '@setup-texlive-action/utils';
 
 import * as repository from '#/texlive/tlmgr/actions/repository';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
-import { ExecError } from '#/util/exec';
 
 vi.unmock('#/texlive/tlmgr/actions/repository');
 
@@ -16,7 +16,10 @@ const setVersion = (version: Version) => {
 describe('add', () => {
   it('adds a repository with a tag', async () => {
     setVersion('2019');
-    await expect(repository.add('<repository>', '<tag>')).toResolve();
+    await expect(repository.add('<repository>', '<tag>'))
+      .resolves
+      .not
+      .toThrow();
     expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
       'repository',
       expect.anything(),
@@ -25,7 +28,7 @@ describe('add', () => {
 
   it('adds a repository with the empty tag', async () => {
     setVersion('2019');
-    await expect(repository.add('<repository>', '')).toResolve();
+    await expect(repository.add('<repository>', '')).resolves.not.toThrow();
     expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
       'repository',
       expect.anything(),
@@ -34,7 +37,7 @@ describe('add', () => {
 
   it('adds a repository with no tags', async () => {
     setVersion('2019');
-    await expect(repository.add('<repository>')).toResolve();
+    await expect(repository.add('<repository>')).resolves.not.toThrow();
     expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith(
       'repository',
       expect.anything(),
@@ -51,7 +54,10 @@ describe('add', () => {
       }),
     );
     setVersion('2019');
-    await expect(repository.add('<repository>', '<tag>')).toResolve();
+    await expect(repository.add('<repository>', '<tag>'))
+      .resolves
+      .not
+      .toThrow();
     expect(TlmgrInternals.prototype.exec).toHaveBeenCalled();
   });
 
@@ -72,6 +78,6 @@ describe('add', () => {
 
   it('fails since the `repository` action is not implemented', async () => {
     setVersion('2011');
-    await expect(repository.add('<repository>', '<tag>')).toReject();
+    await expect(repository.add('<repository>', '<tag>')).rejects.toThrow('');
   });
 });

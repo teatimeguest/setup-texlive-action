@@ -11,6 +11,7 @@ import {
 import { platform } from 'node:os';
 
 import * as core from '@actions/core';
+import { toHaveBeenCalledAfter, toHaveBeenCalledBefore } from 'jest-extended';
 import mockFs from 'mock-fs';
 import { dedent } from 'ts-dedent';
 
@@ -23,15 +24,19 @@ vi.unmock('node:fs/promises');
 vi.unmock('@actions/glob');
 vi.unmock('#/action/config');
 
+beforeAll(() => {
+  expect.extend({ toHaveBeenCalledAfter, toHaveBeenCalledBefore });
+});
+
 const defaultInputs = Inputs.load();
 
 it('calls `env.init`', async () => {
-  await expect(Config.load()).toResolve();
+  await expect(Config.load()).resolves.not.toThrow();
   expect(env.init).toHaveBeenCalledBefore(vi.mocked(Inputs.load));
 });
 
 it('calls `ReleaseData.setup`', async () => {
-  await expect(Config.load()).toResolve();
+  await expect(Config.load()).resolves.not.toThrow();
   expect(ReleaseData.setup).toHaveBeenCalledAfter(vi.mocked(env.init));
   expect(ReleaseData.setup).toHaveBeenCalledBefore(vi.mocked(Inputs.load));
 });
@@ -200,7 +205,7 @@ describe('version', () => {
         ...defaultInputs,
         version: spec,
       });
-      await expect(Config.load()).toResolve();
+      await expect(Config.load()).resolves.not.toThrow();
     });
   });
 

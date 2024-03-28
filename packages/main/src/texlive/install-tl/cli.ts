@@ -2,6 +2,7 @@ import { platform } from 'node:os';
 import * as path from 'node:path';
 
 import { cacheDir, downloadTool, find as findTool } from '@actions/tool-cache';
+import { exec, extract } from '@setup-texlive-action/utils';
 import { Range } from 'semver';
 
 import * as log from '#/log';
@@ -10,7 +11,6 @@ import type { Profile } from '#/texlive/install-tl/profile';
 import { ReleaseData } from '#/texlive/releases';
 import { TlpdbError, patch } from '#/texlive/tlpkg';
 import { Version } from '#/texlive/version';
-import { exec, extract } from '#/util';
 
 export interface InstallTLOptions {
   readonly profile: Profile;

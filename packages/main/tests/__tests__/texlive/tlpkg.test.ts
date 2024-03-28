@@ -37,7 +37,7 @@ describe('patch', () => {
     'applies a patch for tlpkg/TeXLive/TLWinGoo.pm on (%s %s)',
     async (platform, version) => {
       vi.mocked(os.platform).mockReturnValue(platform);
-      await expect(tlpkg.patch({ directory, version })).toResolve();
+      await expect(tlpkg.patch({ directory, version })).resolves.not.toThrow();
       expect(fs.readFile).toHaveBeenCalledWith(
         expect.stringContaining('TLWinGoo.pm'),
         'utf8',
@@ -47,7 +47,10 @@ describe('patch', () => {
 
   it('applies a patch for tlpkg/tlperl/lib/Encode/Alias.pm', async () => {
     vi.mocked(os.platform).mockReturnValue('win32');
-    await expect(tlpkg.patch({ directory, version: `2015` })).toResolve();
+    await expect(tlpkg.patch({ directory, version: `2015` }))
+      .resolves
+      .not
+      .toThrow();
     expect(fs.readFile).toHaveBeenCalledWith(
       expect.stringContaining('Alias.pm'),
       'utf8',
@@ -66,7 +69,7 @@ describe('patch', () => {
     'applies a patch tlpkg/TeXLive/TLUtils.pm (%s %s)',
     async (platform, version) => {
       vi.mocked(os.platform).mockReturnValue(platform);
-      await expect(tlpkg.patch({ directory, version })).toResolve();
+      await expect(tlpkg.patch({ directory, version })).resolves.not.toThrow();
       expect(fs.readFile).toHaveBeenCalledWith(
         expect.stringContaining('TLUtils.pm'),
         'utf8',

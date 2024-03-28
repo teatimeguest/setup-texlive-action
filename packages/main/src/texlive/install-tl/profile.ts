@@ -2,6 +2,7 @@ import { writeFile } from 'node:fs/promises';
 import { arch, platform } from 'node:os';
 import * as path from 'node:path';
 
+import { Case, type Tmpdir, mkdtemp } from '@setup-texlive-action/utils';
 import { Exclude, Expose, Type, instanceToPlain } from 'class-transformer';
 import { Mixin } from 'ts-mixer';
 
@@ -11,7 +12,6 @@ import {
   UserTrees,
 } from '#/texlive/install-tl/texmf';
 import type { Version } from '#/texlive/version';
-import { Case, type Tmpdir, mkdtemp } from '#/util';
 
 @Exclude()
 export class Profile extends Mixin(SystemTrees, UserTrees) {

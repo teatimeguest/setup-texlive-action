@@ -9,6 +9,7 @@ import {
   saveCache,
 } from '@actions/cache';
 import { getState, saveState, setOutput } from '@actions/core';
+import { id } from '@setup-texlive-action/utils';
 import {
   Exclude,
   Expose,
@@ -17,7 +18,6 @@ import {
 } from 'class-transformer';
 import { createContext } from 'unctx';
 
-import id from '#/action/id';
 import * as log from '#/log';
 import type { Version } from '#/texlive';
 

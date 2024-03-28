@@ -5,6 +5,7 @@ import * as util from 'node:util';
 
 import * as core from '@actions/core';
 import * as rawSerializer from '@setup-texlive-action/config/vitest/raw-serializer.js';
+import { toHaveBeenCalledBefore } from 'jest-extended';
 
 import * as log from '#/log';
 
@@ -22,6 +23,7 @@ const hasColors = vi.spyOn(stdout, 'hasColors');
 let error: Error;
 
 beforeAll(async () => {
+  expect.extend({ toHaveBeenCalledBefore });
   expect.addSnapshotSerializer(rawSerializer);
 });
 

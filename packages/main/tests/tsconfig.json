@@ -15,5 +15,6 @@
   ],
   "references": [
     { "path": "../../polyfill" },
+    { "path": "../../utils" },
   ],
 }

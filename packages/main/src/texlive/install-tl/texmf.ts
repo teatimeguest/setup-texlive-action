@@ -1,12 +1,12 @@
 import * as path from 'node:path';
 
+import { AsPath, FromEnv } from '@setup-texlive-action/utils';
 import { Exclude, Expose, instanceToPlain } from 'class-transformer';
 import { decorate as Decorate } from 'ts-mixer';
 
 import { Texmf } from '#/tex/texmf';
 import type { Env } from '#/texlive/install-tl/env';
 import type { Version } from '#/texlive/version';
-import { AsPath, FromEnv } from '#/util/decorators';
 
 export type TexmfOptions =
   & (

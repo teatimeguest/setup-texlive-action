@@ -2,15 +2,12 @@ import { expect, it, vi } from 'vitest';
 
 import stderrCtan from '@setup-texlive-action/fixtures/tlmgr-setup_one_remotetlpdb-ctan.stderr';
 import stderrTlcontrib from '@setup-texlive-action/fixtures/tlmgr-setup_one_remotetlpdb-tlcontrib.stderr';
+import { ExecError } from '@setup-texlive-action/utils';
 
 import { update } from '#/texlive/tlmgr/actions/update';
-import {
-  TLVersionNotSupported,
-  TLVersionOutdated,
-} from '#/texlive/tlmgr/errors';
+import { TlmgrError } from '#/texlive/tlmgr/errors';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
 import type { Version } from '#/texlive/version';
-import { ExecError } from '#/util/exec';
 
 vi.unmock('#/texlive/tlmgr/actions/update');
 
@@ -20,7 +17,7 @@ const setVersion = (version: Version) => {
 
 it('updates packages', async () => {
   setVersion(LATEST_VERSION);
-  await expect(update(['foo', 'bar', 'baz'])).toResolve();
+  await expect(update(['foo', 'bar', 'baz'])).resolves.not.toThrow();
   expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith('update', [
     'foo',
     'bar',
@@ -30,7 +27,7 @@ it('updates packages', async () => {
 
 it('updates tlmgr itself', async () => {
   setVersion(LATEST_VERSION);
-  await expect(update({ self: true })).toResolve();
+  await expect(update({ self: true })).resolves.not.toThrow();
   expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith('update', [
     '--self',
   ]);
@@ -38,7 +35,7 @@ it('updates tlmgr itself', async () => {
 
 it('updates tlmgr itself by updating texlive.infra', async () => {
   setVersion('2008');
-  await expect(update({ self: true })).toResolve();
+  await expect(update({ self: true })).resolves.not.toThrow();
   expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith('update', [
     'texlive.infra',
   ]);
@@ -46,7 +43,7 @@ it('updates tlmgr itself by updating texlive.infra', async () => {
 
 it('updates all packages', async () => {
   setVersion(LATEST_VERSION);
-  await expect(update(['foo', 'bar'], { all: true })).toResolve();
+  await expect(update(['foo', 'bar'], { all: true })).resolves.not.toThrow();
   expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith('update', [
     '--all',
   ]);
@@ -57,7 +54,9 @@ it('updates packages with `--reinstall-forcibly-removed`', async () => {
   await expect(
     update(['foo', 'bar', 'baz'], { reinstallForciblyRemoved: true }),
   )
-    .toResolve();
+    .resolves
+    .not
+    .toThrow();
   expect(TlmgrInternals.prototype.exec).toHaveBeenCalledWith('update', [
     '--reinstall-forcibly-removed',
     'foo',
@@ -76,7 +75,10 @@ it('throws TLVersionOutdated', async () => {
       exitCode: 1,
     }),
   );
-  await expect(update()).rejects.toThrow(TLVersionOutdated as unknown as Error);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  await expect(update()).rejects.toThrow(expect.objectContaining({
+    code: TlmgrError.Code.TL_VERSION_OUTDATED,
+  }));
 });
 
 it('throws TLVersionNotSupported', async () => {
@@ -89,7 +91,8 @@ it('throws TLVersionNotSupported', async () => {
       exitCode: 1,
     }),
   );
-  await expect(update()).rejects.toThrow(
-    TLVersionNotSupported as unknown as Error,
-  );
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  await expect(update()).rejects.toThrow(expect.objectContaining({
+    code: TlmgrError.Code.TL_VERSION_NOT_SUPPORTED,
+  }));
 });

@@ -1,9 +1,13 @@
 import { setTimeout } from 'node:timers/promises';
 
 import { ctan } from '@setup-texlive-action/data/tlnet.json';
+import {
+  HttpClient,
+  HttpCodes,
+  createClientError,
+} from '@setup-texlive-action/utils/http';
 
 import * as log from '#/log';
-import { HttpClient, HttpCodes, createClientError } from '#/util/http';
 
 const MAX_TRIES = 10;
 const RETRY_DELAY = 500;

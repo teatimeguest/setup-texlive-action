@@ -1,6 +1,6 @@
 import { posix as posixPath } from 'node:path';
 
-import { getJson } from '#/util/http';
+import { getJson } from '@setup-texlive-action/utils/http';
 
 const API_VERSION = '2.0';
 const API_BASE_URL = `https://ctan.org/json/${API_VERSION}`;

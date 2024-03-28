@@ -1,16 +1,12 @@
-import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
-import pluginTs from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import pluginImport from 'eslint-plugin-i';
+import pluginImport from 'eslint-plugin-import-x';
 import pluginNode from 'eslint-plugin-n';
 import pluginRegexp from 'eslint-plugin-regexp';
 import pluginUnicorn from 'eslint-plugin-unicorn';
 import pluginVitest from 'eslint-plugin-vitest';
+import tseslint, { config as defineConfig } from 'typescript-eslint';
 
-const flat = new FlatCompat();
-
-export const common = [
+export const common = defineConfig(
   {
     linterOptions: {
       reportUnusedDisableDirectives: true,
@@ -36,17 +32,9 @@ export const common = [
       'require-unicode-regexp': 'error',
     },
   },
-  ...flat.extends(
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
-  ),
+  ...tseslint.configs.recommendedTypeChecked,
   {
-    plugins: {
-      'typescript-eslint': pluginTs,
-    },
     languageOptions: {
-      parser: tsParser,
       parserOptions: {
         project: true,
         ecmaVersion: 'latest',
@@ -80,11 +68,11 @@ export const common = [
   },
   {
     plugins: {
-      import: pluginImport,
+      'import-x': pluginImport,
     },
     settings: {
-      'import/internal-regex': '^#\\w*/',
-      'import/parsers': {
+      'import-x/internal-regex': '^#\\w*/',
+      'import-x/parsers': {
         espree: ['.js', '.cjs', '.mjs'],
         '@typescript-eslint/parser': ['.ts'],
       },
@@ -92,10 +80,10 @@ export const common = [
     rules: {
       ...pluginImport.configs.recommended.rules,
       ...pluginImport.configs.typescript.rules,
-      'import/first': 'error',
-      'import/newline-after-import': 'error',
-      'import/no-unresolved': 'off',
-      'import/order': [
+      'import-x/first': 'error',
+      'import-x/newline-after-import': 'error',
+      'import-x/no-unresolved': 'off',
+      'import-x/order': [
         'error',
         {
           groups: ['builtin', 'external', 'internal', 'object'],
@@ -132,10 +120,10 @@ export const common = [
       'n/no-path-concat': 'error',
     },
   },
-  ...flat.extends('plugin:regexp/recommended'),
-];
+  pluginRegexp.configs['flat/recommended'],
+);
 
-export const sources = [
+export const sources = defineConfig(
   {
     rules: {
       'func-style': [
@@ -216,8 +204,7 @@ export const sources = [
       ],
       '@typescript-eslint/no-throw-literal': 'error',
       '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'error',
-      // See: https://github.com/typescript-eslint/typescript-eslint/pull/6762
-      '@typescript-eslint/no-unnecessary-condition': 'warn',
+      '@typescript-eslint/no-unnecessary-condition': 'error',
       '@typescript-eslint/no-unused-expressions': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -251,11 +238,11 @@ export const sources = [
   },
   {
     rules: {
-      'import/no-commonjs': 'error',
-      'import/no-duplicates': 'error',
-      'import/no-import-module-exports': 'error',
-      'import/no-named-default': 'error',
-      'import/no-relative-packages': 'error',
+      'import-x/no-commonjs': 'error',
+      'import-x/no-duplicates': 'error',
+      'import-x/no-import-module-exports': 'error',
+      'import-x/no-named-default': 'error',
+      'import-x/no-relative-packages': 'error',
     },
   },
   {
@@ -300,9 +287,9 @@ export const sources = [
       'unicorn/switch-case-braces': 'off',
     },
   },
-];
+);
 
-export const tests = [
+export const tests = defineConfig(
   {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
@@ -325,4 +312,6 @@ export const tests = [
       'vitest/require-to-throw-message': 'error',
     },
   },
-];
+);
+
+export { defineConfig };

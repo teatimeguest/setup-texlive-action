@@ -1,6 +1,5 @@
 import { vi } from 'vitest';
 
-import '@setup-texlive-action/config/vitest/setup-jest-extended.js';
 import { current } from '@setup-texlive-action/data/texlive-versions.json';
 
 import '#/globals';

@@ -1,5 +1,6 @@
+import { Exception } from '@setup-texlive-action/utils';
+
 import type { Version } from '#/texlive/version';
-import { Exception } from '#/util/decorators';
 
 export interface TLErrorOptions extends ErrorOptions {
   code?: string;

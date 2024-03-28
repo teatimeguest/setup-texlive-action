@@ -1,11 +1,15 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
+import {
+  Exception,
+  type ExecOutput,
+  type Strict,
+} from '@setup-texlive-action/utils';
 import deline from 'deline';
 
 import { symbols } from '#/log';
 import { TLError, type TLErrorOptions } from '#/texlive/errors';
-import { Exception, type ExecOutput, type Strict } from '#/util';
 
 @Exception
 export class InstallTLError extends TLError {

@@ -1,5 +1,3 @@
-import path from 'node:path';
-import { env } from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import tsConfigPaths from 'vite-tsconfig-paths';
@@ -7,8 +5,6 @@ import tsConfigPaths from 'vite-tsconfig-paths';
 import esbuildConfig, {
   transformConfig,
 } from '@setup-texlive-action/config/esbuild';
-
-const $ = (relative) => path.join(env.npm_config_local_prefix, relative);
 
 /** @type {import('vitest/config').UserConfig} */
 export default {
@@ -41,9 +37,6 @@ export default {
     watch: false,
   },
   resolve: {
-    alias: {
-      '@setup-texlive-action/polyfill': $('packages/polyfill/src'),
-    },
     mainFields: esbuildConfig.mainFields,
   },
   esbuild: transformConfig,

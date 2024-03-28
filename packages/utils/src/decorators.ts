@@ -2,7 +2,9 @@ import * as path from 'node:path';
 import { env } from 'node:process';
 
 import { Expose, Transform } from 'class-transformer';
-import { defaultMetadataStorage } from 'class-transformer/esm5/storage';
+import {
+  defaultMetadataStorage as storage,
+} from 'class-transformer/esm5/storage';
 import { kebabCase, snakeCase } from 'scule';
 
 export function Exception<const F extends Function>(constructor: F): void {
@@ -36,7 +38,7 @@ export function Case(
   function decorator<const F extends Function>(target: F): void;
   function decorator(target: object, key: string | symbol): void;
   function decorator(target: object, key?: string | symbol): void {
-    const metadatas = defaultMetadataStorage.getExposedMetadatas(
+    const metadatas = storage.getExposedMetadatas(
       target instanceof Function ? target : target.constructor,
     );
     if (key !== undefined) {
@@ -59,7 +61,7 @@ export function Case(
 }
 
 export function getExposedName(target: object, key: string | symbol): string {
-  return defaultMetadataStorage
+  return storage
     .getExposedMetadatas(target.constructor)
     .find((data) => data.propertyName === key)
     ?.options
@@ -85,7 +87,7 @@ function assertString(value: unknown): string {
     return value.valueOf();
   }
   const error = new TypeError('Unexpectedly non-string passed');
-  error['input'] = value;
+  (error as unknown as Record<string, unknown>)['input'] = value;
   throw error;
 }
 

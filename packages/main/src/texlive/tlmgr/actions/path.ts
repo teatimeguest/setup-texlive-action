@@ -1,9 +1,9 @@
 import * as path from 'node:path';
 
 import { addPath } from '@actions/core';
+import { uniqueChild } from '@setup-texlive-action/utils';
 
 import { use } from '#/texlive/tlmgr/internals';
-import { uniqueChild } from '#/util';
 
 export async function add(): Promise<void> {
   let dir: string;

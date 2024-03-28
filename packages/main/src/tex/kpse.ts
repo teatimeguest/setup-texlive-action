@@ -1,7 +1,8 @@
 import * as path from 'node:path';
 
+import { exec } from '@setup-texlive-action/utils';
+
 import type { Texmf } from '#/tex/texmf';
-import { exec } from '#/util/exec';
 
 export async function varValue(
   variable: Exclude<keyof Texmf, 'TEXDIR'>,

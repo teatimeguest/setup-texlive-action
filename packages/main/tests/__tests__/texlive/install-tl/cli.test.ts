@@ -6,20 +6,20 @@ import * as os from 'node:os';
 import * as core from '@actions/core';
 import * as tool from '@actions/tool-cache';
 import releaseText from '@setup-texlive-action/fixtures/release-texlive.txt?raw';
+import * as util from '@setup-texlive-action/utils';
 
 import { download, restoreCache } from '#/texlive/install-tl/cli';
-import { Profile } from '#/texlive/install-tl/profile';
-import * as util from '#/util';
 
 vi.unmock('#/texlive/install-tl/cli');
 
 const fail = (): any => {
   throw new Error();
 };
+
 const options = {
-  profile: new Profile(LATEST_VERSION, { prefix: '' }),
-  repository: new URL('https://example.com/'),
-};
+  version: '2023',
+  repository: new URL(MOCK_URL),
+} as const;
 
 beforeAll(() => {
   vi.mocked(readFile).mockResolvedValue(releaseText);
@@ -65,7 +65,7 @@ describe('download', () => {
   it('does not fail even if tool.cacheDir fails', async () => {
     vi.mocked(os.platform).mockReturnValue('linux');
     vi.mocked(tool.cacheDir).mockImplementationOnce(fail);
-    await expect(download(options)).toResolve();
+    await expect(download(options)).resolves.not.toThrow();
     expect(core.info).toHaveBeenCalledTimes(5);
     expect(vi.mocked(core.info).mock.calls[0]?.[0]).toMatchInlineSnapshot(
       '"Downloading install-tl-unx.tar.gz from https://example.com/install-tl-unx.tar.gz"',

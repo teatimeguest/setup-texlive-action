@@ -58,7 +58,7 @@ describe('DefaultCacheService', () => {
   const service = new DefaultCacheService();
 
   it('does nothing', async () => {
-    await expect(service.restore()).toResolve();
+    await expect(service.restore()).resolves.not.toThrow();
     expect(cache.restoreCache).not.toHaveBeenCalled();
   });
 
@@ -109,14 +109,19 @@ describe('ActionsCacheService', () => {
       new Set(['foo', 'bar', 'baz']),
     ])('restores cache', async (packages) => {
       await expect(new ActionsCacheService({ ...entry, packages }).restore())
-        .toResolve();
+        .resolves
+        .not
+        .toThrow();
       expect(cache.restoreCache).toHaveBeenCalledOnce();
       expect(vi.mocked(cache.restoreCache).mock.lastCall).toMatchSnapshot();
     });
 
     it('never throws', async () => {
       vi.mocked(cache.restoreCache).mockImplementationOnce(restore.fail);
-      await expect(new ActionsCacheService(entry).restore()).toResolve();
+      await expect(new ActionsCacheService(entry).restore())
+        .resolves
+        .not
+        .toThrow();
       expect(core.warning).toHaveBeenCalledOnce();
       expect(vi.mocked(core.warning).mock.lastCall?.[0])
         .toMatchInlineSnapshot('"Failed to restore cache: Error"');
@@ -132,7 +137,7 @@ describe('ActionsCacheService', () => {
     it.each(types)(`is set to ${value} (%s)`, async (type) => {
       vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
       const service = new ActionsCacheService(entry);
-      await expect(service.restore()).toResolve();
+      await expect(service.restore()).resolves.not.toThrow();
       expect(service).toHaveProperty('hit', value);
     });
   });
@@ -153,7 +158,7 @@ describe('ActionsCacheService', () => {
     it.each(types)(`is set to ${value} (%s)`, async (type) => {
       vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
       const service = new ActionsCacheService(entry);
-      await expect(service.restore()).toResolve();
+      await expect(service.restore()).resolves.not.toThrow();
       expect(service).toHaveProperty('restored', value);
     });
   });
@@ -177,7 +182,7 @@ describe('ActionsCacheService', () => {
       ] as const,
     )('sets `target` (%s)', async (type) => {
       vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
-      await expect(run()).toResolve();
+      await expect(run()).resolves.not.toThrow();
       expect(core.saveState).toHaveBeenCalledOnce();
       expect(vi.mocked(core.saveState).mock.lastCall).toMatchSnapshot();
     });
@@ -186,7 +191,7 @@ describe('ActionsCacheService', () => {
       ['unique', 'primary'] as const,
     )('does not set `target` (%s)', async (type) => {
       vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
-      await expect(run()).toResolve();
+      await expect(run()).resolves.not.toThrow();
       expect(core.saveState).toHaveBeenCalledOnce();
       expect(vi.mocked(core.saveState).mock.lastCall).toMatchSnapshot();
     });
@@ -196,7 +201,7 @@ describe('ActionsCacheService', () => {
       async (type) => {
         process.env['SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE'] = '1';
         vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
-        await expect(run()).toResolve();
+        await expect(run()).resolves.not.toThrow();
         expect(core.saveState).toHaveBeenCalledOnce();
       },
     );
@@ -206,7 +211,7 @@ describe('ActionsCacheService', () => {
       async (type) => {
         process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '1';
         vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
-        await expect(run()).toResolve();
+        await expect(run()).resolves.not.toThrow();
         expect(core.saveState).toHaveBeenCalledOnce();
         expect(core.notice).toHaveBeenCalledOnce();
       },
@@ -220,7 +225,7 @@ describe('ActionsCacheService', () => {
       it('updates cache', async () => {
         process.env['SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE'] = '1';
         process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '0';
-        await expect(run()).toResolve();
+        await expect(run()).resolves.not.toThrow();
         expect(core.saveState).toHaveBeenCalledOnce();
         expect(vi.mocked(core.saveState).mock.lastCall?.[1])
           .toHaveProperty('target');
@@ -230,7 +235,7 @@ describe('ActionsCacheService', () => {
       it('does not update cache', async () => {
         process.env['SETUP_TEXLIVE_ACTION_FORCE_UPDATE_CACHE'] = '0';
         process.env['SETUP_TEXLIVE_FORCE_UPDATE_CACHE'] = '1';
-        await expect(run()).toResolve();
+        await expect(run()).resolves.not.toThrow();
         expect(core.saveState).toHaveBeenCalledOnce();
         expect(vi.mocked(core.saveState).mock.lastCall?.[1])
           .not
@@ -257,7 +262,7 @@ describe('ActionsCacheService', () => {
     )('sets `cache-hit` to `%j`', (value, types) => {
       it.each(types)('%s', async (type) => {
         vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
-        await expect(run()).toResolve();
+        await expect(run()).resolves.not.toThrow();
         expect(core.setOutput).toHaveBeenCalledWith('cache-hit', value);
       });
     });
@@ -277,7 +282,7 @@ describe('ActionsCacheService', () => {
     )('sets `cache-restored` to `%j`', (value, types) => {
       it.each(types)('%s', async (type) => {
         vi.mocked(cache.restoreCache).mockImplementationOnce(restore[type]);
-        await expect(run()).toResolve();
+        await expect(run()).resolves.not.toThrow();
         expect(core.setOutput).toHaveBeenCalledWith('cache-restored', value);
       });
     });
@@ -286,7 +291,7 @@ describe('ActionsCacheService', () => {
 
 describe('save', () => {
   it('does nothing if state is not saved', async () => {
-    await expect(save()).toResolve();
+    await expect(save()).resolves.not.toThrow();
     expect(cache.saveCache).not.toHaveBeenCalled();
   });
 
@@ -294,7 +299,7 @@ describe('save', () => {
     vi.mocked(core.getState).mockReturnValueOnce(
       JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
     );
-    await expect(save()).toResolve();
+    await expect(save()).resolves.not.toThrow();
     expect(cache.saveCache).toHaveBeenCalled();
   });
 
@@ -302,7 +307,7 @@ describe('save', () => {
     vi.mocked(core.getState).mockReturnValueOnce(
       JSON.stringify({ key: '<key>' }),
     );
-    await expect(save()).toResolve();
+    await expect(save()).resolves.not.toThrow();
     expect(cache.saveCache).not.toHaveBeenCalled();
   });
 
@@ -313,7 +318,7 @@ describe('save', () => {
     vi.mocked(core.getState).mockReturnValueOnce(
       JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
     );
-    await expect(save()).toResolve();
+    await expect(save()).resolves.not.toThrow();
     expect(core.warning).toHaveBeenCalledOnce();
     expect(vi.mocked(core.warning).mock.lastCall?.[0]).toMatchInlineSnapshot(
       '"Failed to save to cache: Error: unexpected error"',
@@ -325,7 +330,7 @@ describe('save', () => {
     vi.mocked(core.getState).mockReturnValueOnce(
       JSON.stringify({ target: '<TEXDIR>', key: '<key>' }),
     );
-    await expect(save()).toResolve();
+    await expect(save()).resolves.not.toThrow();
     expect(core.info).not.toHaveBeenCalledWith(
       expect.stringContaining('saved with cache key:'),
     );

@@ -1,5 +1,6 @@
+import { ExecError } from '@setup-texlive-action/utils';
+
 import { use } from '#/texlive/tlmgr/internals';
-import { ExecError } from '#/util';
 
 export interface RepositoryConfig {
   readonly path: string;

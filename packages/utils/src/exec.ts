@@ -7,7 +7,8 @@ import {
 } from '@actions/exec';
 import { P, match } from 'ts-pattern';
 
-import { Exception, type Lax } from '#/util';
+import { Exception } from './decorators.js';
+import { type Lax } from './types.js';
 
 export interface ExecOptions
   extends Readonly<Omit<ActionsExecOptions, 'input'>>
@@ -37,7 +38,6 @@ export class ExecResult implements ExecOutput {
     this.stdout = config.stdout;
     Object.defineProperty(this, 'silenced', {
       value: config.silenced ?? false,
-      enumerable: false,
     });
   }
 

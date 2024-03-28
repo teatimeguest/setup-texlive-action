@@ -2,12 +2,17 @@ import * as path from 'node:path';
 import { env } from 'node:process';
 
 import { getBooleanInput, getInput } from '@actions/core';
+import {
+  AsPath,
+  Case,
+  FromEnv,
+  type Lax,
+  getExposedName,
+  id,
+} from '@setup-texlive-action/utils';
 import { Transform, instanceToInstance } from 'class-transformer';
 
-import id from '#/action/id';
 import type { Env } from '#/texlive/install-tl/env';
-import { AsPath, Case, FromEnv, getExposedName } from '#/util/decorators';
-import type { Lax } from '#/util/types';
 
 export class Inputs {
   @BooleanInput
