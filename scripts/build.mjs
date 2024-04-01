@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -22,10 +22,8 @@ const { metafile } = await esbuild.build({
 });
 
 if (metafile != undefined) {
-  const outDir = './packages/main/lib';
-  await mkdir(outDir, { recursive: true });
   await writeFile(
-    path.join(outDir, 'metadata.txt'),
+    path.join('node_modules', '.esbuild.metadata.txt'),
     await esbuild.analyzeMetafile(metafile, { verbose: true }),
   );
 }

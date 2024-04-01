@@ -14,7 +14,7 @@
     },
     {
       "description": "Defines Code Page 65001 as an alias for UTF-8",
-      "platforms": ["win32"],
+      "platform": "win32",
       "versions": "2015",
       "file": "tlpkg/tlperl/lib/Encode/Alias.pm",
       "changes": [
@@ -26,7 +26,7 @@
     },
     {
       "description": "Makes it possible to use `\\` as a directory separator",
-      "platforms": ["win32"],
+      "platform": "win32",
       "versions": "<2019",
       "file": "tlpkg/TeXLive/TLUtils.pm",
       "changes": [
@@ -38,7 +38,7 @@
     },
     {
       "description": "Adds support for macOS 11 or later",
-      "platforms": ["darwin"],
+      "platform": "darwin",
       "versions": ">=2017 <2020",
       "file": "tlpkg/TeXLive/TLUtils.pm",
       "changes": [

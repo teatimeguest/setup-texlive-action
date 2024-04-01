@@ -25,7 +25,8 @@ jobs:
       - name: Setup TeX Live
         id: setup
         uses: ./
-      - if: fromJSON(steps.setup.outputs.cache-restored)
+      - name: Check that a new installation has been made
+        if: fromJSON(steps.setup.outputs.cache-restored)
         run: exit 1
       - run: tlmgr version
       - name: Set output
@@ -37,7 +38,12 @@ jobs:
           MATRIX_OS: ${{ matrix.os }}
   restore-cache:
     needs: save-cache
-    if: ${{ !cancelled() }}
+    if: |
+      !cancelled() && (
+        needs.save-cache.outputs.ubuntu ||
+        needs.save-cache.outputs.windows ||
+        needs.save-cache.outputs.macos
+      )
     strategy:
       matrix:
         os:
@@ -53,7 +59,8 @@ jobs:
       - name: Setup TeX Live
         id: setup
         uses: ./
-      - if: ${{ !fromJSON(steps.setup.outputs.cache-hit) }}
+      - name: Check that the cache is exactly matched
+        if: ${{ !fromJSON(steps.setup.outputs.cache-hit) }}
         run: exit 1
       - run: tlmgr version
   delete-caches:
@@ -68,7 +75,7 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: Install
+      - name: Install package
         run: >-
           npm ci
           --omit=dev
@@ -78,8 +85,8 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            const args = { context, core, github };
-            await require('@setup-texlive-action/e2e/delete-caches')(args);
+            const { deleteCaches } = require('@setup-texlive-action/e2e');
+            await deleteCaches({ context, core, github });
   compile:
     strategy:
       matrix:

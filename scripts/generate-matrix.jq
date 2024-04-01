@@ -10,7 +10,7 @@
       version: range(.value // 2008; $latest) | tostring
     }
     | select(
-      contains(env | {os, version} | map_values(. // empty))
+      contains(env | { os, version } | map_values(. // empty))
     )
   )
 )"

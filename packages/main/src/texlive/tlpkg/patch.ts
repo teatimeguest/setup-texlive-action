@@ -1,9 +1,10 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import { EOL, platform } from 'node:os';
+import { EOL } from 'node:os';
 import * as path from 'node:path';
 
+import { satisfies } from '@setup-texlive-action/data';
 import { patches } from '@setup-texlive-action/data/tlpkg-patches.json';
-import { exec } from '@setup-texlive-action/utils';
+import { exec } from '@setup-texlive-action/utils/exec';
 import type { DeepReadonly } from 'ts-essentials';
 
 import * as log from '#/log';
@@ -13,11 +14,7 @@ export async function patch(options: {
   readonly directory: string;
   readonly version: Version;
 }): Promise<void> {
-  const ps = patches.filter((p) => {
-    return (p.platforms?.includes(platform()) ?? true)
-      && Version.satisfies(options.version, p.versions);
-  });
-
+  const ps = patches.filter((p) => satisfies(p, options));
   if (ps.length > 0) {
     log.info('Applying patches');
     const lines = await Promise.all(ps.map((p) => apply(p, options.directory)));

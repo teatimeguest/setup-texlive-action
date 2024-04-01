@@ -1,0 +1,24 @@
+{
+  "$id": "target.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Predicate for filtering entries",
+  "type": "object",
+  "properties": {
+    "platform": {
+      "description": "Minimatch pattern for Node.js platform string",
+      "type": "string",
+      "examples": ["darwin", "linux", "!win32"]
+    },
+    "arch": {
+      "description": "Minimatch pattern for Node.js CPU architecture string",
+      "type": "string",
+      "examples": ["arm", "{arm64,x64}"]
+    },
+    "versions": {
+      "description": "Semver range",
+      "type": "string",
+      "examples": ["2008", ">2010 <=2020"]
+    }
+  },
+  "required": []
+}

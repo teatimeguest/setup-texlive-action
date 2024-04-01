@@ -5,7 +5,6 @@
     "trailingCommas": "jsonc",
     "jsonTrailingCommaFiles": [
       "tsconfig.json",
-      "tsconfig.project.json",
       "*.jsonc",
     ],
   },

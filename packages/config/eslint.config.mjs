@@ -4,7 +4,7 @@ import pluginNode from 'eslint-plugin-n';
 import pluginRegexp from 'eslint-plugin-regexp';
 import pluginUnicorn from 'eslint-plugin-unicorn';
 import pluginVitest from 'eslint-plugin-vitest';
-import tseslint, { config as defineConfig } from 'typescript-eslint';
+import ts, { config as defineConfig } from 'typescript-eslint';
 
 export const common = defineConfig(
   {
@@ -32,7 +32,7 @@ export const common = defineConfig(
       'require-unicode-regexp': 'error',
     },
   },
-  ...tseslint.configs.recommendedTypeChecked,
+  ...ts.configs.recommendedTypeChecked,
   {
     languageOptions: {
       parserOptions: {
@@ -171,7 +171,7 @@ export const sources = defineConfig(
             'typeParameter',
           ],
           format: null,
-          filter: '^(?:_$|RUNNER_TEMP$|NOPERLDOC$|TEX|TL_)',
+          filter: '^(?:_$|GITHUB_|RUNNER_|NOPERLDOC$|TEX|TL_)',
         },
         {
           selector: 'variable',
@@ -311,6 +311,20 @@ export const tests = defineConfig(
       'vitest/prefer-expect-resolves': 'error',
       'vitest/require-to-throw-message': 'error',
     },
+  },
+);
+
+const mockfiles = '**/__mocks__/**/*.ts';
+
+export default defineConfig(
+  {
+    files: ['src/**/*.ts'],
+    ignores: [mockfiles],
+    extends: [...common, ...sources],
+  },
+  {
+    files: ['__tests__/**/*.ts', mockfiles],
+    extends: [...common, ...tests],
   },
 );
 

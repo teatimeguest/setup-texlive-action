@@ -1,3 +1,4 @@
+import { match } from '@setup-texlive-action/data';
 import tlnet from '@setup-texlive-action/data/tlnet.json';
 import { parseTemplate } from 'url-template';
 
@@ -15,9 +16,7 @@ export async function contrib(options?: TlnetOptions): Promise<URL> {
 }
 
 export function historic(version: Version, options?: TlnetOptions): URL {
-  const [template] = Object
-    .entries(tlnet.historic.path)
-    .find(([, { versions }]) => Version.satisfies(version, versions))!;
+  const [template] = match(tlnet.historic.path, { version });
   const tlnetPath = parseTemplate(template).expand({ version });
   const base = (options?.master ?? false)
     ? tlnet.historic.master

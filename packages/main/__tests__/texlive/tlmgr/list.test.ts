@@ -7,14 +7,14 @@ import tlpdb2023 from '@setup-texlive-action/fixtures/texlive.2023.tlpdb';
 
 import { list } from '#/texlive/tlmgr/actions/list';
 import { TlmgrInternals, set } from '#/texlive/tlmgr/internals';
-import type { Tlpobj } from '#/texlive/tlpkg';
+import type { TLPObj } from '#/texlive/tlpkg';
 
 vi.unmock('#/texlive/tlmgr/actions/list');
 
 const years = ['2008', '2023'] as const;
 const tlpdb = {
-  '2008': new Set<Tlpobj>(),
-  '2023': new Set<Tlpobj>(),
+  '2008': new Set<TLPObj>(),
+  '2023': new Set<TLPObj>(),
 } as const;
 
 beforeAll(async () => {

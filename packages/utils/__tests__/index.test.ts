@@ -4,7 +4,7 @@ import type { Dirent } from 'node:fs';
 import * as fs from 'node:fs/promises';
 
 import * as tool from '@actions/tool-cache';
-import '@setup-texlive-action/polyfill/shims';
+import '@setup-texlive-action/polyfill';
 import { extract } from '@setup-texlive-action/utils';
 
 vi.mock('node:fs/promises', () => ({

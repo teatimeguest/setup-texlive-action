@@ -28,8 +28,6 @@ export default {
     js: requireShim.trim(),
   },
   alias: {
-    // See: teatimeguest/setup-texlive-action#255
-    '@azure/abort-controller': '@setup-texlive-action/polyfill/pure',
     // This reduces the script size by about 350kb.
     'whatwg-url': 'node:url',
   },

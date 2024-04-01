@@ -1,7 +1,7 @@
 {
   "$id": "tlpkg-patches.schema.json",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "description": "patches for `tlpkg`",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Patches for `tlpkg`",
   "type": "object",
   "properties": {
     "patches": {
@@ -19,36 +19,33 @@
   "$defs": {
     "patch": {
       "type": "object",
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "platforms": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/platform"
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string"
+            },
+            "file": {
+              "type": "string",
+              "format": "uri-reference"
+            },
+            "changes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/change"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
           },
-          "minItems": 1,
-          "uniqueItems": true
+          "required": ["file", "changes"]
         },
-        "versions": {
-          "$ref": "#/$defs/semverRange"
-        },
-        "file": {
-          "type": "string",
-          "format": "uri-reference"
-        },
-        "changes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/change"
-          },
-          "minItems": 1,
-          "uniqueItems": true
+        {
+          "$ref": "target.schema.json#"
         }
-      },
-      "required": ["file", "changes"],
-      "additionalProperties": false
+      ],
+      "unevaluatedProperties": false
     },
     "change": {
       "type": "object",
@@ -63,14 +60,6 @@
       },
       "required": ["from", "to"],
       "additionalProperties": false
-    },
-    "platform": {
-      "description": "Node.js platform string",
-      "type": "string",
-      "examples": ["darwin", "linux", "win32"]
-    },
-    "semverRange": {
-      "type": "string"
     }
   }
 }

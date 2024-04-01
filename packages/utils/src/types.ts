@@ -2,7 +2,7 @@ export type Strict<T, Keys extends keyof T = keyof T> =
   & Omit<T, Keys>
   & { [K in Keys]-?: NonNullable<T[K]> };
 
-export type Lax<T, Keys extends keyof T = keyof T> =
+export type Nullish<T, Keys extends keyof T = keyof T> =
   & Omit<T, Keys>
   & { [K in Keys]?: T[K] | undefined };
 

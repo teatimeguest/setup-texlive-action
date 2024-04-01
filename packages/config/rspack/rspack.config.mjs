@@ -5,8 +5,8 @@ import esbuildConfig, {
   transformConfig,
 } from '@setup-texlive-action/config/esbuild';
 
-import PluginLicenses from './plugins/licenses.mjs';
-import pluginNoEmit from './plugins/no-emit.mjs';
+import PluginLicenses from './plugin-licenses.mjs';
+import pluginNoEmit from './plugin-no-emit.mjs';
 
 env['FORCE_COLOR'] = '1';
 
@@ -36,7 +36,7 @@ export default {
     ],
   },
   target: transformConfig.target,
-  externals: Object.keys(esbuildConfig.alias),
+  externals: Object.keys(esbuildConfig.alias ?? {}),
   optimization: {
     minimize: false,
   },

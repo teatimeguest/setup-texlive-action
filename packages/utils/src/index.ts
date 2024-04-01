@@ -1,4 +1,4 @@
-import type {} from '@setup-texlive-action/polyfill/shims';
+import type {} from '@setup-texlive-action/polyfill';
 
 export * from './decorators.js';
 export * from './exec.js';

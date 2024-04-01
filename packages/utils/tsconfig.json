@@ -1,12 +1,3 @@
 {
   "extends": "@setup-texlive-action/config/tsconfig",
-  "compilerOptions": {
-    "outDir": "./lib",
-    "experimentalDecorators": true,
-    "composite": true,
-    "tsBuildInfoFile": "./lib/.tsbuildinfo",
-  },
-  "references": [
-    { "path": "../polyfill" },
-  ],
 }

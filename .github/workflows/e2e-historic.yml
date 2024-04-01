@@ -27,8 +27,9 @@ jobs:
       - name: Generate matrix
         id: generate
         run: |
-          ./scripts/generate-matrix.jq packages/data/data/texlive-versions.json |
-          tee -a "${GITHUB_OUTPUT}"
+          ./scripts/generate-matrix.jq \
+            packages/data/data/texlive-versions.json |
+            tee -a "${GITHUB_OUTPUT}"
         env:
           os: ${{ inputs.os }}
           version: ${{ inputs.version }}

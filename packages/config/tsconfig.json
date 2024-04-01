@@ -16,6 +16,7 @@
     "allowSyntheticDefaultImports": false,
     "esModuleInterop": false,
     "verbatimModuleSyntax": true,
+    "experimentalDecorators": true,
     "lib": ["es2023"],
     "target": "esnext",
   },

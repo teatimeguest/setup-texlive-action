@@ -5,21 +5,5 @@
     "paths": {
       "#/*": ["*", "*.js", "*/index.js"],
     },
-    "rootDir": "./src",
-    "outDir": "./lib",
-    "experimentalDecorators": true,
-    "composite": true,
-    "tsBuildInfoFile": "./lib/.tsbuildinfo",
   },
-  "files": [
-    "./src/types.d.ts",
-  ],
-  "include": [
-    "./src/**/*.ts",
-    "./src/**/*.json",
-  ],
-  "references": [
-    { "path": "../polyfill" },
-    { "path": "../utils" },
-  ],
 }

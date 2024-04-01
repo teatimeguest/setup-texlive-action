@@ -6,12 +6,24 @@ tasks:
     requires:
       vars: [schema, data]
     cmd: >-
-      ajv --strict --all-errors -c ajv-formats -s {{ .schema }} -d {{ .data }}
-  lint:
+      ajv
+      --spec=draft2020
+      --strict
+      --all-errors
+      -c ajv-formats
+      -r schemas/target.schema.json
+      -s {{ .schema }}
+      -d {{ .data }}
+  lint:ajv:
     sources: ['data/*.json']
     cmd:
       for: sources
       task: ajv
       vars:
         data: '{{ .ITEM }}'
-        schema: 'schemas/{{ .ITEM | osBase | trimSuffix ".json" }}.schema.json'
+        schema: >-
+          schemas/{{ .ITEM | osBase | trimSuffix ".json" }}.schema.json
+  lint:eslint:
+    cmd: eslint .
+  lint:
+    deps: [lint:ajv, lint:eslint]

@@ -8,7 +8,7 @@ import {
 import { P, match } from 'ts-pattern';
 
 import { Exception } from './decorators.js';
-import { type Lax } from './types.js';
+import { type Nullish } from './types.js';
 
 export interface ExecOptions
   extends Readonly<Omit<ActionsExecOptions, 'input'>>
@@ -18,7 +18,7 @@ export interface ExecOptions
 
 export type ExecResultConfig =
   & Omit<ExecResult, 'args' | 'check' | 'silenced'>
-  & Lax<Pick<ExecResult, 'args' | 'silenced'>>;
+  & Nullish<Pick<ExecResult, 'args' | 'silenced'>>;
 
 export class ExecResult implements ExecOutput {
   readonly command: string;
@@ -52,7 +52,7 @@ export interface ExecError extends Omit<ExecResult, 'check' | 'silenced'> {}
 
 @Exception
 export class ExecError extends Error {
-  constructor(config: Lax<ExecResultConfig, 'silenced'>) {
+  constructor(config: Nullish<ExecResultConfig, 'silenced'>) {
     const { command, exitCode, stderr, silenced = false } = config;
     super(`\`${command}\` exited with status ${exitCode}: ${stderr}`);
     Object.assign(this, config);

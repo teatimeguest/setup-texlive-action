@@ -6,7 +6,7 @@ import {
   AsPath,
   Case,
   FromEnv,
-  type Lax,
+  type Nullish,
   getExposedName,
   id,
 } from '@setup-texlive-action/utils';
@@ -46,8 +46,10 @@ export class Inputs {
   readonly updateAllPackages: boolean = false;
 
   @Input
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  @Transform(({ value }) => (value as Lax<String> | undefined)?.toLowerCase?.())
+  @Transform(({ value }) =>
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    (value as Nullish<String> | undefined)?.toLowerCase?.()
+  )
   readonly version: string = 'latest';
 
   static load(this: void): Inputs {

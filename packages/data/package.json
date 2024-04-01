@@ -6,11 +6,21 @@
     "lint": "task lint"
   },
   "exports": {
+    ".": "./src/index.ts",
     "./*": "./data/*"
   },
   "sideEffects": false,
+  "dependencies": {
+    "minimatch": "^9.0.4"
+  },
+  "peerDependencies": {
+    "semver": "*"
+  },
   "devDependencies": {
+    "@setup-texlive-action/config": "*",
+    "@types/semver": "^7.5.8",
     "ajv-cli": "^5.0.0",
-    "ajv-formats": "^2.1.1"
+    "ajv-formats": "^2.1.1",
+    "ts-essentials": "^9.4.1"
   }
 }

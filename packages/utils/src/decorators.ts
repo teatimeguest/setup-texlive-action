@@ -87,7 +87,7 @@ function assertString(value: unknown): string {
     return value.valueOf();
   }
   const error = new TypeError('Unexpectedly non-string passed');
-  (error as unknown as Record<string, unknown>)['input'] = value;
+  error['input'] = value;
   throw error;
 }
 

@@ -12,7 +12,6 @@ export default {
     tsConfigPaths(),
   ],
   test: {
-    include: [],
     setupFiles: [
       fileURLToPath(import.meta.resolve('./suppress-output.mjs')),
     ],

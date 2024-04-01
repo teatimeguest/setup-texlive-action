@@ -40,9 +40,11 @@ export default class PluginLicenses extends LicenseWebpackPlugin {
         .map((m) => {
           switch (m.name) {
             case '@azure/core-http':
+              // This link is broken.
               delete m.packageJson?.['homepage'];
               break;
             case 'temporal-polyfill':
+              // Remove dummy text (see below).
               delete m.licenseText;
               break;
           }
@@ -68,6 +70,8 @@ export default class PluginLicenses extends LicenseWebpackPlugin {
       renderLicenses,
       excludedPackageTest,
       licenseFileOverrides: {
+        // This package does not contain a license file and `rspack` will fail,
+        // so uses a fake file temporarily.
         'temporal-polyfill': 'package.json',
       },
     });

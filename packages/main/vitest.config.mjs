@@ -6,12 +6,6 @@ import fixtures from '@setup-texlive-action/fixtures';
 export default mergeConfig(sharedConfig, {
   plugins: [fixtures()],
   test: {
-    include: [
-      'tests/__tests__/**/*.test.ts',
-    ],
-    setupFiles: [
-      'tests/setup-globals.ts',
-      'tests/setup-mocks.ts',
-    ],
+    setupFiles: ['__tests__/setup.ts'],
   },
 });

@@ -1,10 +1,1 @@
-import {
-  common,
-  defineConfig,
-  sources,
-} from '@setup-texlive-action/config/eslint';
-
-export default defineConfig({
-  files: ['src/**/*.ts'],
-  extends: [...common, ...sources],
-});
+export { default } from '@setup-texlive-action/config/eslint';
