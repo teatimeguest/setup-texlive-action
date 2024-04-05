@@ -180,7 +180,7 @@ If you want to install some packages, you can use the `packages` input:
 ```yaml
 - uses: teatimeguest/setup-texlive-action@v3
   with:
-    packages: >-
+    packages: |
       scheme-basic
       cleveref
       hyperref
@@ -286,7 +286,7 @@ All inputs are optional.
 | --------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `cache`               | Bool   | <p>Enable caching for [`TEXDIR`].</p> **Default:**&ensp;`true`                                                                                                                                                                        |
 | `package-file`        | String | [Glob patterns] for specifying files containing the names of TeX packages to be installed. The file format should be the same as the syntax for the `packages` input. The [`DEPENDS.txt`] format is also supported.                   |
-| `packages`            | String | Specify the names of TeX packages to install, separated by whitespaces. Schemes and collections are also acceptable. Everything after `#` will be treated as a comment.                                                               |
+| `packages`            | String | Specify the names of TeX packages to install, separated by whitespaces. Schemes and collections are also acceptable. Everything from "`#`" to the end of line will be treated as a comment.                                           |
 | `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env].</p> **Default:**&ensp;<!-- dprint-ignore-start --><code>[$RUNNER_TEMP]/setup-texlive-action</code><!-- dprint-ignore-end --> |
 | `repository`          | URL    | Specify the [package repository URL][repository] to be used as the main repository. Currently only http/https repositories are supported.                                                                                             |
 | `texdir`              | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`] option and takes precedence over the `prefix` input and related environment variables.                                                |
