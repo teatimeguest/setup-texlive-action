@@ -5,7 +5,7 @@ tasks:
     requires:
       vars: [workflows]
     <<: &act
-      desc: '{{ .workflows }}'
+      desc: 'Run: {{ .workflows }}'
       dir: '{{ .npm_config_local_prefix }}'
       cmd: >-
         act
@@ -15,7 +15,9 @@ tasks:
   clear-cache:
     cmd: rm -rf "${npm_config_local_prefix}/node_modules/.act"
   default:
-    - task: act
+    desc: Just checks if the action works with default settings.
+    cmd:
+      task: act
       vars:
         CLI_ARGS: >-
           --job save-cache

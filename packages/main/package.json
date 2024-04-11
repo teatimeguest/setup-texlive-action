@@ -1,6 +1,7 @@
 {
   "name": "@setup-texlive-action/main",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
@@ -43,7 +44,7 @@
     "nock": "^13.5.4",
     "texlive-json-schemas": "^0.1.0",
     "ts-dedent": "^2.2.0",
-    "ts-essentials": "^9.4.1",
+    "ts-essentials": "^9.4.2",
     "vitest": "^1.4.0"
   }
 }

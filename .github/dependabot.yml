@@ -22,10 +22,6 @@ updates:
       time: '05:00'
     allow:
       - dependency-type: production
-    ignore:
-      - dependency-name: node-fetch
-        update-types:
-          - version-update:semver-major
     commit-message:
       prefix: build
       include: scope

@@ -1,10 +1,11 @@
 {
-  "extends": "@tsconfig/strictest/tsconfig.json",
+  "extends": [
+    "@tsconfig/node20/tsconfig.json",
+    "@tsconfig/strictest/tsconfig.json",
+  ],
   "compilerOptions": {
     "noUnusedParameters": false,
     "checkJs": false,
-    "module": "node16",
-    "moduleResolution": "node16",
     "resolveJsonModule": true,
     "declaration": true,
     "sourceMap": true,
@@ -17,7 +18,6 @@
     "esModuleInterop": false,
     "verbatimModuleSyntax": true,
     "experimentalDecorators": true,
-    "lib": ["es2023"],
     "target": "esnext",
   },
 }

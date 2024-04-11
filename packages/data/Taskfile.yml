@@ -14,7 +14,7 @@ tasks:
       -r schemas/target.schema.json
       -s {{ .schema }}
       -d {{ .data }}
-  lint:ajv:
+  default:
     sources: ['data/*.json']
     cmd:
       for: sources
@@ -23,7 +23,3 @@ tasks:
         data: '{{ .ITEM }}'
         schema: >-
           schemas/{{ .ITEM | osBase | trimSuffix ".json" }}.schema.json
-  lint:eslint:
-    cmd: eslint .
-  lint:
-    deps: [lint:ajv, lint:eslint]

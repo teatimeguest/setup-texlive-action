@@ -1,6 +1,7 @@
 {
   "name": "@types/setup-texlive-action",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "types": "src/index.d.ts"
 }

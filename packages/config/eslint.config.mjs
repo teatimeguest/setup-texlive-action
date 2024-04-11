@@ -1,9 +1,12 @@
+// @ts-check
 import js from '@eslint/js';
-import pluginImport from 'eslint-plugin-import-x';
-import pluginNode from 'eslint-plugin-n';
-import pluginRegexp from 'eslint-plugin-regexp';
-import pluginUnicorn from 'eslint-plugin-unicorn';
-import pluginVitest from 'eslint-plugin-vitest';
+import importX from 'eslint-plugin-import-x';
+import jsdoc from 'eslint-plugin-jsdoc';
+import n from 'eslint-plugin-n';
+import * as regexp from 'eslint-plugin-regexp';
+import tsdoc from 'eslint-plugin-tsdoc';
+import unicorn from 'eslint-plugin-unicorn';
+import vitest from 'eslint-plugin-vitest';
 import ts, { config as defineConfig } from 'typescript-eslint';
 
 export const common = defineConfig(
@@ -12,8 +15,8 @@ export const common = defineConfig(
       reportUnusedDisableDirectives: true,
     },
   },
-  js.configs.recommended,
   {
+    extends: [js.configs.recommended],
     rules: {
       eqeqeq: 'error',
       'no-extra-boolean-cast': 'off',
@@ -32,8 +35,8 @@ export const common = defineConfig(
       'require-unicode-regexp': 'error',
     },
   },
-  ...ts.configs.recommendedTypeChecked,
   {
+    extends: ts.configs.recommendedTypeChecked,
     languageOptions: {
       parserOptions: {
         project: true,
@@ -68,7 +71,7 @@ export const common = defineConfig(
   },
   {
     plugins: {
-      'import-x': pluginImport,
+      'import-x': importX,
     },
     settings: {
       'import-x/internal-regex': '^#\\w*/',
@@ -78,8 +81,8 @@ export const common = defineConfig(
       },
     },
     rules: {
-      ...pluginImport.configs.recommended.rules,
-      ...pluginImport.configs.typescript.rules,
+      ...importX.configs.recommended.rules,
+      ...importX.configs.typescript.rules,
       'import-x/first': 'error',
       'import-x/newline-after-import': 'error',
       'import-x/no-unresolved': 'off',
@@ -113,14 +116,15 @@ export const common = defineConfig(
       ],
     },
   },
-  pluginNode.configs['flat/recommended-module'],
   {
+    extends: [n.configs['flat/recommended-module']],
     rules: {
       'n/no-missing-import': 'off',
       'n/no-path-concat': 'error',
     },
   },
-  pluginRegexp.configs['flat/recommended'],
+  // @ts-expect-error
+  regexp.configs['flat/recommended'],
 );
 
 export const sources = defineConfig(
@@ -262,11 +266,9 @@ export const sources = defineConfig(
     },
   },
   {
-    plugins: {
-      unicorn: pluginUnicorn,
-    },
+    plugins: { unicorn },
     rules: {
-      ...pluginUnicorn.configs.recommended.rules,
+      ...unicorn.configs.recommended.rules,
       'unicorn/catch-error-name': 'off',
       'unicorn/consistent-function-scoping': 'off',
       'unicorn/custom-error-definition': 'off',
@@ -287,6 +289,12 @@ export const sources = defineConfig(
       'unicorn/switch-case-braces': 'off',
     },
   },
+  {
+    plugins: { tsdoc },
+    rules: {
+      'tsdoc/syntax': 'error',
+    },
+  },
 );
 
 export const tests = defineConfig(
@@ -302,11 +310,9 @@ export const tests = defineConfig(
     },
   },
   {
-    plugins: {
-      vitest: pluginVitest,
-    },
+    plugins: { vitest },
     rules: {
-      ...pluginVitest.configs.recommended.rules,
+      ...vitest.configs.recommended.rules,
       'vitest/no-test-return-statement': 'error',
       'vitest/prefer-expect-resolves': 'error',
       'vitest/require-to-throw-message': 'error',
@@ -314,17 +320,60 @@ export const tests = defineConfig(
   },
 );
 
+const sourcefiles = 'src/**/*.ts';
 const mockfiles = '**/__mocks__/**/*.ts';
 
-export default defineConfig(
+export const withoutJsdoc = defineConfig(
   {
-    files: ['src/**/*.ts'],
+    files: [sourcefiles],
     ignores: [mockfiles],
     extends: [...common, ...sources],
   },
   {
     files: ['__tests__/**/*.ts', mockfiles],
+    ignores: [],
     extends: [...common, ...tests],
+  },
+);
+
+export default defineConfig(
+  ...withoutJsdoc,
+  {
+    extends: [jsdoc.configs['flat/recommended-typescript']],
+    files: [sourcefiles],
+    settings: {
+      jsdoc: {
+        tagNamePreference: {
+          default: 'defaultValue',
+        },
+      },
+    },
+    rules: {
+      'jsdoc/check-tag-names': [
+        'warn',
+        {
+          definedTags: [
+            'privateRemarks',
+            'remarks',
+          ],
+        },
+      ],
+      'jsdoc/require-jsdoc': [
+        'warn',
+        {
+          publicOnly: true,
+          require: {
+            MethodDefinition: true,
+          },
+          contexts: [
+            'TSMethodSignature',
+          ],
+        },
+      ],
+      'jsdoc/require-param': 'off',
+      'jsdoc/require-returns': 'off',
+      'jsdoc/tag-lines': 'off',
+    },
   },
 );
 

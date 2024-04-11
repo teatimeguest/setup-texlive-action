@@ -1,6 +1,7 @@
 {
   "name": "@setup-texlive-action/fixtures",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {},
   "exports": {

@@ -7,7 +7,7 @@
     "build": "node scripts/build.mjs",
     "check": "tsc -p packages/tsconfig.json --noEmit",
     "dprint": "dprint -c packages/config/dprint/dprint.jsonc",
-    "e2e": "npm -w packages/e2e test --",
+    "e2e": "npm -w packages/e2e run e2e --",
     "fmt": "npm run dprint fmt",
     "fmt-check": "run-p --aggregate-output -c 'dprint check' fmt-check:ec",
     "fmt-check:ec": "git ls-files -z | xargs -0 ec",
@@ -38,7 +38,7 @@
     "semver": "^7.6.0"
   },
   "devDependencies": {
-    "@go-task/cli": "^3.35.1",
+    "@go-task/cli": "^3.36.0",
     "@rspack/cli": "^0.5.9",
     "@types/node": "~20.0.0",
     "better-typescript-lib": "^2.7.0",
@@ -51,7 +51,7 @@
     "npm-run-all2": "^6.1.2",
     "patch-package": "^8.0.0",
     "taze": "^0.13.3",
-    "typescript": "5.3",
+    "typescript": "^5.4.5",
     "vitest": "^1.4.0"
   },
   "overrides": {

@@ -1,6 +1,7 @@
 {
   "name": "@setup-texlive-action/polyfill",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "lint": "eslint ."

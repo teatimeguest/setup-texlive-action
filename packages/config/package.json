@@ -1,6 +1,7 @@
 {
   "name": "@setup-texlive-action/config",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {},
   "exports": {
@@ -13,19 +14,23 @@
   },
   "devDependencies": {
     "@eslint/js": "^8.57.0",
+    "@tsconfig/node20": "^20.1.4",
     "@tsconfig/strictest": "^2.0.5",
+    "@types/nunjucks": "^3.2.6",
     "@vitest/coverage-v8": "^1.4.0",
     "esbuild-loader": "^4.1.0",
     "eslint-plugin-import-x": "^0.4.4",
+    "eslint-plugin-jsdoc": "^48.2.3",
     "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-regexp": "^2.4.0",
+    "eslint-plugin-regexp": "^2.5.0",
+    "eslint-plugin-tsdoc": "^0.2.17",
     "eslint-plugin-unicorn": "^51.0.1",
     "eslint-plugin-vitest": "^0.3.26",
     "github-slugger": "^2.0.0",
     "license-webpack-plugin": "^4.0.2",
     "nunjucks": "^3.2.4",
     "spdx-license-list": "^6.9.0",
-    "typescript-eslint": "^7.4.0",
+    "typescript-eslint": "^7.6.0",
     "vite-tsconfig-paths": "^4.3.2"
   }
 }

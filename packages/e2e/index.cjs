@@ -1,5 +1,7 @@
 // @ts-check
 /**
+ * Delete all caches created by this action.
+ *
  * @param {object} args
  * @param {import('@actions/github').context} args.context
  * @param {import('@actions/core')} args.core

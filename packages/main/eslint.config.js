@@ -1,1 +1,1 @@
-export { default } from '@setup-texlive-action/config/eslint';
+export { withoutJsdoc as default } from '@setup-texlive-action/config/eslint';

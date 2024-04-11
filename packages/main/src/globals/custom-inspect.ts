@@ -112,11 +112,11 @@ function formatStack(text: string): string {
 /**
  * @returns Same value as `$GITHUB_ACTION_PATH/../../..`.
  * @example
- *   On Linux:
- *   ```env
- *   GITHUB_ACTION_PATH = /home/runner/work/_actions/<owner>/<repository>/<ref>
- *   GITHUB_WORKSPACE   = /home/runner/work/<owner>/<repository>
- *   ```
+ * On Linux:
+ * ```env
+ * GITHUB_ACTION_PATH = /home/runner/work/_actions/<owner>/<repository>/<ref>
+ * GITHUB_WORKSPACE   = /home/runner/work/<owner>/<repository>
+ * ```
  */
 function getBasePath(): string | undefined {
   const workspace = env.GITHUB_WORKSPACE;

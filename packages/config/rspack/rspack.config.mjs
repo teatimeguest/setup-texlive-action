@@ -1,5 +1,5 @@
-import path from 'node:path';
 import { env } from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 import esbuildConfig, {
   transformConfig,
@@ -9,6 +9,9 @@ import PluginLicenses from './plugin-licenses.mjs';
 import pluginNoEmit from './plugin-no-emit.mjs';
 
 env['FORCE_COLOR'] = '1';
+
+/** @type {(relative: string) => string} */
+const resolve = (relative) => fileURLToPath(import.meta.resolve(relative));
 
 /** @type {import('@rspack/cli').Configuration} */
 export default {
@@ -23,7 +26,7 @@ export default {
       '.js': ['.ts', '.js'],
     },
     mainFields: esbuildConfig.mainFields,
-    tsConfigPath: path.resolve('./packages/tsconfig.json'),
+    tsConfigPath: resolve('../../tsconfig.json'),
   },
   mode: 'production',
   module: {
@@ -50,7 +53,7 @@ export default {
         'ISC',
         'MIT',
       ]),
-      templatePath: './packages/config/nunjucks/NOTICE.md.njk',
+      templatePath: resolve('../nunjucks/NOTICE.md.njk'),
     }),
   ],
   stats: {

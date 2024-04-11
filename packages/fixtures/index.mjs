@@ -1,12 +1,15 @@
 // @ts-check
-import * as path from 'node:path';
+import { extname } from 'node:path';
 
-/** @returns {import('vite').Plugin} */
+/**
+ * Load fixture files as a module.
+ * @returns {import('vite').Plugin}
+ */
 export default function fixtures() {
   return {
     name: '@setup-texlive-action/fixtures',
     async transform(src, id) {
-      switch (path.extname(id)) {
+      switch (extname(id)) {
         case '.http':
           return {
             code: `
@@ -32,6 +35,8 @@ export default function fixtures() {
               export default ${JSON.stringify(src)};
             `,
           };
+        default:
+          return undefined;
       }
     },
   };
