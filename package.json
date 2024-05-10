@@ -35,7 +35,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "semver": "^7.6.0"
+    "semver": "^7.6.2"
   },
   "devDependencies": {
     "@go-task/cli": "^3.36.0",
