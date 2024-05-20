@@ -9,9 +9,8 @@ jobs:
         runner:
           - ubuntu-20.04
           - windows-2019
-          - macos-14
           - macos-13
-          - macos-11
+          - macos-12
       fail-fast: false
     runs-on: ${{ matrix.runner }}
     steps:

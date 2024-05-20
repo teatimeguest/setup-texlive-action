@@ -261,7 +261,7 @@ Supported TeX Live versions are as follows:
     <tr><td><code>windows-2019</code></td></tr>
     <tr>
       <th rowspan="4">macOS</th>
-      <td><code>macos-14</code></td>
+      <td><code>macos-14</code> (<code>macos-latest</code>)</td>
       <td rowspan="4">
 
 `2013`&ndash;`2024`
@@ -273,8 +273,7 @@ Supported TeX Live versions are as follows:
 </td>
     </tr>
     <tr><td><code>macos-13</code></td></tr>
-    <tr><td><code>macos-12</code> (<code>macos-latest</code>)</td></tr>
-    <tr><td><code>macos-11</code></td></tr>
+    <tr><td><code>macos-12</code></td></tr>
   </tbody>
 </table>
 
