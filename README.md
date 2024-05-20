@@ -245,14 +245,15 @@ Supported TeX Live versions are as follows:
   </thead>
   <tbody>
     <tr>
-      <th rowspan="2">Linux</th>
-      <td><code>ubuntu-22.04</code> (<code>ubuntu-latest</code>)</td>
-      <td rowspan="4">
+      <th rowspan="3">Linux</th>
+      <td><code>ubuntu-24.04</code></td>
+      <td rowspan="5">
 
 `2008`&ndash;`2024`
 
 </td>
     </tr>
+    <tr><td><code>ubuntu-22.04</code> (<code>ubuntu-latest</code>)</td></tr>
     <tr><td><code>ubuntu-20.04</code></td></tr>
     <tr>
       <th rowspan="2">Windows</th>
@@ -260,9 +261,9 @@ Supported TeX Live versions are as follows:
     </tr>
     <tr><td><code>windows-2019</code></td></tr>
     <tr>
-      <th rowspan="4">macOS</th>
+      <th rowspan="3">macOS</th>
       <td><code>macos-14</code> (<code>macos-latest</code>)</td>
-      <td rowspan="4">
+      <td rowspan="3">
 
 `2013`&ndash;`2024`
 
