@@ -32,9 +32,10 @@ export default {
   module: {
     rules: [
       {
-        test: /\.ts/v,
+        test: /\.(ts|json)/v,
         loader: 'esbuild-loader',
         options: transformConfig,
+        type: 'javascript/auto',
       },
     ],
   },

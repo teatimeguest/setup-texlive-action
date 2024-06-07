@@ -25,6 +25,6 @@
   "devDependencies": {
     "@setup-texlive-action/config": "*",
     "@setup-texlive-action/polyfill": "*",
-    "vitest": "^1.4.0"
+    "vitest": "^1.6.0"
   }
 }

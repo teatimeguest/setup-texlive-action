@@ -1,4 +1,6 @@
 // @ts-check
+import { createRequire } from 'node:module';
+
 import js from '@eslint/js';
 import importX from 'eslint-plugin-import-x';
 import jsdoc from 'eslint-plugin-jsdoc';
@@ -8,6 +10,9 @@ import tsdoc from 'eslint-plugin-tsdoc';
 import unicorn from 'eslint-plugin-unicorn';
 import vitest from 'eslint-plugin-vitest';
 import ts, { config as defineConfig } from 'typescript-eslint';
+
+const require = createRequire(import.meta.url);
+const packageJson = require('../../package.json');
 
 export const common = defineConfig(
   {
@@ -118,12 +123,16 @@ export const common = defineConfig(
   },
   {
     extends: [n.configs['flat/recommended-module']],
+    settings: {
+      node: {
+        version: packageJson.engines.node,
+      },
+    },
     rules: {
       'n/no-missing-import': 'off',
       'n/no-path-concat': 'error',
     },
   },
-  // @ts-expect-error
   regexp.configs['flat/recommended'],
 );
 
@@ -272,6 +281,7 @@ export const sources = defineConfig(
       'unicorn/catch-error-name': 'off',
       'unicorn/consistent-function-scoping': 'off',
       'unicorn/custom-error-definition': 'off',
+      'unicorn/import-style': 'off',
       'unicorn/no-array-for-each': 'off',
       'unicorn/no-array-reduce': 'off',
       'unicorn/no-negated-condition': 'off',
