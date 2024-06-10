@@ -16,6 +16,7 @@
     "@actions/glob": "^0.4.0",
     "@actions/http-client": "^2.2.1",
     "class-transformer": "^0.5.1",
+    "source-map-support": "^0.5.21",
     "ts-pattern": "^5.1.2",
     "tslib": "^2.6.3",
     "unctx": "^2.3.1"

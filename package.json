@@ -15,7 +15,7 @@
     "link-check": "markdown-link-check README.md",
     "lint": "cd packages && eslint .",
     "test": "cd packages && vitest",
-    "prepack": "run-p --aggregate-output -c 'build -- --release' licenses",
+    "prepack": "run-p --aggregate-output -c build licenses",
     "preversion": "bash scripts/bump-version.sh",
     "version": "bash scripts/bump-version.sh",
     "postversion": "bash scripts/bump-version.sh"

@@ -15,6 +15,7 @@ vi.mock('@actions/glob');
 vi.mock('@actions/http-client');
 vi.mock('@setup-texlive-action/texlive');
 vi.mock('@setup-texlive-action/utils');
+vi.mock('source-map-support/register');
 vi.mock('unctx');
 vi.mock('#action/cache');
 vi.mock('#action/env');

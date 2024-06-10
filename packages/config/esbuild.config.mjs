@@ -27,10 +27,6 @@ export default {
     // See: https://github.com/evanw/esbuild/issues/1921#issuecomment-1152991694
     js: requireShim.trim(),
   },
-  alias: {
-    // This reduces the script size by about 350kb.
-    'whatwg-url': 'node:url',
-  },
   resolveExtensions: ['.ts', '.mjs', '.js', '.json'],
   logLevel: 'info',
 };
