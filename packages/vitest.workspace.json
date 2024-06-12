@@ -1,1 +1,1 @@
-["packages/*/vitest.config.{js,mjs,ts}"]
+["*/vitest.config.{js,mjs,ts}"]

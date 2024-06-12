@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "lint": "eslint .",
     "test": "task"
   },
   "exports": {
@@ -19,7 +18,6 @@
     "semver": "*"
   },
   "devDependencies": {
-    "@setup-texlive-action/config": "*",
     "@types/semver": "^7.5.8",
     "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",

@@ -1,3 +1,5 @@
-/// <reference path="./array-from-async.d.ts" />
-/// <reference path="./class-transformer.d.ts" />
-/// <reference path="./globals.d.ts" />
+import './array-from-async.d.ts';
+import './class-transformer.d.ts';
+import './env.d.ts';
+import './globals.d.ts';
+import './node.d.ts';

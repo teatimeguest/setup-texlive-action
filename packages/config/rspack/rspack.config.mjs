@@ -15,7 +15,7 @@ const resolve = (relative) => fileURLToPath(import.meta.resolve(relative));
 
 /** @type {import('@rspack/cli').Configuration} */
 export default {
-  entry: './packages/main',
+  entry: './packages/action',
   output: {
     path: './dist',
   },

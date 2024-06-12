@@ -1,12 +1,17 @@
 {
-  "extends": "@setup-texlive-action/config/tsconfig",
+  "extends": "@setup-texlive-action/config/tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "#/*": [
-        "main/src/*",
-        "main/src/*.js",
-        "main/src/*/index.js",
+      "#action/*": [
+        "./action/src/*/index.ts",
+        "./action/src/*.ts",
+        "./action/src/*",
+      ],
+      "#texlive/*": [
+        "./texlive/src/*/index.ts",
+        "./texlive/src/*.ts",
+        "./texlive/src/*",
       ],
     },
   },

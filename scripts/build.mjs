@@ -14,7 +14,7 @@ const { values: { release } } = parseArgs({
 
 const { metafile } = await esbuild.build({
   ...esbuildConfig,
-  entryPoints: ['./packages/main'],
+  entryPoints: ['./packages/action'],
   tsconfig: './packages/tsconfig.json',
   outfile: './dist/index.mjs',
   metafile: !release,

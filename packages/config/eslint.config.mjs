@@ -282,6 +282,7 @@ export const sources = defineConfig(
       'unicorn/consistent-function-scoping': 'off',
       'unicorn/custom-error-definition': 'off',
       'unicorn/import-style': 'off',
+      'unicorn/no-abusive-eslint-disable': 'off',
       'unicorn/no-array-for-each': 'off',
       'unicorn/no-array-reduce': 'off',
       'unicorn/no-negated-condition': 'off',
@@ -330,27 +331,9 @@ export const tests = defineConfig(
   },
 );
 
-const sourcefiles = 'src/**/*.ts';
-const mockfiles = '**/__mocks__/**/*.ts';
-
-export const withoutJsdoc = defineConfig(
-  {
-    files: [sourcefiles],
-    ignores: [mockfiles],
-    extends: [...common, ...sources],
-  },
-  {
-    files: ['__tests__/**/*.ts', mockfiles],
-    ignores: [],
-    extends: [...common, ...tests],
-  },
-);
-
-export default defineConfig(
-  ...withoutJsdoc,
+export const docs = defineConfig(
   {
     extends: [jsdoc.configs['flat/recommended-typescript']],
-    files: [sourcefiles],
     settings: {
       jsdoc: {
         tagNamePreference: {
@@ -387,4 +370,5 @@ export default defineConfig(
   },
 );
 
+export default { common, sources, tests, docs };
 export { defineConfig };

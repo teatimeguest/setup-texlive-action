@@ -7,8 +7,6 @@
     "noUnusedParameters": false,
     "checkJs": false,
     "resolveJsonModule": true,
-    "declaration": true,
-    "sourceMap": true,
     "importHelpers": true,
     "newLine": "lf",
     "noEmitOnError": true,

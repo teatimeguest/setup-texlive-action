@@ -1,3 +1,0 @@
-{
-  "extends": "@setup-texlive-action/config/tsconfig",
-}

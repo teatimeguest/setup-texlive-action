@@ -39,10 +39,6 @@ export default class PluginLicenses extends LicenseWebpackPlugin {
         .sort((lhs, rhs) => lhs.name < rhs.name ? -1 : 1)
         .map((m) => {
           switch (m.name) {
-            case '@azure/core-http':
-              // This link is broken.
-              delete m.packageJson?.['homepage'];
-              break;
             case 'temporal-polyfill':
               // Remove dummy text (see below).
               delete m.licenseText;

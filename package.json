@@ -13,8 +13,8 @@
     "fmt-check:ec": "git ls-files -z | xargs -0 ec",
     "licenses": "rspack -c packages/config/rspack/rspack.config.mjs",
     "link-check": "markdown-link-check README.md",
-    "lint": "npm run -ws --if-present lint",
-    "test": "vitest -c packages/vitest.config.mjs",
+    "lint": "cd packages && eslint .",
+    "test": "cd packages && vitest",
     "prepack": "run-p --aggregate-output -c 'build -- --release' licenses",
     "preversion": "bash scripts/bump-version.sh",
     "version": "bash scripts/bump-version.sh",
@@ -31,6 +31,9 @@
     "action.yml",
     "dist"
   ],
+  "exports": {
+    "./package.json": "./package.json"
+  },
   "workspaces": [
     "packages/*"
   ],
@@ -52,12 +55,14 @@
     "patch-package": "^8.0.0",
     "taze": "^0.13.8",
     "typescript": "^5.4.5",
+    "typescript-eslint": "*",
     "vitest": "^1.6.0"
   },
   "overrides": {
     "ajv-cli": {
       "fast-json-patch": "^3.1.1"
     },
+    "eslint": "$eslint",
     "rimraf@<=3": "^4.4.1",
     "semver": "$semver"
   }

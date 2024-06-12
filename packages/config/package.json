@@ -8,7 +8,8 @@
     "./esbuild": "./esbuild.config.mjs",
     "./eslint": "./eslint.config.mjs",
     "./nunjucks/*": "./nunjucks/*.mjs",
-    "./tsconfig": "./tsconfig.json",
+    "./tsconfig.json": "./tsconfig.json",
+    "./tsdoc.json": "./tsdoc.json",
     "./vitest": "./vitest/vitest.config.mjs",
     "./vitest/*": "./vitest/*"
   },

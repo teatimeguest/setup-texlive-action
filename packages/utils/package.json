@@ -4,13 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "lint": "eslint .",
     "test": "vitest"
   },
   "exports": {
     ".": "./src/index.ts",
     "./exec": "./src/exec.ts",
-    "./http": "./src/http.ts"
+    "./http": "./src/http.ts",
+    "./id": "./src/id.ts"
   },
   "sideEffects": false,
   "dependencies": {
