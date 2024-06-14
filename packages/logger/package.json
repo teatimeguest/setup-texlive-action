@@ -17,7 +17,7 @@
     "@actions/core": "^1.10.1",
     "ansi-styles": "^6.2.1",
     "clean-stack": "^5.2.0",
-    "ts-pattern": "^5.1.2"
+    "ts-pattern": "^5.2.0"
   },
   "devDependencies": {
     "@setup-texlive-action/config": "*",
