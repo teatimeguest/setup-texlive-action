@@ -2,7 +2,7 @@ import { tmpdir } from 'node:os';
 import { env } from 'node:process';
 
 import * as log from '@setup-texlive-action/logger';
-import { type Env, Texmf } from '@setup-texlive-action/texlive';
+import { Texmf } from '@setup-texlive-action/texlive';
 
 export function init(): void {
   if (!('RUNNER_TEMP' in env)) {
@@ -16,7 +16,7 @@ export function init(): void {
   env.TEXLIVE_INSTALL_NO_WELCOME ??= '1';
 
   for (const tree of Texmf.SYSTEM_TREES) {
-    const key = `TEXLIVE_INSTALL_${tree}` satisfies keyof Env;
+    const key = `TEXLIVE_INSTALL_${tree}`;
     if (tree !== 'TEXMFLOCAL' && key in env) {
       log.warn('`%s` is set, but ignored', key);
       delete env[key];

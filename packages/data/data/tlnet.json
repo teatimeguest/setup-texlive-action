@@ -4,7 +4,8 @@
     "master": "http://dante.ctan.org/tex-archive/",
     "mirrors": "https://mirrors.ctan.org/",
     "default": "https://mirror.math.princeton.edu/pub/CTAN/",
-    "path": "systems/texlive/tlnet/"
+    "path": "systems/texlive/tlnet/",
+    "versionFile": "TEXLIVE_{version}"
   },
   "tlcontrib": {
     "mirrors": "https://mirrors.ctan.org/",
@@ -23,6 +24,8 @@
     }
   },
   "tlpretest": {
-    "default": "https://ftp.math.utah.edu/pub/texlive/tlpretest/"
+    "default": "https://ftp.math.utah.edu/pub/texlive/",
+    "path": "tlpretest/",
+    "versionFile": "TEXLIVE_{version}_pretest"
   }
 }

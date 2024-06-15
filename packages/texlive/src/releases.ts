@@ -3,7 +3,6 @@ import {
   next,
 } from '@setup-texlive-action/data/texlive-versions.json';
 import * as log from '@setup-texlive-action/logger';
-import { http } from '@setup-texlive-action/utils';
 import deline from 'deline';
 import { createContext } from 'unctx';
 
@@ -101,12 +100,20 @@ export class Latest implements Release {
       return this.releaseDate = ZonedDateTime.from(current.releaseDate);
     }
     const ctanMaster = await tlnet.ctan({ master: true });
-    const url = new URL(`TEXLIVE_${this.version}`, ctanMaster);
-    const headers = await http.getHeaders(url);
+    const headers = await tlnet.checkVersionFile(ctanMaster, this.version);
+    if (headers === undefined) {
+      const error = new Error('`TEXLIVE_YYYY` file not found');
+      error['repository'] = ctanMaster;
+      error['version'] = this.version;
+      throw error;
+    }
     const timestamp = headers['last-modified'] ?? '';
     const epoch = Date.parse(timestamp);
     if (Number.isNaN(epoch)) {
-      throw new TypeError(`Invalid timestamp: ${timestamp}`);
+      const error = new TypeError(`Invalid timestamp: ${timestamp}`);
+      error['repository'] = ctanMaster;
+      error['version'] = this.version;
+      throw error;
     }
     return this.releaseDate = new Date(epoch)
       .toTemporalInstant()

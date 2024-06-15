@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { platform } from 'node:os';
 import * as path from 'node:path';
 
@@ -6,9 +7,9 @@ import * as log from '@setup-texlive-action/logger';
 import { exec, extract } from '@setup-texlive-action/utils';
 import { Range } from 'semver';
 
+import { type TLErrorOptions } from '#texlive/errors';
 import { InstallTLError } from '#texlive/install-tl/errors';
 import type { Profile } from '#texlive/install-tl/profile';
-import { ReleaseData } from '#texlive/releases';
 import { TlpdbError, patch } from '#texlive/tlpkg';
 import { Version } from '#texlive/version';
 
@@ -100,23 +101,58 @@ async function* commandArgs(
 }
 
 export interface DownloadOptions {
-  readonly version: Version;
+  readonly version?: Version | undefined;
   readonly repository: Readonly<URL>;
 }
 
 export async function acquire(options: DownloadOptions): Promise<InstallTL> {
-  const installerPath = restoreCache(options) ?? await download(options);
-  return new InstallTL(installerPath, options.version);
+  const { version, repository } = options;
+  if (version !== undefined) {
+    const dir = restoreCache(version);
+    if (dir !== undefined) {
+      return new InstallTL(dir, version);
+    }
+  }
+  const dir = await download(repository);
+  const remoteVersion = await checkVersion(dir);
+  await saveCache(dir, remoteVersion);
+  if (version !== undefined && version !== remoteVersion) {
+    throw new InstallTLError(
+      `Unexpected install-tl version: ${remoteVersion}`,
+      { repository, version, remoteVersion },
+    );
+  }
+  return new InstallTL(dir, remoteVersion);
+}
+
+const RELEASE_TEXT_FILE = 'release-texlive.txt';
+const RE = /^TeX Live .+ version (20\d{2})/v;
+
+async function checkVersion(dir: string): Promise<Version> {
+  const opts: TLErrorOptions = {
+    code: InstallTLError.Code.UNEXPECTED_VERSION,
+  };
+  try {
+    const releaseTxt = path.format({ dir, name: RELEASE_TEXT_FILE });
+    opts.remoteVersion = RE.exec(await readFile(releaseTxt, 'utf8'))?.[1];
+    return Version.parse(opts.remoteVersion!);
+  } catch (cause) {
+    opts.cause = cause;
+  }
+  throw new InstallTLError(
+    `Unexpected install-tl version: ${opts.remoteVersion ?? 'unknown'}`,
+    opts,
+  );
 }
 
 /** @internal */
-export function restoreCache(options: DownloadOptions): string | undefined {
-  const executable = executableName(options.version);
+export function restoreCache(version: Version): string | undefined {
+  const executable = executableName(version);
   try {
-    const TEXMFROOT = findTool(executable, options.version);
-    if (TEXMFROOT !== '') {
-      log.info('Found in tool cache: %s', TEXMFROOT);
-      return TEXMFROOT;
+    const dir = findTool(executable, version);
+    if (dir !== '') {
+      log.info('Found in tool cache: %s', dir);
+      return dir;
     }
   } catch (error) {
     log.info({ error }, 'Failed to restore %s', executable);
@@ -125,12 +161,9 @@ export function restoreCache(options: DownloadOptions): string | undefined {
 }
 
 /** @internal */
-export async function download(options: DownloadOptions): Promise<string> {
-  const { latest } = ReleaseData.use();
-  const { version, repository } = options;
+export async function download(repository: Readonly<URL>): Promise<string> {
   const errorOpts = {
     repository,
-    version,
     code: InstallTLError.Code.FAILED_TO_DOWNLOAD,
   };
 
@@ -142,7 +175,6 @@ export async function download(options: DownloadOptions): Promise<string> {
   }
 
   const archive = archiveName();
-  const executable = executableName(version);
 
   const url = new URL(archive, repository);
   log.info('Downloading %s from %s', archive, url.href);
@@ -157,27 +189,11 @@ export async function download(options: DownloadOptions): Promise<string> {
     throw error;
   }
 
-  log.info('Extracting %s from %s', executable, archivePath);
-  const texmfroot = await extract(
+  log.info('Extracting install-tl from %s', archivePath);
+  return await extract(
     archivePath,
     platform() === 'win32' ? 'zip' : 'tgz',
   );
-  if (version >= latest.version) {
-    try {
-      await InstallTLError.checkVersion(texmfroot, { version, repository });
-    } catch (error) {
-      if (
-        error instanceof InstallTLError
-        && Version.isVersion(error.remoteVersion)
-      ) {
-        await saveCache(texmfroot, error.remoteVersion);
-      }
-      throw error;
-    }
-  }
-  await saveCache(texmfroot, version);
-
-  return texmfroot;
 }
 
 async function saveCache(directory: string, version: Version): Promise<void> {

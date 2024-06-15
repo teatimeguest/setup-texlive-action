@@ -64,6 +64,11 @@
               }
             }
           ]
+        },
+        "versionFile": {
+          "description": "Version file path",
+          "type": "string",
+          "format": "uri-template"
         }
       },
       "required": [],

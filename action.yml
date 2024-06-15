@@ -31,7 +31,7 @@ inputs:
   repository:
     description: >-
       Specify the package repository to be used as the main repository.
-      Currently only http/https repositories are supported.
+      Currently only http(s) repositories are supported.
     required: false
   texdir:
     description: >-
@@ -56,7 +56,6 @@ inputs:
     description: >-
       TeX Live version to install.
       Supported values are `2008` to `2024`, and `latest`.
-    default: latest
     required: false
 outputs:
   cache-hit:

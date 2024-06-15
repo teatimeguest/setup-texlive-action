@@ -2,73 +2,71 @@ import * as path from 'node:path';
 import { env } from 'node:process';
 
 import { getBooleanInput, getInput } from '@actions/core';
-import type { Env } from '@setup-texlive-action/texlive';
-import {
-  AsPath,
-  Case,
-  FromEnv,
-  type Nullish,
-  getExposedName,
-  id,
-} from '@setup-texlive-action/utils';
-import { Transform, instanceToInstance } from 'class-transformer';
+import id from '@setup-texlive-action/utils/id';
 
-export class Inputs {
-  @BooleanInput
-  readonly cache: boolean = true;
+export function getCache(): boolean {
+  return getBoolean('cache');
+}
 
-  @Case('kebab')
-  @Input
-  readonly packageFile: string | undefined;
+export function getPackageFile(): string | undefined {
+  return getString('package-file');
+}
 
-  @Input
-  readonly packages: string | undefined;
+export function getPackages(): string | undefined {
+  return getString('packages');
+}
 
-  @Transform(() => path.join(env.RUNNER_TEMP!, id['kebab-case']))
-  @FromEnv('TEXLIVE_INSTALL_PREFIX' satisfies keyof Env)
-  @Input
-  @AsPath
-  readonly prefix!: string;
+export function getPrefix(): string {
+  let input = getString('prefix');
+  input ??= env.TEXLIVE_INSTALL_PREFIX;
+  input ??= path.join(env.RUNNER_TEMP!, id['kebab-case']);
+  return path.normalize(input);
+}
 
-  @Input
-  readonly repository: string | undefined;
-
-  @Input
-  @AsPath
-  readonly texdir: string | undefined;
-
-  @BooleanInput
-  readonly tlcontrib: boolean = false;
-
-  @Case('kebab')
-  @BooleanInput
-  readonly updateAllPackages: boolean = false;
-
-  @Input
-  @Transform(({ value }) =>
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    (value as Nullish<String> | undefined)?.toLowerCase?.()
-  )
-  readonly version: string = 'latest';
-
-  static load(this: void): Inputs {
-    return instanceToInstance(new Inputs(), { ignoreDecorators: true });
+export function getRepository(): URL | undefined {
+  const input = getInput('repository');
+  if (input.length === 0) {
+    return undefined;
   }
+  let url: URL;
+  try {
+    url = new URL(input);
+  } catch (cause) {
+    throw new Error('Invalid input for repository', { cause });
+  }
+  // Normalize
+  if (!url.pathname.endsWith('/')) {
+    url.pathname = path.posix.join(url.pathname, '/');
+  }
+  return url;
 }
 
-function Input(target: object, key: string | symbol): void {
-  Transform(({ value }) => {
-    const raw = getInput(getExposedName(target, key));
-    return raw === '' ? (value as string) : raw;
-  })(target, key);
+export function getTexdir(): string | undefined {
+  const input = getInput('texdir');
+  return input.length === 0 ? undefined : path.normalize(input);
 }
 
-function BooleanInput(target: object, key: string | symbol): void {
-  Transform(({ value }) => {
-    try {
-      return getBooleanInput(getExposedName(target, key));
-    } catch {
-      return value as boolean;
-    }
-  })(target, key);
+export function getTlcontrib(): boolean {
+  return getBoolean('tlcontrib');
+}
+
+export function getUpdateAllPackages(): boolean {
+  return getBoolean('update-all-packages');
+}
+
+export function getVersion(): string | undefined {
+  return getString('version')?.trim().toLowerCase();
+}
+
+function getString(name: string): string | undefined {
+  const input = getInput(name);
+  return input.length === 0 ? undefined : input;
+}
+
+function getBoolean(name: string): boolean {
+  try {
+    return getBooleanInput(name);
+  } catch (cause) {
+    throw new Error(`Invalid input for \`${name}\``, { cause });
+  }
 }

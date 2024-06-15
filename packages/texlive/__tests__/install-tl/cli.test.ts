@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { readFile } from 'node:fs/promises';
 import * as os from 'node:os';
@@ -8,7 +8,7 @@ import * as tool from '@actions/tool-cache';
 import releaseText from '@setup-texlive-action/fixtures/release-texlive.txt?raw';
 import * as util from '@setup-texlive-action/utils';
 
-import { download, restoreCache } from '#texlive/install-tl/cli';
+import { acquire, restoreCache } from '#texlive/install-tl/cli';
 
 vi.unmock('#texlive/install-tl/cli');
 
@@ -25,22 +25,23 @@ beforeAll(() => {
   vi.mocked(readFile).mockResolvedValue(releaseText);
 });
 
+beforeEach(() => {
+  vi.mocked(os.platform).mockReturnValue('linux');
+});
+
 describe('restore', () => {
   it('uses cache if available', () => {
-    vi.mocked(os.platform).mockReturnValue('linux');
     vi.mocked(tool.find).mockReturnValueOnce('<cache>');
-    expect(restoreCache(options)).toBeDefined();
+    expect(restoreCache(options.version)).toBeDefined();
   });
 
   it('returns undefined if cache not found', () => {
-    vi.mocked(os.platform).mockReturnValue('linux');
-    expect(restoreCache(options)).toBeUndefined();
+    expect(restoreCache(options.version)).toBeUndefined();
   });
 
   it('does not fail even if tool.find fails', () => {
-    vi.mocked(os.platform).mockReturnValue('linux');
     vi.mocked(tool.find).mockImplementationOnce(fail);
-    expect(restoreCache(options)).toBeUndefined();
+    expect(restoreCache(options.version)).toBeUndefined();
     expect(core.info).toHaveBeenCalledTimes(2);
     expect(vi.mocked(core.info).mock.calls[1]?.[0]).toMatchInlineSnapshot(
       '"Failed to restore install-tl: Error"',
@@ -48,24 +49,21 @@ describe('restore', () => {
   });
 });
 
-describe('download', () => {
+describe('acquire', () => {
   it('downloads installer', async () => {
-    vi.mocked(os.platform).mockReturnValue('linux');
-    await download(options);
+    await acquire(options);
     expect(tool.downloadTool).toHaveBeenCalled();
     expect(util.extract).toHaveBeenCalled();
   });
 
   it('saves installer to cache', async () => {
-    vi.mocked(os.platform).mockReturnValue('linux');
-    await download(options);
+    await acquire(options);
     expect(tool.cacheDir).toHaveBeenCalled();
   });
 
   it('does not fail even if tool.cacheDir fails', async () => {
-    vi.mocked(os.platform).mockReturnValue('linux');
     vi.mocked(tool.cacheDir).mockImplementationOnce(fail);
-    await expect(download(options)).resolves.not.toThrow();
+    await expect(acquire(options)).resolves.not.toThrow();
     expect(core.info).toHaveBeenCalledTimes(5);
     expect(vi.mocked(core.info).mock.calls[0]?.[0]).toMatchInlineSnapshot(
       '"Downloading install-tl-unx.tar.gz from https://example.com/install-tl-unx.tar.gz"',
@@ -79,5 +77,11 @@ describe('download', () => {
     expect(vi.mocked(core.info).mock.calls[4]?.[0]).toMatchInlineSnapshot(
       '"Failed to cache install-tl: Error"',
     );
+  });
+
+  it('infers version', async () => {
+    await expect(acquire({ repository: options.repository }))
+      .resolves
+      .toHaveProperty('version', options.version);
   });
 });

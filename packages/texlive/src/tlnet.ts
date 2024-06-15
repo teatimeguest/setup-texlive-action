@@ -1,5 +1,8 @@
+import type { IncomingHttpHeaders } from 'node:http';
+
 import { match } from '@setup-texlive-action/data';
 import tlnet from '@setup-texlive-action/data/tlnet.json';
+import { getHeaders } from '@setup-texlive-action/utils/http';
 import { parseTemplate } from 'url-template';
 
 import { mirrors } from '#texlive/ctan';
@@ -22,4 +25,18 @@ export function historic(version: Version, options?: TlnetOptions): URL {
     ? tlnet.historic.master
     : tlnet.historic.default;
   return new URL(tlnetPath, base);
+}
+
+export async function checkVersionFile(
+  repository: Readonly<URL>,
+  version: Version,
+): Promise<IncomingHttpHeaders | undefined> {
+  const pretest = repository.pathname.includes(tlnet.tlpretest.path);
+  const template = tlnet[pretest ? 'tlpretest' : 'ctan'].versionFile;
+  const file = parseTemplate(template).expand({ version });
+  try {
+    return await getHeaders(new URL(file, repository));
+  } catch {
+    return undefined;
+  }
 }

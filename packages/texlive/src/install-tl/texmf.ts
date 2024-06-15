@@ -4,7 +4,6 @@ import { AsPath, FromEnv } from '@setup-texlive-action/utils';
 import { Exclude, Expose, instanceToPlain } from 'class-transformer';
 import { decorate as Decorate } from 'ts-mixer';
 
-import type { Env } from '#texlive/install-tl/env';
 import { Texmf } from '#texlive/tex/texmf';
 import type { Version } from '#texlive/version';
 
@@ -21,17 +20,17 @@ export class SystemTrees implements Texmf.SystemTrees {
   declare readonly TEXDIR: string;
 
   @Decorate(Expose())
-  @FromEnv('TEXLIVE_INSTALL_TEXMFLOCAL' satisfies keyof Env)
+  @FromEnv('TEXLIVE_INSTALL_TEXMFLOCAL')
   @AsPath
   declare readonly TEXMFLOCAL: string;
 
   @Decorate(Expose())
-  @FromEnv('TEXLIVE_INSTALL_TEXMFSYSCONFIG' satisfies keyof Env)
+  @FromEnv('TEXLIVE_INSTALL_TEXMFSYSCONFIG')
   @AsPath
   declare readonly TEXMFSYSCONFIG: string;
 
   @Decorate(Expose())
-  @FromEnv('TEXLIVE_INSTALL_TEXMFSYSVAR' satisfies keyof Env)
+  @FromEnv('TEXLIVE_INSTALL_TEXMFSYSVAR')
   @AsPath
   declare readonly TEXMFSYSVAR: string;
 
@@ -65,17 +64,17 @@ export class SystemTrees implements Texmf.SystemTrees {
 @Exclude()
 export class UserTrees implements Texmf.UserTrees {
   @Decorate(Expose())
-  @FromEnv('TEXLIVE_INSTALL_TEXMFHOME' satisfies keyof Env)
+  @FromEnv('TEXLIVE_INSTALL_TEXMFHOME')
   @AsPath
   declare readonly TEXMFHOME: string;
 
   @Decorate(Expose())
-  @FromEnv('TEXLIVE_INSTALL_TEXMFCONFIG' satisfies keyof Env)
+  @FromEnv('TEXLIVE_INSTALL_TEXMFCONFIG')
   @AsPath
   declare readonly TEXMFCONFIG: string;
 
   @Decorate(Expose())
-  @FromEnv('TEXLIVE_INSTALL_TEXMFVAR' satisfies keyof Env)
+  @FromEnv('TEXLIVE_INSTALL_TEXMFVAR')
   @AsPath
   declare readonly TEXMFVAR: string;
 

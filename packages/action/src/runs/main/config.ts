@@ -1,66 +1,63 @@
 import { readFile } from 'node:fs/promises';
 import { platform } from 'node:os';
-import * as posixPath from 'node:path/posix';
 
 import { create as createGlobber } from '@actions/glob';
 import * as log from '@setup-texlive-action/logger';
 import {
   ReleaseData,
   Version,
+  acquire,
   dependsTxt,
+  tlnet,
 } from '@setup-texlive-action/texlive';
-import type { DeepUndefinable, Writable } from 'ts-essentials';
 
 import * as env from '#action/env';
-import { Inputs } from '#action/inputs';
+import * as inputs from '#action/inputs';
 
-export interface Config
-  extends Omit<Inputs, 'packageFile' | 'packages' | 'repository' | 'version'>
-{
+export interface Config {
+  readonly cache: boolean;
   readonly packages: ReadonlySet<string>;
-  readonly repository?: Readonly<URL>;
+  readonly prefix: string;
+  readonly repository: Readonly<URL> | undefined;
+  readonly texdir: string | undefined;
+  readonly tlcontrib: boolean;
+  readonly updateAllPackages: boolean;
   readonly version: Version;
 }
 
 export namespace Config {
   export async function load(): Promise<Config> {
     env.init();
-
     const releases = await ReleaseData.setup();
-    const {
-      packageFile,
-      packages,
-      repository,
-      version,
-      ...inputs
-    } = Inputs.load();
 
-    const config: Writable<Config> = {
-      ...inputs,
-      version: await resolveVersion({ version }),
-      packages: await collectPackages({ packageFile, packages }),
+    const repository = inputs.getRepository();
+    if (
+      repository !== undefined
+      && !['http:', 'https:'].includes(repository.protocol)
+    ) {
+      const error = new TypeError(
+        'Currently only http/https repositories are supported',
+      );
+      error['repository'] = repository;
+      throw error;
+    }
+    const config = {
+      cache: inputs.getCache(),
+      packages: await collectPackages(),
+      prefix: inputs.getPrefix(),
+      repository,
+      texdir: inputs.getTexdir(),
+      tlcontrib: inputs.getTlcontrib(),
+      updateAllPackages: inputs.getUpdateAllPackages(),
+      version: await resolveVersion(inputs.getVersion(), repository),
     };
 
-    if (repository !== undefined) {
-      if (version < '2012') {
-        const error = new RangeError(
-          'Currently `repository` input is only supported with version 2012 or later',
-        );
-        error['version'] = version;
-        throw error;
-      }
-      const url = new URL(repository);
-      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-        const error = new TypeError(
-          'Currently only http/https repositories are supported',
-        );
-        error['repository'] = repository;
-        throw error;
-      }
-      if (!url.pathname.endsWith('/')) {
-        url.pathname = posixPath.join(url.pathname, '/');
-      }
-      config.repository = url;
+    if (config.repository !== undefined && config.version < '2012') {
+      const error = new RangeError(
+        'Currently `repository` input is only supported with version 2012 or later',
+      );
+      error['version'] = config.version;
+      throw error;
     }
 
     if (config.version < releases.latest.version) {
@@ -83,16 +80,16 @@ export namespace Config {
   }
 }
 
-async function collectPackages(
-  inputs: DeepUndefinable<Pick<Inputs, 'packageFile' | 'packages'>>,
-): Promise<Set<string>> {
+async function collectPackages(): Promise<Set<string>> {
   type Dependency = dependsTxt.Dependency;
   async function* loadDependsTxts(): AsyncGenerator<Dependency, void, void> {
-    if (inputs.packages !== undefined) {
-      yield* dependsTxt.parse(inputs.packages);
+    const input = inputs.getPackages();
+    if (input !== undefined) {
+      yield* dependsTxt.parse(input);
     }
-    if (inputs.packageFile !== undefined) {
-      const globber = await createGlobber(inputs.packageFile, {
+    const pattern = inputs.getPackageFile();
+    if (pattern !== undefined) {
+      const globber = await createGlobber(pattern, {
         implicitDescendants: false,
         matchDirectories: false,
       });
@@ -109,22 +106,48 @@ async function collectPackages(
 }
 
 async function resolveVersion(
-  inputs: Pick<Inputs, 'version'>,
+  version: string | undefined,
+  repository: Readonly<URL> | undefined,
 ): Promise<Version> {
   const { latest, next } = ReleaseData.use();
-  const version = inputs.version === 'latest'
-    ? latest.version
-    : Version.parse(inputs.version);
-  if (version < '2008') {
-    throw new RangeError('Versions prior to 2008 are not supported');
+  if (version === undefined && repository !== undefined) {
+    return await checkRemoteVersion(repository);
   }
-  if (platform() === 'darwin' && version < '2013') {
-    throw new RangeError(
-      'Versions prior to 2013 does not work on 64-bit macOS',
-    );
+  if (version === undefined || version === 'latest') {
+    return latest.version;
   }
-  if (version > next.version) {
-    throw new RangeError(`${version} is not a valid version`);
+  if (Version.isVersion(version)) {
+    if (version < '2008') {
+      throw new RangeError('Versions prior to 2008 are not supported');
+    }
+    if (platform() === 'darwin' && version < '2013') {
+      throw new RangeError(
+        'Versions prior to 2013 does not work on 64-bit macOS',
+      );
+    }
+    if (version <= next.version) {
+      return version;
+    }
   }
+  throw new RangeError(`${version} is not a valid version`);
+}
+
+async function checkRemoteVersion(repository: Readonly<URL>): Promise<Version> {
+  const { latest, next } = ReleaseData.use();
+  const historic = /\/historic\/systems\/texlive\/(\d{4})\//v;
+  const match = historic.exec(repository.pathname);
+  if (Version.isVersion(match?.[1])) {
+    return match[1];
+  }
+  log.info('Checking for remote version: %s', repository.href);
+  const result = await Promise.all(
+    [latest, next].map(async ({ version }) => {
+      const headers = await tlnet.checkVersionFile(repository, version);
+      return headers === undefined ? undefined : version;
+    }),
+  );
+  const version = result.find(Boolean)
+    ?? await acquire({ repository }).then(({ version }) => version);
+  log.info('Remote version: %s', version);
   return version;
 }

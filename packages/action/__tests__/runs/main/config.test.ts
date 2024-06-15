@@ -11,13 +11,18 @@ import {
 import { platform } from 'node:os';
 
 import * as core from '@actions/core';
-import { ReleaseData } from '@setup-texlive-action/texlive';
+import {
+  type InstallTL,
+  ReleaseData,
+  acquire,
+  tlnet,
+} from '@setup-texlive-action/texlive';
 import { toHaveBeenCalledAfter, toHaveBeenCalledBefore } from 'jest-extended';
 import mockFs from 'mock-fs';
 import { dedent } from 'ts-dedent';
 
 import * as env from '#action/env';
-import { Inputs } from '#action/inputs';
+import * as inputs from '#action/inputs';
 import { Config } from '#action/runs/main/config';
 
 vi.unmock('node:fs/promises');
@@ -28,17 +33,14 @@ beforeAll(() => {
   expect.extend({ toHaveBeenCalledAfter, toHaveBeenCalledBefore });
 });
 
-const defaultInputs = Inputs.load();
-
 it('calls `env.init`', async () => {
   await expect(Config.load()).resolves.not.toThrow();
-  expect(env.init).toHaveBeenCalledBefore(vi.mocked(Inputs.load));
+  expect(env.init).toHaveBeenCalled();
 });
 
 it('calls `ReleaseData.setup`', async () => {
   await expect(Config.load()).resolves.not.toThrow();
   expect(ReleaseData.setup).toHaveBeenCalledAfter(vi.mocked(env.init));
-  expect(ReleaseData.setup).toHaveBeenCalledBefore(vi.mocked(Inputs.load));
 });
 
 describe('packages', () => {
@@ -102,10 +104,7 @@ describe('packages', () => {
   });
 
   it('is set to the set of specified packages by packages input', async () => {
-    vi.mocked(Inputs.load).mockReturnValueOnce({
-      ...defaultInputs,
-      packages: 'foo bar baz',
-    });
+    vi.mocked(inputs.getPackages).mockReturnValueOnce('foo bar baz');
     await expect(Config.load()).resolves.toHaveProperty(
       'packages',
       new Set(['bar', 'baz', 'foo']),
@@ -113,13 +112,10 @@ describe('packages', () => {
   });
 
   it('is set to the set of packages defined by `package-file`', async () => {
-    vi.mocked(Inputs.load).mockReturnValueOnce({
-      ...defaultInputs,
-      packageFile: `
-        .github/tl_packages
-        **/DEPENDS.txt
-      `,
-    });
+    vi.mocked(inputs.getPackageFile).mockReturnValueOnce(`
+      .github/tl_packages
+      **/DEPENDS.txt
+    `);
     await expect(Config.load()).resolves.toHaveProperty(
       'packages',
       new Set(['bar', 'baz', 'foo', 'package-1', 'quux', 'qux', 'waldo']),
@@ -127,11 +123,10 @@ describe('packages', () => {
   });
 
   it('contains packages specified by both input and file', async () => {
-    vi.mocked(Inputs.load).mockReturnValueOnce({
-      ...defaultInputs,
-      packageFile: 'bundle/package-1/DEPENDS.txt',
-      packages: 'foo bar baz',
-    });
+    vi.mocked(inputs.getPackageFile).mockReturnValueOnce(
+      'bundle/package-1/DEPENDS.txt',
+    );
+    vi.mocked(inputs.getPackages).mockReturnValueOnce('foo bar baz');
     await expect(Config.load()).resolves.toHaveProperty(
       'packages',
       new Set(['bar', 'baz', 'foo', 'qux']),
@@ -139,13 +134,60 @@ describe('packages', () => {
   });
 });
 
+describe('repository', () => {
+  it.each([
+    'http://example.com/path/to/tlnet/',
+    'https://somewhere.example.com/path/to/tlnet/',
+  ])('accepts %s', async (input) => {
+    vi.mocked(inputs.getRepository).mockReturnValueOnce(new URL(input));
+    vi.mocked(inputs.getVersion).mockReturnValueOnce('latest');
+    await expect(Config.load()).resolves.not.toThrow();
+  });
+
+  it.each([
+    'ftp://example.com/path/to/historic/',
+    'rsync://example.com/path/to/historic/',
+  ])('does not support the protocol for %s', async (input) => {
+    vi.mocked(inputs.getRepository).mockReturnValueOnce(new URL(input));
+    await expect(Config.load()).rejects.toThrow(
+      'http/https repositories are support',
+    );
+  });
+
+  it.each([
+    '2008',
+    '2011',
+  ])('does not support versions prior to 2012', async (version) => {
+    vi.mocked(inputs.getRepository).mockReturnValueOnce(new URL(MOCK_URL));
+    vi.mocked(inputs.getVersion).mockReturnValueOnce(version);
+    await expect(Config.load()).rejects.toThrow(
+      'only supported with version 2012 or later',
+    );
+  });
+
+  it('infers version from URL', async () => {
+    const repository =
+      'https://example.com/path/to/historic/systems/texlive/2019/tlnet-final/';
+    vi.mocked(inputs.getRepository).mockReturnValueOnce(new URL(repository));
+    await expect(Config.load()).resolves.toHaveProperty('version', '2019');
+  });
+
+  it.each([
+    'http://example.com/path/to/tlpretest/',
+    'https://example.com/path/to/tlnet/',
+  ])('checks `TEXLIVE_YYYY(_pretest)` file', async (repository) => {
+    const version = '2018';
+    vi.mocked(inputs.getRepository).mockReturnValueOnce(new URL(repository));
+    vi.mocked(acquire).mockResolvedValueOnce({ version } as InstallTL);
+    await expect(Config.load()).resolves.toHaveProperty('version', version);
+    expect(tlnet.checkVersionFile).toHaveBeenCalledBefore(acquire);
+  });
+});
+
 describe('tlcontrib', () => {
   it('is set to false for older versions', async () => {
-    vi.mocked(Inputs.load).mockReturnValueOnce({
-      ...defaultInputs,
-      tlcontrib: true,
-      version: '2020',
-    });
+    vi.mocked(inputs.getTlcontrib).mockReturnValueOnce(true);
+    vi.mocked(inputs.getVersion).mockReturnValueOnce('2020');
     await expect(Config.load()).resolves.toHaveProperty('tlcontrib', false);
     expect(core.warning).toHaveBeenCalledOnce();
     expect(vi.mocked(core.warning).mock.calls[0]?.[0]).toMatchInlineSnapshot(
@@ -156,11 +198,8 @@ describe('tlcontrib', () => {
 
 describe('updateAllPackages', () => {
   it('is set to false for older versions', async () => {
-    vi.mocked(Inputs.load).mockReturnValueOnce({
-      ...defaultInputs,
-      updateAllPackages: true,
-      version: '2015',
-    });
+    vi.mocked(inputs.getUpdateAllPackages).mockReturnValueOnce(true);
+    vi.mocked(inputs.getVersion).mockReturnValueOnce('2015');
     await expect(Config.load()).resolves.toHaveProperty(
       'updateAllPackages',
       false,
@@ -181,18 +220,14 @@ describe('version', () => {
   });
 
   it('is set to the specified version', async () => {
-    vi.mocked(Inputs.load).mockReturnValueOnce({
-      ...defaultInputs,
-      version: '2018',
-    });
+    vi.mocked(inputs.getVersion).mockReturnValueOnce('2018');
     await expect(Config.load()).resolves.toHaveProperty('version', '2018');
   });
 
   it('permits the next version', async () => {
-    vi.mocked(Inputs.load).mockReturnValueOnce({
-      ...defaultInputs,
-      version: `${Number.parseInt(LATEST_VERSION, 10) + 1}`,
-    });
+    vi.mocked(inputs.getVersion).mockReturnValueOnce(
+      `${Number.parseInt(LATEST_VERSION, 10) + 1}`,
+    );
     await expect(Config.load()).resolves.not.toThrow();
   });
 
@@ -201,10 +236,7 @@ describe('version', () => {
       vi.mocked(platform).mockReturnValue(os);
     });
     it.each(['2013', '2017', '2022'] as const)('accepts %o', async (spec) => {
-      vi.mocked(Inputs.load).mockReturnValueOnce({
-        ...defaultInputs,
-        version: spec,
-      });
+      vi.mocked(inputs.getVersion).mockReturnValueOnce(spec);
       await expect(Config.load()).resolves.not.toThrow();
     });
   });
@@ -213,11 +245,9 @@ describe('version', () => {
     beforeEach(() => {
       vi.mocked(platform).mockReturnValue(os);
     });
+
     it.each(['2007', '2029'] as const)('rejects %o', async (spec) => {
-      vi.mocked(Inputs.load).mockReturnValueOnce({
-        ...defaultInputs,
-        version: spec,
-      });
+      vi.mocked(inputs.getVersion).mockReturnValueOnce(spec);
       await expect(Config.load()).rejects.toThrow('');
     });
   });
@@ -226,11 +256,9 @@ describe('version', () => {
     beforeEach(() => {
       vi.mocked(platform).mockReturnValue('darwin');
     });
+
     it.each(['2008', '2010', '2012'] as const)('rejects %o', async (spec) => {
-      vi.mocked(Inputs.load).mockReturnValueOnce({
-        ...defaultInputs,
-        version: spec,
-      });
+      vi.mocked(inputs.getVersion).mockReturnValueOnce(spec);
       await expect(Config.load()).rejects.toThrow(
         'does not work on 64-bit macOS',
       );

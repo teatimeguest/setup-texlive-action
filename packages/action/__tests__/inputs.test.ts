@@ -2,26 +2,22 @@ import { describe, expect, it, vi } from 'vitest';
 
 import * as path from 'node:path';
 
-import { Inputs } from '#action/inputs';
+import * as inputs from '#action/inputs';
 
 const env = globalThis.process.env;
 
 vi.unmock('#action/inputs');
 
 describe('cache', () => {
-  it('defaults to `true`', () => {
-    expect(Inputs.load()).toHaveProperty('cache', true);
-  });
-
   it.each([true, false])('is set to %j', (input: boolean) => {
     vi.stubEnv('INPUT_CACHE', input.toString());
-    expect(Inputs.load()).toHaveProperty('cache', input);
+    expect(inputs.getCache()).toBe(input);
   });
 });
 
 describe('packageFile', () => {
   it('defaults to `undefined`', () => {
-    expect(Inputs.load()).toHaveProperty('packageFile', undefined);
+    expect(inputs.getPackageFile()).toBeUndefined();
   });
 
   it.each([
@@ -32,14 +28,14 @@ describe('packageFile', () => {
     'is set to %o with input %o',
     (value: string | undefined, input: string) => {
       vi.stubEnv('INPUT_PACKAGE-FILE', input);
-      expect(Inputs.load()).toHaveProperty('packageFile', value);
+      expect(inputs.getPackageFile()).toBe(value);
     },
   );
 });
 
 describe('packages', () => {
   it('defaults to `undefined`', () => {
-    expect(Inputs.load()).toHaveProperty('packages', undefined);
+    expect(inputs.getPackages()).toBeUndefined();
   });
 
   it.each([
@@ -50,22 +46,21 @@ describe('packages', () => {
     'is set to %o with input %o',
     (value: string | undefined, input: string) => {
       vi.stubEnv('INPUT_PACKAGES', input);
-      expect(Inputs.load()).toHaveProperty('packages', value);
+      expect(inputs.getPackages()).toBe(value);
     },
   );
 });
 
 describe('prefix', () => {
   it('uses $RUNNRE_TEMP by default', () => {
-    expect(Inputs.load()).toHaveProperty(
-      'prefix',
+    expect(inputs.getPrefix()).toBe(
       path.join(env.RUNNER_TEMP!, 'setup-texlive-action'),
     );
   });
 
   it('uses $TEXLIVE_INSTALL_PREFIX if set', () => {
     vi.stubEnv('TEXLIVE_INSTALL_PREFIX', '/usr/local');
-    expect(Inputs.load()).toHaveProperty('prefix', env.TEXLIVE_INSTALL_PREFIX);
+    expect(inputs.getPrefix()).toBe(env.TEXLIVE_INSTALL_PREFIX);
   });
 
   it.each([
@@ -73,8 +68,7 @@ describe('prefix', () => {
     '\n  ',
   ])('is set to the default value with input %o', (input: string) => {
     vi.stubEnv('INPUT_PREFIX', input);
-    expect(Inputs.load()).toHaveProperty(
-      'prefix',
+    expect(inputs.getPrefix()).toBe(
       path.join(env.RUNNER_TEMP!, 'setup-texlive-action'),
     );
   });
@@ -84,19 +78,19 @@ describe('prefix', () => {
     ['~/.local', '    ~/.local'],
   ])('is set to %o with input %o', (value: string, input: string) => {
     vi.stubEnv('INPUT_PREFIX', input);
-    expect(Inputs.load()).toHaveProperty('prefix', value);
+    expect(inputs.getPrefix()).toBe(value);
   });
 
   it('prefers input over environment variable', () => {
     vi.stubEnv('TEXLIVE_INSTALL_PREFIX', '/usr/local');
     vi.stubEnv('INPUT_PREFIX', '~/.local');
-    expect(Inputs.load()).toHaveProperty('prefix', env['INPUT_PREFIX']);
+    expect(inputs.getPrefix()).toBe(env['INPUT_PREFIX']);
   });
 });
 
 describe('texdir', () => {
   it('defaults to `undefined`', () => {
-    expect(Inputs.load()).toHaveProperty('texdir', undefined);
+    expect(inputs.getTexdir()).toBeUndefined();
   });
 
   it.each([
@@ -108,36 +102,46 @@ describe('texdir', () => {
     'is set to %o with input %o',
     (value: string | undefined, input: string) => {
       vi.stubEnv('INPUT_TEXDIR', input);
-      expect(Inputs.load()).toHaveProperty('texdir', value);
+      expect(inputs.getTexdir()).toBe(value);
     },
   );
 });
 
 describe('tlcontrib', () => {
-  it('defaults to `false`', () => {
-    expect(Inputs.load()).toHaveProperty('tlcontrib', false);
-  });
-
   it.each([true, false])('is set to %j', (input: boolean) => {
     vi.stubEnv('INPUT_TLCONTRIB', input.toString());
-    expect(Inputs.load()).toHaveProperty('tlcontrib', input);
+    expect(inputs.getTlcontrib()).toBe(input);
   });
 });
 
 describe('updateAllPackages', () => {
-  it('defaults to `false`', () => {
-    expect(Inputs.load()).toHaveProperty('updateAllPackages', false);
-  });
-
   it.each([true, false])('is set to %j', (input: boolean) => {
     vi.stubEnv('INPUT_UPDATE-ALL-PACKAGES', input.toString());
-    expect(Inputs.load()).toHaveProperty('updateAllPackages', input);
+    expect(inputs.getUpdateAllPackages()).toBe(input);
+  });
+});
+
+describe('repository', () => {
+  it.each([
+    'http://example.com/path/to/tlnet/',
+    'https://somewhere.example.com/path/to/tlnet/',
+    'ftp://example.com/path/to/historic/',
+    'rsync://example.com/path/to/historic/',
+  ])('accepts %s', (input: string) => {
+    vi.stubEnv('INPUT_REPOSITORY', input);
+    expect(inputs.getRepository()).toHaveProperty('href', input);
+  });
+
+  it('normalize URL', () => {
+    const input = 'https://somewhere.example.com/path/to/tlnet';
+    vi.stubEnv('INPUT_REPOSITORY', input);
+    expect(inputs.getRepository()).toHaveProperty('href', input + '/');
   });
 });
 
 describe('version', () => {
-  it('defaults to `latest`', () => {
-    expect(Inputs.load()).toHaveProperty('version', 'latest');
+  it('defaults to `undefined`', () => {
+    expect(inputs.getVersion()).toBeUndefined();
   });
 
   it.each([
@@ -148,7 +152,7 @@ describe('version', () => {
     ['latest', 'latest\n'],
   ])('is set to %o with input %o', (value: string, input: string) => {
     vi.stubEnv('INPUT_VERSION', input.toString());
-    expect(Inputs.load()).toHaveProperty('version', value);
+    expect(inputs.getVersion()).toBe(value);
   });
 
   it.each([
@@ -156,6 +160,6 @@ describe('version', () => {
     '\n  ',
   ])('is set to the default value with input %o', (input: string) => {
     vi.stubEnv('INPUT_VERSION', input);
-    expect(Inputs.load()).toHaveProperty('version', 'latest');
+    expect(inputs.getVersion()).toBeUndefined();
   });
 });
