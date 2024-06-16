@@ -42,27 +42,25 @@
   },
   "devDependencies": {
     "@go-task/cli": "^3.37.2",
-    "@rspack/cli": "^0.7.1",
+    "@rspack/cli": "^0.7.3",
     "@types/node": "~20.0.0",
     "better-typescript-lib": "^2.7.0",
-    "dprint": "^0.46.1",
+    "dprint": "^0.46.2",
     "editorconfig-checker": "^5.1.8",
-    "esbuild": "^0.21.4",
-    "eslint": "^9.4.0",
+    "esbuild": "^0.21.5",
+    "eslint": "^9.5.0",
     "git-cliff": "^2.3.0",
     "markdown-link-check": "^3.12.2",
     "npm-run-all2": "^6.2.0",
     "patch-package": "^8.0.0",
     "taze": "^0.13.8",
     "typescript": "^5.4.5",
-    "typescript-eslint": "*",
     "vitest": "^1.6.0"
   },
   "overrides": {
     "ajv-cli": {
       "fast-json-patch": "^3.1.1"
     },
-    "eslint": "$eslint",
     "rimraf@<=3": "^4.4.1",
     "semver": "$semver"
   }

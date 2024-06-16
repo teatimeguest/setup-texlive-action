@@ -15,6 +15,7 @@ const { metafile } = await esbuild.build({
   tsconfig: './packages/tsconfig.json',
   outfile: packageJson.main,
   sourcemap: 'linked',
+  sourcesContent: false,
   metafile: true,
 });
 

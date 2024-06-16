@@ -1,4 +1,5 @@
-/** @type {import('esbuild').CommonOptions} */
+// @ts-check
+/** @satisfies {import('esbuild').CommonOptions} */
 export const transformConfig = {
   target: 'node20',
   format: 'esm',

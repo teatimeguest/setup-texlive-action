@@ -40,25 +40,25 @@ beforeAll(() => {
   error1['info1'] = 'Info 1';
   error1['info2'] = 2;
   error1[log.symbols.note] = 'Note 1';
-  error1.stack;
+  void error1.stack;
 
   const error2 = new TypeError('Error 2', { cause: error1 });
   error2[log.symbols.note] = 'Note 2';
-  error2.stack;
+  void error2.stack;
 
   const error3 = new Error();
   error3['info3'] = 'Info 3';
-  error3.stack;
+  void error3.stack;
 
   const error4 = new Error('Error 4') as SuppressedError;
   error4.name = 'SuppressedError';
   error4.suppressed = error2;
   error4.error = error3;
-  error4.stack;
+  void error4.stack;
 
   const error5 = new RangeError('Error 5', { cause: 'Error 6' });
   error5[log.symbols.note] = 'Note 1';
-  error5.stack;
+  void error5.stack;
 
   error = new AggregateError([
     error4,
@@ -67,7 +67,7 @@ beforeAll(() => {
     null,
     undefined,
   ], 'Error 8');
-  error.stack;
+  void error.stack;
 
   Error.stackTraceLimit = stackTraceLimit;
   Error.prepareStackTrace = prepareStackTrace;

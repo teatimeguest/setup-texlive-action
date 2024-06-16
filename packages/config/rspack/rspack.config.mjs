@@ -1,17 +1,14 @@
+// @ts-check
 import { env } from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import esbuildConfig, {
-  transformConfig,
+  transformConfig, // @ts-expect-error
 } from '@setup-texlive-action/config/esbuild';
 
-import PluginLicenses from './plugin-licenses.mjs';
-import pluginNoEmit from './plugin-no-emit.mjs';
+import pluginLicenses from './plugin-licenses.mjs';
 
 env['FORCE_COLOR'] = '1';
-
-/** @type {(relative: string) => string} */
-const resolve = (relative) => fileURLToPath(import.meta.resolve(relative));
 
 /** @type {import('@rspack/cli').Configuration} */
 export default {
@@ -26,7 +23,8 @@ export default {
       '.js': ['.ts', '.js'],
     },
     mainFields: esbuildConfig.mainFields,
-    tsConfigPath: resolve('../../tsconfig.json'),
+    // @ts-expect-error
+    tsConfigPath: fileURLToPath(import.meta.resolve('../../tsconfig.json')),
   },
   mode: 'production',
   module: {
@@ -44,19 +42,7 @@ export default {
   optimization: {
     minimize: false,
   },
-  plugins: [
-    pluginNoEmit,
-    new PluginLicenses({
-      allowList: new Set([
-        '0BSD',
-        'Apache-2.0',
-        'BSD-3-Clause',
-        'ISC',
-        'MIT',
-      ]),
-      templatePath: resolve('../nunjucks/NOTICE.md.njk'),
-    }),
-  ],
+  plugins: [pluginLicenses],
   stats: {
     preset: 'errors-warnings',
     colors: true,

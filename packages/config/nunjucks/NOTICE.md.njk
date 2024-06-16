@@ -1,37 +1,38 @@
+{% macro render(module) %}
+Version `{{ module.version }}`
+
+{% if module.author %}
+Copyright (c) {{ module.author | escape }}
+
+{% endif -%}
+
+License: `{{ module.license }}`
+
+```
+{{ module.licenseText.trimEnd() }}
+```
+{%- endmacro %}
 # Third-Party Software Licenses and Copyright Notices
 
 This software incorporates the following third-party software components:
 
-{% for m in modules -%}
-  - [`{{ m.name }}`](#{{ m.name |  slugify }})
+{% for name, _ in modules %}
+- [`{{ name }}`](#{{ name |  slugify }})
 {% endfor %}
 
 ------
-{% for m in modules %}
+{% for name, versions in modules %}
 
-## `{{ m.name }}`
+## `{{ name }}`
 
-{% set author =  m.packageJson.author -%}
+URL: <https://www.npmjs.com/package/{{ name }}>
+{% if versions | length == 1 %}
 
-{% if author -%}
-  Copyright (c) {{ author.name or author | escape }}
-  {%- if author.email %} \<<{{ author.email }}>\>{% endif %}
-  {%- if author.url %} (<{{ author.url }}>){% endif %}{{ '\n' }}
-{% endif -%}
+{{ render(versions | first) }}
+{% else %}
+{% for v in versions %}
 
-{% if m.packageJson.homepage -%}
-  URL: <{{ m.packageJson.homepage }}>
-{% else -%}
-  URL: <https://www.npmjs.com/package/{{ m.name }}>
+- {{ render(v) | indent(2) }}
+{% endfor %}
 {% endif %}
-
-License: `{{ m.licenseId }}`
-
-```
-{% if m.licenseText -%}
-  {{ m.licenseText.trimEnd() }}
-{% else -%}
-  {{ spdx[m.licenseId].name }} ({{ spdx[m.licenseId].url }})
-{% endif %}
-```
 {% endfor %}

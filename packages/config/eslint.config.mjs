@@ -64,6 +64,7 @@ export const common = defineConfig(
       '@typescript-eslint/dot-notation': 'error',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-empty-interface': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-inferrable-types': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/no-unsafe-declaration-merging': 'off',
@@ -215,7 +216,6 @@ export const sources = defineConfig(
         'error',
         { ignoreOnInitialization: true },
       ],
-      '@typescript-eslint/no-throw-literal': 'error',
       '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'error',
       '@typescript-eslint/no-unnecessary-condition': 'error',
       '@typescript-eslint/no-unused-expressions': 'error',
@@ -224,6 +224,7 @@ export const sources = defineConfig(
         { ignoreRestSiblings: true },
       ],
       '@typescript-eslint/non-nullable-type-assertion-style': 'error',
+      '@typescript-eslint/only-throw-error': 'error',
       '@typescript-eslint/prefer-readonly-parameter-types': [
         'error',
         {
