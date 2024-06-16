@@ -6,11 +6,6 @@ readonly version="v${npm_package_version}"
 
 # shellcheck disable=SC2154
 case "${npm_lifecycle_event}" in
-  preversion)
-    npm run prepack
-    markdown-link-check dist/NOTICE.md
-    ;;
-
   version)
     git ls-files -z dist |
       xargs -0 git update-index --no-assume-unchanged --
