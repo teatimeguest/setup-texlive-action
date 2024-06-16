@@ -26,12 +26,17 @@ export async function install(options: {
 
   for (const master of fallbackToMaster ? [false, true] : [false]) {
     if (repository === undefined || master) {
-      if (master && version === '2024') {
-        repository = new URL(ctan.path, ctan.default);
+      if (version >= latest.version) {
+        repository = master
+          ? new URL(ctan.path, ctan.default)
+          : await tlnet.ctan({ master });
       } else {
-        repository = version >= latest.version
-          ? await tlnet.ctan({ master })
-          : tlnet.historic(version, { master });
+        repository = master
+          // hotfix (#304)
+          ? new URL(
+            `https://mirrors.tuna.tsinghua.edu.cn/tex-historic-archive/systems/texlive/${version}/tlnet-final/`,
+          )
+          : tlnet.historic(version);
       }
     }
     try {
