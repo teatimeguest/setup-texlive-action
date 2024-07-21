@@ -91,5 +91,4 @@ function assertString(value: unknown): string {
   throw error;
 }
 
-/* eslint
-  @typescript-eslint/ban-types: ["error", { types: { Function: false } }] */
+/* eslint @typescript-eslint/no-unsafe-function-type: off */

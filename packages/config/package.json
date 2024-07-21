@@ -14,24 +14,25 @@
     "./vitest/*": "./vitest/*"
   },
   "devDependencies": {
-    "@eslint/js": "^9.5.0",
+    "@eslint/js": "^9.7.0",
     "@tsconfig/node20": "^20.1.4",
     "@tsconfig/strictest": "^2.0.5",
     "@types/nunjucks": "^3.2.6",
-    "@vitest/coverage-v8": "^1.6.0",
-    "esbuild-loader": "^4.1.0",
-    "eslint-plugin-import-x": "^0.5.1",
-    "eslint-plugin-jsdoc": "^48.2.12",
+    "@types/semver": "^7.5.8",
+    "@vitest/coverage-v8": "^2.0.3",
+    "esbuild-loader": "^4.2.2",
+    "eslint-plugin-import-x": "^3.0.1",
+    "eslint-plugin-jsdoc": "^48.8.3",
     "eslint-plugin-n": "^17.9.0",
     "eslint-plugin-regexp": "^2.6.0",
     "eslint-plugin-tsdoc": "^0.3.0",
-    "eslint-plugin-unicorn": "^53.0.0",
+    "eslint-plugin-unicorn": "^54.0.0",
     "eslint-plugin-vitest": "^0.5.4",
     "github-slugger": "^2.0.0",
     "nunjucks": "^3.2.4",
     "semver": "^7.6.3",
-    "typescript-eslint": "^8.0.0-alpha.30",
+    "typescript-eslint": "^8.0.0-alpha.48",
     "vite-tsconfig-paths": "^4.3.2",
-    "webpack-license-plugin": "^4.4.2"
+    "webpack-license-plugin": "^4.5.0"
   }
 }

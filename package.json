@@ -41,27 +41,35 @@
     "semver": "^7.6.3"
   },
   "devDependencies": {
-    "@go-task/cli": "^3.37.2",
-    "@rspack/cli": "^0.7.3",
-    "@types/node": "~20.0.0",
-    "better-typescript-lib": "^2.7.0",
-    "dprint": "^0.46.2",
+    "@go-task/cli": "^3.38.0",
+    "@rspack/cli": "^0.7.5",
+    "@types/mock-fs": "^4.13.4",
+    "@types/node": "~20.14.11",
+    "@types/semver": "^7.5.8",
+    "better-typescript-lib": "^2.8.0",
+    "dprint": "^0.47.2",
     "editorconfig-checker": "^5.1.8",
-    "esbuild": "^0.21.5",
-    "eslint": "^9.5.0",
-    "git-cliff": "^2.3.0",
+    "esbuild": "^0.23.0",
+    "eslint": "^9.7.0",
+    "git-cliff": "^2.4.0",
+    "jest-extended": "^4.0.2",
     "markdown-link-check": "^3.12.2",
-    "npm-run-all2": "^6.2.0",
+    "mock-fs": "^5.2.0",
+    "npm-run-all2": "^6.2.2",
     "patch-package": "^8.0.0",
-    "taze": "^0.13.8",
-    "typescript": "^5.4.5",
-    "vitest": "^1.6.0"
+    "taze": "^0.16.1",
+    "ts-dedent": "^2.2.0",
+    "ts-essentials": "^10.0.1",
+    "typescript": "^5.5.3",
+    "vitest": "^2.0.3"
   },
   "overrides": {
     "ajv-cli": {
       "fast-json-patch": "^3.1.1"
     },
-    "rimraf@<=3": "^4.4.1",
-    "semver": "$semver"
+    "rimraf@<=3": "^6.0.1",
+    "semver": "$semver",
+    "vitest": "$vitest",
+    "ws": "^8.18.0"
   }
 }

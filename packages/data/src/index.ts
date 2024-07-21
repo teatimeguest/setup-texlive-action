@@ -71,12 +71,12 @@ export function satisfies(
  * @param options - Options for the current platform.
  */
 export function match<const T extends Record<string, Target>>(
-  patterns: Readonly<T>,
+  patterns: T,
   options?: DeepReadonly<Options>,
-): [key: keyof T, value: T[keyof T]] {
-  for (const [key, value] of Object.entries<keyof T, T[keyof T]>(patterns)) {
-    if (satisfies(value, options)) {
-      return [key, value];
+): [keyof T, T[keyof T]] {
+  for (const entry of Object.entries(patterns)) {
+    if (satisfies(entry[1], options)) {
+      return entry as ReturnType<typeof match<T>>;
     }
   }
   const error = new Error('None of the patterns matched');

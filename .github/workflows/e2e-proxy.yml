@@ -14,7 +14,8 @@ jobs:
   proxy:
     runs-on: ubuntu-latest
     container:
-      image: ${{
+      image: >-
+        ${{
           github.actor == 'nektos/act'
           && 'node:20.0'
           || 'ubuntu:latest'

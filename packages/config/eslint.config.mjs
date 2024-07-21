@@ -132,6 +132,20 @@ export const common = defineConfig(
     rules: {
       'n/no-missing-import': 'off',
       'n/no-path-concat': 'error',
+      'n/no-extraneous-import': [
+        'error',
+        {
+          allowModules: [
+            '@setup-texlive-action/config',
+            '@setup-texlive-action/fixtures',
+            'jest-extended',
+            'mock-fs',
+            'ts-dedent',
+            'ts-essentials',
+            'vitest',
+          ],
+        },
+      ],
     },
   },
   regexp.configs['flat/recommended'],

@@ -23,8 +23,6 @@
     "ts-pattern": "^5.2.0"
   },
   "devDependencies": {
-    "@setup-texlive-action/config": "*",
-    "@setup-texlive-action/polyfill": "*",
-    "vitest": "^1.6.0"
+    "@setup-texlive-action/polyfill": "*"
   }
 }
