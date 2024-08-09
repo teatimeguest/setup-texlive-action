@@ -1,17 +1,3 @@
-{% macro render(module) %}
-Version `{{ module.version }}`
-
-{% if module.author %}
-Copyright (c) {{ module.author | escape }}
-
-{% endif -%}
-
-License: `{{ module.license }}`
-
-```
-{{ module.licenseText.trimEnd() }}
-```
-{%- endmacro %}
 # Third-Party Software Licenses and Copyright Notices
 
 This software incorporates the following third-party software components:
@@ -26,13 +12,24 @@ This software incorporates the following third-party software components:
 ## `{{ name }}`
 
 URL: <https://www.npmjs.com/package/{{ name }}>
-{% if versions | length == 1 %}
+{% for m in versions %}
 
-{{ render(versions | first) }}
-{% else %}
-{% for v in versions %}
+### v{{ m.version }}
 
-- {{ render(v) | indent(2) }}
-{% endfor %}
+{% if m.author %}
+Copyright (c) {{ m.author | escape }}
+
+{% endif -%}
+
+License: `{{ m.license }}`
+
+```
+{% if m.licenseText -%}
+{{ m.licenseText.trimEnd() }}
+{% else -%}
+{% set license = spdx[m.license] %}
+{{ license.name }} ({{ license.url }})
 {% endif %}
+```
+{% endfor %}
 {% endfor %}

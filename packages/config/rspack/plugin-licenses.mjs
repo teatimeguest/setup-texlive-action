@@ -2,6 +2,7 @@
 import { createRequire } from 'node:module';
 
 import { compare as semverCompare } from 'semver';
+import spdx from 'spdx-license-list';
 
 // @ts-expect-error
 import nunjucks from '@setup-texlive-action/config/nunjucks/markdown';
@@ -33,7 +34,7 @@ export default function pluginLicenses(compiler) {
             return -semverCompare(lhs.version, rhs.version);
           });
         }
-        return nunjucks.render(template, { modules });
+        return nunjucks.render(template, { modules, spdx });
       },
     },
   });

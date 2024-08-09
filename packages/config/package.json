@@ -31,6 +31,7 @@
     "github-slugger": "^2.0.0",
     "nunjucks": "^3.2.4",
     "semver": "^7.6.3",
+    "spdx-license-list": "^6.9.0",
     "typescript-eslint": "^8.0.0-alpha.48",
     "vite-tsconfig-paths": "^4.3.2",
     "webpack-license-plugin": "^4.5.0"
