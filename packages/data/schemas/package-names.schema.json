@@ -1,0 +1,27 @@
+{
+  "$id": "package-names.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "toTL": {
+      "description": "Package-name mapping from CTAN to TeX Live",
+      "type": "object",
+      "patternProperties": {
+        "^\\S*$": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "generated": {
+      "description": "Approximate date and time of generation",
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["toTL"],
+  "additionalProperties": false
+}
