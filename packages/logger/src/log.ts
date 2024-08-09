@@ -40,8 +40,8 @@ export const fatal = createLogMethod('fatal', core.setFailed);
 const defaultInspectOptions = {
   depth: 10,
   compact: false,
-  maxArrayLength: 10,
-  maxStringLength: 200,
+  maxArrayLength: 20,
+  maxStringLength: 500,
 } as const satisfies InspectOptions;
 
 const logger = { debug, info, warn, fatal } as const;
@@ -161,11 +161,15 @@ function* traverseErrors(
 }
 
 function format(fmt: string, ...values: readonly unknown[]): string {
-  return formatWithOptions(
-    { colors: hasColors(), ...defaultInspectOptions },
-    fmt,
-    ...values,
-  );
+  const opts: InspectOptions = {
+    colors: hasColors(),
+    ...defaultInspectOptions,
+  };
+  if (core.isDebug()) {
+    opts.maxArrayLength = 100;
+    opts.maxStringLength = 10_000;
+  }
+  return formatWithOptions(opts, fmt, ...values);
 }
 
 function indent(text: string, prefix: string): string {
