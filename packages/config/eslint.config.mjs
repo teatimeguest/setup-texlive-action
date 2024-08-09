@@ -304,6 +304,7 @@ export const sources = defineConfig(
       'unicorn/no-static-only-class': 'off',
       'unicorn/no-unnecessary-polyfills': 'off',
       'unicorn/no-useless-undefined': 'off',
+      'unicorn/no-useless-spread': 'off',
       'unicorn/prefer-export-from': 'off',
       'unicorn/prefer-number-properties': [
         'error',

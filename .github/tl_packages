@@ -1,4 +1,4 @@
 # Used for E2E tests.
-l3packages
 lipsum
 shellesc
+xparse

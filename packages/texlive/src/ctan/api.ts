@@ -1,9 +1,26 @@
-import { posix as posixPath } from 'node:path';
-
 import { getJson } from '@setup-texlive-action/utils/http';
+import { parseTemplate } from 'url-template';
 
-const API_VERSION = '2.0';
-const API_BASE_URL = `https://ctan.org/json/${API_VERSION}`;
+const API_BASE_URL: Readonly<URL> = new URL(
+  parseTemplate('https://ctan.org/json/{version}/pkg/{?drop}').expand({
+    version: '2.0',
+    drop: [
+      'aliases',
+      'announce',
+      'bugs',
+      'ctan',
+      'descriptions',
+      'development',
+      'documentation',
+      'home',
+      'index',
+      'install',
+      'repository',
+      'support',
+      'topics',
+    ],
+  }),
+);
 
 export interface Pkg {
   version?: {
@@ -13,7 +30,7 @@ export interface Pkg {
 }
 
 export async function pkg(name: string): Promise<Pkg> {
-  const path = `/pkg/${name}`;
-  const endpoint = posixPath.join(API_BASE_URL, path);
-  return await getJson<Pkg>(endpoint);
+  const url = new URL(name, API_BASE_URL);
+  url.search = API_BASE_URL.search;
+  return await getJson<Pkg>(url);
 }

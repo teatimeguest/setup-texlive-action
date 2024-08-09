@@ -1,4 +1,8 @@
+import { setTimeout } from 'node:timers/promises';
+
+import { toTL } from '@setup-texlive-action/data/package-names.json';
 import * as log from '@setup-texlive-action/logger';
+import { SetMultimap } from '@teppeis/multimaps';
 
 import * as ctan from '#texlive/ctan';
 import { PackageNotFound } from '#texlive/tlmgr/errors';
@@ -15,27 +19,76 @@ export async function install(packages: Iterable<string>): Promise<void> {
     // Some packages have different names in TeX Live and CTAN, and
     // the DEPENDS.txt format requires a CTAN name, while
     // `tlmgr install` requires a TeX Live one.
-    // To install such packages with tlmgr,
-    // the action uses the CTAN API to look up their names in TeX Live.
-    log.info('Trying to resolve package names: ', error.packages.join(', '));
-    const result = await Promise.all(error.packages.map((name) => {
-      return resolvePackageName(name);
-    }));
-    const notFound = [] as string[];
-    const resolved = new Set<string>();
-    for (const [ctanName, tlName] of result) {
-      if (tlName !== undefined) {
-        resolved.add(tlName);
-      } else {
-        notFound.push(ctanName);
+    // To get the correct names for those packages,
+    // the action first looks up the pre-generated dictionary and
+    // then falls back to the CTAN API.
+    log.info(
+      'Looking up the correct package name(s):',
+      error.packages.join(', '),
+    );
+    let rest: ReadonlySet<string> | undefined = new Set(error.packages);
+    rest = await tryToInstallWith(rest, async (name) => {
+      return (toTL as Record<string, string | string[] | undefined>)[name];
+    });
+    if (rest !== undefined && rest.size > 0) {
+      log.info('Querying CTAN:', [...rest].join(', '));
+      rest = await tryToInstallWith(rest, async (name) => {
+        try {
+          const pkg = await ctan.api.pkg(name);
+          if (typeof pkg.texlive === 'string') {
+            return pkg.texlive;
+          }
+        } catch (error) { // eslint-disable-line @typescript-eslint/no-shadow
+          log.info({ error }, 'Failed to request package data');
+        } finally {
+          await setTimeout(200); // 200ms
+        }
+        return undefined;
+      });
+      if (rest !== undefined && rest.size > 0) {
+        throw new PackageNotFound([...rest], { action: 'install' });
       }
-      log.info('  %s (in CTAN) => %s (in TeX Live)', ctanName, tlName ?? '???');
     }
-    if (notFound.length > 0) {
-      throw new PackageNotFound(notFound, { action: 'install' });
-    }
-    await tryToInstall(resolved);
   }
+}
+
+async function tryToInstallWith(
+  packages: ReadonlySet<string>,
+  lookup: (name: string) => Promise<string | string[] | undefined>,
+): Promise<ReadonlySet<string> | undefined> {
+  const fromTL = new SetMultimap<string, string>();
+  const notFound: string[] = [];
+  for (const name of packages) {
+    // eslint-disable-next-line no-await-in-loop
+    let tlnames = await lookup(name.toLowerCase().split('.', 1)[0] ?? name);
+    if (tlnames === undefined) {
+      notFound.push(name);
+    } else {
+      tlnames = Array.isArray(tlnames) ? tlnames : [tlnames];
+      for (const tlname of tlnames) {
+        fromTL.put(tlname, name);
+      }
+      log.info('  %s (in CTAN) => %s (in TeX Live)', name, tlnames.join(', '));
+    }
+  }
+  if (fromTL.size === 0) {
+    return packages;
+  }
+  try {
+    await tryToInstall(new Set(fromTL.keys()));
+  } catch (error) {
+    if (!(error instanceof PackageNotFound)) {
+      throw error;
+    }
+    // This may be a failure to parse logs.
+    if (error.packages.some((tlname) => !fromTL.has(tlname))) {
+      log.debug('Unexpected result: %o', fromTL.asMap());
+      return packages;
+    }
+    notFound.push(...error.packages.flatMap((name) => [...fromTL.get(name)]));
+    return new Set(notFound);
+  }
+  return undefined;
 }
 
 async function tryToInstall(packages: ReadonlySet<string>): Promise<void> {
@@ -56,19 +109,4 @@ async function tryToInstall(packages: ReadonlySet<string>): Promise<void> {
       result.check();
     }
   }
-}
-
-async function resolvePackageName(
-  name: string,
-): Promise<[ctanName: string, tlName?: string]> {
-  try {
-    const pkg = await ctan.api.pkg(name);
-    if (pkg.texlive !== undefined) {
-      return [name, pkg.texlive];
-    }
-    log.info('Unexpected response: %j', pkg);
-  } catch (error) {
-    log.info({ error }, 'Failed to request package data');
-  }
-  return [name];
 }

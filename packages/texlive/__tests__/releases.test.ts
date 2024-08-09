@@ -16,6 +16,7 @@ beforeAll(async () => {
   doMock = () => {
     return nock('https://ctan.org')
       .get('/json/2.0/pkg/texlive')
+      .query(true)
       .reply(200, json);
   };
 });
