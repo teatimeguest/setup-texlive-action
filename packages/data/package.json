@@ -15,9 +15,6 @@
   "dependencies": {
     "minimatch": "^10.0.1"
   },
-  "peerDependencies": {
-    "semver": "*"
-  },
   "devDependencies": {
     "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",

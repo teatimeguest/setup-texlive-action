@@ -23,10 +23,9 @@ export default {
       '.js': ['.ts', '.js'],
     },
     mainFields: esbuildConfig.mainFields,
-    // @ts-expect-error
-    tsConfigPath: fileURLToPath(import.meta.resolve('../../tsconfig.json')),
+    tsConfig: fileURLToPath(import.meta.resolve('../../tsconfig.json')),
   },
-  mode: 'production',
+  mode: 'development',
   module: {
     rules: [
       {

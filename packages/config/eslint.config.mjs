@@ -140,6 +140,7 @@ export const common = defineConfig(
             '@setup-texlive-action/fixtures',
             'jest-extended',
             'mock-fs',
+            'semver',
             'ts-dedent',
             'ts-essentials',
             'vitest',

@@ -20,16 +20,13 @@
     "unctx": "^2.3.1",
     "url-template": "^3.1.1"
   },
-  "peerDependencies": {
-    "semver": "*"
-  },
   "devDependencies": {
     "@setup-texlive-action/data": "*",
     "@setup-texlive-action/logger": "*",
     "@setup-texlive-action/polyfill": "*",
     "@setup-texlive-action/utils": "*",
     "@types/deline": "^1.0.4",
-    "nock": "^13.5.4",
+    "nock": "^13.5.5",
     "texlive-json-schemas": "^0.2.0"
   }
 }
