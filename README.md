@@ -32,6 +32,11 @@ Linux, Windows, and macOS are supported.
 <details>
   <summary>Use Node.js v20 as runtime.</summary>
   <p />
+  <table>
+    <tr></tr><tr><th rowspan="2"></th></tr>
+    <tr>
+      <td>
+        <p>
 
 With Node.js v16 having reached its [end-of-life][nodejs16-eol] and
 GitHub Actions beginning the [transition to Node.js v20],
@@ -44,8 +49,10 @@ If you are using a self-hosted runner, please update it to
 [transition to Node.js v20]: https://github.blog/changelog/2023-09-22-github-actions-transitioning-from-node-16-to-node-20/
 [v2.308.0]: https://github.com/actions/runner/releases/tag/v2.308.0
 
----
-
+</p>
+      </td>
+    </tr>
+  </table>
 </details>
 <details>
   <summary>
@@ -53,6 +60,11 @@ If you are using a self-hosted runner, please update it to
     <code>cache-hit</code> is set to <code>true</code>.
   </summary>
   <p />
+  <table>
+    <tr></tr><tr><td rowspan="2"></td></tr>
+    <tr>
+      <td>
+        <p>
 
 To be more consistent with official actions such as [actions/cache],
 the `cache-hit` output is now set to `true` only if
@@ -69,8 +81,10 @@ To simply check if a cache was found, use `cache-restored` instead:
 
 [actions/cache]: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#cache-hits-and-misses
 
----
-
+</p>
+      </td>
+    </tr>
+  </table>
 </details>
 <details>
   <summary>
@@ -78,6 +92,11 @@ To simply check if a cache was found, use `cache-restored` instead:
     environment variable name, and cache key prefix.
   </summary>
   <p />
+  <table>
+    <tr></tr><tr><th rowspan="2"></th></tr>
+    <tr>
+      <td>
+        <p>
 
 Actions published on [GitHub Marketplace](https://github.com/marketplace?type=actions)
 have unique names defined in the metadata file `action.yml`.
@@ -100,12 +119,19 @@ the action name (`setup-texlive-action`) is now used for the following things:
 
 - Cache keys.
 
----
-
+</p>
+      </td>
+    </tr>
+  </table>
 </details>
 <details>
   <summary>Change default texmf user directories.</summary>
   <p />
+  <table>
+    <tr></tr><tr><th rowspan="2"></th></tr>
+    <tr>
+      <td>
+        <p>
 
 As with `install-tl`'s [portable installation], user directories are
 now set by default to be the same as the corresponding system directories.
@@ -122,14 +148,21 @@ specify the user directories explicitly using environment variables:
 
 [portable installation]: https://tug.org/texlive/doc/texlive-en/texlive-en.html#tlportable "4.2 Portable (USB) installation"
 
----
-
+</p>
+      </td>
+    </tr>
+  </table>
 </details>
 <details>
   <summary>
     Change syntax for the <code>package-file</code> input.
   </summary>
   <p />
+  <table>
+    <tr></tr><tr><th rowspan="2"></th></tr>
+    <tr>
+      <td>
+        <p>
 
 The `package-file` input now accepts
 [glob patterns][glob] to specify multiple files:
@@ -148,34 +181,39 @@ since special characters such as `*` and `?` will need to be escaped.
 
 [glob]: https://github.com/actions/toolkit/tree/main/packages/glob#patterns
 
----
-
+</p>
+      </td>
+    </tr>
+  </table>
 </details>
 
 ## Table of Contents
 
+<!-- "⎿" U+23BF DENTISTRY SYMBOL LIGHT VERTICAL AND BOTTOM RIGHT -->
+<!-- "・" U+30FB KATAKANA MIDDLE DOT -->
+
 - [Usage](#usage)\
   &#x23BF;
-  <!-- dprint-ignore-start -->
-  <sub>[Basic Usage](#basic-usage)</sub>
-  <sub>&#x2502;</sub>
-  <sub>[Caching](#caching)</sub>
-  <sub>&#x2502;</sub>
-  <sub>[Historic Versions](#historic-versions)</sub>
-  <!-- dprint-ignore-end -->
+  <sub>
+  [Basic Usage](#basic-usage)
+  &#x30FB;
+  [Caching](#caching)
+  &#x30FB;
+  [Historic Versions](#historic-versions)
+  </sub>
 - [Inputs](#inputs)
 - [Outputs](#outputs)
 - [Environment Variables](#environment-variables)
 - [Permissions](#permissions)
 - [Troubleshooting](#troubleshooting)\
   &#x23BF;
-  <!-- dprint-ignore-start -->
-  <sub>[Dependency Issues](#dependency-issues)</sub>
-  <sub>&#x2502;</sub>
-  <sub>[Local Testing](#local-testing)</sub>
-  <sub>&#x2502;</sub>
-  <sub>[Debug Logging](#debug-logging)</sub>
-  <!-- dprint-ignore-end -->
+  <sub>
+  [Dependency Issues](#dependency-issues)
+  &#x30FB;
+  [Local Testing](#local-testing)
+  &#x30FB;
+  [Debug Logging](#debug-logging)
+  </sub>
 - [Changelog](#changelog)
 - [License](#license)
 
@@ -192,7 +230,7 @@ since special characters such as `*` and `?` will need to be escaped.
 
 To make it suitable for CI use, by default, the action will only set up
 [`tlmgr`](https://www.tug.org/texlive/tlmgr.html) (TeX Live package manager) and
-_**will not install any TeX packages, even basic commands such as `pdflatex`.**_
+**will not install any TeX packages, even basic commands such as `pdflatex`.**
 If you want to install some TeX packages, you can use the `packages` input:
 
 ```yaml
@@ -203,7 +241,8 @@ If you want to install some TeX packages, you can use the `packages` input:
       hyperref
       microtype
 
-# `pdflatex` is now available along with hyperlink and microtypography support.
+  # `pdflatex` is now available
+  # along with hyperlink and microtypography support.
 ```
 
 > [!NOTE]\
@@ -215,7 +254,7 @@ If you want to install some TeX packages, you can use the `packages` input:
 >
 > See also "[Troubleshooting](#troubleshooting)."
 
-You can also specify packages by file using the [`package-file`](#inputs) input:
+You can also specify packages by file using the `package-file` input:
 
 ```yaml
 - uses: actions/checkout@v4
@@ -229,14 +268,14 @@ You can also specify packages by file using the [`package-file`](#inputs) input:
 ### Caching
 
 By default, the action will save `TEXDIR` to cache using [`@actions/cache`].
-This is done in the post-process of a successfully completed workflow, so that,
-for example, LuaTeX font cache files generated in your jobs are
-also saved and restored as part of the entry.
+This is done in the [post-process] of a successfully completed workflow,
+so that, for example, LuaTeX font cache files generated in your jobs are
+also saved and restored as part of the cache entry.
 
 If you have problems due to a corrupt cache entry,
 you can delete it from the [web interface], [GitHub CLI], or [REST API].
-For programmatically deleting cache entries created by this action
-using [actions/github-script], see [this example][e2e/index.cjs].
+For an example of programmatically deleting cache entries created by this action
+using [actions/github-script], see [this script][e2e/index.cjs].
 
 If you want to disable caching, set the `cache` input to `false`:
 
@@ -251,6 +290,7 @@ If you want to disable caching, set the `cache` input to `false`:
 [`@actions/cache`]: https://github.com/actions/toolkit/tree/main/packages/cache
 [actions/github-script]: https://github.com/actions/github-script
 [e2e/index.cjs]: https://github.com/teatimeguest/setup-texlive-action/blob/v3.3.0/packages/e2e/index.cjs
+[post-process]: https://docs.github.com/en/actions/sharing-automations/creating-actions/metadata-syntax-for-github-actions#runspost
 [web interface]: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#deleting-cache-entries
 
 ### Historic Versions
@@ -269,7 +309,7 @@ with small patches to fix minor problems.
 
 <details>
   <summary>
-    <strong>Supported TeX Live versions</strong>
+    <ins>Supported TeX Live versions</ins>
   </summary>
   <p />
   <table>
@@ -290,7 +330,7 @@ with small patches to fix minor problems.
 
 </td>
       </tr>
-      <!-- U+2011 NON-BREAKING HYPHEN -->
+      <!-- "‑" U+2011 NON-BREAKING HYPHEN -->
       <tr><td><code>ubuntu&#x2011;22.04</code>*</td></tr>
       <tr><td><code>ubuntu-20.04</code></td></tr>
       <tr>
@@ -305,7 +345,7 @@ with small patches to fix minor problems.
 
 `2013`&ndash;`2024`
 
-> Versions prior to `2013` are for 32-bit systems and
+> :memo:&ensp;Versions prior to `2013` are for 32-bit systems and
 > will not work due to _<q>Bad CPU type in executable.</q>_
 
 </td>
@@ -360,7 +400,7 @@ All inputs are optional.
 
 ## Outputs
 
-<!-- U+2011 NON-BREAKING HYPHEN -->
+<!-- "‑" U+2011 NON-BREAKING HYPHEN -->
 
 | Name                               | Type   | Description                                                                              |
 | ---------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
@@ -387,9 +427,15 @@ the [official environment variables][install-tl-env-vars] for `install-tl`
 are supported, but excluding `TEXLIVE_INSTALL_TEXMFSYS(CONFIG|VAR)`
 in order to ensure system directories are cached correctly.
 
+To specify the installation prefix, either the input `prefix` or
+the environment variable `TEXLIVE_INSTALL_PREFIX` can be used,
+with `prefix` taking precedence if both are set.
+Precedence for all other texmf-related inputs and environment variables follows
+the behavior of the latest version of `install-tl`.
+
 <details>
   <summary>
-    <strong>Default values in this action</strong>
+    <ins>Default values in this action</ins>
   </summary>
   <p />
 
@@ -410,9 +456,6 @@ in order to ensure system directories are cached correctly.
 | `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                                                                               |
 | `TEXLIVE_INSTALL_TEXMFVAR`         | Same as `TEXMFSYSVAR`                                                                                  |
 | `NOPERLDOC`                        |                                                                                                        |
-
-If both `prefix` and `TEXLIVE_INSTALL_PREFIX` are set,
-`prefix` takes precedence.
 
 </details>
 
@@ -443,9 +486,9 @@ you may often encounter compilation errors like:
 While there is no perfect solution,
 there are some tools that can help address this problem:
 
-- [TeXFindPkg] &ndash; Query or install TeX packages and their dependencies
-- [DEPP] &ndash; Dependency Printer for TeX Live
-- [texliveonfly] &ndash; On-the-fly download of missing TeX live packages
+- [TeXFindPkg] &mdash; Query or install TeX packages and their dependencies
+- [DEPP] &mdash; Dependency Printer for TeX Live
+- [texliveonfly] &mdash; On-the-fly download of missing TeX live packages
 
 [TeXFindPkg]: https://ctan.org/pkg/texfindpkg
 [DEPP]: https://gitlab.com/islandoftex/texmf/depp
@@ -461,19 +504,28 @@ This action can be run on a [`node:20`](https://hub.docker.com/_/node) image,
 so the following configuration is
 a good starting point for testing or debugging with `act`:
 
-<div align="right">
-  <a href="https://nektosact.com/usage/index.html#configuration-file">
-    <samp><code>.actrc</code></samp>
-  </a>
-</div>
+<table>
+  <tr>
+    <td align="right">
+      <a href="https://nektosact.com/usage/index.html#configuration-file">
+        <samp><code>.actrc</code></samp>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td width="1200">
 
 ```opts
 --platform ubuntu-latest=node:20
 --pull=false
 --detect-event
---env RUNNER_DEBUG=1         # Enable debug logging
-# --env NODE_DEBUG=<module>  # Might be useful in few cases
+--env RUNNER_DEBUG=1           # Enable debug logging
+# --env NODE_DEBUG=<module>    # Might be useful in few cases
 ```
+
+</td>
+  </tr>
+</table>
 
 ### Debug Logging
 
