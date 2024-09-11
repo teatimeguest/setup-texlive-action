@@ -1,5 +1,4 @@
 export * as ctan from '#texlive/ctan';
-export * as dependsTxt from '#texlive/depends-txt';
 export * from '#texlive/install-tl';
 export * from '#texlive/releases';
 export * from '#texlive/tex';

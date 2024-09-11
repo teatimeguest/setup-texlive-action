@@ -7,9 +7,9 @@ import {
   ReleaseData,
   Version,
   acquire,
-  dependsTxt,
   tlnet,
 } from '@setup-texlive-action/texlive';
+import { Event, ParseError, Parser } from 'depends-txt';
 
 import * as env from '#action/env';
 import * as inputs from '#action/inputs';
@@ -81,28 +81,52 @@ export namespace Config {
 }
 
 async function collectPackages(): Promise<Set<string>> {
-  type Dependency = dependsTxt.Dependency;
-  async function* loadDependsTxts(): AsyncGenerator<Dependency, void, void> {
-    const input = inputs.getPackages();
-    if (input !== undefined) {
-      yield* dependsTxt.parse(input);
-    }
-    const pattern = inputs.getPackageFile();
-    if (pattern !== undefined) {
-      const globber = await createGlobber(pattern, {
-        implicitDescendants: false,
-        matchDirectories: false,
-      });
-      for await (const packageFile of globber.globGenerator()) {
-        yield* dependsTxt.parse(await readFile(packageFile, 'utf8'));
+  function* parse(input: string): Generator<string, undefined, void> {
+    for (const event of new Parser(input)) {
+      switch (event.type) {
+        case Event.Name:
+          yield event.value;
+          break;
+        case Event.Error:
+          log.warn(new ParseError(undefined, event.data.message).message);
+          break;
+        default:
+          break;
       }
     }
   }
-  const packages = [];
-  for await (const { name } of loadDependsTxts()) {
-    packages.push(name);
+  const packages: string[] = [];
+  const input = inputs.getPackages();
+  if (input !== undefined) {
+    log.info('Parsing `packages` input...');
+    packages.push(...parse(input));
   }
-  return new Set(packages.sort());
+  const pattern = inputs.getPackageFile();
+  if (pattern !== undefined) {
+    log.info('Searching for `package-file`...');
+    const globber = await createGlobber(pattern, {
+      implicitDescendants: false,
+      matchDirectories: false,
+    });
+    let found = false;
+    for await (const packageFile of globber.globGenerator()) {
+      found = true;
+      log.info('Parsing `%s`...', packageFile);
+      packages.push(...parse(await readFile(packageFile, 'utf8')));
+    }
+    if (!found) {
+      log.info('No file matched the pattern `package-file`');
+    }
+  }
+  const packagesSet = new Set(packages.sort());
+  if (input !== undefined || pattern !== undefined) {
+    if (packagesSet.size > 0) {
+      log.info('%d package(s) found:', packagesSet.size, ...packagesSet);
+    } else {
+      log.info('No packages found');
+    }
+  }
+  return packagesSet;
 }
 
 async function resolveVersion(
