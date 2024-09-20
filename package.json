@@ -41,8 +41,8 @@
     "semver": "^7.6.3"
   },
   "devDependencies": {
-    "@go-task/cli": "^3.38.0",
-    "@rspack/cli": "^1.0.0",
+    "@go-task/cli": "^3.39.2",
+    "@rspack/cli": "^1.0.5",
     "@types/mock-fs": "^4.13.4",
     "@types/node": "~20.16.3",
     "@types/semver": "^7.5.8",
@@ -50,19 +50,19 @@
     "dprint": "^0.47.2",
     "editorconfig-checker": "^5.1.8",
     "esbuild": "^0.23.1",
-    "eslint": "^9.9.1",
+    "eslint": "^9.10.0",
     "git-cliff": "^2.5.0",
     "jest-extended": "^4.0.2",
     "markdown-link-check": "^3.12.2",
     "mock-fs": "^5.2.0",
-    "npm-run-all2": "^6.2.2",
+    "npm-run-all2": "^6.2.3",
     "patch-package": "^8.0.0",
-    "taze": "^0.16.7",
+    "taze": "^0.16.9",
     "ts-dedent": "^2.2.0",
     "ts-essentials": "^10.0.2",
-    "tsx": "^4.19.0",
-    "typescript": "^5.5.4",
-    "vitest": "^2.0.5"
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
   },
   "overrides": {
     "ajv-cli": {
