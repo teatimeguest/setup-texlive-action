@@ -110,7 +110,7 @@ export class PackageNotFound extends TlmgrError {
     },
     {
       versions: new Range('>=2015'),
-      re: /^tlmgr install: package (\S+) not present/gmv,
+      re: /^tlmgr(?:\.pl)? install: package (\S+) not present/gmv,
     },
   ] as const;
 
