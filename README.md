@@ -323,15 +323,15 @@ with small patches to fix minor problems.
     <tbody>
       <tr>
         <th rowspan="3">Linux</th>
-        <td><code>ubuntu-24.04</code></td>
+        <!-- "‑" U+2011 NON-BREAKING HYPHEN -->
+        <td><code>ubuntu&#x2011;24.04</code>*</td>
         <td rowspan="5">
 
 `2008`&ndash;`2024`
 
 </td>
       </tr>
-      <!-- "‑" U+2011 NON-BREAKING HYPHEN -->
-      <tr><td><code>ubuntu&#x2011;22.04</code>*</td></tr>
+      <tr><td><code>ubuntu-22.04</code></td></tr>
       <tr><td><code>ubuntu-20.04</code></td></tr>
       <tr>
         <th rowspan="2">Windows</th>
@@ -340,7 +340,7 @@ with small patches to fix minor problems.
       <tr><td><code>windows-2019</code></td></tr>
       <tr>
         <th rowspan="3">macOS</th>
-        <td><code>macos-14</code>*</td>
+        <td><code>macos-15</code></td>
         <td rowspan="3">
 
 `2013`&ndash;`2024`
@@ -350,8 +350,8 @@ with small patches to fix minor problems.
 
 </td>
       </tr>
+      <tr><td><code>macos-14</code>*</td></tr>
       <tr><td><code>macos-13</code></td></tr>
-      <tr><td><code>macos-12</code></td></tr>
     </tbody>
     <tfoot>
       <tr>
