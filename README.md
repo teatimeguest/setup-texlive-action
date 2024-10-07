@@ -210,6 +210,8 @@ since special characters such as `*` and `?` will need to be escaped.
   <sub>
   [Dependency Issues](#dependency-issues)
   &#x30FB;
+  [Repository-Related Issues](#repository-related-issues)
+  &#x30FB;
   [Local Testing](#local-testing)
   &#x30FB;
   [Debug Logging](#debug-logging)
@@ -493,6 +495,31 @@ there are some tools that can help address this problem:
 [TeXFindPkg]: https://ctan.org/pkg/texfindpkg
 [DEPP]: https://gitlab.com/islandoftex/texmf/depp
 [texliveonfly]: https://ctan.org/pkg/texliveonfly
+
+### Repository-Related Issues
+
+By default, the action automatically picks
+one of the [CTAN mirrors](https://ctan.org/mirrors) and
+sets it as the main package repository for the installation.
+Infrequently, a repository has problems with,
+for example, SSL certificates or package checksums,
+causing setup to fail with log messages like:
+
+```console
+Error: unable to verify the first certificate
+```
+
+```console
+TeXLive::TLUtils::check_file_and_remove: checksums differ for /tmp/path/to/some/package.tar.xz:
+```
+
+In most cases, these problems do not last so long and
+after a while the workflow should be stable again.
+
+Alternatively, you can pin the main repository
+using the `repository` input to avoid using problematic repositories.
+Please refer to the [official documentation][package repository URL]
+for the repository URL format.
 
 ### Local Testing
 
