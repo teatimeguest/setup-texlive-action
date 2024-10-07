@@ -70,7 +70,15 @@ runs:
   using: node20
   main: dist/index.mjs
   post: dist/index.mjs
-  post-if: success()
+  # - Use `fromJSON` since there are no array literals.
+  # - Use `toJSON` for strict value comparison.
+  post-if: >-
+    contains(
+      fromJSON('["null", "\"0\""]'),
+      toJSON(env.SETUP_TEXLIVE_ACTION_NO_CACHE_ON_FAILURE)
+    )
+    && !cancelled()
+    || success()
 branding:
   color: green
   icon: type

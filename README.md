@@ -268,8 +268,8 @@ You can also specify packages by file using the `package-file` input:
 ### Caching
 
 By default, the action will save `TEXDIR` to cache using [`@actions/cache`].
-This is done in the [post-process] of a successfully completed workflow,
-so that, for example, LuaTeX font cache files generated in your jobs are
+This is done in the [post-process] of a completed workflow job,
+so that, for example, LuaTeX font cache files generated in your job are
 also saved and restored as part of the cache entry.
 
 If you have problems due to a corrupt cache entry,
@@ -414,10 +414,11 @@ The action reads the following environment variable:
 
 <!-- U+200B ZERO WIDTH SPACE -->
 
-| Name                                                         | Type   | Description                                                                                                                                                                                                                                                                                |
-| ------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <code>SETUP_TEXLIVE_ACTION_&#x200B;FORCE_UPDATE_CACHE</code> | String | Setting this to anything other than `0`, the action will use a [unique cache key each time][update-a-cache] to keep the cache up-to-date.<p /><blockquote>:warning:&ensp;Enabling this will consume more [cache space][cache-limits].</blockquote><p /> **Default:**&ensp;<var>unset</var> |
-| [`NO_COLOR`](https://no-color.org/)                          | String | Disable color output.                                                                                                                                                                                                                                                                      |
+| Name                                                          | Type   | Description                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <code>SETUP_TEXLIVE_ACTION_&#x200B;FORCE_UPDATE_CACHE</code>  | String | Setting this to anything other than `0`, the action will use a [unique cache key each time][update-a-cache] to keep the cache up-to-date.<p /><blockquote>:warning:&ensp;Enabling this will consume more [cache space][cache-limits].</blockquote> |
+| <code>SETUP_TEXLIVE_ACTION_&#x200B;NO_CACHE_ON_FAILURE</code> | String | Setting this to anything other than `0`, no cache will be saved when a job fails.                                                                                                                                                                  |
+| [`NO_COLOR`](https://no-color.org/)                           | String | Disable color output.                                                                                                                                                                                                                              |
 
 [cache-limits]: https://github.com/actions/cache#cache-limits
 [update-a-cache]: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
