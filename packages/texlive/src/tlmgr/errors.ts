@@ -1,3 +1,5 @@
+import { platform } from 'node:os';
+
 import {
   Exception,
   type ExecOutput,
@@ -118,8 +120,13 @@ export class PackageNotFound extends TlmgrError {
     output: Readonly<ExecOutput>,
     options: Readonly<Strict<TlmgrErrorOptions, 'version'>>,
   ): void {
-    // Missing packages is not an error in versions prior to 2015.
-    if (options.version < '2015' || output.exitCode !== 0) {
+    // Missing packages is not an error in versions prior to 2015
+    // and also in Windows(?).
+    if (
+      options.version < '2015'
+      || output.exitCode !== 0
+      || platform() === 'win32'
+    ) {
       const pattern = this.PATTERNS.find(({ versions }) => {
         return Version.satisfies(options.version, versions);
       });
