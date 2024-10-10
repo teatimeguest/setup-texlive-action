@@ -5,8 +5,10 @@
   "scripts": {
     "e2e": "task"
   },
+  "type": "module",
   "main": "index.cjs",
   "devDependencies": {
-    "@actions/github": "^6.0.0"
+    "@actions/github": "^6.0.0",
+    "@kie/act-js": "^2.6.2"
   }
 }
