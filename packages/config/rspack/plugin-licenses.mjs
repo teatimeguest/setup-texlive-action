@@ -1,15 +1,21 @@
 // @ts-check
-import { createRequire } from 'node:module';
+import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 
 import { compare as semverCompare } from 'semver';
 import spdx from 'spdx-license-list';
+import LicensePlugin from 'webpack-license-plugin';
+/**
+ * @typedef
+ *   {Required<NonNullable<ConstructorParameters<typeof LicensePlugin>[0]>>}
+ *   IPluginOptions
+ * @typedef
+ *   {Parameters<IPluginOptions['additionalFiles'][string]>[0][number]}
+ *   IPackageLicenseMeta
+ */
 
-// @ts-expect-error
-import nunjucks from '@setup-texlive-action/config/nunjucks/markdown';
+import nunjucks from '../nunjucks/markdown.mjs';
 
-const require = createRequire(import.meta.url);
-/** @type {typeof import('webpack-license-plugin').default} */
-const LicensePlugin = require('webpack-license-plugin');
 const allowList = new Set([
   '0BSD',
   'Apache-2.0',
@@ -18,25 +24,17 @@ const allowList = new Set([
   'MIT',
 ]);
 const output = 'NOTICE.md';
+const templatePath = fileURLToPath(
+  import.meta.resolve(`../nunjucks/${output}.njk`),
+);
 
 /** @type {import('webpack').WebpackPluginFunction} */
 export default function pluginLicenses(compiler) {
   const plugin = new LicensePlugin({
     unacceptableLicenseTest: (id) => !allowList.has(id),
     excludedPackageTest: (name) => name.startsWith('@setup-texlive-action/'),
-    additionalFiles: {
-      [output]: (packages) => {
-        console.table(packages, ['name', 'version', 'license']);
-        const template = require.resolve(`../nunjucks/${output}.njk`);
-        const modules = Object.groupBy(packages, ({ name }) => name);
-        for (const [key, value] of Object.entries(modules)) {
-          modules[key] = value?.sort((lhs, rhs) => {
-            return -semverCompare(lhs.version, rhs.version);
-          });
-        }
-        return nunjucks.render(template, { modules, spdx });
-      },
-    },
+    additionalFiles: { [output]: render },
+    includeNoticeText: true,
   });
   plugin.apply(compiler);
 
@@ -50,4 +48,23 @@ export default function pluginLicenses(compiler) {
       }
     });
   });
+}
+
+/**
+ * @param {IPackageLicenseMeta[]} packages
+ * @returns {string}
+ */
+function render(packages) {
+  console.table(packages, ['name', 'version', 'license']);
+  for (const { name, version, noticeText } of packages) {
+    assert.equal(noticeText, undefined, `${name}@${version} has notice text`);
+  }
+  /** @type {Partial<{ [name: string]: IPackageLicenseMeta[] }>} */
+  const modules = Object.groupBy(packages, ({ name }) => name);
+  for (const [key, value] of Object.entries(modules)) {
+    modules[key] = value?.sort((lhs, rhs) => {
+      return -semverCompare(lhs.version, rhs.version);
+    });
+  }
+  return nunjucks.render(templatePath, { modules, spdx });
 }

@@ -2,10 +2,7 @@
 import { env } from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import esbuildConfig, {
-  transformConfig, // @ts-expect-error
-} from '@setup-texlive-action/config/esbuild';
-
+import esbuildConfig, { transformConfig } from '../esbuild.config.mjs';
 import pluginLicenses from './plugin-licenses.mjs';
 
 env['FORCE_COLOR'] = '1';
@@ -25,7 +22,7 @@ export default {
     mainFields: esbuildConfig.mainFields,
     tsConfig: fileURLToPath(import.meta.resolve('../../tsconfig.json')),
   },
-  mode: 'development',
+  mode: 'none',
   module: {
     rules: [
       {

@@ -1,34 +1,38 @@
 [changelog]
 header = ""
 body = """
-{%- if version %}
-  {{- version }}
-  {% for commit in commits | filter(attribute="breaking", value=true) -%}
-    {%- if loop.first %}
-      ### Breaking Changes
+{{- version | default(value="Unreleased") }}
 
-    {% endif -%}
-    - {{ commit.breaking_description }}
-  {% endfor %}
+{% if commit_id -%}
   ### Full Commit SHA
 
   ```sha1
   {{ commit_id }}
   ```
-  {% for group, commits in commits | group_by(attribute="group") -%}
-    {% for commit in commits | sort(attribute="scope") -%}
-      {%- if loop.first %}
-        ### {{ group | split(pat=" ") | slice(start=1) | join(sep=" ") }}
 
-      {% endif -%}
-      - {{ commit.id }} \
-        {% if commit.scope != "" -%}
-          **{{ commit.scope ~ ":" }}** \
-        {%- endif -%}
-        {{ commit.message }}
-    {% endfor -%}
-  {% endfor %}
-{%- endif -%}
+{% endif -%}
+{% for commit in commits | filter(attribute="breaking", value=true) -%}
+  {% if loop.first -%}
+    ### Breaking Changes
+
+  {% endif -%}
+  - {{ commit.breaking_description }}
+  {% if loop.last %}
+  {% endif -%}
+{% endfor -%}
+{% for group, commits in commits | group_by(attribute="group") -%}
+  ### {{ group | striptags }}
+
+  {% for commit in commits -%}
+    - {{ commit.id }} \
+      {% if commit.scope != "" -%}
+        **({{ commit.scope }})** \
+      {%- endif -%}
+      {{ commit.message }}
+  {% endfor -%}
+  {% if not loop.last %}
+  {% endif -%}
+{% endfor %}
 """
 footer = ""
 trim = true
@@ -39,11 +43,11 @@ commit_preprocessors = [
   { pattern = "\\s*\\[skip ci\\]", replace = "" },
 ]
 commit_parsers = [
-  { message = "^feat", group = "1 Features", default_scope = "" },
+  { message = "^feat", group = "<1>Features", default_scope = "" },
   { message = "^fix\\(unreleased\\)", skip = true },
-  { message = "^fix", group = "2 Bug Fixes", default_scope = "" },
-  { message = "^perf", group = "3 Performance Improvements", default_scope = "" },
-  { message = "^build\\(deps\\)", group = "4 Dependency Updates", scope = "" },
+  { message = "^fix", group = "<2>Bug Fixes", default_scope = "" },
+  { message = "^perf", group = "<3>Performance Improvements", default_scope = "" },
+  { message = "^build\\(deps\\)", group = "<4>Dependency Updates", scope = "" },
   { message = ".*", skip = true },
 ]
 protect_breaking_commits = true

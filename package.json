@@ -1,10 +1,11 @@
 {
   "name": "setup-texlive-action",
   "private": true,
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "A GitHub Action to set up TeX Live",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "changelog": "git cliff -c packages/config/cliff.toml -u -s all",
     "check": "tsc -p packages/tsconfig.json --noEmit",
     "dprint": "dprint -c packages/config/dprint/dprint.jsonc",
     "e2e": "npm -w packages/e2e run e2e --",
@@ -42,26 +43,26 @@
   },
   "devDependencies": {
     "@go-task/cli": "^3.39.2",
-    "@rspack/cli": "^1.0.5",
+    "@rspack/cli": "^1.0.8",
     "@types/mock-fs": "^4.13.4",
     "@types/node": "~20.16.3",
     "@types/semver": "^7.5.8",
-    "better-typescript-lib": "^2.8.0",
+    "better-typescript-lib": "^2.9.0",
     "dprint": "^0.47.2",
-    "editorconfig-checker": "^5.1.8",
+    "editorconfig-checker": "^6.0.0",
     "esbuild": "^0.23.1",
-    "eslint": "^9.10.0",
-    "git-cliff": "^2.5.0",
+    "eslint": "^9.12.0",
+    "git-cliff": "^2.6.1",
     "jest-extended": "^4.0.2",
     "markdown-link-check": "^3.12.2",
-    "mock-fs": "^5.2.0",
+    "mock-fs": "^5.3.0",
     "npm-run-all2": "^6.2.3",
     "patch-package": "^8.0.0",
     "taze": "^0.16.9",
     "ts-dedent": "^2.2.0",
     "ts-essentials": "^10.0.2",
     "tsx": "^4.19.1",
-    "typescript": "^5.6.2",
+    "typescript": "^5.6.3",
     "vitest": "^2.1.2"
   },
   "overrides": {
@@ -69,7 +70,6 @@
       "fast-json-patch": "^3.1.1"
     },
     "rimraf@<=3": "^6.0.1",
-    "semver": "$semver",
-    "ws": "^8.18.0"
+    "semver": "$semver"
   }
 }

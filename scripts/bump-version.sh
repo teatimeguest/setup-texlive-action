@@ -3,6 +3,7 @@ set -euo pipefail
 
 # shellcheck disable=SC2154
 readonly version="v${npm_package_version}"
+export RUST_LOG="${RUST_LOG:-warn}"
 
 # shellcheck disable=SC2154
 case "${npm_lifecycle_event}" in
@@ -17,10 +18,7 @@ case "${npm_lifecycle_event}" in
     git ls-files -z dist |
       xargs -0 git update-index --assume-unchanged --
 
-    git cliff \
-      --config packages/config/cliff.toml \
-      --unreleased \
-      --tag "${version}" |
+    npm run --silent changelog -- --tag "${version}" |
       git tag "${version}" --cleanup=whitespace -F -
     git tag -f "${version%%.*}" -m "${version}"
 
