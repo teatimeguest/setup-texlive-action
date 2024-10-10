@@ -1,10 +1,9 @@
+// @ts-check
 import { fileURLToPath } from 'node:url';
 
 import tsConfigPaths from 'vite-tsconfig-paths';
 
-import esbuildConfig, {
-  transformConfig,
-} from '@setup-texlive-action/config/esbuild';
+import esbuildConfig, { transformConfig } from '../esbuild.config.mjs';
 
 /** @type {import('vitest/config').UserConfig} */
 export default {

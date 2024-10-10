@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`default 1`] = `"Main Setup TeX Live"`;
+
+exports[`default 2`] = `"Main Check that a new installation has been made"`;
+
+exports[`default 3`] = `"Post Setup TeX Live"`;
+
+exports[`with- 1`] = `"Main Setup TeX Live"`;
+
+exports[`with- 2`] = `"Main Check that a new installation has been made"`;
+
+exports[`with-0 1`] = `"Main Setup TeX Live"`;
+
+exports[`with-0 2`] = `"Main Check that a new installation has been made"`;
+
+exports[`with-0 3`] = `"Post Setup TeX Live"`;
+
+exports[`with-1 1`] = `"Main Setup TeX Live"`;
+
+exports[`with-1 2`] = `"Main Check that a new installation has been made"`;
+
+exports[`with-true 1`] = `"Main Setup TeX Live"`;
+
+exports[`with-true 2`] = `"Main Check that a new installation has been made"`;

@@ -1,4 +1,6 @@
 version: '3'
+vars:
+  basedir: '{{ .TASKFILE_DIR | relPath .npm_config_local_prefix }}'
 tasks:
   act:
     internal: true
@@ -8,7 +10,7 @@ tasks:
       desc: 'Run: {{ .workflows }}'
       dir: '{{ .npm_config_local_prefix }}'
       cmd: >-
-        act
+        act-js
         --container-architecture linux/{{ default ARCH .architecture }}
         --workflows {{ .workflows }}
         {{ .CLI_ARGS }}
@@ -38,7 +40,22 @@ tasks:
     <<: *act
     deps: [clear-cache]
     vars:
-      basedir: '{{ .TASKFILE_DIR | relPath .npm_config_local_prefix }}'
       workflows: '{{ .basedir }}/workflows/{{ .TASK }}.yml'
   move-to-historic: *run-local-workflow
   tlpretest: *run-local-workflow
+
+  cache-on-failure:
+    <<: &cache-on-failure
+      vars:
+        workflow: '{{ .TASK | splitList ":" | first }}'
+        case: '{{ .TASK | trimPrefix .workflow | trimPrefix ":" }}'
+      desc: >-
+        Run: {{ .basedir }}/workflows/{{ .workflow }}.yml
+        {{ if .case }}({{ .case }}){{ end }}
+      cmd: >-
+        vitest {{- if .case }} --testNamePattern '^{{ .case }}$'{{ end }}
+  cache-on-failure:default: *cache-on-failure
+  cache-on-failure:with-0: *cache-on-failure
+  cache-on-failure:with-1: *cache-on-failure
+  cache-on-failure:with-true: *cache-on-failure
+  cache-on-failure:with-: *cache-on-failure

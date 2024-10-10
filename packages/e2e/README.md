@@ -2,22 +2,19 @@
 
 > E2E test files and helper scripts
 
+Local testing is done inside a container using [`act`].
+The `act` binary is automatically installed during `npm ci` by [`@kie/act-js`].
+
 ## Prerequisites
 
-- <!-- dprint-ignore-start -->
-  <code>[act](https://github.com/nektos/act) >=0.2.53</code>
-  <!-- dprint-ignore-end -->
-- `docker`, or
-  [compatible container engine](https://nektosact.com/usage/custom_engine.html)
+- `docker`
 
 ### Container Images
 
-- <!-- dprint-ignore-start -->
-  <code>[node](https://hub.docker.com/_/node):20.0</code>
-  <!-- dprint-ignore-end -->
-- <!-- dprint-ignore-start -->
-  <code>[ubuntu/squid](https://hub.docker.com/r/ubuntu/squid):latest</code>
-  <!-- dprint-ignore-end -->
+<!-- dprint-ignore-start -->
+- <code>[node]:20.0</code>
+- <code>[ubuntu/squid]:latest</code>
+<!-- dprint-ignore-end -->
 
 ## Testing
 
@@ -28,3 +25,8 @@ npm run e2e [target]
 ```sh
 npm run e2e -- --list  # Lists all test targets
 ```
+
+[`@kie/act-js`]: https://www.npmjs.com/package/@kie/act-js
+[`act`]: https://nektosact.com
+[node]: https://hub.docker.com/_/node
+[ubuntu/squid]: https://hub.docker.com/r/ubuntu/squid
