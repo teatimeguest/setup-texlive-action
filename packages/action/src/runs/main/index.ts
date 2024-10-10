@@ -75,9 +75,9 @@ export async function main(): Promise<void> {
     });
   }
 
-  await log.group('TeX Live version info', async () => {
+  await log.group('TeX Live environment details', async () => {
     await tlmgr.version();
-    log.info('Package version:');
+    log.info('Package versions:');
     for await (const { name, revision, cataloguedata } of tlmgr.list()) {
       log.info('  %s: %s', name, cataloguedata?.version ?? `rev${revision}`);
     }

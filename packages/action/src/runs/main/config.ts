@@ -103,7 +103,7 @@ async function collectPackages(): Promise<Set<string>> {
   }
   const pattern = inputs.getPackageFile();
   if (pattern !== undefined) {
-    log.info('Searching for `package-file`...');
+    log.info('Looking for `package-file`...');
     const globber = await createGlobber(pattern, {
       implicitDescendants: false,
       matchDirectories: false,

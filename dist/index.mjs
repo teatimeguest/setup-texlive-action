@@ -70610,8 +70610,8 @@ function match2(patterns, options) {
     }
   }
   const error = new Error("None of the patterns matched");
-  const { platform: platform7 = os3.platform(), arch: arch5 = os3.arch(), version: version3 } = options ?? {};
-  Object.assign(error, { patterns, platform: platform7, arch: arch5, version: version3 });
+  const { platform: platform8 = os3.platform(), arch: arch5 = os3.arch(), version: version3 } = options ?? {};
+  Object.assign(error, { patterns, platform: platform8, arch: arch5, version: version3 });
   throw error;
 }
 
@@ -71776,6 +71776,7 @@ var SUPPORTED_VERSIONS = {
 };
 
 // packages/texlive/src/tlmgr/errors.ts
+import { platform as platform5 } from "node:os";
 var import_semver4 = __toESM(require_semver2(), 1);
 var TlmgrError = class extends TLError {
   action;
@@ -71842,7 +71843,7 @@ var PackageNotFound = class extends TlmgrError {
     this.packages = packages;
   }
   static check(output, options) {
-    if (options.version < "2015" || output.exitCode !== 0) {
+    if (options.version < "2015" || output.exitCode !== 0 || platform5() === "win32") {
       const pattern = this.PATTERNS.find(({ versions: versions2 }) => {
         return Version.satisfies(options.version, versions2);
       });
@@ -72837,7 +72838,7 @@ var Tlmgr;
 var import_cache2 = __toESM(require_cache2(), 1);
 var import_core5 = __toESM(require_core(), 1);
 import { createHash, randomUUID as randomUUID2 } from "node:crypto";
-import { arch as arch4, platform as platform5 } from "node:os";
+import { arch as arch4, platform as platform6 } from "node:os";
 import { env as env4 } from "node:process";
 var STATE_NAME = "CACHE";
 var CacheInfo = class {
@@ -73023,7 +73024,7 @@ var CacheKeys = class {
   #digest;
   #id;
   constructor(entry) {
-    this.#distribution = `${platform5()}-${arch4()}-${entry.version}`;
+    this.#distribution = `${platform6()}-${arch4()}-${entry.version}`;
     this.#digest = digest([...entry.packages]);
     this.#id = randomString().replaceAll("-", "");
   }
@@ -73053,7 +73054,7 @@ function randomString() {
 // packages/action/src/runs/main/config.ts
 var import_glob = __toESM(require_glob2(), 1);
 import { readFile as readFile4 } from "node:fs/promises";
-import { platform as platform6 } from "node:os";
+import { platform as platform7 } from "node:os";
 
 // node_modules/unist-util-stringify-position/lib/index.js
 function stringifyPosition(value) {
@@ -73590,7 +73591,7 @@ async function collectPackages() {
   }
   const pattern = getPackageFile();
   if (pattern !== void 0) {
-    info2("Searching for `package-file`...");
+    info2("Looking for `package-file`...");
     const globber = await (0, import_glob.create)(pattern, {
       implicitDescendants: false,
       matchDirectories: false
@@ -73627,7 +73628,7 @@ async function resolveVersion(version3, repository) {
     if (version3 < "2008") {
       throw new RangeError("Versions prior to 2008 are not supported");
     }
-    if (platform6() === "darwin" && version3 < "2013") {
+    if (platform7() === "darwin" && version3 < "2013") {
       throw new RangeError(
         "Versions prior to 2013 does not work on 64-bit macOS"
       );
@@ -73844,9 +73845,9 @@ async function main() {
         await tlmgr.install(config.packages);
       });
     }
-    await import_core2.group("TeX Live version info", async () => {
+    await import_core2.group("TeX Live environment details", async () => {
       await tlmgr.version();
-      info2("Package version:");
+      info2("Package versions:");
       for await (const { name: name2, revision, cataloguedata } of tlmgr.list()) {
         info2("  %s: %s", name2, cataloguedata?.version ?? `rev${revision}`);
       }
