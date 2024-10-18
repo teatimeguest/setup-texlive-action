@@ -17,7 +17,7 @@
     "@actions/core": "^1.11.0",
     "ansi-styles": "^6.2.1",
     "clean-stack": "^5.2.0",
-    "ts-pattern": "^5.4.0"
+    "ts-pattern": "^5.5.0"
   },
   "devDependencies": {
     "@setup-texlive-action/polyfill": "*",
