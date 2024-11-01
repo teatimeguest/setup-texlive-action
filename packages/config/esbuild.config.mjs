@@ -6,6 +6,7 @@ export const transformConfig = {
   format: 'esm',
   platform: 'node',
   legalComments: 'inline',
+  keepNames: true,
 };
 
 const requireShim = String.raw`
