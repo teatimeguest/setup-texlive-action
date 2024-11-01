@@ -1606,7 +1606,7 @@ SOFTWARE.
 
 URL: <https://www.npmjs.com/package/ts-pattern>
 
-### v5.4.0
+### v5.5.0
 
 Copyright (c) Gabriel Vergnaud
 
@@ -1640,7 +1640,7 @@ SOFTWARE.
 
 URL: <https://www.npmjs.com/package/tslib>
 
-### v2.7.0
+### v2.8.0
 
 Copyright (c) Microsoft Corp.
 

@@ -262,7 +262,12 @@ export const sources = defineConfig(
           allowString: false,
         },
       ],
-      '@typescript-eslint/switch-exhaustiveness-check': 'error',
+      '@typescript-eslint/switch-exhaustiveness-check': [
+        'error',
+        {
+          considerDefaultExhaustiveForUnions: true,
+        },
+      ],
     },
   },
   {
