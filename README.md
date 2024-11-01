@@ -22,7 +22,7 @@ Linux, Windows, and macOS are supported.
 [ci]: https://github.com/teatimeguest/setup-texlive-action/actions/workflows/ci.yml
 [codecov-badge]: https://codecov.io/gh/teatimeguest/setup-texlive-action/branch/main/graph/badge.svg?token=97878QAWCF
 [codecov]: https://codecov.io/gh/teatimeguest/setup-texlive-action
-[marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?logo=github&logoColor=959da5&label=Marketplace&labelColor=2e353b
+[marketplace-badge]: https://img.shields.io/github/v/release/teatimeguest/setup-texlive-action?logo=githubactions&label=Marketplace&labelColor=2e353b&color=2088ff
 [marketplace]: https://github.com/marketplace/actions/setup-texlive-action
 
 ## Breaking Changes in V3
@@ -192,30 +192,15 @@ since special characters such as `*` and `?` will need to be escaped.
 <!-- "⎿" U+23BF DENTISTRY SYMBOL LIGHT VERTICAL AND BOTTOM RIGHT -->
 <!-- "・" U+30FB KATAKANA MIDDLE DOT -->
 
-- [Usage](#usage)\
-  &#x23BF;
-  <sub>
-  [Basic Usage](#basic-usage)
-  &#x30FB;
-  [Caching](#caching)
-  &#x30FB;
-  [Historic Versions](#historic-versions)
-  </sub>
+- [Usage](#usage)
+  - [Basic Usage](#basic-usage)
+  - [Caching](#caching)
+  - [Historic Versions](#historic-versions)
 - [Inputs](#inputs)
 - [Outputs](#outputs)
 - [Environment Variables](#environment-variables)
 - [Permissions](#permissions)
-- [Troubleshooting](#troubleshooting)\
-  &#x23BF;
-  <sub>
-  [Dependency Issues](#dependency-issues)
-  &#x30FB;
-  [Repository-Related Issues](#repository-related-issues)
-  &#x30FB;
-  [Local Testing](#local-testing)
-  &#x30FB;
-  [Debug Logging](#debug-logging)
-  </sub>
+- [Troubleshooting](#troubleshooting)
 - [Changelog](#changelog)
 - [License](#license)
 
@@ -376,17 +361,17 @@ with small patches to fix minor problems.
 
 All inputs are optional.
 
-| Name                  | Type   | Description                                                                                                                                                                                                                                |
-| --------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `cache`               | Bool   | <p>Enable caching for [`TEXDIR`].</p> **Default:**&ensp;`true`                                                                                                                                                                             |
-| `package-file`        | String | A (multi-line) [glob] string to specify files that contain package names to be installed. The file format is the same as the syntax for the `packages` input. In addition, the [`DEPENDS.txt`] format is also supported.                   |
-| `packages`            | String | TeX package names to be installed, separated by whitespaces. Schemes and collections are also acceptable. Everything from "`#`" to the end of line will be treated as a comment.                                                           |
-| `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env-vars].</p> **Default:**&ensp;<!-- dprint-ignore-start --><code>[$RUNNER_TEMP]/setup-texlive-action</code><!-- dprint-ignore-end --> |
-| `repository`          | URL    | Specify the [package repository URL] to be used as the main repository. Currently only http(s) repositories are supported.                                                                                                                 |
-| `texdir`              | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`] option and takes precedence over the `prefix` input and related environment variables.                                                     |
-| `tlcontrib`           | Bool   | <p>Set up [TLContrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                                                                                |
-| `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                                                                |
-| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2024`, and `latest`.</p> **Default:**&ensp;`latest` if the `repository` input is not set, otherwise the remote version will be assumed.                                    |
+| Name                  | Type   | Description                                                                                                                                                                                                              |
+| --------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cache`               | Bool   | <p>Enable caching for [`TEXDIR`].</p> **Default:**&ensp;`true`                                                                                                                                                           |
+| `package-file`        | String | A (multi-line) [glob] string to specify files that contain package names to be installed. The file format is the same as the syntax for the `packages` input. In addition, the [`DEPENDS.txt`] format is also supported. |
+| `packages`            | String | TeX package names to be installed, separated by whitespaces. Schemes and collections are also acceptable. Everything from "`#`" to the end of line will be treated as a comment.                                         |
+| `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env-vars].</p> **Default:**&ensp;<code>[$RUNNER_TEMP]/setup-texlive-action</code>                                     |
+| `repository`          | URL    | Specify the [package repository URL] to be used as the main repository. Currently only http(s) repositories are supported.                                                                                               |
+| `texdir`              | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`] option and takes precedence over the `prefix` input and related environment variables.                                   |
+| `tlcontrib`           | Bool   | <p>Set up [TLContrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                                                              |
+| `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                                              |
+| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2024`, and `latest`.</p> **Default:**&ensp;`latest` if the `repository` input is not set, otherwise the remote version will be assumed.                  |
 
 <!-- TODO
   - Provide a separate subsection on the input syntax and file format.
@@ -427,7 +412,7 @@ The action reads the following environment variable:
 
 In addition,
 the [official environment variables][install-tl-env-vars] for `install-tl`
-are supported, but excluding `TEXLIVE_INSTALL_TEXMFSYS(CONFIG|VAR)`
+are supported, with the exception of `TEXLIVE_INSTALL_TEXMFSYS(CONFIG|VAR)`
 in order to ensure system directories are cached correctly.
 
 To specify the installation prefix, either the input `prefix` or
@@ -442,23 +427,23 @@ the behavior of the latest version of `install-tl`.
   </summary>
   <p />
 
-| Name                               | Default                                                                                                |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `TEXLIVE_DOWNLOADER`               |                                                                                                        |
-| `TL_DOWNLOAD_PROGRAM`              |                                                                                                        |
-| `TL_DOWNLOAD_ARGS`                 |                                                                                                        |
-| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                                                                                    |
-| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                                                                        |
-| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                                                                        |
-| `TEXLIVE_INSTALL_NO_RESUME`        |                                                                                                        |
-| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                                                                                    |
-| `TEXLIVE_INSTALL_PAPER`            |                                                                                                        |
-| `TEXLIVE_INSTALL_PREFIX`           | <!-- dprint-ignore-start --><code>[$RUNNER_TEMP]/setup-texlive-action</code><!-- dprint-ignore-end --> |
-| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                                                                        |
-| `TEXLIVE_INSTALL_TEXMFHOME`        | Same as `TEXMFLOCAL`                                                                                   |
-| `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                                                                               |
-| `TEXLIVE_INSTALL_TEXMFVAR`         | Same as `TEXMFSYSVAR`                                                                                  |
-| `NOPERLDOC`                        |                                                                                                        |
+| Name                               | Default                                           |
+| ---------------------------------- | ------------------------------------------------- |
+| `TEXLIVE_DOWNLOADER`               |                                                   |
+| `TL_DOWNLOAD_PROGRAM`              |                                                   |
+| `TL_DOWNLOAD_ARGS`                 |                                                   |
+| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                               |
+| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                   |
+| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                   |
+| `TEXLIVE_INSTALL_NO_RESUME`        |                                                   |
+| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                               |
+| `TEXLIVE_INSTALL_PAPER`            |                                                   |
+| `TEXLIVE_INSTALL_PREFIX`           | <code>[$RUNNER_TEMP]/setup-texlive-action</code>> |
+| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                   |
+| `TEXLIVE_INSTALL_TEXMFHOME`        | Same as `TEXMFLOCAL`                              |
+| `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                          |
+| `TEXLIVE_INSTALL_TEXMFVAR`         | Same as `TEXMFSYSVAR`                             |
+| `NOPERLDOC`                        |                                                   |
 
 </details>
 
@@ -473,6 +458,11 @@ does not require any [permissions].
 ## Troubleshooting
 
 > If a problem persists, feel free to open an issue.
+
+- [Dependency Issues](#dependency-issues)
+- [Repository-Related Issues](#repository-related-issues)
+- [Local Testing](#local-testing)
+- [Debug Logging](#debug-logging)
 
 ### Dependency Issues
 
@@ -489,12 +479,17 @@ you may often encounter compilation errors like:
 While there is no perfect solution,
 there are some tools that can help address this problem:
 
-- [TeXFindPkg] &mdash; Query or install TeX packages and their dependencies
-- [DEPP] &mdash; Dependency Printer for TeX Live
-- [texliveonfly] &mdash; On-the-fly download of missing TeX live packages
+| Name           | Version                                     | Description                                          |
+| -------------- | ------------------------------------------- | ---------------------------------------------------- |
+| [DEPP]         | [![GitLab][DEPP-badge]][DEPP]               | Dependency Printer for TeX Live                      |
+| [TeXFindPkg]   | [![CTAN][TeXFindPkg-badge]][TeXFindPkg]     | Query or install TeX packages and their dependencies |
+| [texliveonfly] | [![CTAN][texliveonfly-badge]][texliveonfly] | On-the-fly download of missing TeX live packages     |
 
-[TeXFindPkg]: https://ctan.org/pkg/texfindpkg
+[DEPP-badge]: https://img.shields.io/gitlab/v/tag/islandoftex%2Ftexmf%2Fdepp?logo=gitlab&logoColor=fc6d26&label=GitLab&labelColor=2e353b&color=fc6d26
 [DEPP]: https://gitlab.com/islandoftex/texmf/depp
+[TeXFindPkg-badge]: https://img.shields.io/ctan/v/texfindpkg?label=CTAN&labelColor=2e353b&color=424285
+[TeXFindPkg]: https://ctan.org/pkg/texfindpkg
+[texliveonfly-badge]: https://img.shields.io/ctan/v/texliveonfly?label=CTAN&labelColor=2e353b&color=424285
 [texliveonfly]: https://ctan.org/pkg/texliveonfly
 
 ### Repository-Related Issues
@@ -502,25 +497,37 @@ there are some tools that can help address this problem:
 By default, the action automatically picks
 one of the [CTAN mirrors](https://ctan.org/mirrors) and
 sets it as the main package repository for the installation.
-Infrequently, a repository has problems with,
-for example, SSL certificates or package checksums,
+Infrequently, there may be some problem with the repository,
 causing setup to fail with log messages like:
 
-```console
-Error: unable to verify the first certificate
-```
+- ```console
+  Error: unable to verify the first certificate
+  ```
 
-```console
-TeXLive::TLUtils::check_file_and_remove: checksums differ for /tmp/path/to/some/package.tar.xz:
-```
+- ```console
+  TeXLive::TLUtils::check_file_and_remove:
+    checksums differ for /tmp/path/to/some/package.tar.xz:
+  ```
+
+- ```console
+  gpg: BAD signature from "TeX Live Distribution <tex-live@tug.org>" [ultimate]
+  ```
 
 In most cases, these problems do not last so long and
 after a while the workflow should be stable again.
 
 Alternatively, you can pin the main repository
-using the `repository` input to avoid using problematic repositories.
-Please refer to the [official documentation][package repository URL]
-for the repository URL format.
+using the `repository` input to avoid using problematic repositories:
+
+```yaml
+- uses: teatimeguest/setup-texlive-action@v3
+  with:
+    repository: https://example.com/path/to/systems/texlive/tlnet/
+```
+
+For more information on the repository URL format,
+see "[3.3.1 The `-repository` option][package repository URL]"
+in the official TeX Live documentation.
 
 ### Local Testing
 

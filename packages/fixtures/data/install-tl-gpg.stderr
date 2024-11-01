@@ -1,0 +1,14 @@
+
+./install-tl-20241013/install-tl: signature verification error of /tmp/oKzVaHXD0r/LQbYvepj8v from https://ctan.org/tex-archive/systems/texlive/tlnet/tlpkg/texlive.tlpdb: cryptographic signature verification of
+  /tmp/oKzVaHXD0r/aa5mk_BI9W
+against
+  https://ctan.org/tex-archive/systems/texlive/tlnet/tlpkg/texlive.tlpdb.sha512.asc
+failed. Output was:
+gpg: Signature made Sun Oct 13 23:48:58 2024 UTC
+gpg:                using RSA key D8F2F86057A857E42A88106A4CE1877E19438C70
+gpg: BAD signature from "TeX Live Distribution <tex-live@tug.org>" [ultimate]
+
+Please try from a different mirror and/or wait a few minutes
+and try again; usually this is because of transient updates.
+If problems persist, feel free to report to texlive@tug.org.
+
