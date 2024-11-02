@@ -389,11 +389,11 @@ All inputs are optional.
 
 <!-- "‑" U+2011 NON-BREAKING HYPHEN -->
 
-| Name                               | Type   | Description                                                                              |
-| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `cache-hit`                        | Bool   | A boolean value to indicate if an exact cache match was found. Implies `cache-restored`. |
-| <code>cache&#x2011;restored</code> | Bool   | A boolean value to indicate if a cache was found.                                        |
-| `version`                          | String | The installed TeX Live version.                                                          |
+| Name             | Type   | Description                                                                              |
+| ---------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `cache-hit`      | Bool   | A boolean value to indicate if an exact cache match was found. Implies `cache-restored`. |
+| `cache-restored` | Bool   | A boolean value to indicate if a cache was found.                                        |
+| `version`        | String | The installed TeX Live version.                                                          |
 
 ## Environment Variables
 
@@ -438,7 +438,7 @@ the behavior of the latest version of `install-tl`.
 | `TEXLIVE_INSTALL_NO_RESUME`        |                                                   |
 | `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                               |
 | `TEXLIVE_INSTALL_PAPER`            |                                                   |
-| `TEXLIVE_INSTALL_PREFIX`           | <code>[$RUNNER_TEMP]/setup-texlive-action</code>> |
+| `TEXLIVE_INSTALL_PREFIX`           | <code>[$RUNNER_TEMP]/setup-texlive-action`</code> |
 | `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                   |
 | `TEXLIVE_INSTALL_TEXMFHOME`        | Same as `TEXMFLOCAL`                              |
 | `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                          |
