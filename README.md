@@ -427,23 +427,23 @@ the behavior of the latest version of `install-tl`.
   </summary>
   <p />
 
-| Name                               | Default                                           |
-| ---------------------------------- | ------------------------------------------------- |
-| `TEXLIVE_DOWNLOADER`               |                                                   |
-| `TL_DOWNLOAD_PROGRAM`              |                                                   |
-| `TL_DOWNLOAD_ARGS`                 |                                                   |
-| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                               |
-| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                   |
-| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                   |
-| `TEXLIVE_INSTALL_NO_RESUME`        |                                                   |
-| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                               |
-| `TEXLIVE_INSTALL_PAPER`            |                                                   |
-| `TEXLIVE_INSTALL_PREFIX`           | <code>[$RUNNER_TEMP]/setup-texlive-action`</code> |
-| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                   |
-| `TEXLIVE_INSTALL_TEXMFHOME`        | Same as `TEXMFLOCAL`                              |
-| `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                          |
-| `TEXLIVE_INSTALL_TEXMFVAR`         | Same as `TEXMFSYSVAR`                             |
-| `NOPERLDOC`                        |                                                   |
+| Name                               | Default                                          |
+| ---------------------------------- | ------------------------------------------------ |
+| `TEXLIVE_DOWNLOADER`               |                                                  |
+| `TL_DOWNLOAD_PROGRAM`              |                                                  |
+| `TL_DOWNLOAD_ARGS`                 |                                                  |
+| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                              |
+| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                  |
+| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                  |
+| `TEXLIVE_INSTALL_NO_RESUME`        |                                                  |
+| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                              |
+| `TEXLIVE_INSTALL_PAPER`            |                                                  |
+| `TEXLIVE_INSTALL_PREFIX`           | <code>[$RUNNER_TEMP]/setup-texlive-action</code> |
+| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                  |
+| `TEXLIVE_INSTALL_TEXMFHOME`        | Same as `TEXMFLOCAL`                             |
+| `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                         |
+| `TEXLIVE_INSTALL_TEXMFVAR`         | Same as `TEXMFSYSVAR`                            |
+| `NOPERLDOC`                        |                                                  |
 
 </details>
 
