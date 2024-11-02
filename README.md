@@ -310,8 +310,8 @@ with small patches to fix minor problems.
     <tbody>
       <tr>
         <th rowspan="3">Linux</th>
-        <!-- "‑" U+2011 NON-BREAKING HYPHEN -->
-        <td><code>ubuntu&#x2011;24.04</code>*</td>
+        <!-- &zwj; U+200D ZERO WIDTH JOINER -->
+        <td><code>ubuntu-&zwj;24.04</code>*</td>
         <td rowspan="5">
 
 `2008`&ndash;`2024`
@@ -387,11 +387,13 @@ All inputs are optional.
 
 ## Outputs
 
-| Name             | Type   | Description                                                                              |
-| ---------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `cache-hit`      | Bool   | A boolean value to indicate if an exact cache match was found. Implies `cache-restored`. |
-| `cache-restored` | Bool   | A boolean value to indicate if a cache was found.                                        |
-| `version`        | String | The installed TeX Live version.                                                          |
+<!-- &zwj; U+200D ZERO WIDTH JOINER -->
+
+| Name                             | Type   | Description                                                                              |
+| -------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `cache-hit`                      | Bool   | A boolean value to indicate if an exact cache match was found. Implies `cache-restored`. |
+| <code>cache-&zwj;restored</code> | Bool   | A boolean value to indicate if a cache was found.                                        |
+| `version`                        | String | The installed TeX Live version.                                                          |
 
 ## Environment Variables
 
