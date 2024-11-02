@@ -310,8 +310,8 @@ with small patches to fix minor problems.
     <tbody>
       <tr>
         <th rowspan="3">Linux</th>
-        <!-- "‑" U+2011 NON-BREAKING HYPHEN -->
-        <td><code>ubuntu&#x2011;24.04</code>*</td>
+        <!-- &zwj; U+200D ZERO WIDTH JOINER -->
+        <td><code>ubuntu-&zwj;24.04</code>*</td>
         <td rowspan="5">
 
 `2008`&ndash;`2024`
@@ -387,13 +387,13 @@ All inputs are optional.
 
 ## Outputs
 
-<!-- "‑" U+2011 NON-BREAKING HYPHEN -->
+<!-- &zwj; U+200D ZERO WIDTH JOINER -->
 
-| Name                               | Type   | Description                                                                              |
-| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `cache-hit`                        | Bool   | A boolean value to indicate if an exact cache match was found. Implies `cache-restored`. |
-| <code>cache&#x2011;restored</code> | Bool   | A boolean value to indicate if a cache was found.                                        |
-| `version`                          | String | The installed TeX Live version.                                                          |
+| Name                             | Type   | Description                                                                              |
+| -------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `cache-hit`                      | Bool   | A boolean value to indicate if an exact cache match was found. Implies `cache-restored`. |
+| <code>cache-&zwj;restored</code> | Bool   | A boolean value to indicate if a cache was found.                                        |
+| `version`                        | String | The installed TeX Live version.                                                          |
 
 ## Environment Variables
 
@@ -427,23 +427,23 @@ the behavior of the latest version of `install-tl`.
   </summary>
   <p />
 
-| Name                               | Default                                           |
-| ---------------------------------- | ------------------------------------------------- |
-| `TEXLIVE_DOWNLOADER`               |                                                   |
-| `TL_DOWNLOAD_PROGRAM`              |                                                   |
-| `TL_DOWNLOAD_ARGS`                 |                                                   |
-| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                               |
-| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                   |
-| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                   |
-| `TEXLIVE_INSTALL_NO_RESUME`        |                                                   |
-| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                               |
-| `TEXLIVE_INSTALL_PAPER`            |                                                   |
-| `TEXLIVE_INSTALL_PREFIX`           | <code>[$RUNNER_TEMP]/setup-texlive-action</code>> |
-| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                   |
-| `TEXLIVE_INSTALL_TEXMFHOME`        | Same as `TEXMFLOCAL`                              |
-| `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                          |
-| `TEXLIVE_INSTALL_TEXMFVAR`         | Same as `TEXMFSYSVAR`                             |
-| `NOPERLDOC`                        |                                                   |
+| Name                               | Default                                          |
+| ---------------------------------- | ------------------------------------------------ |
+| `TEXLIVE_DOWNLOADER`               |                                                  |
+| `TL_DOWNLOAD_PROGRAM`              |                                                  |
+| `TL_DOWNLOAD_ARGS`                 |                                                  |
+| `TEXLIVE_INSTALL_ENV_NOCHECK`      | `1`                                              |
+| `TEXLIVE_INSTALL_NO_CONTEXT_CACHE` |                                                  |
+| `TEXLIVE_INSTALL_NO_DISKCHECK`     |                                                  |
+| `TEXLIVE_INSTALL_NO_RESUME`        |                                                  |
+| `TEXLIVE_INSTALL_NO_WELCOME`       | `1`                                              |
+| `TEXLIVE_INSTALL_PAPER`            |                                                  |
+| `TEXLIVE_INSTALL_PREFIX`           | <code>[$RUNNER_TEMP]/setup-texlive-action</code> |
+| `TEXLIVE_INSTALL_TEXMFLOCAL`       |                                                  |
+| `TEXLIVE_INSTALL_TEXMFHOME`        | Same as `TEXMFLOCAL`                             |
+| `TEXLIVE_INSTALL_TEXMFCONFIG`      | Same as `TEXMFSYSCONFIG`                         |
+| `TEXLIVE_INSTALL_TEXMFVAR`         | Same as `TEXMFSYSVAR`                            |
+| `NOPERLDOC`                        |                                                  |
 
 </details>
 
