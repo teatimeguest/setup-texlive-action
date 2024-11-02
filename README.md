@@ -387,8 +387,6 @@ All inputs are optional.
 
 ## Outputs
 
-<!-- "‑" U+2011 NON-BREAKING HYPHEN -->
-
 | Name             | Type   | Description                                                                              |
 | ---------------- | ------ | ---------------------------------------------------------------------------------------- |
 | `cache-hit`      | Bool   | A boolean value to indicate if an exact cache match was found. Implies `cache-restored`. |
