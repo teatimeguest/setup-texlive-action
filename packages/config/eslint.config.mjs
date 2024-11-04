@@ -307,10 +307,11 @@ export const sources = defineConfig(
       'unicorn/no-array-for-each': 'off',
       'unicorn/no-array-reduce': 'off',
       'unicorn/no-negated-condition': 'off',
+      'unicorn/no-nested-ternary': 'off',
       'unicorn/no-static-only-class': 'off',
       'unicorn/no-unnecessary-polyfills': 'off',
-      'unicorn/no-useless-undefined': 'off',
       'unicorn/no-useless-spread': 'off',
+      'unicorn/no-useless-undefined': 'off',
       'unicorn/prefer-export-from': 'off',
       'unicorn/prefer-number-properties': [
         'error',

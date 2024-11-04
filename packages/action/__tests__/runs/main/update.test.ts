@@ -8,9 +8,9 @@ import {
 } from '@setup-texlive-action/texlive';
 
 import { CacheService } from '#action/cache';
-import { updateTlmgr } from '#action/runs/main/update';
+import { update } from '#action/runs/main/update';
 
-const { update, repository: { list, remove } } = tlmgr;
+const { repository: { list, remove } } = tlmgr;
 
 const updateCache = vi.fn();
 
@@ -35,26 +35,26 @@ const failedToInitialize = new TlpdbError('', {
 });
 
 it('move to historic', async () => {
-  vi.mocked(update).mockRejectedValueOnce(versionOutdated);
+  vi.mocked(tlmgr.update).mockRejectedValueOnce(versionOutdated);
   const opts = { version: LATEST_VERSION };
-  await expect(updateTlmgr(opts)).resolves.not.toThrow();
+  await expect(update(opts)).resolves.not.toThrow();
   expect(updateCache).toHaveBeenCalled();
 });
 
 it('move to historic master', async () => {
   vi
-    .mocked(update)
+    .mocked(tlmgr.update)
     .mockRejectedValueOnce(versionOutdated)
     .mockRejectedValueOnce(failedToInitialize);
   const opts = { version: LATEST_VERSION };
-  await expect(updateTlmgr(opts)).resolves.not.toThrow();
+  await expect(update(opts)).resolves.not.toThrow();
   expect(updateCache).toHaveBeenCalled();
 });
 
 it('does not move to historic if repository set', async () => {
-  vi.mocked(update).mockRejectedValueOnce(versionOutdated);
+  vi.mocked(tlmgr.update).mockRejectedValueOnce(versionOutdated);
   const opts = { version: LATEST_VERSION, repository: new URL(MOCK_URL) };
-  await expect(updateTlmgr(opts)).rejects.toThrow(versionOutdated);
+  await expect(update(opts)).rejects.toThrow(versionOutdated);
 });
 
 it('removes tlcontrib', async () => {
@@ -63,7 +63,7 @@ it('removes tlcontrib', async () => {
     yield { tag: 'tlcontrib', path: MOCK_URL };
   });
   const opts = { version: '2023' } as const;
-  await expect(updateTlmgr(opts)).resolves.not.toThrow();
+  await expect(update(opts)).resolves.not.toThrow();
   expect(remove).toHaveBeenCalledWith('tlcontrib');
 });
 
@@ -73,6 +73,30 @@ it('removes tlpretest', async () => {
     yield { tag: 'tlcontrib', path: MOCK_URL };
   });
   const opts = { version: LATEST_VERSION };
-  await expect(updateTlmgr(opts)).resolves.not.toThrow();
+  await expect(update(opts)).resolves.not.toThrow();
   expect(remove).toHaveBeenCalledWith('main');
+});
+
+it('defaults to update only tlmgr', async () => {
+  await expect(update({ version: LATEST_VERSION }))
+    .resolves
+    .not
+    .toThrow();
+  expect(tlmgr.update).toHaveBeenCalledWith({
+    self: true,
+    all: false,
+    reinstallForciblyRemoved: false,
+  });
+});
+
+it('calls `tlmgr update --all` if `updateAllPackages: true`', async () => {
+  await expect(update({ version: LATEST_VERSION, updateAllPackages: true }))
+    .resolves
+    .not
+    .toThrow();
+  expect(tlmgr.update).toHaveBeenCalledWith({
+    self: true,
+    all: true,
+    reinstallForciblyRemoved: true,
+  });
 });

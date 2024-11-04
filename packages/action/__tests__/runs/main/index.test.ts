@@ -11,7 +11,7 @@ import { CacheService } from '#action/cache';
 import { main } from '#action/runs/main';
 import { Config } from '#action/runs/main/config';
 import { install } from '#action/runs/main/install';
-import { adjustTexmf, updateTlmgr } from '#action/runs/main/update';
+import { adjustTexmf, update } from '#action/runs/main/update';
 
 vi.unmock('#action/runs/main');
 
@@ -138,20 +138,7 @@ it.each(cacheTypes)(
   async (...kind) => {
     setCacheType(kind);
     await expect(main()).resolves.not.toThrow();
-    expect(updateTlmgr).toHaveBeenCalledOnce();
-  },
-);
-
-it.each(cacheTypes)(
-  'updates all packages if `update-all-packages` is true (%s)',
-  async (...kind) => {
-    setCacheType(kind);
-    config.updateAllPackages = true;
-    await expect(main()).resolves.not.toThrow();
-    expect(tlmgr.update).toHaveBeenCalledWith({
-      all: true,
-      reinstallForciblyRemoved: true,
-    });
+    expect(update).toHaveBeenCalledOnce();
   },
 );
 

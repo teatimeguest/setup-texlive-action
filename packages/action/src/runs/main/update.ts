@@ -16,9 +16,10 @@ import { CacheService } from '#action/cache';
 export interface UpdateOptions {
   readonly version: Version;
   readonly repository?: Readonly<URL> | undefined;
+  readonly updateAllPackages?: boolean | undefined;
 }
 
-export async function updateTlmgr(options: UpdateOptions): Promise<void> {
+export async function update(options: UpdateOptions): Promise<void> {
   try {
     await updateRepositories(options);
   } catch (error) {
@@ -28,17 +29,23 @@ export async function updateTlmgr(options: UpdateOptions): Promise<void> {
       && options.repository === undefined
     ) {
       log.info({ error });
-      await moveToHistoric(options.version);
+      await moveToHistoric(options);
     } else {
       throw error;
     }
   }
 }
 
+async function updateTlmgr(options: UpdateOptions): Promise<void> {
+  const tlmgr = Tlmgr.use();
+  const all = options.updateAllPackages ?? false;
+  await tlmgr.update({ self: true, all, reinstallForciblyRemoved: all });
+}
+
 async function updateRepositories(options: UpdateOptions): Promise<void> {
   const tlmgr = Tlmgr.use();
   const { latest, previous } = ReleaseData.use();
-  const version = options.version;
+  const { version } = options;
   let repository = options.repository;
   if (version >= previous.version) {
     for await (const { path, tag } of tlmgr.repository.list()) {
@@ -60,16 +67,17 @@ async function updateRepositories(options: UpdateOptions): Promise<void> {
   }
   if (repository !== undefined) {
     await changeRepository('main', repository);
-  } else {
-    await tlmgr.update({ self: true });
   }
+  await updateTlmgr(options);
 }
 
-async function moveToHistoric(version: Version): Promise<void> {
+async function moveToHistoric(options: UpdateOptions): Promise<void> {
   const cache = CacheService.use();
+  const { version } = options;
   const tag = 'main';
   try {
     await changeRepository(tag, tlnet.historic(version));
+    await updateTlmgr(options);
   } catch (error) {
     if (
       error instanceof TlpdbError
@@ -77,6 +85,7 @@ async function moveToHistoric(version: Version): Promise<void> {
     ) {
       log.info({ error });
       await changeRepository(tag, tlnet.historic(version, { master: true }));
+      await updateTlmgr(options);
     } else {
       throw error;
     }
@@ -97,7 +106,6 @@ async function changeRepository(
   }
   await tlmgr.repository.remove(tag);
   await tlmgr.repository.add(url, tag);
-  await tlmgr.update({ self: true });
 }
 
 export async function adjustTexmf(profile: Profile): Promise<void> {

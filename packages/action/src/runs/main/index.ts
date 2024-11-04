@@ -10,7 +10,7 @@ import {
 import { CacheService } from '#action/cache';
 import { Config } from '#action/runs/main/config';
 import { install } from '#action/runs/main/install';
-import { adjustTexmf, updateTlmgr } from '#action/runs/main/update';
+import { adjustTexmf, update } from '#action/runs/main/update';
 
 export async function main(): Promise<void> {
   const config = await Config.load();
@@ -45,19 +45,14 @@ export async function main(): Promise<void> {
 
   if (cache.restored) {
     if (profile.version >= previous.version) {
-      await log.group(
-        profile.version >= latest.version
-          ? 'Updating tlmgr'
-          : 'Checking the package repository status',
-        async () => {
-          await updateTlmgr(config);
-        },
-      );
-      if (config.updateAllPackages) {
-        await log.group(`Updating packages`, async () => {
-          await tlmgr.update({ all: true, reinstallForciblyRemoved: true });
-        });
-      }
+      const msg = config.updateAllPackages
+        ? 'Updating packages'
+        : profile.version >= latest.version
+        ? 'Updating tlmgr'
+        : 'Checking the package repository status';
+      await log.group(msg, async () => {
+        await update(config);
+      });
     }
     await adjustTexmf(profile);
   }
