@@ -1,7 +1,7 @@
 {
   "$schema": "../schemas/tlnet.schema.json",
   "ctan": {
-    "master": "http://dante.ctan.org/tex-archive/",
+    "master": "https://ctan.org/",
     "mirrors": "https://mirrors.ctan.org/",
     "default": "https://mirror.math.princeton.edu/pub/CTAN/",
     "path": "systems/texlive/tlnet/",
