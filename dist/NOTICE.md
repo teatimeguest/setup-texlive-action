@@ -86,7 +86,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 URL: <https://www.npmjs.com/package/@actions/cache>
 
-### v3.2.4
+### v3.3.0
 
 License: `MIT`
 
@@ -1640,7 +1640,7 @@ SOFTWARE.
 
 URL: <https://www.npmjs.com/package/tslib>
 
-### v2.8.0
+### v2.8.1
 
 Copyright (c) Microsoft Corp.
 

@@ -27669,168 +27669,6 @@ var require_glob = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/node_modules/uuid/lib/rng.js
-var require_rng2 = __commonJS({
-  "node_modules/@actions/cache/node_modules/uuid/lib/rng.js"(exports, module) {
-    "use strict";
-    var crypto = __require("crypto");
-    module.exports = /* @__PURE__ */ __name(function nodeRNG() {
-      return crypto.randomBytes(16);
-    }, "nodeRNG");
-  }
-});
-
-// node_modules/@actions/cache/node_modules/uuid/lib/bytesToUuid.js
-var require_bytesToUuid2 = __commonJS({
-  "node_modules/@actions/cache/node_modules/uuid/lib/bytesToUuid.js"(exports, module) {
-    "use strict";
-    var byteToHex = [];
-    for (i3 = 0; i3 < 256; ++i3) {
-      byteToHex[i3] = (i3 + 256).toString(16).substr(1);
-    }
-    var i3;
-    function bytesToUuid(buf, offset) {
-      var i4 = offset || 0;
-      var bth = byteToHex;
-      return [
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        "-",
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        "-",
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        "-",
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        "-",
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        bth[buf[i4++]],
-        bth[buf[i4++]]
-      ].join("");
-    }
-    __name(bytesToUuid, "bytesToUuid");
-    module.exports = bytesToUuid;
-  }
-});
-
-// node_modules/@actions/cache/node_modules/uuid/v1.js
-var require_v1 = __commonJS({
-  "node_modules/@actions/cache/node_modules/uuid/v1.js"(exports, module) {
-    "use strict";
-    var rng = require_rng2();
-    var bytesToUuid = require_bytesToUuid2();
-    var _nodeId;
-    var _clockseq;
-    var _lastMSecs = 0;
-    var _lastNSecs = 0;
-    function v1(options, buf, offset) {
-      var i3 = buf && offset || 0;
-      var b3 = buf || [];
-      options = options || {};
-      var node = options.node || _nodeId;
-      var clockseq = options.clockseq !== void 0 ? options.clockseq : _clockseq;
-      if (node == null || clockseq == null) {
-        var seedBytes = rng();
-        if (node == null) {
-          node = _nodeId = [
-            seedBytes[0] | 1,
-            seedBytes[1],
-            seedBytes[2],
-            seedBytes[3],
-            seedBytes[4],
-            seedBytes[5]
-          ];
-        }
-        if (clockseq == null) {
-          clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
-        }
-      }
-      var msecs = options.msecs !== void 0 ? options.msecs : (/* @__PURE__ */ new Date()).getTime();
-      var nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs + 1;
-      var dt2 = msecs - _lastMSecs + (nsecs - _lastNSecs) / 1e4;
-      if (dt2 < 0 && options.clockseq === void 0) {
-        clockseq = clockseq + 1 & 16383;
-      }
-      if ((dt2 < 0 || msecs > _lastMSecs) && options.nsecs === void 0) {
-        nsecs = 0;
-      }
-      if (nsecs >= 1e4) {
-        throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
-      }
-      _lastMSecs = msecs;
-      _lastNSecs = nsecs;
-      _clockseq = clockseq;
-      msecs += 122192928e5;
-      var tl = ((msecs & 268435455) * 1e4 + nsecs) % 4294967296;
-      b3[i3++] = tl >>> 24 & 255;
-      b3[i3++] = tl >>> 16 & 255;
-      b3[i3++] = tl >>> 8 & 255;
-      b3[i3++] = tl & 255;
-      var tmh = msecs / 4294967296 * 1e4 & 268435455;
-      b3[i3++] = tmh >>> 8 & 255;
-      b3[i3++] = tmh & 255;
-      b3[i3++] = tmh >>> 24 & 15 | 16;
-      b3[i3++] = tmh >>> 16 & 255;
-      b3[i3++] = clockseq >>> 8 | 128;
-      b3[i3++] = clockseq & 255;
-      for (var n3 = 0; n3 < 6; ++n3) {
-        b3[i3 + n3] = node[n3];
-      }
-      return buf ? buf : bytesToUuid(b3);
-    }
-    __name(v1, "v1");
-    module.exports = v1;
-  }
-});
-
-// node_modules/@actions/cache/node_modules/uuid/v4.js
-var require_v42 = __commonJS({
-  "node_modules/@actions/cache/node_modules/uuid/v4.js"(exports, module) {
-    "use strict";
-    var rng = require_rng2();
-    var bytesToUuid = require_bytesToUuid2();
-    function v4(options, buf, offset) {
-      var i3 = buf && offset || 0;
-      if (typeof options == "string") {
-        buf = options === "binary" ? new Array(16) : null;
-        options = null;
-      }
-      options = options || {};
-      var rnds = options.random || (options.rng || rng)();
-      rnds[6] = rnds[6] & 15 | 64;
-      rnds[8] = rnds[8] & 63 | 128;
-      if (buf) {
-        for (var ii2 = 0; ii2 < 16; ++ii2) {
-          buf[i3 + ii2] = rnds[ii2];
-        }
-      }
-      return buf || bytesToUuid(rnds);
-    }
-    __name(v4, "v4");
-    module.exports = v4;
-  }
-});
-
-// node_modules/@actions/cache/node_modules/uuid/index.js
-var require_uuid = __commonJS({
-  "node_modules/@actions/cache/node_modules/uuid/index.js"(exports, module) {
-    "use strict";
-    var v1 = require_v1();
-    var v4 = require_v42();
-    var uuid = v4;
-    uuid.v1 = v1;
-    uuid.v4 = v4;
-    module.exports = uuid;
-  }
-});
-
 // node_modules/@actions/cache/lib/internal/constants.js
 var require_constants7 = __commonJS({
   "node_modules/@actions/cache/lib/internal/constants.js"(exports) {
@@ -27952,11 +27790,11 @@ var require_cacheUtils = __commonJS({
     var exec2 = __importStar(require_exec());
     var glob = __importStar(require_glob());
     var io2 = __importStar(require_io());
+    var crypto = __importStar(__require("crypto"));
     var fs4 = __importStar(__require("fs"));
     var path14 = __importStar(__require("path"));
     var semver = __importStar(require_semver2());
     var util3 = __importStar(__require("util"));
-    var uuid_1 = require_uuid();
     var constants_1 = require_constants7();
     function createTempDirectory() {
       return __awaiter(this, void 0, void 0, function* () {
@@ -27975,7 +27813,7 @@ var require_cacheUtils = __commonJS({
           }
           tempDirectory = path14.join(baseLocation, "actions", "temp");
         }
-        const dest = path14.join(tempDirectory, (0, uuid_1.v4)());
+        const dest = path14.join(tempDirectory, crypto.randomUUID());
         yield io2.mkdirP(dest);
         return dest;
       });
@@ -70188,7 +70026,7 @@ import { setTimeout as setTimeout2 } from "node:timers/promises";
 
 // packages/data/data/tlnet.json
 var ctan = {
-  master: "http://dante.ctan.org/tex-archive/",
+  master: "https://ctan.org/",
   mirrors: "https://mirrors.ctan.org/",
   default: "https://mirror.math.princeton.edu/pub/CTAN/",
   path: "systems/texlive/tlnet/",
@@ -76040,23 +75878,29 @@ __name(install2, "install");
 
 // packages/action/src/runs/main/update.ts
 var import_http_client2 = __toESM(require_lib(), 1);
-async function updateTlmgr(options) {
+async function update4(options) {
   try {
     await updateRepositories(options);
   } catch (error) {
     if (error instanceof TlmgrError && error.code === TlmgrError.Code.TL_VERSION_OUTDATED && options.repository === void 0) {
       info2({ error });
-      await moveToHistoric(options.version);
+      await moveToHistoric(options);
     } else {
       throw error;
     }
   }
 }
+__name(update4, "update");
+async function updateTlmgr(options) {
+  const tlmgr = Tlmgr.use();
+  const all = options.updateAllPackages ?? false;
+  await tlmgr.update({ self: true, all, reinstallForciblyRemoved: all });
+}
 __name(updateTlmgr, "updateTlmgr");
 async function updateRepositories(options) {
   const tlmgr = Tlmgr.use();
   const { latest, previous } = ReleaseData.use();
-  const version3 = options.version;
+  const { version: version3 } = options;
   let repository = options.repository;
   if (version3 >= previous.version) {
     for await (const { path: path14, tag } of tlmgr.repository.list()) {
@@ -76070,20 +75914,22 @@ async function updateRepositories(options) {
   }
   if (repository !== void 0) {
     await changeRepository("main", repository);
-  } else {
-    await tlmgr.update({ self: true });
   }
+  await updateTlmgr(options);
 }
 __name(updateRepositories, "updateRepositories");
-async function moveToHistoric(version3) {
+async function moveToHistoric(options) {
   const cache = CacheService.use();
+  const { version: version3 } = options;
   const tag = "main";
   try {
     await changeRepository(tag, tlnet_exports.historic(version3));
+    await updateTlmgr(options);
   } catch (error) {
     if (error instanceof TlpdbError && error.code === TlpdbError.Code.FAILED_TO_INITIALIZE) {
       info2({ error });
       await changeRepository(tag, tlnet_exports.historic(version3, { master: true }));
+      await updateTlmgr(options);
     } else {
       throw error;
     }
@@ -76101,7 +75947,6 @@ async function changeRepository(tag, url2) {
   }
   await tlmgr.repository.remove(tag);
   await tlmgr.repository.add(url2, tag);
-  await tlmgr.update({ self: true });
 }
 __name(changeRepository, "changeRepository");
 async function adjustTexmf(profile) {
@@ -76156,17 +76001,10 @@ async function main() {
     await tlmgr.path.add();
     if (cache.restored) {
       if (profile.version >= previous.version) {
-        await import_core2.group(
-          profile.version >= latest.version ? "Updating tlmgr" : "Checking the package repository status",
-          async () => {
-            await updateTlmgr(config);
-          }
-        );
-        if (config.updateAllPackages) {
-          await import_core2.group(`Updating packages`, async () => {
-            await tlmgr.update({ all: true, reinstallForciblyRemoved: true });
-          });
-        }
+        const msg = config.updateAllPackages ? "Updating packages" : profile.version >= latest.version ? "Updating tlmgr" : "Checking the package repository status";
+        await import_core2.group(msg, async () => {
+          await update4(config);
+        });
       }
       await adjustTexmf(profile);
     }
