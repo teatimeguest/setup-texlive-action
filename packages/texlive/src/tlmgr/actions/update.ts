@@ -1,4 +1,4 @@
-import { ExecError, isIterable } from '@setup-texlive-action/utils';
+import { ExecError, ExecResult, isIterable } from '@setup-texlive-action/utils';
 import { P, match } from 'ts-pattern';
 
 import { TlmgrError } from '#texlive/tlmgr/errors';
@@ -11,20 +11,20 @@ export interface UpdateOptions {
   readonly reinstallForciblyRemoved?: boolean;
 }
 
-export function update(): Promise<void>;
-export function update(options: UpdateOptions): Promise<void>;
-export function update(packages: Iterable<string>): Promise<void>;
+export function update(): Promise<ExecResult>;
+export function update(options: UpdateOptions): Promise<ExecResult>;
+export function update(packages: Iterable<string>): Promise<ExecResult>;
 export function update(
   packages: Iterable<string>,
   options: UpdateOptions,
-): Promise<void>;
+): Promise<ExecResult>;
 export async function update(
   ...inputs:
     | readonly []
     | readonly [UpdateOptions]
     | readonly [Iterable<string>]
     | readonly [Iterable<string>, UpdateOptions]
-): Promise<void> {
+): Promise<ExecResult> {
   const internals = use();
   const [packages, options] = match(inputs)
     .returnType<[Iterable<string>, UpdateOptions | undefined]>()
@@ -57,7 +57,7 @@ export async function update(
   const action = 'update';
 
   try {
-    await internals.exec(action, [...args]);
+    return await internals.exec(action, [...args]);
   } catch (cause) {
     if (cause instanceof ExecError) {
       const opts = { action, cause, version: internals.version } as const;

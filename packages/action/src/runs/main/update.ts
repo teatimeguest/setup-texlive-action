@@ -37,9 +37,17 @@ export async function update(options: UpdateOptions): Promise<void> {
 }
 
 async function updateTlmgr(options: UpdateOptions): Promise<void> {
+  const cache = CacheService.use();
   const tlmgr = Tlmgr.use();
   const all = options.updateAllPackages ?? false;
-  await tlmgr.update({ self: true, all, reinstallForciblyRemoved: all });
+  const { stdout } = await tlmgr.update({
+    self: true,
+    all,
+    reinstallForciblyRemoved: all,
+  });
+  if (/\] (?:update|auto-install): /v.test(stdout)) {
+    cache.update();
+  }
 }
 
 async function updateRepositories(options: UpdateOptions): Promise<void> {
