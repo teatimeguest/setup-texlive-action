@@ -74049,7 +74049,6 @@ var toTL = {
   bahyph: "hyphen-basque",
   balance: "preprint",
   base: "plain",
-  baskervaldadf: "baskervald",
   bbs: "beebe",
   bdfchess: "chess",
   beletter: "ltxmisc",
@@ -74062,6 +74061,7 @@ var toTL = {
   bigdelim: "multirow",
   bigstrut: "multirow",
   binhex: "kastrup",
+  biolinum: "libertine",
   biolist: "shipunov",
   blkcntrl: "frankenstein",
   bm: "tools",
@@ -74148,7 +74148,6 @@ var toTL = {
   easytable: "easy",
   easyvector: "easy",
   egothic: "bookhands",
-  electrumadf: "electrum",
   eledpar: "eledmac",
   elhyphen: "hyphen-greek",
   engord: "oberdiek",
@@ -74385,7 +74384,6 @@ var toTL = {
   report: "latex",
   resizegather: "oberdiek",
   "revtex4-0": "revtex4",
-  romandeadf: "romande",
   rotchiffre: "oberdiek",
   rubikcube: "rubik",
   rubikrotation: "rubik",
@@ -74905,7 +74903,7 @@ async function update(...inputs) {
   }
   const action5 = "update";
   try {
-    await internals.exec(action5, [...args]);
+    return await internals.exec(action5, [...args]);
   } catch (cause) {
     if (cause instanceof ExecError) {
       const opts = { action: action5, cause, version: internals.version };
@@ -75892,9 +75890,17 @@ async function update4(options) {
 }
 __name(update4, "update");
 async function updateTlmgr(options) {
+  const cache = CacheService.use();
   const tlmgr = Tlmgr.use();
   const all = options.updateAllPackages ?? false;
-  await tlmgr.update({ self: true, all, reinstallForciblyRemoved: all });
+  const { stdout: stdout2 } = await tlmgr.update({
+    self: true,
+    all,
+    reinstallForciblyRemoved: all
+  });
+  if (new RegExp("\\] (?:update|auto-install): ", "v").test(stdout2)) {
+    cache.update();
+  }
 }
 __name(updateTlmgr, "updateTlmgr");
 async function updateRepositories(options) {
