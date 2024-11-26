@@ -45,7 +45,6 @@
     "bahyph": "hyphen-basque",
     "balance": "preprint",
     "base": "plain",
-    "baskervaldadf": "baskervald",
     "bbs": "beebe",
     "bdfchess": "chess",
     "beletter": "ltxmisc",
@@ -58,6 +57,7 @@
     "bigdelim": "multirow",
     "bigstrut": "multirow",
     "binhex": "kastrup",
+    "biolinum": "libertine",
     "biolist": "shipunov",
     "blkcntrl": "frankenstein",
     "bm": "tools",
@@ -144,7 +144,6 @@
     "easytable": "easy",
     "easyvector": "easy",
     "egothic": "bookhands",
-    "electrumadf": "electrum",
     "eledpar": "eledmac",
     "elhyphen": "hyphen-greek",
     "engord": "oberdiek",
@@ -381,7 +380,6 @@
     "report": "latex",
     "resizegather": "oberdiek",
     "revtex4-0": "revtex4",
-    "romandeadf": "romande",
     "rotchiffre": "oberdiek",
     "rubikcube": "rubik",
     "rubikrotation": "rubik",
@@ -536,5 +534,5 @@
     "yswab": "gothic",
     "zahl2string": "sauerj"
   },
-  "generated": "2024-08-09T09:31:02.650Z"
+  "generated": "2024-11-26T16:25:35.991Z"
 }

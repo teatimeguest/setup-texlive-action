@@ -61,7 +61,8 @@ namespace JSONL {
 
 namespace ctan {
   export const MASTER_URL = new URL(
-    'http://dante.ctan.org/tex-archive/systems/texlive/tlnet/',
+    'systems/texlive/tlnet/',
+    'https://mirror.math.princeton.edu/pub/CTAN/',
   );
 
   export namespace api {
