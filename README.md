@@ -33,7 +33,8 @@ Linux, Windows, and macOS are supported.
   <summary>Use Node.js v20 as runtime.</summary>
   <p />
   <table>
-    <tr></tr><tr><th rowspan="2"></th></tr>
+    <tr></tr>
+    <tr><th rowspan="2"></th></tr>
     <tr>
       <td>
         <p>
@@ -61,7 +62,8 @@ If you are using a self-hosted runner, please update it to
   </summary>
   <p />
   <table>
-    <tr></tr><tr><td rowspan="2"></td></tr>
+    <tr></tr>
+    <tr><td rowspan="2"></td></tr>
     <tr>
       <td>
         <p>
@@ -93,7 +95,8 @@ To simply check if a cache was found, use `cache-restored` instead:
   </summary>
   <p />
   <table>
-    <tr></tr><tr><th rowspan="2"></th></tr>
+    <tr></tr>
+    <tr><th rowspan="2"></th></tr>
     <tr>
       <td>
         <p>
@@ -128,7 +131,8 @@ the action name (`setup-texlive-action`) is now used for the following things:
   <summary>Change default texmf user directories.</summary>
   <p />
   <table>
-    <tr></tr><tr><th rowspan="2"></th></tr>
+    <tr></tr>
+    <tr><th rowspan="2"></th></tr>
     <tr>
       <td>
         <p>
@@ -159,7 +163,8 @@ specify the user directories explicitly using environment variables:
   </summary>
   <p />
   <table>
-    <tr></tr><tr><th rowspan="2"></th></tr>
+    <tr></tr>
+    <tr><th rowspan="2"></th></tr>
     <tr>
       <td>
         <p>
@@ -179,7 +184,12 @@ The `package-file` input now accepts
 This change might break existing workflow behavior
 since special characters such as `*` and `?` will need to be escaped.
 
+> #### :blue_book: Update (20XX-XX-XX)
+>
+> The `package-file` input is renamed to `packages-files` in [v3.X.X].
+
 [glob]: https://github.com/actions/toolkit/tree/main/packages/glob#patterns
+[v3.X.X]: https://github.com/teatimeguest/setup-texlive-action/releases/tag/v3.X.X
 
 </p>
       </td>
@@ -188,9 +198,6 @@ since special characters such as `*` and `?` will need to be escaped.
 </details>
 
 ## Table of Contents
-
-<!-- "⎿" U+23BF DENTISTRY SYMBOL LIGHT VERTICAL AND BOTTOM RIGHT -->
-<!-- "・" U+30FB KATAKANA MIDDLE DOT -->
 
 - [Usage](#usage)
   - [Basic Usage](#basic-usage)
@@ -241,13 +248,13 @@ If you want to install some TeX packages, you can use the `packages` input:
 >
 > See also "[Troubleshooting](#troubleshooting)."
 
-You can also specify packages by file using the `package-file` input:
+You can also specify packages by file using the `packages-files` input:
 
 ```yaml
 - uses: actions/checkout@v4
 - uses: teatimeguest/setup-texlive-action@v3
   with:
-    package-file: |
+    packages-files: |
       .github/tl_packages
       **/DEPENDS.txt
 ```
@@ -287,7 +294,7 @@ You can use an older version of TeX Live by setting the `version` input:
 ```yaml
 - uses: teatimeguest/setup-texlive-action@v3
   with:
-    version: 2008
+    texlive-version: 2008
 ```
 
 The action will install an older version
@@ -361,17 +368,17 @@ with small patches to fix minor problems.
 
 All inputs are optional.
 
-| Name                  | Type   | Description                                                                                                                                                                                                              |
-| --------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `cache`               | Bool   | <p>Enable caching for [`TEXDIR`].</p> **Default:**&ensp;`true`                                                                                                                                                           |
-| `package-file`        | String | A (multi-line) [glob] string to specify files that contain package names to be installed. The file format is the same as the syntax for the `packages` input. In addition, the [`DEPENDS.txt`] format is also supported. |
-| `packages`            | String | TeX package names to be installed, separated by whitespaces. Schemes and collections are also acceptable. Everything from "`#`" to the end of line will be treated as a comment.                                         |
-| `prefix`              | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env-vars].</p> **Default:**&ensp;<code>[$RUNNER_TEMP]/setup-texlive-action</code>                                     |
-| `repository`          | URL    | Specify the [package repository URL] to be used as the main repository. Currently only http(s) repositories are supported.                                                                                               |
-| `texdir`              | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`] option and takes precedence over the `prefix` input and related environment variables.                                   |
-| `tlcontrib`           | Bool   | <p>Set up [TLContrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                                                              |
-| `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                                              |
-| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2024`, and `latest`.</p> **Default:**&ensp;`latest` if the `repository` input is not set, otherwise the remote version will be assumed.                  |
+| Name                              | Type   | Description                                                                                                                                                                                                              |
+| --------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cache`                           | Bool   | <p>Enable caching for [`TEXDIR`].</p> **Default:**&ensp;`true`                                                                                                                                                           |
+| `packages`                        | String | TeX package names to be installed, separated by whitespaces. Schemes and collections are also acceptable. Everything from "`#`" to the end of line will be treated as a comment.                                         |
+| `packages-files`                  | String | A (multi-line) [glob] string to specify files that contain package names to be installed. The file format is the same as the syntax for the `packages` input. In addition, the [`DEPENDS.txt`] format is also supported. |
+| `prefix`                          | String | <p>TeX Live installation prefix. This has the same effect as [`TEXLIVE_INSTALL_PREFIX`][install-tl-env-vars].</p> **Default:**&ensp;<code>[$RUNNER_TEMP]/setup-texlive-action</code>                                     |
+| `repository`                      | URL    | Specify the [package repository URL] to be used as the main repository. Currently only http(s) repositories are supported.                                                                                               |
+| `texdir`                          | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`] option and takes precedence over the `prefix` input and related environment variables.                                   |
+| <code>texlive-&zwj;version</code> | String | <p>TeX Live version to install. Supported values are `2008` to `2024`, and `latest`.</p> **Default:**&ensp;`latest` if the `repository` input is not set, otherwise the remote version will be assumed.                  |
+| `tlcontrib`                       | Bool   | <p>Set up [TLContrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                                                              |
+| `update`                          | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                                              |
 
 <!-- TODO
   - Provide a separate subsection on the input syntax and file format.
@@ -389,11 +396,11 @@ All inputs are optional.
 
 <!-- &zwj; U+200D ZERO WIDTH JOINER -->
 
-| Name                             | Type   | Description                                                                              |
-| -------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `cache-hit`                      | Bool   | A boolean value to indicate if an exact cache match was found. Implies `cache-restored`. |
-| <code>cache-&zwj;restored</code> | Bool   | A boolean value to indicate if a cache was found.                                        |
-| `version`                        | String | The installed TeX Live version.                                                          |
+| Name                              | Type   | Description                                                                              |
+| --------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `cache-hit`                       | Bool   | A boolean value to indicate if an exact cache match was found. Implies `cache-restored`. |
+| `cache-restored`                  | Bool   | A boolean value to indicate if a cache was found.                                        |
+| <code>texlive-&zwj;version</code> | String | The installed TeX Live version.                                                          |
 
 ## Environment Variables
 

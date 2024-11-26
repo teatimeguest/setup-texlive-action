@@ -7,19 +7,19 @@ inputs:
       Enable caching for `TEXDIR`.
     default: 'true'
     required: false
-  package-file:
-    description: >-
-      Glob patterns for specifying files
-      containing the names of TeX packages to be installed.
-      The file format should be the same as the syntax for the `packages` input.
-      The `DEPENDS.txt` format is also supported.
-    default: ''
-    required: false
   packages:
     description: >-
       Specify the names of TeX packages to install, separated by whitespaces.
       Schemes and collections are also acceptable.
       Everything after `#` will be treated as a comment.
+    default: ''
+    required: false
+  packages-files:
+    description: >-
+      Glob patterns for specifying files
+      containing the names of TeX packages to be installed.
+      The file format should be the same as the syntax for the `packages` input.
+      The `DEPENDS.txt` format is also supported.
     default: ''
     required: false
   prefix:
@@ -40,23 +40,36 @@ inputs:
       takes precedence
       over the `prefix` input and related environment variables.
     required: false
+  texlive-version:
+    description: >-
+      TeX Live version to install.
+      Supported values are `2008` to `2024`, and `latest`.
+    required: false
   tlcontrib:
     description: >-
       Set up TLContrib as an additional TeX package repository.
       This input will be ignored for older versions.
     default: 'false'
     required: false
-  update-all-packages:
+  update:
     description: >-
-      Update all TeX packages when cache restored.
+      Update TeX packages when cache restored.
       The default is `false` and the action will update only `tlmgr`.
     default: 'false'
     required: false
-  version:
-    description: >-
-      TeX Live version to install.
-      Supported values are `2008` to `2024`, and `latest`.
+  # Old names:
+  package-file:
+    description: Alias for `packages-files`.
     required: false
+    # deprecationMessage: Use `packages-files` instead.
+  update-all-packages:
+    description: Alias for `update`.
+    required: false
+    # deprecationMessage: Use `update` instead.
+  version:
+    description: Alias for `texlive-version`.
+    required: false
+    # deprecationMessage: Use `texlive-version` instead.
 outputs:
   cache-hit:
     description: >-
@@ -64,8 +77,11 @@ outputs:
   cache-restored:
     description: >-
       A boolean value to indicate if a cache was found.
-  version:
+  texlive-version:
     description: The installed TeX Live version.
+  # Old names:
+  version:
+    description: Alias for `version`.
 runs:
   using: node20
   main: dist/index.mjs
