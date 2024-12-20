@@ -312,7 +312,7 @@ with small patches to fix minor problems.
         <th rowspan="3">Linux</th>
         <!-- &zwj; U+200D ZERO WIDTH JOINER -->
         <td><code>ubuntu-&zwj;24.04</code>*</td>
-        <td rowspan="5">
+        <td rowspan="6">
 
 `2008`&ndash;`2024`
 
@@ -321,9 +321,10 @@ with small patches to fix minor problems.
       <tr><td><code>ubuntu-22.04</code></td></tr>
       <tr><td><code>ubuntu-20.04</code></td></tr>
       <tr>
-        <th rowspan="2">Windows</th>
-        <td><code>windows-2022</code>*</td>
+        <th rowspan="3">Windows</th>
+        <td><code>windows-2025</code></td>
       </tr>
+      <tr><td><code>windows-2022</code>*</td></tr>
       <tr><td><code>windows-2019</code></td></tr>
       <tr>
         <th rowspan="3">macOS</th>
