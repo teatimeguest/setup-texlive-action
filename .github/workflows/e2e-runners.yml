@@ -9,6 +9,7 @@ jobs:
         runner:
           - ubuntu-22.04
           - ubuntu-20.04
+          - windows-2025
           - windows-2019
           - macos-15
           - macos-13
