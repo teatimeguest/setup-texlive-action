@@ -30,7 +30,7 @@
     "eslint-plugin-vitest": "^0.5.4",
     "github-slugger": "^2.0.0",
     "nunjucks": "^3.2.4",
-    "semver": "^7.7.0",
+    "semver": "^7.7.1",
     "spdx-license-list": "^6.9.0",
     "typescript-eslint": "^8.12.2",
     "vite-tsconfig-paths": "^5.0.1",
