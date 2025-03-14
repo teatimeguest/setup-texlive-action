@@ -1,15 +1,15 @@
 {
   "$schema": "../schemas/texlive-versions.schema.json",
   "previous": {
-    "version": "2023",
-    "releaseDate": "2023-03-19T21:25:25Z"
-  },
-  "current": {
     "version": "2024",
     "releaseDate": "2024-03-13T17:37:00Z"
   },
-  "next": {
+  "current": {
     "version": "2025",
-    "releaseDate": "2025-03-08"
+    "releaseDate": "2025-03-08T17:37:00Z"
+  },
+  "next": {
+    "version": "2026",
+    "releaseDate": "2026-03-07"
   }
 }

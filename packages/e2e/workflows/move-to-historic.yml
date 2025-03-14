@@ -8,7 +8,7 @@ jobs:
         id: setup
         uses: ./
         with:
-          version: 2023
+          version: 2024
       - if: fromJSON(steps.setup.outputs.cache-restored)
         run: exit 1
       - run: |
@@ -23,6 +23,6 @@ jobs:
         id: setup
         uses: ./
         with:
-          version: 2023
+          version: 2024
       - if: ${{ !fromJSON(steps.setup.outputs.cache-hit) }}
         run: exit 1

@@ -314,7 +314,7 @@ with small patches to fix minor problems.
         <td><code>ubuntu-&zwj;24.04</code>*</td>
         <td rowspan="5">
 
-`2008`&ndash;`2024`
+`2008`&ndash;`2025`
 
 </td>
       </tr>
@@ -330,7 +330,7 @@ with small patches to fix minor problems.
         <td><code>macos-15</code></td>
         <td rowspan="3">
 
-`2013`&ndash;`2024`
+`2013`&ndash;`2025`
 
 > :memo:&ensp;Versions prior to `2013` are for 32-bit systems and
 > will not work due to _<q>Bad CPU type in executable.</q>_
@@ -371,7 +371,7 @@ All inputs are optional.
 | `texdir`              | String | TeX Live system installation directory. This has the same effect as the installer's [`-texdir`] option and takes precedence over the `prefix` input and related environment variables.                                   |
 | `tlcontrib`           | Bool   | <p>Set up [TLContrib] as an additional TeX package repository. This input will be ignored for older versions.</p> **Default:**&ensp;`false`                                                                              |
 | `update-all-packages` | Bool   | <p>Update all TeX packages when cache restored. Defaults to `false`, and the action will update only `tlmgr`.</p> **Default:**&ensp;`false`                                                                              |
-| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2024`, and `latest`.</p> **Default:**&ensp;`latest` if the `repository` input is not set, otherwise the remote version will be assumed.                  |
+| `version`             | String | <p>TeX Live version to install. Supported values are `2008` to `2025`, and `latest`.</p> **Default:**&ensp;`latest` if the `repository` input is not set, otherwise the remote version will be assumed.                  |
 
 <!-- TODO
   - Provide a separate subsection on the input syntax and file format.
