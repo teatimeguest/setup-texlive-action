@@ -1,4 +1,14 @@
 name: E2E Runners
+#
+# Tests on GitHub hosted runners[^1]
+# - including runners in public preview, but
+# - excluding the `-latest` runners.
+#
+# The `-latest` runners are tested in a separate workflow file[^2].
+#
+# [^1]: <https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories>
+# [^2]: <https://github.com/teatimeguest/setup-texlive-action/blob/main/.github/workflows/e2e.yml>
+#
 on: workflow_dispatch
 permissions:
   contents: read
@@ -9,6 +19,8 @@ jobs:
         runner:
           - ubuntu-22.04
           - ubuntu-20.04
+          - ubuntu-24.04-arm
+          - ubuntu-22.04-arm
           - windows-2025
           - windows-2019
           - macos-15
