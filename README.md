@@ -189,9 +189,6 @@ since special characters such as `*` and `?` will need to be escaped.
 
 ## Table of Contents
 
-<!-- "⎿" U+23BF DENTISTRY SYMBOL LIGHT VERTICAL AND BOTTOM RIGHT -->
-<!-- "・" U+30FB KATAKANA MIDDLE DOT -->
-
 - [Usage](#usage)
   - [Basic Usage](#basic-usage)
   - [Caching](#caching)
@@ -304,25 +301,48 @@ with small patches to fix minor problems.
       <tr>
         <th>OS</th>
         <th>Runner</th>
-        <th>TeX Live Versions</th>
+        <th>Versions</th>
+        <th>Note</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <th rowspan="3">Linux</th>
+        <th rowspan="4">Linux</th>
+        <td><code>ubuntu-24.04</code>*</td>
+        <td rowspan="2">
+
+<!-- &zwj; U+200D ZERO WIDTH JOINER -->
+
+`2008`&ndash;&zwj;`2025`
+
+</td>
+        <td rowspan="2"></td>
+      </tr>
+      <tr><td><code>ubuntu-22.04</code></td></tr>
+      <tr>
         <!-- &zwj; U+200D ZERO WIDTH JOINER -->
-        <td><code>ubuntu-&zwj;24.04</code>*</td>
-        <td rowspan="6">
+        <td><code>ubuntu-&zwj;24.04-&zwj;arm</code></td>
+        <td rowspan="2">
+
+`2017`&ndash;`2025`
+
+</td>
+        <td rowspan="2">
+
+Versions prior to `2017` does not support AArch64 (ARM64).
+
+</td>
+      </tr>
+      <tr><td><code>ubuntu-22.04-arm</code></td></tr>
+      <tr>
+        <th rowspan="3">Windows</th>
+        <td><code>windows-2025</code></td>
+        <td rowspan="3">
 
 `2008`&ndash;`2025`
 
 </td>
-      </tr>
-      <tr><td><code>ubuntu-22.04</code></td></tr>
-      <tr><td><code>ubuntu-20.04</code></td></tr>
-      <tr>
-        <th rowspan="3">Windows</th>
-        <td><code>windows-2025</code></td>
+        <td rowspan="3"></td>
       </tr>
       <tr><td><code>windows-2022</code>*</td></tr>
       <tr><td><code>windows-2019</code></td></tr>
@@ -333,8 +353,11 @@ with small patches to fix minor problems.
 
 `2013`&ndash;`2025`
 
-> :memo:&ensp;Versions prior to `2013` are for 32-bit systems and
-> will not work due to _<q>Bad CPU type in executable.</q>_
+</td>
+        <td rowspan="3">
+
+Versions prior to `2013` are for 32-bit systems and
+will not work due to _<q>Bad CPU type in executable.</q>_
 
 </td>
       </tr>
@@ -343,7 +366,7 @@ with small patches to fix minor problems.
     </tbody>
     <tfoot>
       <tr>
-        <td colspan="3">
+        <td colspan="4">
           <p />
           <sub>
             The runners marked with "*" are
