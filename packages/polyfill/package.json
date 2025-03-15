@@ -7,7 +7,7 @@
   "main": "src/index.ts",
   "sideEffects": true,
   "dependencies": {
-    "@abraham/reflection": "^0.12.0",
+    "@abraham/reflection": "^0.13.0",
     "array-from-async": "^3.0.0",
     "temporal-polyfill": "^0.2.5"
   }
