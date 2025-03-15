@@ -80,7 +80,7 @@ export class Profile extends Mixin(SystemTrees, UserTrees) {
       }
     }
     if (binary !== undefined) {
-      plain[`binary_${binary}`] = '1';
+      plain[`binary_${binary as string}`] = '1';
     }
     return plain;
   }

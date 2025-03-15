@@ -43,14 +43,14 @@
   },
   "devDependencies": {
     "@go-task/cli": "^3.39.2",
-    "@rspack/cli": "^1.0.14",
+    "@rspack/cli": "~1.1.8",
     "@types/mock-fs": "^4.13.4",
     "@types/node": "~20.16.15",
     "@types/semver": "^7.5.8",
-    "better-typescript-lib": "^2.9.0",
-    "dprint": "^0.47.5",
+    "better-typescript-lib": "^2.10.1",
+    "dprint": "^0.49.0",
     "editorconfig-checker": "^6.0.0",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.1",
     "eslint": "^9.13.0",
     "git-cliff": "^2.6.1",
     "jest-extended": "^4.0.2",
@@ -60,12 +60,13 @@
     "patch-package": "^8.0.0",
     "taze": "^0.18.0",
     "ts-dedent": "^2.2.0",
-    "ts-essentials": "^10.0.2",
+    "ts-essentials": "^10.0.4",
     "tsx": "^4.19.2",
-    "typescript": "^5.6.3",
+    "typescript": "5.6.*",
     "vitest": "^2.1.2"
   },
   "overrides": {
+    "@rspack/core": "1.1.*",
     "ajv-cli": {
       "fast-json-patch": "^3.1.1"
     },

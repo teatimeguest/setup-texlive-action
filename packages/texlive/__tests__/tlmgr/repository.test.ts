@@ -78,6 +78,6 @@ describe('add', () => {
 
   it('fails since the `repository` action is not implemented', async () => {
     setVersion('2011');
-    await expect(repository.add('<repository>', '<tag>')).rejects.toThrow('');
+    await expect(repository.add('<repository>', '<tag>')).rejects.toThrow(/./v);
   });
 });

@@ -56,6 +56,7 @@ export default function pluginLicenses(compiler) {
  * @returns {string}
  */
 function render(packages) {
+  assert.notEqual(packages.length, 0, 'No packages found');
   console.table(packages, ['name', 'version', 'license']);
   for (const { name, version, noticeText } of packages) {
     assert.equal(noticeText, undefined, `${name}@${version} has notice text`);

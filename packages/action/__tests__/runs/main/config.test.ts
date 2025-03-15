@@ -248,7 +248,7 @@ describe('version', () => {
 
     it.each(['2007', '2029'] as const)('rejects %o', async (spec) => {
       vi.mocked(inputs.getVersion).mockReturnValueOnce(spec);
-      await expect(Config.load()).rejects.toThrow('');
+      await expect(Config.load()).rejects.toThrow(/./v);
     });
   });
 
