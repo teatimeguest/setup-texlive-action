@@ -59,7 +59,8 @@ export namespace TlpdbError {
 
 export namespace TlpdbError {
   /** @see `tlpkg/TeXLive/TLPDB.pm` */
-  const RE = /TLPDB::from_file could not initialize from: (.*)$/mv;
+  const RE =
+    /TLPDB::from_file could not (?:initialize|get texlive\.tlpdb) from: (.*)$/mv;
 
   export function checkRepositoryStatus(
     output: Readonly<ExecOutput>,
