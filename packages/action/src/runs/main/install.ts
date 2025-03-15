@@ -6,84 +6,110 @@ import {
   type Profile,
   ReleaseData,
   TlpdbError,
+  type Version,
   acquire,
   tlnet,
 } from '@setup-texlive-action/texlive';
 import { P, match } from 'ts-pattern';
 
-export async function install(options: {
-  readonly profile: Profile;
-  readonly repository?: Readonly<URL> | undefined;
-}): Promise<void> {
-  const { latest, previous } = ReleaseData.use();
-  const { version } = options.profile;
+export interface InstallOptions {
+  profile: Profile;
+  repository?: Readonly<URL> | undefined;
+}
 
-  let repository = options.repository;
-  const fallbackToMaster = repository === undefined
-    && version >= previous.version;
+export async function install(
+  options: Readonly<InstallOptions>,
+): Promise<void> {
+  await new Installer(options).run();
+}
 
-  let installTL: InstallTL | undefined;
+class Installer {
+  private readonly maxRetries: 0 | 1 = 0;
+  private try: number = 1;
+  private installTL: InstallTL | undefined;
 
-  for (const master of fallbackToMaster ? [false, true] : [false]) {
-    if (repository === undefined || master) {
-      if (version >= latest.version) {
-        repository = master
-          ? new URL(ctan.path, ctan.default)
-          : await tlnet.ctan({ master });
-      } else {
-        repository = master
-          // hotfix (#304)
-          ? new URL(
-            `https://mirrors.tuna.tsinghua.edu.cn/tex-historic-archive/systems/texlive/${version}/tlnet-final/`,
-          )
-          : tlnet.historic(version);
+  constructor(private options: Readonly<InstallOptions>) {
+    if (
+      this.options.repository === undefined
+      && this.version >= ReleaseData.use().previous.version
+    ) {
+      this.maxRetries = 1;
+    }
+  }
+
+  async run(): Promise<void> {
+    for (; this.try <= this.maxRetries + 1; ++this.try) {
+      try {
+        await this.tryWith(await this.pickRepository());
+      } catch (error) {
+        if (
+          this.try <= this.maxRetries
+          && match(error)
+            .with(
+              P.instanceOf(InstallTLError),
+              {
+                code: P.union(
+                  InstallTLError.Code.FAILED_TO_DOWNLOAD,
+                  InstallTLError.Code.UNEXPECTED_VERSION,
+                  InstallTLError.Code.INCOMPATIBLE_REPOSITORY_VERSION,
+                ),
+              },
+              () => true,
+            )
+            .with(
+              P.instanceOf(TlpdbError),
+              { code: TlpdbError.Code.FAILED_TO_INITIALIZE },
+              () => true,
+            )
+            .otherwise(() => false)
+        ) {
+          log.info({ error });
+          continue;
+        }
+        throw error;
       }
     }
-    try {
-      installTL ??= await acquire({ repository, version });
-    } catch (error) {
-      if (
-        !master
-        && fallbackToMaster
-        && error instanceof InstallTLError
-        && match(error.code)
-          .with(InstallTLError.Code.FAILED_TO_DOWNLOAD, () => true)
-          .with(InstallTLError.Code.UNEXPECTED_VERSION, () => true)
-          .otherwise(() => false)
-      ) {
-        log.info({ error });
-        continue;
-      }
-      throw error;
+  }
+
+  private async tryWith(repository: Readonly<URL>): Promise<void> {
+    if (this.try > 1) {
+      log.info('Switched to repository: %s', repository);
+    } else {
+      log.info('Using repository: %s', repository);
     }
-    log.info('Using repository: %s', repository);
-    try {
-      await installTL.run({
-        profile: options.profile,
-        repository: options.repository ?? repository,
-      });
-      return;
-    } catch (error) {
-      if (
-        !master
-        && fallbackToMaster
-        && match(error)
-          .with(
-            P.instanceOf(TlpdbError),
-            ({ code }) => code === TlpdbError.Code.FAILED_TO_INITIALIZE,
-          )
-          .with(
-            P.instanceOf(InstallTLError),
-            ({ code }) =>
-              code === InstallTLError.Code.INCOMPATIBLE_REPOSITORY_VERSION,
-          )
-          .otherwise(() => false)
-      ) {
-        log.info({ error });
-        continue;
-      }
-      throw error;
+    this.installTL ??= await acquire({ repository, version: this.version });
+    await this.installTL.run({
+      profile: this.options.profile,
+      repository,
+    });
+  }
+
+  private async pickRepository(): Promise<URL> {
+    if (this.try === 1 && this.options.repository !== undefined) {
+      return new URL(this.options.repository);
     }
+    if (this.version < ReleaseData.use().latest.version) {
+      switch (this.try) {
+        case 1:
+          return tlnet.historic(this.version);
+        case 2:
+          return new URL(
+            `https://mirrors.tuna.tsinghua.edu.cn/tex-historic-archive/systems/texlive/${this.version}/tlnet-final/`,
+          );
+      }
+    } else {
+      switch (this.try) {
+        case 1:
+          return new URL(ctan.path, ctan.default);
+        case 2:
+          return await tlnet.ctan({ master: false });
+      }
+    }
+    throw new Error('Failed to find a suitable repository');
+  }
+
+  get version(): Version {
+    return this.options.profile.version;
   }
 }
 
