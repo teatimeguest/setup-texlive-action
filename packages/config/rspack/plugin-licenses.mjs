@@ -17,6 +17,7 @@ import LicensePlugin from 'webpack-license-plugin';
 import nunjucks from '../nunjucks/markdown.mjs';
 
 const allowList = new Set([
+  '(Apache-2.0 AND BSD-3-Clause)',
   '0BSD',
   'Apache-2.0',
   'BSD-3-Clause',
