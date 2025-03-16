@@ -41,6 +41,7 @@ class Installer {
     for (; this.try <= this.maxRetries + 1; ++this.try) {
       try {
         await this.tryWith(await this.pickRepository());
+        return;
       } catch (error) {
         if (
           this.try <= this.maxRetries
@@ -100,9 +101,9 @@ class Installer {
     } else {
       switch (this.try) {
         case 1:
-          return new URL(ctan.path, ctan.default);
-        case 2:
           return await tlnet.ctan({ master: false });
+        case 2:
+          return new URL(ctan.path, ctan.default);
       }
     }
     throw new Error('Failed to find a suitable repository');
