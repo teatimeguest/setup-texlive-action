@@ -81590,6 +81590,7 @@ var Installer = class {
     for (; this.try <= this.maxRetries + 1; ++this.try) {
       try {
         await this.tryWith(await this.pickRepository());
+        return;
       } catch (error) {
         if (this.try <= this.maxRetries && z2(error).with(
           N2.instanceOf(InstallTLError),
@@ -81641,9 +81642,9 @@ var Installer = class {
     } else {
       switch (this.try) {
         case 1:
-          return new URL(ctan.path, ctan.default);
-        case 2:
           return await tlnet_exports.ctan({ master: false });
+        case 2:
+          return new URL(ctan.path, ctan.default);
       }
     }
     throw new Error("Failed to find a suitable repository");
