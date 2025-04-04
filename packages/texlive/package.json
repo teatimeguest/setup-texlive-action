@@ -16,7 +16,7 @@
     "class-transformer": "^0.5.1",
     "deline": "^1.0.4",
     "ts-mixer": "^6.0.4",
-    "ts-pattern": "^5.6.2",
+    "ts-pattern": "^5.7.0",
     "unctx": "^2.4.1",
     "url-template": "^3.1.1"
   },
