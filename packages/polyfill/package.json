@@ -9,6 +9,6 @@
   "dependencies": {
     "@abraham/reflection": "^0.13.0",
     "array-from-async": "^3.0.0",
-    "temporal-polyfill": "^0.2.5"
+    "temporal-polyfill": "^0.3.0"
   }
 }
