@@ -1,0 +1,64 @@
+name: E2E Runner
+on:
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: Runner name
+        required: false
+        type: string
+      texlive-version:
+        description: TeX Live version
+        type: string
+        required: true
+        default: latest
+permissions:
+  contents: read
+jobs:
+  all-nonlatest-runners:
+    #
+    # Tests on GitHub hosted runners[^1]
+    # - including runners in public preview, but
+    # - excluding the `-latest` runners.
+    #
+    # The `-latest` runners are tested in a separate workflow file[^2].
+    #
+    # [^1]: <https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories>
+    # [^2]: <https://github.com/teatimeguest/setup-texlive-action/blob/main/.github/workflows/e2e.yml>
+    #
+    if: ${{ !inputs.runner }}
+    strategy:
+      matrix:
+        runner:
+          - ubuntu-22.04
+          - ubuntu-24.04-arm
+          - ubuntu-22.04-arm
+          - windows-2025
+          - windows-2019
+          - macos-15
+          - macos-13
+      fail-fast: false
+    runs-on: ${{ matrix.runner }}
+    name: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup TeX Live
+        uses: ./
+        with:
+          cache: false
+          version: ${{ inputs.texlive-version }}
+      - run: tlmgr version
+  single-runner:
+    #
+    # Tests on the runner specified in the input.
+    #
+    if: ${{ !!inputs.runner }}
+    runs-on: ${{ inputs.runner }}
+    name: ${{ inputs.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup TeX Live
+        uses: ./
+        with:
+          cache: false
+          version: ${{ inputs.texlive-version }}
+      - run: tlmgr version

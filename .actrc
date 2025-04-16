@@ -1,4 +1,4 @@
---matrix os:ubuntu
+--matrix runner:ubuntu-latest
 --platform ubuntu-latest=node:20.0
 --detect-event
 --env RUNNER_DEBUG=1

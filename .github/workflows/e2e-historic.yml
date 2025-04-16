@@ -2,11 +2,11 @@ name: E2E Historic
 on:
   workflow_dispatch:
     inputs:
-      os:
-        description: OS (ubuntu, windows, macos)
+      runner:
+        description: Runner name
         type: string
         required: false
-      version:
+      texlive-version:
         description: TeX Live version
         type: string
         required: false
@@ -27,12 +27,15 @@ jobs:
       - name: Generate matrix
         id: generate
         run: |
-          ./scripts/generate-matrix.jq \
-            packages/data/data/texlive-versions.json |
-            tee -a "${GITHUB_OUTPUT}"
+          matrix=$(
+            ./scripts/generate-matrix.jq \
+              packages/data/data/texlive-versions.json
+          )
+          echo "matrix=${matrix}" >>"${GITHUB_OUTPUT}"
+          jq . <<<"${matrix}"
         env:
-          os: ${{ inputs.os }}
-          version: ${{ inputs.version }}
+          runner: ${{ inputs.runner }}
+          texlive-version: ${{ inputs.texlive-version }}
   historic:
     needs: generate-matrix
     strategy:
@@ -40,11 +43,11 @@ jobs:
         include: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
       fail-fast: false
       max-parallel: 4
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup TeX Live
         uses: ./
         with:
           cache: false
-          version: ${{ matrix.version }}
+          version: ${{ matrix.texlive-version }}

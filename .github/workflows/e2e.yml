@@ -13,13 +13,13 @@ jobs:
   save-cache:
     strategy:
       matrix:
-        os: [ubuntu, windows, macos]
+        runner: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.runner }}
     outputs:
-      ubuntu: ${{ steps.status.outputs.ubuntu || '' }}
-      windows: ${{ steps.status.outputs.windows || '' }}
-      macos: ${{ steps.status.outputs.macos || '' }}
+      ubuntu-latest: ${{ steps.status.outputs.ubuntu-latest || '' }}
+      windows-latest: ${{ steps.status.outputs.windows-latest || '' }}
+      macos-latest: ${{ steps.status.outputs.macos-latest || '' }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup TeX Live
@@ -33,27 +33,27 @@ jobs:
         id: status
         shell: bash
         run: |
-          echo "${MATRIX_OS}=${MATRIX_OS}" >> "${GITHUB_OUTPUT}"
+          echo "${MATRIX_RUNNER}=${MATRIX_RUNNER}" >> "${GITHUB_OUTPUT}"
         env:
-          MATRIX_OS: ${{ matrix.os }}
+          MATRIX_RUNNER: ${{ matrix.runner }}
   restore-cache:
     needs: save-cache
     if: |
       !cancelled() && (
-        needs.save-cache.outputs.ubuntu ||
-        needs.save-cache.outputs.windows ||
-        needs.save-cache.outputs.macos
+        needs.save-cache.outputs.ubuntu-latest ||
+        needs.save-cache.outputs.windows-latest ||
+        needs.save-cache.outputs.macos-latest
       )
     strategy:
       matrix:
-        os:
-          - ${{ needs.save-cache.outputs.ubuntu }}
-          - ${{ needs.save-cache.outputs.windows }}
-          - ${{ needs.save-cache.outputs.macos }}
+        runner:
+          - ${{ needs.save-cache.outputs.ubuntu-latest }}
+          - ${{ needs.save-cache.outputs.windows-latest }}
+          - ${{ needs.save-cache.outputs.macos-latest }}
         exclude:
-          - os: ''
+          - runner: ''
       fail-fast: false
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup TeX Live
@@ -90,9 +90,9 @@ jobs:
   compile:
     strategy:
       matrix:
-        os: [ubuntu, windows, macos]
+        runner: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup TeX Live
