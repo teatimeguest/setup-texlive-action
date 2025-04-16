@@ -345,7 +345,7 @@ Versions prior to `2017` does not support AArch64 (ARM64).
         <td rowspan="3"></td>
       </tr>
       <tr><td><code>windows-2022</code>*</td></tr>
-      <tr><td><code>windows-2019</code></td></tr>
+      <tr><td><code>windows-11-arm</code></td></tr>
       <tr>
         <th rowspan="3">macOS</th>
         <td><code>macos-15</code></td>
