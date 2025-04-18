@@ -1,10 +1,9 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { env } from 'node:process';
 
 import { setOutput } from '@actions/core';
 import { tlmgr } from '@setup-texlive-action/texlive';
-import { toHaveBeenCalledAfter, toHaveBeenCalledBefore } from 'jest-extended';
 import type { Writable } from 'ts-essentials';
 
 import { CacheService } from '#action/cache';
@@ -20,10 +19,6 @@ vi.mocked(Config.load).mockResolvedValue(config);
 
 vi.mock('#action/runs/main/install');
 vi.mock('#action/runs/main/update');
-
-beforeAll(() => {
-  expect.extend({ toHaveBeenCalledAfter, toHaveBeenCalledBefore });
-});
 
 beforeEach(() => {
   config.cache = true;
@@ -109,7 +104,7 @@ it.each([LATEST_VERSION, '2009', '2014'] as const)(
 
 it('adds TeX Live to path after installation', async () => {
   await expect(main()).resolves.not.toThrow();
-  expect(tlmgr.path.add).toHaveBeenCalledAfter(install);
+  expect(tlmgr.path.add).toHaveBeenCalledAfter(vi.mocked(install));
 });
 
 it.each(cacheTypes)(
@@ -118,7 +113,7 @@ it.each(cacheTypes)(
     setCacheType(kind);
     await expect(main()).resolves.not.toThrow();
     expect(tlmgr.path.add).not.toHaveBeenCalledBefore(
-      MockCacheService.prototype.restore,
+      vi.mocked(MockCacheService.prototype.restore),
     );
     expect(tlmgr.path.add).toHaveBeenCalled();
   },
@@ -152,7 +147,7 @@ it.each(cacheTypes)(
   async (...kind) => {
     setCacheType(kind);
     await expect(main()).resolves.not.toThrow();
-    expect(adjustTexmf).not.toHaveBeenCalledBefore(tlmgr.path.add);
+    expect(adjustTexmf).not.toHaveBeenCalledBefore(vi.mocked(tlmgr.path.add));
   },
 );
 
@@ -174,12 +169,16 @@ it('does not setup tlcontrib by default', async () => {
 it('sets up tlcontrib if input tlcontrib is true', async () => {
   config.tlcontrib = true;
   await expect(main()).resolves.not.toThrow();
-  expect(tlmgr.repository.add).not.toHaveBeenCalledBefore(tlmgr.path.add);
+  expect(tlmgr.repository.add).not.toHaveBeenCalledBefore(
+    vi.mocked(tlmgr.path.add),
+  );
   expect(tlmgr.repository.add).toHaveBeenCalledWith(
     expect.anything(),
     'tlcontrib',
   );
-  expect(tlmgr.pinning.add).not.toHaveBeenCalledBefore(tlmgr.repository.add);
+  expect(tlmgr.pinning.add).not.toHaveBeenCalledBefore(
+    vi.mocked(tlmgr.repository.add),
+  );
   expect(tlmgr.pinning.add).toHaveBeenCalledWith('tlcontrib', '*');
 });
 

@@ -1,5 +1,4 @@
-// @ts-check
-import assert from 'node:assert/strict';
+import * as assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 
 import { compare as semverCompare } from 'semver';
@@ -62,6 +61,7 @@ function render(packages) {
     assert.equal(noticeText, undefined, `${name}@${version} has notice text`);
   }
   /** @type {Partial<{ [name: string]: IPackageLicenseMeta[] }>} */
+  // @ts-expect-error
   const modules = Object.groupBy(packages, ({ name }) => name);
   for (const [key, value] of Object.entries(modules)) {
     modules[key] = value?.sort((lhs, rhs) => {

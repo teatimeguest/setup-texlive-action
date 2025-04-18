@@ -5,7 +5,6 @@
   ],
   "compilerOptions": {
     "noUnusedParameters": false,
-    "checkJs": false,
     "resolveJsonModule": true,
     "importHelpers": true,
     "newLine": "lf",
@@ -16,6 +15,7 @@
     "esModuleInterop": false,
     "verbatimModuleSyntax": true,
     "experimentalDecorators": true,
+    "module": "node18",
     "target": "esnext",
   },
 }

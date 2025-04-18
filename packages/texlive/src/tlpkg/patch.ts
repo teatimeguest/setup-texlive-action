@@ -3,7 +3,9 @@ import { EOL } from 'node:os';
 import * as path from 'node:path';
 
 import { satisfies } from '@setup-texlive-action/data';
-import { patches } from '@setup-texlive-action/data/tlpkg-patches.json';
+import patches from '@setup-texlive-action/data/tlpkg-patches.json' with {
+  type: 'json',
+};
 import * as log from '@setup-texlive-action/logger';
 import { exec } from '@setup-texlive-action/utils/exec';
 import type { DeepReadonly } from 'ts-essentials';
@@ -14,7 +16,7 @@ export async function patch(options: {
   readonly directory: string;
   readonly version: Version;
 }): Promise<void> {
-  const ps = patches.filter((p) => satisfies(p, options));
+  const ps = patches.patches.filter((p) => satisfies(p, options));
   if (ps.length > 0) {
     log.info('Applying patches');
     const lines = await Promise.all(ps.map((p) => apply(p, options.directory)));
@@ -22,7 +24,7 @@ export async function patch(options: {
   }
 }
 
-type Patch = DeepReadonly<typeof patches[number]>;
+type Patch = DeepReadonly<typeof patches.patches[number]>;
 
 async function apply(
   { description, file, changes }: Patch,

@@ -7,6 +7,7 @@ import ansi, {
   type ModifierName,
 } from 'ansi-styles';
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 export function hasColors(): boolean {
   if (env.GITHUB_ACTIONS === 'true' && !('ACT' in env)) {
     return !isDebug() && (env.NO_COLOR ?? '') === '';

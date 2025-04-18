@@ -1,11 +1,6 @@
-declare module 'array-from-async' {
-  export default function fromAsync<T>(
-    items: Iterable<T> | AsyncIterable<T> | ArrayLike<T>,
-  ): PromiseLike<T[]>;
+/// <reference lib="esnext.array" />
 
-  export default function fromAsync<T, U, This = undefined>(
-    items: Iterable<T> | AsyncIterable<T> | ArrayLike<T>,
-    mapfn: (this: This, item: T, index: number) => U,
-    thisArg?: This,
-  ): PromiseLike<U[]>;
+declare module 'array-from-async' {
+  declare const fromAsync: typeof Array.fromAsync;
+  export default fromAsync;
 }

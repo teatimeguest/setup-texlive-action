@@ -1,4 +1,0 @@
-[
-  "*/vitest.config.{js,mjs,ts}",
-  "!e2e/vitest.config.mjs"
-]

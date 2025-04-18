@@ -1,6 +1,8 @@
 import { setTimeout } from 'node:timers/promises';
 
-import { toTL } from '@setup-texlive-action/data/package-names.json';
+import names from '@setup-texlive-action/data/package-names.json' with {
+  type: 'json',
+};
 import * as log from '@setup-texlive-action/logger';
 import { SetMultimap } from '@teppeis/multimaps';
 
@@ -28,7 +30,8 @@ export async function install(packages: Iterable<string>): Promise<void> {
     );
     let rest: ReadonlySet<string> | undefined = new Set(error.packages);
     rest = await tryToInstallWith(rest, async (name) => {
-      return (toTL as Record<string, string | string[] | undefined>)[name];
+      const toTL = names.toTL as Record<string, string | string[] | undefined>;
+      return toTL[name];
     });
     if (rest !== undefined && rest.size > 0) {
       log.info('Querying CTAN:', [...rest].join(', '));

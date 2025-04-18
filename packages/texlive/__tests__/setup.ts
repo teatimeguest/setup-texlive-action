@@ -1,6 +1,8 @@
 import { vi } from 'vitest';
 
-import { current } from '@setup-texlive-action/data/texlive-versions.json';
+import versions from '@setup-texlive-action/data/texlive-versions.json' with {
+  type: 'json',
+};
 import '@setup-texlive-action/polyfill';
 
 import type { Version } from '#texlive/version';
@@ -34,7 +36,7 @@ vi.mock('#texlive/tlnet');
 vi.mock('#texlive/tlpkg/patch');
 vi.mock('#texlive/tlpkg/util');
 
-vi.stubGlobal('LATEST_VERSION', current.version as Version);
+vi.stubGlobal('LATEST_VERSION', versions.current.version as Version);
 // https://www.rfc-editor.org/rfc/rfc2606.html
 vi.stubGlobal('MOCK_URL', 'https://example.com/');
 

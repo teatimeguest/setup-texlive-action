@@ -1,4 +1,3 @@
-// @ts-check
 import { extname } from 'node:path';
 
 /**

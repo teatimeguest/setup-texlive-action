@@ -62,3 +62,5 @@ test.for(['1', 'true', ''])('with-%s', async (value) => {
   expect(steps[3]?.status).toBe(1);
   expect(steps[4]).toBeUndefined();
 });
+
+/* eslint n/no-unsupported-features/node-builtins: off */

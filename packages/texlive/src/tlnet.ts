@@ -1,7 +1,7 @@
 import type { IncomingHttpHeaders } from 'node:http';
 
 import { match } from '@setup-texlive-action/data';
-import tlnet from '@setup-texlive-action/data/tlnet.json';
+import tlnet from '@setup-texlive-action/data/tlnet.json' with { type: 'json' };
 import { getHeaders } from '@setup-texlive-action/utils/http';
 import { parseTemplate } from 'url-template';
 

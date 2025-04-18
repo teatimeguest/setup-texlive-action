@@ -17,7 +17,6 @@ import {
   acquire,
   tlnet,
 } from '@setup-texlive-action/texlive';
-import { toHaveBeenCalledAfter, toHaveBeenCalledBefore } from 'jest-extended';
 import mockFs from 'mock-fs';
 import { dedent } from 'ts-dedent';
 
@@ -28,10 +27,6 @@ import { Config } from '#action/runs/main/config';
 vi.unmock('node:fs/promises');
 vi.unmock('@actions/glob');
 vi.unmock('#action/runs/main/config');
-
-beforeAll(() => {
-  expect.extend({ toHaveBeenCalledAfter, toHaveBeenCalledBefore });
-});
 
 it('calls `env.init`', async () => {
   await expect(Config.load()).resolves.not.toThrow();
@@ -180,7 +175,7 @@ describe('repository', () => {
     vi.mocked(inputs.getRepository).mockReturnValueOnce(new URL(repository));
     vi.mocked(acquire).mockResolvedValueOnce({ version } as InstallTL);
     await expect(Config.load()).resolves.toHaveProperty('version', version);
-    expect(tlnet.checkVersionFile).toHaveBeenCalledBefore(acquire);
+    expect(tlnet.checkVersionFile).toHaveBeenCalledBefore(vi.mocked(acquire));
   });
 });
 

@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import * as core from '@actions/core';
-import json from '@setup-texlive-action/fixtures/ctan-api-pkg-texlive.json';
+import json from '@setup-texlive-action/fixtures/ctan-api-pkg-texlive.json' with {
+  type: 'json',
+};
 import nock from 'nock';
 
 import { Latest, ReleaseData } from '#texlive/releases';

@@ -39,6 +39,7 @@ export function Case(
   function decorator(target: object, key: string | symbol): void;
   function decorator(target: object, key?: string | symbol): void {
     const metadatas = storage.getExposedMetadatas(
+      // eslint-disable-next-line unicorn/no-instanceof-builtins
       target instanceof Function ? target : target.constructor,
     );
     if (key !== undefined) {
@@ -83,6 +84,7 @@ export const AsPath: PropertyDecorator = Transform(({ value }) => {
 function assertString(value: unknown): string {
   if (typeof value === 'string') {
     return value;
+    // eslint-disable-next-line unicorn/no-instanceof-builtins
   } else if (value instanceof String) {
     return value.valueOf();
   }

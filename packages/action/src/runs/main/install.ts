@@ -1,4 +1,4 @@
-import { ctan } from '@setup-texlive-action/data/tlnet.json';
+import data from '@setup-texlive-action/data/tlnet.json' with { type: 'json' };
 import * as log from '@setup-texlive-action/logger';
 import {
   type InstallTL,
@@ -103,7 +103,7 @@ class Installer {
         case 1:
           return await tlnet.ctan({ master: false });
         case 2:
-          return new URL(ctan.path, ctan.default);
+          return new URL(data.ctan.path, data.ctan.default);
       }
     }
     throw new Error('Failed to find a suitable repository');

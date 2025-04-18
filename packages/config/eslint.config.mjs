@@ -1,18 +1,16 @@
-// @ts-check
 import { createRequire } from 'node:module';
 
 import js from '@eslint/js';
+import vitest from '@vitest/eslint-plugin';
 import importX from 'eslint-plugin-import-x';
 import jsdoc from 'eslint-plugin-jsdoc';
 import n from 'eslint-plugin-n';
 import * as regexp from 'eslint-plugin-regexp';
 import tsdoc from 'eslint-plugin-tsdoc';
 import unicorn from 'eslint-plugin-unicorn';
-import vitest from 'eslint-plugin-vitest';
 import ts, { config as defineConfig } from 'typescript-eslint';
 
-const require = createRequire(import.meta.url);
-const packageJson = require('../../package.json');
+const packageJson = createRequire(import.meta.url)('../../package.json');
 
 export const common = defineConfig(
   {
@@ -138,7 +136,6 @@ export const common = defineConfig(
           allowModules: [
             '@setup-texlive-action/config',
             '@setup-texlive-action/fixtures',
-            'jest-extended',
             'mock-fs',
             'semver',
             'ts-dedent',

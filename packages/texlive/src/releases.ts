@@ -1,7 +1,6 @@
-import {
-  current,
-  next,
-} from '@setup-texlive-action/data/texlive-versions.json';
+import versions from '@setup-texlive-action/data/texlive-versions.json' with {
+  type: 'json',
+};
 import * as log from '@setup-texlive-action/logger';
 import deline from 'deline';
 import { createContext } from 'unctx';
@@ -35,7 +34,7 @@ export namespace ReleaseData {
       await latest.checkVersion();
     }
     function newVersionReleased(): boolean {
-      return current.version < latest.version;
+      return versions.current.version < latest.version;
     }
     const latestVersionNumber = Number.parseInt(latest.version, 10);
     const releases = {
@@ -52,7 +51,7 @@ export namespace ReleaseData {
 /** @internal */
 export class Latest implements Release {
   releaseDate: ZonedDateTime | undefined;
-  #version: Version = current.version as Version;
+  #version: Version = versions.current.version as Version;
 
   get version(): Version {
     return this.#version;
@@ -96,8 +95,10 @@ export class Latest implements Release {
     if (this.releaseDate !== undefined) {
       return this.releaseDate;
     }
-    if (this.version === current.version) {
-      return this.releaseDate = ZonedDateTime.from(current.releaseDate);
+    if (this.version === versions.current.version) {
+      return this.releaseDate = ZonedDateTime.from(
+        versions.current.releaseDate,
+      );
     }
     const ctanMaster = await tlnet.ctan({ master: true });
     const headers = await tlnet.checkVersionFile(ctanMaster, this.version);
@@ -125,7 +126,7 @@ export class Latest implements Release {
     /** @see {@link https://en.wikipedia.org/wiki/UTC%2B14:00} */
     const tzEarliest = '+14:00';
     const nextReleaseDate = PlainDateTime
-      .from(next.releaseDate)
+      .from(versions.next.releaseDate)
       .toZonedDateTime(tzEarliest)
       .toInstant();
     return Instant.compare(now, nextReleaseDate) >= 0;

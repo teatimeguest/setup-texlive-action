@@ -1,26 +1,25 @@
-// @ts-check
 import { env } from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import esbuildConfig, { transformConfig } from '../esbuild.config.mjs';
-import pluginLicenses from './plugin-licenses.mjs';
+import esbuildConfig, { transformConfig } from './config/esbuild.config.mjs';
+import pluginLicenses from './config/rspack/plugin-licenses.mjs';
 
 env['FORCE_COLOR'] = '1';
 
 /** @type {import('@rspack/cli').Configuration} */
 export default {
-  entry: './packages/action',
+  entry: './action',
   output: {
-    path: './dist',
+    path: '../dist',
   },
   resolve: {
-    conditionNames: esbuildConfig.conditions,
-    extensions: esbuildConfig.resolveExtensions,
+    conditionNames: esbuildConfig.conditions ?? [],
+    extensions: esbuildConfig.resolveExtensions ?? [],
     extensionAlias: {
       '.js': ['.ts', '.js'],
     },
-    mainFields: esbuildConfig.mainFields,
-    tsConfig: fileURLToPath(import.meta.resolve('../../tsconfig.json')),
+    mainFields: esbuildConfig.mainFields ?? [],
+    tsConfig: fileURLToPath(import.meta.resolve('./tsconfig.json')),
   },
   mode: 'none',
   module: {

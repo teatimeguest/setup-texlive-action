@@ -1,4 +1,3 @@
-// @ts-check
 /** @satisfies {import('esbuild').CommonOptions} */
 export const transformConfig = {
   /** @type {'node20'} */

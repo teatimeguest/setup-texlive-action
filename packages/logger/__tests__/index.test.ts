@@ -7,7 +7,6 @@ import * as core from '@actions/core';
 import * as rawSerializer from '@setup-texlive-action/config/vitest/raw-serializer.js';
 import * as log from '@setup-texlive-action/logger';
 import '@setup-texlive-action/logger/custom-inspect';
-import { toHaveBeenCalledBefore } from 'jest-extended';
 
 vi.mock('process');
 vi.mock('node:util', async (importOriginal) => {
@@ -25,7 +24,6 @@ const hasColors = vi.spyOn(stdout, 'hasColors');
 let error: Error;
 
 beforeAll(async () => {
-  expect.extend({ toHaveBeenCalledBefore });
   expect.addSnapshotSerializer(rawSerializer);
 });
 
@@ -158,7 +156,7 @@ describe('warn', () => {
     log.warn({ error }, 'Failed to ...');
     expect(util.formatWithOptions).toHaveBeenCalledTimes(2);
     expect(core.warning).toHaveBeenCalledOnce();
-    expect(core.info).toHaveBeenCalledBefore(core.warning);
+    expect(core.info).toHaveBeenCalledBefore(vi.mocked(core.warning));
     expect(vi.mocked(core.warning).mock.lastCall?.[0]).toMatchInlineSnapshot(
       'Failed to ...: Error: NG',
     );
@@ -191,7 +189,7 @@ describe('fatal', () => {
     log.fatal({ error }, 'Failed to ...');
     expect(util.formatWithOptions).toHaveBeenCalledTimes(2);
     expect(core.setFailed).toHaveBeenCalledOnce();
-    expect(core.info).toHaveBeenCalledBefore(core.setFailed);
+    expect(core.info).toHaveBeenCalledBefore(vi.mocked(core.setFailed));
     expect(vi.mocked(core.setFailed).mock.lastCall?.[0])
       .toMatchInlineSnapshot(
         'Failed to ...: Error: NG',

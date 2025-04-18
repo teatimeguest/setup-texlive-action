@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest';
 
-import shellesc from '@setup-texlive-action/fixtures/ctan-api-pkg-shellesc.json';
+import shellesc from '@setup-texlive-action/fixtures/ctan-api-pkg-shellesc.json' with {
+  type: 'json',
+};
 import stderr2008 from '@setup-texlive-action/fixtures/tlmgr-install.2008.stderr';
 import stderr2009 from '@setup-texlive-action/fixtures/tlmgr-install.2009.stderr';
 import stderr2014 from '@setup-texlive-action/fixtures/tlmgr-install.2014.stderr';
@@ -15,8 +17,10 @@ import type { Version } from '#texlive/version';
 const toTL: Record<string, string | undefined> = {};
 vi.mock('node:timers/promises');
 vi.mock('@setup-texlive-action/data/package-names.json', () => ({
-  get toTL() {
-    return toTL;
+  default: {
+    get toTL() {
+      return toTL;
+    },
   },
 }));
 vi.unmock('@actions/http-client');

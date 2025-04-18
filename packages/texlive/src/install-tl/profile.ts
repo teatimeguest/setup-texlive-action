@@ -4,6 +4,7 @@ import * as path from 'node:path';
 
 import { Case, type Tmpdir, mkdtemp } from '@setup-texlive-action/utils';
 import { Exclude, Expose, Type, instanceToPlain } from 'class-transformer';
+import { snakeCase } from 'scule';
 import { Mixin } from 'ts-mixer';
 
 import {
@@ -76,7 +77,7 @@ export class Profile extends Mixin(SystemTrees, UserTrees) {
       : { instopt, tlpdbopt };
     for (const [prefix, values] of Object.entries(options)) {
       for (const [key, value] of Object.entries(values ?? {})) {
-        plain[`${prefix}_${key}`] = value;
+        plain[`${prefix}_${snakeCase(key)}`] = value;
       }
     }
     if (binary !== undefined) {

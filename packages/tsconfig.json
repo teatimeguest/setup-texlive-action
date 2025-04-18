@@ -1,5 +1,5 @@
 {
-  "extends": "@setup-texlive-action/config/tsconfig.json",
+  "extends": "@setup-texlive-action/config/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

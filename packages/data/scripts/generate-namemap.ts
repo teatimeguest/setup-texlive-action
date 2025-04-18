@@ -242,7 +242,7 @@ async function generate(args: Readonly<Args>): Promise<void> {
     consola.info('%s `%s`', progress, id);
     const pkg = await ctan.api.pkg(id);
     packages.addPkg(pkg);
-    jsonl.appendFile(JSON.stringify(pkg) + '\n', { flush: true, encoding });
+    await jsonl.appendFile(JSON.stringify(pkg) + '\n', { encoding });
     await setTimeout(1000); // 1s
   }
 

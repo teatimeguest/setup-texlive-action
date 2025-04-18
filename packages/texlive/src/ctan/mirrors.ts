@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers/promises';
 
-import { ctan } from '@setup-texlive-action/data/tlnet.json';
+import data from '@setup-texlive-action/data/tlnet.json' with { type: 'json' };
 import * as log from '@setup-texlive-action/logger';
 import {
   HttpClient,
@@ -20,7 +20,7 @@ export interface CtanMirrorOptions {
 
 export async function resolve(options?: CtanMirrorOptions): Promise<URL> {
   if (options?.master ?? false) {
-    return new URL(ctan.master);
+    return new URL(data.ctan.master);
   }
   if (resolvedMirrorLocation !== undefined) {
     return new URL(resolvedMirrorLocation.href);
@@ -31,10 +31,10 @@ export async function resolve(options?: CtanMirrorOptions): Promise<URL> {
   });
   for (let i = 0; i < MAX_TRIES; ++i) {
     try {
-      const { message } = await http.head(ctan.mirrors);
+      const { message } = await http.head(data.ctan.mirrors);
       const { headers, statusCode = Number.NaN } = message.destroy();
       if (!REDIRECT_CODES.has(statusCode as HttpCodes)) {
-        throw createClientError(statusCode, ctan.mirrors);
+        throw createClientError(statusCode, data.ctan.mirrors);
       }
       const mirror = new URL(headers.location!);
       log.debug(

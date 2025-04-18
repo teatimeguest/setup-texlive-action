@@ -1,12 +1,11 @@
-// @ts-check
 import { fileURLToPath } from 'node:url';
 
 import tsConfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from 'vitest/config';
 
 import esbuildConfig, { transformConfig } from '../esbuild.config.mjs';
 
-/** @type {import('vitest/config').UserConfig} */
-export default {
+export default defineConfig({
   plugins: [
     tsConfigPaths(),
   ],
@@ -35,7 +34,8 @@ export default {
     watch: false,
   },
   resolve: {
-    mainFields: esbuildConfig.mainFields,
+    conditions: esbuildConfig.conditions ?? [],
+    mainFields: esbuildConfig.mainFields ?? [],
   },
   esbuild: transformConfig,
-};
+});

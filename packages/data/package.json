@@ -19,7 +19,7 @@
     "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",
     "citty": "^0.1.6",
-    "consola": "^3.2.3",
+    "consola": "^3.4.2",
     "texlive-json-schemas": "^0.2.0",
     "url-template": "^3.1.1"
   }

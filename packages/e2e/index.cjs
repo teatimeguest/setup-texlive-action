@@ -1,4 +1,3 @@
-// @ts-check
 /**
  * Delete all caches created by this action.
  *

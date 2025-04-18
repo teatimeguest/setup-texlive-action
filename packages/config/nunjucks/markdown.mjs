@@ -1,4 +1,3 @@
-// @ts-check
 import GitHubSlugger from 'github-slugger';
 import nunjucks from 'nunjucks';
 
