@@ -32,12 +32,26 @@ export function getRepository(): URL | undefined {
   try {
     url = new URL(input);
   } catch (cause) {
-    throw new Error('Invalid input for repository', { cause });
+    const error = new TypeError('Invalid input for `repository`', { cause });
+    error['input'] = input;
+    throw error;
   }
-  // Normalize
-  if (!url.pathname.endsWith('/')) {
-    url.pathname = path.posix.join(url.pathname, '/');
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    const error = new TypeError(
+      'Currently only http/https repositories are supported',
+    );
+    error['repository'] = url;
+    throw error;
   }
+  // Normalize url
+  url.pathname = path.posix.join(
+    path
+      .posix
+      .normalize(url.pathname)
+      // See `only_load_remote` in `install-tl`:
+      .replace(/\/archive\/?|\/tlpkg(?:\/(?:texlive\.tlpdb)?)?$/v, ''),
+    path.posix.sep,
+  );
   return url;
 }
 

@@ -32,7 +32,7 @@ export class Profile extends Mixin(SystemTrees, UserTrees) {
   readonly instopt = new InstOpt();
   @Expose()
   readonly tlpdbopt = new TlpdbOpt();
-  @Expose({ until: 2017, groups: ['darwin'] })
+  @Expose()
   declare readonly binary?: string;
 
   #tmpdir: Tmpdir | undefined;

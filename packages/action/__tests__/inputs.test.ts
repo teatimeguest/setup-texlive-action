@@ -125,17 +125,43 @@ describe('repository', () => {
   it.each([
     'http://example.com/path/to/tlnet/',
     'https://somewhere.example.com/path/to/tlnet/',
-    'ftp://example.com/path/to/historic/',
-    'rsync://example.com/path/to/historic/',
   ])('accepts %s', (input: string) => {
     vi.stubEnv('INPUT_REPOSITORY', input);
-    expect(inputs.getRepository()).toHaveProperty('href', input);
+    expect(inputs.getRepository()).toBeDefined();
   });
 
-  it('normalize URL', () => {
-    const input = 'https://somewhere.example.com/path/to/tlnet';
+  it.each([
+    'ftp://example.com/path/to/historic/',
+    'rsync://example.com/path/to/historic/',
+  ])('rejects %s', (input: string) => {
     vi.stubEnv('INPUT_REPOSITORY', input);
-    expect(inputs.getRepository()).toHaveProperty('href', input + '/');
+    expect(inputs.getRepository).toThrowError(TypeError);
+  });
+
+  it.each([
+    [
+      'http://example.com?foo&bar=1',
+      'http://example.com/?foo&bar=1',
+    ],
+    [
+      'https://somewhere.example.com/path/to/tlnet',
+      'https://somewhere.example.com/path/to/tlnet/',
+    ],
+    [
+      'https://example.com///path/to/tlnet//archive',
+      'https://example.com/path/to/tlnet/',
+    ],
+    [
+      'https://example.com/path/to//tlnet/tlpkg//',
+      'https://example.com/path/to/tlnet/',
+    ],
+    [
+      'http://example.com/path/to/tlnet/tlpkg//texlive.tlpdb',
+      'http://example.com/path/to/tlnet/',
+    ],
+  ])('normalize URL', (input, result) => {
+    vi.stubEnv('INPUT_REPOSITORY', input);
+    expect(inputs.getRepository()).toHaveProperty('href', result);
   });
 });
 

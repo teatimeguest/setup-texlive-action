@@ -8,7 +8,7 @@ import {
   vi,
 } from 'vitest';
 
-import { platform } from 'node:os';
+import { arch, platform } from 'node:os';
 
 import * as core from '@actions/core';
 import {
@@ -131,25 +131,6 @@ describe('packages', () => {
 
 describe('repository', () => {
   it.each([
-    'http://example.com/path/to/tlnet/',
-    'https://somewhere.example.com/path/to/tlnet/',
-  ])('accepts %s', async (input) => {
-    vi.mocked(inputs.getRepository).mockReturnValueOnce(new URL(input));
-    vi.mocked(inputs.getVersion).mockReturnValueOnce('latest');
-    await expect(Config.load()).resolves.not.toThrow();
-  });
-
-  it.each([
-    'ftp://example.com/path/to/historic/',
-    'rsync://example.com/path/to/historic/',
-  ])('does not support the protocol for %s', async (input) => {
-    vi.mocked(inputs.getRepository).mockReturnValueOnce(new URL(input));
-    await expect(Config.load()).rejects.toThrow(
-      'http/https repositories are support',
-    );
-  });
-
-  it.each([
     '2008',
     '2011',
   ])('does not support versions prior to 2012', async (version) => {
@@ -247,16 +228,26 @@ describe('version', () => {
     });
   });
 
-  describe('on macOS', () => {
-    beforeEach(() => {
-      vi.mocked(platform).mockReturnValue('darwin');
-    });
+  it.each(['2008', '2012', '2016'])(
+    'rejects %s on AArch64 Linux',
+    async (v) => {
+      vi.mocked(platform).mockReturnValue('linux');
+      vi.mocked(arch).mockReturnValue('arm64');
+      vi.mocked(inputs.getVersion).mockReturnValueOnce(v);
+      await expect(Config.load()).rejects.toThrowError(
+        'does not support AArch64 Linux',
+      );
+    },
+  );
 
-    it.each(['2008', '2010', '2012'] as const)('rejects %o', async (spec) => {
+  it.each(['2008', '2010', '2012'])(
+    'rejects %o on macOS',
+    async (spec) => {
+      vi.mocked(platform).mockReturnValue('darwin');
       vi.mocked(inputs.getVersion).mockReturnValueOnce(spec);
-      await expect(Config.load()).rejects.toThrow(
+      await expect(Config.load()).rejects.toThrowError(
         'does not work on 64-bit macOS',
       );
-    });
-  });
+    },
+  );
 });

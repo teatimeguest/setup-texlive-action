@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { platform } from 'node:os';
+import { arch, platform } from 'node:os';
 
 import { create as createGlobber } from '@actions/glob';
 import * as log from '@setup-texlive-action/logger';
@@ -31,16 +31,6 @@ export namespace Config {
     const releases = await ReleaseData.setup();
 
     const repository = inputs.getRepository();
-    if (
-      repository !== undefined
-      && !['http:', 'https:'].includes(repository.protocol)
-    ) {
-      const error = new TypeError(
-        'Currently only http/https repositories are supported',
-      );
-      error['repository'] = repository;
-      throw error;
-    }
     const config = {
       cache: inputs.getCache(),
       packages: await collectPackages(),
@@ -144,10 +134,22 @@ async function resolveVersion(
     if (version < '2008') {
       throw new RangeError('Versions prior to 2008 are not supported');
     }
-    if (platform() === 'darwin' && version < '2013') {
-      throw new RangeError(
-        'Versions prior to 2013 does not work on 64-bit macOS',
-      );
+    switch (platform()) {
+      case 'linux':
+        if (arch() === 'arm64' && version < '2017') {
+          throw new RangeError(
+            'Versions prior to 2017 does not support AArch64 Linux',
+          );
+        }
+        break;
+      case 'darwin':
+        if (version < '2013') {
+          throw new RangeError(
+            'Versions prior to 2013 does not work on 64-bit macOS',
+          );
+        }
+        break;
+      default:
     }
     if (version <= next.version) {
       return version;
