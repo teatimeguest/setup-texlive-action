@@ -18,7 +18,7 @@
     "class-transformer": "^0.5.1",
     "depends-txt": "^0.1.0",
     "source-map-support": "^0.5.21",
-    "ts-pattern": "^5.7.0",
+    "ts-pattern": "^5.7.1",
     "tslib": "^2.8.1",
     "unctx": "^2.4.1"
   },
