@@ -13,7 +13,7 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "minimatch": "^10.0.1"
+    "minimatch": "^10.0.3"
   },
   "devDependencies": {
     "ajv-cli": "^5.0.0",
